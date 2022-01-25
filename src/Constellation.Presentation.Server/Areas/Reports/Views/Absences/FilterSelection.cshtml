@@ -1,0 +1,80 @@
+﻿@using Constellation.Application.DTOs
+@using Constellation.Core.Enums
+@using Constellation.Presentation.Server.Areas.Reports.Controllers
+@model Absence_FilterSelectionViewModel
+
+<h2>Absence Reports</h2>
+
+<hr />
+
+<form asp-action="ReportAction" asp-controller="Absences" asp-area="Reports" method="post">
+<div class="form-horizontal">
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    
+    <div class="form-group row">
+        <label asp-for="Filter.StudentId" class="col-md-2"></label>
+        <div class="col-md-3">
+            <select asp-for="Filter.StudentId" asp-items="Model.StudentList" class="form-control combo">
+                <option value="">-- Select --</option>
+            </select>
+            <span asp-validation-for="Filter.StudentId" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label asp-for="Filter.SchoolCode" class="col-md-2"></label>
+        <div class="col-md-3">
+            <select asp-for="Filter.SchoolCode" asp-items="Model.SchoolList" class="form-control combo">
+                <option value="">-- Select --</option>
+            </select>
+            <span asp-validation-for="Filter.SchoolCode" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label asp-for="Filter.Grade" class="col-md-2"></label>
+        <div class="col-md-3">
+            <select asp-for="Filter.Grade" asp-items="Html.GetEnumSelectList<Grade>()" class="form-control">
+                <option value="">-- Select --</option>
+            </select>
+            <span asp-validation-for="Filter.Grade" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label asp-for="Filter.StartDate" class="col-md-2"></label>
+        <div class="col-md-3">
+            <input asp-for="Filter.StartDate" class="form-control" />
+            <span asp-validation-for="Filter.StartDate" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label asp-for="Filter.EndDate" class="col-md-2"></label>
+        <div class="col-md-3">
+            <input asp-for="Filter.EndDate" class="form-control" />
+            <span asp-validation-for="Filter.EndDate" class="text-danger"></span>
+        </div>
+    </div>
+    
+    <div class="form-group row">
+        <label asp-for="Filter.Report" class="col-md-2"></label>
+        <div class="col-md-3">
+            <select asp-for="Filter.Report" asp-items="Html.GetEnumSelectList<AbsenceFilterDto.ReportType>()" class="form-control"></select>
+            <span asp-validation-for="Filter.Report" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-3">
+            <input type="submit" value="Run Report" class="btn btn-primary btn-block btn-lg" />
+        </div>
+    </div>
+</div>
+</form>
+
+@section scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

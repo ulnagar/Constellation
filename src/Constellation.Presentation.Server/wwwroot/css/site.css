@@ -1,0 +1,251 @@
+﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+for details on configuring this project to bundle and minify static web assets. */
+
+a.navbar-brand {
+  white-space: normal;
+  text-align: center;
+  word-break: break-all;
+}
+
+/* Provide sufficient contrast against white background */
+a {
+  color: #0366d6;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+body {
+    padding-top: 70px;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  font-size: 14px;
+}
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.border-top {
+  border-top: 1px solid #e5e5e5;
+}
+.border-bottom {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.box-shadow {
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+
+button.accept-policy {
+  font-size: 1rem;
+  line-height: inherit;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+
+.footer {
+  /*position: absolute;*/
+  bottom: 0;
+  background-color: slategrey;
+  color: ghostwhite;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;  /*Vertically center the text there */
+}
+
+/* Shim for Bootstrap 3 => 4 upgrade */
+label {
+    font-weight: bold;
+}
+
+.btn-pull-right {
+    float: right;
+}
+
+.btn-pull-right-solo {
+    margin-right: 0;
+    margin-left: auto;
+    display: block;
+}
+
+.btn-show-hover {
+    visibility: hidden;
+}
+
+tr:hover .btn-show-hover {
+    visibility: visible;
+}
+
+.glyph-color-blue {
+    color: #3a87ad;
+}
+
+.glyph-color-pink {
+    color: #da70d6;
+}
+
+.glyph-color-green {
+    color: green;
+}
+
+.glyph-color-red {
+    color: firebrick;
+}
+
+.glyph-color-orange {
+    color: orange;
+}
+
+.nav-bar-logo {
+    height: 35px;
+    width: 35px;
+}
+
+.mw-45 {
+    min-width: 45%;
+}
+
+.lesson-modal .heading {
+    display: block;
+    text-align: center;
+    font-weight: bold;
+    font-size: large;
+    padding-bottom: 10px;
+}
+
+.lesson-modal .modal-header {
+    font-weight: bold;
+    font-size: larger;
+}
+
+.lesson-modal .subheading {
+    color: grey;
+    font-size: small;
+}
+
+.tab-pane h3 {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.tab-pane > .btn {
+    margin-bottom: 0.5em;
+}
+
+.Timetable-Teaching {
+    background-color: lightgreen;
+}
+
+.Timetable-Break {
+    background-color: lightpink;
+}
+
+.Timetable-Other {
+    background-color: lightgrey;
+}
+
+.Timetable-Period {
+    display: block;
+    overflow: hidden;
+    border-bottom: 1px solid black;
+    padding: 5px;
+    text-align: center;
+}
+
+    .Timetable-Period:first-child {
+        border-top: 1px solid black;
+    }
+
+
+    .Timetable-Period:last-child {
+        border-bottom: none;
+    }
+
+.Timetable-Period .subheading {
+    color: grey;
+    font-size: small;
+}
+
+.Timetable-Day {
+    width: 160px;
+    float: left;
+    border: 1px solid black;
+    border-right: none;
+    text-align: center;
+}
+
+    .Timetable-Day:last-child {
+        width: 160px;
+        float: left;
+        border: 1px solid black;
+    }
+
+.Timetable-Week {
+    clear: left;
+    margin-top: 50px;
+    overflow: auto;
+}
+
+.blockLink {
+    text-decoration: none;
+    color: inherit;
+}
+
+    .blockLink:hover {
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+    }
+
+.pt_Selected {
+    font-weight: bold;
+    color: red;
+}
+
+    .pt_Selected:hover {
+        text-decoration: none;
+        color: red;
+    }
+
+.pt_Selected_Elsewhere {
+    font-weight: bold;
+    color: slateblue;
+}
+
+    .pt_Selected_Elsewhere:hover {
+        text-decoration: none;
+        color: slateblue;
+    }
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+tr.group,
+tr.group:hover {
+    background-color: #ddd !important;
+}

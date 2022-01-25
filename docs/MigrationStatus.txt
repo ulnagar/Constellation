@@ -1,0 +1,80 @@
+Constellation.Application
+
+Constellation.Core
+
+Constellation.Infrastructure
+
+Constellation.Infrastructure.Templates
+
+Constellation.Microservice.ClassMonitor
+
+Constellation.Microservice.LessonsNotifications
+
+Constellation.Microservice.PermissionsUpdate
+
+Constellation.Presentation.Server
+
+SQL Scripts
+	Convert from ACOS (as of Migration 202111100611192_IncludeCanvasServiceAppSettings) to CONSTELLATION_PROD
+	Include TEST versions of scripts to go from ACOS_TEST to CONSTELLATION_TEST
+	Arranged in six phases to ensure data consistency during migration
+
+Identity
+	Create default admin and user accounts on first launch
+	Create roles on first launch
+	Test password login for Admin and User roles
+	Users created by default without passwords. Need to either send them Password Reset emails or allow login via federation
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ACOS.Connector.AdobeConnect => Constellation.Infrastructure.Gateways.AdobeConnectGateway (DONE)
+ACOS.Connector.BUD => Constellation.Infrastructure.Gateways.NetworkStatisticsGateway (DONE)
+ACOS.Connector.Email => Constellation.Infrastructure.Gateways.EmailGateway (DONE)
+ACOS.Connector.Firebase => Constellation.Infrastructure.Gateways.LinkShortenerGateway (DONE)
+ACOS.Connector.Sentral => Constellation.Infrastructure.Gateways.SentralGateway (DONE)
+ACOS.Connector.SMS => Constellation.Infrastructure.Gateways.SMSGateway (DONE)
+ACOS.Data
+	\Core\Models => Constellation.Core.Models (DONE)
+	\Core\Models\Identity (DONE)
+	\Core\Enums => Constellation.Core.Enums (DONE)
+	\Core\Repositories (DONE)
+	\Core\Services (DONE)
+	\Persistence\EntityConfigurations (DONE)
+	\Persistence\Migrations (DONE)
+	\Persistence\ApplicationDbContext.cs (DONE)
+	\Persistence\Repositories (DONE)
+	\Persistence\Services (DONE)
+ACOS.Shared
+ACOS.Utility.AbsenceNotifications
+ACOS.Utility.AccessReports (NO LONGER NEEDED)
+ACOS.Utility.AttendanceReports
+ACOS.Utility.DataTasks (NO LONGER NEEDED)
+ACOS.Utility.LessonsNotifications => Constellation.Microservice.LessonsNotifications (DONE)
+ACOS.Utility.Monitor => Constellation.Microservice.ClassMonitor (DONE)
+ACOS.Utility.Networks
+ACOS.Utility.UserAction => Constellation.Microservice.PermissionsUpdate (DONE)
+ACOS.Web
+	\Areas\Admin => Constellation.Presentation.Web (DONE)
+	\Areas\Equipment => Constellation.Presentation.Web (DONE)
+	\Areas\Partner => Constellation.Presentation.Web (DONE)
+	\Areas\Subject => Constellation.Presentation.Web (DONE)
+	\Areas\Reports => Constellation.Presentation.Web (DONE)
+	\Areas\Utility => Constellation.Presentation.Web (DONE)
+	\Areas\Portal => Constellation.Presentation.Web (DONE)
+	\Areas\ShortTerm => Constellation.Presentation.Web (DONE)
+
+Need to scaffold/create additional Identity pages to handle Access Denied etc.
+Need to convert all services to async.
+Need to update all DTO/Resources with Attributes for required, datatype, and displayname.
+
+Migrated the ACOS content created after migration start, up to the 20-01-2022 commit: Bugfix: perform error checking on CANVAS API responses.
+	To Test: Canvas Operations, Classwork Notifications flow, RollMarking report flow.
+	To Complete: AbsencesTeacher page/portal
+
+Migrating Microservices that need to send emails:
+	- Must be converted to server side code, with the microservice simply "jump-starting" the process
+	- Server side code seems to need to be in a HostedService to allow it to be long running and background:
+		https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-6.0&tabs=visual-studio
+	- Convert just the email sending to an API call, using a single DTO (per email request).
+		The API can then take the information and process sending the email on behalf of the application.
+	- Issues with injecting a service that (somewhere down the chain) injects the IEmailService or IRazorViewEngine (e.g. PermissionsUpdate)

@@ -1,0 +1,118 @@
+﻿@using Constellation.Application.Models.Identity
+@model Casual_DetailsViewModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.CoverEditor) || User.IsInRole(AuthRoles.Admin));
+}
+
+<h2>Casual Teacher Details</h2>
+
+<div>
+    @if (authorised)
+    {
+        <a asp-action="Update" asp-controller="Casuals" asp-area="ShortTerm" asp-route-id="@Model.Casual.Id" class="btn btn-warning">Edit</a>
+
+        @if (Model.Casual.IsDeleted)
+        {
+            <a asp-action="Reinstate" asp-controller="Casuals" asp-area="ShortTerm" asp-route-id="@Model.Casual.Id" class="btn btn-warning">Reinstate</a>
+        } else
+        {
+            <a asp-action="Delete" asp-controller="Casuals" asp-area="ShortTerm" asp-route-id="@Model.Casual.Id" class="btn btn-warning">Delete</a>
+        }
+    }
+
+    <a asp-action="Index" asp-controller="Casuals" asp-area="ShortTerm" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+    
+<hr/>
+
+<div>
+    <div class="row">
+        <label asp-for="Casual.Name" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Casual.Name, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+
+        <label asp-for="Casual.IsDeleted" class="col-md-2 offset-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Casual.IsDeleted, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Casual.SchoolName" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Casual.SchoolName, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+
+        <label asp-for="Casual.DateEntered" class="col-md-2 offset-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Casual.DateEntered, "ShortDate", new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Casual.EmailAddress" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Casual.EmailAddress, "EmailAddress", new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+
+        <label asp-for="Casual.DateDeleted" class="col-md-2 offset-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Casual.DateDeleted, "ShortDate", new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Casual.AdobeConnectId" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Casual.AdobeConnectId, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<div>
+    <div class="nav nav-pills" data-tabs="tabs">
+        <a class="nav-link active" href="#covers" data-toggle="tab">
+                Assigned covers
+                @if (Model.Casual.Covers != null)
+                {
+                    <span class="badge">@Model.Casual.Covers.Count()</span>
+                }
+            </a>
+        </>
+    </div>
+
+    <div class="tab-content">
+        <div id="covers" class="tab-pane active">
+            <h3>Upcoming Covers</h3>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Class Name</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Casual.Covers)
+                    {
+                        <tr class="@item.Status">
+                            <td>@Html.DisplayFor(model => item.OfferingName)</td>
+                            <td>@Html.DisplayFor(model => item.StartDate, "ShortDate")</td>
+                            <td>@Html.DisplayFor(model => item.EndDate, "ShortDate")</td>
+                            <td>
+                                <a asp-action="Details" asp-controller="Covers" asp-area="ShortTerm" asp-route-id="@item.Id" class="btn btn-sm btn-show-hover">More Info...</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

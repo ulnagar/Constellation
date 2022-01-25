@@ -1,0 +1,75 @@
+﻿@model Devices_UpdateViewModel
+
+<h2>@((Model.IsNew) ? "New Device" : "Edit Device")</h2>
+
+<div class="row">
+    <a asp-action="Index" asp-controller="Devices" asp-area="Equipment" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-action="Update" asp-controller="Devices" asp-area="Equipment" method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.IsNew)
+
+        <div class="form-group row">
+            <label asp-for="Device.SerialNumber" class="col-md-2">Serial Number</label>
+            <div class="col-md-3">
+                <input asp-for="Device.SerialNumber" class="form-control" readonly="@(!Model.IsNew)" />
+                <span asp-validation-for="Device.SerialNumber" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Device.Make" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="Device.Make" class="form-control" readonly="@(!Model.IsNew)" />
+                <span asp-validation-for="Device.Make" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Device.Model" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="Device.Model" class="form-control" readonly="@(!Model.IsNew)" />
+                <span asp-validation-for="Device.Model" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Device.Description" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="Device.Description" class="form-control" />
+                <span asp-validation-for="Device.Description" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Device.Status" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="Device.Status" class="form-control" readonly />
+                <span asp-validation-for="Device.Status" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Device.DateWarrantyExpires" class="col-md-2">Warranty Expiry</label>
+            <div class="col-md-3">
+                <input asp-for="Device.DateWarrantyExpires" class="form-control" />
+                <span asp-validation-for="Device.DateWarrantyExpires" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

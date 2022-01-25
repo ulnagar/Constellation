@@ -1,0 +1,59 @@
+﻿@using Constellation.Application.Models.Identity
+@model School_ViewModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin));
+}
+
+<h2>School List</h2>
+
+<div>
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">With Status <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            <a asp-action="All" asp-controller="Schools" asp-area="Partner" class="dropdown-item">All Schools</a>
+            <a asp-action="WithStudents" asp-controller="Schools" asp-area="Partner" class="dropdown-item">With Students</a>
+            <a asp-action="WithStaff" asp-controller="Schools" asp-area="Partner" class="dropdown-item">With Staff</a>
+            <a asp-action="WithBoth" asp-controller="Schools" asp-area="Partner" class="dropdown-item">With Both</a>
+            <a asp-action="WithEither" asp-controller="Schools" asp-area="Partner" class="dropdown-item">With Either</a>
+            <a asp-action="WithNeither" asp-controller="Schools" asp-area="Partner" class="dropdown-item">With Neither</a>
+        </div>
+    </div>
+
+    @if (authorised)
+    {
+        <div class="btn-group new-group" role="group">
+            <a asp-action="Create" asp-controller="Schools" asp-area="Partner" class="btn btn-info">Create New</a>
+        </div>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+    <tr>
+        <th>School Code</th>
+        <th>Name</th>
+        <th>Town</th>
+        <th>Phone Number</th>
+        <th>Email Address</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Schools)
+    {
+        <tr>
+            <td>@Html.DisplayFor(model => item.SchoolCode)</td>
+            <td>@Html.DisplayFor(model => item.Name)</td>
+            <td>@Html.DisplayFor(model => item.Town)</td>
+            <td>@Html.DisplayFor(model => item.PhoneNumber, "PhoneNumber")</td>
+            <td>@Html.DisplayFor(model => item.EmailAddress, "EmailAddress")</td>
+            <td>
+                @Html.ActionLink("More Info...", "Details", new {id = item.SchoolCode}, new {@class = "btn btn-sm btn-info btn-show-hover"})
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

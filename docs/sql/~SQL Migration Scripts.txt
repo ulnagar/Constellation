@@ -1,0 +1,60 @@
+Migration must be compelted in the following table order to ensure that all foreign keys are verified on import!
+
+FIRST
+~~~~~~~~~~~~~~~~~~
+x Schools
+x SchoolContact
+x Periods
+x Devices
+x Lessons
+x AdobeConnectRooms
+- CanvasOperations (NOT YET INTEGRATED FROM MASTER)
+
+SECOND
+~~~~~~~~~~~~~~~~~~
+x Casuals
+x SchoolContactRole
+x Students
+x Staff
+x DeviceNotes
+x LessonRolls
+
+THIRD
+~~~~~~~~~~~~~~~~~~
+x Courses
+x DeviceAllocations
+x LessonRollStudentAttendances
+
+FOURTH
+~~~~~~~~~~~~~~~~~~
+x CourseOfferings
+
+FIFTH
+~~~~~~~~~~~~~~~~~~
+x OfferingResources
+x LessonCourseOfferings
+x Absences
+x ClassCovers
+x Enrolments
+x OfferingSessions
+
+SIXTH
+~~~~~~~~~~~~~~~~~~
+x AbsenceNotifications
+x AbsenceResponses
+
+
+MANUAL TRANSLATION NEEDED
+~~~~~~~~~~~~~~~~~~
+AppAccessTokens
+AppSettings
+AspNetRoles
+AspNetUserClaims
+AspNetUserLogins
+AspNetUserRoles
+AspNetUsers
+
+HISTORY NOT REQUIRED/START FRESH
+~~~~~~~~~~~~~~~~~~
+- AdobeConnectOperations
+- MSTeamOperations

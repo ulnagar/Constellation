@@ -1,0 +1,25 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.MissedWork
+@model TeacherMissedWorkNotificationEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>The following students have been recorded as absent for the entire lesson of class @Model.OfferingName on @Model.AbsenceDate.ToLongDateString():</p>
+<ul>
+    @foreach (var student in Model.StudentList)
+    {
+        <li>@student</li>
+    }
+</ul>
+<p>To assist these students in completing the classwork delivered during this lesson, we will send an email to them and their parents outlining the work required.</p>
+@if (Model.IsCovered)
+{
+    <p>As we have recorded a cover for this class on this day, we request that you as Head Teacher supply the details required.</p>
+}
+<p>Please visit the following site to provide details and instructions for students and parents to follow: <a href="@Model.Link" target="_blank">@Model.Link</a></p>

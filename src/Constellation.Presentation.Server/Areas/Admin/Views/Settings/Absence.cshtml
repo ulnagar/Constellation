@@ -1,0 +1,135 @@
+﻿@model Constellation.Presentation.Server.Areas.Admin.Models.Settings_AbsenceViewModel
+
+<h2>Absence Scanning and Reporting Settings</h2>
+
+<hr />
+
+<form asp-area="Admin" asp-controller="Settings" asp-action="Absences" method="post">
+    <div class="row mt-5">
+        <h3>General Settings</h3>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-8">
+            <h4>School Absence Coordinator Email</h4>
+            What email address should absence explanation emails be sent to?
+        </div>
+        <div class="col-md-4">
+            <input asp-for="ForwardingEmailAbsenceCoordinator" class="form-control" />
+            <span asp-validation-for="ForwardingEmailAbsenceCoordinator" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-8">
+            <h4>School Truancy Coordinator Email</h4>
+            What email address should truancy notification emails be sent to?
+        </div>
+        <div class="col-md-4">
+            <input asp-for="ForwardingEmailTruancyOfficer" class="form-control" />
+            <span asp-validation-for="ForwardingEmailTruancyOfficer" class="text-danger"></span>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="row mt-5">
+        <h3>Discounted Absence Reasons</h3>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-8">
+            <h4>Whole Absences</h4>
+            Which absence reasons in Sentral should be ignored for Whole Absences?
+        </div>
+        <div class="col-md-4">
+            <select asp-for="DiscountedWholeReasons" asp-items="Model.AbsenceReasonList" class="form-control"></select>
+            <span asp-validation-for="DiscountedWholeReasons" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-8">
+            <h4>Partial Absences</h4>
+            Which absence reasons in Sentral should be ignored for Partial Absences?
+        </div>
+        <div class="col-md-4">
+            <select asp-for="DiscountedPartialReasons" asp-items="Model.AbsenceReasonList" class="form-control"></select>
+            <span asp-validation-for="DiscountedPartialReasons" class="text-danger"></span>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="row mt-5">
+        <h3>Timing Settings</h3>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-8">
+            <h4>Earliest Start Date</h4>
+            At what date should the scan start? Any absences that occur before this date will be ignored.
+        </div>
+        <div class="col-md-4">
+            <input asp-for="AbsenceScanStartDate" class="form-control" />
+            <span asp-validation-for="AbsenceScanStartDate" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-8">
+            <h4>Length Threshold</h4>
+            What is the minimum length (in minutes) that should be sent for partial absence explanations?
+        </div>
+        <div class="col-md-4">
+            <input asp-for="PartialLengthThreshold" class="form-control" />
+            <span asp-validation-for="PartialLengthThreshold" class="text-danger"></span>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="row mt-5">
+        <h3>Notification Email Settings</h3>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-8">
+            <h4>Signature Block Name</h4>
+            Who should the email be signed as coming from?
+        </div>
+        <div class="col-md-4">
+            <input asp-for="AbsenceCoordinatorName" class="form-control" />
+            <span asp-validation-for="AbsenceCoordinatorName" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-8">
+            <h4>Signature Block Title</h4>
+            What title should be included in the email signature block?
+        </div>
+        <div class="col-md-4">
+            <input asp-for="AbsenceCoordinatorTitle" class="form-control" />
+            <span asp-validation-for="AbsenceCoordinatorTitle" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-8">
+            <h4>Email From Address</h4>
+            What email address should notification emails be sent from?
+        </div>
+        <div class="col-md-4">
+            <input asp-for="AbsenceCoordinatorEmail" class="form-control" />
+            <span asp-validation-for="AbsenceCoordinatorEmail" class="text-danger"></span>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="row mt-5">
+        <div class="col-md-4 col-md-offset-8">
+            <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+        </div>
+    </div>
+
+</form>
+
+@section scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

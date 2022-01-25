@@ -1,0 +1,83 @@
+﻿@using Constellation.Application.Models.Identity
+@model Covers_ViewModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.CoverEditor) || User.IsInRole(AuthRoles.Admin));
+}
+
+<h2>Covers List</h2>
+
+<div>
+    <div class="btn-group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">With Status <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            <a asp-action="All" asp-controller="Covers" asp-area="ShortTerm" class="dropdown-item">All</a>
+            <a asp-action="Upcoming" asp-controller="Covers" asp-area="ShortTerm" class="dropdown-item">Upcoming</a>
+        </div>
+    </div>
+
+    @if (authorised)
+    {
+        <div class="btn-group new-group">
+            <a asp-action="Create" asp-controller="Covers" asp-area="ShortTerm" class="btn btn-info">Create New</a>
+        </div>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+    <tr>
+        <th colspan="7">Legend:
+            <span class="legend">
+                <span class="glyphicon glyphicon-ok"></span> Current Cover
+            </span>
+            <span class="legend">
+                <span class="glyphicon glyphicon-time"></span> Future Cover
+            </span>
+            <span class="legend">
+                <span class="glyphicon glyphicon-remove"></span> Past or Cancelled Cover
+            </span>
+        </th>
+    </tr>
+    <tr>
+        <th></th>
+        <th>Name</th>
+        <th>School</th>
+        <th>Class</th>
+        <th>Cover From</th>
+        <th>Cover Until</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Covers.OrderBy(c => c.StartDate))
+        {
+            var glyph = "";
+            if (item.IsCurrent)
+            {
+                glyph = "ok";
+            } else if (item.IsFuture)
+            {
+                glyph = "time";
+            }
+            else
+            {
+                glyph = "remove";
+            }
+
+            <tr>
+                <td><span class="glyphicon glyphicon-@glyph"></span></td>
+                <td>@Html.DisplayFor(model => item.UserName)</td>
+                <td>@Html.DisplayFor(model => item.UserSchool)</td>
+                <td>@Html.DisplayFor(model => item.OfferingName)</td>
+                <td>@Html.DisplayFor(model => item.StartDate, "ShortDate")</td>
+                <td>@Html.DisplayFor(model => item.EndDate, "ShortDate")</td>
+                <td>
+                    <a asp-action="Details" asp-controller="Covers" asp-area="ShortTerm" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

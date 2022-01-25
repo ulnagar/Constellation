@@ -1,0 +1,26 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Covers
+@model CancelledCoverEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>@Model.ToName</p>
+<br />
+<p>This email is to advise you that a cover previously arranged for Aurora College has been cancelled in our system for the classes below. This cover is no longer required @Model.DateBlock.</p>
+<ul>
+    @foreach (var pair in Model.ClassWithLink)
+    {
+        <li>@pair.Key - <a rel="noopener" href="@pair.Value" target="_blank">@pair.Value</a></li>
+    }
+
+    <li>Microsoft Teams - <a rel="noopener" href="https://teams.microsoft.com/" target="_blank">https://teams.microsoft.com/</a></li>
+</ul>
+<p>Access to the resources will be automatically removed if already granted.</p>
+<br />
+<p>If you have any questions, please contact the school on 1300 287 629.</p>

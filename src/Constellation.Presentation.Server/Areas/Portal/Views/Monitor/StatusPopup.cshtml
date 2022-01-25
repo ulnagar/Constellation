@@ -1,0 +1,94 @@
+﻿@model ClassMonitorDtos.MonitorCourse
+@using Constellation.Application.DTOs
+@using Constellation.Application.Extensions
+
+<div class="modal-header">Room Status Details</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="col-md-12 status-title">
+            @Model.RoomName<br/>
+            <a href="@Model.RoomUrlPath" target="_blank">@Model.RoomUrlPath</a><br />
+            <span class="scantime">Last Scanned: @Model.LastScanTime.AsRelativeTime()</span>
+        </div>
+    </div>
+    <div class="box-row">
+        <div class="box1 box-column left">
+                <div class="box1">
+                    <span class="modal-heading">Teachers</span>
+                    <ul>
+                        @{
+                            foreach (var teacher in Model.Teachers)
+                            {
+                                if (teacher.IsPresent)
+                                {
+                                    <li class="present">@teacher.DisplayName</li>
+                                }
+                                else
+                                {
+                                    <li class="not-present">@teacher.DisplayName</li>
+                                }
+                            }
+                        }
+                    </ul>
+                </div>
+                <div class="box1">
+                    <span class="modal-heading">Casuals</span>
+                    <ul>
+                        @foreach (var casual in Model.Covers)
+                        {
+                            if (casual.IsPresent)
+                            {
+                                <li class="present">@casual.PersonName</li>
+                            }
+                            else
+                            {
+                                <li class="not-present">@casual.PersonName</li>
+                            }
+                        }
+
+                        @foreach (var teacher in Model.OtherStaff)
+                        {
+                            if (teacher.IsPresent)
+                            {
+                                <li class="present">@teacher.DisplayName</li>
+                            } else
+                            {
+                                <li class="not-present">@teacher.DisplayName</li>
+                            }
+                        }
+                    </ul>
+                </div>
+                <div class="box1">
+                    <span class="modal-heading">Guests</span>
+                    @Model.Guests
+                </div>
+            </div>
+        
+        <div class="box1 right">
+            <span class="modal-heading">Students</span>
+            <ul>
+                @{
+                    foreach (var student in Model.Enrolments)
+                    {
+                        if (student.IsPresent)
+                        {
+                            <li class="present">@student.StudentDisplayName</li>
+                        }
+                        else
+                        {
+                            <li class="not-present">@student.StudentDisplayName</li>
+                        }
+                    }
+
+                    foreach (var student in Model.OtherAttendees)
+                    {
+                        <li class="not-enrolled">@student.StudentDisplayName</li>
+                    }
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+</div>

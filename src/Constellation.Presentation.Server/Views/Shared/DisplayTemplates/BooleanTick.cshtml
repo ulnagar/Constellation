@@ -1,0 +1,17 @@
+﻿@model bool?
+    
+@if (Model.HasValue)
+{
+    if (Model.Value)
+    {
+        <span class="glyphicon glyphicon-ok glyph-color-green"></span>
+    }
+    else
+    {
+        <span class="glyphicon glyphicon-remove glyph-color-red"></span>
+    }
+}
+else
+{
+    <span class="label label-info">Not Set</span>
+}

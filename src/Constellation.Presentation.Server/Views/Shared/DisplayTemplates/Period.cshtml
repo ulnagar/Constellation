@@ -1,0 +1,53 @@
+﻿@using Constellation.Core.Models
+@model TimetablePeriod
+
+@{
+    var WeekNo = (Model.Day - 1) / 5;
+    var WeekName = "";
+
+    var GridName = Model.Timetable.Substring(0, 3).ToUpper();
+
+    switch (WeekNo)
+    {
+        case 0:
+            WeekName = "Week A";
+            break;
+        case 1:
+            WeekName = "Week B";
+            break;
+        case 2:
+            WeekName = "Week C";
+            break;
+        case 4:
+            WeekName = "Week D";
+            break;
+        default:
+            WeekName = "";
+            break;
+    }
+
+    var DayNo = Model.Day%5;
+    var DayName = "";
+    switch (DayNo)
+    {
+        case 1:
+            DayName = "Monday";
+            break;
+        case 2:
+            DayName = "Tuesday";
+            break;
+        case 3:
+            DayName = "Wednesday";
+            break;
+        case 4:
+            DayName = "Thursday";
+            break;
+        case 0:
+            DayName = "Friday";
+            break;
+        default:
+            DayName = "";
+            break;
+    }
+}
+@GridName @WeekName @DayName - @Model.Name

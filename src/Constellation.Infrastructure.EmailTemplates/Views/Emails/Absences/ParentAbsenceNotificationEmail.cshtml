@@ -1,0 +1,25 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Absences
+@model ParentAbsenceNotificationEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Regular attendance at school is essential if students are to achieve their educational best, social and psychological potential, and increase their career and life options.</p>
+<p>The school is required to record explanations for any absences as a way of ensuring that students are absent from school only when they are sick or have another acceptable reason for missing school.</p>
+<p>If you are able to explain any absences within seven days of their occurence we will adjust our records.</p>
+<p>@Model.StudentFirstName was absent from school on the following dates and no explanation has been received.</p>
+<dl>
+    @foreach (var entry in Model.Absences)
+    {
+        <dt>@entry.Date.ToLongDateString()</dt>
+        <dd>@entry.PeriodName (@entry.PeriodTimeframe) - @entry.OfferingName</dd>
+    }
+</dl>
+<p>Please assist us by completing the form at the following link: <a href="@Model.Link" target="_blank">@Model.Link</a></p>
+<p>If you have any questions or concerns about this absence, please contact our office on 1300 629 or at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a></p>

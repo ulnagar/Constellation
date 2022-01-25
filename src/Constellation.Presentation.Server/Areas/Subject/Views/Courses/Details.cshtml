@@ -1,0 +1,125 @@
+﻿@using Constellation.Application.Models.Identity
+@model Course_DetailsViewModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin));
+}
+
+<h2>Course Details</h2>
+
+<div>
+    @if (authorised)
+    {
+        <a asp-action="Update" asp-controller="Courses" asp-area="Subject" asp-route-id="@Model.Course.Id" class="btn btn-warning">Edit</a>
+        <a asp-action="Index" asp-controller="Courses" asp-area="Subject" class="btn btn-danger btn-pull-right">Go Back</a>
+    } 
+    else
+    {
+        <a asp-action="Index" asp-controller="Courses" asp-area="Subject" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+    }
+</div>
+
+<hr />
+
+<div>
+    <div class="row">
+        <label asp-for="Course.Name" class="col-md-2"></label>
+        <div class="col-md-9">
+            @Html.DisplayFor(model => model.Course.Name, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Course.Grade" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Course.Grade, "Grade", new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Course.Faculty" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Course.Faculty, "Faculty")
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Course.HeadTeacherName" class="col-md-2">Head Teacher</label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Course.HeadTeacherName, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Course.FTEValue" class="col-md-2">FTE Value</label>
+        <div class="col-md-3">
+            @Model.Course.FTEValue.ToString("N3")
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Course.FTECalculation" class="col-md-2">FTE Calculation</label>
+        <div class="col-md-3">
+            @Model.Course.FTECalculation.ToString("N3")
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<div>
+    <ul class="nav nav-pills" data-tabs="tabs">
+        <li class="nav-item">
+            <a class="nav-link active" href="#classes" data-toggle="tab">
+                Classes
+                @if (Model.Courses.Any())
+                {
+                    <span class="badge">@Model.Courses.Count()</span>
+                }
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="classes" class="tab-pane active">
+            <h3>Classes</h3>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Teacher</th>
+                        <th>Scholastic Year</th>
+                        <th>Is Active?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Courses.OrderByDescending(o => o.EndDate))
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(model => item.Name)</td>
+                            <td>@Html.DisplayFor(model => item.Teachers, "StringList")</td>
+                            <td>@item.EndDate.ToString("yyyy")</td>
+                            <td>
+                                @{
+                                    if (item.IsCurrent)
+                                    {
+                                        <text>Current</text>
+                                    }
+                                    else if (item.IsFuture)
+                                    {
+                                        <text>Future</text>
+                                    }
+                                    else
+                                    {
+                                        <text>Finished</text>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

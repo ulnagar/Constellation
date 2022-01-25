@@ -1,0 +1,186 @@
+﻿.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: minmax(45vh, max-content) minmax(45vh, max-content);
+    grid-gap: 1em;
+    padding: 1em;
+}
+
+.stats-bar {
+    grid-area: 1/1/1/5;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+    .stats-bar div {
+        font-size: 16pt;
+        font-weight: bold;
+        text-align: center;
+    }
+
+.class-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-row-gap: 0.25em;
+}
+
+.class {
+    padding: 0.25em 0.25em 0.25em 0;
+    border: 1px solid #bbb;
+    display: grid;
+    grid-template-columns: 0.25fr 3fr repeat(3, 1fr);
+    grid-template-rows: 1.2em;
+    align-content: center;
+    grid-column-gap: 0.25em;
+    height: 2.5em;
+}
+
+.grade-card {
+    border: 2px solid #555;
+    padding: 0.25em;
+}
+
+.grade-card-header {
+    text-align: center;
+}
+
+.class.status-current {
+    border: 2px solid darkgreen;
+}
+
+.class.status-covered div:first-child {
+    background-color: blue;
+    margin-top: -0.6em;
+    margin-bottom: -0.6em;
+}
+
+.class.status-current.status-covered.status-students:not(.status-teachers) div:first-child {
+    margin-top: -1.05em;
+    margin-bottom: -1.05em;
+}
+
+.class.status-current.status-teachers {
+    background-color: darkgreen;
+    color: white !important;
+}
+
+.class.status-current.status-students:not(.status-teachers) {
+    background-color: firebrick;
+    color: white !important;
+    height: 3.5em;
+}
+
+.class:not(.status-current) {
+    background-color: sandybrown;
+}
+
+.modal-link:hover {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.scantime {
+    color: grey;
+    font-size: small;
+}
+
+.box-row {
+    display: flex;
+    flex-direction: row;
+}
+
+    .box-row > div {
+        width: 50%;
+    }
+
+.box-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.box1 {
+    flex: 1 1 auto;
+}
+
+.left {
+    border-right: 1px solid;
+}
+
+.left, .right {
+    text-align: center;
+    padding: 5px 25px;
+}
+
+    .left > div {
+        padding: 5px;
+        min-height: 100px;
+        text-align: center;
+    }
+
+        .left > div > ul {
+            text-align: left;
+            list-style-type: none;
+        }
+
+    .right > ul {
+        text-align: left;
+        list-style-type: none;
+        height: 280px;
+        overflow-y: auto;
+    }
+
+ul > li.present {
+    font-weight: bold;
+}
+
+    ul > li.present:before {
+        content: "\e013";
+        font-family: 'Glyphicons Halflings';
+        font-size: 9px;
+        float: left;
+        margin-top: 4px;
+        margin-left: -17px;
+        color: green;
+    }
+
+ul > .not-present:before {
+    /*Using a Bootstrap glyphicon as the bullet point*/
+    content: "\e014";
+    font-family: 'Glyphicons Halflings';
+    font-size: 9px;
+    float: left;
+    margin-top: 4px;
+    margin-left: -17px;
+    color: red;
+}
+
+ul > .not-enrolled:before {
+    content: "\e161";
+    font-family: 'Glyphicons Halflings';
+    font-size: 9px;
+    float: left;
+    margin-top: 4px;
+    margin-left: -17px;
+    color: darkorange;
+}
+
+.status-title {
+    padding: 5px;
+    text-align: center;
+    font-weight: bold;
+    font-size: larger;
+    padding-bottom: 20px;
+}
+
+.modal-heading {
+    display: block;
+    text-align: center;
+    font-weight: bold;
+    font-size: large;
+    padding-bottom: 10px;
+}
+
+.modal-header {
+    font-weight: bold;
+    font-size: larger;
+}

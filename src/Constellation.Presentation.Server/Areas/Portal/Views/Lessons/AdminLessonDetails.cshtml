@@ -1,0 +1,86 @@
+﻿@using Constellation.Core.Enums
+@using Constellation.Presentation.Server.Areas.Portal.Models.Lessons
+@model AdminDetailViewModel
+
+    <h2>Lesson Details - @Model.Name</h2>
+
+    @if (Model.Rolls.All(roll => roll.Status != LessonStatus.Completed))
+    {
+        <div>
+            <a asp-action="AdminUpsertLesson" asp-controller="Lessons" asp-area="Portal" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+            <a asp-action="AdminDeleteLesson" asp-controller="Lessons" asp-area="Portal" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+            <a asp-action="AdminLessons" asp-controller="Lessons" asp-area="Portal" class="btn btn-danger btn-pull-right">Go Back</a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <a asp-action="AdminLessons" asp-controller="Lessons" asp-area="Portal" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+        </div>
+    }
+
+    <hr />
+
+    <div class="form-horizontal">
+
+        <div class="row">
+            <label asp-for="Name" class="col-md-2"></label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.Name</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <label asp-for="CourseName" class="col-md-2"></label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.CourseName</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <label asp-for="DueDate" class="col-md-2"></label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.DueDate.ToString("dd/MM/yyyy")</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <label asp-for="Offerings" class="col-md-2"></label>
+            <div class="col-md-6">
+                <span class="control-label text-only">
+                    @foreach (var offering in Model.Offerings)
+                    {
+                        @:@offering
+                    }
+                </span>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="margin-top-10">
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <td>School</td>
+                        <td>Completed</td>
+                        <td># Students</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var roll in Model.Rolls.OrderBy(roll => roll.SchoolName))
+                    {
+                        <tr>
+                            <td>@roll.SchoolName</td>
+                            <td>@roll.Status.ToString()</td>
+                            <td>@roll.Attendance.Count()</td>
+                            <td>
+                                <a asp-action="AdminRollDetails" asp-controller="Lessons" asp-area="Portal" asp-route-id="@roll.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>

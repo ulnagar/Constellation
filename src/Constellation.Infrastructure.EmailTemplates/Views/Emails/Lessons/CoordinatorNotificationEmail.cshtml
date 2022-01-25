@@ -1,0 +1,20 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Lessons
+@model CoordinatorNotificationEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+
+<p>The following lessons at @Model.SchoolName have not been completed and are now overdue. Repeated reminder emails to the school have not resulted in the lesson being marked completed in the SPT website.</p>
+<ul>
+    @foreach (var entry in Model.Lessons)
+    {
+        <li>@entry.Name (Due by @entry.DueDate.ToShortDateString())</li>
+    }
+</ul>

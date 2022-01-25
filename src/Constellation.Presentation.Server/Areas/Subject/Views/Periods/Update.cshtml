@@ -1,0 +1,88 @@
+﻿@model Periods_UpdateViewModel
+
+<h2>@(Model.IsNew ? "New Period" : "Edit Period")</h2>
+
+<div class="row">
+    <a asp-action="Index", asp-controller="Periods" asp-area="Subject" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-action="Update" asp-controller="Periods" asp-area="Subject" method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.IsNew)
+        @Html.HiddenFor(model => model.Period.Id)
+        
+        <div class="form-group row">
+            <label asp-for="Period.Timetable" class="col-md-2"></label>
+            <div class="col-md-3">
+                <select asp-for="Period.Timetable" asp-items="@Model.TimetableList" class="form-control combo-with-tag">
+                    <option value="-- Select or Enter --"></option>
+                </select>
+                <span asp-validation-for="Period.Timetable" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Period.Name" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="Period.Name" class="form-control" />
+                <span asp-validation-for="Period.Name" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="Period.Day" class="col-md-2"></label>
+            <div class="col-md-3">
+                <select asp-for="Period.Day" asp-items="Html.GetEnumSelectList<Periods_UpdateViewModel.ValidDays>()" class="form-control"></select>
+                <span asp-validation-for="Period.Day" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Period.Period" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="Period.Period" class="form-control" />
+                <span asp-validation-for="Period.Period" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="Period.StartTime" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="Period.StartTime" class="form-control" />
+                <span asp-validation-for="Period.StartTime" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="Period.EndTime" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="Period.EndTime" class="form-control" />
+                <span asp-validation-for="Period.EndTime" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="Period.Type" class="col-md-2"></label>
+            <div class="col-md-3">
+                <select asp-for="Period.Type" asp-items="@Model.TypeList" class="form-control combo-with-tag">
+                    <option value="-- Select or Enter --"></option>
+                </select>
+                <span asp-validation-for="Period.Type" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

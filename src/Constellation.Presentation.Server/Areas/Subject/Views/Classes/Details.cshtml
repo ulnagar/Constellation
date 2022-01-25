@@ -1,0 +1,343 @@
+﻿@using Constellation.Application.Helpers
+@using Constellation.Application.Models.Identity
+@using Constellation.Core.Enums
+@model Classes_DetailsViewModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin));
+}
+
+<h2>Class Details</h2>
+
+<div>
+    @if (authorised)
+    {
+        <a asp-action="Update" asp-controller="Classes" asp-area="Subject" asp-route-id="@Model.Class.Id" class="btn btn-warning">Edit</a>
+        <a asp-action="Index" asp-controller="Classes" asp-area="Subject" class="btn btn-danger btn-pull-right">Go Back</a>
+    } else
+    {
+        <a asp-action="Index" asp-controller="Classes" asp-area="Subject" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+    }
+</div>
+
+<hr />
+
+<div>
+    <div class="row">
+        <label asp-for="Class.CourseName" class="col-md-2"></label>
+        <div class="col-md-9">
+            @Html.DisplayFor(model => model.Class.CourseName, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Class.Name" class="col-md-2">Class</label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Class.Name, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+
+        <label class="col-md-2 offset-2">Scholastic Year</label>
+        <div class="col-md-3">
+            @Model.Class.EndDate.ToString("yyyy")
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Class.IsCurrent" class="col-md-2">Is Current?</label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Class.IsCurrent, "Boolean")
+        </div>
+
+        <label asp-for="Class.StartDate" class="col-md-2 offset-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Class.StartDate, "ShortDate")
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Class.FTECalculation" class="col-md-2">FTE Calculation</label>
+        <div class="col-md-3">
+            @Model.Class.FTECalculation.ToString("N3")
+        </div>
+
+        <label asp-for="Class.EndDate" class="col-md-2 offset-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Class.EndDate, "ShortDate")
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Class.RoomLinks" class="col-md-2">Room Links</label>
+        <div class="col-md-9">
+            <span><a href="@Model.Class.RoomLinks.FirstOrDefault()" _target="blank">@(Model.Class.RoomLinks.FirstOrDefault())</a></span>
+        </div>
+        @foreach(var link in Model.Class.RoomLinks.Skip(1))
+        {
+            <div class="col-md-9 offset-2">
+                <span><a href="@link" _target="blank">@link</a></span>
+            </div>
+        }
+    </div>
+</div>
+
+<hr />
+
+<div>
+    <ul class="nav nav-pills" data-tabs="tabs">
+        <li class="nav-item">
+            <a class="nav-link active" href="#students" data-toggle="tab">
+                Active students
+                @if (Model.Students.Any())
+                {
+                    <span class="badge">@Model.Students.Count()</span>
+                }
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#sessions" data-toggle="tab">
+                Active periods
+                @if (Model.Sessions.Any())
+                {
+                    <span class="badge">@Model.Sessions.Count()</span>
+                }
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#pracLessons" data-toggle="tab">
+                Prac Lessons
+                @if (Model.Lessons.Any())
+                {
+                    <span class="badge">@Model.Lessons.Count()</span>
+                }
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="students" class="tab-pane active">
+            <h3>Active Students</h3>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>SRN</th>
+                        <th>Name</th>
+                        <th>Grade</th>
+                        <th>School</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Students)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(model => item.StudentId)</td>
+                            <td>@Html.DisplayFor(model => item.Gender, "Gender") @Html.DisplayFor(model => item.Name)</td>
+                            <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
+                            <td>@Html.DisplayFor(model => item.SchoolName)</td>
+                            <td>
+                                @if (authorised)
+                                {
+                                    <a asp-action="Unenrol" asp-controller="Classes" asp-area="Subject" asp-route-id="@item.StudentId" asp-route-classId="@Model.Class.Id" asp-route-returnPage="class" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-controller="Classes" asp-area="Partner" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                @if (authorised)
+                {
+                    <tfoot>
+                        <tr>
+                            <th>Enrol new student:</th>
+                            <th>
+                                <select id="StudentId" class="form-control combo">
+                                    <option value="">-- Select --</option>
+                                    @foreach (var item in Model.StudentList)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                </select>
+                            </th>
+                            <th><a id="enrolLink" class="btn btn-sm btn-success" onClick="enrolStudent(@Model.Class.Id)">Enrol</a></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                }
+            </table>
+        </div>
+
+        <div id="sessions" class="tab-pane">
+            <h3>Active Sessions</h3>
+
+            @if (authorised)
+            {
+                <button type="button" data-toggle="modal" data-target="#addSession" class="btn btn-info btn-sm">Assign a new session</button>
+                <a asp-action="AddBulkSession" asp-controller="Sessions" asp-area="Subject" asp-route-id="@Model.Class.Id" class="btn btn-sm btn-warning">Bulk Add Sessions</a>
+                <a asp-action="BulkRemoveSession" asp-controller="Sessions" asp-area="Subject" asp-route-id="@Model.Class.Id" class="btn btn-sm btn-danger">Bulk Remove Sessions</a>
+            }
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Period</th>
+                        <th>Teacher</th>
+                        <th>Room</th>
+                        <th></th>
+                        <th>Duration</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Sessions)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(model => item.Period, "Period")</td>
+                            <td>@Html.DisplayFor(model => item.Teacher)</td>
+                            <td>@Html.DisplayFor(model => item.RoomName)</td>
+                            <td><a class="btn btn-sm btn-success btn-show-hover" href="@item.RoomLink" target="_blank">Open Room</a></td>
+                            <td>@Html.DisplayFor(model => item.Period, "Duration")</td>
+                            <td>
+                                @if (authorised)
+                                {
+                                    <a asp-action="RemoveSession" asp-controller="Sessions" asp-area="Subject" asp-route-id="@item.Id" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="4" class="text-right">Total Minutes per Cycle:</th>
+                        <th colspan="1">@Model.Class.MinPerFN</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div id="pracLessons" class="tab-pane">
+            <h3>Practical Lessons</h3>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Lesson</th>
+                        <th>Completion</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var lesson in Model.Lessons.OrderBy(l => l.DueDate))
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(model => lesson.DueDate, "ShortDate")</td>
+                            <td>@Html.DisplayFor(model => lesson.Name)</td>
+                            <td>@lesson.Students.Count(student => student.WasPresent) / @lesson.Students.Count()</td>
+                            <td><button type="button" data-toggle="modal" data-target="#modal-container-@lesson.Id" class="btn btn-info btn-sm btn-show-hover">View details</button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @foreach (var lesson in Model.Lessons.OrderBy(l => l.DueDate))
+            {
+                <div id="modal-container-@lesson.Id" class="modal lesson-modal" role="dialog">
+                    <div class="modal-dialog mw-45">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>Lesson Status Details</h3>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-12 heading">
+                                        @lesson.Name<br />
+                                        <span class="subheading">Date Due: @Html.DisplayFor(model => lesson.DueDate, "ShortDate")</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table class="table table-striped table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>School</th>
+                                                    <th></th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            @foreach (var student in lesson.Students.OrderBy(s => s.Name))
+                                            {
+                                                <tr>
+                                                    <td nowrap>@student.Name</td>
+                                                    <td>@Html.Raw(string.Format(student.SchoolName).Replace(",", ",<br />"))</td>
+                                                    <th>
+                                                        @if (!string.IsNullOrWhiteSpace(student.Comment))
+                                                        {
+                                                            <span class="glyphicon glyphicon-export" title="@student.Comment" />
+                                                        }
+                                                    </th>
+                                                    <td nowrap>
+                                                        @if (student.Status == LessonStatus.Completed)
+                                                        {
+                                                            if (student.WasPresent)
+                                                            {
+                                                                @:<span class="glyphicon glyph-color-green glyphicon-ok" /> Completed
+                                                            }
+                                                            else
+                                                            {
+                                                                @:<span class="glyphicon glyph-color-red glyphicon-remove" /> Missed
+                                                            }
+                                                        }
+                                                        else if (student.Status == LessonStatus.Active)
+                                                        {
+                                                            @:<span class="glyphicon glyph-color-orange glyphicon-time" /> Pending
+                                                        }
+                                                        else if (student.Status == LessonStatus.Cancelled)
+                                                        {
+                                                            @:<span class="glyphicon glyph-color-red glyphicon-remove" /> Cancelled
+                                                        }
+                                                        else
+                                                        {
+                                                            student.Status.GetDisplayName();
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (authorised)
+{
+    @await Html.PartialAsync("_AddSession", Model.AddSessionDto)
+} 
+
+@section scripts
+{
+    <script>
+        function enrolStudent(classId) {
+            var studentId = $('#StudentId').val();
+            $('#enrolLink').attr("href", "/Subject/Classes/Enrol/" + studentId + "?classId=" + classId);
+        };
+    </script>
+}

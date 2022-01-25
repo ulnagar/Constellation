@@ -1,0 +1,36 @@
+﻿@model Student_FTEBreakdown_ViewModel
+
+<h2>FTE Value by Grade</h2>
+
+<div class="row">
+    <a asp-action="Index" asp-controller="Students" asp-area="Reports" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th>Grade</th>
+            <th># Students</th>
+            <th>FTE</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var grade in Model.Grades.OrderBy(grade => grade.Grade))
+            {
+                <tr>
+                    <td>@grade.Grade</td>
+                    <td>@grade.Enrolments</td>
+                    <td>@grade.EnrolmentFTE</td>
+                </tr>
+            }
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>Total</th>
+            <th>@Model.TotalEnrolments</th>
+            <th>@Model.TotalEnrolmentFTE</th>
+        </tr>
+    </tfoot>
+</table>

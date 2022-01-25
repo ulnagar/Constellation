@@ -1,0 +1,227 @@
+﻿@using Constellation.Core.Enums
+@model Student_InterviewDetails_ViewModel
+
+<h2>Export PTO Interview File</h2>
+
+<div class="row">
+    <a asp-action="Index" asp-controller="Students" asp-area="Reports" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-action="ExportInterviews" asp-controller="ExcelExport" asp-area="Utility" method="post">
+<div class="form-horizontal">
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group row">
+        <label class="col-md-4 offset-1">Filter by Grade</label>
+    </div>
+
+    <div class="form-group row">
+        <label asp-for="Filter.Grades" class="col-md-2">All Grades</label>
+        <div class="col-md-3">
+            <select id="allGrades" multiple="multiple" name="allGrades" class="form-control">
+                @foreach (var entry in Html.GetEnumSelectList<Grade>())
+                {
+                    <option value="@entry.Value">@entry.Text</option>
+                }
+            </select>
+            <span asp-validation-for="Filter.Grades" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="offset-2 col-md-3">
+            <btn class="btn btn-sm btn-secondary" onClick="addGrade()">Add</btn> <btn class="btn btn-sm btn-secondary" onClick="removeGrade()">Remove</btn>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label asp-for="Filter.Grades" class="col-md-2">Selected Grades</label>
+        <div class="col-md-3">
+            <select id="selectedGrades" multiple="multiple" name="selectedGrades" class="form-control"></select>
+        </div>
+        <div id="grade_inputs"></div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-md-4 offset-1">Filter by Class</label>
+    </div>
+
+    <div class="form-group row">
+        <label asp-for="Filter.ClassList" class="col-md-2">All Classes</label>
+        <div class="col-md-3">
+            <select id="allClasses" multiple="multiple" name="allClasses" class="form-control">
+                @foreach (var entry in Model.AllClasses)
+                {
+                    <option value="@entry.Value">@entry.Text</option>
+                }
+            </select>
+            <span asp-validation-for="Filter.ClassList" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="offset-2 col-md-3">
+            <btn class="btn btn-sm btn-secondary" onClick="addClass()">Add</btn> <btn class="btn btn-sm btn-secondary" onClick="removeClass()">Remove</btn>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label asp-for="Filter.ClassList" class="col-md-2">Selected Classes</label>
+        <div class="col-md-3">
+            <select id="selectedClasses" multiple="multiple" name="selectedClasses" class="form-control"></select>
+        </div>
+        <div id="class_inputs"></div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-3">
+            <input type="submit" value="Export" class="btn btn-primary btn-block btn-lg" />
+        </div>
+    </div>
+</div>
+</form>
+
+@section scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        function addGrade() {
+            var grade_list = $('select[id="allGrades"]')[0];
+            var selected_grades = $('select#allGrades>option:selected');
+            var selected_list = $('select[id="selectedGrades"]')[0];
+            if (grade_list.selectedIndex != -1) {
+                for (var i = 0; i < selected_grades.length; i++) {
+                    //Copy the element
+                    var element = $('select#allGrades>option[value=' + selected_grades[i].value + ']');
+                    var new_element = element.clone();
+
+                    //Remove it from the All Grades list
+                    element.remove();
+
+                    //Add it to the Selected Grades list
+                    selected_list.append(new_element[0]);
+
+                    //Sort the Selected Grades list
+                    sort_list = $('select#selectedGrades option');
+                    sort_list.detach().sort(function (a, b) {
+                        var at = a.value, bt = b.value;
+                        return (at > bt) ? 1 : ((at < bt) ? -1 : 0);
+                    });
+                    sort_list.appendTo("select#selectedGrades");
+
+                    //Add element to signify value in Grades array
+                    var inputTemplate = new_element[0];
+                    var input = $('<input>').attr('id', inputTemplate.value + "_input")
+                        .attr('name', "Grades")
+                        .attr('type', "hidden");
+                    input.val(inputTemplate.value);
+                    var gradeInputDiv = $('div#grade_inputs')[0];
+                    gradeInputDiv.append(input[0]);
+                }
+            }
+        }
+
+        function removeGrade() {
+            var grade_list = $('select[id="allGrades"]')[0];
+            var selected_grades = $('select#selectedGrades>option:selected');
+            var selected_list = $('select[id="selectedGrades"]')[0];
+            if (selected_list.selectedIndex != -1) {
+                for (var i = 0; i < selected_grades.length; i++) {
+                    //Copy the element
+                    var element = $('select#selectedGrades>option[value=' + selected_grades[i].value + ']');
+                    var new_element = element.clone();
+
+                    //Remove it from the Selected Grades list
+                    element.remove();
+
+                    //Add it to the All Grades list
+                    grade_list.append(new_element[0]);
+
+                    //Sort the All Grades list
+                    sort_list = $('select#allGrades option');
+                    sort_list.detach().sort(function (a, b) {
+                        var at = a.text, bt = b.text;
+                        return (at > bt) ? 1 : ((at < bt) ? -1 : 0);
+                    });
+                    sort_list.appendTo('select#allGrades');
+
+                    //Remove element that signifies value in Grades array
+                    var inputTemplate = new_element[0];
+                    var input = $('#' + inputTemplate.value + '_input');
+                    input.remove();
+                }
+            }
+        }
+
+        function addClass() {
+            var class_list = $('select[id="allClasses"]')[0];
+            var selected_classes = $('select#allClasses>option:selected');
+            var selected_list = $('select[id="selectedClasses"]')[0];
+            if (class_list.selectedIndex != -1) {
+                for (var i = 0; i < selected_classes.length; i++) {
+                    //Copy the element
+                    var element = $('select#allClasses>option[value=' + selected_classes[i].value + ']');
+                    var new_element = element.clone();
+
+                    //Remove it from the All Classes list
+                    element.remove();
+
+                    //Add it to the Selected Classes list
+                    selected_list.append(new_element[0]);
+
+                    //Sort the Selected Classes list
+                    sort_list = $('select#selectedClasses option');
+                    sort_list.detach().sort(function (a, b) {
+                        var at = a.value, bt = b.value;
+                        return (at > bt) ? 1 : ((at < bt) ? -1 : 0);
+                    });
+                    sort_list.appendTo("select#selectedClasses");
+
+                    //Add element to signify value in Classes array
+                    var inputTemplate = new_element[0];
+                    var input = $('<input>').attr('id', inputTemplate.value + "_input")
+                        .attr('name', "ClassList")
+                        .attr('type', "hidden");
+                    input.val(inputTemplate.value);
+                    var classInputDiv = $('div#class_inputs')[0];
+                    classInputDiv.append(input[0]);
+                }
+            }
+        }
+
+        function removeClass() {
+            var class_list = $('select[id="allClasses"]')[0];
+            var selected_classes = $('select#selectedClasses>option:selected');
+            var selected_list = $('select[id="selectedClasses"]')[0];
+            if (selected_list.selectedIndex != -1) {
+                for (var i = 0; i < selected_classes.length; i++) {
+                    //Copy the element
+                    var element = $('select#selectedClasses>option[value=' + selected_classes[i].value + ']');
+                    var new_element = element.clone();
+
+                    //Remove it from the Selected Classes list
+                    element.remove();
+
+                    //Add it to the All Classes list
+                    class_list.append(new_element[0]);
+
+                    //Sort the All Classes list
+                    sort_list = $('select#allClasses option');
+                    sort_list.detach().sort(function (a, b) {
+                        var at = a.text, bt = b.text;
+                        return (at > bt) ? 1 : ((at < bt) ? -1 : 0);
+                    });
+                    sort_list.appendTo('select#allClasses');
+
+                    //Remove element that signifies value in Classes array
+                    var inputTemplate = new_element[0];
+                    var input = $('#' + inputTemplate.value + '_input');
+                    input.remove();
+                }
+            }
+        }
+    </script>
+}

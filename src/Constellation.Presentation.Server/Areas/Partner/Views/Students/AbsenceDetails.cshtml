@@ -1,0 +1,178 @@
+﻿@using Constellation.Application.Models.Identity
+@using Constellation.Core.Models
+@model Absence_Details_ViewModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.AbsencesEditor) || User.IsInRole(AuthRoles.Admin));
+}
+
+<h2>Absence Details</h2>
+
+<div>
+
+    <div class="row">
+        <label asp-for="Absence.Student.DisplayName" class="col-md-2">Student</label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Absence.Student.DisplayName, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+
+        <label asp-for="Absence.Student.CurrentGrade" class="col-md-2 offset-2">Grade</label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Absence.Student.CurrentGrade, "Grade", new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Absence.Student.School.Name" class="col-md-2">School</label>
+        <div class="col-md-8">
+            @Html.DisplayFor(model => model.Absence.Student.School.Name, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Absence.Type" class="col-md-2">Absence Type</label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Absence.Type, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+
+        <label asp-for="Absence.Date" class="col-md-2 offset-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Absence.Date, "ShortDate", new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Absence.PeriodName" class="col-md-2">Period</label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Absence.PeriodName, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+
+        <label asp-for="Absence.PeriodTimeframe" class="col-md-2 offset-2">Period Time</label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Absence.PeriodTimeframe, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Absence.AbsenceLength" class="col-md-2">Length of Absence</label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Absence.AbsenceLength, new {htmlAttributes = new {@class = "form-control"}}) minutes
+        </div>
+
+        <label asp-for="Absence.AbsenceTimeframe" class="col-md-2 offset-2">Absence Time</label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Absence.AbsenceTimeframe, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<div>
+    <ul class="nav nav-pills" data-tabs="tabs">
+        <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#notifications" role="tab">
+                Notifications
+                @if (Model.Absence.Notifications.Any())
+                {
+                    <span class="badge">@Model.Absence.Notifications.Count()</span>
+                }
+            </a>
+        </li>
+        <li>
+            <a class="nav-link" href="#responses" data-toggle="tab">
+                Responses
+                @if (Model.Absence.Responses.Any())
+                {
+                    <span class="badge">@Model.Absence.Responses.Count()</span>
+                }
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="notifications" class="tab-pane active">
+            <h3>Notifications</h3>
+            
+            @if (authorised)
+            {
+                <a asp-action="SendNotification" asp-controller="Absences" asp-area="Reports" asp-route-id="@Model.Absence.Id" asp-route-method="@AbsenceNotification.SMS" class="btn btn-info">Resend SMS</a>
+                <a asp-action="SendNotification" asp-controller="Absences" asp-area="Reports" asp-route-id="@Model.Absence.Id" asp-route-method="@AbsenceNotification.Email" class="btn btn-info">Resent Email</a>
+            }
+            
+            <table class="table-striped data-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>To</th>
+                        <th>Message</th>
+                        <th>Sent</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Absence.Notifications.OrderBy(n => n.SentAt))
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(model => item.Type)</td>
+                            <td>@Html.DisplayFor(model => item.Recipients)</td>
+                            <td>@Html.DisplayFor(model => item.Message, "EmailContent")</td>
+                            <td>@Html.DisplayFor(model => item.SentAt, "ShortDate")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="responses" class="tab-pane">
+            <h3>Responses</h3>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Explanation</th>
+                        <th>Verified Status</th>
+                        <th>Received</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Absence.Responses.OrderBy(r => r.ReceivedAt))
+                    {
+                        <tr>
+                            <td>
+                                @if (item.Type == null)
+                                {
+                                    @Html.DisplayFor(model => item.From)
+                                }
+                                else
+                                {
+                                    @Html.DisplayFor(model => item.Type)
+                                }
+                            </td>
+                            <td>@Html.DisplayFor(model => item.Explanation)</td>
+                            <td>
+                                @if (item.VerificationStatus == AbsenceResponse.Verified)
+                                {
+                                    <a href="#" data-toggle="tooltip" title="Verified by @item.Verifier on @item.VerifiedAt.Value.ToShortDateString()"><span class="label label-success"><span class="glyphicon glyphicon-ok" /> Verified</span></a>
+                                }
+                                else if (item.VerificationStatus == AbsenceResponse.Rejected)
+                                {
+                                    <a href="#" data-toggle="tooltip" title="Rejected by @item.Verifier on @item.VerifiedAt.Value.ToShortDateString() with comment @item.VerificationComment"><span class="label label-danger"><span class="glyphicon glyphicon-remove" /> Rejected</span></a>
+                                }
+                                else if (item.VerificationStatus == AbsenceResponse.Pending)
+                                {
+                                    @:<span class="label label-info"><span class="glyphicon glyphicon-refresh" /> Pending</span>
+                                }
+                                else if (item.VerificationStatus == null || item.VerificationStatus == AbsenceResponse.NotRequired || item.Type == AbsenceResponse.Parent || item.Type == AbsenceResponse.Coordinator)
+                                {
+                                    @:<span class="label label-info"><span class="glyphicon glyphicon-ban-circle" /> Not Required</span>
+                                }
+                            </td>
+                            <td>@Html.DisplayFor(model => item.ReceivedAt, "ShortDate")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,204 @@
+﻿@using Constellation.Application.Models.Identity
+@model Staff_DetailsViewModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin));
+}
+
+<h2>Staff Member Details</h2>
+
+<div>
+    @if (authorised)
+    {
+        <a asp-action="Update" asp-controller="Staff" asp-area="Partner" asp-route-id="@Model.Staff.StaffId" class="btn btn-warning">Edit</a>
+
+        if (Model.Staff.IsDeleted)
+        {
+            <a asp-action="Reinstate" asp-controller="Staff" asp-area="Partner" asp-route-id="@Model.Staff.StaffId" class="btn btn-danger">Reinstate</a>
+
+        }
+        else
+        {
+            <a asp-action="Resign" asp-controller="Staff" asp-area="Partner" asp-route-id="@Model.Staff.StaffId" class="btn btn-danger">Resign</a>
+        }
+    }
+    
+    <a asp-action="Index" asp-controller="Staff" asp-area="Partner" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr/>
+
+<div>
+    <div class="row">
+        <label asp-for="Staff.StaffId" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Staff.StaffId, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+
+        <label asp-for="Staff.IsDeleted" class="col-md-2 offset-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Staff.IsDeleted, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Staff.Name" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Staff.Name, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+
+        <label asp-for="Staff.DateEntered" class="col-md-2 offset-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Staff.DateEntered, "ShortDate", new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Staff.EmailAddress" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Staff.EmailAddress, "EmailAddress", new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+
+        <label asp-for="Staff.DateDeleted" class="col-md-2 offset-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Staff.DateDeleted, "ShortDate", new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Staff.SchoolName" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Staff.SchoolName, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+
+        <label asp-for="Staff.AdobeConnectId" class="col-md-2 offset-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Staff.AdobeConnectId, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Staff.Faculty" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Staff.Faculty, "StringList", new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+</div>
+
+<hr/>
+
+<div>
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            <a class="nav-link active" href="#classes" data-toggle="tab" role="tab">
+                Active classes
+                @if (Model.Offerings.Any())
+                {
+                    <span class="badge">@Model.Offerings.Count()</span>
+                }
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#sessions" data-toggle="tab" role="tab">
+                Active periods
+                @if (Model.Sessions.Any())
+                {
+                    <span class="badge">@Model.Sessions.Count()</span>
+                }
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#schoolStaff" data-toggle="tab" role="tab">
+                School contacts
+                @if (Model.SchoolStaff.Any())
+                {
+                    <span class="badge">@Model.SchoolStaff.Count()</span>
+                }
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="schoolStaff" class="tab-pane">
+            <h3>Partner School Staff</h3>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email Address</th>
+                    <th>Phone Number</th>
+                    <th>Role</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model.SchoolStaff)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(model => item.Name)</td>
+                        <td>@Html.DisplayFor(model => item.EmailAddress, "EmailAddress")</td>
+                        <td>@Html.DisplayFor(model => item.PhoneNumber, "PhoneNumber")</td>
+                        <td>@Html.DisplayFor(model => item.Role)</td>
+                        <td>
+                            @Html.ActionLink("Remove", "DeleteAssignment", "SchoolContact", new {id = item.Id}, new {@class = "btn btn-sm btn-warning btn-show-hover"})
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="sessions" class="tab-pane">
+            <h3>Scheduled Periods</h3>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Period</th>
+                        <th>Class</th>
+                        <th>Room</th>
+                        <th>Duration</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Sessions)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(model => item.Period, "Period")</td>
+                            <td>@Html.DisplayFor(model => item.ClassName)</td>
+                            <td>@Html.DisplayFor(model => item.RoomName)</td>
+                            <td>@Html.DisplayFor(model => item.Duration)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="classes" class="tab-pane active">
+            <h3>Classes</h3>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Course</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Offerings)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(model => item.Name)</td>
+                            <td>@Html.DisplayFor(model => item.CourseName)</td>
+                            <td>
+                                @Html.ActionLink("More Info...", "Details", "Classes", new {area = "Subject", id = item.Id}, new {@class = "btn btn-sm btn-info btn-show-hover"})
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

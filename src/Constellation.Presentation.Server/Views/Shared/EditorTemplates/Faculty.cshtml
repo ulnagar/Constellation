@@ -1,0 +1,10 @@
+﻿@using Constellation.Core.Enums
+@model Faculty
+
+@foreach (Faculty item in Enum.GetValues(typeof(Faculty)))
+{
+    <div class="custom-control custom-switch">
+        <input type="checkbox" id="@(Html.GenerateIdFromName(ViewData.TemplateInfo.GetFullHtmlFieldName(item.ToString())))" name="@(ViewData.TemplateInfo.GetFullHtmlFieldName(item.ToString()))" value="@item" @Html.Raw((Model & item) == item ? "checked=\"checked\"" : "") class="custom-control-input" />
+        <label class="custom-control-label" for="@(Html.GenerateIdFromName(ViewData.TemplateInfo.GetFullHtmlFieldName(item.ToString())))">@item</label>
+    </div>
+}

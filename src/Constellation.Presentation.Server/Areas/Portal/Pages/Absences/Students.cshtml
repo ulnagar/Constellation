@@ -1,0 +1,67 @@
+﻿@page "{studentId}"
+@model Constellation.Presentation.Server.Areas.Portal.Pages.Absences.StudentsModel
+
+<h2>All Absences for @Model.StudentName</h2>
+
+<div>
+    @{
+        var all_style = "btn-outline-secondary";
+        var pending_style = all_style;
+
+        switch (Model.ShowAll)
+        {
+            case false:
+                pending_style = "btn-primary";
+                break;
+            case true:
+                all_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Students" asp-area="Portal" asp-route-studentId="@Model.StudentId" asp-route-ShowAll="true" class="btn @all_style">All</a>
+        <a asp-page="Students" asp-area="Portal" asp-route-studentId="@Model.StudentId" asp-route-ShowAll="false" class="btn @pending_style">Pending</a>
+    </div>
+</div>
+
+<hr />
+
+<table class="table table-striped data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Period</th>
+            <th>Length</th>
+            <th>Class</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.Explanations)
+        {
+            <tr>
+                <td>@Html.DisplayFor(model => entry.IsExplained, "BooleanTick")</td>
+                <td>@Html.DisplayFor(model => entry.Type)</td>
+                <td>@Html.DisplayFor(model => entry.Date, "ShortDate")</td>
+                <td>@Html.DisplayFor(model => entry.PeriodTimeframe)</td>
+                <td>@Html.DisplayFor(model => entry.PeriodName)</td>
+                <td>@Html.DisplayFor(model => entry.AbsenceLength) minutes</td>
+                <td>@Html.DisplayFor(model => entry.OfferingName)</td>
+                <td class="text-center">
+                    @if (!entry.IsExplained && entry.Type == Constellation.Core.Models.Absence.Partial)
+                    {
+                        <a asp-page="StudentExplanation" asp-area="Portal" asp-route-id="@entry.AbsenceId" class="btn btn-sm btn-primary btn-show-hover">Explain</a>
+                    }
+                    else if (entry.Type == Constellation.Core.Models.Absence.Partial)
+                    {
+                        <a asp-page="StudentExplanation" asp-area="Portal" asp-route-id="@entry.AbsenceId" class="btn btn-sm btn-secondary btn-show-hover">More Info...</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

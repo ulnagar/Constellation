@@ -1,0 +1,24 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Absences
+@model StudentAbsenceExplanationRequestEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Dear @Model.StudentName,</p>
+<p>Regular attendance at school is essential if students are to achieve their educational best, social and psychological potential, and increase their career and life options.</p>
+<p>Our records show you were absent for portions of the following classes. Once you submit an explanation for these absences, we will seek confirmation from your Aurora College Coordinator, and adjust our records.</p>
+<dl>
+    @foreach (var entry in Model.Absences)
+    {
+        <dt>@entry.Date.ToLongDateString()</dt>
+        <dd>@entry.PeriodName (@entry.PeriodTimeframe) - @entry.OfferingName absent for the period of @entry.AbsenceTimeframe</dd>
+    }
+</dl>
+<p>Please assist us by completing the form at the following link: <a href="@Model.Link" target="_blank">@Model.Link</a></p>
+<p>If you have any questions or concerns about this absence, please contact our office on 1300 287 629 or at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a></p>

@@ -1,0 +1,8 @@
+﻿@using Constellation.Core.Models
+@model TimetablePeriod
+
+@{
+    var length = @Model.EndTime.Subtract(Model.StartTime).Minutes;
+    length += @Model.EndTime.Subtract(Model.StartTime).Hours * 60;
+}
+@length

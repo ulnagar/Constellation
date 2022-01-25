@@ -1,0 +1,70 @@
+﻿@using Constellation.Presentation.Server.Areas.Portal.Models.Lessons
+@model RollViewModel
+
+
+<h2>Science Practical Lesson</h2>
+            
+<div class="row">
+    <a asp-action="AdminRollDetails" asp-controller="Lessons" asp-area="Portal" asp-route-id="@Model.Roll.RollId" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-action="AdminRollSubmit" asp-controller="Lessons" asp-area="Portal" method="post">
+    <div class="form-horizontal">
+        @Html.HiddenFor(model => model.Roll.RollId)
+
+        <div class="row">
+            <label asp-for="Roll.LessonName" class="col-md-2"></label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.Roll.LessonName</span>
+            </div>
+        </div>
+
+        <div class="roll">
+            <label asp-for="Roll.DueDate" class="col-md-2"></label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.Roll.DueDate.ToString("dd/MM/yyyy")</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <label asp-for="Roll.LessonDate" class="col-md-2"></label>
+            <div class="col-md-6">
+                <input asp-for="Roll.LessonDate" class="form-control" />
+                <span asp-validation-for="Roll.LessonDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <table class="table">
+                <thead>
+                <tr>
+                    <td class="col-md-4"><label>Name</label></td>
+                    <td><label>Present?</label></td>
+                </tr>
+                </thead>
+                <tbody>
+                @for (var i = 0; i < Model.Roll.Attendance.Count(); i++)
+                {
+                    @Html.EditorFor(m => m.Roll.Attendance[i])
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="row">
+            <label asp-for="Roll.Comment" class="col-md-2"></label>
+            <div class="col-md-6">
+                <textarea asp-for="Roll.Comment" class="form-control"></textarea>
+                <span asp-validation-for="Roll.Comment" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-offset-2 col-md-3">
+                <input type="submit" value="Submit" class="btn btn-primary btn-block btn-lg"/>
+            </div>
+        </div>
+    </div>
+</form>

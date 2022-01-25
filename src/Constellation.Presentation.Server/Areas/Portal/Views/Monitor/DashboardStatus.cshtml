@@ -1,0 +1,25 @@
+﻿@using Constellation.Application.DTOs
+@model ICollection<ClassMonitorDtos.MonitorCourse>
+    
+@foreach (var grade in Model.GroupBy(course => course.GradeName).OrderBy(group => group.Key))
+{
+    <div class="grade-card">
+        <div class="grade-card-header">
+            <h2>@grade.Key</h2>
+            <hr/>
+        </div>
+
+        <div class="class-list">
+            @foreach (var status in grade.OrderBy(course => course.Name).Where(course => !string.IsNullOrEmpty(course.StatusCode)))
+            {
+                <div class="class @status.StatusCode modal-link" href="@Url.Action("StatusPopup", "Monitor", new { area = "Portal", id = status.Id })">
+                    <div></div>
+                    <div>@status.Name</div>
+                    <div>T - @status.Teachers.Count(teacher => teacher.IsPresent)</div>
+                    <div>S - @status.Enrolments.Count(enrol => enrol.IsPresent)</div>
+                    <div>G - @status.Guests</div>
+                </div>
+            }
+        </div>
+    </div>
+}

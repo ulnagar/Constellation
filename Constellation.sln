@@ -1,0 +1,85 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F42D170F-99FA-4279-BD76-0B88D71AA3A4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Application", "src\Constellation.Application\Constellation.Application.csproj", "{5A2EAF0C-CC43-4DDF-8C04-560434E3B657}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Core", "src\Constellation.Core\Constellation.Core.csproj", "{4A0B1941-2745-4CED-AF4F-366641F18352}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Infrastructure", "src\Constellation.Infrastructure\Constellation.Infrastructure.csproj", "{61B0691A-F126-4A40-801C-9EDF37835FA1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Infrastructure.Templates", "src\Constellation.Infrastructure.EmailTemplates\Constellation.Infrastructure.Templates.csproj", "{1867CD04-7663-48FD-9526-DBB8AA9A0685}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Presentation.Server", "src\Constellation.Presentation.Server\Constellation.Presentation.Server.csproj", "{B100AA07-F366-4BC0-97F4-EF126928B8F7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{8E4ACA9A-B3CB-4538-96EE-FC153E53AA1F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sql", "sql", "{AAD6B84B-76A4-43EE-A99D-885E6A7612FA}"
+	ProjectSection(SolutionItems) = preProject
+		docs\sql\PROD-Constellation Migration Phase 1.sql = docs\sql\PROD-Constellation Migration Phase 1.sql
+		docs\sql\PROD-Constellation Migration Phase 2.sql = docs\sql\PROD-Constellation Migration Phase 2.sql
+		docs\sql\PROD-Constellation Migration Phase 3.sql = docs\sql\PROD-Constellation Migration Phase 3.sql
+		docs\sql\PROD-Constellation Migration Phase 4.sql = docs\sql\PROD-Constellation Migration Phase 4.sql
+		docs\sql\PROD-Constellation Migration Phase 5.sql = docs\sql\PROD-Constellation Migration Phase 5.sql
+		docs\sql\PROD-Constellation Migration Phase 6.sql = docs\sql\PROD-Constellation Migration Phase 6.sql
+		docs\sql\TEST-Constellation Migration Phase 1.sql = docs\sql\TEST-Constellation Migration Phase 1.sql
+		docs\sql\TEST-Constellation Migration Phase 2.sql = docs\sql\TEST-Constellation Migration Phase 2.sql
+		docs\sql\TEST-Constellation Migration Phase 3.sql = docs\sql\TEST-Constellation Migration Phase 3.sql
+		docs\sql\TEST-Constellation Migration Phase 4.sql = docs\sql\TEST-Constellation Migration Phase 4.sql
+		docs\sql\TEST-Constellation Migration Phase 5.sql = docs\sql\TEST-Constellation Migration Phase 5.sql
+		docs\sql\TEST-Constellation Migration Phase 6.sql = docs\sql\TEST-Constellation Migration Phase 6.sql
+		docs\sql\~SQL Migration Scripts.txt = docs\sql\~SQL Migration Scripts.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{971D2536-E75B-4D18-851E-B8B424192ACC}"
+	ProjectSection(SolutionItems) = preProject
+		docs\Resources\A04.svg = docs\Resources\A04.svg
+		docs\Resources\logo.svg = docs\Resources\logo.svg
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5A2EAF0C-CC43-4DDF-8C04-560434E3B657}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A2EAF0C-CC43-4DDF-8C04-560434E3B657}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A2EAF0C-CC43-4DDF-8C04-560434E3B657}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A2EAF0C-CC43-4DDF-8C04-560434E3B657}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A0B1941-2745-4CED-AF4F-366641F18352}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A0B1941-2745-4CED-AF4F-366641F18352}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A0B1941-2745-4CED-AF4F-366641F18352}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A0B1941-2745-4CED-AF4F-366641F18352}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61B0691A-F126-4A40-801C-9EDF37835FA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61B0691A-F126-4A40-801C-9EDF37835FA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61B0691A-F126-4A40-801C-9EDF37835FA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61B0691A-F126-4A40-801C-9EDF37835FA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1867CD04-7663-48FD-9526-DBB8AA9A0685}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1867CD04-7663-48FD-9526-DBB8AA9A0685}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1867CD04-7663-48FD-9526-DBB8AA9A0685}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1867CD04-7663-48FD-9526-DBB8AA9A0685}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B100AA07-F366-4BC0-97F4-EF126928B8F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B100AA07-F366-4BC0-97F4-EF126928B8F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B100AA07-F366-4BC0-97F4-EF126928B8F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B100AA07-F366-4BC0-97F4-EF126928B8F7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5A2EAF0C-CC43-4DDF-8C04-560434E3B657} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
+		{4A0B1941-2745-4CED-AF4F-366641F18352} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
+		{61B0691A-F126-4A40-801C-9EDF37835FA1} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
+		{1867CD04-7663-48FD-9526-DBB8AA9A0685} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
+		{B100AA07-F366-4BC0-97F4-EF126928B8F7} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
+		{AAD6B84B-76A4-43EE-A99D-885E6A7612FA} = {8E4ACA9A-B3CB-4538-96EE-FC153E53AA1F}
+		{971D2536-E75B-4D18-851E-B8B424192ACC} = {8E4ACA9A-B3CB-4538-96EE-FC153E53AA1F}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {266E1BC1-EC70-416D-8B6F-E86CB0C2066C}
+	EndGlobalSection
+EndGlobal

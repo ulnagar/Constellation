@@ -1,0 +1,105 @@
+﻿@model Absence_FortnightReportViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+    <style>
+        body {
+            font-size: 16px;
+        }
+
+        .mt-2 {
+            margin-top: 0.5em;
+        }
+
+        .mt-3 {
+            margin-top: 1em;
+        }
+
+        .mt-4 {
+            margin-top: 1.25em;
+        }
+
+        .w-25 {
+            width: 25%;
+        }
+
+        td.app-card {
+            padding: 1rem .25rem .25rem .5rem;
+            vertical-align: top;
+            border-bottom: 1px solid;
+        }
+
+        tr th {
+            width: 30%;
+        }
+
+        tr td {
+            width: 70%;
+        }
+
+        tr td, tr th {
+            padding: 1em;
+            border: 1px solid;
+        }
+
+        th {
+            text-align: left;
+        }
+
+        .table-roll {
+            width: 95%;
+            font-size: 12px;
+            border: 1px solid;
+            border-collapse: collapse;
+        }
+
+        .offset-1 {
+            margin-left: 5%;
+        }
+
+        .col-10 {
+            -ms-flex: 0 0 83.333333%;
+            flex: 0 0 83.333333%;
+            /*max-width: 83.333333%*/
+        }
+
+        .row {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+            margin-right: -15px;
+            margin-left: -15px
+        }
+
+        .logo {
+            width: 50%;
+            margin-top: 1.5em;
+            margin-right: 5%;
+        }
+
+        .right-align {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="row col-10">
+        <div class="offset-1">
+            <h2>Aurora College Attendence Report</h2>
+            <h3><strong>Student: </strong>@Model.Student.DisplayName</h3>
+            <h3><strong>Fortnight Starting: </strong>@Model.StartDate.ToLongDateString()</h3>
+        </div>
+        <div class="right-align">
+            <img src="~/logo.svg" class="logo" />
+        </div>
+    </div>
+</body>
+</html>

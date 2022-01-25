@@ -1,0 +1,116 @@
+﻿@using Constellation.Application.Models.Identity
+
+@model Constellation.Presentation.Server.BaseModels.IBaseModel
+<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3 fixed-top">
+    <div class="container">
+        <a class="navbar-brand" asp-area="" asp-page="/Index"><img src="~/logo.svg" class="nav-bar-logo d-inline-block align-middle" />Constellation</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+            <ul class="navbar-nav flex-grow-1 mr-auto">
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Partners <span class="caret"></span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" asp-area="Partner" asp-controller="Schools" asp-action="Index">Schools</a>
+                        <a class="dropdown-item" asp-area="Partner" asp-controller="SchoolContacts" asp-action="Index">School Contacts</a>
+                        <a class="dropdown-item" asp-area="Partner" asp-controller="Students" asp-action="Index">Students</a>
+                        <a class="dropdown-item" asp-area="Partner" asp-controller="Staff" asp-action="Index">Staff</a>
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Subjects <span class="caret"></span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" asp-area="Subject" asp-controller="Courses" asp-action="Index">Courses</a>
+                        <a class="dropdown-item" asp-area="Subject" asp-controller="Classes" asp-action="Index">Classes</a>
+                        <a class="dropdown-item" asp-area="Subject" asp-controller="Periods" asp-action="Index">Periods</a>
+                    </div>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Class Covers <span class="caret"></span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" asp-area="ShortTerm" asp-controller="Casuals" asp-action="Index">Casuals</a>
+                        <a class="dropdown-item" asp-area="ShortTerm" asp-controller="Covers" asp-action="Index">Covers</a>
+                        <a class="dropdown-item" asp-area="Admin" asp-controller="Actions" asp-action="Index">Operations</a>
+                    </div>
+                </li>
+                                
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Reports <span class="caret"></span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" asp-area="Reports" asp-controller="Absences" asp-action="Index">Absences</a>
+                        <a class="dropdown-item" asp-area="Reports" asp-controller="Students" asp-action="Index">Students</a>
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Equipment <span class="caret"></span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" asp-area="Equipment" asp-controller="Devices" asp-action="Index">Devices</a>
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Portals <span class="caret"></span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" asp-area="Portal" asp-controller="Monitor" asp-action="Index">Room Monitor</a>
+                        <a class="dropdown-item" asp-area="Portal" asp-controller="Lessons" asp-action="Index">Lessons</a>
+                        <a class="dropdown-item" asp-area="Portal" asp-page="/Absences/School">School Absences</a>
+                    </div>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav navbar-right">
+                @{
+                    var loggedIn = User.Identity.IsAuthenticated;
+                    var isAdmin = User.IsInRole(AuthRoles.Admin);
+                }
+                
+                  <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">My Classes <span class="caret"></span></a>
+                        <div class="dropdown-menu">
+                              @if (Model.Classes.Count == 0)
+                              {
+                                    <a class="dropdown-item" href="#">None Found</a>
+                              }
+                              else
+                              {
+                                    foreach (var entry in Model.Classes.OrderBy(x => x.Key))
+                                    {
+                                          <a class="dropdown-item" asp-area="Subject" asp-controller="Classes" asp-action="Details" asp-route-id="@entry.Key" asp-route-code="@entry.Value">@entry.Key</a>
+                                    }
+                              }
+                        </div>
+                  </li>
+
+
+                <li class="nav-item dropdown">
+                    <a href="#" id="nav-user-dropdown" class="nav-link glyphicon-dropdown" data-toggle="dropdown" role="button" aria-expanded="false"><i class="glyphicon glyphicon-user glyphicon-dropdown"></i></a>
+                    <div class="dropdown-menu">
+                        @if (loggedIn)
+                        {
+                            <a class="dropdown-item" asp-area="Admin" asp-controller="Auth" asp-action="UpdateUser">Update Profile</a>
+                            <a class="dropdown-item" asp-area="Admin" asp-controller="Auth" asp-action="ChangePassword">Change Password</a>
+                            <a class="dropdown-item" asp-area="Admin" asp-page="/Logout">Log Out</a>
+                        }
+                        else
+                        {
+                            <a class="dropdown-item" asp-area="Admin" asp-page="/Login">Log In</a>
+                        }
+
+                        @if (isAdmin)
+                        {
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" asp-area="Admin" asp-controller="Settings" asp-action="Update">App Settings</a>
+                            <a class="dropdown-item" asp-area="Admin" asp-controller="Settings" asp-action="Absences">Absence Settings</a>
+                            <a class="dropdown-item" asp-area="Admin" asp-controller="Auth" asp-action="AuthSettings">Auth Settings</a>
+                            <a class="dropdown-item" asp-area="Admin" asp-controller="AdobeConnect" asp-action="Actions">Adobe Connect Bulk Actions</a>
+                        }
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

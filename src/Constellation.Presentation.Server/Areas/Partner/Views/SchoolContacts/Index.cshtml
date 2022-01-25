@@ -1,0 +1,206 @@
+﻿@using Constellation.Application.Helpers
+@using Constellation.Application.Models.Identity
+@using Constellation.Core.Enums
+@model SchoolStaff_ViewModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin));
+}
+
+<h2>School Contacts</h2>
+
+<div>
+    <div class="btn-group" role="group">
+        <a asp-action="All" asp-controller="SchoolContacts" asp-area="Partner" class="btn btn-secondary">All Contacts</a>
+    </div>
+
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">For Grade <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            @{
+                var grades = Enum.GetValues(typeof(Grade));
+                foreach (var grade in grades)
+                {
+                    <a asp-action="FromGrade" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@grade" class="dropdown-item">Year @(((int)grade).ToString("D2"))</a>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">With Role <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            @{
+                foreach (var role in Model.RoleList)
+                {
+                    <a asp-action="WithRole" asp-controller="SchoolContacts" asp-area="Partner" asp-route-role="@role" class="dropdown-item">@role</a>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary" id="custom-search-toggle">Custom Search</button>
+    </div>
+
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-warning" onclick="getEmailAddresses()">Copy Contact Emails</button>
+    </div>
+
+    @if (authorised)
+    {
+        <div class="btn-group" role="group">
+            <a asp-action="Create" asp-controller="SchoolContacts" asp-area="Partner" class="btn btn-info">Create New</a>
+        </div>
+    }
+</div>
+
+<div class="row" id="custom-search-box">
+    <div class="col-md-10">
+        <div class="row">
+            <div class="col-md-8"><span class="menu-heading">Grade</span></div>
+            <div class="col-md-4"><span class="menu-heading">Role</span></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                @{
+                    foreach (Grade grade in grades)
+                    {
+                        if ((int)grade <= 8)
+                        {
+                            <input type="checkbox" value="@((int) grade)" name="grade" />
+                            @grade.GetDisplayName()
+                            <br />
+                        }
+                    }
+                }
+            </div>
+            <div class="col-md-4">
+                @{
+                    foreach (Grade grade in grades)
+                    {
+                        if ((int)grade > 8 && (int)grade <= 12)
+                        {
+                            <input type="checkbox" value="@((int) grade)" name="grade" />
+                            @grade.GetDisplayName()
+                            <br />
+                        }
+                    }
+                }
+            </div>
+            <div class="col-md-4">
+                @{
+                    foreach (var role in Model.RoleList)
+                    {
+                        <input type="checkbox" value="@role" name="role" />
+                        @role
+                        <br />
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <button type="button" class="btn btn-success" id="custom-search-button">Search!</button>
+    </div>
+</div>
+
+<hr />
+
+<table class="table-striped table-hover interactive-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone Number</th>
+            <th>Role</th>
+            <th>School</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Contacts)
+        {
+            <tr>
+                <td class="text-nowrap">@Html.DisplayFor(model => item.Name)</td>
+                <td>@Html.DisplayFor(model => item.EmailAddress, "EmailAddress")</td>
+                <td class="text-nowrap">@Html.DisplayFor(model => item.PhoneNumber, "PhoneNumber")</td>
+                <td>@Html.DisplayFor(model => item.Role)</td>
+                <td>@Html.DisplayFor(model => item.SchoolName)</td>
+                <td>
+                    @if (authorised)
+                    {
+                        <a asp-action="Update" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.Id" class="btn btn-sm btn-warning btn-show-hover">Edit Contact</a>
+                    }
+                </td>
+                <td>
+                    @if (authorised && !string.IsNullOrEmpty(item.Role))
+                    {
+                        <a asp-action="DeleteAssignment" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.AssignmentId" class="btn btn-sm btn-warning btn-show-hover">Remove from Role</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts
+{
+    <script>
+        var table;
+
+        $(document)
+            .ready(function() {
+                table = $('.interactive-table').DataTable({
+                    "order": []
+                });
+
+                $('#custom-search-box').hide();
+            });
+
+        function getEmailAddresses() {
+            var email = '';
+
+            table.column(1, { search: 'applied' }).data().each(function (value, index) {
+                email += '; ' + value.replace(/<.*?>/ig, "");
+            });
+
+            var arr =  $.unique(email.split(';'));
+            email = arr.join(";");
+
+            var dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.textContent = email;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+
+            alert('The email addresses of all contacts in the table displayed below have been copied to your clipboard. Please paste (with Ctrl+V) into your email client now.');
+        }
+
+        $('#custom-search-toggle').click(function() {
+            $('#custom-search-box').toggle();
+        });
+
+        $('#custom-search-button').click(function() {
+            var searchParam = "?search=custom";
+
+            $('input:checkbox[name="grade"]').each(function() {
+                if ($(this).prop('checked')) {
+                    searchParam += "&grade=" + $(this).attr('value');
+                }
+            });
+
+            $('input:checkbox[name="role"]').each(function() {
+                if ($(this).prop('checked')) {
+                    searchParam += "&role=" + $(this).attr('value');
+                }
+            });
+
+            var searchUrl = "@Url.Action("Search")";
+
+            window.location.href = searchUrl + searchParam;
+        });
+    </script>
+}

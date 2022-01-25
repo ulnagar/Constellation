@@ -1,0 +1,27 @@
+﻿@model Student_AbsenceSettings_ViewModel
+
+<h2>Student Absence Scanning Settings</h2>
+
+<table class="table-striped table-hover data-table">
+    <thead>
+    <tr>
+        <th>School</th>
+        <th>Name</th>
+        <th>Grade</th>
+        <th>Absence Enabled?</th>
+        <th>Scan Absences From</th>
+    </tr>
+    </thead>
+    <tbody>
+        @foreach (var student in Model.Students)
+        {
+            <tr>
+                <td>@student.SchoolName</td>
+                <td>@student.Name</td>
+                <td>@Html.DisplayFor(model => student.Grade, "Grade")</td>
+                <td>@Html.DisplayFor(model => student.IsEnabled, "Boolean")</td>
+                <td>@Html.DisplayFor(model => student.EnabledFromDate, "ShortDate")</td>
+            </tr>
+        }
+    </tbody>
+</table>

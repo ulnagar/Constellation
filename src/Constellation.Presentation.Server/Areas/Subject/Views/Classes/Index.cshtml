@@ -1,0 +1,82 @@
+﻿@using Constellation.Application.Models.Identity
+@using Constellation.Core.Enums
+@model Classes_ViewModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin));
+}
+
+<h2>Class List</h2>
+
+<div>
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">Class Status <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            <a asp-action="All" asp-controller="Classes" asp-area="Subject" class="dropdown-item">All</a>
+            <a asp-action="Active" asp-controller="Classes" asp-area="Subject" class="dropdown-item">Active</a>
+            <a asp-action="Inactive" asp-controller="Classes" asp-area="Subject" class="dropdown-item">Inactive</a>
+            <a asp-action="Upcoming" asp-controller="Classes" asp-area="Subject" class="dropdown-item">Upcoming</a>
+        </div>
+    </div>
+
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">For Grade <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            @{
+                var grades = Enum.GetValues(typeof(Grade));
+                foreach (var grade in grades)
+                {
+                    <a asp-action="FromGrade" asp-controller="Classes" asp-area="Subject" asp-route-id="@grade" class="dropdown-item">Year @(((int)grade).ToString())</a>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">For Faculty <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            @{
+                var faculties = Enum.GetValues(typeof(Faculty));
+                foreach (var faculty in faculties)
+                {
+                    <a asp-action="FromFaculty" asp-controller="Classes" asp-area="Subject" asp-route-id="@faculty" class="dropdown-item">@faculty.ToString()</a>
+                }
+            }
+        </div>
+    </div>
+    
+    @if (authorised)
+    {
+        <div class="btn-group new-group" role="group">
+            <a asp-action="Create" asp-controller="Classes" asp-area="Subject" class="btn btn-info">Create New</a>
+        </div>
+    }
+</div>
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Course</th>
+            <th>Scholastic Year</th>
+            <th>Teacher</th>
+            <th>Minutes per fortnight</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Offerings)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.CourseName)</td>
+                <td>@item.EndDate.ToString("yyyy")</td>
+                <td>@Html.DisplayFor(modelItem => item.Teachers, "StringList")</td>
+                <td>@item.MinPerFN</td>
+                <td>
+                    <a asp-action="Details" asp-controller="Classes" asp-area="Subject" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

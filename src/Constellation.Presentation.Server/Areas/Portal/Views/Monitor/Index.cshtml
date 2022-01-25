@@ -1,0 +1,71 @@
+﻿@{
+    Layout = "_MonitorLayout.cshtml";
+}
+
+    <div id="statusTable" class="grid">
+
+    </div>
+    
+    <div id="modal-container" class="modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            </div>
+        </div>
+    </div>
+
+@section Scripts 
+{
+    <script>
+        var updateInterval;
+        var refreshTimeout = 30000;
+
+        function updatePage(pageAjaxUrl) {
+            clearInterval(updateInterval);
+            $.ajax({
+                type: "GET",
+                url: pageAjaxUrl,
+                success: function (data) {
+                    $("#statusTable").html(data);
+                }
+            });
+            updateInterval = setInterval(function() { updatePage(pageAjaxUrl); }, refreshTimeout);
+        };
+
+        $(document).ready(function () {
+            updatePage("@Url.Action("DashboardStatus", "Monitor", new {area = "Portal"})", null);
+            updateInterval = setInterval(function() { updatePage("@Url.Action("DashboardStatus", "Monitor", new {area = "Portal"})", null); }, refreshTimeout);
+        });
+
+        $(function() {
+            $('body')
+                .on('click',
+                    '.modal-link',
+                    function(e) {
+                        e.preventDefault();
+                        $('.modal-content').load($(this).attr('href'));
+                        $(this).attr('data-target', '#modal-container');
+                        $(this).attr('data-toggle', 'modal');
+                    });
+
+            $('body')
+                .on('click',
+                    '.modal-close-btn',
+                    function() {
+                        $('#modal-container').modal('hide');
+                    });
+
+            $('#modal-container')
+                .on('hidden.bs.modal',
+                    function() {
+                        $(this).removeData('bs.modal');
+                        $(".modal-content").html("");
+                    });
+
+            $('#CancelModal')
+                .on('click',
+                    function() {
+                        return false;
+                    });
+        });
+    </script>
+}

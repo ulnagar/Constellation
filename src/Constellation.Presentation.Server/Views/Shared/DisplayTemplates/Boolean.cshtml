@@ -1,0 +1,17 @@
+﻿@model bool?
+    
+@if (Model.HasValue)
+{
+    if (Model.Value)
+    {
+        <span class="badge badge-info">Yes</span> 
+    }
+    else
+    {
+        <span class="badge badge-warning">No</span>
+    }
+}
+else
+{
+    <span class="label label-info">Not Set</span>
+}

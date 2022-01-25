@@ -1,0 +1,89 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.Portal.Pages.Lessons.TeacherModel
+
+<h2>Science Practical Lessons</h2>
+
+<div>
+
+    @{
+        var all_style = "btn-outline-secondary";
+        var pending_style = all_style;
+        var overdue_style = all_style;
+        var completed_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case TeacherModel.FilterDto.All:
+                all_style = "btn-primary";
+                break;
+            case TeacherModel.FilterDto.Pending:
+                pending_style = "btn-primary";
+                break;
+            case TeacherModel.FilterDto.Overdue:
+                overdue_style = "btn-primary";
+                break;
+            case TeacherModel.FilterDto.Complete:
+                completed_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Teacher" asp-area="Portal" asp-route-filter="@TeacherModel.FilterDto.All" class="btn @all_style">All</a>
+        <a asp-page="Teacher" asp-area="Portal" asp-route-filter="@TeacherModel.FilterDto.Pending" class="btn @pending_style">Pending</a>
+        <a asp-page="Teacher" asp-area="Portal" asp-route-filter="@TeacherModel.FilterDto.Overdue" class="btn @overdue_style">Overdue</a>
+        <a asp-page="Teacher" asp-area="Portal" asp-route-filter="@TeacherModel.FilterDto.Complete" class="btn @completed_style">Completed</a>
+    </div>
+</div>
+
+<hr />
+
+<table class="table table-striped data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Lesson</th>
+            <th>Due Date</th>
+            <th>Course</th>
+            <th>School</th>
+            <th>Lesson Held</th>
+            <th>Attendance</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.FilteredLessons.OrderBy(lesson => lesson.DueDate))
+        {
+            <tr>
+                <td>
+                    @if (entry.Roll.Submitted)
+                    {
+                        <span class="glyphicon glyphicon-ok"></span>
+                    }
+                    else if (entry.Overdue)
+                    {
+                        <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    }
+                    else
+                    {
+                        <span class="glyphicon glyphicon-time"></span>
+                    }
+                </td>
+                <td>@entry.Name</td>
+                <td>@entry.DueDate.ToShortDateString()</td>
+                <td>@entry.CourseName</td>
+                <td>@entry.Roll.SchoolName</td>
+                <td>@(entry.Roll.LessonDate.HasValue ? entry.Roll.LessonDate.Value.ToShortDateString() : "")</td>
+                <td>
+                    @if (entry.Roll.Submitted)
+                    {
+                        @Html.ActionLink($"Present: {entry.Roll.AttendanceStatistics}", "Roll", "Lessons", new { @area = "Portal", id = entry.Roll.Id }, new { @class = "btn btn-success btn-sm" })
+                    }
+                    else
+                    {
+                        @Html.ActionLink("Submit Roll", "Roll", "Lessons", new { @area = "Portal", id = entry.Roll.Id }, new { @class = "btn btn-warning btn-sm" })
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

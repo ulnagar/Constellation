@@ -1,0 +1,29 @@
+﻿@model Export_Awards_ViewModel
+
+<h2>Awards Calculation</h2>
+
+<form asp-action="Awards" asp-controller="DocumentExport" asp-area="Utility" method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.uploadedFile, "Sentral Awards Export File", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-3">
+                @Html.TextBoxFor(model => model.uploadedFile, new { type = "file", @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.uploadedFile, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-3">
+                <input type="submit" value="Export" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-3">
+                <span class="text-danger">Please note that this process can take some time.</span>
+            </div>
+        </div>
+    </div>
+</form>

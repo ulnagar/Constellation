@@ -1,0 +1,79 @@
+﻿@model Absence_ReportViewModel
+
+<h2>Attendance Report</h2>
+
+<div class="row">
+    <form asp-action="BuildAbsencesExport" asp-controller="Absences" asp-area="Reports" method="post">
+        <input asp-for="Filter.SchoolCode" value="@Model.Filter.SchoolCode" hidden="hidden" />
+        <input asp-for="Filter.Grade" value="@Model.Filter.Grade" hidden="hidden" />
+        <input asp-for="Filter.StartDate" value="@Model.Filter.StartDate" hidden="hidden" />
+        <input asp-for="Filter.EndDate" value="@Model.Filter.EndDate" hidden="hidden" />
+        <input asp-for="Filter.StudentId" value="@Model.Filter.StudentId" hidden="hidden" />
+        <input asp-for="Filter.Report" value="@Model.Filter.Report" hidden="hidden" />
+        <input type="submit" value="Export Data" class="btn btn-info"/>
+    </form>
+
+    <a asp-action="Index" asp-controller="Absences" asp-area="Reports" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<table class="table-striped table-hover custom-data-table">
+    <thead>
+        <tr>
+            <th>Student</th>
+            <th>Explained</th>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Period</th>
+            <th>Class</th>
+            <th># Notifications</th>
+            <th># Responses</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Absences.OrderBy(a => a.StudentGrade).ThenBy(a => a.SortName).ThenBy(a => a.Date))
+        {
+            <tr>
+                <td>@Html.DisplayFor(model => item.StudentName) (@Html.DisplayFor(model => item.StudentGrade, "Grade") @Html.DisplayFor(model => item.SchoolName))</td>
+                <td>@if (item.IsExplained)
+                    {
+                        <span class="glyphicon glyphicon-ok glyph-color-green" />
+                    }
+                    else
+                    {
+                        <span class="glyphicon glyphicon-remove glyph-color-red" />
+                    }
+                </td>
+                <td>@Html.DisplayFor(model => item.Type)</td>
+                <td>@Html.DisplayFor(model => item.Date, "ShortDate")</td>
+                <td>@Html.DisplayFor(model => item.AbsenceTimeframe) (@Html.DisplayFor(model => item.PeriodName))</td>
+                <td>@Html.DisplayFor(model => item.OfferingName)</td>
+                <td>@Html.DisplayFor(model => item.NotificationCount)</td>
+                <td>@Html.DisplayFor(model => item.ResponseCount)</td>
+                <td>
+                    <a asp-action="AbsenceDetails" asp-controller="Students" asp-area="Partner" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts
+{
+    <script>
+        $(document)
+            .ready(function () {
+                $('.custom-data-table').DataTable({
+                    "order": [],
+                    "rowGroup": {
+                        "dataSrc": 0
+                    },
+                    "columnDefs": [
+                        { "visible": false, "targets": 0 }
+                    ]
+                });
+            });
+    </script>
+}

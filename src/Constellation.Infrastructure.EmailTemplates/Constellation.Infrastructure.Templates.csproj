@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<Content Update="Views\**\*.cshtml" />
+  </ItemGroup>
+
+  <!--<ItemGroup>
+    <Compile Include="Views\**\*.cshtml" />
+  </ItemGroup>-->
+	
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Constellation.Application\Constellation.Application.csproj" />
+  </ItemGroup>
+</Project>

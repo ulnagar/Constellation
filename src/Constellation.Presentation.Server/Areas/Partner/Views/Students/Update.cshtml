@@ -1,0 +1,143 @@
+﻿@using Constellation.Core.Enums
+@model Student_UpdateViewModel
+
+<h2>@((Model.IsNew) ? "New Student" : "Edit Student")</h2>
+
+<div class="row">
+    <a asp-action="Index" asp-controller="Students" asp-area="Partner" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-action="Update" asp-controller="Students" asp-area="Partner" method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new {@class = "text-danger"})
+        @Html.HiddenFor(model => model.IsNew)
+
+        <div class="form-group row">
+            <label asp-for="Student.StudentId" class="col-md-2">SRN</label>
+            <div class="col-md-3">
+                <input asp-for="Student.StudentId" class="form-control" readonly="@(!Model.IsNew)" />
+                <span asp-validation-for="Student.StudentId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Student.FirstName" class="col-md-2">First Name</label>
+            <div class="col-md-3">
+                <input asp-for="Student.FirstName" class="form-control" />
+                <span asp-validation-for="Student.FirstName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Student.LastName" class="col-md-2">Last Name</label>
+            <div class="col-md-3">
+                <input asp-for="Student.LastName" class="form-control" />
+                <span asp-validation-for="Student.LastName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Student.PortalUsername" class="col-md-2">DoE Username</label>
+            <div class="col-md-3">
+                <input asp-for="Student.PortalUsername" class="form-control" />
+                <span asp-validation-for="Student.PortalUsername" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row" id="acpid-group">
+            <label asp-for="Student.AdobeConnectPrincipalId" class="col-md-2">Adobe Connect User</label>
+            <div class="col-md-3">
+                <input asp-for="Student.AdobeConnectPrincipalId" class="form-control" />
+                <span asp-validation-for="Student.AdobeConnectPrincipalId" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <button id="getPID" type="button" class="btn btn-secondary">Search Adobe Connect</button>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Student.EnrolledGrade" class="col-md-2">Grade at Enrolment</label>
+            <div class="col-md-3">
+                <select asp-for="Student.EnrolledGrade" asp-items="Html.GetEnumSelectList<Grade>()" class="form-control">
+                    <option value="">-- Select --</option>
+                </select>
+                <span asp-validation-for="Student.EnrolledGrade" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="Student.CurrentGrade" class="col-md-2">Grade at Present</label>
+            <div class="col-md-3">
+                <select asp-for="Student.CurrentGrade" asp-items="Html.GetEnumSelectList<Grade>()" class="form-control">
+                    <option value="">-- Select --</option>
+                </select>
+                <span asp-validation-for="Student.CurrentGrade" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Student.Gender" class="col-md-2"></label>
+            <div class="col-md-3">
+                <select asp-for="Student.Gender" asp-items="@Model.GenderList" class="form-control">
+                    <option value="">-- Select --</option>
+                </select>
+                <span asp-validation-for="Student.Gender" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Student.SchoolCode" class="col-md-2">School</label>
+            <div class="col-md-3">
+                <select asp-for="Student.SchoolCode" asp-items="@Model.SchoolList" class="form-control combo">
+                    <option value="">-- Select --</option>
+                </select>
+                <span asp-validation-for="Student.SchoolCode" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg"/>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $('#getPID')
+            .on('click',
+                function(event) {
+                    var url = "@Url.Action("_getUserACPID", "AdobeConnect", new {area = "Admin"})";
+                    $('span[id="warningIcon"]').remove();
+                    $('span[id="helpBlock"]').remove();
+                    $('#acpid-group').removeClass("has-warning").removeClass("has-feedback");
+                    $.ajax({
+                        dataType: "json",
+                        url: url,
+                        data: { username: $('#Student_PortalUsername').val() },
+                        success: function(data) {
+                            var response = JSON.parse(data);
+                            $('#Student_AdobeConnectPrincipalId').val(response);
+                            $('span[id="warningIcon"]').remove();
+                            $('span[id="helpBlock"]').remove();
+                            $('#acpid-group').removeClass("has-warning").removeClass("has-feedback");
+                        },
+                        error: function() {
+                            var newContent = $('' +
+                                '<span id="warningIcon" class="glyphicon glyphicon-warning-sign form-control-feedback" aria-hidden="true"></span>' +
+                                '<span id="helpBlock" class="help-block">This user has not logged into the Adobe Connect server yet. No automatic process will be able to provide this user with access to rooms.</span>');
+                            $('#acpid-group').addClass("has-warning").addClass("has-feedback");
+                            $('#Student_AdobeConnectPrincipalId')
+                                .parent()
+                                .append(newContent);
+                        }
+                    });
+                });
+    </script>
+}

@@ -1,0 +1,21 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.RollMarking
+@model DailyReportEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Sentral reports that the following rolls have not yet been submitted.</p>
+<ul>
+    @foreach (var entry in Model.UnsubmittedRolls)
+    {
+        <li>@entry</li>
+    }
+</ul>
+<p>Please ensure that these rolls have been submitted prior to 11am tomorrow.</p>
+<p>If there is some reason why the roll cannot be submitted, such as the class was cancelled, please contact the office to have this issue rectified asap.</p>

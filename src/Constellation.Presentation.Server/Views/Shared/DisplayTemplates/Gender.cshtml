@@ -1,0 +1,7 @@
+﻿@model string
+    
+@if (!string.IsNullOrEmpty(Model))
+{
+    var color = (Model == "F") ? "glyph-color-pink" : "glyph-color-blue";
+    <span class="glyphicon glyphicon-user @color" style="padding-right: 5px;"></span>
+}

@@ -1,0 +1,27 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Covers
+@model UpdatedCoverEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>@Model.ToName</p>
+<br />
+<p>This email is to advise you that a cover previously arranged for Aurora College has been modified in our system for the classes below. This cover is now active @Model.DateBlock.</p>
+<ul>
+    @foreach (var pair in Model.ClassWithLink)
+    {
+        <li>@pair.Key - <a rel="noopener" href="@pair.Value" target="_blank">@pair.Value</a></li>
+    }
+
+    <li>Microsoft Teams - <a rel="noopener" href="https://teams.microsoft.com/" target="_blank">https://teams.microsoft.com/</a></li>
+</ul>
+<p>Access to the resources will be automatically provided on @Model.StartDate.AddDays(-1).ToShortDateString()., and automatically removed on @Model.EndDate.AddDays(1).ToShortDateString().</p>
+<p>It is important that you attempt to access all class resources required before the start of class, and if you are having any difficulty, please get in touch urgently.</p>
+<br />
+<p>For tips on how to operate an Adobe Connect classroom, please read the instructions at the following link: <a rel="noopener" href="https://education.nsw.gov.au/technology/how-to-guides/learning-and-collaboration-tools/adobe-connect" target="_blank">https://education.nsw.gov.au/technology/how-to-guides/learning-and-collaboration-tools/adobe-connect</a></p>

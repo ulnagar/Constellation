@@ -1,0 +1,168 @@
+﻿@model Covers_CreateViewModel
+
+<h2>Create New Cover</h2>
+
+<div class="row">
+    <a asp-action="Index" asp-controller="Covers" asp-area="ShortTerm" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-action="Create" asp-controller="Covers" asp-area="ShortTerm" method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Cover.UserType)
+        
+        <div class="form-group row">
+            <label asp-for="Cover.UserId" class="col-md-2">Covering Teacher</label>
+            <div class="col-md-3">
+                <select asp-for="Cover.UserId" asp-items="Model.UserList" class="form-control combo">
+                    <option value="">-- Select --</option>
+                </select>
+                <span asp-validation-for="Cover.UserId" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="Cover.TeacherId" class="col-md-2">Classroom Teacher</label>
+            <div class="col-md-3">
+                <select asp-for="Cover.TeacherId" asp-items="Model.TeacherList" class="form-control combo">
+                    <option value="">-- Select --</option>
+                </select>
+                <span asp-validation-for="Cover.TeacherId" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="Cover.ClassId" class="col-md-2">All Classes</label>
+            <div class="col-md-3">
+                <select id="allClasses" multiple="multiple" name="allClasses" class="form-control">
+                    @foreach (var entry in Model.MultiClassList)
+                    {
+                        <option value="@entry.Value">@entry.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="offset-2 col-md-3">
+                <btn class="btn btn-sm btn-secondary" onClick="addClassToCover()">Add</btn> 
+                <btn class="btn btn-sm btn-secondary new-group" onClick="removeClassFromCover()">Remove</btn>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Cover.ClassId" class="col-md-2">Selected Classes</label>
+            <div class="col-md-3">
+                <select id="selectedClasses" multiple="multiple" name="selectedClasses" class="form-control"></select>
+                <span asp-validation-for="Cover.ClassId" class="text-danger"></span>
+            </div>
+            <div id="class_inputs"></div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Cover.StartDate" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="Cover.StartDate" class="form-control" />
+                <span asp-validation-for="Cover.StartDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Cover.EndDate" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="Cover.EndDate" class="form-control" />
+                <span asp-validation-for="Cover.EndDate" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts
+{    
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function addClassToCover() {
+            var class_list = $('select[id="allClasses"]')[0];
+            var selected_classes = $('select#allClasses>option:selected');
+            var selected_list = $('select[id="selectedClasses"]')[0];
+            if (class_list.selectedIndex != -1) {
+                for (var i = 0; i < selected_classes.length; i++) {
+                    //Copy the element
+                    var element = $('select#allClasses>option[value=' + selected_classes[i].value + ']');
+                    var new_element = element.clone();
+
+                    //Remove it from the All Classes list
+                    element.remove();
+
+                    //Add it to the Selected Classes list
+                    selected_list.append(new_element[0]);
+
+                    //Sort the Selected Classes list
+                    sort_list = $('select#selectedClasses option');
+                    sort_list.detach().sort(function(a, b) {
+                        var at = a.value, bt = b.value;
+                        return (at > bt) ? 1 : ((at < bt) ? -1 : 0);
+                    });
+                    sort_list.appendTo("select#selectedClasses");
+
+                    //Add element to signify value in Classes array
+                    var inputTemplate = new_element[0];
+                    var input = $('<input>').attr('id', inputTemplate.value + "_input")
+                        .attr('name', "Classes")
+                        .attr('type', "hidden");
+                    input.val(inputTemplate.value);
+                    var classInputDiv = $('div#class_inputs')[0];
+                    classInputDiv.append(input[0]);
+                }
+            }
+        }
+
+        function removeClassFromCover() {
+            var class_list = $('select[id="allClasses"]')[0];
+            var selected_clases = $('select#selectedClasses>option:selected');
+            var selected_list = $('select[id="selectedClasses"]')[0];
+            if (selected_list.selectedIndex != -1) {
+                for (var i = 0; i < selected_clases.length; i++) {
+                    //Copy the element
+                    var element = $('select#selectedClasses>option[value=' + selected_clases[i].value + ']');
+                    var new_element = element.clone();
+
+                    //Remove it from the Selected Classes list
+                    element.remove();
+
+                    //Add it to the All Classes list
+                    class_list.append(new_element[0]);
+
+                    //Sort the All Classes list
+                    sort_list = $('select#allClasses option');
+                    sort_list.detach().sort(function (a, b) {
+                        var at = a.text, bt = b.text;
+                        return (at > bt) ? 1 : ((at < bt) ? -1 : 0);
+                    });
+                    sort_list.appendTo('select#allClasses');
+
+                    //Remove element that signifies value in Classes array
+                    var inputTemplate = new_element[0];
+                    var input = $('#' + inputTemplate.value + '_input');
+                    input.remove();
+                }
+            }
+        }
+
+        $(document).ready(function() {
+            $("#Cover_UserId").on("select2:select", function(e) {
+                var group = e.params.data.element.parentElement.label;
+                $("#Cover_UserType").val(group);
+            })
+        })
+    </script>
+}

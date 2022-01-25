@@ -1,0 +1,27 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Absences
+@model CoordinatorAbsenceVerificationRequestEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Dear Coordinator,</p>
+<p>@Model.StudentName is a student shared between @Model.SchoolName and Aurora College, and was marked absent during portions of their lessons. When asked to explain these absences, they provided the following responses.</p>
+<dl>
+    @foreach (var entry in Model.ClassList)
+    {
+        <dt>@entry.Date.ToString("D")</dt>
+        <dd>
+            @entry.PeriodName (@entry.PeriodTimeframe) - @entry.OfferingName absent for the period of @entry.AbsenceTimeframe
+            <br />@entry.Explanation
+        </dd>
+    }
+</dl>
+<p>Please review the accuracy of their description, and either verify or reject their response.</p>
+<p>A new Coordinator portal has been developed for absences. You can now view all outstanding absences for students at your school by going to the following site: <a href="@Model.PortalLink" target="_blank">@Model.PortalLink</a></p>
+<p>If you have any questions or concerns about this absence, please contact our office on 1300 287 629 or at auroracoll-h.school@det.nsw.edu.au.</p>

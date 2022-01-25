@@ -1,0 +1,23 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Absences
+@model AbsenceExplanationToSchoolAdminEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>The following absence explanation has been received via our online system.</p>
+<dl>
+    @foreach (var absence in Model.Absences)
+    {
+        <dt>@Model.StudentName - @absence.AbsenceDate.ToLongDateString():</dt>
+        <dd>@absence.ClassName (@absence.PeriodName)<br />
+            @absence.Explanation<br />
+            @Html.Raw(absence.Source)
+        </dd>
+    }
+</dl>

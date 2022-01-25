@@ -1,0 +1,43 @@
+﻿@using Constellation.Application.Models.Identity;
+@model Constellation.Presentation.Server.Areas.Admin.Models.Actions_ViewModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.Admin));
+}
+
+<h2>Adobe Connect Operations</h2>
+
+<table class="table table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>User Type</th>
+            <th>User Id</th>
+            <th>User Name</th>
+            <th>Action</th>
+            <th>Room</th>
+            <th>Date Scheduled</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Operations)
+        {
+            <tr>
+                <td>@Html.DisplayFor(model => item.IsCompleted, "Boolean")</td>
+                <td>@Html.DisplayFor(model => item.UserType)</td>
+                <td>@Html.DisplayFor(model => item.UserId)</td>
+                <td>@Html.DisplayFor(model => item.UserName)</td>
+                <td>@Html.DisplayFor(model => item.ActionType)</td>
+                <td>@Html.DisplayFor(model => item.RoomName)</td>
+                <td>@Html.DisplayFor(model => item.DateScheduled, "ShortDate")</td>
+                <td>
+                    @if (item.IsCompleted == false && item.IsDeleted == false && authorised)
+                    {
+                        @Html.ActionLink("Process Now", "Process", new { operationId = item.Id, userType = item.UserType, userId = item.UserId }, new { @class = "btn btn-sm btn-info btn-show-hover" });
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

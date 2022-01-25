@@ -1,0 +1,51 @@
+﻿@model Sessions_AssignmentViewModel
+
+<div class="modal fade" id="addSession">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="_AddSession" asp-controller="Sessions" asp-area="Subject" method="post">
+                <div class="modal-header">
+                    <h3 class="modal-title">Add Session</h3>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        @Html.HiddenFor(model => model.OfferingId)
+                        <div class="row">
+                            <div class="form-group col-md-10 offset-1">
+                                <span>Class </span>@Model.OfferingName
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-10 offset-1">
+                                <span>should have a scheduled session at </span>
+                                <select asp-for="PeriodId" asp-items="@Model.PeriodList" class="form-control">
+                                    <option value="">-- Select --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-10 offset-1">
+                                <span>in room </span>
+                                <select asp-for="RoomId" asp-items="@Model.RoomList" class="form-control combo">
+                                    <option value="">-- Select --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-10 offset-1">
+                                <span>with teacher </span>
+                                <select asp-for="TeacherId" asp-items="@Model.StaffList" class="form-control combo">
+                                    <option value="">-- Select --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

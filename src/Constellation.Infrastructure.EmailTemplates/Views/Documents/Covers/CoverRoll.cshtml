@@ -1,0 +1,113 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Documents.Covers
+@model CoverRollViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Aurora College Class Roll</title>
+    <style>
+        .mt-2 {
+            margin-top: 0.5em;
+        }
+
+        .mt-3 {
+            margin-top: 1em;
+        }
+
+        .mt-4 {
+            margin-top: 1.25em;
+        }
+
+        .w-25 {
+            width: 25%;
+        }
+
+        td.app-card {
+            padding: 1rem .25rem .25rem .5rem;
+            vertical-align: top;
+            border-bottom: 1px solid;
+        }
+
+        .table-roll {
+            font-size: 12px;
+        }
+
+        .offset-1 {
+            margin-left: 5%;
+        }
+
+        .col-10 {
+            -ms-flex: 0 0 83.333333%;
+            flex: 0 0 83.333333%;
+            max-width: 83.333333%
+        }
+
+        .row {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+            margin-right: -15px;
+            margin-left: -15px
+        }
+    </style>
+</head>
+<body>
+<div class="row">
+    <div class="offset-1 col-10">
+        <h2>Aurora College Casual Roll</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="offset-1 col-10">
+        <h4 class="mt-2">Class @Model.ClassName</h4>
+        <h4 class="mt-2">Date: ____________________________</h4>
+
+        <h5 class="mt-2">Instructions: </h5>
+        <p>
+            Please complete this roll for each lesson you teach, and email to <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a> as soon as possible after the class finishes.
+        </p>
+        <p>
+            If you have any issues, please contact the school on 1300 287 629.
+        </p>
+
+        <table class="table table-bordered mt-3 table-roll">
+            <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Gender</th>
+                <th>School</th>
+                <th>Time In</th>
+                <th>Time Out</th>
+                <th class="w-25">Notes</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var student in Model.Students.OrderBy(enrolment => enrolment.OrderName))
+            {
+                <tr>
+                    <td class="app-card">@student.Name</td>
+                    <td class="app-card">@student.Gender</td>
+                    <td class="app-card">@student.School</td>
+                    <td class="app-card"></td>
+                    <td class="app-card"></td>
+                    <td class="app-card"></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+        <h4 class="mt-4">Name: ____________________________</h4>
+        <h4 class="mt-2">Signature: ____________________________</h4>
+    </div>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,135 @@
+﻿@page "{id}"
+@model Constellation.Presentation.Server.Areas.Portal.Pages.Lessons.RollModel
+
+<h2>Science Practical Lesson Roll - @Model.Roll.School</h2>
+            
+<div class="row">
+    <a asp-page="/Lessons/Teacher" asp-area="Portal" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+@if (Model.Roll.Submitted)
+{
+    <div class="form-horizontal">
+        <div class="row">
+            <label asp-for="Roll.LessonName" class="col-md-2"></label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.Roll.LessonName</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <label asp-for="Roll.DueDate" class="col-md-2"></label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.Roll.DueDate.ToString("dd/MM/yyyy")</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <label asp-for="Roll.LessonDate" class="col-md-2"></label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.Roll.LessonDate.ToString("dd/MM/yyyy")</span>
+            </div>
+        </div>
+                    
+        <div class="row">
+            <label asp-for="Roll.TeacherName" class="col-md-2"></label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.Roll.TeacherName</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <label asp-for="Roll.Comment" class="col-md-2"></label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.Roll.Comment</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <table class="table">
+                <thead>
+                <tr>
+                    <td class="col-md-4"><label>Name</label></td>
+                    <td><label>Present?</label></td>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var student in Model.Roll.Attendance)
+                {
+                    <tr>
+                        <td><span class="control-label text-only">@student.DisplayName</span></td>
+                        <td><span class="control-label text-only">@(student.Present ? "Yes" : "No")</span></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <form method="post">
+        @Html.HiddenFor(model => model.Roll.RollId)
+
+        <div class="form-horizontal">
+            <div class="form-group row">
+                <label asp-for="Roll.LessonName" class="col-md-2"></label>
+                <div class="col-md-6">
+                    <span class="control-label text-only">@Model.Roll.LessonName</span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label asp-for="Roll.DueDate" class="col-md-2"></label>
+                <div class="col-md-6">
+                    <span class="control-label text-only">@Model.Roll.DueDate.ToString("dd/MM/yyyy")</span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label asp-for="Roll.LessonDate" class="col-md-2"></label>
+                <div class="col-md-3">
+                    <input asp-for="Roll.LessonDate" class="form-control" />
+                    <span asp-validation-for="Roll.LessonDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label asp-for="Roll.Comment" class="col-md-2"></label>
+                <div class="col-md-6">
+                    <textarea asp-for="Roll.Comment" class="form-control"></textarea>
+                    <span asp-validation-for="Roll.Comment" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <td class="col-md-4"><label>Name</label></td>
+                        <td><label>Present?</label></td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @for (var i = 0; i < Model.Roll.Attendance.Count(); i++)
+                    {
+                        <tr>
+                            @Html.HiddenFor(model => model.Roll.Attendance[i].Id)
+                            <td>@Html.DisplayFor(model => model.Roll.Attendance[i].DisplayName)</td>
+                            <td>@Html.EditorFor(model => model.Roll.Attendance[i].Present)</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-md-offset-2 col-md-3">
+                    <input type="submit" value="Submit" class="btn btn-primary btn-block btn-lg"/>
+                </div>
+            </div>
+        </div>
+    </form>
+}

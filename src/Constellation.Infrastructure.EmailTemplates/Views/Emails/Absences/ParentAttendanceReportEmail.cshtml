@@ -1,0 +1,14 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Absences
+@model ParentAttendanceReportEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Please find attached the Attendance Report for @Model.StudentName during the period of @Model.StartDate.ToLongDateString() to @Model.EndDate.ToLongDateString().</p>
+<p>If you have any questions or concerns about this absence, please contact our office on 1300 287 629 or at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a></p>

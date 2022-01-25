@@ -1,0 +1,105 @@
+﻿@using Constellation.Application.Models.Identity
+@using Constellation.Core.Enums
+@model Course_ViewModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin));
+}
+
+<h2>Course List</h2>
+
+<div>
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">With Classes <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            <a asp-action="All" asp-controller="Courses" asp-area="Subject" class="dropdown-item">All</a>
+            <a asp-action="WithClasses" asp-controller="Courses" asp-area="Subject" class="dropdown-item">Active</a>
+            <a asp-action="WithoutClasses" asp-controller="Courses" asp-area="Subject" class="dropdown-item">Inactive</a>
+        </div>
+    </div>
+
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">For Grade <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            @{
+                var grades = Enum.GetValues(typeof(Grade));
+                foreach (var grade in grades)
+                {
+                    <a asp-action="ForGrade" asp-controller="Courses" asp-area="Subject" asp-route-id="@grade.ToString()" class="dropdown-item">@(((int)grade).ToString())</a>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">For Faculty <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            @{
+                var faculties = Enum.GetValues(typeof(Faculty));
+                foreach (var faculty in faculties)
+                {
+                    <a asp-action="ForFaculty" asp-controller="Courses" asp-area="Subject" asp-route-id="@faculty.ToString()" class="dropdown-item">@faculty.ToString()</a>
+                }
+            }
+        </div>
+    </div>
+    
+    @if (authorised)
+    {
+        <div class="btn-group new-group" role="group">
+            <a asp-action="Create" asp-controller="Courses" asp-area="Subject" class="btn btn-info">Create New</a>
+        </div>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Name</th>
+        <th>Grade</th>
+        <th>Faculty</th>
+        <th>Classes</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in Model.Courses)
+        {
+            <tr>
+                <td>
+                    <span class="badge">@item.Offerings.Count(offering => offering.IsCurrent)</span> 
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Grade, "Grade")
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Faculty, "Faculty")
+                </td>
+                <td>
+                    @foreach (var offering in item.Offerings.Where(offering => offering.IsCurrent))
+                    {
+                        if (offering.IsCurrent)
+                        {
+                            <a asp-action="Details" asp-controller="Classes" asp-area="Subject" asp-route-id="@offering.Id" class="badge badge-secondary">@offering.Name</a>
+                        }
+                        else
+                        {
+                            <a asp-action="Details" asp-controller="Classes" asp-area="Subject" asp-route-id="@offering.Id" class="badge badge-primary">@offering.Name</a>
+                        }
+                    }
+                </td>
+                <td>
+                    <a asp-action="Details" asp-controller="Courses" asp-area="Subject" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>
