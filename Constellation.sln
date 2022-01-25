@@ -16,6 +16,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Presentation.Server", "src\Constellation.Presentation.Server\Constellation.Presentation.Server.csproj", "{B100AA07-F366-4BC0-97F4-EF126928B8F7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{8E4ACA9A-B3CB-4538-96EE-FC153E53AA1F}"
+	ProjectSection(SolutionItems) = preProject
+		docs\MigrationStatus.txt = docs\MigrationStatus.txt
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sql", "sql", "{AAD6B84B-76A4-43EE-A99D-885E6A7612FA}"
 	ProjectSection(SolutionItems) = preProject

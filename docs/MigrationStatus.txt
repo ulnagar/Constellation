@@ -6,12 +6,6 @@ Constellation.Infrastructure
 
 Constellation.Infrastructure.Templates
 
-Constellation.Microservice.ClassMonitor
-
-Constellation.Microservice.LessonsNotifications
-
-Constellation.Microservice.PermissionsUpdate
-
 Constellation.Presentation.Server
 
 SQL Scripts
@@ -45,14 +39,14 @@ ACOS.Data
 	\Persistence\Repositories (DONE)
 	\Persistence\Services (DONE)
 ACOS.Shared
-ACOS.Utility.AbsenceNotifications
+ACOS.Utility.AbsenceNotifications => IAbsenceMonitorJob
 ACOS.Utility.AccessReports (NO LONGER NEEDED)
-ACOS.Utility.AttendanceReports
+ACOS.Utility.AttendanceReports => IAttendanceReportsJob
 ACOS.Utility.DataTasks (NO LONGER NEEDED)
-ACOS.Utility.LessonsNotifications => Constellation.Microservice.LessonsNotifications (DONE)
-ACOS.Utility.Monitor => Constellation.Microservice.ClassMonitor (DONE)
+ACOS.Utility.LessonsNotifications => ILessonNotificationsJob
+ACOS.Utility.Monitor => IClassroomMonitorJob
 ACOS.Utility.Networks
-ACOS.Utility.UserAction => Constellation.Microservice.PermissionsUpdate (DONE)
+ACOS.Utility.UserAction => IPermissionsUpdateJob
 ACOS.Web
 	\Areas\Admin => Constellation.Presentation.Web (DONE)
 	\Areas\Equipment => Constellation.Presentation.Web (DONE)
@@ -67,14 +61,7 @@ Need to scaffold/create additional Identity pages to handle Access Denied etc.
 Need to convert all services to async.
 Need to update all DTO/Resources with Attributes for required, datatype, and displayname.
 
-Migrated the ACOS content created after migration start, up to the 20-01-2022 commit: Bugfix: perform error checking on CANVAS API responses.
-	To Test: Canvas Operations, Classwork Notifications flow, RollMarking report flow.
-	To Complete: AbsencesTeacher page/portal
-
-Migrating Microservices that need to send emails:
-	- Must be converted to server side code, with the microservice simply "jump-starting" the process
-	- Server side code seems to need to be in a HostedService to allow it to be long running and background:
-		https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-6.0&tabs=visual-studio
-	- Convert just the email sending to an API call, using a single DTO (per email request).
-		The API can then take the information and process sending the email on behalf of the application.
-	- Issues with injecting a service that (somewhere down the chain) injects the IEmailService or IRazorViewEngine (e.g. PermissionsUpdate)
+TODO:
+ - Update email layout template to remove format errors
+ - Scaffold additional Identity pages to perform Register and Password Reset tasks
+ - Test SSO with DoE systems
