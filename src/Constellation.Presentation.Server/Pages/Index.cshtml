@@ -1,16 +1,42 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    Layout = "~/Shared/_OuterLayout";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center mb-3">
+    <h1 class="display-4">Constellation</h1>
+    <p>Constellation is an online system for Aurora College to help manage and monitor operations. Access is restricted to authorised users only.</p>
 </div>
 
-<table>
-    <tr>
+<div class="row justify-content-around">
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <h3>For Staff</h3>
+            <p class="card-text">
+                Constellation provides Aurora College staff with information on Students, Classes, Schools, and Devices...
+            </p>
+            <a asp-page="Dashboard" asp-area="" class="card-link">Log In</a>
+        </div>
+    </div>
 
-    </tr>
-</table>
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <h3>For Schools</h3>
+            <p class="card-text">
+                Constellation provides Aurora College partner schools with information on our shared Students including attendance and Science lesson rolls...
+            </p>
+            <a class="card-link" href="/Portal/School">Log In</a>
+        </div>
+    </div>
+
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <h3>For Parents</h3>
+            <p class="card-text">
+                Constellation provides Aurora College families with information on their Students including attendance and reports...
+            </p>
+            <a class="card-link" href="/Portal/Parents">Log In</a>
+        </div>
+    </div>
+</div>

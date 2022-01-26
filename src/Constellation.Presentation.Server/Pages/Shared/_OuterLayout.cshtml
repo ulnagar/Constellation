@@ -1,0 +1,63 @@
+﻿@using System.IO;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Constellation</title>
+
+    <link rel="icon" type="image/svg" href="~/logo.svg" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="//cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/lib/select2-theme-bootstrap4/dist/select2-bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/glyphicon.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3 fixed-top">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-page="Index"><img src="~/logo.svg" class="nav-bar-logo d-inline-block align-middle" />Constellation</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav">
+                        <li><a asp-page="Dashboard" asp-area="" class="nav-link">Staff</a></li>
+                        <li><a class="nav-link" href="/Portal/School">Schools</a></li>
+                        <li><a class="nav-link" href="/Portal/Parents">Parents</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer fixed-bottom">
+        <div class="container">
+            @Html.Raw(String.Format("Build Version: {0}. &copy; {1} - Aurora College, NSW",
+                File.GetLastWriteTime(ViewContext.GetType().Assembly.Location).ToString("yyMM.d"),
+             DateTime.Now.Year))
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="//cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.10.22/sorting/datetime-moment.js"></script>
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <script src="~/lib/Chart.js/chart.js"></script>
+    <script src="~/lib/downloadjs/download.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
