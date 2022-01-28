@@ -2,7 +2,7 @@
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Constellation.Presentation.Server.Pages
+namespace Constellation.Presentation.Server.Areas.Home.Pages
 {
     [Authorize]
     public class DashboardModel : BasePageModel

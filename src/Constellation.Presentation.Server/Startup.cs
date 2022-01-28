@@ -52,6 +52,12 @@ namespace Constellation.Presentation.Server
                 .WriteTo.Logger(config =>
                 {
                     config.WriteTo.File("logs/RollMarkingReport.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
+                    config.Filter.ByIncludingOnly(Matching.FromSource<IRollMarkingReportJob>());
+                })
+                .WriteTo.Logger(config =>
+                {
+                    config.WriteTo.File("logs/SchoolRegister.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
+                    config.Filter.ByIncludingOnly(Matching.FromSource<ISchoolRegisterJob>());
                 })
                 .WriteTo.File("logs/System.log", Serilog.Events.LogEventLevel.Debug, rollingInterval: RollingInterval.Day)
                 .CreateLogger();
@@ -68,19 +74,16 @@ namespace Constellation.Presentation.Server
             services.AddRazorPages();
             services.AddServerSideBlazor();
 
-            services.AddHangfire(c => {
-                c.UseSqlServerStorage(Configuration.GetConnectionString("Hangfire"), new SqlServerStorageOptions
-                {
-                    CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
-                    SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-                    QueuePollInterval = TimeSpan.Zero,
-                    UseRecommendedIsolationLevel = true,
-                    DisableGlobalLocks = true
-                });
+            services.AddHangfire(c => c.UseSqlServerStorage(Configuration.GetConnectionString("Hangfire")));
+            GlobalConfiguration.Configuration.UseSqlServerStorage(Configuration.GetConnectionString("Hangfire"), new SqlServerStorageOptions
+            {
+                CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                QueuePollInterval = TimeSpan.Zero,
+                UseRecommendedIsolationLevel = true,
+                DisableGlobalLocks = true
             });
             services.AddHangfireServer();
-
-            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
