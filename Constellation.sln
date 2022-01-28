@@ -43,6 +43,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{
 		docs\Resources\logo.svg = docs\Resources\logo.svg
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Constellation.Presentation.Portal.Schools", "src\Constellation.Presentation.Portal.Schools\Constellation.Presentation.Portal.Schools.csproj", "{8BCE7325-73BC-488E-A932-4FC31AACC4E9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{B100AA07-F366-4BC0-97F4-EF126928B8F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B100AA07-F366-4BC0-97F4-EF126928B8F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B100AA07-F366-4BC0-97F4-EF126928B8F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BCE7325-73BC-488E-A932-4FC31AACC4E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BCE7325-73BC-488E-A932-4FC31AACC4E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BCE7325-73BC-488E-A932-4FC31AACC4E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BCE7325-73BC-488E-A932-4FC31AACC4E9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -81,6 +87,7 @@ Global
 		{B100AA07-F366-4BC0-97F4-EF126928B8F7} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
 		{AAD6B84B-76A4-43EE-A99D-885E6A7612FA} = {8E4ACA9A-B3CB-4538-96EE-FC153E53AA1F}
 		{971D2536-E75B-4D18-851E-B8B424192ACC} = {8E4ACA9A-B3CB-4538-96EE-FC153E53AA1F}
+		{8BCE7325-73BC-488E-A932-4FC31AACC4E9} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {266E1BC1-EC70-416D-8B6F-E86CB0C2066C}
