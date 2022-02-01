@@ -1,11 +1,25 @@
+using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
+using Constellation.Infrastructure.Persistence;
+using Constellation.Presentation.Portal.Parents.Areas.Identity;
+using Constellation.Presentation.Portal.Parents.Data;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Constellation.Presentation.Portal.Schools
+namespace Constellation.Presentation.Portal.Parents
 {
     public class Startup
     {
@@ -21,10 +35,13 @@ namespace Constellation.Presentation.Portal.Schools
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddInfrastructure(Configuration);
-            services.AddSchoolPortalAuthentication();
+            services.AddParentPortalAuthentication();
 
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
+            services.AddDatabaseDeveloperPageExceptionFilter();
+            services.AddSingleton<WeatherForecastService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -33,6 +50,7 @@ namespace Constellation.Presentation.Portal.Schools
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseMigrationsEndPoint();
             }
             else
             {
@@ -46,10 +64,14 @@ namespace Constellation.Presentation.Portal.Schools
 
             app.UseRouting();
 
-            app.UsePathBase("/Portal/School");
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UsePathBase("/Portal/Parents");
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });

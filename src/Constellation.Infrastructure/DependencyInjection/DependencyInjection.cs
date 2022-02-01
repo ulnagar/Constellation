@@ -27,6 +27,32 @@ namespace Constellation.Infrastructure.DependencyInjection
                     b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
             });
 
+            services.AddScoped<AppDbContext>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.Scan(scan => scan
+                .FromAssemblyOf<IApplicationService>()
+
+                .AddClasses(classes => classes.AssignableTo<IScopedService>())
+                .AsMatchingInterface()
+                .WithScopedLifetime()
+
+                .AddClasses(classes => classes.AssignableTo<ITransientService>())
+                .AsMatchingInterface()
+                .WithTransientLifetime()
+
+                .AddClasses(classes => classes.AssignableTo<ISingletonService>())
+                .AsMatchingInterface()
+                .WithSingletonLifetime()
+            );
+
+            services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddMainAppAuthentication(this IServiceCollection services)
+        {
             services.AddIdentity<AppUser, AppRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
@@ -48,46 +74,61 @@ namespace Constellation.Infrastructure.DependencyInjection
                 options.LogoutPath = new PathString("/Admin/Logout");
             });
 
-            //services.AddAuthentication(options =>
-            //{
-            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            //})
-            //    .AddJwtBearer(options =>
-            //{
-            //    options.SaveToken = true;
-            //    options.RequireHttpsMetadata = false;
-            //    options.TokenValidationParameters = new TokenValidationParameters()
-            //    {
-            //        ValidateIssuer = true,
-            //        ValidateAudience = true,
-            //        ValidAudience = configuration["JWT:ValidAudience"],
-            //        ValidIssuer = configuration["JWT:ValidIssuer"],
-            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
-            //    };
-            //});
+            return services;
+        }
 
-            services.AddScoped<AppDbContext>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+        public static IServiceCollection AddParentPortalAuthentication(this IServiceCollection services)
+        {
+            services.AddIdentity<AppUser, AppRole>()
+                .AddUserManager<UserManager<AppUser>>()
+                .AddRoleManager<RoleManager<AppRole>>()
+                .AddSignInManager<SignInManager<AppUser>>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
 
-            services.Scan(scan => scan
-                .FromAssemblyOf<IApplicationService>()
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 1;
+                options.User.RequireUniqueEmail = true;
+            });
 
-                .AddClasses(classes => classes.AssignableTo<IScopedService>())
-                .AsMatchingInterface()
-                .WithScopedLifetime()
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromHours(1);
+                options.LoginPath = new PathString("/Portal/Parents/Identity/Login");
+                options.LogoutPath = new PathString("/Portal/Parents/Identity/Logout");
+            });
 
-                .AddClasses(classes => classes.AssignableTo<ITransientService>())
-                .AsMatchingInterface()
-                .WithTransientLifetime()
+            return services;
+        }
 
-                .AddClasses(classes => classes.AssignableTo<ISingletonService>())
-                .AsMatchingInterface()
-                .WithSingletonLifetime()
-            );
+        public static IServiceCollection AddSchoolPortalAuthentication(this IServiceCollection services)
+        {
+            services.AddIdentity<AppUser, AppRole>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
 
-            services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 1;
+            });
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromHours(1);
+                options.LoginPath = new PathString("/Portal/School/Admin/Login");
+                options.LogoutPath = new PathString("/Portal/School/Admin/Logout");
+            });
 
             return services;
         }
