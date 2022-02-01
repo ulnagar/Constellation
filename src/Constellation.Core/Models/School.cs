@@ -27,6 +27,9 @@ namespace Constellation.Core.Models
         public string PrincipalNetwork { get; set; }
         public string TimetableApplication { get; set; }
         public string RollCallGroup { get; set; }
+        public double Longitude { get; set; }
+        public double Latitude { get; set; }
+        public string Website { get; set; }
         public bool HasStudents => (Students.Any());
         public bool HasStaff => (Staff.Any());
         public  ICollection<SchoolContactRole> StaffAssignments { get; set; }

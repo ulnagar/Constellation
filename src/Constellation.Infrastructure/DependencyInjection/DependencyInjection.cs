@@ -1,18 +1,16 @@
-﻿using Constellation.Application.Interfaces.Repositories;
+﻿using Constellation.Application;
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.Persistence;
 using Constellation.Infrastructure.Persistence.Repositories;
 using Constellation.Infrastructure.Templates.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 using System;
-using System.Text;
 
 namespace Constellation.Infrastructure.DependencyInjection
 {
@@ -47,6 +45,8 @@ namespace Constellation.Infrastructure.DependencyInjection
             );
 
             services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
+
+            services.AddApplication();
 
             return services;
         }
