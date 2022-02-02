@@ -1,4 +1,5 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Application.DTOs;
+using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -25,5 +26,6 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<School> ForDetailDisplayAsync(string id);
         Task<bool> AnyWithId(string id);
         Task<ICollection<School>> ForBulkUpdate();
+        IList<MapLayer> GetForMapping(IList<string> schoolCodes);
     }
 }

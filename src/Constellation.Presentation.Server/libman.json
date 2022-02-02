@@ -22,6 +22,14 @@
     {
       "library": "summernote@0.8.20",
       "destination": "wwwroot/lib/summernote/"
+    },
+    {
+      "library": "leaflet@1.7.1",
+      "destination": "wwwroot/lib/leaflet/"
+    },
+    {
+      "library": "Leaflet.awesome-markers@2.0.2",
+      "destination": "wwwroot/lib/Leaflet.awesome-markers/"
     }
   ]
 }

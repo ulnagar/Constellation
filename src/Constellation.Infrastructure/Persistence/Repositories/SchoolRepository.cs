@@ -1,4 +1,6 @@
-﻿using Constellation.Application.Interfaces.Repositories;
+﻿using Constellation.Application.DTOs;
+using Constellation.Application.Helpers;
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -165,6 +167,42 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .Include(school => school.StaffAssignments)
                 .ThenInclude(role => role.SchoolContact)
                 .ToListAsync();
+        }
+
+        public IList<MapLayer> GetForMapping(IList<string> schoolCodes)
+        {
+            var vm = new List<MapLayer>();
+
+            var schools = _context.Schools
+                .Include(school => school.Students)
+                .Include(school => school.Staff);
+
+            var filteredSchools = (schoolCodes.Count > 0)
+                    ? schools.Where(school => schoolCodes.Any(code => code == school.Code))
+                    : schools;
+
+            vm.Add(MapHelpers.MapLayerBuilder(
+                filteredSchools.Where(school =>
+                    school.Students.Any(student => !student.IsDeleted) &&
+                    school.Staff.All(staff => staff.IsDeleted)),
+                "Students only",
+                "blue"));
+
+            vm.Add(MapHelpers.MapLayerBuilder(
+                filteredSchools.Where(school =>
+                    school.Students.All(student => student.IsDeleted) &&
+                    school.Staff.Any(staff => !staff.IsDeleted)),
+                "Staff only",
+                "red"));
+
+            vm.Add(MapHelpers.MapLayerBuilder(
+                filteredSchools.Where(school =>
+                    school.Students.Any(student => !student.IsDeleted) &&
+                    school.Staff.Any(staff => !staff.IsDeleted)),
+                "Both Students and Staff",
+                "green"));
+
+            return vm;
         }
     }
 }
