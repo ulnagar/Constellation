@@ -7,7 +7,6 @@ using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Components.Map;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
