@@ -77,7 +77,7 @@
         $('#mapSchools')
             .on('click',
                 function(event) {
-                    var schools = customTable.column(0).data();
+                    var schools = customTable.column(0, { search:'applied'}).data();
 
                     console.log(schools);
 
