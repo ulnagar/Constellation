@@ -7,7 +7,9 @@ using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Server.Components.Map;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
@@ -278,6 +280,17 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             };
 
             return View(viewModel);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> ViewMap(IList<string> schoolCodes)
+        {
+            var vm = await CreateViewModel<School_MapViewModel>();
+
+            vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
+
+            return View("Map", vm);
         }
     }
 }

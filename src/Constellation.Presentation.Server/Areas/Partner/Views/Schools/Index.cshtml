@@ -20,6 +20,13 @@
         </div>
     </div>
 
+    <div class="btn-group new-group" role="group">
+        <form asp-action="ViewMap" asp-controller="Schools" asp-area="Partner" id="MapForm">
+            <div id="MapFormInputs"></div>
+            <a id="mapSchools" class="btn btn-info">Map Schools</a>
+        </form>
+    </div>
+
     @if (authorised)
     {
         <div class="btn-group new-group" role="group">
@@ -30,7 +37,7 @@
 
 <hr />
 
-<table class="table-striped table-hover data-table">
+<table class="table-striped table-hover custom-data-table">
     <thead>
     <tr>
         <th>School Code</th>
@@ -57,3 +64,39 @@
     }
     </tbody>
 </table>
+
+@section scripts 
+{
+    <script>
+        var customTable;
+
+        $(document).ready(function () {
+            customTable = $('.custom-data-table').DataTable({ "order": [] });
+        });
+
+        $('#mapSchools')
+            .on('click',
+                function(event) {
+                    var schools = customTable.column(0).data();
+
+                    console.log(schools);
+
+                    var formGroup = document.getElementById('MapFormInputs');
+
+                    $.each(schools, function(key, value) {
+                        console.log(key, value);
+
+                        var input = document.createElement("input");
+                        input.type = "hidden";
+                        input.name = "schoolCodes";
+                        input.value = value;
+
+                        formGroup.appendChild(input);
+                    });
+
+                    var form = document.getElementById('MapForm');
+                    form.submit();
+                });
+
+    </script>
+}

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Constellation.Presentation.Server.Components.Map
+namespace Constellation.Application.DTOs
 {
     public class MapLayer
     {
