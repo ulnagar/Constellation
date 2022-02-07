@@ -69,11 +69,11 @@ namespace Constellation.Presentation.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddInfrastructure(Configuration);
-            services.AddMainAppAuthentication();
+            services.AddMainAppAuthentication(Configuration);
 
             services.AddMvc().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddRazorPages();
-            services.AddServerSideBlazor();
+            //services.AddServerSideBlazor();
 
             services.AddHangfire(c => c.UseSqlServerStorage(Configuration.GetConnectionString("Hangfire")));
             GlobalConfiguration.Configuration.UseSqlServerStorage(Configuration.GetConnectionString("Hangfire"), new SqlServerStorageOptions
@@ -140,7 +140,6 @@ namespace Constellation.Presentation.Server
             jobManager.AddOrUpdate<IAttendanceReportJob>($"{nameof(IAttendanceReportJob)} - 28/03/22", (job) => job.StartJob(), "0 13 28 3 1", TimeZoneInfo.Local);
 #endif
 
-
             IdentityDefaults.SeedRoles(roleManager);
             IdentityDefaults.SeedUsers(userManager);
 
@@ -151,7 +150,7 @@ namespace Constellation.Presentation.Server
                     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
                 );
 
-                endpoints.MapBlazorHub();
+                //endpoints.MapBlazorHub();
                 endpoints.MapControllers();
                 endpoints.MapRazorPages();
             });

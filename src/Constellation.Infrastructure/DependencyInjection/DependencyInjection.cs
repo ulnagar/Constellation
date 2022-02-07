@@ -51,7 +51,7 @@ namespace Constellation.Infrastructure.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddMainAppAuthentication(this IServiceCollection services)
+        public static IServiceCollection AddMainAppAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddIdentity<AppUser, AppRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
@@ -73,6 +73,18 @@ namespace Constellation.Infrastructure.DependencyInjection
                 options.LoginPath = new PathString("/Admin/Login");
                 options.LogoutPath = new PathString("/Admin/Logout");
             });
+
+            var clientId = configuration["Authentication:Microsoft:ClientId"];
+            var clientSecret = configuration["Authentication:Microsoft:ClientSecret"];
+
+            if (!string.IsNullOrWhiteSpace(clientId) && !string.IsNullOrWhiteSpace(clientSecret)) {
+                services.AddAuthentication()
+                    .AddMicrosoftAccount(options =>
+                    {
+                        options.ClientId = configuration["Authentication:Microsoft:ClientId"];
+                        options.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
+                    });
+            }
 
             return services;
         }
