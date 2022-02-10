@@ -126,15 +126,9 @@ namespace Constellation.Presentation.Server
 
 #if RELEASE
             jobManager.AddOrUpdate<IAbsenceMonitorJob>(nameof(IAbsenceMonitorJob), (job) => job.StartJob(), "0 13 * * 1-6", TimeZoneInfo.Local);
-
-            // LessonNotifications for Term 1 2022 (specific dates)
-            jobManager.AddOrUpdate<ILessonNotificationsJob>($"{nameof(ILessonNotificationsJob)} - 21/02/22", (job) => job.StartJob(), "0 10 21 2 1", TimeZoneInfo.Local);
-            jobManager.AddOrUpdate<ILessonNotificationsJob>($"{nameof(ILessonNotificationsJob)} - 07/03/22", (job) => job.StartJob(), "0 10 7 3 1", TimeZoneInfo.Local);
-            jobManager.AddOrUpdate<ILessonNotificationsJob>($"{nameof(ILessonNotificationsJob)} - 21/03/22", (job) => job.StartJob(), "0 10 21 3 1", TimeZoneInfo.Local);
-            jobManager.AddOrUpdate<ILessonNotificationsJob>($"{nameof(ILessonNotificationsJob)} - 04/04/22", (job) => job.StartJob(), "0 10 4 4 1", TimeZoneInfo.Local);
+            jobManager.AddOrUpdate<ILessonNotificationsJob>(nameof(ILessonNotificationsJob), (job) => job.StartJob(), "0 10 * * 1", TimeZoneInfo.Local);
 
             // AttendanceReports for Term 1 2022 (specific dates)
-            jobManager.AddOrUpdate<IAttendanceReportJob>($"{nameof(IAttendanceReportJob)} - 14/02/22", (job) => job.StartJob(), "0 13 14 2 1", TimeZoneInfo.Local);
             jobManager.AddOrUpdate<IAttendanceReportJob>($"{nameof(IAttendanceReportJob)} - 28/02/22", (job) => job.StartJob(), "0 13 28 2 1", TimeZoneInfo.Local);
             jobManager.AddOrUpdate<IAttendanceReportJob>($"{nameof(IAttendanceReportJob)} - 14/03/22", (job) => job.StartJob(), "0 13 14 3 1", TimeZoneInfo.Local);
             jobManager.AddOrUpdate<IAttendanceReportJob>($"{nameof(IAttendanceReportJob)} - 28/03/22", (job) => job.StartJob(), "0 13 28 3 1", TimeZoneInfo.Local);

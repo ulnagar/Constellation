@@ -226,7 +226,7 @@ namespace Constellation.Infrastructure.Services
 
         public async Task AddStudentToFutureRollsForCourse(string studentId, string schoolCode, int offeringId)
         {
-            var lessons = await _unitOfWork.Lessons.GetAllForCourse(offeringId);
+            var lessons = await _unitOfWork.Lessons.GetForClass(offeringId);
 
             foreach (var lesson in lessons.Where(lesson => lesson.DueDate > DateTime.Today))
             {
