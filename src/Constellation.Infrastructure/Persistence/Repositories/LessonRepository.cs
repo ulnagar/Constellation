@@ -119,6 +119,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
             return await _context.Lessons
                 .Include(lesson => lesson.Offerings)
                 .Include(lesson => lesson.Rolls)
+                    .ThenInclude(roll => roll.Attendance)
                 .Where(lesson => lesson.Offerings.Any(offering => offering.CourseId == courseId))
                 .ToListAsync();
         }

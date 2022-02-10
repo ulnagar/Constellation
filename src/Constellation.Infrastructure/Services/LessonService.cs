@@ -226,28 +226,37 @@ namespace Constellation.Infrastructure.Services
 
         public async Task AddStudentToFutureRollsForCourse(string studentId, string schoolCode, int offeringId)
         {
-            // TODO: Fix this
-            // This does not cover the case where the school does not have any rolls because this is the first enrolment
-            // Should search for future lessons, and then add the student if a roll exists for that school
-            // And create new roll if it does not already exist.
+            var lessons = await _unitOfWork.Lessons.GetAllForCourse(offeringId);
 
-            var lessons = await _unitOfWork.Lessons.GetWithRollsForSchool(schoolCode);
-
-            var futureRolls = lessons.Where(lesson => lesson.DueDate > DateTime.Today && lesson.Offerings.Any(offer => offer.Id == offeringId))
-                .SelectMany(lesson => lesson.Rolls.Where(roll => roll.SchoolCode == schoolCode))
-                .ToList();
-
-            foreach (var roll in futureRolls)
+            foreach (var lesson in lessons.Where(lesson => lesson.DueDate > DateTime.Today))
             {
-                if (roll.Attendance.Any(attendance => attendance.StudentId == studentId))
-                    continue;
+                var roll = lesson.Rolls.FirstOrDefault(innerRoll => innerRoll.SchoolCode == schoolCode);
 
-                var attend = new LessonRoll.LessonRollStudentAttendance
+                if (roll != null)
                 {
-                    StudentId = studentId
-                };
+                    if (roll.Attendance.Any(attendance => attendance.StudentId == studentId))
+                        continue;
 
-                roll.Attendance.Add(attend);
+                    roll.Attendance.Add(new LessonRoll.LessonRollStudentAttendance
+                    {
+                        StudentId = studentId
+                    });
+                }
+                else
+                {
+                    roll = new LessonRoll
+                    {
+                        SchoolCode = schoolCode,
+                        Status = LessonStatus.Active
+                    };
+
+                    roll.Attendance.Add(new LessonRoll.LessonRollStudentAttendance
+                    {
+                        StudentId = studentId
+                    });
+
+                    lesson.Rolls.Add(roll);
+                }
             }
         }
 
