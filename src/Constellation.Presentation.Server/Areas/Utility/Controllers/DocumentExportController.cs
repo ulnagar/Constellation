@@ -45,24 +45,22 @@ namespace Constellation.Presentation.Server.Areas.Utility.Controllers
             return fs;
         }
 
-        [Route("Awards")]
-        public async Task<ActionResult> AwardsUpload()
+        public async Task<IActionResult> Awards()
         {
-            var viewModel = CreateViewModel<Export_Awards_ViewModel>();
+            var viewModel = await CreateViewModel<Export_Awards_ViewModel>();
 
             return View("Awards", viewModel);
         }
 
         [HttpPost]
-        [Route("Awards")]
         [ValidateAntiForgeryToken]
-        public async Task<FileResult> DownloadAwardsFile(Export_Awards_ViewModel viewModel)
+        public async Task<FileResult> Awards(Export_Awards_ViewModel viewModel)
         {
-            if (viewModel.uploadedFile.Length == 0)
+            if (viewModel.UploadedFile.Length == 0)
                 return null;
 
             using var stream = new MemoryStream();
-            await viewModel.uploadedFile.CopyToAsync(stream);
+            await viewModel.UploadedFile.CopyToAsync(stream);
 
             var resultStream = await _excelService.CreateAwardsCalculationFile(stream);
 

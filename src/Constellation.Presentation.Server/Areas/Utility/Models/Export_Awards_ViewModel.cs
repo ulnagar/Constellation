@@ -5,6 +5,6 @@ namespace Constellation.Presentation.Server.Areas.Utility.Models
 {
     public class Export_Awards_ViewModel : BaseViewModel
     {
-        public IFormFile uploadedFile { get; set; }
+        public IFormFile UploadedFile { get; set; }
     }
 }

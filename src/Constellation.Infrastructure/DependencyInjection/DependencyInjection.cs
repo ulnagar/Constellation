@@ -51,6 +51,36 @@ namespace Constellation.Infrastructure.DependencyInjection
             return services;
         }
 
+        public static IServiceCollection AddStandardAuthentication(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddIdentity<AppUser, AppRole>()
+                .AddUserManager<UserManager<AppUser>>()
+                .AddRoleManager<RoleManager<AppRole>>()
+                .AddSignInManager<SignInManager<AppUser>>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 1;
+                options.User.RequireUniqueEmail = true;
+            });
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromHours(1);
+                options.LoginPath = new PathString("/Admin/Login");
+                options.LogoutPath = new PathString("/Admin/Logout");
+            });
+
+            return services;
+        }
+
         public static IServiceCollection AddMainAppAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddIdentity<AppUser, AppRole>()
