@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
-    public class SchoolRegisterJob : ISchoolRegisterJob, IScopedService
+    public class SchoolRegisterJob : ISchoolRegisterJob, IScopedService, IHangfireJob
     {
         private readonly ISchoolRegisterGateway _schoolRegisterGateway;
         private readonly IMediator _mediator;

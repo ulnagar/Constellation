@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace Constellation.Infrastructure.Jobs
 
 {
-    public class LessonNotificationsJob : ILessonNotificationsJob, IScopedService
+    public class LessonNotificationsJob : ILessonNotificationsJob, IScopedService, IHangfireJob
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailService _emailService;

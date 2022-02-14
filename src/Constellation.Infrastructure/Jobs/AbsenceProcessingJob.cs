@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
-    public class AbsenceProcessingJob : IAbsenceProcessingJob, IScopedService
+    public class AbsenceProcessingJob : IAbsenceProcessingJob, IScopedService, IHangfireJob
     {
         private readonly ISentralGateway _sentralService;
         private readonly IEmailService _emailService;
