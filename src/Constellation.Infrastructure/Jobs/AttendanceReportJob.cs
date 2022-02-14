@@ -135,18 +135,10 @@ namespace Constellation.Infrastructure.Jobs
 
             notification.Attachments.Add(new Attachment(pdfStream, filename));
 
-            var success = await _emailService.SendAttendanceReport(notification);
+            await _emailService.SendAttendanceReport(notification);
 
-            if (success)
-            {
-                foreach (var email in emailAddresses)
-                    _logger.LogInformation($"  Message sent via Email to {email} with attachment: {filename}");
-            }
-            else
-            {
-                foreach (var email in emailAddresses)
-                    _logger.LogInformation($"  FAILED to send email to {email} with attachment: {filename}");
-            }
+            foreach (var email in emailAddresses)
+                _logger.LogInformation($"  Message queued to send via Email to {email} with attachment: {filename}");
         }
 
         private async Task SendSchoolEmailAsync(string schoolCode, List<Attachment> attachmentList, DateTime dateToReport)
@@ -165,18 +157,10 @@ namespace Constellation.Infrastructure.Jobs
                 Attachments = attachmentList
             };
 
-            var success = await _emailService.SendAttendanceReport(notification);
+            await _emailService.SendAttendanceReport(notification);
 
-            if (success)
-            {
-                foreach (var email in contacts)
-                    _logger.LogInformation($"  Message sent via Email to {email} with Attendance Reports for {school.Name}");
-            }
-            else
-            {
-                foreach (var email in contacts)
-                    _logger.LogInformation($"  FAILED to send email to {email} with Attendance Reports for {school.Name}");
-            }
+            foreach (var email in contacts)
+                _logger.LogInformation($"  Message queued to send via Email to {email} with Attendance Reports for {school.Name}");
         }
 
         private async Task<ValueTuple<string, string>> GetStudentData(Student student, DateTime startDate)

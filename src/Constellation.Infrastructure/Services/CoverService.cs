@@ -141,6 +141,8 @@ namespace Constellation.Infrastructure.Services
                     if (result.Success)
                     {
                         coverList.Add(result.Entity);
+                        _unitOfWork.Load(result.Entity.Offering, entity => entity.Course);
+                        _unitOfWork.Load(result.Entity.Offering.Course, entity => entity.HeadTeacher);
                         cover.Id = result.Entity.Id;
                     }
                 }
@@ -173,6 +175,8 @@ namespace Constellation.Infrastructure.Services
                     if (result.Success)
                     {
                         coverList.Add(result.Entity);
+                        _unitOfWork.Load(result.Entity.Offering, entity => entity.Course);
+                        _unitOfWork.Load(result.Entity.Offering.Course, entity => entity.HeadTeacher);
                         cover.Id = result.Entity.Id;
                     }
                     else

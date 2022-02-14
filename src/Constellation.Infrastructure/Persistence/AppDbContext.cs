@@ -43,6 +43,7 @@ namespace Constellation.Infrastructure.Persistence
         public DbSet<LessonRoll> LessonRolls { get; set; }
         public DbSet<CanvasOperation> CanvasOperations { get; set; }
         public DbSet<ClassworkNotification> ClassworkNotifications { get; set; }
+        public DbSet<EmailToProcess> EmailToProcess { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

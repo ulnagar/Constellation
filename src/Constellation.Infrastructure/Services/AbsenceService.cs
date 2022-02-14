@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
@@ -177,10 +178,10 @@ namespace Constellation.Infrastructure.Services
             {
                 Absence = absence,
                 AbsenceId = absence.Id,
-                OutgoingId = email.id,
+                OutgoingId = email.ToString(),
                 Type = "Email",
-                Message = email.message,
-                Recipients = email.recipients,
+                Message = "",
+                Recipients = notificationEmail.Recipients.Collapse('|'),
                 SentAt = DateTime.Now,
             };
 

@@ -135,9 +135,9 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
                         {
                             Type = AbsenceNotification.Email,
                             SentAt = DateTime.Now,
-                            Message = sentMessage.message,
+                            Message = "",
                             Recipients = emailAddresses.Collapse('|'),
-                            OutgoingId = sentMessage.id
+                            OutgoingId = sentMessage.ToString()
                         });
 
                         break;

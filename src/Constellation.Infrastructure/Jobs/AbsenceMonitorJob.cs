@@ -70,10 +70,10 @@ namespace Constellation.Infrastructure.Jobs
                             absence.Notifications.Add(new AbsenceNotification
                             {
                                 Type = AbsenceNotification.Email,
-                                Message = sentEmail.message,
+                                Message = "",
                                 SentAt = DateTime.Now,
-                                Recipients = sentEmail.recipients,
-                                OutgoingId = sentEmail.id
+                                Recipients = recipients.Collapse('|'),
+                                OutgoingId = sentEmail.ToString()
                             });
                         }
 
@@ -126,10 +126,10 @@ namespace Constellation.Infrastructure.Jobs
                                     absence.Notifications.Add(new AbsenceNotification
                                     {
                                         Type = AbsenceNotification.Email,
-                                        Message = message.message,
+                                        Message = "",
                                         SentAt = DateTime.Now,
                                         Recipients = string.Join(", ", emailAddresses),
-                                        OutgoingId = message.id
+                                        OutgoingId = message.ToString()
                                     });
                                 }
 
@@ -166,10 +166,10 @@ namespace Constellation.Infrastructure.Jobs
                                 absence.Notifications.Add(new AbsenceNotification
                                 {
                                     Type = AbsenceNotification.Email,
-                                    Message = sentmessage.message,
+                                    Message = "",
                                     SentAt = DateTime.Now,
                                     Recipients = string.Join(", ", emailAddresses),
-                                    OutgoingId = sentmessage.id
+                                    OutgoingId = sentmessage.ToString()
                                 });
                             }
                         }
@@ -196,10 +196,10 @@ namespace Constellation.Infrastructure.Jobs
                             absence.Notifications.Add(new AbsenceNotification
                             {
                                 Type = AbsenceNotification.Email,
-                                Message = message.message,
+                                Message = "",
                                 SentAt = DateTime.Now,
                                 Recipients = string.Join(", ", emailAddresses),
-                                OutgoingId = message.id
+                                OutgoingId = message.ToString()
                             });
                         }
                     }

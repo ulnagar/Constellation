@@ -1,6 +1,7 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Core.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -14,15 +15,15 @@ namespace Constellation.Application.Interfaces.Services
 
         // Absence Emails
         Task SendAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail);
-        Task<EmailDtos.SentEmail> SendCoordinatorPartialAbsenceVerificationRequest(EmailDtos.AbsenceResponseEmail emailDto);
-        Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(List<Absence> absences);
-        Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(List<Absence> absences, List<string> emailAddresses);
-        Task<EmailDtos.SentEmail> SendParentWholeAbsenceDigest(List<Absence> absences, List<string> emailAddresses);
-        Task<EmailDtos.SentEmail> SendStudentPartialAbsenceExplanationRequest(List<Absence> absences, List<string> emailAddresses);
+        Task<Guid> SendCoordinatorPartialAbsenceVerificationRequest(EmailDtos.AbsenceResponseEmail emailDto);
+        Task<Guid> SendCoordinatorWholeAbsenceDigest(List<Absence> absences);
+        Task<Guid> SendParentWholeAbsenceAlert(List<Absence> absences, List<string> emailAddresses);
+        Task<Guid> SendParentWholeAbsenceDigest(List<Absence> absences, List<string> emailAddresses);
+        Task<Guid> SendStudentPartialAbsenceExplanationRequest(List<Absence> absences, List<string> emailAddresses);
 
 
         // Attendance Emails
-        Task<bool> SendAttendanceReport(AttendanceReportEmail notification);
+        Task SendAttendanceReport(AttendanceReportEmail notification);
 
 
         // ClassworkNotification Emails

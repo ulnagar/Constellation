@@ -1,4 +1,5 @@
-﻿using Constellation.Application.Interfaces.Repositories;
+﻿using Constellation.Application.Interfaces.Jobs;
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Admin.Models;
@@ -16,14 +17,16 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAdobeConnectService _adobeConnectService;
         private readonly IOperationService _operationService;
+        private readonly IEmailSenderJob _emailSender;
 
         public ActionsController(IUnitOfWork unitOfWork, IConfiguration configuration,
-            IAdobeConnectService adobeConnectService, IOperationService operationService)
+            IAdobeConnectService adobeConnectService, IOperationService operationService, IEmailSenderJob emailSender)
             : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _adobeConnectService = adobeConnectService;
             _operationService = operationService;
+            _emailSender = emailSender;
         }
 
         public async Task<IActionResult> Index()
@@ -137,6 +140,11 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+
+        public async Task SendEmails()
+        {
+            await _emailSender.StartJob();
         }
     }
 }

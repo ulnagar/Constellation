@@ -1,8 +1,10 @@
-﻿using Constellation.Application.DTOs;
+﻿using Constellation.Application.Common.CQRS.Emails.Commands;
+using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Models;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Templates.Views.Emails.Absences;
@@ -10,6 +12,9 @@ using Constellation.Infrastructure.Templates.Views.Emails.Covers;
 using Constellation.Infrastructure.Templates.Views.Emails.Lessons;
 using Constellation.Infrastructure.Templates.Views.Emails.MissedWork;
 using Constellation.Infrastructure.Templates.Views.Emails.RollMarking;
+using MediatR;
+using MimeKit;
+using MimeKit.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,31 +27,30 @@ namespace Constellation.Infrastructure.Services
     public class EmailService : IEmailService, IScopedService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IEmailGateway _emailSender;
         private readonly IRazorViewToStringRenderer _razorService;
+        private readonly IMediator _mediator;
 
-        public EmailService(IUnitOfWork unitOfWork, IEmailGateway emailSender,
-            IRazorViewToStringRenderer razorService)
+        public EmailService(IUnitOfWork unitOfWork, IRazorViewToStringRenderer razorService, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
-            _emailSender = emailSender;
             _razorService = razorService;
+            _mediator = mediator;
         }
 
-        public async Task<bool> SendAttendanceReport(AttendanceReportEmail notification)
+        public async Task SendAttendanceReport(AttendanceReportEmail notification)
         {
             switch (notification.NotificationType)
             {
                 case AttendanceReportEmail.NotificationSequence.Student:
-                    return await SendParentAttendanceReportEmail(notification);
+                    await SendParentAttendanceReportEmail(notification);
+                    break;
                 case AttendanceReportEmail.NotificationSequence.School:
-                    return await SendSchoolAttendanceReportEmail(notification);
+                    await SendSchoolAttendanceReportEmail(notification);
+                    break;
             }
-
-            return false;
         }
 
-        private async Task<bool> SendParentAttendanceReportEmail(AttendanceReportEmail notification)
+        private async Task SendParentAttendanceReportEmail(AttendanceReportEmail notification)
         {
             var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
@@ -67,19 +71,21 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in notification.Recipients)
                 toRecipients.Add(entry.Name, entry.Email);
 
-            var message = await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, notification.Attachments);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", absenceSettings.AbsenceCoordinatorEmail),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = notification.Attachments
+            };
 
-            // Perhaps used for future where message file (.eml) is saved to database
-            //var messageStream = new MemoryStream();
-            //message.WriteTo(messageStream);
-
-            if (message != null)
-                return true;
-            else
-                return false;
+            await _mediator.Send(message);
         }
 
-        private async Task<bool> SendSchoolAttendanceReportEmail(AttendanceReportEmail notification)
+        private async Task SendSchoolAttendanceReportEmail(AttendanceReportEmail notification)
         {
             var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
@@ -99,19 +105,21 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in notification.Recipients)
                 toRecipients.Add(entry.Name, entry.Email);
 
-            var message = await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, notification.Attachments);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", absenceSettings.AbsenceCoordinatorEmail),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = notification.Attachments
+            };
 
-            // Perhaps used for future where message file (.eml) is saved to database
-            //var messageStream = new MemoryStream();
-            //message.WriteTo(messageStream);
-
-            if (message != null)
-                return true;
-            else
-                return false;
+            await _mediator.Send(message);
         }
 
-        public async Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(List<Absence> absences, List<string> emailAddresses)
+        public async Task<Guid> SendParentWholeAbsenceAlert(List<Absence> absences, List<string> emailAddresses)
         {
             var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
@@ -134,26 +142,23 @@ namespace Constellation.Infrastructure.Services
                 toRecipients.Add(entry, entry);
             }
 
-            var message = await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, null);
-
-            // Perhaps used for future where message file (.eml) is saved to database
-            //var messageStream = new MemoryStream();
-            //message.WriteTo(messageStream);
-
-            if (message != null)
+            var message = new AddEmailToQueue
             {
-                return new EmailDtos.SentEmail
-                {
-                    message = body,
-                    id = message.MessageId,
-                    recipients = message.To.ToString()
-                };
-            }
-            else
-                return null;
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", absenceSettings.AbsenceCoordinatorEmail),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = null
+            };
+
+            var id = await _mediator.Send(message);
+
+            return id;
         }
 
-        public async Task<EmailDtos.SentEmail> SendParentWholeAbsenceDigest(List<Absence> absences, List<string> emailAddresses)
+        public async Task<Guid> SendParentWholeAbsenceDigest(List<Absence> absences, List<string> emailAddresses)
         {
             var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
@@ -176,26 +181,23 @@ namespace Constellation.Infrastructure.Services
                 toRecipients.Add(entry, entry);
             }
 
-            var message = await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, null);
-
-            // Perhaps used for future where message file (.eml) is saved to database
-            //var messageStream = new MemoryStream();
-            //message.WriteTo(messageStream);
-
-            if (message != null)
+            var message = new AddEmailToQueue
             {
-                return new EmailDtos.SentEmail
-                {
-                    message = body,
-                    id = message.MessageId,
-                    recipients = message.To.ToString()
-                };
-            }
-            else
-                return null;
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", absenceSettings.AbsenceCoordinatorEmail),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = null
+            };
+
+            var id = await _mediator.Send(message);
+
+            return id;
         }
 
-        public async Task<EmailDtos.SentEmail> SendStudentPartialAbsenceExplanationRequest(List<Absence> absences, List<string> emailAddresses)
+        public async Task<Guid> SendStudentPartialAbsenceExplanationRequest(List<Absence> absences, List<string> emailAddresses)
         {
             var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
@@ -218,26 +220,21 @@ namespace Constellation.Infrastructure.Services
                 toRecipients.Add(entry, entry);
             }
 
-            var message = await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, null);
-
-            // Perhaps used for future where message file (.eml) is saved to database
-            //var messageStream = new MemoryStream();
-            //message.WriteTo(messageStream);
-
-            if (message != null)
+            var message = new AddEmailToQueue
             {
-                return new EmailDtos.SentEmail
-                {
-                    message = body,
-                    id = message.MessageId,
-                    recipients = message.To.ToString()
-                };
-            }
-            else
-                return null;
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", absenceSettings.AbsenceCoordinatorEmail),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = null
+            };
+
+            return await _mediator.Send(message);
         }
 
-        public async Task<EmailDtos.SentEmail> SendCoordinatorPartialAbsenceVerificationRequest(EmailDtos.AbsenceResponseEmail emailDto)
+        public async Task<Guid> SendCoordinatorPartialAbsenceVerificationRequest(EmailDtos.AbsenceResponseEmail emailDto)
         {
             var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
@@ -273,26 +270,21 @@ namespace Constellation.Infrastructure.Services
                 toRecipients.Add(entry, entry);
             }
 
-            var message = await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, null);
-
-            // Perhaps used for future where message file (.eml) is saved to database
-            //var messageStream = new MemoryStream();
-            //message.WriteTo(messageStream);
-
-            if (message != null)
+            var message = new AddEmailToQueue
             {
-                return new EmailDtos.SentEmail
-                {
-                    message = body,
-                    id = message.MessageId,
-                    recipients = message.To.ToString()
-                };
-            }
-            else
-                return null;
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", absenceSettings.AbsenceCoordinatorEmail),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = null
+            };
+
+            return await _mediator.Send(message);
         }
 
-        public async Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(List<Absence> absences)
+        public async Task<Guid> SendCoordinatorWholeAbsenceDigest(List<Absence> absences)
         {
             var coordinators = await _unitOfWork.SchoolContacts.EmailAddressesOfAllInRoleAtSchool(absences.First().Student.SchoolCode, SchoolContactRole.Coordinator);
 
@@ -316,24 +308,18 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in coordinators)
                 toRecipients.Add(entry, entry);
 
-            var message = await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, null);
-
-            // Perhaps used for future where message file (.eml) is saved to database
-            //var messageStream = new MemoryStream();
-            //message.WriteTo(messageStream);
-
-            if (message != null)
+            var message = new AddEmailToQueue
             {
-                return new EmailDtos.SentEmail
-                {
-                    message = body,
-                    id = message.MessageId,
-                    recipients = message.To.ToString()
-                };
-            }
-            else
-                return null;
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", absenceSettings.AbsenceCoordinatorEmail),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = null
+            };
 
+            return await _mediator.Send(message);
         }
 
         public async Task SendAdminAbsenceSentralAlert(Student student)
@@ -347,7 +333,18 @@ namespace Constellation.Infrastructure.Services
                 { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
             };
 
-            await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", "[Aurora College] Student absence notification", body, null);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", "noreply@aurora.nsw.edu.au"),
+                Subject = "[Aurora College] Student absence notification",
+                Body = body,
+                Attachments = null
+            };
+
+            await _mediator.Send(message);
         }
 
         public async Task SendAdminAbsenceContactAlert(Student student)
@@ -361,7 +358,18 @@ namespace Constellation.Infrastructure.Services
                 { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
             };
 
-            await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", "[Aurora College] Constellation Data Issue Identified", body, null);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", "noreply@aurora.nsw.edu.au"),
+                Subject = "[Aurora College] Constellation Data Issue Identified",
+                Body = body,
+                Attachments = null
+            };
+
+            await _mediator.Send(message);
         }
 
         public async Task SendAdminLowCreditAlert(double credit)
@@ -376,7 +384,18 @@ namespace Constellation.Infrastructure.Services
                 { "auroracoll-h.school@det.nsw.edu.au", "auroracoll-h.school@det.nsw.edu.au" }
             };
 
-            await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", "[Aurora College] SMS Gateway Low Balance Alert", body, null);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", "noreply@aurora.nsw.edu.au"),
+                Subject = "[Aurora College] SMS Gateway Low Balance Alert",
+                Body = body,
+                Attachments = null
+            };
+
+            await _mediator.Send(message);
         }
 
 
@@ -430,7 +449,18 @@ namespace Constellation.Infrastructure.Services
                 toRecipients.Add(entry, entry);
             }
 
-            await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, $"Absence Explanation Received - {viewModel.StudentName}", body, null);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", absenceSettings.AbsenceCoordinatorEmail),
+                Subject = $"Absence Explanation Received - {viewModel.StudentName}",
+                Body = body,
+                Attachments = null
+            };
+
+            await _mediator.Send(message);
         }
 
         public async Task SendNewCoverEmail(EmailDtos.CoverEmail resource)
@@ -464,7 +494,18 @@ namespace Constellation.Infrastructure.Services
                 if (!ccRecipients.Any(recipient => recipient.Value == entry.Value))
                     ccRecipients.Add(entry.Key, entry.Value);
 
-            await _emailSender.Send(toRecipients, ccRecipients, null, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Inforation - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", "auroracoll-h.school@det.nsw.edu.au"),
+                Subject = $"Class Cover Inforation - {resource.StartDate.ToShortDateString()}",
+                Body = body,
+                Attachments = resource.Attachments
+            };
+
+            await _mediator.Send(message);
         }
 
         public async Task SendUpdatedCoverEmail(EmailDtos.CoverEmail resource)
@@ -498,7 +539,18 @@ namespace Constellation.Infrastructure.Services
                 if (!ccRecipients.Any(recipient => recipient.Value == entry.Value))
                     ccRecipients.Add(entry.Key, entry.Value);
 
-            await _emailSender.Send(toRecipients, ccRecipients, null, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Inforation - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", "auroracoll-h.school@det.nsw.edu.au"),
+                Subject = $"Class Cover Inforation - {resource.StartDate.ToShortDateString()}",
+                Body = body,
+                Attachments = resource.Attachments
+            };
+
+            await _mediator.Send(message);
         }
 
         public async Task SendCancelledCoverEmail(EmailDtos.CoverEmail resource)
@@ -532,7 +584,18 @@ namespace Constellation.Infrastructure.Services
                 if (!ccRecipients.Any(recipient => recipient.Value == entry.Value))
                     ccRecipients.Add(entry.Key, entry.Value);
 
-            await _emailSender.Send(toRecipients, ccRecipients, null, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Inforation - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", "auroracoll-h.school@det.nsw.edu.au"),
+                Subject = $"Class Cover Inforation - {resource.StartDate.ToShortDateString()}",
+                Body = body,
+                Attachments = resource.Attachments
+            };
+
+            await _mediator.Send(message);
         }
 
         public async Task SendLessonMissedEmail(LessonMissedNotificationEmail notification)
@@ -578,7 +641,18 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in notification.Recipients)
                 toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", settings.LessonsCoordinatorEmail),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = null
+            };
+
+            await _mediator.Send(message);
         }
 
         private async Task SendSecondLessonWarningEmail(LessonMissedNotificationEmail notification)
@@ -602,7 +676,18 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in notification.Recipients)
                 toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", settings.LessonsCoordinatorEmail),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = null
+            };
+
+            await _mediator.Send(message);
         }
 
         private async Task SendThirdLessonWarningEmail(LessonMissedNotificationEmail notification)
@@ -626,7 +711,18 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in notification.Recipients)
                 toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", settings.LessonsCoordinatorEmail),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = null
+            };
+
+            await _mediator.Send(message);
         }
 
         private async Task SendFinalLessonWarningEmail(LessonMissedNotificationEmail notification)
@@ -650,7 +746,18 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in notification.Recipients)
                 toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", settings.LessonsCoordinatorEmail),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = null
+            };
+
+            await _mediator.Send(message);
         }
 
         private async Task SendLessonAlertEmail(LessonMissedNotificationEmail notification)
@@ -673,7 +780,18 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in notification.Recipients)
                 toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", settings.LessonsCoordinatorEmail),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = null
+            };
+
+            await _mediator.Send(message);
         }
 
         public async Task SendServiceLogEmail(ServiceLogEmail notification)
@@ -692,7 +810,18 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in notification.Recipients)
                 toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", $"[Aurora College] Service Log Output - {notification.Source}", body, null);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", "noreply@aurora.nsw.edu.au"),
+                Subject = $"[Aurora College] Service Log Output - {notification.Source}",
+                Body = body,
+                Attachments = null
+            };
+
+            await _mediator.Send(message);
         }
 
         public async Task SendTeacherClassworkNotificationRequest(ClassworkNotificationTeacherEmail notification)
@@ -718,7 +847,18 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in notification.Teachers)
                 toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, null);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new("Aurora College", absenceSettings.AbsenceCoordinatorEmail),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = null
+            };
+
+            await _mediator.Send(message);
         }
 
         public async Task SendStudentClassworkNotification(Absence absence, ClassworkNotification notification, List<string> parentEmails)
@@ -752,7 +892,18 @@ namespace Constellation.Infrastructure.Services
 
             var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MissedWork/StudentMissedWorkNotificationEmail.cshtml", viewModel);
 
-            await _emailSender.Send(toRecipients, null, null, notification.CompletedBy.EmailAddress, viewModel.Title, body, null);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new(notification.CompletedBy.DisplayName, notification.CompletedBy.EmailAddress),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = null
+            };
+
+            await _mediator.Send(message);
         }
 
         private async Task SendParentClassworkNotification(Absence absence, ClassworkNotification notification, List<string> parentEmails)
@@ -777,7 +928,18 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in parentEmails)
                 toRecipients.Add(entry, entry);
 
-            await _emailSender.Send(toRecipients, null, null, notification.CompletedBy.EmailAddress, viewModel.Title, body, null);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new(notification.CompletedBy.DisplayName, notification.CompletedBy.EmailAddress),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = null
+            };
+
+            await _mediator.Send(message);
         }
 
         public async Task SendDailyRollMarkingReport(List<RollMarkReportDto> orderedEntries, bool completeReport)
@@ -806,7 +968,18 @@ namespace Constellation.Infrastructure.Services
                 toRecipients.Add(orderedEntries.First().EmailSentTo, orderedEntries.First().EmailSentTo);
             }
 
-            await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, null);
+            var message = new AddEmailToQueue
+            {
+                ToAddresses = toRecipients,
+                CcAddresses = null,
+                BccAddresses = null,
+                FromAddress = new(absenceSettings.AbsenceCoordinatorName, absenceSettings.AbsenceCoordinatorEmail),
+                Subject = viewModel.Title,
+                Body = body,
+                Attachments = null
+            };
+
+            await _mediator.Send(message);
         }
     }
 }

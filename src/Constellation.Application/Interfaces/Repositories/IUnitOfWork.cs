@@ -1,4 +1,7 @@
 ﻿using Constellation.Core.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
@@ -37,6 +40,7 @@ namespace Constellation.Application.Interfaces.Repositories
 
         void Remove<TEntity>(TEntity entity) where TEntity : class;
         void Add<TEntity>(TEntity entity) where TEntity : class;
+        void Load<TEntity, TProperty>(TEntity entity, Expression<Func<TEntity, TProperty>> predicate) where TEntity : class where TProperty : class;
         Task CompleteAsync();
     }
 }

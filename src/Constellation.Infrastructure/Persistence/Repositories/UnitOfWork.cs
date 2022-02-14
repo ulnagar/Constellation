@@ -2,6 +2,10 @@
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Metadata;
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Persistence.Repositories
@@ -84,6 +88,13 @@ namespace Constellation.Infrastructure.Persistence.Repositories
         public void Add<TEntity>(TEntity entity) where TEntity : class
         {
             _context.Set<TEntity>().Add(entity);
+        }
+
+        public void Load<TEntity, TProperty>(TEntity entity, Expression<Func<TEntity, TProperty>> predicate) where TEntity : class where TProperty : class
+        {
+            _context.Entry(entity)
+                .Reference(predicate)
+                .Load();
         }
 
         public async Task CompleteAsync()

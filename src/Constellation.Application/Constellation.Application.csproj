@@ -15,4 +15,8 @@
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="5.0.10" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Common\CQRS\Emails\Queries\" />
+  </ItemGroup>
+
 </Project>
