@@ -59,7 +59,11 @@ namespace Constellation.Presentation.Server
                     config.WriteTo.File("logs/SchoolRegister.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
                     config.Filter.ByIncludingOnly(Matching.FromSource<ISchoolRegisterJob>());
                 })
-                .WriteTo.File("logs/System.log", Serilog.Events.LogEventLevel.Debug, rollingInterval: RollingInterval.Day)
+                .WriteTo.Logger(config =>
+                {
+                    config.WriteTo.File("logs/System.log", Serilog.Events.LogEventLevel.Debug, rollingInterval: RollingInterval.Day);
+                    config.Filter.ByExcluding(Matching.FromSource<IHangfireJob>());
+                })
                 .CreateLogger();
         }
 
@@ -126,7 +130,7 @@ namespace Constellation.Presentation.Server
             jobManager.AddOrUpdate<IClassMonitorJob>(nameof(IClassMonitorJob), (job) => job.StartJob(), "* 7-15 * * 1-5", TimeZoneInfo.Local);
             jobManager.AddOrUpdate<IPermissionUpdateJob>(nameof(IPermissionUpdateJob), (job) => job.StartJob(), "*/5 7-15 * * 1-5", TimeZoneInfo.Local);
             jobManager.AddOrUpdate<ISchoolRegisterJob>(nameof(ISchoolRegisterJob), (job) => job.StartJob(), "15 18 1 * *", TimeZoneInfo.Local);
-            jobManager.AddOrUpdate<IRollMarkingReportJob>(nameof(IRollMarkingReportJob), (job) => job.StartJob(), "0 17 * * 1-5", TimeZoneInfo.Local);
+            //jobManager.AddOrUpdate<IRollMarkingReportJob>(nameof(IRollMarkingReportJob), (job) => job.StartJob(), "0 17 * * 1-5", TimeZoneInfo.Local);
 
 #if RELEASE
             jobManager.AddOrUpdate<IAbsenceMonitorJob>(nameof(IAbsenceMonitorJob), (job) => job.StartJob(), "0 13 * * 1-6", TimeZoneInfo.Local);

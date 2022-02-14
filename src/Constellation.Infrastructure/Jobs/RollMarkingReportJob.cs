@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
-    public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService
+    public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHangfireJob
     {
         private readonly ISentralGateway _sentralService;
         private readonly IUnitOfWork _unitOfWork;

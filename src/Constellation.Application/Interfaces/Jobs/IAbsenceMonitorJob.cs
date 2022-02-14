@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Jobs
 {
-    public interface IAbsenceMonitorJob
+    public interface IAbsenceMonitorJob : IHangfireJob
     {
         Task StartJob();
     }

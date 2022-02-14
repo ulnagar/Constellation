@@ -2,7 +2,7 @@
 
 namespace Constellation.Application.Interfaces.Jobs
 {
-    public interface IPermissionUpdateJob
+    public interface IPermissionUpdateJob : IHangfireJob
     {
         Task StartJob();
     }
