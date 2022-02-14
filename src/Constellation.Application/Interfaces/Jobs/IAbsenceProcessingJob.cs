@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Jobs
 {
-    public interface IAbsenceProcessingJob : IHangfireJob
+    public interface IAbsenceProcessingJob
     {
         Task<ICollection<Absence>> StartJob(Student student);
     }

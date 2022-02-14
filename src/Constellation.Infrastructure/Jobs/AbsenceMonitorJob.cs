@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
-    public class AbsenceMonitorJob : IAbsenceMonitorJob, IScopedService, IHangfireJob
+    public class AbsenceMonitorJob : IAbsenceMonitorJob, IScopedService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAbsenceProcessingJob _absenceProcessor;

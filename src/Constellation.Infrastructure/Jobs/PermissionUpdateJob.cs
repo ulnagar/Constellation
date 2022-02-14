@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
-    public class PermissionUpdateJob : IPermissionUpdateJob, IScopedService, IHangfireJob
+    public class PermissionUpdateJob : IPermissionUpdateJob, IScopedService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAdobeConnectService _adobeConnectService;

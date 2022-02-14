@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Jobs
 {
-    public interface IAbsenceClassworkNotificationJob : IHangfireJob
+    public interface IAbsenceClassworkNotificationJob
     {
         Task StartJob(DateTime scanDate);
     }

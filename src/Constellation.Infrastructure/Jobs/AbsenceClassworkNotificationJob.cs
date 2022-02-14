@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
-    public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob, IScopedService, IHangfireJob
+    public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob, IScopedService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailService _emailService;

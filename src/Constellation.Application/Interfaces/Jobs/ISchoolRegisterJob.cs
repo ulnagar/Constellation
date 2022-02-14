@@ -2,7 +2,7 @@
 
 namespace Constellation.Application.Interfaces.Jobs
 {
-    public interface ISchoolRegisterJob : IHangfireJob
+    public interface ISchoolRegisterJob
     {
         Task StartJob();
     }
