@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
-    public class AttendanceReportJob : IAttendanceReportJob, IScopedService
+    public class AttendanceReportJob : IAttendanceReportJob, IScopedService, IHangfireJob
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailService _emailService;

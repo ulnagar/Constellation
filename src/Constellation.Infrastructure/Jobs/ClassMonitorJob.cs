@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
-    public class ClassMonitorJob : IClassMonitorJob, IScopedService
+    public class ClassMonitorJob : IClassMonitorJob, IScopedService, IHangfireJob
     {
         private readonly SemaphoreSlim _semaphore = new(5, 5);
         private ClassMonitorDtos _cache;
