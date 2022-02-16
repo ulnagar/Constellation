@@ -29,6 +29,11 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Scrutor" Version="3.3.0" />
     <PackageReference Include="Select.HtmlToPdf.NetCore" Version="21.1.0" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Identity\" />
   </ItemGroup>
 
 </Project>

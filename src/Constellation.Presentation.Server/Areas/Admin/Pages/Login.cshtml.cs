@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -49,6 +50,9 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
 
             [Display(Name = "Remember me?")]
             public bool RememberMe { get; set; }
+
+            [Display(Name = "Logon from domain?")]
+            public bool DomainAuthentication { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -80,7 +84,23 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
             {
 #if DEBUG
                 var user = await _userManager.FindByEmailAsync(Input.Email);
+
+                if (Input.DomainAuthentication)
+                {
+#pragma warning disable CA1416 // Validate platform compatibility
+                    var context = new PrincipalContext(ContextType.Domain, "DETNSW.WIN");
+                    var success = context.ValidateCredentials(Input.Email, Input.Password);
+#pragma warning restore CA1416 // Validate platform compatibility
+
+                    if (!success)
+                    {
+                        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                        return Page();
+                    }
+                }
+
                 await _signInManager.SignInAsync(user, false);
+
                 return LocalRedirect(returnUrl);
 #else
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);

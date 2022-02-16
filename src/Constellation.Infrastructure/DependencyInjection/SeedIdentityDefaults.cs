@@ -75,6 +75,24 @@ namespace Constellation.Infrastructure.DependencyInjection
                 _ = userManager.ConfirmEmailAsync(guestUser, guestEmailToken).Result;
             }
 
+            var benUser = new AppUser
+            {
+                Email = "benjamin.hillsley@det.nsw.edu.au",
+                UserName = "benjamin.hillsley@det.nsw.edu.au",
+                FirstName = "Ben",
+                LastName = "Hillsley",
+            };
+
+            var benSuccess = userManager.CreateAsync(benUser).Result;
+
+            if (benSuccess.Succeeded)
+            {
+                _ = userManager.AddToRoleAsync(benUser, AuthRoles.Admin).Result;
+                var benPasswordToken = userManager.GeneratePasswordResetTokenAsync(benUser).Result;
+                var benPasswordSuccess = userManager.ResetPasswordAsync(benUser, benPasswordToken, "P@ssw0rd").Result;
+                var benEmailToken = userManager.GenerateEmailConfirmationTokenAsync(benUser).Result;
+                _ = userManager.ConfirmEmailAsync(adminUser, benEmailToken).Result;
+            }
         }
     }
 }

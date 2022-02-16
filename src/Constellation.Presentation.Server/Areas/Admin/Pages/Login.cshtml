@@ -32,6 +32,14 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <div class="checkbox">
+                        <label asp-for="Input.DomainAuthentication">
+                            <input asp-for="Input.DomainAuthentication" />
+                            @Html.DisplayNameFor(m => m.Input.DomainAuthentication)
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
                     <button type="submit" class="btn btn-primary">Log in</button>
                 </div>
                 <div class="form-group">
