@@ -33,6 +33,9 @@ namespace Constellation.Infrastructure.Jobs
         {
             var date = DateTime.Today;
 
+            if (DateTime.Now.TimeOfDay < new TimeSpan(17, 0, 0))
+                return;
+
             if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
                 return;
 

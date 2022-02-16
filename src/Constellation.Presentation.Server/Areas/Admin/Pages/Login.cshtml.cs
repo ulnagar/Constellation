@@ -50,9 +50,6 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
 
             [Display(Name = "Remember me?")]
             public bool RememberMe { get; set; }
-
-            [Display(Name = "Logon from domain?")]
-            public bool DomainAuthentication { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -82,10 +79,11 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
 
             if (ModelState.IsValid)
             {
-#if DEBUG
+                var localAuth = Input.Email.Contains("~");
+                Input.Email = Input.Email.Replace("~", "");
                 var user = await _userManager.FindByEmailAsync(Input.Email);
 
-                if (Input.DomainAuthentication)
+                if (!localAuth)
                 {
 #pragma warning disable CA1416 // Validate platform compatibility
                     var context = new PrincipalContext(ContextType.Domain, "DETNSW.WIN");
@@ -99,11 +97,12 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                     }
                 }
 
+#if DEBUG
                 await _signInManager.SignInAsync(user, false);
-
-                return LocalRedirect(returnUrl);
+                var result = new { Succeeded = true, RequiresTwoFactor = false, IsLockedOut = false };
 #else
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+#endif
 
                 if (result.Succeeded)
                 {
@@ -122,7 +121,6 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
                 }
-#endif
             }
 
             // If we got this far, something failed, redisplay form

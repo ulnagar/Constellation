@@ -24,43 +24,23 @@
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>
                 <div class="form-group">
-                    <div class="checkbox">
-                        <label asp-for="Input.RememberMe">
-                            <input asp-for="Input.RememberMe" />
-                            @Html.DisplayNameFor(m => m.Input.RememberMe)
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="checkbox">
-                        <label asp-for="Input.DomainAuthentication">
-                            <input asp-for="Input.DomainAuthentication" />
-                            @Html.DisplayNameFor(m => m.Input.DomainAuthentication)
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group">
                     <button type="submit" class="btn btn-primary">Log in</button>
-                </div>
-                <div class="form-group">
-                    <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
                 </div>
             </form>
         </section>
     </div>
     <div class="col-md-6 col-md-offset-2">
         <section>
-            <h4>Use another service to log in.</h4>
+            <h4>Coming Soon</h4>
             <hr />
-            @{
+            <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                <div>
+                    <p>
+                        <button type="submit" class="btn btn-primary" disabled name="provider" value="NSWDOE" title="Log in using your NSW DOE account">Single Sign on with NSW DOE</button>
+                    </p>
+                </div>
+            </form>
+            @*@{
                 if ((Model.ExternalLogins?.Count ?? 0) == 0)
                 {
                     <div>
@@ -83,7 +63,7 @@
                         </div>
                     </form>
                 }
-            }
+            }*@
         </section>
     </div>
 </div>
