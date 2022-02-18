@@ -1,6 +1,8 @@
 ﻿using Constellation.Application.Models.Identity;
+using Constellation.Core.Models;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.DependencyInjection
 {
@@ -32,6 +34,81 @@ namespace Constellation.Infrastructure.DependencyInjection
 
                     var result = roleManager.CreateAsync(newRole).Result;
                 }
+            }
+        }
+
+        private static void CreateStaffUser(UserManager<AppUser> userManager, Staff staffMember)
+        {
+            var existingUser = userManager.FindByEmailAsync(staffMember.EmailAddress).Result;
+
+            if (existingUser != null)
+                return;
+
+            var user = new AppUser
+            {
+                Email = staffMember.EmailAddress,
+                UserName = staffMember.EmailAddress,
+                FirstName = staffMember.FirstName,
+                LastName = staffMember.LastName,
+            };
+
+            var result = userManager.CreateAsync(user).Result;
+
+            if (result.Succeeded)
+            {
+                _ = userManager.AddToRoleAsync(user, AuthRoles.User).Result;
+                var adminEmailToken = userManager.GenerateEmailConfirmationTokenAsync(user).Result;
+                _ = userManager.ConfirmEmailAsync(user, adminEmailToken).Result;
+            }
+        }
+
+        private static void CreateContactUser(UserManager<AppUser> userManager, SchoolContact contact)
+        {
+            var existingUser = userManager.FindByEmailAsync(contact.EmailAddress).Result;
+
+            if (existingUser != null)
+                return;
+
+            var user = new AppUser
+            {
+                Email = contact.EmailAddress,
+                UserName = contact.EmailAddress,
+                FirstName = contact.FirstName,
+                LastName = contact.LastName,
+            };
+
+            var result = userManager.CreateAsync(user).Result;
+
+            if (result.Succeeded)
+            {
+                _ = userManager.AddToRoleAsync(user, AuthRoles.LessonsUser).Result;
+                var adminEmailToken = userManager.GenerateEmailConfirmationTokenAsync(user).Result;
+                _ = userManager.ConfirmEmailAsync(user, adminEmailToken).Result;
+            }
+        }
+
+        private static void CreateUser(UserManager<AppUser> userManager, string emailAddress, string firstName, string lastName, string defaultRole)
+        {
+            var existingUser = userManager.FindByEmailAsync(emailAddress).Result;
+
+            if (existingUser != null)
+                return;
+
+            var user = new AppUser
+            {
+                Email = emailAddress,
+                UserName = emailAddress,
+                FirstName = firstName,
+                LastName = lastName,
+            };
+
+            var result = userManager.CreateAsync(user).Result;
+
+            if (result.Succeeded)
+            {
+                _ = userManager.AddToRoleAsync(user, defaultRole).Result;
+                var adminEmailToken = userManager.GenerateEmailConfirmationTokenAsync(user).Result;
+                _ = userManager.ConfirmEmailAsync(user, adminEmailToken).Result;
             }
         }
 
@@ -73,25 +150,6 @@ namespace Constellation.Infrastructure.DependencyInjection
                 var guestPasswordSuccess = userManager.ResetPasswordAsync(guestUser, guestPasswordToken, "P@ssw0rd").Result;
                 var guestEmailToken = userManager.GenerateEmailConfirmationTokenAsync(guestUser).Result;
                 _ = userManager.ConfirmEmailAsync(guestUser, guestEmailToken).Result;
-            }
-
-            var benUser = new AppUser
-            {
-                Email = "benjamin.hillsley@det.nsw.edu.au",
-                UserName = "benjamin.hillsley@det.nsw.edu.au",
-                FirstName = "Ben",
-                LastName = "Hillsley",
-            };
-
-            var benSuccess = userManager.CreateAsync(benUser).Result;
-
-            if (benSuccess.Succeeded)
-            {
-                _ = userManager.AddToRoleAsync(benUser, AuthRoles.Admin).Result;
-                var benPasswordToken = userManager.GeneratePasswordResetTokenAsync(benUser).Result;
-                var benPasswordSuccess = userManager.ResetPasswordAsync(benUser, benPasswordToken, "P@ssw0rd").Result;
-                var benEmailToken = userManager.GenerateEmailConfirmationTokenAsync(benUser).Result;
-                _ = userManager.ConfirmEmailAsync(adminUser, benEmailToken).Result;
             }
         }
     }
