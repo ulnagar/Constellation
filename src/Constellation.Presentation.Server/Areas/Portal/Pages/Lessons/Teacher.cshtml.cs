@@ -1,5 +1,6 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Portal.Pages.Lessons
 {
+    [Authorize]
     public class TeacherModel : PageModel
     {
         private readonly IUnitOfWork _unitOfWork;

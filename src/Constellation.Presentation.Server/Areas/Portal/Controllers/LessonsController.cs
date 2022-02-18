@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 namespace Constellation.Presentation.Server.Areas.Portal.Controllers
 {
     [Area("Portal")]
+    [Authorize]
     public class LessonsController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -35,7 +36,6 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
             _operationsService = operationsService;
         }
 
-        [Authorize]
         public async Task<IActionResult> Index()
         {
             if (User.Identity.IsAuthenticated)

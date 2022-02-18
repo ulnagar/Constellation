@@ -60,13 +60,29 @@ namespace Constellation.Infrastructure.Gateways
 
                 var principal = dbSchool.StaffAssignments.FirstOrDefault(role => role.Role == SchoolContactRole.Principal && !role.IsDeleted);
 
+                if (string.IsNullOrWhiteSpace(csvSchool.PrincipalEmail))
+                {
+                    await _unitOfWork.CompleteAsync();
+                    continue;
+                }
+
                 // Compare Principal in database to information in csv by email address
                 // If different, mark database entry as old/deleted and create a new entry
-                if (principal != null && principal.SchoolContact.EmailAddress.ToLower() != csvSchool.PrincipalEmail.ToLower())
+                if (principal != null)
                 {
-                    Console.WriteLine($" Removing old Principal: {principal.SchoolContact.DisplayName}");
-                    await _schoolContactService.RemoveRole(principal.Id);
-                    principal = null;
+                    if (!dbSchool.Students.Any(student => !student.IsDeleted) || !dbSchool.Staff.Any(staff => !staff.IsDeleted))
+                    {
+                        Console.WriteLine($" Removing old Principal: {principal.SchoolContact.DisplayName}");
+                        await _schoolContactService.RemoveRole(principal.Id);
+
+                        await _unitOfWork.CompleteAsync();
+                        continue;
+                    } else if (principal.SchoolContact.EmailAddress.ToLower() != csvSchool.PrincipalEmail.ToLower())
+                    {
+                        Console.WriteLine($" Removing old Principal: {principal.SchoolContact.DisplayName}");
+                        await _schoolContactService.RemoveRole(principal.Id);
+                        principal = null;
+                    }
                 }
 
                 if (principal == null)

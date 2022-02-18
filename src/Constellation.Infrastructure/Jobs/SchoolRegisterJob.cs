@@ -21,7 +21,9 @@ namespace Constellation.Infrastructure.Jobs
         public async Task StartJob()
         {
             await _schoolRegisterGateway.UpdateSchoolDetails();
-            await _schoolRegisterGateway.GetSchoolPrincipals();
+
+            // Do not update Principal data as this might overwrite custom data updates
+            //await _schoolRegisterGateway.GetSchoolPrincipals();
 
             await _mediator.Send(new UpdateSchoolsFromMasterList());
         }
