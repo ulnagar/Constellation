@@ -52,6 +52,13 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
             public bool RememberMe { get; set; }
         }
 
+        private class LoginResult
+        {
+            public bool Succeeded { get; set; }
+            public bool RequiresTwoFactor { get; set; }
+            public bool IsLockedOut { get; set; }
+        }
+
         public async Task OnGetAsync(string returnUrl = null)
         {
             if (!string.IsNullOrEmpty(ErrorMessage))
@@ -83,6 +90,8 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                 Input.Email = Input.Email.Replace("~", "");
                 var user = await _userManager.FindByEmailAsync(Input.Email);
 
+                var result = new LoginResult();
+
                 if (!localAuth)
                 {
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -95,27 +104,31 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                         ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                         return Page();
                     }
-                }
 
+                    result.Succeeded = true;
+                } else
+                {
 #if DEBUG
-                await _signInManager.SignInAsync(user, false);
-                var result = new { Succeeded = true, RequiresTwoFactor = false, IsLockedOut = false };
+                    await _signInManager.SignInAsync(user, false);
+                    result.Succeeded = true;
 #else
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                    var passwordResult = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                    result.Succeeded = passwordResult.Succeeded;
 #endif
+                }
 
                 if (result.Succeeded)
                 {
                     return LocalRedirect(returnUrl);
                 }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, Input.RememberMe });
-                }
-                if (result.IsLockedOut)
-                {
-                    return RedirectToPage("./Lockout");
-                }
+                //if (result.RequiresTwoFactor)
+                //{
+                //    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, Input.RememberMe });
+                //}
+                //if (result.IsLockedOut)
+                //{
+                //    return RedirectToPage("./Lockout");
+                //}
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
