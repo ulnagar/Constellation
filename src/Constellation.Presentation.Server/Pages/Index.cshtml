@@ -13,7 +13,9 @@
             <p class="card-text">
                 Constellation provides Aurora College staff with information on Students, Classes, Schools, and Devices...
             </p>
-            <a asp-page="Dashboard" asp-area="Home" class="card-link">Log In</a>
+            <div class="pb-1">
+                <a asp-page="Dashboard" asp-area="Home" class="btn btn-sm btn-primary">Log In</a>
+            </div>
         </div>
     </div>
 
@@ -23,8 +25,10 @@
             <p class="card-text">
                 Constellation provides Aurora College partner schools with information on our shared Students including attendance and Science lesson rolls...
             </p>
-            <a class="card-link" href="/Portal/Absences/School">Absences Log In</a>
-            <a class="card-link" href="/Portal/Lessons/Teacher">Lessons Log In</a>
+            <div class="pb-1">
+                <a class="btn btn-sm btn-primary" href="/Portal/Absences/School">Absences Log In</a>
+            </div>
+            <a class="btn btn-sm btn-primary" href="/Portal/Lessons/Teacher">Lessons Log In</a>
             @*<a class="card-link" href="/Portal/School">Log In</a>*@
         </div>
     </div>

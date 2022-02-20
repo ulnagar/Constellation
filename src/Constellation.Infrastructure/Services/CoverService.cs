@@ -140,6 +140,7 @@ namespace Constellation.Infrastructure.Services
 
                     if (result.Success)
                     {
+                        await _unitOfWork.CompleteAsync();
                         coverList.Add(result.Entity);
                         cover.Id = result.Entity.Id;
                     }
@@ -172,8 +173,8 @@ namespace Constellation.Infrastructure.Services
 
                     if (result.Success)
                     {
-                        coverList.Add(result.Entity);
-                        cover.Id = result.Entity.Id;
+                        await _unitOfWork.CompleteAsync();
+                        coverList.Add(await _unitOfWork.TeacherClassCovers.ForEditAsync(result.Entity.Id));
                     }
                     else
                         break;
