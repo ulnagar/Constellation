@@ -1,6 +1,8 @@
 using Constellation.Application.Interfaces.Jobs;
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
+using Constellation.Presentation.Server.Helpers.DependencyInjection;
 using Constellation.Presentation.Server.Infrastructure;
 using Hangfire;
 using Hangfire.SqlServer;
@@ -101,7 +103,7 @@ namespace Constellation.Presentation.Server
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserManager<AppUser> userManager, RoleManager<AppRole> roleManager, IRecurringJobManager jobManager)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserManager<AppUser> userManager, RoleManager<AppRole> roleManager, IUnitOfWork unitOfWork, IRecurringJobManager manager)
         {
             if (env.IsDevelopment())
             {
@@ -132,21 +134,8 @@ namespace Constellation.Presentation.Server
                 }
             });
 
-            jobManager.AddOrUpdate<IClassMonitorJob>(nameof(IClassMonitorJob), (job) => job.StartJob(), "* 7-15 * * 1-5", TimeZoneInfo.Local);
-            jobManager.AddOrUpdate<IPermissionUpdateJob>(nameof(IPermissionUpdateJob), (job) => job.StartJob(), "*/5 7-15 * * 1-5", TimeZoneInfo.Local);
-            jobManager.AddOrUpdate<ISchoolRegisterJob>(nameof(ISchoolRegisterJob), (job) => job.StartJob(), "15 18 1 * *", TimeZoneInfo.Local);
-            jobManager.AddOrUpdate<IUserManagerJob>(nameof(IUserManagerJob), (job) => job.StartJob(), "0 6 1 * *", TimeZoneInfo.Local);
-            jobManager.AddOrUpdate<IRollMarkingReportJob>(nameof(IRollMarkingReportJob), (job) => job.StartJob(), "0 17 * * 1-5", TimeZoneInfo.Local);
-
-#if RELEASE
-            jobManager.AddOrUpdate<IAbsenceMonitorJob>(nameof(IAbsenceMonitorJob), (job) => job.StartJob(), "0 13 * * 1-6", TimeZoneInfo.Local);
-            jobManager.AddOrUpdate<ILessonNotificationsJob>(nameof(ILessonNotificationsJob), (job) => job.StartJob(), "0 10 * * 1", TimeZoneInfo.Local);
-
-            // AttendanceReports for Term 1 2022 (specific dates)
-            jobManager.AddOrUpdate<IAttendanceReportJob>($"{nameof(IAttendanceReportJob)} - 28/02/22", (job) => job.StartJob(), "0 13 28 2 1", TimeZoneInfo.Local);
-            jobManager.AddOrUpdate<IAttendanceReportJob>($"{nameof(IAttendanceReportJob)} - 14/03/22", (job) => job.StartJob(), "0 13 14 3 1", TimeZoneInfo.Local);
-            jobManager.AddOrUpdate<IAttendanceReportJob>($"{nameof(IAttendanceReportJob)} - 28/03/22", (job) => job.StartJob(), "0 13 28 3 1", TimeZoneInfo.Local);
-#endif
+            var jobManager = new HangfireJobRegistration(unitOfWork, manager);
+            jobManager.RegisterJobs();
 
             IdentityDefaults.SeedRoles(roleManager);
             IdentityDefaults.SeedUsers(userManager);

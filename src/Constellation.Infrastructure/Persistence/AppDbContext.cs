@@ -1,14 +1,16 @@
-﻿using Constellation.Application.Models;
+﻿using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Persistence
 {
-    public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
+    public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>, IAppDbContext
     {
         public AppDbContext(DbContextOptions options)
             : base(options)
@@ -43,6 +45,7 @@ namespace Constellation.Infrastructure.Persistence
         public DbSet<LessonRoll> LessonRolls { get; set; }
         public DbSet<CanvasOperation> CanvasOperations { get; set; }
         public DbSet<ClassworkNotification> ClassworkNotifications { get; set; }
+        public DbSet<JobActivation> JobActivations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -50,5 +53,7 @@ namespace Constellation.Infrastructure.Persistence
 
             base.OnModelCreating(builder);
         }
+
+
     }
 }

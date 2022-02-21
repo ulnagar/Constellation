@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Jobs;
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Infrastructure.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -18,17 +19,26 @@ namespace Constellation.Infrastructure.Jobs
         private readonly IClassMonitorCacheService _monitorCacheService;
         private readonly IAdobeConnectService _adobeConnectService;
         private readonly ILogger<IClassMonitorJob> _logger;
+        private readonly IUnitOfWork _unitOfWork;
 
         public ClassMonitorJob(IClassMonitorCacheService monitorCacheService, IAdobeConnectService adobeConnectService,
-            ILogger<IClassMonitorJob> logger)
+            ILogger<IClassMonitorJob> logger, IUnitOfWork unitOfWork)
         {
             _monitorCacheService = monitorCacheService;
             _adobeConnectService = adobeConnectService;
             _logger = logger;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task StartJob()
         {
+            var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IClassMonitorJob));
+            if (jobStatus == null || !jobStatus.IsActive)
+            {
+                _logger.LogWarning("Stopped due to job being set inactive.");
+                return;
+            }
+
             var scanTime = DateTime.Now;
             _logger.LogInformation($"Starting room monitor scan at {scanTime}");
 

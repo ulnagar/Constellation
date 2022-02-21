@@ -42,6 +42,13 @@ namespace Constellation.Infrastructure.Jobs
 
         public async Task StartJob()
         {
+            var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IAttendanceReportJob));
+            if (jobStatus == null || !jobStatus.IsActive)
+            {
+                _logger.LogWarning("Stopped due to job being set inactive.");
+                return;
+            }
+
             var dateToReport = DateTime.Today.AddDays(-1).VerifyStartOfFortnight();
 
             var students = await _unitOfWork.Students.AllActiveAsync();

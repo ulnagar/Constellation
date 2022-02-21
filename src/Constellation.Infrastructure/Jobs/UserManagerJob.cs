@@ -25,6 +25,13 @@ namespace Constellation.Infrastructure.Jobs
 
         public async Task StartJob()
         {
+            var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IUserManagerJob));
+            if (jobStatus == null || !jobStatus.IsActive)
+            {
+                _logger.LogWarning("Stopped due to job being set inactive.");
+                return;
+            }
+
             _logger.LogInformation("Starting job");
             var staff = await _unitOfWork.Staff.ForListAsync(staff => !staff.IsDeleted);
             _logger.LogInformation($"Found {staff.Count} Staff Members to check...");

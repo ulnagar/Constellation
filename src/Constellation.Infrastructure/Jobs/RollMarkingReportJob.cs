@@ -31,6 +31,13 @@ namespace Constellation.Infrastructure.Jobs
 
         public async Task StartJob()
         {
+            var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IRollMarkingReportJob));
+            if (jobStatus == null || !jobStatus.IsActive)
+            {
+                _logger.LogWarning("Stopped due to job being set inactive.");
+                return;
+            }
+
             var date = DateTime.Today;
 
             if (DateTime.Now.TimeOfDay < new TimeSpan(17, 0, 0))

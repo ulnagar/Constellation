@@ -37,6 +37,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
         public ICoverRepository Covers { get; set; }
         public ICanvasOperationsRepository CanvasOperations { get; set; }
         public IClassworkNotificationRepository ClassworkNotifications { get; set; }
+        public IJobActivationRepository JobActivations { get; set; }
 
         public string[] AbsenceReasons { get; set; } = {
             "Absent", "Exempt", "Flexible", "Leave", "School Business", "Sick", "Shared Enrolment", "Suspended",
@@ -74,6 +75,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
             Covers = new CoverRepository(context);
             CanvasOperations = new CanvasOperationsRepository(context);
             ClassworkNotifications = new ClassworkNotificationRepository(context);
+            JobActivations = new JobActivationRepository(context);
         }
 
         public void Remove<TEntity>(TEntity entity) where TEntity : class

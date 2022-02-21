@@ -25,7 +25,7 @@ namespace Constellation.Infrastructure.DependencyInjection
                     b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
             });
 
-            services.AddScoped<AppDbContext>();
+            services.AddScoped<IAppDbContext, AppDbContext>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.Scan(scan => scan

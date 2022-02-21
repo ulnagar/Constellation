@@ -30,6 +30,7 @@
     @if (Model.IsAdmin)
     {
         <a class="btn btn-success btn-block" href="/hangfire">Hangfire</a>
+        <a asp-page="HangfireDashboard" asp-area="Admin" class="btn btn-success btn-block">Job Activation</a>
     }
 
     @foreach (var entry in @Model.Classes.OrderBy(entry => entry.Key))

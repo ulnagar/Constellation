@@ -32,6 +32,13 @@ namespace Constellation.Infrastructure.Jobs
 
         public async Task StartJob()
         {
+            var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(ILessonNotificationsJob));
+            if (jobStatus == null || !jobStatus.IsActive)
+            {
+                _logger.Log(LogSeverity.Warning, "Stopped due to job being set inactive.");
+                return;
+            }
+
             _logger.Log(LogSeverity.Information, $"Service started.");
 
             var settings = await _unitOfWork.Settings.Get();

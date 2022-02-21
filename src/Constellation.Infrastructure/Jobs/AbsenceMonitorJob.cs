@@ -35,6 +35,13 @@ namespace Constellation.Infrastructure.Jobs
 
         public async Task StartJob()
         {
+            var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IAbsenceMonitorJob));
+            if (jobStatus == null || !jobStatus.IsActive)
+            {
+                Console.WriteLine("Stopped due to job being set inactive.");
+                return;
+            }
+
             var students = await _unitOfWork.Students.ForAbsenceScan();
 
             foreach (var student in students)
@@ -206,7 +213,7 @@ namespace Constellation.Infrastructure.Jobs
                 }
             }
 
-            await _classworkNotifier.StartJob(DateTime.Today.AddDays(-1));
+            await _classworkNotifier.StartJob(DateTime.Today);
 
             await _unitOfWork.CompleteAsync();
         }

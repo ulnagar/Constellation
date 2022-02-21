@@ -45,7 +45,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Presentation.Portal.Schools", "src\Constellation.Presentation.Portal.Schools\Constellation.Presentation.Portal.Schools.csproj", "{8BCE7325-73BC-488E-A932-4FC31AACC4E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Constellation.Presentation.Portal.Parents", "src\Constellation.Presentation.Portal.Parents\Constellation.Presentation.Portal.Parents.csproj", "{7A561886-192D-44C3-ABB3-BD2302B5EE3E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Presentation.Portal.Parents", "src\Constellation.Presentation.Portal.Parents\Constellation.Presentation.Portal.Parents.csproj", "{7A561886-192D-44C3-ABB3-BD2302B5EE3E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

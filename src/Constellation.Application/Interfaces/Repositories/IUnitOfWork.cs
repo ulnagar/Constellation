@@ -32,6 +32,7 @@ namespace Constellation.Application.Interfaces.Repositories
         ICoverRepository Covers { get; set; }
         ICanvasOperationsRepository CanvasOperations { get; set; }
         IClassworkNotificationRepository ClassworkNotifications { get; set; }
+        IJobActivationRepository JobActivations { get; set; }
 
         string[] AbsenceReasons { get; set; }
 

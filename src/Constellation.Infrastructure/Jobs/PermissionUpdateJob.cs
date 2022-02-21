@@ -30,6 +30,13 @@ namespace Constellation.Infrastructure.Jobs
 
         public async Task StartJob()
         {
+            var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IPermissionUpdateJob));
+            if (jobStatus == null || !jobStatus.IsActive)
+            {
+                _logger.LogWarning("Stopped due to job being set inactive.");
+                return;
+            }
+
             _logger.LogInformation($"Searching for users without Adobe Connect Principal Id information...");
             var updatedUsers = await _adobeConnectService.UpdateUsers();
             _logger.LogInformation($"Found information for {updatedUsers.Count()} users.");
