@@ -31,7 +31,7 @@ namespace Constellation.Application.Interfaces.Services
 
 
         // RollMarking Emails
-        Task SendDailyRollMarkingReport(List<RollMarkReportDto> orderedEntries, bool completeReport);
+        Task SendDailyRollMarkingReport(List<RollMarkReportDto> orderedEntries, bool sendToAbsenceCoordinator, bool sendToFacultyHeadTeacher);
 
 
 

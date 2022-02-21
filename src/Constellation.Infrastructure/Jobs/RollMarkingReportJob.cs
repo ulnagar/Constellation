@@ -40,9 +40,6 @@ namespace Constellation.Infrastructure.Jobs
 
             var date = DateTime.Today;
 
-            if (DateTime.Now.TimeOfDay < new TimeSpan(17, 0, 0))
-                return;
-
             if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
                 return;
 
@@ -55,7 +52,7 @@ namespace Constellation.Infrastructure.Jobs
             {
                 foreach (var entry in unsubmitted.OrderBy(item => item.ClassName).ThenBy(item => item.Period))
                 {
-                    var offeringName = entry.ClassName.PadLeft(6, '0');
+                    var offeringName = entry.ClassName.StartsWith("5") || entry.ClassName.StartsWith("6") ? entry.ClassName.PadLeft(7, '0') : entry.ClassName.PadLeft(6, '0');
                     entry.ClassName = offeringName;
 
                     var offering = await _unitOfWork.CourseOfferings.GetFromYearAndName(date.Year, offeringName);
@@ -70,6 +67,10 @@ namespace Constellation.Infrastructure.Jobs
                             covers.Add(cover);
                         foreach (var cover in teacherCovers)
                             covers.Add(cover);
+
+                        entry.HeadTeacher = offering.Course.HeadTeacher.DisplayName;
+                        entry.HeadTeacherEmail = offering.Course.HeadTeacher.EmailAddress;
+                        entry.Faculty = offering.Course.Faculty.ToString();
                     }
 
                     if (covers.Any())
@@ -77,7 +78,7 @@ namespace Constellation.Infrastructure.Jobs
                         entry.Covered = true;
                         entry.HeadTeacher = offering.Course.HeadTeacher.DisplayName;
                         entry.EmailSentTo = offering.Course.HeadTeacher.EmailAddress;
-
+                        
                         foreach (var cover in covers)
                         {
                             if (cover.GetType().Name == nameof(CasualClassCover))
@@ -127,14 +128,27 @@ namespace Constellation.Infrastructure.Jobs
                     }
                 }
 
-                var groupedEntries = unsubmitted.GroupBy(item => item.EmailSentTo);
+                var groupedByRecipient = unsubmitted.GroupBy(item => item.EmailSentTo);
 
-                foreach (var group in groupedEntries)
+                foreach (var group in groupedByRecipient)
                 {
                     // Email the relevant person (as outlined in the EmailSentTo field
                     var orderedEntries = group.OrderBy(item => item.Date).ThenBy(item => item.ClassName).ThenBy(item => item.Period).ToList();
 
-                    await _emailService.SendDailyRollMarkingReport(orderedEntries, false);
+                    await _emailService.SendDailyRollMarkingReport(orderedEntries, false, false);
+                }
+
+                var groupedByFaculty = unsubmitted.GroupBy(item => item.Faculty);
+
+                foreach (var group in groupedByFaculty)
+                {
+                    // Email the relevant person (as outlined in the EmailSentTo field
+                    var orderedEntries = group.OrderBy(item => item.Date).ThenBy(item => item.ClassName).ThenBy(item => item.Period).ToList();
+
+                    if (group == null)
+                        continue;
+
+                    await _emailService.SendDailyRollMarkingReport(orderedEntries, false, true);
                 }
             }
             else
@@ -145,7 +159,7 @@ namespace Constellation.Infrastructure.Jobs
             }
 
             if (unsubmitted.Any())
-                await _emailService.SendDailyRollMarkingReport(unsubmitted, true);
+                await _emailService.SendDailyRollMarkingReport(unsubmitted, true, false);
         }
     }
 }

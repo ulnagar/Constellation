@@ -67,7 +67,7 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in notification.Recipients)
                 toRecipients.Add(entry.Name, entry.Email);
 
-            var message = await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, notification.Attachments);
+            var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, notification.Attachments);
 
             // Perhaps used for future where message file (.eml) is saved to database
             //var messageStream = new MemoryStream();
@@ -99,7 +99,7 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in notification.Recipients)
                 toRecipients.Add(entry.Name, entry.Email);
 
-            var message = await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, notification.Attachments);
+            var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, notification.Attachments);
 
             // Perhaps used for future where message file (.eml) is saved to database
             //var messageStream = new MemoryStream();
@@ -134,7 +134,7 @@ namespace Constellation.Infrastructure.Services
                 toRecipients.Add(entry, entry);
             }
 
-            var message = await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, null);
+            var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
 
             // Perhaps used for future where message file (.eml) is saved to database
             //var messageStream = new MemoryStream();
@@ -176,7 +176,7 @@ namespace Constellation.Infrastructure.Services
                 toRecipients.Add(entry, entry);
             }
 
-            var message = await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, null);
+            var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
 
             // Perhaps used for future where message file (.eml) is saved to database
             //var messageStream = new MemoryStream();
@@ -218,7 +218,7 @@ namespace Constellation.Infrastructure.Services
                 toRecipients.Add(entry, entry);
             }
 
-            var message = await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, null);
+            var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
 
             // Perhaps used for future where message file (.eml) is saved to database
             //var messageStream = new MemoryStream();
@@ -273,7 +273,7 @@ namespace Constellation.Infrastructure.Services
                 toRecipients.Add(entry, entry);
             }
 
-            var message = await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, null);
+            var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
 
             // Perhaps used for future where message file (.eml) is saved to database
             //var messageStream = new MemoryStream();
@@ -316,7 +316,7 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in coordinators)
                 toRecipients.Add(entry, entry);
 
-            var message = await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, null);
+            var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
 
             // Perhaps used for future where message file (.eml) is saved to database
             //var messageStream = new MemoryStream();
@@ -430,7 +430,7 @@ namespace Constellation.Infrastructure.Services
                 toRecipients.Add(entry, entry);
             }
 
-            await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, $"Absence Explanation Received - {viewModel.StudentName}", body, null);
+            await _emailSender.Send(toRecipients, null, null, null, $"Absence Explanation Received - {viewModel.StudentName}", body, null);
         }
 
         public async Task SendNewCoverEmail(EmailDtos.CoverEmail resource)
@@ -718,7 +718,7 @@ namespace Constellation.Infrastructure.Services
             foreach (var entry in notification.Teachers)
                 toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, null);
+            await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
         }
 
         public async Task SendStudentClassworkNotification(Absence absence, ClassworkNotification notification, List<string> parentEmails)
@@ -780,7 +780,7 @@ namespace Constellation.Infrastructure.Services
             await _emailSender.Send(toRecipients, null, null, notification.CompletedBy.EmailAddress, viewModel.Title, body, null);
         }
 
-        public async Task SendDailyRollMarkingReport(List<RollMarkReportDto> orderedEntries, bool completeReport)
+        public async Task SendDailyRollMarkingReport(List<RollMarkReportDto> orderedEntries, bool sendToAbsenceCoordinator, bool sendToFacultyHeadTeacher)
         {
             var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
@@ -790,23 +790,30 @@ namespace Constellation.Infrastructure.Services
                 SenderName = absenceSettings.AbsenceCoordinatorName,
                 SenderTitle = absenceSettings.AbsenceCoordinatorTitle,
                 Title = $"[Aurora College] Roll Marking Report - {orderedEntries.First().Date.ToShortDateString()}",
+                UnsubmittedRolls = orderedEntries.Select(entry => entry.Description).ToList()
             };
 
             var body = await _razorService.RenderViewToStringAsync("/Views/Emails/RollMarking/DailyReportEmail.cshtml", viewModel);
 
             var toRecipients = new Dictionary<string, string>();
-            if (completeReport)
+            if (sendToAbsenceCoordinator)
             {
                 // Send the Absence Coordinator
-                toRecipients.Add(absenceSettings.AbsenceCoordinatorName, absenceSettings.AbsenceCoordinatorEmail);
+                toRecipients.Add(absenceSettings.AbsenceCoordinatorName, absenceSettings.ForwardingEmailAbsenceCoordinator);
             }
-            else
+            
+            if (sendToFacultyHeadTeacher)
+            {
+                toRecipients.Add(orderedEntries.First().HeadTeacher, orderedEntries.First().HeadTeacherEmail);
+            }
+            
+            if (!sendToFacultyHeadTeacher && !sendToAbsenceCoordinator)
             {
                 // Send to the Classroom Teacher
                 toRecipients.Add(orderedEntries.First().EmailSentTo, orderedEntries.First().EmailSentTo);
             }
 
-            await _emailSender.Send(toRecipients, null, null, absenceSettings.AbsenceCoordinatorEmail, viewModel.Title, body, null);
+            await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
         }
     }
 }

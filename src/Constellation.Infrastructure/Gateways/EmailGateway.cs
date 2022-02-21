@@ -23,7 +23,10 @@ namespace Constellation.Infrastructure.Gateways
         {
             var message = new MimeMessage();
 
-            message.From.Add(new MailboxAddress("Aurora College", fromAddress));
+            if (fromAddress == null)
+                message.From.Add(new MailboxAddress("Aurora College", "auroracoll-h.school@det.nsw.edu.au"));
+            else
+                message.From.Add(new MailboxAddress("Aurora College", fromAddress));
 
             foreach (var recipient in toAddresses)
                 message.To.Add(new MailboxAddress(recipient.Key, recipient.Value));

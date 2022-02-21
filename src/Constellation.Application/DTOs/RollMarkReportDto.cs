@@ -19,7 +19,9 @@ namespace Constellation.Application.DTOs
         public string CoveredBy { get; set; }
         public string CoverType { get; set; }
         public string HeadTeacher { get; set; }
+        public string HeadTeacherEmail { get; set; }
         public string EmailSentTo { get; set; }
         public string Description { get; set; }
+        public string Faculty { get; set; }
     }
 }
