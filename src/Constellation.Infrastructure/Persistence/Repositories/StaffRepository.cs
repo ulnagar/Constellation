@@ -142,7 +142,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
         public async Task<Staff> FromEmailForExistCheck(string email)
         {
             return await _context.Staff
-                .FirstOrDefaultAsync(member => email.Contains(member.EmailAddress));
+                .FirstOrDefaultAsync(member => email.Contains(member.PortalUsername));
         }
 
         public async Task<Staff> GetFromName(string name)

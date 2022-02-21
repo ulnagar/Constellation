@@ -7,12 +7,12 @@
 
 <h2>Staff Member Details</h2>
 
-<div>
-    @if (authorised)
-    {
+@if (authorised)
+{
+    <div>
         <a asp-action="Update" asp-controller="Staff" asp-area="Partner" asp-route-id="@Model.Staff.StaffId" class="btn btn-warning">Edit</a>
 
-        if (Model.Staff.IsDeleted)
+        @if (Model.Staff.IsDeleted)
         {
             <a asp-action="Reinstate" asp-controller="Staff" asp-area="Partner" asp-route-id="@Model.Staff.StaffId" class="btn btn-danger">Reinstate</a>
 
@@ -21,10 +21,15 @@
         {
             <a asp-action="Resign" asp-controller="Staff" asp-area="Partner" asp-route-id="@Model.Staff.StaffId" class="btn btn-danger">Resign</a>
         }
-    }
-    
-    <a asp-action="Index" asp-controller="Staff" asp-area="Partner" class="btn btn-danger btn-pull-right">Go Back</a>
-</div>
+
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    </div>
+} else
+{
+    <div class="row">
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+    </div>
+}
 
 <hr/>
 

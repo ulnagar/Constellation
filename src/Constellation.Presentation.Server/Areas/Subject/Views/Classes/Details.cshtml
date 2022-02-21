@@ -9,16 +9,18 @@
 
 <h2>Class Details</h2>
 
-<div>
-    @if (authorised)
-    {
+@if (authorised)
+{
+    <div>
         <a asp-action="Update" asp-controller="Classes" asp-area="Subject" asp-route-id="@Model.Class.Id" class="btn btn-warning">Edit</a>
-        <a asp-action="Index" asp-controller="Classes" asp-area="Subject" class="btn btn-danger btn-pull-right">Go Back</a>
-    } else
-    {
-        <a asp-action="Index" asp-controller="Classes" asp-area="Subject" class="btn btn-danger btn-pull-right-solo">Go Back</a>
-    }
-</div>
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    </div>
+} else
+{
+    <div class="row">
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+    </div>
+}
 
 <hr />
 
@@ -143,7 +145,7 @@
                                 }
                             </td>
                             <td>
-                                <a asp-action="Details" asp-controller="Classes" asp-area="Partner" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                                <a asp-action="Details" asp-controller="Students" asp-area="Partner" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                             </td>
                         </tr>
                     }

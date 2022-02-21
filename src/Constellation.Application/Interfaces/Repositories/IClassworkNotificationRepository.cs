@@ -10,5 +10,6 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<ICollection<ClassworkNotification>> GetAll();
         Task<ClassworkNotification> Get(Guid id);
         Task<ClassworkNotification> GetForDuplicateCheck(int offeringId, DateTime absenceDate);
+        Task<ICollection<ClassworkNotification>> GetOutstandingForTeacher(string staffId);
     }
 }

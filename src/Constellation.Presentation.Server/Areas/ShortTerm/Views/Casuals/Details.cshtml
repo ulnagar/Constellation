@@ -7,9 +7,9 @@
 
 <h2>Casual Teacher Details</h2>
 
-<div>
-    @if (authorised)
-    {
+@if (authorised)
+{
+    <div>
         <a asp-action="Update" asp-controller="Casuals" asp-area="ShortTerm" asp-route-id="@Model.Casual.Id" class="btn btn-warning">Edit</a>
 
         @if (Model.Casual.IsDeleted)
@@ -19,11 +19,15 @@
         {
             <a asp-action="Delete" asp-controller="Casuals" asp-area="ShortTerm" asp-route-id="@Model.Casual.Id" class="btn btn-warning">Delete</a>
         }
-    }
 
-    <a asp-action="Index" asp-controller="Casuals" asp-area="ShortTerm" class="btn btn-danger btn-pull-right">Go Back</a>
-</div>
-
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    </div>
+} else
+{
+    <div class="row">
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+    </div>
+}
     
 <hr/>
 

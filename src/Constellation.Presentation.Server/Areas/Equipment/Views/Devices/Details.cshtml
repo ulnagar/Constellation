@@ -7,9 +7,9 @@
 
 <h2>Device details</h2>
 
-<div>
-    @if (authorised)
-    {
+@if (authorised)
+{
+    <div>
         <a asp-action="Update" asp-controller="Devices" asp-area="Equipment" asp-route-id="@Model.Device.SerialNumber" class="btn btn-warning">Edit</a>
 
         <div class="btn-group" role="group">
@@ -22,11 +22,19 @@
         </div>
 
         <a asp-action="AddNote" asp-controller="Devices" asp-area="Equipment" asp-route-id="@Model.Device.SerialNumber" class="btn btn-secondary">Add Note</a>
-    }
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    </div>
+} else
+{
+    <div class="row">
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+    </div>
+}
 
-    <a asp-action="Index" asp-controller="Devices" asp-area="Equipment" class="btn btn-danger btn-pull-right">Go Back</a>
+<hr/>
 
-    <hr/>
+<div>
+    
 
     <div class="row">
         <label asp-for="Device.Make" class="col-md-2"></label>

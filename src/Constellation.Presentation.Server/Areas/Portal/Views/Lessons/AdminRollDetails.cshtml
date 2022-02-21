@@ -9,20 +9,20 @@
     <div>
         <a asp-action="AdminRollCancel" asp-controller="Lessons" asp-area="Portal" asp-route-id="@Model.Roll.RollId" class="btn btn-danger">Cancel</a>
         <a asp-action="AdminRollSubmit" asp-controller="Lessons" asp-area="Portal" asp-route-id="@Model.Roll.RollId" class="btn btn-warning">Submit Roll</a>
-        <a asp-action="AdminLessonDetails" asp-controller="Lessons" asp-area="Portal" asp-route-id="@Model.Roll.LessonId" class="btn btn-danger btn-pull-right">Go Back</a>
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
     </div>
 }
 else if (Model.Roll.Status == LessonStatus.Cancelled)
 {
     <div>
         <a asp-action="AdminRollUnCancel" asp-controller="Lessons" asp-area="Portal" asp-route-id="@Model.Roll.RollId" class="btn btn-danger">Un-Cancel</a>
-        <a asp-action="AdminLessonDetails" asp-controller="Lessons" asp-area="Portal" asp-route-id="@Model.Roll.LessonId" class="btn btn-danger btn-pull-right">Go Back</a>
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
     </div>
 }
 else
 {
     <div class="row">
-        <a asp-action="AdminLessonDetails" asp-controller="Lessons" asp-area="Portal" asp-route-id="@Model.Roll.LessonId" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
     </div>
 }
 

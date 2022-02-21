@@ -242,7 +242,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             return View("Update", viewModel);
         }
 
-        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
         public async Task<IActionResult> Details(string id)
         {
             if (string.IsNullOrEmpty(id))

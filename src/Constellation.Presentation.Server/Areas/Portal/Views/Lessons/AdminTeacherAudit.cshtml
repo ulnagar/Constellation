@@ -5,7 +5,8 @@
 
 <div>
     <a asp-action="AdminRepairTeacherAccount" asp-controller="Lessons" asp-area="Portal" asp-route-id="@Model.AuditResult.Contact.Id" class="btn btn-warning">Fix User</a>
-    <a asp-action="AdminTeachers" asp-controller="Lessons" asp-area="Portal" class="btn btn-danger btn-pull-right">Go Back</a>
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+
 </div>
 
 <hr />

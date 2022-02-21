@@ -34,13 +34,12 @@ namespace Constellation.Presentation.Server.BaseModels
         {
             var result = new Dictionary<string, int>();
 
-            var user = (ClaimsIdentity)User.Identity;
-            var claims = user.Claims;
-            var staffId = claims.FirstOrDefault(claim => claim.Type == AppUser.StaffMemberId);
+            var username = User.Identity.Name;
+            var teacher = await _unitOfWork.Staff.FromEmailForExistCheck(username);
 
-            if (staffId != null && !string.IsNullOrWhiteSpace(staffId.Value))
+            if (teacher != null)
             {
-                var entries = await _unitOfWork.CourseOfferings.AllForTeacherAsync(staffId.Value);
+                var entries = await _unitOfWork.CourseOfferings.AllForTeacherAsync(teacher.StaffId);
 
                 foreach (var entry in entries)
                 {

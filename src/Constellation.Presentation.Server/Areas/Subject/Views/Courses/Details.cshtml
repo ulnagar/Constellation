@@ -7,17 +7,18 @@
 
 <h2>Course Details</h2>
 
-<div>
-    @if (authorised)
-    {
+@if (authorised)
+{
+    <div>
         <a asp-action="Update" asp-controller="Courses" asp-area="Subject" asp-route-id="@Model.Course.Id" class="btn btn-warning">Edit</a>
-        <a asp-action="Index" asp-controller="Courses" asp-area="Subject" class="btn btn-danger btn-pull-right">Go Back</a>
-    } 
-    else
-    {
-        <a asp-action="Index" asp-controller="Courses" asp-area="Subject" class="btn btn-danger btn-pull-right-solo">Go Back</a>
-    }
-</div>
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    </div>
+} else
+{
+    <div class="row">
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+    </div>
+}
 
 <hr />
 

@@ -1,13 +1,77 @@
 ﻿@page
 @model DashboardModel
 
+<style>
+    .quick-links {
+        width: 27%;
+        margin-right: 3%;
+        float: left;
+    }
+
+    .classwork-notifications {
+        width: 70%;
+        float: right;
+    }
+
+    .text-center {
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid orange;
+    }
+</style>
+
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h2>Welcome, @Model.UserName</h2>
 </div>
 
-<table>
-    <tr>
+<div class="quick-links">
+    <h3>Quick Links</h3>
 
-    </tr>
-</table>
+    @if (Model.IsAdmin)
+    {
+        <a class="btn btn-success btn-block" href="/hangfire">Hangfire</a>
+    }
+
+    @foreach (var entry in @Model.Classes.OrderBy(entry => entry.Key))
+    {
+        <a class="btn btn-secondary btn-block" asp-area="Subject" asp-controller="Classes" asp-action="Details" asp-route-id="@entry.Value">@entry.Key</a>
+    }
+</div>
+
+<div class="classwork-notifications">
+    <h3>Classwork Notifications</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Class</th>
+                <th>Students</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.ClassworkNotifications.Any())
+            {
+                @foreach (var item in Model.ClassworkNotifications)
+                {
+                    <tr>
+                        <td>@item.ClassDate.ToShortDateString()</td>
+                        <td>@item.ClassName</td>
+                        <td>
+                            @foreach (var student in item.Students)
+                            {
+                                <span class="badge badge-secondary">@student</span>
+                            }
+                        </td>
+                        <td>LINK</td>
+                    </tr>
+                }
+            } else
+            {
+                <tr>
+                    <td colspan="5">No Items Found!</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

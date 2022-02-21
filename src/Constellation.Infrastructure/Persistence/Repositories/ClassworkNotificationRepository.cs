@@ -21,7 +21,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
         {
             return await _context.ClassworkNotifications
                 .Include(notification => notification.Absences)
-                .Include(notification => notification.Absences.Select(absence => absence.Student))
+                .ThenInclude(absence => absence.Student)
                 .Include(notification => notification.Offering)
                 .Include(notification => notification.Offering.Course)
                 .Include(notification => notification.Covers)
@@ -47,6 +47,17 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .Include(notification => notification.Covers)
                 .Include(notification => notification.Teachers)
                 .SingleOrDefaultAsync(notification => notification.AbsenceDate == absenceDate && notification.OfferingId == offeringId);
+        }
+
+        public async Task<ICollection<ClassworkNotification>> GetOutstandingForTeacher(string staffId)
+        {
+            return await _context.ClassworkNotifications
+                .Include(notification => notification.Absences)
+                .ThenInclude(absence => absence.Student)
+                .Include(notification => notification.Offering)
+                .Include(notification => notification.Offering.Course)
+                .Where(notification => notification.Teachers.Any(teacher => teacher.StaffId == staffId) && !notification.CompletedAt.HasValue)
+                .ToListAsync();
         }
     }
 }

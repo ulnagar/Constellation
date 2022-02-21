@@ -5,9 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="emails\**" />
     <Compile Remove="logs\**" />
+    <Content Remove="emails\**" />
     <Content Remove="logs\**" />
+    <EmbeddedResource Remove="emails\**" />
     <EmbeddedResource Remove="logs\**" />
+    <None Remove="emails\**" />
     <None Remove="logs\**" />
   </ItemGroup>
 

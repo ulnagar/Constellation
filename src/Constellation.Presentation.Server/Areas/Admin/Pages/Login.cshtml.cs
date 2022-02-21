@@ -66,7 +66,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                 ModelState.AddModelError(string.Empty, ErrorMessage);
             }
 
-            base.GetClasses(_unitOfWork);
+            await GetClasses(_unitOfWork);
 
             returnUrl ??= Url.Content("~/");
 
@@ -105,6 +105,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                         return Page();
                     }
 
+                    await _signInManager.SignInAsync(user, false);
                     result.Succeeded = true;
                 } else
                 {

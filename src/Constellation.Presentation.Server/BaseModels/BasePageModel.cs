@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.BaseModels
 {
@@ -16,15 +17,14 @@ namespace Constellation.Presentation.Server.BaseModels
             Classes = new Dictionary<string, int>();
         }
 
-        public void GetClasses(IUnitOfWork unitOfWork)
+        public async Task GetClasses(IUnitOfWork unitOfWork)
         {
-            var user = (ClaimsIdentity)User.Identity;
-            var claims = user.Claims;
-            var staffId = claims.FirstOrDefault(claim => claim.Type == AppUser.StaffMemberId);
+            var username = User.Identity.Name;
+            var teacher = await unitOfWork.Staff.FromEmailForExistCheck(username);
 
-            if (staffId != null && !string.IsNullOrWhiteSpace(staffId.Value))
+            if (teacher != null)
             {
-                var entries = unitOfWork.CourseOfferings.AllForTeacher(staffId.Value);
+                var entries = unitOfWork.CourseOfferings.AllForTeacher(teacher.StaffId);
 
                 foreach (var entry in entries)
                 {

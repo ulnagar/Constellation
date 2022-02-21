@@ -7,18 +7,20 @@
 
 <h2>Cover Details</h2>
 
-<div>
-    @if (authorised)
-    {
+@if (authorised)
+{
+    <div>
         <a asp-action="Update" asp-controller="Covers" asp-area="ShortTerm" asp-route-id="@Model.Cover.Id" class="btn btn-warning">Edit</a>
         <a asp-action="Cancel" asp-controller="Covers" asp-area="ShortTerm" asp-route-id="@Model.Cover.Id" class="btn btn-danger">Cancel</a>
 
-        <a asp-action="Index" asp-controller="Covers" asp-area="ShortTerm" class="btn btn-danger btn-pull-right">Go Back</a>
-    } else
-    {
-        <a asp-action="Index" asp-controller="Covers" asp-area="ShortTerm" class="btn btn-danger btn-pull-right-solo">Go Back</a>
-    }
-</div>
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    </div>
+} else
+{
+    <div class="row">
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+    </div>
+}
 
 <hr/>
 

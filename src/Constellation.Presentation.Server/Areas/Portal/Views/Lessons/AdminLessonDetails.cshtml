@@ -9,13 +9,13 @@
         <div>
             <a asp-action="AdminUpsertLesson" asp-controller="Lessons" asp-area="Portal" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
             <a asp-action="AdminDeleteLesson" asp-controller="Lessons" asp-area="Portal" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
-            <a asp-action="AdminLessons" asp-controller="Lessons" asp-area="Portal" class="btn btn-danger btn-pull-right">Go Back</a>
+            <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
         </div>
     }
     else
     {
         <div class="row">
-            <a asp-action="AdminLessons" asp-controller="Lessons" asp-area="Portal" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+            <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
         </div>
     }
 
