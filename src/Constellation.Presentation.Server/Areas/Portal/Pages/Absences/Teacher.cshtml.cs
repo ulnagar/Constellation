@@ -64,8 +64,17 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
             {
                 // Email student and parents with information
                 var parentEmails = await _sentralService.GetContactEmailsAsync(absence.Student.SentralStudentId);
-                await _emailService.SendStudentClassworkNotification(absence, entry, parentEmails);
+
+                if (parentEmails == null)
+                {
+                    await _emailService.SendAdminClassworkNotificationContactAlert(absence.Student, teacher, entry);
+                } else
+                {
+                    await _emailService.SendStudentClassworkNotification(absence, entry, parentEmails);
+                }
             }
+
+            await _emailService.SendTeacherClassworkNotificationCopy(entry.Absences.First(), entry, teacher);
 
             await _unitOfWork.CompleteAsync();
 

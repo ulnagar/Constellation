@@ -364,6 +364,21 @@ namespace Constellation.Infrastructure.Services
             await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", "[Aurora College] Constellation Data Issue Identified", body, null);
         }
 
+        public async Task SendAdminClassworkNotificationContactAlert(Student student, Staff teacher, ClassworkNotification notification)
+        {
+            var viewModel = $"<p>The student {student.DisplayName} did not receive notification of the classwork required to catch up on their absence ({notification.Id}) as there are no parent contact details available in Sentral.</p>";
+
+            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+
+            var toRecipients = new Dictionary<string, string>
+            {
+                { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" },
+                { teacher.DisplayName, teacher.EmailAddress }
+            };
+
+            await _emailSender.Send(toRecipients, null, null, null, "[Aurora College] Constellation Data Issue Identified", body, null);
+        }
+
         public async Task SendAdminLowCreditAlert(double credit)
         {
             var viewModel = $"<p>The SMS Global account has a low balance of ${credit:c}.</p><p>Please top up the account immediately!</p>";
@@ -719,6 +734,29 @@ namespace Constellation.Infrastructure.Services
                 toRecipients.Add(entry.Name, entry.Email);
 
             await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
+        }
+
+        public async Task SendTeacherClassworkNotificationCopy(Absence absence, ClassworkNotification notification, Staff teacher)
+        {
+            var viewModel = new StudentMissedWorkNotificationEmailViewModel
+            {
+                Preheader = "",
+                SenderName = notification.CompletedBy.DisplayName,
+                SenderTitle = "Teacher",
+                Title = $"[Aurora College] Missed Classwork Notification - {notification.Offering.Name} - {notification.AbsenceDate.ToShortDateString()}",
+                OfferingName = notification.Offering.Name,
+                AbsenceDate = notification.AbsenceDate,
+                CourseName = notification.Offering.Course.Name,
+                StudentName = absence.Student.FirstName,
+                WorkDescription = notification.Description
+            };
+
+            var toRecipients = new Dictionary<string, string>();
+            toRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
+
+            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MissedWork/StudentMissedWorkNotificationEmail.cshtml", viewModel);
+
+            await _emailSender.Send(toRecipients, null, null, notification.CompletedBy.EmailAddress, viewModel.Title, body, null);
         }
 
         public async Task SendStudentClassworkNotification(Absence absence, ClassworkNotification notification, List<string> parentEmails)

@@ -28,6 +28,7 @@ namespace Constellation.Application.Interfaces.Services
         // ClassworkNotification Emails
         Task SendTeacherClassworkNotificationRequest(ClassworkNotificationTeacherEmail notification);
         Task SendStudentClassworkNotification(Absence absence, ClassworkNotification notification, List<string> parentEmails);
+        Task SendTeacherClassworkNotificationCopy(Absence absence, ClassworkNotification notification, Staff teacher);
 
 
         // RollMarking Emails
@@ -47,5 +48,6 @@ namespace Constellation.Application.Interfaces.Services
         Task SendAdminAbsenceContactAlert(Student student);
         Task SendAdminAbsenceSentralAlert(Student student);
         Task SendAdminLowCreditAlert(double credit);
+        Task SendAdminClassworkNotificationContactAlert(Student student, Staff teacher, ClassworkNotification notification);
     }
 }
