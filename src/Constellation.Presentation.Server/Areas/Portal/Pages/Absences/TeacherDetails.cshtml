@@ -1,0 +1,50 @@
+﻿@page "/Portal/Absences/Teachers/Details/{Id}"
+@model Constellation.Presentation.Server.Areas.Portal.Pages.Absences.TeacherDetailsModel
+
+@{
+    Layout = "/Pages/Shared/_WebLayout.cshtml";
+}
+
+<h2>Missing Classwork Notification</h2>
+
+<div class="row">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<div>
+    <div class="row">
+        <label asp-for="Notification.OfferingName" class="col-md-2">Class</label>
+        <div class="col-md-3">
+            @Model.Notification.OfferingName
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Notification.AbsenceDate" class="col-md-2">Absence Date</label>
+        <div class="col-md-3">
+            @Model.Notification.AbsenceDate.ToLongDateString()
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Notification.Students" class="col-md-2">Students</label>
+        <div class="col-md-3">
+            <ul>
+                @foreach (var student in Model.Notification.Students)
+                {
+                    <li>@student.DisplayName</li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Notification.Description" class="col-md-2">Missed Work</label>
+        <div class="col-md-10">
+            @Html.Raw(Model.Notification.Description)
+        </div>
+    </div>
+
+</div>

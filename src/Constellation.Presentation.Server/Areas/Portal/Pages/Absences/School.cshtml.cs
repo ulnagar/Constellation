@@ -41,7 +41,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
             var coordinator = await _unitOfWork.SchoolContacts.FromEmailForExistCheck(username);
 
             if (coordinator == null)
-                return NotFound();
+                return RedirectToPage("/Error");
             
             var schools = coordinator.Assignments.Where(assign => !assign.IsDeleted).OrderBy(assign => assign.School.Name).Select(assign => assign.SchoolCode).Distinct().ToList();
 
@@ -66,7 +66,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
 
             var schoolData = await _unitOfWork.Absences.AllFromSchoolForCoordinatorPortal(Data.Code);
 
-            //schoolData = schoolData.Where(absence => absence.Date.Year == DateTime.Now.Year).ToList();
+            schoolData = schoolData.Where(absence => absence.Date.Year == DateTime.Now.Year).ToList();
 
             bool unexplainedPartialsPredicate(Absence absence) => !absence.Responses.Any() && !absence.Explained && absence.Type == Absence.Partial;
             bool unverifiedPartialsPredicate(Absence absence) => absence.Type == Absence.Partial && absence.Responses.Any(response => response.VerificationStatus == AbsenceResponse.Pending) && !absence.Explained;

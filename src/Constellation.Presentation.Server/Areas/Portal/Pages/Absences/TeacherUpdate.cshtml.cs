@@ -2,6 +2,7 @@ using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
+using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
@@ -12,13 +13,14 @@ using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
 {
-    public class TeacherModel : PageModel
+    public class TeacherUpdateModel : BasePageModel
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ISentralGateway _sentralService;
         private readonly IEmailService _emailService;
 
-        public TeacherModel(IUnitOfWork unitOfWork, ISentralGateway sentralService, IEmailService emailService)
+        public TeacherUpdateModel(IUnitOfWork unitOfWork, ISentralGateway sentralService, IEmailService emailService)
+            : base()
         {
             _unitOfWork = unitOfWork;
             _sentralService = sentralService;
@@ -37,6 +39,8 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
             var entry = await _unitOfWork.ClassworkNotifications.Get(Id);
 
             Notification = NotificationDto.ConvertFromNotification(entry);
+
+            await GetClasses(_unitOfWork);
 
             return Page();
         }

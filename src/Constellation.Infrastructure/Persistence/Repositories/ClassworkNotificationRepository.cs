@@ -59,5 +59,15 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .Where(notification => notification.Teachers.Any(teacher => teacher.StaffId == staffId) && !notification.CompletedAt.HasValue)
                 .ToListAsync();
         }
+
+        public async Task<ICollection<ClassworkNotification>> GetForTeacher(string staffId)
+        {
+            return await _context.ClassworkNotifications
+                .Include(notification => notification.Offering)
+                .Include(notification => notification.Absences)
+                .ThenInclude(absence => absence.Student)
+                .Where(notification => notification.Teachers.Any(staff => staff.StaffId == staffId))
+                .ToListAsync();
+        }
     }
 }

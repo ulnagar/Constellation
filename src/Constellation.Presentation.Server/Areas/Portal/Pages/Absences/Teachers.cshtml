@@ -1,0 +1,43 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.Portal.Pages.Absences.TeachersModel
+
+@{
+    Layout = "/Pages/Shared/_WebLayout.cshtml";
+}
+
+<h2>Missing Classwork Notifications</h2>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Class Name</th>
+        <th>Class Date</th>
+        <th># Students</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Notifications)
+        {
+            <tr>
+                <td>@Html.DisplayFor(model => item.IsCompleted, "BooleanTick")</td>
+                <td>@Html.DisplayFor(model => item.ClassName)</td>
+                <td>@Html.DisplayFor(model => item.ClassDate, "ShortDate")</td>
+                <td>@Html.DisplayFor(model => item.NumStudents)</td>
+                <td>
+                    @if (item.IsCompleted)
+                    {
+                        <a asp-page="TeacherDetails" asp-area="Portal" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                    }
+                    else
+                    {
+                        <a asp-page="TeacherUpdate" asp-area="Portal" asp-route-id="@item.Id" class="btn btn-sm btn-success btn-show-hover">Submit Work...</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

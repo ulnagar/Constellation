@@ -723,7 +723,7 @@ namespace Constellation.Infrastructure.Services
                 OfferingName = notification.OfferingName,
                 AbsenceDate = notification.AbsenceDate,
                 StudentList = notification.Students,
-                Link = $"https://acos.aurora.nsw.edu.au/Portal/Absences/Teachers/{notification.NotificationId}",
+                Link = $"https://acos.aurora.nsw.edu.au/Portal/Absences/Teachers/Update/{notification.NotificationId}",
                 IsCovered = notification.IsCovered
             };
 
