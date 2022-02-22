@@ -1,0 +1,104 @@
+﻿@page "/Admin/Auth/Roles/Edit/{id}"
+@model Constellation.Presentation.Server.Areas.Admin.Pages.Auth.RolesEditModel
+
+<h2>Manage Application Roles</h2>
+
+<div class="row">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<div class="row mb-1">
+    <div class="col">
+        Select users to add to @Model.Role.NormalizedName.
+    </div>
+</div>
+
+<div class="row fixed-size-modal mb-1">
+    <div class="col">
+        <span class="card-title">Available users</span>
+        <div class="card app-card-list">
+            <ul class="list-group">
+                @foreach (var user in Model.NonMembers)
+                {
+                    <li class="list-group-item app-card noselect" onclick="AddUser('@user.Id', '@Model.Role.Id')">
+                        <span class="title">@user.DisplayName</span><br />
+                        <span class="subtext">@user.Email</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <div class="col">
+        <span class="card-title">Member users</span>
+        <div class="card app-card-list">
+            <ul class="list-group">
+                @foreach (var user in Model.Members)
+                {
+                    <li class="list-group-item app-card selected noselect" onclick="RemoveUser('@user.Id', '@Model.Role.Id')">
+                        <span class="title">@user.DisplayName</span><br />
+                        <span class="subtext">@user.Email</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+<form method="post"></form>
+
+@section scripts {
+    <script>
+        function AddUser(userId, roleId) {
+            var form = document.createElement("form");
+            form.method = "POST";
+            form.action = "/Admin/Auth/Roles/Edit/" + roleId + "?handler=AddUser";
+
+            var inputRequestToken = document.createElement("input");
+            inputRequestToken.value = $('input[name=__RequestVerificationToken]').val();
+            inputRequestToken.name = "__RequestVerificationToken";
+            form.appendChild(inputRequestToken);
+
+            var inputUserId = document.createElement("input");
+            inputUserId.value = userId;
+            inputUserId.name = "UserId";
+            form.appendChild(inputUserId);
+
+            var inputRoleId = document.createElement("input");
+            inputRoleId.value = roleId;
+            inputRoleId.name = "Id";
+            form.appendChild(inputRoleId);
+
+            document.body.appendChild(form);
+
+            form.submit();
+        }
+
+        function RemoveUser(userId, roleId) {
+            var form = document.createElement("form");
+            form.method = "POST";
+            form.action = "/Admin/Auth/Roles/Edit/" + roleId + "?handler=RemoveUser";
+
+            var inputRequestToken = document.createElement("input");
+            inputRequestToken.value = $('input[name=__RequestVerificationToken]').val();
+            inputRequestToken.name = "__RequestVerificationToken";
+            form.appendChild(inputRequestToken);
+
+            var inputUserId = document.createElement("input");
+            inputUserId.value = userId;
+            inputUserId.name = "UserId";
+            form.appendChild(inputUserId);
+
+            var inputRoleId = document.createElement("input");
+            inputRoleId.value = roleId;
+            inputRoleId.name = "Id";
+            form.appendChild(inputRoleId);
+
+            document.body.appendChild(form);
+
+            form.submit();
+        }
+    </script>
+}
