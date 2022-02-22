@@ -233,6 +233,19 @@ namespace Constellation.Infrastructure.Services
             await _operationService.CreateCasualMSTeamOwnerAccess(cover.CasualId, cover.OfferingId, cover.Id, cover.StartDate.AddDays(-1));
             await _operationService.RemoveCasualMSTeamAccess(cover.CasualId, cover.OfferingId, cover.Id, cover.EndDate.AddDays(1));
 
+            // Add the Casual Coordinators to the Team as well
+            if (!offering.Sessions.Any(session => session.StaffId == "1030937" && !session.IsDeleted)) //Cathy Crouch
+            {
+                await _operationService.CreateTeacherMSTeamOwnerAccess("1030937", cover.OfferingId, cover.StartDate.AddDays(-1), null);
+                await _operationService.RemoveTeacherMSTeamAccess("1030937", cover.OfferingId, cover.EndDate.AddDays(1), null);
+            }
+
+            if (!offering.Sessions.Any(session => session.StaffId == "735422017" && !session.IsDeleted) && !offering.Course.Faculty.HasFlag(Faculty.Mathematics)) //Karen Bellamy
+            {
+                await _operationService.CreateTeacherMSTeamOwnerAccess("735422017", cover.OfferingId, cover.StartDate.AddDays(-1), null);
+                await _operationService.RemoveTeacherMSTeamAccess("735422017", cover.OfferingId, cover.EndDate.AddDays(1), null);
+            }
+
             result.Success = true;
             result.Entity = cover;
 
