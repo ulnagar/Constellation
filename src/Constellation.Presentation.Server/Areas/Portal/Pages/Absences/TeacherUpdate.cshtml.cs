@@ -62,7 +62,9 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
             entry.CompletedAt = DateTime.Now;
             entry.CompletedBy = teacher;
             entry.StaffId = teacher.StaffId;
-            entry.Description = Notification.Description;
+            entry.Description = Description;
+
+            await _unitOfWork.CompleteAsync();
 
             foreach (var absence in entry.Absences)
             {
@@ -70,19 +72,14 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
                 var parentEmails = await _sentralService.GetContactEmailsAsync(absence.Student.SentralStudentId);
 
                 if (parentEmails == null)
-                {
                     await _emailService.SendAdminClassworkNotificationContactAlert(absence.Student, teacher, entry);
-                } else
-                {
-                    await _emailService.SendStudentClassworkNotification(absence, entry, parentEmails);
-                }
+
+                await _emailService.SendStudentClassworkNotification(absence, entry, parentEmails);
             }
 
             await _emailService.SendTeacherClassworkNotificationCopy(entry.Absences.First(), entry, teacher);
 
-            await _unitOfWork.CompleteAsync();
-
-            return RedirectToPage("/Index", new { area = ""});
+            return RedirectToPage("Teachers", new { area = "Portal"});
         }
 
         public class NotificationDto

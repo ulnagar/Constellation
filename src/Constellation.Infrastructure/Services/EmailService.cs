@@ -776,14 +776,17 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
 
-            if (!absence.Explained)
+            if (parentEmails != null)
             {
-                await SendParentClassworkNotification(absence, notification, parentEmails);
-            }
-            else
-            {
-                foreach (var entry in parentEmails)
-                    toRecipients.Add(entry, entry);
+                if (!absence.Explained)
+                {
+                    await SendParentClassworkNotification(absence, notification, parentEmails);
+                }
+                else
+                {
+                    foreach (var entry in parentEmails)
+                        toRecipients.Add(entry, entry);
+                }
             }
 
             toRecipients.Add(absence.Student.DisplayName, absence.Student.EmailAddress);
