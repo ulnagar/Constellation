@@ -13,8 +13,8 @@ namespace Constellation.Application.Interfaces.Repositories
         MSTeamOperation WithFilter(Expression<Func<MSTeamOperation, bool>> predicate);
         ICollection<MSTeamOperation> All();
         ICollection<MSTeamOperation> AllWithFilter(Expression<Func<MSTeamOperation, bool>> predicate);
-        MSTeamOperationsList ToProcess();
-        MSTeamOperationsList OverdueToProcess();
+        Task<MSTeamOperationsList> ToProcess();
+        Task<MSTeamOperationsList> OverdueToProcess();
         MSTeamOperationsList Recent();
         Task<MSTeamOperation> ForMarkingCompleteOrCancelled(int id);
     }

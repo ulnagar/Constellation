@@ -48,65 +48,65 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .ToList();
         }
 
-        public MSTeamOperationsList ToProcess()
+        public async Task<MSTeamOperationsList> ToProcess()
         {
             var dateToday = DateTime.Today;
 
             var dataset = new MSTeamOperationsList
             {
-                StudentOperations = Collection().OfType<StudentMSTeamOperation>().Include(op => op.Student).Include(op => op.Offering)
+                StudentOperations = await _context.MSTeamOperations.OfType<StudentMSTeamOperation>().Include(op => op.Student).Include(op => op.Offering)
                     .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
-                    .ToList(),
-                TeacherOperations = Collection().OfType<TeacherMSTeamOperation>().Include(op => op.Staff).Include(op => op.Offering)
+                    .ToListAsync(),
+                TeacherOperations = await _context.MSTeamOperations.OfType<TeacherMSTeamOperation>().Include(op => op.Staff).Include(op => op.Offering)
                     .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
-                    .ToList(),
-                CasualOperations = Collection().OfType<CasualMSTeamOperation>().Include(op => op.Casual).Include(op => op.Offering)
+                    .ToListAsync(),
+                CasualOperations = await _context.MSTeamOperations.OfType<CasualMSTeamOperation>().Include(op => op.Casual).Include(op => op.Offering)
                     .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
-                    .ToList(),
-                GroupOperations = Collection().OfType<GroupMSTeamOperation>().Include(op => op.Offering)
+                    .ToListAsync(),
+                GroupOperations = await _context.MSTeamOperations.OfType<GroupMSTeamOperation>().Include(op => op.Offering)
                     .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
-                    .ToList(),
-                EnrolmentOperations = Collection().OfType<StudentEnrolledMSTeamOperation>().Include(op => op.Student)
+                    .ToListAsync(),
+                EnrolmentOperations = await _context.MSTeamOperations.OfType<StudentEnrolledMSTeamOperation>().Include(op => op.Student)
                     .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
-                    .ToList(),
-                EmploymentOperations = Collection().OfType<TeacherEmployedMSTeamOperation>().Include(op => op.Staff)
+                    .ToListAsync(),
+                EmploymentOperations = await _context.MSTeamOperations.OfType<TeacherEmployedMSTeamOperation>().Include(op => op.Staff)
                     .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
-                    .ToList(),
-                ContactOperations = Collection().OfType<ContactAddedMSTeamOperation>().Include(op => op.Contact)
+                    .ToListAsync(),
+                ContactOperations = await _context.MSTeamOperations.OfType<ContactAddedMSTeamOperation>().Include(op => op.Contact)
                     .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
-                    .ToList()
+                    .ToListAsync()
             };
 
             return dataset;
         }
 
-        public MSTeamOperationsList OverdueToProcess()
+        public async Task<MSTeamOperationsList> OverdueToProcess()
         {
-            var dateToday = DateTime.Now.Date;
+            var dateToday = DateTime.Today;
 
             var dataset = new MSTeamOperationsList
             {
-                StudentOperations = Collection().OfType<StudentMSTeamOperation>().Include(op => op.Student).Include(op => op.Offering)
+                StudentOperations = await _context.MSTeamOperations.OfType<StudentMSTeamOperation>().Include(op => op.Student).Include(op => op.Offering)
                     .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
-                    .ToList(),
-                TeacherOperations = Collection().OfType<TeacherMSTeamOperation>().Include(op => op.Staff).Include(op => op.Offering)
+                    .ToListAsync(),
+                TeacherOperations = await _context.MSTeamOperations.OfType<TeacherMSTeamOperation>().Include(op => op.Staff).Include(op => op.Offering)
                     .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
-                    .ToList(),
-                CasualOperations = Collection().OfType<CasualMSTeamOperation>().Include(op => op.Casual).Include(op => op.Offering)
+                    .ToListAsync(),
+                CasualOperations = await _context.MSTeamOperations.OfType<CasualMSTeamOperation>().Include(op => op.Casual).Include(op => op.Offering)
                     .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
-                    .ToList(),
-                GroupOperations = Collection().OfType<GroupMSTeamOperation>().Include(op => op.Offering)
+                    .ToListAsync(),
+                GroupOperations = await _context.MSTeamOperations.OfType<GroupMSTeamOperation>().Include(op => op.Offering)
                     .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
-                    .ToList(),
-                EnrolmentOperations = Collection().OfType<StudentEnrolledMSTeamOperation>().Include(op => op.Student)
+                    .ToListAsync(),
+                EnrolmentOperations = await _context.MSTeamOperations.OfType<StudentEnrolledMSTeamOperation>().Include(op => op.Student)
                     .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
-                    .ToList(),
-                EmploymentOperations = Collection().OfType<TeacherEmployedMSTeamOperation>().Include(op => op.Staff)
+                    .ToListAsync(),
+                EmploymentOperations = await _context.MSTeamOperations.OfType<TeacherEmployedMSTeamOperation>().Include(op => op.Staff)
                     .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
-                    .ToList(),
-                ContactOperations = Collection().OfType<ContactAddedMSTeamOperation>().Include(op => op.Contact)
+                    .ToListAsync(),
+                ContactOperations = await _context.MSTeamOperations.OfType<ContactAddedMSTeamOperation>().Include(op => op.Contact)
                     .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
-                    .ToList()
+                    .ToListAsync()
             };
 
             return dataset;
