@@ -35,7 +35,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
                 {
                     Id = lesson.Id,
                     Name = lesson.Name,
-                    CourseName = lesson.Offerings.First().Course.Name,
+                    CourseName = $"{lesson.Offerings.First().Course.Grade} {lesson.Offerings.First().Course.Name}",
                     DueDate = lesson.DueDate,
                     Overdue = lesson.DueDate < DateTime.Today,
                     AttendanceStatistics = $"{lesson.Rolls.Count(roll => roll.LessonDate.HasValue)}/{lesson.Rolls.Count(l => l.Status != LessonStatus.Cancelled)}"

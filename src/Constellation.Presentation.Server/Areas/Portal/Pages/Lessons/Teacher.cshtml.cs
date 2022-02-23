@@ -29,10 +29,14 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Lessons
         public ICollection<LessonDto> FilteredLessons { get; set; }
         public SchoolContact Teacher { get; set; }
 
-        public async Task OnGet()
+        public async Task<IActionResult> OnGet()
         {
             var username = User.Identity.Name;
             var coordinator = await _unitOfWork.SchoolContacts.FromEmailForExistCheck(username);
+
+            if (coordinator == null)
+                return RedirectToPage("/Error");
+            
             Teacher = coordinator;
 
             var schools = coordinator.Assignments.Where(role => !role.IsDeleted && role.Role == SchoolContactRole.SciencePrac).Select(role => role.School).ToList();
@@ -70,6 +74,8 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Lessons
                     await FilterPending();
                     break;
             }
+
+            return Page();
         }
 
         public async Task FilterComplete()
