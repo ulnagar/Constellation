@@ -44,6 +44,7 @@
     <div class="row">
         <a asp-page="/Absences/Teachers" asp-area="Portal" class="btn btn-info">View All</a>
     </div>
+    <hr />
     <table class="data-table">
         <thead>
             <tr>
@@ -67,7 +68,9 @@
                                 <span class="badge badge-secondary">@student</span>
                             }
                         </td>
-                        <td>LINK</td>
+                        <td>
+                            <a href="/Portal/Absences/Teachers/Update/@item.Id" class="btn btn-sm btn-success btn-show-hover">Submit Work...</a>
+                        </td>
                     </tr>
                 }
             } else
