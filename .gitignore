@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /src/Constellation.Presentation.Server/appsettings.development.json
 /src/Constellation.Presentation.Server/emails
+/src/Constellation.Presentation.Server/~appsettings.development.json

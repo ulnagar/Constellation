@@ -44,7 +44,7 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
 
         public async Task<IActionResult> Upcoming()
         {
-            var covers = await _unitOfWork.Covers.ForListAsync(cover => cover.EndDate > DateTime.Now);
+            var covers = await _unitOfWork.Covers.ForListAsync(cover => cover.EndDate >= DateTime.Today);
 
             var viewModel = await CreateViewModel<Covers_ViewModel>();
             viewModel.Covers = covers.Select(Covers_ViewModel.CoverDto.ConvertFromCover).ToList();
@@ -74,14 +74,18 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
             var casuals = await _unitOfWork.Casuals.ForSelectionAsync();
             var classes = await _unitOfWork.CourseOfferings.ForSelectionAsync();
 
-            var userList = teachers.Select(teacher => new { Id = teacher.StaffId, Name = teacher.DisplayName, Group = "Teachers" }).ToList();
-            userList.AddRange(casuals.Select(casuals => new { Id = casuals.Id.ToString(), Name = casuals.DisplayName, Group = "Casuals" }));
+            classes = classes.OrderBy(course => course.Name).ToList();
+            teachers = teachers.OrderBy(teacher => teacher.LastName).ToList();
+            casuals = casuals.OrderBy(casual => casual.LastName).ToList();
+
+            var userList = teachers.Select(teacher => new { Id = teacher.StaffId, Name = teacher.DisplayName, Sort = teacher.LastName, Group = "Teachers" }).ToList();
+            userList.AddRange(casuals.Select(casual => new { Id = casual.Id.ToString(), Name = casual.DisplayName, Sort = casual.LastName, Group = "Casuals" }));
 
             var viewModel = await CreateViewModel<Covers_CreateViewModel>();
-            viewModel.UserList = new SelectList(userList, "Id", "Name", null, "Group");
+            viewModel.UserList = new SelectList(userList.OrderBy(user => user.Sort), "Id", "Name", null, "Group");
             viewModel.ClassList = new SelectList(classes, "Id", "Name");
-            viewModel.TeacherList = new SelectList(teachers, "StaffId", "DisplayName");
-            viewModel.MultiClassList = new MultiSelectList(classes, "Id", "Name");
+            viewModel.TeacherList = new SelectList(teachers.OrderBy(entry => entry.LastName), "StaffId", "DisplayName");
+            viewModel.MultiClassList = new MultiSelectList(classes.OrderBy(entry => entry.Name), "Id", "Name");
 
             return View(viewModel);
         }
@@ -119,6 +123,10 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
                 var teachers = await _unitOfWork.Staff.ForSelectionAsync();
                 var casuals = await _unitOfWork.Casuals.ForSelectionAsync();
                 var classes = await _unitOfWork.CourseOfferings.ForSelectionAsync();
+
+                classes = classes.OrderBy(course => course.Name).ToList();
+                teachers = teachers.OrderBy(teacher => teacher.LastName).ToList();
+                casuals = casuals.OrderBy(casual => casual.LastName).ToList();
 
                 var userList = teachers.Select(teacher => new { Id = teacher.StaffId, Name = teacher.DisplayName, Group = "Teachers" }).ToList();
                 userList.AddRange(casuals.Select(casuals => new { Id = casuals.Id.ToString(), Name = casuals.DisplayName, Group = "Casuals" }));

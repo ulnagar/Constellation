@@ -10,7 +10,7 @@
 
 <form asp-action="Create" asp-controller="Covers" asp-area="ShortTerm" method="post">
     <div class="form-horizontal">
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div asp-validation-summary="All" class="text-danger"></div>
         @Html.HiddenFor(model => model.Cover.UserType)
         
         <div class="form-group row">
@@ -117,7 +117,7 @@
                     //Add element to signify value in Classes array
                     var inputTemplate = new_element[0];
                     var input = $('<input>').attr('id', inputTemplate.value + "_input")
-                        .attr('name', "Classes")
+                        .attr('name', "Cover.SelectedClasses")
                         .attr('type', "hidden");
                     input.val(inputTemplate.value);
                     var classInputDiv = $('div#class_inputs')[0];
