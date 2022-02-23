@@ -14,6 +14,7 @@ namespace Constellation.Core.Models
             AdobeConnectGroupOperations = new List<TeacherAdobeConnectGroupOperation>();
             MSTeamOperations = new List<TeacherMSTeamOperation>();
             ResponsibleCourses = new List<Course>();
+            ClassworkNotifications = new List<ClassworkNotification>();
 
             IsDeleted = false;
             DateEntered = DateTime.Now;
@@ -38,5 +39,6 @@ namespace Constellation.Core.Models
         public ICollection<TeacherAdobeConnectGroupOperation> AdobeConnectGroupOperations { get; set; }
         public ICollection<TeacherMSTeamOperation> MSTeamOperations { get; set; }
         public ICollection<Course> ResponsibleCourses { get; set; }
+        public ICollection<ClassworkNotification> ClassworkNotifications { get; set; }
     }
 }

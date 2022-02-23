@@ -11,6 +11,7 @@ namespace Constellation.Core.Models
 
             AdobeConnectOperations = new List<AdobeConnectOperation>();
             MSTeamOperations = new List<MSTeamOperation>();
+            ClassworkNotifications = new List<ClassworkNotification>();
         }
 
         public int Id { get; set; }
@@ -22,6 +23,7 @@ namespace Constellation.Core.Models
         public ICollection<AdobeConnectOperation> AdobeConnectOperations { get; set; }
         public ICollection<MSTeamOperation> MSTeamOperations { get; set; }
 
+        public ICollection<ClassworkNotification> ClassworkNotifications { get; set; }
         public bool IsCurrent => (StartDate <= DateTime.Now && EndDate >= DateTime.Now);
         public bool IsFuture => (StartDate > DateTime.Now);
                

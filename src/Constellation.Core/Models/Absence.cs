@@ -11,6 +11,8 @@ namespace Constellation.Core.Models
             Notifications = new List<AbsenceNotification>();
             Responses = new List<AbsenceResponse>();
 
+            ClassworkNotifications = new List<ClassworkNotification>();
+
             Id = Guid.Empty;
         }
 
@@ -47,6 +49,7 @@ namespace Constellation.Core.Models
 
         public ICollection<AbsenceNotification> Notifications { get; set; }
         public ICollection<AbsenceResponse> Responses { get; set; }
+        public ICollection<ClassworkNotification> ClassworkNotifications { get; set; }
 
         public DateTime DateScanned { get; set; }
         public DateTime LastSeen { get; set; }
