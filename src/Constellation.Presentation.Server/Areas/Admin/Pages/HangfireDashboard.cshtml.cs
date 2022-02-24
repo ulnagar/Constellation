@@ -47,6 +47,12 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                     InactiveUntil = record.InactiveUntil
                 });
             }
+
+            JobStatuses.Add(new JobActivationDto
+            {
+                Id = Guid.Parse("ae24398b-2e82-4509-a743-ff60631215a2"),
+                JobName = "IAbsenceClassworkNotificationJob"
+            });
         }
 
         public async Task<IActionResult> OnPostToggleJob(Guid Id)

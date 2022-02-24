@@ -4,7 +4,6 @@ using Constellation.Application.Interfaces.Gateways;
 using Constellation.Infrastructure.DependencyInjection;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -115,7 +114,7 @@ namespace Constellation.Infrastructure.Gateways
             }
             else
             {
-                response = await _client.PostAsJsonAsync(_uri.ToString(), (MessageToSend)payload);
+                response = await _client.PostAsJsonAsync(_uri.ToString(), (SMSMessageToSend)payload);
             }
 
             return response;
@@ -186,19 +185,6 @@ namespace Constellation.Infrastructure.Gateways
         private class SentMessages : Response
         {
             public SentMessage[] messages { get; set; }
-        }
-
-        private class MessageToSend
-        {
-            public string origin { get; set; }
-            public string message { get; set; }
-            public ICollection<string> destinations { get; set; }
-            public string notifyUrl { get; set; }
-
-            public MessageToSend()
-            {
-                destinations = new List<string>();
-            }
         }
 
         private class CreditBalance : Response

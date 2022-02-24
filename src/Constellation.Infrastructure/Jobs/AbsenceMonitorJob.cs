@@ -3,6 +3,7 @@ using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using System;
@@ -45,9 +46,18 @@ namespace Constellation.Infrastructure.Jobs
                 }
             }
 
-            var students = await _unitOfWork.Students.ForAbsenceScan();
+            var students = new List<Student>();
 
-            foreach (var student in students)
+            foreach (Grade grade in Enum.GetValues(typeof(Grade)))
+            {
+                var gradeStudents = await _unitOfWork.Students.ForAbsenceScan(grade);
+
+                students.AddRange(gradeStudents);
+            }
+
+            //var students = await _unitOfWork.Students.ForAbsenceScan();
+
+            foreach (var student in students.Skip(39))
             {
                 var absences = await _absenceProcessor.StartJob(student);
 

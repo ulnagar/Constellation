@@ -28,7 +28,16 @@ namespace Constellation.Application.Common.CQRS.Admin.HangfireDashboard.Commands
         {
             var record = await _unitOfWork.JobActivations.GetFromId(request.Id);
 
-            if (record == null) return Unit.Value;
+            if (record == null)
+            {
+                if (request.Id == Guid.Parse("ae24398b-2e82-4509-a743-ff60631215a2"))
+                {
+                    var classworkNotification = _serviceProvider.GetService<IAbsenceClassworkNotificationJob>();
+                    await classworkNotification.StartJob(DateTime.Today);
+                }
+                
+                return Unit.Value;
+            }
 
             switch (record.JobName)
             {

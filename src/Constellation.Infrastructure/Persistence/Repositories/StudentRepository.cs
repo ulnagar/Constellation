@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
@@ -217,15 +218,19 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .ToListAsync();
         }
 
-        public async Task<ICollection<Student>> ForAbsenceScan()
+        public async Task<ICollection<Student>> ForAbsenceScan(Grade grade)
         {
             return await _context.Students
+                .Include(student => student.Enrolments)
+                .ThenInclude(enrol => enrol.Offering)
+                .ThenInclude(offer => offer.Sessions)
+                .ThenInclude(session => session.Period)
                 .Include(student => student.School)
                 .Include(student => student.Absences)
                 .ThenInclude(absence => absence.Notifications)
                 .Include(student => student.Absences)
                 .ThenInclude(absence => absence.Responses)
-                .Where(student => !student.IsDeleted && student.IncludeInAbsenceNotifications)
+                .Where(student => !student.IsDeleted && student.IncludeInAbsenceNotifications && student.CurrentGrade == grade)
                 .ToListAsync();
         }
 

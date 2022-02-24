@@ -86,7 +86,7 @@ namespace Constellation.Infrastructure.Jobs
                         OfferingName = notification.Offering.Name,
                         Students = notification.Absences.Select(absence => absence.Student.DisplayName).ToList(),
                         AbsenceDate = notification.AbsenceDate,
-                        Teachers = notification.Teachers.Select(teacher => new ClassworkNotificationTeacherEmail.Teacher { Name = teacher.DisplayName, Email = teacher.DisplayName}).ToList(),
+                        Teachers = notification.Teachers.Select(teacher => new ClassworkNotificationTeacherEmail.Teacher { Name = teacher.DisplayName, Email = teacher.EmailAddress}).ToList(),
                         IsCovered = notification.Covers.Any()
                     };
 
@@ -102,7 +102,6 @@ namespace Constellation.Infrastructure.Jobs
                     _logger.LogInformation($" Found existing entry for {notification.Offering.Name} @ {notification.AbsenceDate.ToShortDateString()}");
 
                     var newAbsences = new List<Absence>();
-                    var removedAbsences = new List<Absence>();
 
                     foreach (var absence in notification.Absences)
                     {
@@ -111,16 +110,6 @@ namespace Constellation.Infrastructure.Jobs
                             newAbsences.Add(absence);
 
                             _logger.LogInformation($"  Adding {absence.Student.DisplayName} to the existing entry");
-                        }
-                    }
-
-                    foreach (var absence in check.Absences)
-                    {
-                        if (!notification.Absences.Contains(absence))
-                        {
-                            removedAbsences.Add(absence);
-
-                            _logger.LogInformation($"  Removing {absence.Student.DisplayName} from the existing entry");
                         }
                     }
 
@@ -140,10 +129,6 @@ namespace Constellation.Infrastructure.Jobs
                         foreach (var absence in newAbsences)
                             check.Absences.Add(absence);
                     }
-
-                    if (removedAbsences != null)
-                        foreach (var absence in removedAbsences)
-                            check.Absences.Remove(absence);
 
                     await _unitOfWork.CompleteAsync();
                 }

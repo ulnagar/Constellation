@@ -62,12 +62,25 @@ namespace Constellation.Infrastructure.Gateways
         {
             await Login();
 
-            var response = await _client.GetAsync(uri);
+            for (int i = 1; i < 4; i++)
+            {
+                try
+                {
+                    var response = await _client.GetAsync(uri);
 
-            var page = new HtmlDocument();
-            page.LoadHtml(await response.Content.ReadAsStringAsync());
+                    var page = new HtmlDocument();
+                    page.LoadHtml(await response.Content.ReadAsStringAsync());
 
-            return page;
+                    return page;
+                }
+                catch
+                {
+                    // Wait and retry
+                    await Task.Delay(1000);
+                }
+            }
+
+            throw new Exception($"Could not connect to {uri}");
         }
 
         public async Task<string> GetSentralStudentIdAsync(string studentName)

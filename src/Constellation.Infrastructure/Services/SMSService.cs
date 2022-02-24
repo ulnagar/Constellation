@@ -38,7 +38,7 @@ namespace Constellation.Infrastructure.Services
 
             var notifyUri = "json+https://acos.aurora.nsw.edu.au/api/SMS/Delivery";
 
-            var messageContent = new { origin = "Aurora", destinations = phoneNumbers, message = messageText, notifyUrl = notifyUri };
+            var messageContent = new SMSMessageToSend { origin = "Aurora", destinations = phoneNumbers, message = messageText, notifyUrl = notifyUri };
             return await _service.SendSmsAsync(messageContent);
         }
     }
