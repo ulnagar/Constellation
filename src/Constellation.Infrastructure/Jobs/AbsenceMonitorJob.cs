@@ -33,13 +33,16 @@ namespace Constellation.Infrastructure.Jobs
             _classworkNotifier = classworkNotifier;
         }
 
-        public async Task StartJob()
+        public async Task StartJob(bool automated)
         {
-            var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IAbsenceMonitorJob));
-            if (jobStatus == null || !jobStatus.IsActive)
+            if (automated)
             {
-                Console.WriteLine("Stopped due to job being set inactive.");
-                return;
+                var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IAbsenceMonitorJob));
+                if (jobStatus == null || !jobStatus.IsActive)
+                {
+                    Console.WriteLine("Stopped due to job being set inactive.");
+                    return;
+                }
             }
 
             var students = await _unitOfWork.Students.ForAbsenceScan();

@@ -23,3 +23,20 @@
         </tr>
     }
 </table>
+
+<h3>Manual Job Activator</h3>
+
+<table>
+    @foreach (var job in Model.JobStatuses.OrderBy(status => status.JobName)) 
+    {
+        <tr>
+            <td style="width: 30%"><span class="heading">@job.JobName</span></td>
+            <td>
+                <form asp-page-handler="RunJob" method="post">
+                    <input type="hidden" name="id" value="@job.Id" />
+                    <button class="btn btn-danger">Run Now</button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>

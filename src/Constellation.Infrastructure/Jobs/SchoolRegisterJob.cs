@@ -23,13 +23,16 @@ namespace Constellation.Infrastructure.Jobs
             _unitOfWork = unitOfWork;
         }
 
-        public async Task StartJob()
+        public async Task StartJob(bool automated)
         {
-            var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(ISchoolRegisterJob));
-            if (jobStatus == null || !jobStatus.IsActive)
+            if (automated)
             {
-                Console.WriteLine("Stopped due to job being set inactive.");
-                return;
+                var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(ISchoolRegisterJob));
+                if (jobStatus == null || !jobStatus.IsActive)
+                {
+                    Console.WriteLine("Stopped due to job being set inactive.");
+                    return;
+                }
             }
 
             await _schoolRegisterGateway.UpdateSchoolDetails();

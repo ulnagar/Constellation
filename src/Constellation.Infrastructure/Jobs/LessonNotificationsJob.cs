@@ -30,13 +30,16 @@ namespace Constellation.Infrastructure.Jobs
             _logger = logger;
         }
 
-        public async Task StartJob()
+        public async Task StartJob(bool automated)
         {
-            var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(ILessonNotificationsJob));
-            if (jobStatus == null || !jobStatus.IsActive)
+            if (automated)
             {
-                _logger.Log(LogSeverity.Warning, "Stopped due to job being set inactive.");
-                return;
+                var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(ILessonNotificationsJob));
+                if (jobStatus == null || !jobStatus.IsActive)
+                {
+                    _logger.Log(LogSeverity.Warning, "Stopped due to job being set inactive.");
+                    return;
+                }
             }
 
             _logger.Log(LogSeverity.Information, $"Service started.");

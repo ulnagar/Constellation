@@ -4,6 +4,6 @@ namespace Constellation.Application.Interfaces.Jobs
 {
     public interface IRollMarkingReportJob : IHangfireJob
     {
-        Task StartJob();
+        Task StartJob(bool automated);
     }
 }

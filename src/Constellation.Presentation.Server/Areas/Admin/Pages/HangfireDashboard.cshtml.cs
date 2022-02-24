@@ -55,5 +55,12 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
 
             return RedirectToPage();
         }
+
+        public async Task<IActionResult> OnPostRunJob(Guid Id)
+        {
+            await _mediator.Send(new RunJobManuallyCommand { Id = Id });
+
+            return RedirectToPage();
+        }
     }
 }

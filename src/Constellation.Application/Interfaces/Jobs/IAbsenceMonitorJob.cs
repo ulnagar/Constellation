@@ -8,6 +8,6 @@ namespace Constellation.Application.Interfaces.Jobs
 {
     public interface IAbsenceMonitorJob : IHangfireJob
     {
-        Task StartJob();
+        Task StartJob(bool automated);
     }
 }
