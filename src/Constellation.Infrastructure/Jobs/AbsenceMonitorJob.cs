@@ -48,17 +48,17 @@ namespace Constellation.Infrastructure.Jobs
             {
                 var absences = await _absenceProcessor.StartJob(student);
 
-                student.Absences.AddRange(absences);
-                await _unitOfWork.CompleteAsync();
-
-                if (string.IsNullOrWhiteSpace(student.SentralStudentId))
-                    continue;
-
-                var phoneNumbers = await _sentralService.GetContactNumbersAsync(student.SentralStudentId);
-                var emailAddresses = await _sentralService.GetContactEmailsAsync(student.SentralStudentId);
-
                 if (absences.Any())
                 {
+                    student.Absences.AddRange(absences);
+                    await _unitOfWork.CompleteAsync();
+
+                    if (string.IsNullOrWhiteSpace(student.SentralStudentId))
+                    continue;
+
+                    var phoneNumbers = await _sentralService.GetContactNumbersAsync(student.SentralStudentId);
+                    var emailAddresses = await _sentralService.GetContactEmailsAsync(student.SentralStudentId);
+
                     var recentPartialAbsences = absences.Where(absence =>
                             absence.Explained == false &&
                             absence.Type == Absence.Partial &&
@@ -161,6 +161,8 @@ namespace Constellation.Infrastructure.Jobs
                             absence.DateScanned >= DateTime.Today.AddDays(-7) &&
                             absence.DateScanned <= DateTime.Today.AddDays(-1))
                         .ToList();
+
+                    var emailAddresses = await _sentralService.GetContactEmailsAsync(student.SentralStudentId);
 
                     if (parentDigestAbsences.Any())
                     {

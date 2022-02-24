@@ -47,7 +47,7 @@ namespace Constellation.Presentation.Server.Helpers.DependencyInjection
             if (jobActivations.All(job => job.JobName != rollMarkingReportRecord.JobName))
                 _unitOfWork.Add(rollMarkingReportRecord);
 
-            _jobManager.AddOrUpdate<IAbsenceMonitorJob>(nameof(IAbsenceMonitorJob), (job) => job.StartJob(), "0 13 * * 1-6", TimeZoneInfo.Local);
+            _jobManager.AddOrUpdate<IAbsenceMonitorJob>(nameof(IAbsenceMonitorJob), (job) => job.StartJob(), "0 11 * * 1-6", TimeZoneInfo.Local);
             var absenceMonitorRecord = new JobActivation { JobName = nameof(IAbsenceMonitorJob) };
             if (jobActivations.All(job => job.JobName != absenceMonitorRecord.JobName))
                 _unitOfWork.Add(absenceMonitorRecord);
