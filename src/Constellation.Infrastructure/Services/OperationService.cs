@@ -37,6 +37,7 @@ namespace Constellation.Infrastructure.Services
             };
 
             _unitOfWork.Add(operation);
+            await _unitOfWork.CompleteAsync();
         }
 
         public async Task CreateCasualAdobeConnectAccess(int casualId, string roomId, DateTime schedule, int coverId)
@@ -249,6 +250,7 @@ namespace Constellation.Infrastructure.Services
             };
 
             _unitOfWork.Add(operation);
+            await _unitOfWork.CompleteAsync();
         }
 
         public async Task CreateCasualMSTeamMemberAccess(int casualId, int offeringId, int coverId, DateTime scheduled)
@@ -832,7 +834,7 @@ namespace Constellation.Infrastructure.Services
             return Task.CompletedTask;
         }
 
-        public Task EnrolStudentInCanvasCourse(Student student, CourseOffering offering, DateTime? scheduledFor = null)
+        public async Task EnrolStudentInCanvasCourse(Student student, CourseOffering offering, DateTime? scheduledFor = null)
         {
             var operation = new ModifyEnrolmentCanvasOperation()
             {
@@ -846,8 +848,7 @@ namespace Constellation.Infrastructure.Services
                 operation.ScheduledFor = scheduledFor.Value;
 
             _unitOfWork.Add(operation);
-
-            return Task.CompletedTask;
+            await _unitOfWork.CompleteAsync();
         }
 
         public Task EnrolStaffInCanvasCourse(Staff staff, CourseOffering offering, DateTime? scheduledFor = null)

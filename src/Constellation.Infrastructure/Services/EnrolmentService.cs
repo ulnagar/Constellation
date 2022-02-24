@@ -44,6 +44,8 @@ namespace Constellation.Infrastructure.Services
                 DateCreated = dateCreated
             };
 
+            _unitOfWork.Add(enrolment);
+
             if (offering.IsCurrent())
             {
                 await _lessonService.AddStudentToFutureRollsForCourse(studentId, student.SchoolCode, offeringId);
@@ -64,7 +66,8 @@ namespace Constellation.Infrastructure.Services
                 await _operationService.EnrolStudentInCanvasCourse(student, offering, offering.StartDate);
             }
 
-            _unitOfWork.Add(enrolment);
+            await _unitOfWork.CompleteAsync();
+
         }
 
         public async Task RemoveEnrolment(int enrolmentId)

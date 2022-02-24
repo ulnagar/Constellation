@@ -326,7 +326,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             if (!student.Enrolments.Any(e => e.OfferingId == classId && !e.IsDeleted))
             {
                 await _studentService.EnrolStudentInClass(student.StudentId, offering.Id);
-                await _unitOfWork.CompleteAsync();
             }
 
             return RedirectToAction("Details", new { id });

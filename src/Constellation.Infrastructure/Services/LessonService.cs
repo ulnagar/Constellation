@@ -228,36 +228,44 @@ namespace Constellation.Infrastructure.Services
         {
             var lessons = await _unitOfWork.Lessons.GetForClass(offeringId);
 
-            foreach (var lesson in lessons.Where(lesson => lesson.DueDate > DateTime.Today))
+            lessons = lessons.Where(lesson => lesson.DueDate >= DateTime.Today).ToList();
+
+            var rolls = lessons.SelectMany(lesson => lesson.Rolls.Where(roll => roll.SchoolCode == schoolCode)).ToList();
+
+            foreach (var roll in rolls)
             {
-                var roll = lesson.Rolls.FirstOrDefault(innerRoll => innerRoll.SchoolCode == schoolCode);
+                if (roll.Attendance.Any(attendance => attendance.StudentId == studentId))
+                    continue;
 
-                if (roll != null)
+                var attend = new LessonRoll.LessonRollStudentAttendance
                 {
-                    if (roll.Attendance.Any(attendance => attendance.StudentId == studentId))
-                        continue;
+                    LessonRollId = roll.Id,
+                    StudentId = studentId
+                };
 
-                    roll.Attendance.Add(new LessonRoll.LessonRollStudentAttendance
-                    {
-                        StudentId = studentId
-                    });
-                }
-                else
-                {
-                    roll = new LessonRoll
-                    {
-                        SchoolCode = schoolCode,
-                        Status = LessonStatus.Active
-                    };
-
-                    roll.Attendance.Add(new LessonRoll.LessonRollStudentAttendance
-                    {
-                        StudentId = studentId
-                    });
-
-                    lesson.Rolls.Add(roll);
-                }
+                _unitOfWork.Add(attend);
             }
+
+            var newRollsRequired = lessons.Where(lesson => lesson.Rolls.All(roll => roll.SchoolCode != schoolCode)).ToList();
+
+            foreach (var lesson in newRollsRequired)
+            {
+                var roll = new LessonRoll
+                {
+                    LessonId = lesson.Id,
+                    SchoolCode = schoolCode,
+                    Status = LessonStatus.Active
+                };
+
+                roll.Attendance.Add(new LessonRoll.LessonRollStudentAttendance
+                {
+                    StudentId = studentId
+                });
+
+                _unitOfWork.Add(roll);
+            }
+
+            await _unitOfWork.CompleteAsync();
         }
 
         public async Task SubmitLessonRoll(LessonRollDto vm)
