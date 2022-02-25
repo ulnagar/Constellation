@@ -6,6 +6,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,10 +22,12 @@ namespace Constellation.Infrastructure.Jobs
         private readonly IEmailService _emailService;
         private readonly ISMSService _smsService;
         private readonly IAbsenceClassworkNotificationJob _classworkNotifier;
+        private readonly ILogger<IAbsenceMonitorJob> _logger;
 
         public AbsenceMonitorJob(IUnitOfWork unitOfWork, IAbsenceProcessingJob absenceProcessor, 
             ISentralGateway sentralService, IEmailService emailService, 
-            ISMSService smsService, IAbsenceClassworkNotificationJob classworkNotifier)
+            ISMSService smsService, IAbsenceClassworkNotificationJob classworkNotifier,
+            ILogger<IAbsenceMonitorJob> logger)
         {
             _unitOfWork = unitOfWork;
             _absenceProcessor = absenceProcessor;
@@ -32,6 +35,7 @@ namespace Constellation.Infrastructure.Jobs
             _emailService = emailService;
             _smsService = smsService;
             _classworkNotifier = classworkNotifier;
+            _logger = logger;
         }
 
         public async Task StartJob(bool automated)
@@ -41,7 +45,7 @@ namespace Constellation.Infrastructure.Jobs
                 var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IAbsenceMonitorJob));
                 if (jobStatus == null || !jobStatus.IsActive)
                 {
-                    Console.WriteLine("Stopped due to job being set inactive.");
+                    _logger.LogInformation("Stopped due to job being set inactive.");
                     return;
                 }
             }
@@ -98,7 +102,7 @@ namespace Constellation.Infrastructure.Jobs
                         }
 
                         foreach (var email in recipients)
-                            Console.WriteLine($"  Message sent via Email to {email} for Partial Absence on {absences.First().Date.ToShortDateString()}");
+                            _logger.LogInformation($"  Message sent via Email to {email} for Partial Absence on {absences.First().Date.ToShortDateString()}");
                     }
 
                     var recentWholeAbsences = absences.Where(absence =>
@@ -134,7 +138,7 @@ namespace Constellation.Infrastructure.Jobs
                                     }
 
                                     foreach (var number in phoneNumbers)
-                                        Console.WriteLine($"  Message sent via SMS to {number} for Whole Absence on {absences.First().Date.ToShortDateString()}");
+                                        _logger.LogInformation($"  Message sent via SMS to {number} for Whole Absence on {absences.First().Date.ToShortDateString()}");
                                 }
                             }
                             else if (emailAddresses.Any())
@@ -154,7 +158,7 @@ namespace Constellation.Infrastructure.Jobs
                                 }
 
                                 foreach (var email in emailAddresses)
-                                    Console.WriteLine($"  Message sent via Email to {email} for Whole Absence on {absences.First().Date.ToShortDateString()}");
+                                    _logger.LogInformation($"  Message sent via Email to {email} for Whole Absence on {absences.First().Date.ToShortDateString()}");
                             }
                             else
                             {
