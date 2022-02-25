@@ -50,6 +50,8 @@ namespace Constellation.Infrastructure.Jobs
                 }
             }
 
+            _logger.LogInformation("Starting Absence Monitor Scan.");
+
             var students = new List<Student>();
 
             foreach (Grade grade in Enum.GetValues(typeof(Grade)))
@@ -60,8 +62,9 @@ namespace Constellation.Infrastructure.Jobs
             }
 
             //var students = await _unitOfWork.Students.ForAbsenceScan();
+            _logger.LogInformation($"Found {students.Count} students to scan.");
 
-            foreach (var student in students.Skip(39))
+            foreach (var student in students)
             {
                 var absences = await _absenceProcessor.StartJob(student);
 
