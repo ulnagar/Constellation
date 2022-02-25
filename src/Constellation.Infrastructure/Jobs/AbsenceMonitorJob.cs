@@ -57,14 +57,16 @@ namespace Constellation.Infrastructure.Jobs
             foreach (Grade grade in Enum.GetValues(typeof(Grade)))
             {
                 var gradeStudents = await _unitOfWork.Students.ForAbsenceScan(grade);
-
+                
                 students.AddRange(gradeStudents);
             }
 
             //var students = await _unitOfWork.Students.ForAbsenceScan();
             _logger.LogInformation($"Found {students.Count} students to scan.");
 
-            foreach (var student in students)
+            students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+
+            foreach (var student in students.Skip(10))
             {
                 var absences = await _absenceProcessor.StartJob(student);
 

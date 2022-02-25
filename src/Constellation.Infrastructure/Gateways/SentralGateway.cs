@@ -54,15 +54,30 @@ namespace Constellation.Infrastructure.Gateways
             };
             var formDataEncoded = new FormUrlEncodedContent(formData);
 
-            var response = await _client.PostAsync(uri, formDataEncoded);
-            response.EnsureSuccessStatusCode();
+            for (int i = 1; i < 6; i++)
+            {
+                try
+                {
+                    var response = await _client.PostAsync(uri, formDataEncoded);
+                    response.EnsureSuccessStatusCode();
+
+                    return;
+                }
+                catch
+                {
+                    // Wait and retry
+                    await Task.Delay(5000);
+                }
+            }
+
+            throw new Exception($"Could not connect to Sentral Server");
         }
 
         private async Task<HtmlDocument> GetPageAsync(string uri)
         {
             await Login();
 
-            for (int i = 1; i < 4; i++)
+            for (int i = 1; i < 6; i++)
             {
                 try
                 {
@@ -76,7 +91,7 @@ namespace Constellation.Infrastructure.Gateways
                 catch
                 {
                     // Wait and retry
-                    await Task.Delay(1000);
+                    await Task.Delay(5000);
                 }
             }
 
