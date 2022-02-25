@@ -1,10 +1,11 @@
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Server.Helpers.Attributes;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
 {
+    [Roles(AuthRoles.Admin, AuthRoles.User)]
     public class TeacherUpdateModel : BasePageModel
     {
         private readonly IUnitOfWork _unitOfWork;

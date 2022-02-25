@@ -15,7 +15,12 @@
     @foreach (var absence in Model.Absences)
     {
         <dt>@Model.StudentName - @absence.AbsenceDate.ToLongDateString():</dt>
-        <dd>@absence.ClassName (@absence.PeriodName)<br />
+        <dd>@absence.Type<br />
+            @absence.ClassName (@absence.PeriodName)<br />
+            @if (absence.Type == "Partial")
+            {
+                @absence.AbsenceTime<br />
+            }
             @absence.Explanation<br />
             @Html.Raw(absence.Source)
         </dd>

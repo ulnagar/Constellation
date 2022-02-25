@@ -21,6 +21,8 @@ namespace Constellation.Infrastructure.Templates.Views.Emails.Absences
             public string PeriodName { get; set; }
             public string Explanation { get; set; }
             public string Source { get; set; }
+            public string Type { get; set; }
+            public string AbsenceTime { get; set; }
         }
     }
 }

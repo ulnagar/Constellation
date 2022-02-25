@@ -66,7 +66,7 @@ namespace Constellation.Infrastructure.Jobs
 
             students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
 
-            foreach (var student in students.Skip(10))
+            foreach (var student in students)
             {
                 var absences = await _absenceProcessor.StartJob(student);
 
