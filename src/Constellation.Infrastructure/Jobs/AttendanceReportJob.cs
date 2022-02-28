@@ -55,7 +55,7 @@ namespace Constellation.Infrastructure.Jobs
             var dateToReport = DateTime.Today.AddDays(-1).VerifyStartOfFortnight();
 
             var students = await _unitOfWork.Students.AllActiveAsync();
-            var studentsBySchool = students.GroupBy(s => s.SchoolCode).ToList();
+            var studentsBySchool = students.OrderBy(s => s.School.Name).GroupBy(s => s.SchoolCode).ToList();
 
             foreach (var school in studentsBySchool)
             {

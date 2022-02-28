@@ -57,7 +57,7 @@ namespace Constellation.Infrastructure.Gateways
                     {
                         Content = new MimeContent(item.ContentStream, ContentEncoding.Default),
                         ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
-                        ContentTransferEncoding = ContentEncoding.Default,
+                        ContentTransferEncoding = ContentEncoding.Base64,
                         FileName = item.Name
                     };
 

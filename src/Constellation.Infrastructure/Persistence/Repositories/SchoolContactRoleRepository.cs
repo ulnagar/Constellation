@@ -152,11 +152,11 @@ namespace Constellation.Infrastructure.Persistence.Repositories
 
         public async Task<ICollection<string>> EmailsFromSchoolWithRole(string schoolCode, string role)
         {
-            return await _context.SchoolContacts
-                .Include(contact => contact.Assignments)
-                .ThenInclude(assignment => assignment.School)
-                .Where(contact => contact.Assignments.Any(assignment => assignment.SchoolCode == schoolCode && !assignment.IsDeleted && assignment.Role == role))
-                .Select(contact => contact.EmailAddress)
+            return await _context.SchoolContactRoles
+                .Include(record => record.SchoolContact)
+                .Include(record => record.School)
+                .Where(record => record.SchoolCode == schoolCode && !record.IsDeleted && record.Role == role)
+                .Select(record => record.SchoolContact.EmailAddress)
                 .ToListAsync();
         }
 

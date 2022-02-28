@@ -296,6 +296,11 @@ namespace Constellation.Infrastructure.Services
         {
             var coordinators = await _unitOfWork.SchoolContacts.EmailAddressesOfAllInRoleAtSchool(absences.First().Student.SchoolCode, SchoolContactRole.Coordinator);
 
+            coordinators = coordinators.Distinct().ToList();
+
+            if (coordinators == null || coordinators.Count == 0)
+                return null;
+
             var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
             var viewModel = new CoordinatorAbsenceDigestEmailViewModel

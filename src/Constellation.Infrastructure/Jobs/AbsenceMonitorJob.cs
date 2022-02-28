@@ -184,13 +184,16 @@ namespace Constellation.Infrastructure.Jobs
                             absence.DateScanned <= DateTime.Today.AddDays(-1))
                         .ToList();
 
-                    var emailAddresses = await _sentralService.GetContactEmailsAsync(student.SentralStudentId);
-
                     if (parentDigestAbsences.Any())
                     {
+                        var emailAddresses = await _sentralService.GetContactEmailsAsync(student.SentralStudentId);
+
                         if (emailAddresses.Any())
                         {
                             var sentmessage = await _emailService.SendParentWholeAbsenceDigest(parentDigestAbsences, emailAddresses);
+
+                            if (sentmessage == null)
+                                continue;
 
                             foreach (var absence in parentDigestAbsences)
                             {
@@ -202,6 +205,11 @@ namespace Constellation.Infrastructure.Jobs
                                     Recipients = string.Join(", ", emailAddresses),
                                     OutgoingId = sentmessage.id
                                 });
+                            }
+
+                            foreach (var address in emailAddresses)
+                            {
+                                _logger.LogInformation($"  Parent digest sent to {address} for {student.DisplayName}");
                             }
                         }
                         else
@@ -222,6 +230,9 @@ namespace Constellation.Infrastructure.Jobs
                     {
                         var message = await _emailService.SendCoordinatorWholeAbsenceDigest(coordinatorDigestAbsences);
 
+                        if (message == null)
+                            continue;
+
                         foreach (var absence in coordinatorDigestAbsences)
                         {
                             absence.Notifications.Add(new AbsenceNotification
@@ -229,10 +240,12 @@ namespace Constellation.Infrastructure.Jobs
                                 Type = AbsenceNotification.Email,
                                 Message = message.message,
                                 SentAt = DateTime.Now,
-                                Recipients = string.Join(", ", emailAddresses),
+                                Recipients = "School Contacts",
                                 OutgoingId = message.id
                             });
                         }
+
+                        _logger.LogInformation($"  School digest sent to {student.School.Name} for {student.DisplayName}");
                     }
                 }
             }
