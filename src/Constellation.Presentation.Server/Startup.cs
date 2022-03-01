@@ -1,3 +1,4 @@
+using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
@@ -66,11 +67,16 @@ namespace Constellation.Presentation.Server
                     config.WriteTo.File("logs/UserManager.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
                     config.Filter.ByIncludingOnly(Matching.FromSource<IUserManagerJob>());
                 })
-                //.WriteTo.Logger(config =>
-                //{
-                //    config.WriteTo.File("logs/System.log", Serilog.Events.LogEventLevel.Debug, rollingInterval: RollingInterval.Day);
-                //    config.Filter.ByExcluding(Matching.FromSource<IHangfireJob>());
-                //})
+                .WriteTo.Logger(config =>
+                {
+                    config.WriteTo.File("logs/EmailGateway.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
+                    config.Filter.ByIncludingOnly(Matching.FromSource<IEmailGateway>());
+                })
+                .WriteTo.Logger(config =>
+                {
+                    config.WriteTo.File("logs/System.log", Serilog.Events.LogEventLevel.Debug, rollingInterval: RollingInterval.Day);
+                    config.Filter.ByExcluding(Matching.FromSource<IHangfireJob>());
+                })
                 .CreateLogger();
         }
 

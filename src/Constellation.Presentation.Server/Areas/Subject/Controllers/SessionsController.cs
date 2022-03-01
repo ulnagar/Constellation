@@ -95,7 +95,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 
                 // Is this class already scheduled during this period?
                 var check = await _unitOfWork.OfferingSessions.ForOfferingAndPeriod(offering.Id, period.Id);
-                if (check != null)
+                if (check.Count > 0)
                     continue;
 
                 var assignment = new SessionDto

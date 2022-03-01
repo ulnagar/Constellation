@@ -2,8 +2,10 @@
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Infrastructure.DependencyInjection;
 using MailKit.Security;
+using Microsoft.Extensions.Logging;
 using MimeKit;
 using MimeKit.Text;
+using System;
 using System.Collections.Generic;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -13,14 +15,20 @@ namespace Constellation.Infrastructure.Gateways
     public class EmailGateway : IEmailGateway, IScopedService
     {
         private IEmailGatewayConfiguration _configuration;
+        private readonly ILogger<IEmailGateway> _logger;
 
-        public EmailGateway(IEmailGatewayConfiguration configuration)
+        public EmailGateway(IEmailGatewayConfiguration configuration, ILogger<IEmailGateway> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments)
         {
+            var id = Guid.NewGuid();
+
+            _logger.LogInformation($"Sending email {id}");
+
             var message = new MimeMessage();
 
             if (fromAddress == null)
@@ -29,16 +37,26 @@ namespace Constellation.Infrastructure.Gateways
                 message.From.Add(new MailboxAddress("Aurora College", fromAddress));
 
             foreach (var recipient in toAddresses)
+            {
+                _logger.LogInformation($"{id}: Adding {recipient.Key} ({recipient.Value}) to TO field.");
                 message.To.Add(new MailboxAddress(recipient.Key, recipient.Value));
+            }
 
             if (ccAddresses != null)
                 foreach (var recipient in ccAddresses)
+                {
+                    _logger.LogInformation($"{id}: Adding {recipient.Key} ({recipient.Value}) to CC field.");
                     message.Cc.Add(new MailboxAddress(recipient.Key, recipient.Value));
+                }
 
             if (bccAddresses != null)
                 foreach (var recipient in bccAddresses)
+                {
+                    _logger.LogInformation($"{id}: Adding {recipient.Key} ({recipient.Value}) to BCC field.");
                     message.Bcc.Add(new MailboxAddress(recipient.Key, recipient.Value));
+                }
 
+            _logger.LogInformation($"{id}: Setting Subject to \"{subject}\"");
             message.Subject = subject;
             
             var textPartBody = new TextPart(TextFormat.Html)
@@ -61,6 +79,8 @@ namespace Constellation.Infrastructure.Gateways
                         FileName = item.Name
                     };
 
+                    _logger.LogInformation($"{id}: Adding attachment {item.Name}");
+
                     multipart.Add(attachment);
                 }
 
@@ -70,6 +90,7 @@ namespace Constellation.Infrastructure.Gateways
                 message.Body = textPartBody;
             }
 
+            _logger.LogInformation($"{id}: Sending...");
             await PushToServer(message);
 
             return message;
