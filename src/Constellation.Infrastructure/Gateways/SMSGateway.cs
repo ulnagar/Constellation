@@ -71,10 +71,10 @@ namespace Constellation.Infrastructure.Gateways
         /// <returns>Task</returns>
         public async Task<SMSMessageCollectionDto> SendSmsAsync(Object payload)
         {
-            HttpResponseMessage response = await RequestAsync("sms", payload);
-
             try
             {
+                HttpResponseMessage response = await RequestAsync("sms", payload);
+
                 var content = await response.Content.ReadAsStringAsync();
                 var collection = JsonConvert.DeserializeObject<SentMessages>(content);
 
@@ -108,16 +108,29 @@ namespace Constellation.Infrastructure.Gateways
 
             HttpResponseMessage response;
 
-            if (payload == null)
+            for (int i = 1; i < 6; i++)
             {
-                response = await _client.GetAsync(_uri.ToString());
-            }
-            else
-            {
-                response = await _client.PostAsJsonAsync(_uri.ToString(), (SMSMessageToSend)payload);
+                try
+                {
+                    if (payload == null)
+                    {
+                        response = await _client.GetAsync(_uri.ToString());
+                    }
+                    else
+                    {
+                        response = await _client.PostAsJsonAsync(_uri.ToString(), (SMSMessageToSend)payload);
+                    }
+
+                    return response;
+                }
+                catch
+                {
+                    // Wait and retry
+                    await Task.Delay(5000);
+                }
             }
 
-            return response;
+            throw new Exception($"Could not connect to SMS Gateway");
         }
 
         /// <summary>
