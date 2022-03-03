@@ -30,6 +30,10 @@ namespace Constellation.Presentation.Portal.Schools
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // MUST BE CALLED FIRST
+            // to ensure that other middleware takes notice of this setting.
+            app.UsePathBase("/Portal/School");
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -45,8 +49,6 @@ namespace Constellation.Presentation.Portal.Schools
             app.UseStaticFiles();
 
             app.UseRouting();
-
-            app.UsePathBase("/Portal/School");
 
             app.UseEndpoints(endpoints =>
             {

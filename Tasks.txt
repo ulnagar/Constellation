@@ -1,0 +1,15 @@
+CANVAS:
+	Paper Exam Submission Portal => take file uploads from ACC and proxy it up to CANVAS as student submission of assignment
+
+TEAMS:
+	Cache team ids in database to prevent needing to search for teams at start of operations
+
+OPERATIONS:
+	Return more meaningful errors to log for troubleshooting
+
+COVERS:
+	Add calendar appointment to single day covers
+	Add timetable sheet to multi-day covers
+
+ERROR:
+	Modify error page to give some information on what is happening.
