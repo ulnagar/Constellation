@@ -219,7 +219,7 @@ namespace Constellation.Infrastructure.Services
             var accessLevel = typeof(T).Name == "StudentAdobeConnectOperation" ? AdobeConnectAccessLevel.Student : AdobeConnectAccessLevel.Teacher;
             bool success = false;
 
-            switch (typeof(T).Name)
+            switch (operation.GetType().Name)
             {
                 case "StudentAdobeConnectOperation":
                     var sOperation = operation as StudentAdobeConnectOperation;
