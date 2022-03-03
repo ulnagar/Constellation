@@ -75,12 +75,12 @@ namespace Constellation.Infrastructure.Gateways
 
         private async Task<HtmlDocument> GetPageAsync(string uri)
         {
-            await Login();
-
             for (int i = 1; i < 6; i++)
             {
                 try
                 {
+                    await Login();
+
                     var response = await _client.GetAsync(uri);
 
                     var page = new HtmlDocument();
@@ -95,13 +95,16 @@ namespace Constellation.Infrastructure.Gateways
                 }
             }
 
-            throw new Exception($"Could not connect to {uri}");
+            return null;
         }
 
         public async Task<string> GetSentralStudentIdAsync(string studentName)
         {
             if (StudentListPage == null)
                 StudentListPage = await GetPageAsync($"{_settings.Server}/profiles/main/search?eduproq=&search=advanced&plan_type=plans");
+
+            if (StudentListPage == null)
+                return null;
 
             var page = StudentListPage;
 
@@ -139,6 +142,9 @@ namespace Constellation.Infrastructure.Gateways
         {
             var page = await GetPageAsync($"{_settings.Server}/admin/datasync/students?year={grade}&type=active");
 
+            if (page == null)
+                return null;
+
             var studentTable = page.DocumentNode.SelectSingleNode("/html/body/div[6]/div/div/div[3]/div/div/div/div[2]/table");
 
             if (studentTable != null)
@@ -173,6 +179,9 @@ namespace Constellation.Infrastructure.Gateways
         public async Task<List<SentralPeriodAbsenceDto>> GetAbsenceDataAsync(string sentralStudentId)
         {
             var page = await GetPageAsync($"{_settings.Server}/attendancepxp/administration/student?id={sentralStudentId}");
+
+            if (page == null)
+                return new List<SentralPeriodAbsenceDto>();
 
             var absenceTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "AbsenceTable").Value);
 
@@ -291,6 +300,9 @@ namespace Constellation.Infrastructure.Gateways
         {
             var page = await GetPageAsync($"{_settings.Server}/attendance/administration/student/{sentralStudentId}?term={term}");
 
+            if (page == null)
+                return new List<SentralPeriodAbsenceDto>();
+
             var absenceTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "PartialAbsenceTable").Value);
 
             var detectedAbsences = new List<SentralPeriodAbsenceDto>();
@@ -385,6 +397,9 @@ namespace Constellation.Infrastructure.Gateways
         {
             var page = await GetPageAsync($"{_settings.Server}/admin/settings/school/calendar/{year}/month");
 
+            if (page == null)
+                return new List<DateTime>();
+
             var calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "CalendarTable").Value);
 
             var nonSchoolDays = new List<DateTime>();
@@ -416,12 +431,16 @@ namespace Constellation.Infrastructure.Gateways
 
             return nonSchoolDays.OrderBy(a => a).ToList();
         }
+
         public async Task<List<string>> GetContactNumbersAsync(string sentralStudentId)
         {
             if (string.IsNullOrWhiteSpace(sentralStudentId))
                 return new List<string>();
 
             var page = await GetPageAsync($"{_settings.Server}/profiles/students/{sentralStudentId}/family");
+
+            if (page == null)
+                return new List<string>();
 
             var phoneNumbers = new List<string>();
 
@@ -530,6 +549,9 @@ namespace Constellation.Infrastructure.Gateways
 
             var page = await GetPageAsync($"{_settings.Server}/profiles/students/{sentralStudentId}/family");
 
+            if (page == null)
+                return result;
+
             var familyName = HttpUtility.HtmlDecode(page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "FamilyName").Value).InnerHtml.Trim().Split('<')[0]);
             var lastName = familyName.Split(' ').Last();
             var firstName = familyName.Substring(0, familyName.Length - lastName.Length).Trim();
@@ -602,11 +624,13 @@ namespace Constellation.Infrastructure.Gateways
 
             var page = await GetPageAsync($"{_settings.Server}/profiles/students/{sentralStudentId}/family");
 
+            if (page == null)
+                return new List<string>();
+
             var emailAddresses = new List<string>();
 
             var mothersEmail = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "MothersEmail").Value).InnerText.Trim();
             var fathersEmail = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "FathersEmail").Value).InnerText.Trim();
-
 
             switch (_settings.ContactPreference)
             {
@@ -657,6 +681,9 @@ namespace Constellation.Infrastructure.Gateways
 
             var primaryPage = await GetPageAsync($"{_settings.Server}/attendancepxp/period/administration/roll_report?campus_id={1}&range=single_day&date={sentralDate}&export=1");
             var secondaryPage = await GetPageAsync($"{_settings.Server}/attendancepxp/period/administration/roll_report?campus_id={2}&range=single_day&date={sentralDate}&export=1");
+
+            if (primaryPage == null || secondaryPage == null)
+                return new List<RollMarkReportDto>();
 
             var primaryList = new List<string>();
             if (!primaryPage.DocumentNode.InnerHtml.StartsWith("<"))

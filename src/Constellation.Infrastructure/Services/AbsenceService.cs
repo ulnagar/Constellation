@@ -98,6 +98,7 @@ namespace Constellation.Infrastructure.Services
                 .Distinct()
                 .ToList();
 
+            notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
             notificationEmail.Recipients.AddRange(teachers);
             notificationEmail.WholeAbsences.Add(absence);
 

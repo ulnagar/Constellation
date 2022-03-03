@@ -125,7 +125,36 @@ namespace Constellation.Infrastructure.Jobs
                         {
                             if (phoneNumbers.Any() && group.Key.Date == DateTime.Today.AddDays(-1).Date)
                             {
-                                var sentMessages = await _smsService.SendAbsenceNotificationAsync(group.ToList(), phoneNumbers); ;
+                                var sentMessages = await _smsService.SendAbsenceNotificationAsync(group.ToList(), phoneNumbers);
+
+                                if (sentMessages == null)
+                                {
+                                    // SMS Gateway failed. Send via email instead.
+                                    _logger.LogWarning($"  SMS Sending Failed! Fallback to Email notifications.");
+
+                                    if (emailAddresses.Any())
+                                    {
+                                        var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses);
+
+                                        foreach (var absence in group)
+                                        {
+                                            absence.Notifications.Add(new AbsenceNotification
+                                            {
+                                                Type = AbsenceNotification.Email,
+                                                Message = message.message,
+                                                SentAt = DateTime.Now,
+                                                Recipients = string.Join(", ", emailAddresses),
+                                                OutgoingId = message.id
+                                            });
+                                        }
+
+                                        foreach (var email in emailAddresses)
+                                            _logger.LogInformation($"  Message sent via Email to {email} for Whole Absence on {absences.First().Date.ToShortDateString()}");
+                                    } else
+                                    {
+                                        _logger.LogError($"  Email addresses not found! Parents have not been notified!");
+                                    }
+                                }
 
                                 // Once the message has been sent, add it to the database.
                                 if (sentMessages.Messages.Count > 0)

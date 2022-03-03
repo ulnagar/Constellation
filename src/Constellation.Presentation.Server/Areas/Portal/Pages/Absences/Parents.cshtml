@@ -56,11 +56,11 @@
                 <td class="text-center">
                     @if (!entry.IsExplained && entry.Type == Constellation.Core.Models.Absence.Whole)
                     {
-                        <a asp-page="ParentExplanation" asp-area="Portal" asp-route-id="@entry.AbsenceId" class="btn btn-sm btn-primary btn-show-hover">Explain</a>
+                        <a asp-page="ParentExplanation" asp-area="Portal" asp-route-id="@entry.AbsenceId" class="btn btn-sm btn-primary">Explain</a>
                     }
                     else if (entry.Type == Constellation.Core.Models.Absence.Whole)
                     {
-                        <a asp-page="ParentExplanation" asp-area="Portal" asp-route-id="@entry.AbsenceId" class="btn btn-sm btn-secondary btn-show-hover">More Info...</a>
+                        <a asp-page="ParentExplanation" asp-area="Portal" asp-route-id="@entry.AbsenceId" class="btn btn-sm btn-secondary">More Info...</a>
                     }
                 </td>
             </tr>
