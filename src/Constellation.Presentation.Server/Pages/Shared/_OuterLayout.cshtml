@@ -41,11 +41,7 @@
     </div>
 
     <footer class="border-top footer fixed-bottom">
-        <div class="container">
-            @Html.Raw(String.Format("Build Version: {0}. &copy; {1} - Aurora College, NSW",
-                File.GetLastWriteTime(ViewContext.GetType().Assembly.Location).ToString("yyMM.d"),
-             DateTime.Now.Year))
-        </div>
+        @await Html.PartialAsync("_Footer")
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

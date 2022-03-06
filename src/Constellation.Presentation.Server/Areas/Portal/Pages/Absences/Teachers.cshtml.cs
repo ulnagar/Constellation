@@ -2,7 +2,6 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +22,8 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
         }
 
         public ICollection<NotificationDto> Notifications { get; set; }
+        [BindProperty(SupportsGet = true)]
+        public FilterDto Filter { get; set; }
 
 
         public async Task<IActionResult> OnGet()
@@ -33,7 +34,13 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
             if (teacher != null)
             {
                 var notifications = await _unitOfWork.ClassworkNotifications.GetForTeacher(teacher.StaffId);
-                Notifications = notifications.Select(notification => NotificationDto.ConvertFromNotification(notification)).ToList();
+
+                Notifications = Filter switch
+                {
+                    FilterDto.Complete => notifications.Where(notification => notification.CompletedAt.HasValue).Select(notification => NotificationDto.ConvertFromNotification(notification)).ToList(),
+                    FilterDto.All => notifications.Select(notification => NotificationDto.ConvertFromNotification(notification)).ToList(),
+                    _ => notifications.Where(notification => !notification.CompletedAt.HasValue).Select(notification => NotificationDto.ConvertFromNotification(notification)).ToList(),
+                };
             }
 
             await GetClasses(_unitOfWork);
@@ -43,10 +50,16 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
 
         public class NotificationDto
         {
+            public NotificationDto()
+            {
+                Students = new List<string>();
+            }
+
             public Guid Id { get; set; }
             public DateTime ClassDate { get; set; }
             public string ClassName { get; set; }
             public int NumStudents { get; set; }
+            public ICollection<string> Students { get; set; }
             public bool IsCompleted { get; set; }
 
             public static NotificationDto ConvertFromNotification(ClassworkNotification notification)
@@ -57,11 +70,19 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
                     ClassDate = notification.AbsenceDate,
                     ClassName = notification.Offering.Name,
                     NumStudents = notification.Absences.Count,
+                    Students = notification.Absences.Select(absence => absence.Student).OrderBy(student => student.LastName).Select(student => student.DisplayName).ToList(),
                     IsCompleted = notification.CompletedAt.HasValue
                 };
 
                 return viewModel;
             }
+        }
+
+        public enum FilterDto
+        {
+            Pending,
+            Complete,
+            All
         }
     }
 }

@@ -7,6 +7,31 @@
 
 <h2>Missing Classwork Notifications</h2>
 
+    @{
+        var all_style = "btn-outline-secondary";
+        var pending_style = all_style;
+        var completed_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case TeachersModel.FilterDto.All:
+                all_style = "btn-primary";
+                break;
+            case TeachersModel.FilterDto.Pending:
+                pending_style = "btn-primary";
+                break;
+            case TeachersModel.FilterDto.Complete:
+                completed_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Teachers" asp-area="Portal" asp-route-filter="@TeachersModel.FilterDto.All" class="btn @all_style">All</a>
+        <a asp-page="Teachers" asp-area="Portal" asp-route-filter="@TeachersModel.FilterDto.Pending" class="btn @pending_style">Pending</a>
+        <a asp-page="Teachers" asp-area="Portal" asp-route-filter="@TeachersModel.FilterDto.Complete" class="btn @completed_style">Completed</a>
+    </div>
+
 <hr />
 
 <table class="table-striped table-hover data-table">
@@ -15,7 +40,7 @@
         <th></th>
         <th>Class Name</th>
         <th>Class Date</th>
-        <th># Students</th>
+        <th>Students</th>
         <th></th>
     </tr>
     </thead>
@@ -26,7 +51,14 @@
                 <td>@Html.DisplayFor(model => item.IsCompleted, "BooleanTick")</td>
                 <td>@Html.DisplayFor(model => item.ClassName)</td>
                 <td>@Html.DisplayFor(model => item.ClassDate, "ShortDate")</td>
-                <td>@Html.DisplayFor(model => item.NumStudents)</td>
+                <td>
+                    <ul>
+                        @foreach (var student in item.Students)
+                        {
+                            <li>@student</li>
+                        }
+                    </ul>
+                </td>
                 <td>
                     @if (item.IsCompleted)
                     {

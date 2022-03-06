@@ -1,0 +1,13 @@
+﻿@using System.Reflection
+@using System.IO
+
+@{
+    var file = Assembly.GetExecutingAssembly().Location;
+    var lastWriteTime = File.GetLastWriteTime(file);
+}
+
+<div class="container">
+    @Html.Raw(String.Format("Build Version: {0}. &copy; {1} - Aurora College, NSW",
+        lastWriteTime.ToString("yyMM.d"),
+        DateTime.Now.Year))
+</div>
