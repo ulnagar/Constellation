@@ -2,6 +2,7 @@
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,13 +41,21 @@ namespace Constellation.Presentation.Server.Areas.Home.Pages
             public ICollection<string> Students { get; set; }
         }
 
-        public async Task OnGet()
+        public async Task<IActionResult> OnGet()
         {
             var username = User.Identity.Name;
+            var IsStaff = User.IsInRole(AuthRoles.User);
+
+            if (!IsStaff)
+            {
+                return RedirectToPage("Index", new { area = "" });
+            }
+
             var teacher = await _unitOfWork.Staff.FromEmailForExistCheck(username);
             IsAdmin = User.IsInRole(AuthRoles.Admin);
 
-            if (teacher == null) return;
+
+            if (teacher == null) return Page();
 
             UserName = teacher.DisplayName;
 
@@ -64,6 +73,8 @@ namespace Constellation.Presentation.Server.Areas.Home.Pages
                     Students = notification.Absences.Select(absence => absence.Student.DisplayName).ToList()
                 });
             }
+
+            return Page();
         }
     }
 }

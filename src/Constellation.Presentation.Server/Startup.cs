@@ -132,7 +132,7 @@ namespace Constellation.Presentation.Server
 
             app.UseHangfireDashboard("/hangfire", new DashboardOptions()
             {
-                AppPath = null,
+                AppPath = "/",
                 DashboardTitle = "Hangfire Dashboard",
                 Authorization = new[]
                 {

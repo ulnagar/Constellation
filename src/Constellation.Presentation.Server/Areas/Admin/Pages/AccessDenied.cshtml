@@ -1,17 +1,11 @@
-﻿@page
-@model ErrorModel
+﻿@page "/Account/AccessDenied"
+@model AccessDeniedModel
 
 <div class="error__container">
     <div class="error__">
         <div class="error__text">
-            <h1 class="error__title">An error occured <b>:(</b></h1>
-            <h2 class="error__title">@Model.ProblemDetails.Title</h2>
-        </div>
-    </div>
-
-    <div class="error__">
-        <div class="error__text">
-            <p>You can go back to our <a href="/">home page</a>.</p>
+            <h1 class="error__title">Access Denied <b>:(</b></h1>
+            <h2 class="error__title">No access to @Model.ReturnUrl</h2>
         </div>
     </div>
 
@@ -32,14 +26,13 @@
             <div class="bar"></div>
         </div>
     </div>
-    
+
     <div class="error__">
-        <button class="btn btn-warning" type="button" data-toggle="collapse" data-target="#errorDetailCollapse">Show Error Details</button>
-        <div class="error__text collapse" id="errorDetailCollapse" style="text-align: left">
-            <p>Error details: @Model.ProblemDetails.Detail</p>
+        <div class="error__text">
+            <p>It looks like you don't have access to this page. If you think this is a mistake, you can <a href="mailto:support@aurora.nsw.edu.au">contact our support team</a>.</p>
+            <p>You can also go back to our <a href="/">home page</a>.</p>
         </div>
     </div>
-
 </div>
 
 <style>
