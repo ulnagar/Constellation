@@ -13,3 +13,6 @@ COVERS:
 
 ERROR:
 	Modify error page to give some information on what is happening.
+
+EMAILS:
+	Make sure every email process dedups the list of contacts before added them.

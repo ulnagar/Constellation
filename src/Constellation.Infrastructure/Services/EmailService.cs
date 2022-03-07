@@ -598,7 +598,12 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in notification.Recipients)
-                toRecipients.Add(entry.Name, entry.Email);
+            {
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                {
+                    toRecipients.Add(entry.Name, entry.Email);
+                }
+            }
 
             await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
         }
@@ -622,7 +627,12 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in notification.Recipients)
-                toRecipients.Add(entry.Name, entry.Email);
+            {
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                {
+                    toRecipients.Add(entry.Name, entry.Email);
+                }
+            }
 
             await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
         }
@@ -646,7 +656,12 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in notification.Recipients)
-                toRecipients.Add(entry.Name, entry.Email);
+            {
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                {
+                    toRecipients.Add(entry.Name, entry.Email);
+                }
+            }
 
             await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
         }
@@ -670,7 +685,12 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in notification.Recipients)
-                toRecipients.Add(entry.Name, entry.Email);
+            {
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                {
+                    toRecipients.Add(entry.Name, entry.Email);
+                }
+            }
 
             await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
         }
@@ -693,7 +713,12 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in notification.Recipients)
-                toRecipients.Add(entry.Name, entry.Email);
+            {
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                {
+                    toRecipients.Add(entry.Name, entry.Email);
+                }
+            }
 
             await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
         }
@@ -712,7 +737,12 @@ namespace Constellation.Infrastructure.Services
             };
 
             foreach (var entry in notification.Recipients)
-                toRecipients.Add(entry.Name, entry.Email);
+            {
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                {
+                    toRecipients.Add(entry.Name, entry.Email);
+                }
+            }
 
             await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", $"[Aurora College] Service Log Output - {notification.Source}", body, null);
         }
