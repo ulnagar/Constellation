@@ -11,6 +11,11 @@ COVERS:
 	Add calendar appointment to single day covers
 	Add timetable sheet to multi-day covers
 
+
+~~~~~~~~~~~~~~~~~~~~~~~~
+DONE
+~~~~~~~~~~~~~~~~~~~~~~~~
+
 ERROR:
 	Modify error page to give some information on what is happening.
 

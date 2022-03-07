@@ -65,7 +65,8 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in notification.Recipients)
-                toRecipients.Add(entry.Name, entry.Email);
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                    toRecipients.Add(entry.Name, entry.Email);
 
             var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, notification.Attachments);
 
@@ -97,7 +98,8 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in notification.Recipients)
-                toRecipients.Add(entry.Name, entry.Email);
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                    toRecipients.Add(entry.Name, entry.Email);
 
             var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, notification.Attachments);
 
@@ -130,9 +132,8 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in emailAddresses)
-            {
-                toRecipients.Add(entry, entry);
-            }
+                if (!toRecipients.Any(recipient => recipient.Value == entry))
+                    toRecipients.Add(entry, entry);
 
             var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
 
@@ -172,9 +173,8 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in emailAddresses)
-            {
-                toRecipients.Add(entry, entry);
-            }
+                if (!toRecipients.Any(recipient => recipient.Value == entry))
+                    toRecipients.Add(entry, entry);
 
             var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
 
@@ -214,9 +214,8 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in emailAddresses)
-            {
-                toRecipients.Add(entry, entry);
-            }
+                if (!toRecipients.Any(recipient => recipient.Value == entry))
+                    toRecipients.Add(entry, entry);
 
             var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
 
@@ -269,9 +268,8 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in emailDto.Recipients)
-            {
-                toRecipients.Add(entry, entry);
-            }
+                if (!toRecipients.Any(recipient => recipient.Value == entry))
+                    toRecipients.Add(entry, entry);
 
             var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
 
@@ -319,7 +317,8 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in coordinators)
-                toRecipients.Add(entry, entry);
+                if (!toRecipients.Any(recipient => recipient.Value == entry))
+                    toRecipients.Add(entry, entry);
 
             var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
 
@@ -447,10 +446,9 @@ namespace Constellation.Infrastructure.Services
             var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/AbsenceExplanationToSchoolAdminEmail.cshtml", viewModel);
 
             var toRecipients = new Dictionary<string, string>();
-            foreach (var entry in notificationEmail.Recipients)
-            {
-                toRecipients.Add(entry, entry);
-            }
+            foreach (var entry in notification.Recipients)
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                    toRecipients.Add(entry.Name, entry.Email);
 
             await _emailSender.Send(toRecipients, null, null, null, $"Absence Explanation Received - {viewModel.StudentName}", body, null);
         }
@@ -480,7 +478,8 @@ namespace Constellation.Infrastructure.Services
             var ccRecipients = new Dictionary<string, string>();
 
             foreach (var entry in resource.ClassroomTeachers)
-                ccRecipients.Add(entry.Key, entry.Value);
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Value))
+                    toRecipients.Add(entry.Key, entry.Value);
 
             foreach (var entry in resource.SecondaryRecipients)
                 if (!ccRecipients.Any(recipient => recipient.Value == entry.Value))
@@ -514,7 +513,8 @@ namespace Constellation.Infrastructure.Services
             var ccRecipients = new Dictionary<string, string>();
 
             foreach (var entry in resource.ClassroomTeachers)
-                ccRecipients.Add(entry.Key, entry.Value);
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Value))
+                    toRecipients.Add(entry.Key, entry.Value);
 
             foreach (var entry in resource.SecondaryRecipients)
                 if (!ccRecipients.Any(recipient => recipient.Value == entry.Value))
@@ -548,7 +548,8 @@ namespace Constellation.Infrastructure.Services
             var ccRecipients = new Dictionary<string, string>();
 
             foreach (var entry in resource.ClassroomTeachers)
-                ccRecipients.Add(entry.Key, entry.Value);
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Value))
+                    toRecipients.Add(entry.Key, entry.Value);
 
             foreach (var entry in resource.SecondaryRecipients)
                 if (!ccRecipients.Any(recipient => recipient.Value == entry.Value))
@@ -598,12 +599,8 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in notification.Recipients)
-            {
                 if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                {
                     toRecipients.Add(entry.Name, entry.Email);
-                }
-            }
 
             await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
         }
@@ -627,12 +624,8 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in notification.Recipients)
-            {
                 if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                {
                     toRecipients.Add(entry.Name, entry.Email);
-                }
-            }
 
             await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
         }
@@ -656,12 +649,8 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in notification.Recipients)
-            {
                 if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                {
                     toRecipients.Add(entry.Name, entry.Email);
-                }
-            }
 
             await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
         }
@@ -685,12 +674,8 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in notification.Recipients)
-            {
                 if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                {
                     toRecipients.Add(entry.Name, entry.Email);
-                }
-            }
 
             await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
         }
@@ -713,12 +698,8 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in notification.Recipients)
-            {
                 if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                {
                     toRecipients.Add(entry.Name, entry.Email);
-                }
-            }
 
             await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
         }
@@ -737,12 +718,8 @@ namespace Constellation.Infrastructure.Services
             };
 
             foreach (var entry in notification.Recipients)
-            {
                 if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                {
                     toRecipients.Add(entry.Name, entry.Email);
-                }
-            }
 
             await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", $"[Aurora College] Service Log Output - {notification.Source}", body, null);
         }
@@ -768,7 +745,8 @@ namespace Constellation.Infrastructure.Services
 
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in notification.Teachers)
-                toRecipients.Add(entry.Name, entry.Email);
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                    toRecipients.Add(entry.Name, entry.Email);
 
             await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
         }
@@ -853,7 +831,8 @@ namespace Constellation.Infrastructure.Services
             
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in parentEmails)
-                toRecipients.Add(entry, entry);
+                if (!toRecipients.Any(recipient => recipient.Value == entry))
+                    toRecipients.Add(entry, entry);
 
             await _emailSender.Send(toRecipients, null, null, notification.CompletedBy.EmailAddress, viewModel.Title, body, null);
         }
