@@ -217,7 +217,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
         public async Task<ICollection<string>> EmailAddressesOfAllInRoleAtSchool(string schoolCode, string role)
         {
             return await _context.SchoolContactRoles
-                .Where(assignment => assignment.SchoolCode == schoolCode && assignment.Role == role)
+                .Where(assignment => assignment.SchoolCode == schoolCode && assignment.Role == role && !assignment.IsDeleted)
                 .Select(assignment => assignment.SchoolContact.EmailAddress)
                 .ToListAsync();
         }
