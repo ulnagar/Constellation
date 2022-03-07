@@ -124,6 +124,21 @@ namespace Constellation.Infrastructure.Gateways
             return enrolments.FirstOrDefault(enrol => enrol.SISId == UserId)?.Id;
         }
 
+        private async Task<List<AssignmentResult>> SearchForCourseAssignment(string UserId, string CourseId)
+        {
+            var path = $"users/sis_user_id:{UserId}/courses/sis_course_id:{CourseId}/assignments";
+
+            var response = await RequestAsync(path, HttpVerb.Get);
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            var responseText = await response.Content.ReadAsStringAsync();
+
+            var assignments = JsonConvert.DeserializeObject<List<AssignmentResult>>(responseText);
+
+            return assignments;
+        }
+
         public async Task<bool> CreateUser(string UserId, string FirstName, string LastName, string LoginEmail, string UserEmail)
         {
             var CanvasUserId = await SearchForUser(UserId);
@@ -296,6 +311,20 @@ namespace Constellation.Infrastructure.Gateways
             return false;
         }
 
+        public async Task<bool> UploadFileForAssignment()
+        {
+            // Need:
+            // - File
+            // - Student
+            // - Assignment
+
+            // Store assignment in database as ID, SIS_COURSE_ID, NAME, DUEDATE, VISIBLEDATE
+
+
+
+            return false;
+        }
+
         private class UserResult
         {
             [JsonProperty("id")]
@@ -366,6 +395,18 @@ namespace Constellation.Infrastructure.Gateways
 
             [JsonProperty("sis_user_id")]
             public string SISId { get; set; }
+        }
+
+        private class AssignmentResult
+        {
+            [JsonProperty("id")]
+            public int Id { get; set; }
+            [JsonProperty("name")]
+            public string Name { get; set; }
+            [JsonProperty("due_at")]
+            public DateTime DueDate { get; set; }
+            [JsonProperty("unlock_at")]
+            public DateTime UnlockDate { get; set; }
         }
     }
 }

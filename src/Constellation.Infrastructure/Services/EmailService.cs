@@ -446,9 +446,9 @@ namespace Constellation.Infrastructure.Services
             var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/AbsenceExplanationToSchoolAdminEmail.cshtml", viewModel);
 
             var toRecipients = new Dictionary<string, string>();
-            foreach (var entry in notification.Recipients)
-                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                    toRecipients.Add(entry.Name, entry.Email);
+            foreach (var entry in notificationEmail.Recipients)
+                if (!toRecipients.Any(recipient => recipient.Value == entry))
+                    toRecipients.Add(entry, entry);
 
             await _emailSender.Send(toRecipients, null, null, null, $"Absence Explanation Received - {viewModel.StudentName}", body, null);
         }
