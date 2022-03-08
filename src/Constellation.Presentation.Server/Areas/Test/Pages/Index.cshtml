@@ -1,0 +1,9 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
+
+<form method="post">
+    <input asp-for="LinkToShorten" />
+    <button type="submit">Submit</button>
+</form>
+
+Shortened Link: @Model.ShortLink
