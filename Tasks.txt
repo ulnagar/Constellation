@@ -11,6 +11,8 @@ COVERS:
 	Add calendar appointment to single day covers
 	Add timetable sheet to multi-day covers
 
+ADOBE CONNECT ACTIONS:
+	Complete migration of action to scan for new rooms
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE

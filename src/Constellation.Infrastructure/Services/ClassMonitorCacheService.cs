@@ -25,6 +25,7 @@ namespace Constellation.Infrastructure.Services
         public ClassMonitorCacheService(IServiceScopeFactory scopeFactory)
         {
             _scopeFactory = scopeFactory;
+            Statuses = new List<ClassMonitorDtos.MonitorCourse>();
         }
 
         public async Task<ClassMonitorDtos> GetData()
