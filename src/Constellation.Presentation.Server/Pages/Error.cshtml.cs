@@ -26,19 +26,22 @@ namespace Constellation.Presentation.Server.Pages
             var exceptionDetails = HttpContext.Features.Get<IExceptionHandlerFeature>();
             var ex = exceptionDetails?.Error;
 
-            var title = "An error occured: " + ex.Message;
-            var details = ex.ToString();
-
-            ProblemDetails = new ProblemDetails
+            if (ex != null)
             {
-                Status = 500,
-                Title = title,
-                Detail = details
-            };
+                var title = "An error occured: " + ex.Message;
+                var details = ex.ToString();
 
-            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
-            if (RequestId != null)
-                ProblemDetails.Extensions["traceId"] = RequestId;
+                ProblemDetails = new ProblemDetails
+                {
+                    Status = 500,
+                    Title = title,
+                    Detail = details
+                };
+
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+                if (RequestId != null)
+                    ProblemDetails.Extensions["traceId"] = RequestId;
+            }
         }
     }
 }
