@@ -3,6 +3,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,16 +37,16 @@ namespace Constellation.Application.Common.CQRS.Partners.Schools.Commands
 
     public class UpsertSchoolHandler : IRequestHandler<UpsertSchool>
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IAppDbContext _context;
 
-        public UpsertSchoolHandler(IUnitOfWork unitOfWork)
+        public UpsertSchoolHandler(IAppDbContext context)
         {
-            _unitOfWork = unitOfWork;
+            _context = context;
         }
 
         public async Task<Unit> Handle(UpsertSchool request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.Schools.ForEditAsync(request.Code);
+            var entity = await _context.Schools.SingleOrDefaultAsync(school => school.Code == request.Code, cancellationToken);
             var newSchool = false;
 
             if (entity == null)
@@ -68,9 +69,9 @@ namespace Constellation.Application.Common.CQRS.Partners.Schools.Commands
             entity.HeatSchool = request.LateOpening;
 
             if (newSchool)
-                _unitOfWork.Add(entity);
+                _context.Schools.Add(entity);
 
-            await _unitOfWork.CompleteAsync();
+            await _context.SaveChangesAsync(cancellationToken);
 
             return Unit.Value;
         }
