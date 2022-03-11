@@ -48,8 +48,6 @@ namespace Constellation.Infrastructure.Persistence
         public DbSet<ClassworkNotification> ClassworkNotifications { get; set; }
         public DbSet<JobActivation> JobActivations { get; set; }
         public DbSet<StoredFile> StoredFiles { get; set; }
-        public DbSet<CanvasAssignment> CanvasAssignments { get; set; }
-        public DbSet<CanvasAssignmentSubmission> CanvasAssignmentsSubmissions { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {

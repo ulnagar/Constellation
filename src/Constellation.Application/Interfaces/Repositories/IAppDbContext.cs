@@ -39,8 +39,6 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<Student> Students { get; set; }
         DbSet<StudentWholeAbsence> WholeAbsences { get; set; }
         DbSet<StoredFile> StoredFiles { get; set; }
-        DbSet<CanvasAssignment> CanvasAssignments { get; set; }
-        DbSet<CanvasAssignmentSubmission> CanvasAssignmentsSubmissions { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }

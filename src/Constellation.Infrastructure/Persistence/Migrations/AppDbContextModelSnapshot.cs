@@ -467,67 +467,6 @@ namespace Constellation.Infrastructure.Persistence.Migrations
                     b.ToTable("Rooms");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.CanvasAssignment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("AllowedAttempts")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CanvasId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CourseId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("LockDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UnlockDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.ToTable("CanvasAssignments");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.CanvasAssignmentSubmission", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("AssignmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Attempt")
-                        .HasColumnType("int");
-
-                    b.Property<string>("StudentId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("SubmittedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AssignmentId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("CanvasAssignmentsSubmissions");
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.CanvasOperation", b =>
                 {
                     b.Property<int>("Id")
@@ -2089,33 +2028,6 @@ namespace Constellation.Infrastructure.Persistence.Migrations
                     b.Navigation("Cover");
 
                     b.Navigation("Room");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.CanvasAssignment", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Course", "Course")
-                        .WithMany()
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Course");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.CanvasAssignmentSubmission", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.CanvasAssignment", "Assignment")
-                        .WithMany()
-                        .HasForeignKey("AssignmentId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Constellation.Core.Models.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Assignment");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Casual", b =>
