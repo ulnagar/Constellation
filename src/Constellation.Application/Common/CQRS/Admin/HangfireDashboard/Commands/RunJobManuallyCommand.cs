@@ -1,7 +1,6 @@
 ﻿using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading;
@@ -16,18 +15,18 @@ namespace Constellation.Application.Common.CQRS.Admin.HangfireDashboard.Commands
 
     public class RunJobManuallyCommandHandler : IRequestHandler<RunJobManuallyCommand>
     {
-        private readonly IAppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IServiceProvider _serviceProvider;
 
-        public RunJobManuallyCommandHandler(IAppDbContext context, IServiceProvider serviceProvider)
+        public RunJobManuallyCommandHandler(IUnitOfWork unitOfWork, IServiceProvider serviceProvider)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
             _serviceProvider = serviceProvider;
         }
 
         public async Task<Unit> Handle(RunJobManuallyCommand request, CancellationToken cancellationToken)
         {
-            var record = await _context.JobActivations.SingleOrDefaultAsync(job => job.Id == request.Id, cancellationToken);
+            var record = await _unitOfWork.JobActivations.GetFromId(request.Id);
 
             if (record == null)
             {

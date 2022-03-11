@@ -27,7 +27,6 @@ namespace Constellation.Infrastructure.Gateways
             config.UseProxy = true;
             config.Proxy = proxy;
 
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             _client = new HttpClient(config);
         }
 

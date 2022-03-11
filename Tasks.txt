@@ -14,9 +14,6 @@ COVERS:
 ADOBE CONNECT ACTIONS:
 	Complete migration of action to scan for new rooms
 
-MISSED CLASSWORK:
-	Periodic report for HTs on what hasn't been completed
-
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~

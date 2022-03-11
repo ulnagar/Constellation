@@ -1243,36 +1243,6 @@ namespace Constellation.Infrastructure.Persistence.Migrations
                     b.ToTable("Staff");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.StoredFile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<byte[]>("FileData")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("FileType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LinkId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LinkType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("StoredFiles");
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.Student", b =>
                 {
                     b.Property<string>("StudentId")

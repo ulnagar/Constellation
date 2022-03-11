@@ -14,22 +14,22 @@ namespace Constellation.Application.Common.CQRS.Admin.HangfireDashboard.Commands
 
     public class ToggleJobActivationCommandHandler : IRequestHandler<ToggleJobActivationCommand>
     {
-        private readonly IAppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ToggleJobActivationCommandHandler(IAppDbContext context)
+        public ToggleJobActivationCommandHandler(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Unit> Handle(ToggleJobActivationCommand request, CancellationToken cancellationToken)
         {
-            var record = await _context.JobActivations.SingleOrDefaultAsync(job => job.Id == request.Id, cancellationToken);
+            var record = await _unitOfWork.JobActivations.GetFromId(request.Id);
 
             if (record == null) return Unit.Value;
 
             record.IsActive = !record.IsActive;
 
-            await _context.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.CompleteAsync();
 
             return Unit.Value;
         }
