@@ -1,6 +1,9 @@
 using Constellation.Infrastructure.DependencyInjection;
+using Constellation.Presentation.Portal.Schools.Pages;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,6 +28,8 @@ namespace Constellation.Presentation.Portal.Schools
 
             services.AddRazorPages();
             services.AddServerSideBlazor();
+
+            services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

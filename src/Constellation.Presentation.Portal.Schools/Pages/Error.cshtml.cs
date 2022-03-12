@@ -1,11 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Portal.Schools.Pages
 {
@@ -14,6 +11,7 @@ namespace Constellation.Presentation.Portal.Schools.Pages
     public class ErrorModel : PageModel
     {
         public string RequestId { get; set; }
+        public ProblemDetails ProblemDetails { get; set; }
 
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
@@ -26,7 +24,25 @@ namespace Constellation.Presentation.Portal.Schools.Pages
 
         public void OnGet()
         {
-            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+            var exceptionDetails = HttpContext.Features.Get<IExceptionHandlerFeature>();
+            var ex = exceptionDetails?.Error;
+
+            if (ex != null)
+            {
+                var title = "An error occured: " + ex.Message;
+                var details = ex.ToString();
+
+                ProblemDetails = new ProblemDetails
+                {
+                    Status = 500,
+                    Title = title,
+                    Detail = details
+                };
+
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+                if (RequestId != null)
+                    ProblemDetails.Extensions["traceId"] = RequestId;
+            }
         }
     }
 }

@@ -7,7 +7,7 @@
 
     <div class="main">
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            School: 
         </div>
 
         <div class="content px-4">
@@ -15,3 +15,17 @@
         </div>
     </div>
 </div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private string SelectedSchool { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateTask;
+
+        authState.User.Claims
+    }
+}

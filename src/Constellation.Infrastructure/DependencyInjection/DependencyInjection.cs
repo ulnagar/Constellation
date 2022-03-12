@@ -170,8 +170,8 @@ namespace Constellation.Infrastructure.DependencyInjection
             services.ConfigureApplicationCookie(options =>
             {
                 options.ExpireTimeSpan = TimeSpan.FromHours(1);
-                options.LoginPath = new PathString("/Portal/School/Admin/Login");
-                options.LogoutPath = new PathString("/Portal/School/Admin/Logout");
+                options.LoginPath = new PathString("/Portal/School/Login");
+                options.LogoutPath = new PathString("/Portal/School/Logout");
             });
 
             return services;
