@@ -1,4 +1,5 @@
 ﻿using Constellation.Core.Enums;
+using Constellation.Core.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Application.DTOs
@@ -28,5 +29,24 @@ namespace Constellation.Application.DTOs
 
         [Required]
         public string SchoolCode { get; set; }
+
+        public static StudentDto ConvertFromStudent(Student student)
+        {
+            var viewModel = new StudentDto
+            {
+                StudentId = student.StudentId,
+                FirstName = student.FirstName,
+                LastName = student.LastName,
+                PortalUsername = student.PortalUsername,
+                AdobeConnectPrincipalId = student.AdobeConnectPrincipalId,
+                SentralStudentId = student.SentralStudentId,
+                EnrolledGrade = student.EnrolledGrade,
+                CurrentGrade = student.CurrentGrade,
+                Gender = student.Gender,
+                SchoolCode = student.SchoolCode
+            };
+
+            return viewModel;
+        }
     }
 }

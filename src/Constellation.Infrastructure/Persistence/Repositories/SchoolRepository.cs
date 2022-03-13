@@ -155,6 +155,12 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .SingleOrDefaultAsync(school => school.Code == id);
         }
 
+        public async Task<bool> IsPartnerSchoolWithStudents(string code)
+        {
+            return await _context.Schools
+                .AnyAsync(school => school.Code == code && school.Students.Any(student => !student.IsDeleted));
+        }
+
         public async Task<bool> AnyWithId(string id)
         {
             return await _context.Schools

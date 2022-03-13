@@ -24,6 +24,7 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<ICollection<School>> ForListAsync(Expression<Func<School, bool>> predicate);
         Task<School> ForEditAsync(string id);
         Task<School> ForDetailDisplayAsync(string id);
+        Task<bool> IsPartnerSchoolWithStudents(string code);
         Task<bool> AnyWithId(string id);
         Task<ICollection<School>> ForBulkUpdate();
         IList<MapLayer> GetForMapping(IList<string> schoolCodes);

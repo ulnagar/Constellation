@@ -9,7 +9,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Presentation.Portal.Schools.Pages
+namespace Constellation.Presentation.Portal.Schools.Pages.Auth
 {
     public class RevalidatingIdentityAuthenticationStateProvider<TUser>
         : RevalidatingServerAuthenticationStateProvider where TUser : class

@@ -1,5 +1,55 @@
 ﻿@page "/"
 @attribute [Authorize]
 
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IMediator mediator
+
 <h1>Aurora College Schools Portal</h1>
 
+@foreach (var student in Students)
+{
+    <div class="card w-25 m-3 float-left">
+        <img class="card-img-top" src="">
+        <div class="card-body">
+            <h5 class="card-title">@student.FirstName @student.LastName</h5>
+            <p class="card-text">Grade: @student.CurrentGrade</p>
+        </div>
+    </div>
+}
+
+@code{
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+
+    public List<Claim> Claims { get; set; }
+
+    public List<StudentDto> Students { get; set; }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            Claims = user.Claims.ToList();
+        }
+        else
+        {
+            Claims = new List<Claim>();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SelectedSchool != null)
+        {
+            var students = await mediator.Send(new GetStudentsFromSchoolQuery { SchoolCode = SelectedSchool.Code });
+            Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();    
+        } else
+        {
+            Students = new List<StudentDto>();
+        }
+
+    }
+}
