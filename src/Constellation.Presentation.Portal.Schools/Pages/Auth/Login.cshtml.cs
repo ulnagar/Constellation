@@ -85,9 +85,15 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
             if (ModelState.IsValid)
             {
                 var result = new LoginResult();
+                var user = await _userManager.FindByEmailAsync(Input.Email);
+
+                if (user != null)
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return Page();
+                }
 
 #if DEBUG
-                var user = await _userManager.FindByEmailAsync(Input.Email);
 
                 var claimList = new List<Claim>();
                 claimList.Add(new Claim("Schools", "8146,8155"));
@@ -96,7 +102,6 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
 
                 return LocalRedirect(returnUrl);
 #else
-                var user = await _userManager.FindByEmailAsync(Input.Email);
 #pragma warning disable CA1416 // Validate platform compatibility
                 var context = new PrincipalContext(ContextType.Domain, "DETNSW.WIN");
                 var success = context.ValidateCredentials(Input.Email, Input.Password);
@@ -114,8 +119,21 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
                         try
                         {
                             // Get list of users linked schools from AD
-                            var adAttributeValue = adAccount.Properties["detAttribute12"].Value.ToString();
-                            var adSchoolList = JsonConvert.DeserializeObject<List<string>>(adAttributeValue);
+                            var adAttributeValue = adAccount.Properties["detAttribute12"].Value;
+                            var adSchoolList = new List<string>();
+
+                            // If the adAttributeValue is a string, it is a single school link
+                            // If the adAttributeValue is an array, it is multiple school links
+
+                            if (adAttributeValue.GetType() == typeof(string))
+                                adSchoolList.Add(adAttributeValue as string);
+                            else
+                            {
+                                foreach (var entry in adAttributeValue as Array)
+                                {
+                                    adSchoolList.Add(entry as string);
+                                }
+                            }
 
                             // Check each school against the DB to ensure it is an active partner school with students
                             // Add any matching entries to the user claims

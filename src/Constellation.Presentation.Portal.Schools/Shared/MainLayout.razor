@@ -10,7 +10,7 @@
         </div>
 
         <div class="main">
-            <div class="top-row px-4 align-right">
+            <div class="top-row px-4 text-right">
                 <div class="col-md-8">
                 @if (ShowChangeSchoolBox)
                 {
@@ -24,7 +24,10 @@
                 } else
                 {
                     @:School: @SelectedSchool?.Name
-                    <button class="btn btn-sm btn-secondary ml-4" @onclick="ToggleChangeSchoolBox">Change School</button>
+                    @if (Schools.Count > 1)
+                    {
+                        <button class="btn btn-sm btn-secondary ml-4" @onclick="ToggleChangeSchoolBox">Change School</button>
+                    }
                 }
                 </div>
                 <div class="col">

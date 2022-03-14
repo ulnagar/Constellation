@@ -73,6 +73,7 @@ namespace Constellation.Infrastructure.DependencyInjection
 
             services.ConfigureApplicationCookie(options =>
             {
+                options.Cookie.Name = "Constellation.Fallback.Identity";
                 options.ExpireTimeSpan = TimeSpan.FromHours(1);
                 options.LoginPath = new PathString("/Admin/Login");
                 options.LogoutPath = new PathString("/Admin/Logout");
@@ -100,6 +101,7 @@ namespace Constellation.Infrastructure.DependencyInjection
 
             services.ConfigureApplicationCookie(options =>
             {
+                options.Cookie.Name = "Constellation.Staff.Identity";
                 options.ExpireTimeSpan = TimeSpan.FromHours(7);
                 options.LoginPath = new PathString("/Admin/Login");
                 options.LogoutPath = new PathString("/Admin/Logout");
@@ -142,6 +144,7 @@ namespace Constellation.Infrastructure.DependencyInjection
 
             services.ConfigureApplicationCookie(options =>
             {
+                options.Cookie.Name = "Constellation.Parents.Identity";
                 options.ExpireTimeSpan = TimeSpan.FromHours(1);
                 options.LoginPath = new PathString("/Portal/Parents/Identity/Login");
                 options.LogoutPath = new PathString("/Portal/Parents/Identity/Logout");
@@ -169,6 +172,7 @@ namespace Constellation.Infrastructure.DependencyInjection
 
             services.ConfigureApplicationCookie(options =>
             {
+                options.Cookie.Name = "Constellation.Schools.Identity";
                 options.ExpireTimeSpan = TimeSpan.FromHours(1);
                 options.LoginPath = new PathString("/Portal/School/Auth/Login");
                 options.LogoutPath = new PathString("/Portal/School/Auth/LogOut");
