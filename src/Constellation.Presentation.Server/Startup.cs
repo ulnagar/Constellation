@@ -1,6 +1,7 @@
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Presentation.Server.Helpers.DependencyInjection;
@@ -74,8 +75,22 @@ namespace Constellation.Presentation.Server
                 })
                 .WriteTo.Logger(config =>
                 {
+                    config.WriteTo.File("logs/Authentication.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Day);
+                    config.Filter.ByIncludingOnly(Matching.FromSource<IAuthService>());
+                })
+                .WriteTo.Logger(config =>
+                {
                     config.WriteTo.File("logs/System.log", Serilog.Events.LogEventLevel.Debug, rollingInterval: RollingInterval.Day);
-                    config.Filter.ByExcluding(Matching.FromSource<IHangfireJob>());
+                    config.Filter.ByExcluding(Matching.FromSource<IClassMonitorJob>());
+                    config.Filter.ByExcluding(Matching.FromSource<IPermissionUpdateJob>());
+                    config.Filter.ByExcluding(Matching.FromSource<ILessonNotificationsJob>());
+                    config.Filter.ByExcluding(Matching.FromSource<IAttendanceReportJob>());
+                    config.Filter.ByExcluding(Matching.FromSource<IAbsenceMonitorJob>());
+                    config.Filter.ByExcluding(Matching.FromSource<IRollMarkingReportJob>());
+                    config.Filter.ByExcluding(Matching.FromSource<ISchoolRegisterJob>());
+                    config.Filter.ByExcluding(Matching.FromSource<IUserManagerJob>());
+                    config.Filter.ByExcluding(Matching.FromSource<IEmailGateway>());
+                    config.Filter.ByExcluding(Matching.FromSource<IAuthService>());
                 })
                 .CreateLogger();
         }
