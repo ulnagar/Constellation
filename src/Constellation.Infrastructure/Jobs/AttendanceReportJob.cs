@@ -134,6 +134,13 @@ namespace Constellation.Infrastructure.Jobs
             // Email the file to the parents
             var emailAddresses = await _sentralGateway.GetContactEmailsAsync(student.SentralStudentId);
 
+            if (emailAddresses == null || emailAddresses.Count == 0)
+            {
+                _logger.LogWarning($"  Could not identify parent email address for {student.DisplayName} ({student.CurrentGrade})");
+                await _emailService.SendAdminAbsenceContactAlert(student);
+                return;
+            }
+
             var notification = new AttendanceReportEmail
             {
                 StudentName = student.DisplayName,

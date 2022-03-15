@@ -2,7 +2,6 @@
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
@@ -38,10 +37,6 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<Staff> Staff { get; set; }
         DbSet<Student> Students { get; set; }
         DbSet<StudentWholeAbsence> WholeAbsences { get; set; }
-        DbSet<StoredFile> StoredFiles { get; set; }
-        DbSet<CanvasAssignment> CanvasAssignments { get; set; }
-        DbSet<CanvasAssignmentSubmission> CanvasAssignmentsSubmissions { get; set; }
 
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }
 }

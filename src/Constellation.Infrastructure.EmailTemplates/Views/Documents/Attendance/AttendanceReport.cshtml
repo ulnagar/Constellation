@@ -90,9 +90,45 @@
         .right-align {
             text-align: right;
         }
+
+        .heading-row {
+            display: block;
+            font-weight: bold;
+            text-align: center;
+            margin-left: 6.25%;
+            margin-top: 1.5em;
+        }
+
+        .legend {
+            display: block;
+            margin-left: 6.25%;
+        }
+
+        .legend-box {
+            float: left;
+            padding-right: 1.5em;
+        }
     </style>
 </head>
 <body>
+    <div class="row">
+        <div class="heading-row">Legend:</div>
+        <div class="legend">
+            <div class="legend-box">
+                <img src="@Model.GreenLightIcon" height="50px" width="50px" />
+                All Absences Explained
+            </div>
+            <div class="legend-box">
+                <img src="@Model.YellowLightIcon" height="50px" width="50px" />
+                Some Absences Explained
+            </div>
+            <div class="legend-box">
+                <img src="@Model.RedLightIcon" height="50px" width="50px" />
+                No Absences Explained
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="offset-1 col-10">
             <h2>Week A</h2>
@@ -145,6 +181,22 @@
                                             }
                                         }
                                     </td>
+                                    <td>
+                                        @{
+                                            if (periodAbsences.All(a => a.Explained))
+                                            {
+                                                <img src="@Model.GreenLightIcon" height="50px" width="50px" />
+                                            }
+                                            else if (periodAbsences.All(a => !a.Explained))
+                                            {
+                                                <img src="@Model.RedLightIcon" height="50px" width="50px" />
+                                            }
+                                            else
+                                            {
+                                                <img src="@Model.YellowLightIcon" height="50px" width="50px" />
+                                            }
+                                        }
+                                    </td>
                                 </tr>
                             }
                         </table>
@@ -157,9 +209,29 @@
                 }
             </div>
         }
+    </div>
+    
+    <div style="page-break-after: always; border: none;"></div>
 
-        <div style="page-break-after: always; border: none;"></div>
+    <div class="row">
+        <div class="heading-row">Legend:</div>
+        <div class="legend">
+            <div class="legend-box">
+                <img src="@Model.GreenLightIcon" height="50px" width="50px" />
+                All Absences Explained
+            </div>
+            <div class="legend-box">
+                <img src="@Model.YellowLightIcon" height="50px" width="50px" />
+                Some Absences Explained
+            </div>
+            <div class="legend-box">
+                <img src="@Model.RedLightIcon" height="50px" width="50px" />
+                No Absences Explained
+            </div>
+        </div>
+    </div>
 
+    <div class="row">
         <div class="offset-1 col-10">
             <h2>Week B</h2>
         </div>
@@ -208,6 +280,22 @@
                                             else
                                             {
                                                 <strong>Student was marked present for the entire lesson</strong>
+                                            }
+                                        }
+                                    </td>
+                                    <td>
+                                        @{
+                                            if (periodAbsences.All(a => a.Explained))
+                                            {
+                                                <img src="@Model.GreenLightIcon" height="50px" width="50px" />
+                                            }
+                                            else if (periodAbsences.All(a => !a.Explained))
+                                            {
+                                                <img src="@Model.RedLightIcon" height="50px" width="50px" />
+                                            }
+                                            else
+                                            {
+                                                <img src="@Model.YellowLightIcon" height="50px" width="50px" />
                                             }
                                         }
                                     </td>
