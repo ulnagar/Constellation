@@ -1,0 +1,33 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.Test.Pages.SubmitModel
+
+<form method="post" enctype="multipart/form-data">
+    <input asp-for="SubmittedFile" />
+    <button type="Submit">Submit</button>
+</form>
+
+<table class="table table-striped data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Size</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var file in Model.Files)
+        {
+            <tr>
+                <form asp-page-handler="DownloadFile">
+                <td><input type="hidden" name="FileId" value="@file.Id" /></td>
+                <td>@file.Name</td>
+                <td>@file.FileType</td>
+                <td>@file.Size</td>
+                <td><button type="submit" class="btn btn-sm btn-success btn-show-hover">Download</button></td>
+                </form>
+            </tr>
+        }
+    </tbody>
+</table>
