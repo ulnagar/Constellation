@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Persistence
@@ -46,6 +47,14 @@ namespace Constellation.Infrastructure.Persistence
         public DbSet<CanvasOperation> CanvasOperations { get; set; }
         public DbSet<ClassworkNotification> ClassworkNotifications { get; set; }
         public DbSet<JobActivation> JobActivations { get; set; }
+        public DbSet<StoredFile> StoredFiles { get; set; }
+        public DbSet<CanvasAssignment> CanvasAssignments { get; set; }
+        public DbSet<CanvasAssignmentSubmission> CanvasAssignmentsSubmissions { get; set; }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+        {
+            return base.SaveChangesAsync(cancellationToken);
+        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -53,7 +62,5 @@ namespace Constellation.Infrastructure.Persistence
 
             base.OnModelCreating(builder);
         }
-
-
     }
 }
