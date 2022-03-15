@@ -18,7 +18,9 @@
 
     public CourseDto SelectedCourse { get; set; }
 
-    
+    public ICollection<CanvasAssignmentDto> Assignments { get; set; }
+
+    public CanvasAssignmentDto SelectedAssignment { get; set; }
 
     // Allow user to select:
     // 1. A Student
@@ -37,6 +39,30 @@
         } else
         {
             Students = new List<StudentDto>();
+        }
+    }
+
+    private async Task GetCoursesForSelectedStudent()
+    {
+        if (SelectedStudent != null)
+        {
+            var courses = await mediator.Send(new GetCoursesForStudentQuery { StudentId = SelectedStudent.StudentId });
+            Courses = courses.OrderBy(course => course.Name).ToList();
+        } else
+        {
+            Courses = new List<CourseDto>();
+        }
+    }
+
+    private async Task GetAssignmentsForSelectedCourse()
+    {
+        if (SelectedCourse != null)
+        {
+            var assignments = await mediator.Send(new GetAssignmentsForCourseQuery { CourseId = SelectedCourse.Id });
+            Assignments = assignments.OrderBy(assignment => assignment.DueDate);
+        } else
+        {
+            Assignments = new List<CanvasAssignmentDto>();
         }
     }
 }
