@@ -1,0 +1,42 @@
+﻿@page "/Exams/"
+@attribute [Authorize]
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IMediator mediator
+
+<h1>Exam Uploads!</h1>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+
+    public ICollection<StudentDto> Students { get; set; }
+
+    public StudentDto SelectedStudent { get; set; }
+
+    public ICollection<CourseDto> Courses { get; set; }
+
+    public CourseDto SelectedCourse { get; set; }
+
+    
+
+    // Allow user to select:
+    // 1. A Student
+    // 2. A Course the student is enrolled in
+    // 3. An Assessment from that course
+    //
+    // Then:
+    // 4. Upload a file to be submitted to the assessment as the student
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SelectedSchool != null)
+        {
+            var students = await mediator.Send(new GetStudentsFromSchoolQuery { SchoolCode = SelectedSchool.Code });
+            Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();    
+        } else
+        {
+            Students = new List<StudentDto>();
+        }
+    }
+}
