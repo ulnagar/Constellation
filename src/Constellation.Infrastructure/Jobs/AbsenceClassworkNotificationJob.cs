@@ -42,7 +42,8 @@ namespace Constellation.Infrastructure.Jobs
                 var absenceDate = group.Key.Date;
                 var offeringId = group.Key.OfferingId;
 
-                var teachers = group.First().Offering.Sessions.Select(session => session.Teacher).Distinct().ToList();
+                // Make sure to filter out cancelled sessions and deleted teachers
+                var teachers = group.First().Offering.Sessions.Where(session => !session.IsDeleted).Select(session => session.Teacher).Where(teacher => !teacher.IsDeleted).Distinct().ToList();
                 var students = group.Select(absence => absence.Student).Distinct().ToList();
                 var offering = group.First().Offering;
 

@@ -127,7 +127,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .Include(absence => absence.Responses)
                 .Include(absence => absence.Offering)
                 .ThenInclude(offering => offering.Course)
-                .Where(absence => absence.StudentId == studentId) // && absence.Date.Year == DateTime.Now.Year)
+                .Where(absence => absence.StudentId == studentId && absence.Date.Year == DateTime.Now.Year)
                 .ToListAsync();
         }
 
