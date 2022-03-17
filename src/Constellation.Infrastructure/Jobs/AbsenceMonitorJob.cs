@@ -62,7 +62,7 @@ namespace Constellation.Infrastructure.Jobs
             }
 
             //var students = await _unitOfWork.Students.ForAbsenceScan();
-            _logger.LogInformation($"Found {students.Count} students to scan.");
+            _logger.LogInformation("Found {students} students to scan.", students.Count);
 
             students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
 
@@ -107,7 +107,7 @@ namespace Constellation.Infrastructure.Jobs
                         }
 
                         foreach (var email in recipients)
-                            _logger.LogInformation($"  Message sent via Email to {email} for Partial Absence on {absences.First().Date.ToShortDateString()}");
+                            _logger.LogInformation("  Message sent via Email to {email} for Partial Absence on {Date}", email, absences.First().Date.ToShortDateString());
                     }
 
                     var recentWholeAbsences = absences.Where(absence =>
@@ -130,7 +130,7 @@ namespace Constellation.Infrastructure.Jobs
                                 if (sentMessages == null)
                                 {
                                     // SMS Gateway failed. Send via email instead.
-                                    _logger.LogWarning($"  SMS Sending Failed! Fallback to Email notifications.");
+                                    _logger.LogWarning("  SMS Sending Failed! Fallback to Email notifications.");
 
                                     if (emailAddresses.Any())
                                     {
@@ -149,10 +149,10 @@ namespace Constellation.Infrastructure.Jobs
                                         }
 
                                         foreach (var email in emailAddresses)
-                                            _logger.LogInformation($"  Message sent via Email to {email} for Whole Absence on {absences.First().Date.ToShortDateString()}");
+                                            _logger.LogInformation("  Message sent via Email to {email} for Whole Absence on {Date}", email, absences.First().Date.ToShortDateString());
                                     } else
                                     {
-                                        _logger.LogError($"  Email addresses not found! Parents have not been notified!");
+                                        _logger.LogError("  Email addresses not found! Parents have not been notified!");
                                     }
                                 }
 
@@ -172,7 +172,7 @@ namespace Constellation.Infrastructure.Jobs
                                     }
 
                                     foreach (var number in phoneNumbers)
-                                        _logger.LogInformation($"  Message sent via SMS to {number} for Whole Absence on {absences.First().Date.ToShortDateString()}");
+                                        _logger.LogInformation("  Message sent via SMS to {number} for Whole Absence on {Date}", number, absences.First().Date.ToShortDateString());
                                 }
                             }
                             else if (emailAddresses.Any())
@@ -192,7 +192,7 @@ namespace Constellation.Infrastructure.Jobs
                                 }
 
                                 foreach (var email in emailAddresses)
-                                    _logger.LogInformation($"  Message sent via Email to {email} for Whole Absence on {absences.First().Date.ToShortDateString()}");
+                                    _logger.LogInformation("  Message sent via Email to {email} for Whole Absence on {Date}", email, absences.First().Date.ToShortDateString());
                             }
                             else
                             {
@@ -238,7 +238,7 @@ namespace Constellation.Infrastructure.Jobs
 
                             foreach (var address in emailAddresses)
                             {
-                                _logger.LogInformation($"  Parent digest sent to {address} for {student.DisplayName}");
+                                _logger.LogInformation("  Parent digest sent to {address} for {student}", address, student.DisplayName);
                             }
                         }
                         else
@@ -274,7 +274,7 @@ namespace Constellation.Infrastructure.Jobs
                             });
                         }
 
-                        _logger.LogInformation($"  School digest sent to {student.School.Name} for {student.DisplayName}");
+                        _logger.LogInformation("  School digest sent to {School} for {student}", student.School.Name, student.DisplayName);
                     }
                 }
             }

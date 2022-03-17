@@ -40,7 +40,7 @@ namespace Constellation.Infrastructure.Jobs
             _student = student;
             _appSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
-            _logger.LogInformation($" Scanning student {student.DisplayName} ({student.CurrentGrade})");
+            _logger.LogInformation(" Scanning student {student} ({grade})", student.DisplayName, student.CurrentGrade);
 
             var returnAbsences = new List<Absence>();
 
@@ -215,9 +215,9 @@ namespace Constellation.Infrastructure.Jobs
                             {
                                 // Add the absence to the database
                                 if (newAbsence.Explained)
-                                    _logger.LogInformation($"  Found new externally explained {newAbsence.Type} absence on {newAbsence.Date.ToShortDateString()} - {newAbsence.PeriodName}");
+                                    _logger.LogInformation("  Found new externally explained {Type} absence on {Date} - {PeriodName}", newAbsence.Type, newAbsence.Date.ToShortDateString(), newAbsence.PeriodName);
                                 else
-                                    _logger.LogInformation($"  Found new unexplained {newAbsence.Type} absence on {newAbsence.Date.ToShortDateString()} - {newAbsence.PeriodName} - {newAbsence.AbsenceReason}");
+                                    _logger.LogInformation("  Found new unexplained {Type} absence on {Date} - {PeriodName} - {AbsenceReason}", newAbsence.Type, newAbsence.Date.ToShortDateString(), newAbsence.PeriodName, newAbsence.AbsenceReason);
 
                                 returnAbsences.Add(newAbsence);
                             }
@@ -299,7 +299,7 @@ namespace Constellation.Infrastructure.Jobs
             // Excluded absences (either dates that are not valid, or length below thresholds):
             if (absence.MinutesAbsent == 5)
             {
-                _logger.LogInformation($"  Found absence below Sentral threshold on {absence.Date.ToShortDateString()} - {absence.Period} - {absence.Reason}");
+                _logger.LogInformation("  Found absence below Sentral threshold on {Date} - {Period} - {Reason}", absence.Date.ToShortDateString(), absence.Period, absence.Reason);
                 return null;
             }
 
@@ -569,9 +569,9 @@ namespace Constellation.Infrastructure.Jobs
             if (IsNewAbsence(absenceRecord, _student, _appSettings.DiscountedWholeReasons))
             {
                 if (absenceRecord.Explained)
-                    _logger.LogInformation($"  Found new externally explained {absenceRecord.Type} absence on {absenceRecord.Date.ToShortDateString()} - {absenceRecord.PeriodName}");
+                    _logger.LogInformation("  Found new externally explained {Type} absence on {Date} - {PeriodName}", absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName);
                 else
-                    _logger.LogInformation($"  Found new unexplained {absenceRecord.Type} absence on {absenceRecord.Date.ToShortDateString()} - {absenceRecord.PeriodName} - {absenceRecord.AbsenceReason}");
+                    _logger.LogInformation("  Found new unexplained {Type} absence on {Date} - {PeriodName} - {AbsenceReason}", absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName, absenceRecord.AbsenceReason);
 
                 return absenceRecord;
             }
@@ -665,7 +665,7 @@ namespace Constellation.Infrastructure.Jobs
                     // If the new absence is explained with an accepted reason, and the existing absences are not, then update them to signify they were changed on Sentral
                     if (existingAbsences.All(innerabsence => !innerabsence.Explained) && acceptedReasons.Contains(absence.AbsenceReason))
                     {
-                        _logger.LogInformation($"  Found external explaination for {absence.Type} absence on {absence.Date.ToShortDateString()} - {absence.PeriodName}");
+                        _logger.LogInformation("  Found external explaination for {Type} absence on {Date} - {PeriodName}", absence.Type, absence.Date.ToShortDateString(), absence.PeriodName);
                         existingAbsence.ExternallyExplained = true;
                         existingAbsence.ExternalExplanation = absence.ExternalExplanation;
                         existingAbsence.ExternalExplanationSource = absence.ExternalExplanationSource;

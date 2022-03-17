@@ -31,7 +31,7 @@ namespace Constellation.Infrastructure.Jobs
 
         public async Task StartJob(DateTime scanDate)
         {
-            _logger.LogInformation($"Starting missed classwork notifications scan:");
+            _logger.LogInformation("Starting missed classwork notifications scan:");
 
             var absences = await _unitOfWork.Absences.ForClassworkNotifications(scanDate);
 
@@ -77,7 +77,7 @@ namespace Constellation.Infrastructure.Jobs
                     _unitOfWork.Add(notification);
                     await _unitOfWork.CompleteAsync();
 
-                    _logger.LogInformation($" Sending email for {notification.Offering.Name} @ {notification.AbsenceDate.ToShortDateString()}");
+                    _logger.LogInformation(" Sending email for {Offering} @ {AbsenceDate}", notification.Offering.Name, notification.AbsenceDate.ToShortDateString());
                     foreach (var teacher in teachers)
                         _logger.LogInformation($"  {teacher.DisplayName} - {teacher.EmailAddress}");
 
@@ -100,7 +100,7 @@ namespace Constellation.Infrastructure.Jobs
                     // entry accordingly. Then, if the teacher has already responded, send the student/parent email
                     // with the details of work required.
 
-                    _logger.LogInformation($" Found existing entry for {notification.Offering.Name} @ {notification.AbsenceDate.ToShortDateString()}");
+                    _logger.LogInformation(" Found existing entry for {Offering} @ {AbsenceDate}", notification.Offering.Name, notification.AbsenceDate.ToShortDateString());
 
                     var newAbsences = new List<Absence>();
 
@@ -110,7 +110,7 @@ namespace Constellation.Infrastructure.Jobs
                         {
                             newAbsences.Add(absence);
 
-                            _logger.LogInformation($"  Adding {absence.Student.DisplayName} to the existing entry");
+                            _logger.LogInformation("  Adding {Student} to the existing entry", absence.Student.DisplayName);
                         }
                     }
 
