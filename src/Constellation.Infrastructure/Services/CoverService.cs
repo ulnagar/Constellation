@@ -20,15 +20,17 @@ namespace Constellation.Infrastructure.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailService _emailService;
         private readonly IPDFService _pdfService;
+        private readonly IRazorViewToStringRenderer _razorService;
         private readonly IOperationService _operationService;
 
         public CoverService(IUnitOfWork unitOfWork, IOperationService operationService,
-            IEmailService emailService, IPDFService pdfService)
+            IEmailService emailService, IPDFService pdfService, IRazorViewToStringRenderer razorService)
         {
             _unitOfWork = unitOfWork;
             _operationService = operationService;
             _emailService = emailService;
             _pdfService = pdfService;
+            _razorService = razorService;
         }
 
         public async Task<ServiceOperationResult<ICollection<ClassCover>>> BulkCreateCovers(CoverDto coverResource)
@@ -649,9 +651,9 @@ namespace Constellation.Infrastructure.Services
                     Students = offering.Enrolments.Where(enrol => !enrol.IsDeleted).Select(CoverRollViewModel.EnrolledStudent.ConvertFromEnrolment).ToList()
                 };
 
-                //var htmlString = await _razorService.RenderViewToStringAsync("/Views/Documents/Covers/CoverRoll.cshtml", model);
+                var htmlString = await _razorService.RenderViewToStringAsync("/Views/Documents/Covers/CoverRoll.cshtml", model);
 
-                //resource.Attachments.Add(_pdfService.StringToPdfAttachment(htmlString, $"{cover.Offering.Name} Roll.pdf"));
+                resource.Attachments.Add(_pdfService.StringToPdfAttachment(htmlString, $"{cover.Offering.Name} Roll.pdf"));
             }
 
             return resource;
