@@ -74,7 +74,7 @@ namespace Constellation.Infrastructure.Gateways
         /// <returns>Task</returns>
         public async Task<SMSMessageCollectionDto> SendSmsAsync(Object payload)
         {
-            var messageId = new Guid();
+            var messageId = Guid.NewGuid();
             _logger.LogInformation("{id}: Sending SMS {sms}", messageId, payload);
 
             try

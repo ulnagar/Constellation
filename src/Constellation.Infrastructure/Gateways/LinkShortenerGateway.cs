@@ -35,7 +35,7 @@ namespace Constellation.Infrastructure.Gateways
 
         public async Task<string> ShortenURL(string url)
         {
-            var requestId = new Guid();
+            var requestId = Guid.NewGuid();
             _logger.LogInformation("{id}: Attempting to shorten url : {url}", requestId, url);
 
             var linkInfo = new DynamicLink();
@@ -43,7 +43,7 @@ namespace Constellation.Infrastructure.Gateways
             linkInfo.dynamicLinkInfo.link = url;
             linkInfo.suffix.option = DynamicLinkSuffix.Short;
 
-            _logger.LogInformation("{id}: Using object : {object}", requestId, linkInfo);
+            _logger.LogInformation("{id}: Using object : {object}", requestId, JsonConvert.SerializeObject(linkInfo));
             var response = await _client.PostAsJsonAsync($"{_settings.ApiEndpoint}?key={_settings.ApiKey}", linkInfo);
             if (response.IsSuccessStatusCode)
             {
