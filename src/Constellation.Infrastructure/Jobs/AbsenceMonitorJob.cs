@@ -78,7 +78,8 @@ namespace Constellation.Infrastructure.Jobs
                     if (string.IsNullOrWhiteSpace(student.SentralStudentId))
                     continue;
 
-                    var phoneNumbers = await _sentralService.GetContactNumbersAsync(student.SentralStudentId);
+                    //var phoneNumbers = await _sentralService.GetContactNumbersAsync(student.SentralStudentId);
+                    var phoneNumbers = new List<string>();
                     var emailAddresses = await _sentralService.GetContactEmailsAsync(student.SentralStudentId);
 
                     var recentPartialAbsences = absences.Where(absence =>
