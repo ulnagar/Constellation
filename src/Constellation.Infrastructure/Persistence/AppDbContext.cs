@@ -4,8 +4,10 @@ using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Persistence
@@ -54,6 +56,19 @@ namespace Constellation.Infrastructure.Persistence
             base.OnModelCreating(builder);
         }
 
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+        {
+            return base.SaveChangesAsync(cancellationToken);
+        }
 
+        public override EntityEntry Attach(object entity)
+        {
+            return base.Attach(entity);
+        }
+
+        public override EntityEntry Entry(object entity)
+        {
+            return base.Entry(entity);
+        }
     }
 }

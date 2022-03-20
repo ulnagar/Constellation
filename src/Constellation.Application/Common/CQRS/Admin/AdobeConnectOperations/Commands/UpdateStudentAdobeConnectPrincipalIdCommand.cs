@@ -2,10 +2,6 @@
 using Constellation.Core.Models;
 using FluentValidation;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,8 +35,10 @@ namespace Constellation.Application.Common.CQRS.Admin.AdobeConnectOperations.Com
         {
             var record = new Student { StudentId = request.StudentId, AdobeConnectPrincipalId = request.PrincipalId };
             _context.Attach(record);
-            _context.Entry(record).Property(r => r.AdobeConnectPrincipalId).IsModified = true;
-            _context.SaveChangesAsync();
+            _context.Entry(record).Property("AdobeConnectPrincipalId").IsModified = true;
+            await _context.SaveChangesAsync();
+
+            return Unit.Value;
         }
     }
 }

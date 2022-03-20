@@ -1,4 +1,5 @@
-﻿using Constellation.Application.Common.CQRS.Admin.AdobeConnectOperations.Queries;
+﻿using Constellation.Application.Common.CQRS.Admin.AdobeConnectOperations.Commands;
+using Constellation.Application.Common.CQRS.Admin.AdobeConnectOperations.Queries;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
@@ -156,13 +157,7 @@ namespace Constellation.Infrastructure.Services
 
                 if (!string.IsNullOrWhiteSpace(acPID))
                 {
-                    var studentResource = new StudentDto
-                    {
-                        AdobeConnectPrincipalId = acPID
-                    };
-
-                    await _studentService.UpdateStudent(student.StudentId, studentResource);
-
+                    await _mediator.Send(new UpdateStudentAdobeConnectPrincipalIdCommand { StudentId = student.StudentId, PrincipalId = acPID });
                     returnList.Add(new AdobeConnectUserDetailDto { ScoId = acPID, UserId = student.StudentId, UserType = "Students", DisplayName = student.DisplayName });
                 }
             }

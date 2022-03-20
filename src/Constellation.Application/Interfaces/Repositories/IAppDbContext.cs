@@ -2,6 +2,8 @@
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
@@ -38,5 +40,8 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<Student> Students { get; set; }
         DbSet<StudentWholeAbsence> WholeAbsences { get; set; }
 
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken());
+        EntityEntry Attach(object entity);
+        EntityEntry Entry(object entity);
     }
 }
