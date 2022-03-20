@@ -214,7 +214,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
         public async Task<ICollection<Student>> WithoutAdobeConnectDetailsForUpdate()
         {
             return await _context.Students
-                .Where(student => string.IsNullOrWhiteSpace(student.AdobeConnectPrincipalId))
+                .Where(student => string.IsNullOrWhiteSpace(student.AdobeConnectPrincipalId) && !student.IsDeleted)
                 .ToListAsync();
         }
 

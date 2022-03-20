@@ -1,4 +1,5 @@
-﻿using Constellation.Application.DTOs;
+﻿using Constellation.Application.Common.CQRS.Admin.AdobeConnectOperations.Queries;
+using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -6,6 +7,7 @@ using Constellation.Application.Models;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,10 +24,12 @@ namespace Constellation.Infrastructure.Services
         private readonly IStudentService _studentService;
         private readonly IStaffService _staffService;
         private readonly ICasualService _casualService;
+        private readonly IMediator _mediator;
 
         public AdobeConnectService(IUnitOfWork unitOfWork, IAdobeConnectGateway adobeConnectServer,
             IAdobeConnectRoomService roomService, IStudentService studentService,
-            IStaffService staffService, ICasualService casualService)
+            IStaffService staffService, ICasualService casualService,
+            IMediator mediator)
         {
             _unitOfWork = unitOfWork;
 
@@ -34,6 +38,7 @@ namespace Constellation.Infrastructure.Services
             _studentService = studentService;
             _staffService = staffService;
             _casualService = casualService;
+            _mediator = mediator;
         }
 
         public async Task<string> CreateRoom(CourseOffering offering)
@@ -143,7 +148,7 @@ namespace Constellation.Infrastructure.Services
         {
             var returnList = new List<AdobeConnectUserDetailDto>();
 
-            var students = await _unitOfWork.Students.WithoutAdobeConnectDetailsForUpdate();
+            var students = await _mediator.Send(new GetStudentsWithoutAdobeConnectPrincipalIdQuery());
 
             foreach (var student in students)
             {
