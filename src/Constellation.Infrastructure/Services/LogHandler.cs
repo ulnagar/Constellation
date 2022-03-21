@@ -34,9 +34,10 @@ namespace Constellation.Infrastructure.Services
                 case LogSeverity.Critical:
                     _logger.LogCritical(message);
                     break;
+                default:
+                    _logger.LogInformation(message);
+                    break;
             }
-
-            _logger.LogInformation(message);
         }
 
         public ICollection<string> GetLogHistory()
