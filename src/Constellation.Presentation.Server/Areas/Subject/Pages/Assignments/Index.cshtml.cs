@@ -1,7 +1,7 @@
+using Constellation.Application.Common.CQRS.Subject.Assignments.Queries;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
-using System;
+using MediatR;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,53 +10,21 @@ namespace Constellation.Presentation.Server.Areas.Subject.Pages.Assignments
     public class IndexModel : BasePageModel
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMediator _mediator;
 
-        public IndexModel(IUnitOfWork unitOfWork)
+        public IndexModel(IUnitOfWork unitOfWork, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
+            _mediator = mediator;
         }
 
-        public ICollection<AssignmentDto> Assignments { get; set; }
+        public ICollection<AssignmentForList> Assignments { get; set; }
 
         public async Task OnGet()
         {
             await GetClasses(_unitOfWork);
 
-            //Assignments = await _unitOfWork.
-        }
-
-        public class AssignmentDto
-        {
-            public Guid Id { get; set; }
-            public string CourseName { get; set; }
-            public string Name { get; set; }
-            public DateTime DueDate { get; set; }
-            public DateTime? LockDate { get; set; }
-            public DateTime? UnlockDate { get; set; }
-            public int AllowedAttempts { get; set; }
-
-            public static AssignmentDto ConvertFromCanvasAssignment(CanvasAssignment assignment)
-            {
-                var viewModel = new AssignmentDto
-                {
-                    Id = assignment.Id,
-                    Name = assignment.Name,
-                    DueDate = assignment.DueDate,
-                    LockDate = assignment.LockDate,
-                    UnlockDate = assignment.UnlockDate,
-                    AllowedAttempts = assignment.AllowedAttempts
-                };
-
-                if (assignment.Course != null)
-                {
-                    viewModel.CourseName = $"{assignment.Course.Grade} {assignment.Course.Name}";
-                } else
-                {
-                    viewModel.CourseName = "";
-                }
-
-                return viewModel;
-            }
+            Assignments = await _mediator.Send(new GetAssignmentsQuery());
         }
     }
 }

@@ -1,4 +1,32 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Subject.Pages.Assignments.IndexModel
-@{
-}
+
+<h2>Canvas Assignments</h2>
+
+<a asp-area="Subject" asp-page="/Assignments/Create" class="btn btn-primary">Create New</a>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Class Name</th>
+        <th>Assignment Name</th>
+        <th>DueDate</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Assignments)
+        {
+            <tr>
+                <td></td>
+                <td>@Html.DisplayFor(model => item.CourseName)</td>
+                <td>@Html.DisplayFor(model => item.Name)</td>
+                <td>@Html.DisplayFor(model => item.DueDate, "ShortDate")</td>
+                <td></td>
+            </tr>
+        }
+    </tbody>
+</table>
