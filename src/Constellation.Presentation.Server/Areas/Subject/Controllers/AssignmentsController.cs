@@ -1,0 +1,94 @@
+﻿using Constellation.Application.Common.CQRS.Subject.Assignments.Queries;
+using Constellation.Application.Common.CQRS.Subject.Courses.Queries;
+using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Models.Identity;
+using Constellation.Presentation.Server.Areas.Subject.Models.Assignments;
+using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Server.Helpers.Attributes;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Constellation.Presentation.Server.Areas.Subject.Controllers
+{
+    [Area("Subject")]
+    [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.User)]
+    public class AssignmentsController : BaseController
+    {
+        private readonly IMediator _mediator;
+
+        public AssignmentsController(IUnitOfWork unitOfWork, IMediator mediator)
+            : base(unitOfWork)
+        {
+            _mediator = mediator;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var viewModel = await CreateViewModel<IndexViewModel>();
+            viewModel.Assignments = await _mediator.Send(new GetAssignmentsQuery());
+
+            return View(viewModel);
+        }
+
+        [Route("Create/Step1")]
+        public async Task<IActionResult> Create_Step1()
+        {
+            var viewModel = await CreateViewModel<CreateViewModel>();
+            var courses = await _mediator.Send(new GetCoursesForDropdownSelectionQuery());
+            viewModel.CoursesList = new SelectList(courses, nameof(CourseForDropdownSelection.Id), nameof(CourseForDropdownSelection.DisplayName), null, nameof(CourseForDropdownSelection.Faculty));
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [Route("Create/Step2")]
+        public async Task<IActionResult> Create_Step2(CreateViewModel viewModel)
+        {
+            await UpdateViewModel(viewModel);
+
+            var courses = await _mediator.Send(new GetCoursesForDropdownSelectionQuery());
+            //viewModel.CoursesList = new SelectList(courses, nameof(CourseForDropdownSelection.Id), nameof(CourseForDropdownSelection.DisplayName), null, nameof(CourseForDropdownSelection.Faculty));
+            viewModel.CourseName = courses.FirstOrDefault(course => course.Id == viewModel.Command.CourseId)?.DisplayName;
+
+            viewModel.Assignments = await _mediator.Send(new GetAssignmentsFromCourseForDropdownSelectionQuery { CourseId = viewModel.Command.CourseId });
+            viewModel.AssignmentsList = viewModel.Assignments.Select(a => new SelectListItem { Text = a.Name, Value = a.CanvasId.ToString(), Disabled = a.ExistsInDatabase }).ToList();
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [Route("Create/Step3")]
+        public async Task<IActionResult> Create_Step3(CreateViewModel viewModel)
+        {
+            await UpdateViewModel(viewModel);
+
+            var courses = await _mediator.Send(new GetCoursesForDropdownSelectionQuery());
+            //viewModel.CoursesList = new SelectList(courses, nameof(CourseForDropdownSelection.Id), nameof(CourseForDropdownSelection.DisplayName), null, nameof(CourseForDropdownSelection.Faculty));
+            viewModel.CourseName = courses.FirstOrDefault(course => course.Id == viewModel.Command.CourseId)?.DisplayName;
+
+            viewModel.Assignments = await _mediator.Send(new GetAssignmentsFromCourseForDropdownSelectionQuery { CourseId = viewModel.Command.CourseId });
+            //viewModel.AssignmentsList = new SelectList(viewModel.Assignments, nameof(AssignmentFromCourseForDropdownSelection.CanvasId), nameof(AssignmentFromCourseForDropdownSelection.Name));
+
+            var selectedAssignment = viewModel.Assignments.FirstOrDefault(assignment => assignment.CanvasId == viewModel.Command.CanvasId);
+
+            viewModel.Command.Name = selectedAssignment.Name;
+            viewModel.Command.DueDate = selectedAssignment.DueDate;
+            viewModel.Command.LockDate = selectedAssignment.LockDate;
+            viewModel.Command.UnlockDate = selectedAssignment.UnlockDate;
+            viewModel.Command.AllowedAttempts = selectedAssignment.AllowedAttempts;
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create_Step4(CreateViewModel viewModel)
+        {
+            await _mediator.Send(viewModel.Command);
+
+            return RedirectToAction("Index");
+        }
+    }
+}

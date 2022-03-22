@@ -8,6 +8,7 @@ namespace Constellation.Application.DTOs
         public Guid Id { get; set; }
         public int? CourseId { get; set; }
         public string Name { get; set; }
+        public int CanvasId { get; set; }
         public DateTime DueDate { get; set; }
         public DateTime? LockDate { get; set; }
         public DateTime? UnlockDate { get; set; }

@@ -107,8 +107,8 @@ namespace Constellation.Presentation.Server
             services.AddMainAppAuthentication(Configuration);
 #endif
 
-            services.AddMvc().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddRazorPages();
+            services.AddMvc().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             //services.AddServerSideBlazor();
 
             services.AddHangfire(c => c.UseSqlServerStorage(Configuration.GetConnectionString("Hangfire")));

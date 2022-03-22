@@ -42,27 +42,27 @@
         }
     }
 
-    private async Task GetCoursesForSelectedStudent()
-    {
-        if (SelectedStudent != null)
-        {
-            var courses = await mediator.Send(new GetCoursesForStudentQuery { StudentId = SelectedStudent.StudentId });
-            Courses = courses.OrderBy(course => course.Name).ToList();
-        } else
-        {
-            Courses = new List<CourseDto>();
-        }
-    }
+    //private async Task GetCoursesForSelectedStudent()
+    //{
+    //    if (SelectedStudent != null)
+    //    {
+    //        var courses = await mediator.Send(new GetCoursesForStudentQuery { StudentId = SelectedStudent.StudentId });
+    //        Courses = courses.OrderBy(course => course.Name).ToList();
+    //    } else
+    //    {
+    //        Courses = new List<CourseDto>();
+    //    }
+    //}
 
-    private async Task GetAssignmentsForSelectedCourse()
-    {
-        if (SelectedCourse != null)
-        {
-            var assignments = await mediator.Send(new GetAssignmentsForCourseQuery { CourseId = SelectedCourse.Id });
-            Assignments = assignments.OrderBy(assignment => assignment.DueDate);
-        } else
-        {
-            Assignments = new List<CanvasAssignmentDto>();
-        }
-    }
+    //private async Task GetAssignmentsForSelectedCourse()
+    //{
+    //    if (SelectedCourse != null)
+    //    {
+    //        var assignments = await mediator.Send(new GetAssignmentsForCourseQuery { CourseId = SelectedCourse.Id });
+    //        Assignments = assignments.OrderBy(assignment => assignment.DueDate);
+    //    } else
+    //    {
+    //        Assignments = new List<CanvasAssignmentDto>();
+    //    }
+    //}
 }

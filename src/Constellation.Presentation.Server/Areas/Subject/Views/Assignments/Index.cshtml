@@ -1,9 +1,8 @@
-﻿@page
-@model Constellation.Presentation.Server.Areas.Subject.Pages.Assignments.IndexModel
+﻿@model Constellation.Presentation.Server.Areas.Subject.Models.Assignments.IndexViewModel
 
 <h2>Canvas Assignments</h2>
 
-<a asp-area="Subject" asp-page="/Assignments/Create" class="btn btn-primary">Create New</a>
+<a asp-area="Subject" asp-controller="Assignments" asp-action="Create_Step1" class="btn btn-primary">Create New</a>
 
 <hr />
 
@@ -21,8 +20,7 @@
         @foreach (var item in Model.Assignments)
         {
             <tr>
-                <td></td>
-                <td>@Html.DisplayFor(model => item.CourseName)</td>
+                <td>@Html.DisplayFor(model => item.CourseDisplayName)</td>
                 <td>@Html.DisplayFor(model => item.Name)</td>
                 <td>@Html.DisplayFor(model => item.DueDate, "ShortDate")</td>
                 <td></td>

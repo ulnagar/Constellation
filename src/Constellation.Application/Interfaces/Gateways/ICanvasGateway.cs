@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using Constellation.Application.DTOs;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Gateways
 {
@@ -10,5 +12,6 @@ namespace Constellation.Application.Interfaces.Gateways
         Task<bool> ReactivateUser(string UserId);
         Task<bool> UnenrolUser(string UserId, string CourseId);
         Task<bool> DeleteUser(string UserId);
+        Task<List<CanvasAssignmentDto>> GetAllCourseAssignments(string CourseId);
     }
 }

@@ -1,24 +1,23 @@
-﻿@page
-@model Constellation.Presentation.Server.Areas.Subject.Pages.Assignments.CreateModel
+﻿@model Constellation.Presentation.Server.Areas.Subject.Models.Assignments.CreateViewModel
 
 <h2>Canvas Assignments</h2>
 
 <hr />
 
-<form method="post">
+<form asp-area="Subject" asp-controller="Assignments" asp-action="Create_Step2" method="post">
     <div class="form-horizontal">
 
         <div class="form-group row">
             <label asp-for="Command.CourseId" class="col-md-2">Course</label>
             <div class="col-md-3">
-                <select asp-for="SelectedCourseId" asp-items="Model.CoursesList"></select>
+                <select asp-for="Command.CourseId" asp-items="Model.CoursesList" class="form-control"></select>
                 <span asp-validation-for="Command.CourseId" class="text-danger"></span>
             </div>
         </div>
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-3">
-                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                <input type="submit" value="Next" class="btn btn-primary btn-block btn-lg" />
             </div>
         </div>
     </div>

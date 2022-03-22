@@ -1,4 +1,6 @@
-﻿using Constellation.Application.Interfaces.GatewayConfigurations;
+﻿using Constellation.Application.Common.CQRS.Subject.Assignments.Queries;
+using Constellation.Application.DTOs;
+using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Infrastructure.DependencyInjection;
 using Newtonsoft.Json;
@@ -137,6 +139,36 @@ namespace Constellation.Infrastructure.Gateways
             var assignments = JsonConvert.DeserializeObject<List<AssignmentResult>>(responseText);
 
             return assignments;
+        }
+
+        public async Task<List<CanvasAssignmentDto>> GetAllCourseAssignments(string CourseId)
+        {
+            var path = $"courses/sis_course_id:{CourseId}/assignments";
+
+            var response = await RequestAsync(path, HttpVerb.Get);
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            var responseText = await response.Content.ReadAsStringAsync();
+
+            var assignments = JsonConvert.DeserializeObject<List<AssignmentResult>>(responseText);
+
+            var returnData = new List<CanvasAssignmentDto>();
+
+            foreach (var assignment in assignments.Where(a => a.IsPublished && a.SubmissionTypes.Contains("online_upload")))
+            {
+                returnData.Add(new CanvasAssignmentDto
+                {
+                    CanvasId = assignment.Id,
+                    Name = assignment.Name,
+                    DueDate = (assignment.DueDate.HasValue ? assignment.DueDate.Value : DateTime.Today),
+                    LockDate = assignment.LockDate,
+                    UnlockDate = assignment.UnlockDate,
+                    AllowedAttempts = assignment.AllowedAttempts
+                });
+            }
+
+            return returnData;
         }
 
         public async Task<bool> CreateUser(string UserId, string FirstName, string LastName, string LoginEmail, string UserEmail)
@@ -407,19 +439,23 @@ namespace Constellation.Infrastructure.Gateways
             /// The date the assignment is due.
             /// </summary>
             [JsonProperty("due_at")]
-            public DateTime DueDate { get; set; }
+            public DateTime? DueDate { get; set; }
             /// <summary>
             /// The date after which submissions are accepted.
             /// </summary>
             [JsonProperty("unlock_at")]
-            public DateTime UnlockDate { get; set; }
+            public DateTime? UnlockDate { get; set; }
             /// <summary>
             /// The date after which no more submission are accepted.
             /// </summary>
             [JsonProperty("lock_at")]
-            public DateTime LockDate { get; set; }
+            public DateTime? LockDate { get; set; }
             [JsonProperty("allowed_attempts")]
             public int AllowedAttempts { get; set; }
+            [JsonProperty("submission_types")]
+            public ICollection<string> SubmissionTypes { get; set; }
+            [JsonProperty("published")]
+            public bool IsPublished { get; set; }
         }
     }
 }

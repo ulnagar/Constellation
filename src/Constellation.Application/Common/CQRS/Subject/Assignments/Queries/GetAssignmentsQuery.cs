@@ -21,6 +21,8 @@ namespace Constellation.Application.Common.CQRS.Subject.Assignments.Queries
     {
         public Guid Id { get; set; }
         public string CourseName { get; set; }
+        public string CourseGrade { get; set; }
+        public string CourseDisplayName => $"{CourseGrade} {CourseName}";
         public string Name { get; set; }
         public DateTime DueDate { get; set; }
         public DateTime? LockDate { get; set; }

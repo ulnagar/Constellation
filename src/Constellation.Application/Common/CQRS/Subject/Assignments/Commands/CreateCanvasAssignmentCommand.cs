@@ -3,6 +3,7 @@ using Constellation.Core.Models;
 using FluentValidation;
 using MediatR;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,8 +14,18 @@ namespace Constellation.Application.Common.CQRS.Subject.Assignments.Commands
         public int CourseId { get; set; }
         public string Name { get; set; }
         public int CanvasId { get; set; }
+
+        [Required]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime DueDate { get; set; }
+        [Required]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime? LockDate { get; set; }
+        [Required]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime? UnlockDate { get; set; }
         public int AllowedAttempts { get; set; }
     }

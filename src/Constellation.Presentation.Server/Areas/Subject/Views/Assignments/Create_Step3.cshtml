@@ -1,0 +1,72 @@
+﻿@model Constellation.Presentation.Server.Areas.Subject.Models.Assignments.CreateViewModel
+
+<h2>Canvas Assignments</h2>
+
+<hr />
+
+<form asp-area="Subject" asp-controller="Assignments" asp-action="Create_Step4" method="post">
+    <div class="form-horizontal">
+        <input type="hidden" asp-for="Command.CourseId" />
+        <input type="hidden" asp-for="Command.CanvasId" />
+
+        <div class="form-group row">
+            <label asp-for="Command.CourseId" class="col-md-2">Course</label>
+            <div class="col-md-3">
+                <span>@Model.CourseName</span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Command.Name" class="col-md-2">Assignment</label>
+            <div class="col-md-3">
+                <input asp-for="Command.Name" class="form-control" />
+                <span asp-validation-for="Command.Name" class="text-danger"></span>
+            </div>
+        </div>
+
+        <span class="text-danger">NOTE: The following options will not change the assignment settings in Canvas!</span>
+
+        <div class="form-group row">
+            <label asp-for="Command.DueDate" class="col-md-2">Due Date</label>
+            <div class="col-md-3">
+                <input asp-for="Command.DueDate" class="form-control" />
+                <span asp-validation-for="Command.DueDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Command.UnlockDate" class="col-md-2">Unlock Date</label>
+            <div class="col-md-3">
+                <input asp-for="Command.UnlockDate" class="form-control" />
+                <span asp-validation-for="Command.UnlockDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Command.LockDate" class="col-md-2">Lock Date</label>
+            <div class="col-md-3">
+                <input asp-for="Command.LockDate" class="form-control" />
+                <span asp-validation-for="Command.LockDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Command.AllowedAttempts" class="col-md-2">Allowed Attempts</label>
+            <div class="col-md-3">
+                <input asp-for="Command.AllowedAttempts" class="form-control" />
+                <span asp-validation-for="Command.AllowedAttempts" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}
