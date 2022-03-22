@@ -60,11 +60,9 @@ namespace Constellation.Infrastructure.Jobs
                 
                 students.AddRange(gradeStudents);
             }
-
-            //var students = await _unitOfWork.Students.ForAbsenceScan();
-            _logger.LogInformation("Found {students} students to scan.", students.Count);
-
             students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+
+            _logger.LogInformation("Found {students} students to scan.", students.Count);
 
             foreach (var student in students)
             {
@@ -76,107 +74,134 @@ namespace Constellation.Infrastructure.Jobs
                     await _unitOfWork.CompleteAsync();
 
                     if (string.IsNullOrWhiteSpace(student.SentralStudentId))
-                    continue;
+                        continue;
 
-                    //var phoneNumbers = await _sentralService.GetContactNumbersAsync(student.SentralStudentId);
-                    var phoneNumbers = new List<string>();
-                    var emailAddresses = await _sentralService.GetContactEmailsAsync(student.SentralStudentId);
+                    await SendStudentNotifications(student, absences);
+                    await SendParentNotifications(student, absences);
+                }
 
-                    var recentPartialAbsences = absences.Where(absence =>
-                            absence.Explained == false &&
-                            absence.Type == Absence.Partial &&
-                            absence.DateScanned.Date == DateTime.Today)
+                if (DateTime.Now.DayOfWeek == DayOfWeek.Monday)
+                {
+                    await SendParentDigests(student);
+                    await SendCoordinatorDigests(student);
+                }
+            }
+
+            await _classworkNotifier.StartJob(DateTime.Today);
+
+            await _unitOfWork.CompleteAsync();
+        }
+
+        private async Task SendCoordinatorDigests(Student student)
+        {
+            var coordinatorDigestAbsences = student.Absences
+                        .Where(absence =>
+                            !absence.Explained &&
+                            absence.Type == Absence.Whole &&
+                            absence.DateScanned >= DateTime.Today.AddDays(-14) &&
+                            absence.DateScanned <= DateTime.Today.AddDays(-8))
                         .ToList();
 
-                    // Send emails to students
-                    if (recentPartialAbsences.Any())
+            if (coordinatorDigestAbsences.Any())
+            {
+                var message = await _emailService.SendCoordinatorWholeAbsenceDigest(coordinatorDigestAbsences);
+
+                if (message == null)
+                    return;
+
+                foreach (var absence in coordinatorDigestAbsences)
+                {
+                    absence.Notifications.Add(new AbsenceNotification
                     {
-                        var recipients = new List<string> { student.EmailAddress };
+                        Type = AbsenceNotification.Email,
+                        Message = message.message,
+                        SentAt = DateTime.Now,
+                        Recipients = "School Contacts",
+                        OutgoingId = message.id
+                    });
+                }
 
-                        var sentEmail = await _emailService.SendStudentPartialAbsenceExplanationRequest(recentPartialAbsences, recipients);
+                _logger.LogInformation("  School digest sent to {School} for {student}", student.School.Name, student.DisplayName);
+            }
 
-                        foreach (var absence in recentPartialAbsences)
+            coordinatorDigestAbsences = null;
+        }
+
+        private async Task SendParentDigests(Student student)
+        {
+            var parentDigestAbsences = student.Absences
+                        .Where(absence =>
+                            !absence.Explained &&
+                            absence.Type == Absence.Whole &&
+                            absence.DateScanned >= DateTime.Today.AddDays(-7) &&
+                            absence.DateScanned <= DateTime.Today.AddDays(-1))
+                        .ToList();
+
+            if (parentDigestAbsences.Any())
+            {
+                var emailAddresses = await _sentralService.GetContactEmailsAsync(student.SentralStudentId);
+
+                if (emailAddresses.Any())
+                {
+                    var sentmessage = await _emailService.SendParentWholeAbsenceDigest(parentDigestAbsences, emailAddresses);
+
+                    if (sentmessage == null)
+                        return;
+
+                    foreach (var absence in parentDigestAbsences)
+                    {
+                        absence.Notifications.Add(new AbsenceNotification
                         {
-                            absence.Notifications.Add(new AbsenceNotification
-                            {
-                                Type = AbsenceNotification.Email,
-                                Message = sentEmail.message,
-                                SentAt = DateTime.Now,
-                                Recipients = sentEmail.recipients,
-                                OutgoingId = sentEmail.id
-                            });
-                        }
-
-                        foreach (var email in recipients)
-                            _logger.LogInformation("  Message sent via Email to {email} for Partial Absence on {Date}", email, absences.First().Date.ToShortDateString());
+                            Type = AbsenceNotification.Email,
+                            Message = sentmessage.message,
+                            SentAt = DateTime.Now,
+                            Recipients = string.Join(", ", emailAddresses),
+                            OutgoingId = sentmessage.id
+                        });
                     }
 
-                    var recentWholeAbsences = absences.Where(absence =>
-                            absence.Explained == false &&
-                            absence.Type == Absence.Whole &&
-                            absence.DateScanned.Date == DateTime.Today)
-                        .ToList();
-
-                    // Send SMS or emails to parents
-                    if (recentWholeAbsences.Any())
+                    foreach (var address in emailAddresses)
                     {
-                        var groupedAbsences = recentWholeAbsences.GroupBy(absence => absence.Date).ToList();
+                        _logger.LogInformation("  Parent digest sent to {address} for {student}", address, student.DisplayName);
+                    }
+                }
+                else
+                {
+                    await _emailService.SendAdminAbsenceContactAlert(student);
+                }
+            }
 
-                        foreach (var group in groupedAbsences)
+            parentDigestAbsences = null;
+        }
+
+        private async Task SendParentNotifications(Student student, ICollection<Absence> absences)
+        {
+            var phoneNumbers = await _sentralService.GetContactNumbersAsync(student.SentralStudentId);
+            var emailAddresses = await _sentralService.GetContactEmailsAsync(student.SentralStudentId);
+
+            var recentWholeAbsences = absences.Where(absence =>
+                                        absence.Explained == false &&
+                                        absence.Type == Absence.Whole &&
+                                        absence.DateScanned.Date == DateTime.Today)
+                                    .ToList();
+
+            // Send SMS or emails to parents
+            if (recentWholeAbsences.Any())
+            {
+                var groupedAbsences = recentWholeAbsences.GroupBy(absence => absence.Date).ToList();
+
+                foreach (var group in groupedAbsences)
+                {
+                    if (phoneNumbers.Any() && group.Key.Date == DateTime.Today.AddDays(-1).Date)
+                    {
+                        var sentMessages = await _smsService.SendAbsenceNotificationAsync(group.ToList(), phoneNumbers);
+
+                        if (sentMessages == null)
                         {
-                            if (phoneNumbers.Any() && group.Key.Date == DateTime.Today.AddDays(-1).Date)
-                            {
-                                var sentMessages = await _smsService.SendAbsenceNotificationAsync(group.ToList(), phoneNumbers);
+                            // SMS Gateway failed. Send via email instead.
+                            _logger.LogWarning("  SMS Sending Failed! Fallback to Email notifications.");
 
-                                if (sentMessages == null)
-                                {
-                                    // SMS Gateway failed. Send via email instead.
-                                    _logger.LogWarning("  SMS Sending Failed! Fallback to Email notifications.");
-
-                                    if (emailAddresses.Any())
-                                    {
-                                        var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses);
-
-                                        foreach (var absence in group)
-                                        {
-                                            absence.Notifications.Add(new AbsenceNotification
-                                            {
-                                                Type = AbsenceNotification.Email,
-                                                Message = message.message,
-                                                SentAt = DateTime.Now,
-                                                Recipients = string.Join(", ", emailAddresses),
-                                                OutgoingId = message.id
-                                            });
-                                        }
-
-                                        foreach (var email in emailAddresses)
-                                            _logger.LogInformation("  Message sent via Email to {email} for Whole Absence on {Date}", email, absences.First().Date.ToShortDateString());
-                                    } else
-                                    {
-                                        _logger.LogError("  Email addresses not found! Parents have not been notified!");
-                                    }
-                                }
-
-                                // Once the message has been sent, add it to the database.
-                                if (sentMessages.Messages.Count > 0)
-                                {
-                                    foreach (var absence in group)
-                                    {
-                                        absence.Notifications.Add(new AbsenceNotification
-                                        {
-                                            Type = AbsenceNotification.SMS,
-                                            SentAt = DateTime.Now,
-                                            Message = sentMessages.Messages.First().MessageBody,
-                                            Recipients = string.Join(", ", phoneNumbers),
-                                            OutgoingId = sentMessages.Messages.First().OutgoingId
-                                        });
-                                    }
-
-                                    foreach (var number in phoneNumbers)
-                                        _logger.LogInformation("  Message sent via SMS to {number} for Whole Absence on {Date}", number, absences.First().Date.ToShortDateString());
-                                }
-                            }
-                            else if (emailAddresses.Any())
+                            if (emailAddresses.Any())
                             {
                                 var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses);
 
@@ -197,92 +222,92 @@ namespace Constellation.Infrastructure.Jobs
                             }
                             else
                             {
-                                await _emailService.SendAdminAbsenceContactAlert(student);
+                                _logger.LogError("  Email addresses not found! Parents have not been notified!");
                             }
                         }
-                    }
 
-                }
-
-                if (DateTime.Now.DayOfWeek == DayOfWeek.Monday)
-                {
-                    var parentDigestAbsences = student.Absences
-                        .Where(absence =>
-                            !absence.Explained &&
-                            absence.Type == Absence.Whole &&
-                            absence.DateScanned >= DateTime.Today.AddDays(-7) &&
-                            absence.DateScanned <= DateTime.Today.AddDays(-1))
-                        .ToList();
-
-                    if (parentDigestAbsences.Any())
-                    {
-                        var emailAddresses = await _sentralService.GetContactEmailsAsync(student.SentralStudentId);
-
-                        if (emailAddresses.Any())
+                        // Once the message has been sent, add it to the database.
+                        if (sentMessages.Messages.Count > 0)
                         {
-                            var sentmessage = await _emailService.SendParentWholeAbsenceDigest(parentDigestAbsences, emailAddresses);
-
-                            if (sentmessage == null)
-                                continue;
-
-                            foreach (var absence in parentDigestAbsences)
+                            foreach (var absence in group)
                             {
                                 absence.Notifications.Add(new AbsenceNotification
                                 {
-                                    Type = AbsenceNotification.Email,
-                                    Message = sentmessage.message,
+                                    Type = AbsenceNotification.SMS,
                                     SentAt = DateTime.Now,
-                                    Recipients = string.Join(", ", emailAddresses),
-                                    OutgoingId = sentmessage.id
+                                    Message = sentMessages.Messages.First().MessageBody,
+                                    Recipients = string.Join(", ", phoneNumbers),
+                                    OutgoingId = sentMessages.Messages.First().OutgoingId
                                 });
                             }
 
-                            foreach (var address in emailAddresses)
-                            {
-                                _logger.LogInformation("  Parent digest sent to {address} for {student}", address, student.DisplayName);
-                            }
-                        }
-                        else
-                        {
-                            await _emailService.SendAdminAbsenceContactAlert(student);
+                            foreach (var number in phoneNumbers)
+                                _logger.LogInformation("  Message sent via SMS to {number} for Whole Absence on {Date}", number, absences.First().Date.ToShortDateString());
                         }
                     }
-
-                    var coordinatorDigestAbsences = student.Absences
-                        .Where(absence =>
-                            !absence.Explained &&
-                            absence.Type == Absence.Whole &&
-                            absence.DateScanned >= DateTime.Today.AddDays(-14) &&
-                            absence.DateScanned <= DateTime.Today.AddDays(-8))
-                        .ToList();
-
-                    if (coordinatorDigestAbsences.Any())
+                    else if (emailAddresses.Any())
                     {
-                        var message = await _emailService.SendCoordinatorWholeAbsenceDigest(coordinatorDigestAbsences);
+                        var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses);
 
-                        if (message == null)
-                            continue;
-
-                        foreach (var absence in coordinatorDigestAbsences)
+                        foreach (var absence in group)
                         {
                             absence.Notifications.Add(new AbsenceNotification
                             {
                                 Type = AbsenceNotification.Email,
                                 Message = message.message,
                                 SentAt = DateTime.Now,
-                                Recipients = "School Contacts",
+                                Recipients = string.Join(", ", emailAddresses),
                                 OutgoingId = message.id
                             });
                         }
 
-                        _logger.LogInformation("  School digest sent to {School} for {student}", student.School.Name, student.DisplayName);
+                        foreach (var email in emailAddresses)
+                            _logger.LogInformation("  Message sent via Email to {email} for Whole Absence on {Date}", email, absences.First().Date.ToShortDateString());
+                    }
+                    else
+                    {
+                        await _emailService.SendAdminAbsenceContactAlert(student);
                     }
                 }
+
+                groupedAbsences = null;
             }
 
-            await _classworkNotifier.StartJob(DateTime.Today);
+            recentWholeAbsences = null;
+        }
 
-            await _unitOfWork.CompleteAsync();
+        private async Task SendStudentNotifications(Student student, ICollection<Absence> absences)
+        {
+            var recentPartialAbsences = absences.Where(absence =>
+                                        absence.Explained == false &&
+                                        absence.Type == Absence.Partial &&
+                                        absence.DateScanned.Date == DateTime.Today)
+                                    .ToList();
+
+            // Send emails to students
+            if (recentPartialAbsences.Any())
+            {
+                var recipients = new List<string> { student.EmailAddress };
+
+                var sentEmail = await _emailService.SendStudentPartialAbsenceExplanationRequest(recentPartialAbsences, recipients);
+
+                foreach (var absence in recentPartialAbsences)
+                {
+                    absence.Notifications.Add(new AbsenceNotification
+                    {
+                        Type = AbsenceNotification.Email,
+                        Message = sentEmail.message,
+                        SentAt = DateTime.Now,
+                        Recipients = sentEmail.recipients,
+                        OutgoingId = sentEmail.id
+                    });
+                }
+
+                foreach (var email in recipients)
+                    _logger.LogInformation("  Message sent via Email to {email} for Partial Absence on {Date}", email, absences.First().Date.ToShortDateString());
+            }
+
+            recentPartialAbsences = null;
         }
     }
 }

@@ -226,6 +226,9 @@ namespace Constellation.Infrastructure.Jobs
                 }
             }
 
+            pxpAbsences = null;
+            attendanceAbsences = null;
+
             return returnAbsences;
         }
 
