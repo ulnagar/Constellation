@@ -17,7 +17,6 @@ namespace Constellation.Application.Common.Behaviours
             _validators = validators;
         }
 
-        //TODO: Figure out how to have validation failures return error to user instead of WASM reload state.
         public Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
             var context = new ValidationContext<TRequest>(request);

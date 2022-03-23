@@ -57,7 +57,7 @@ namespace Constellation.Application.Common.CQRS.Subject.Assignments.Queries
                 .FirstOrDefaultAsync(offering => offering.CourseId == request.CourseId && offering.EndDate >= DateTime.Now, cancellationToken);
 
             if (offering == null)
-                return null;
+                return new List<AssignmentFromCourseForDropdownSelection>();
 
             var canvasCourseId = $"{offering.EndDate.Year}-{offering.Name.Substring(0, offering.Name.Length - 1)}";
 

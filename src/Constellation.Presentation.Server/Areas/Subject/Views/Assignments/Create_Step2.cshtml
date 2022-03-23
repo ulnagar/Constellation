@@ -2,7 +2,16 @@
 
 <h2>Canvas Assignments</h2>
 
+<a asp-area="Subject" asp-controller="Assignments" asp-action="Create_Step1" class="btn btn-warning">Reset</a>
+
 <hr />
+
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+    <h1 class="display-4">Step 2</h1>
+    <p class="lead">Select the assignment from Canvas that you wish to add.</p>
+    </div>
+</div>
 
 <form asp-area="Subject" asp-controller="Assignments" asp-action="Create_Step3" method="post">
     <div class="form-horizontal">
@@ -18,8 +27,14 @@
         <div class="form-group row">
             <label asp-for="Command.CanvasId" class="col-md-2">Assignment</label>
             <div class="col-md-3">
-                <select asp-for="Command.CanvasId" asp-items="Model.AssignmentsList" class="form-control"></select>
-                <span asp-validation-for="Command.CanvasId" class="text-danger"></span>
+                @if (Model.AssignmentsList.Count == 0)
+                {
+                    <span>No Valid Assignments found!</span>
+                } else
+                {
+                    <select asp-for="Command.CanvasId" asp-items="Model.AssignmentsList" class="form-control"></select>
+                    <span asp-validation-for="Command.CanvasId" class="text-danger"></span>    
+                }
             </div>
         </div>
 

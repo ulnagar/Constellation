@@ -18,15 +18,15 @@ namespace Constellation.Application.Common.CQRS.Subject.Assignments.Commands
         [Required]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-        public DateTime DueDate { get; set; }
+        public DateTime DueDate { get; set; } = DateTime.Now;
         [Required]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-        public DateTime? LockDate { get; set; }
+        public DateTime? LockDate { get; set; } = DateTime.Now;
         [Required]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-        public DateTime? UnlockDate { get; set; }
+        public DateTime? UnlockDate { get; set; } = DateTime.Now;
         public int AllowedAttempts { get; set; }
     }
 
@@ -34,6 +34,9 @@ namespace Constellation.Application.Common.CQRS.Subject.Assignments.Commands
     {
         public CreateCanvasAssignmentCommandValidator()
         {
+            RuleFor(command => command.DueDate).GreaterThanOrEqualTo(DateTime.Today);
+            RuleFor(command => command.UnlockDate).LessThanOrEqualTo(command => command.DueDate);
+            RuleFor(command => command.LockDate).GreaterThanOrEqualTo(command => command.UnlockDate);
         }
     }
 

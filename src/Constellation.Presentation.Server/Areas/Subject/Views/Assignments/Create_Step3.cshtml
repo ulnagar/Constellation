@@ -4,6 +4,15 @@
 
 <hr />
 
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+    <h1 class="display-4">Step 3</h1>
+    <p class="lead">Check and update the assignment information from Canvas.</p>
+    <p class="text-danger">Please note: changing the settings here does not change the assignment settings in Canvas!</p>
+    </div>
+</div>
+
+
 <form asp-area="Subject" asp-controller="Assignments" asp-action="Create_Step4" method="post">
     <div class="form-horizontal">
         <input type="hidden" asp-for="Command.CourseId" />
@@ -23,8 +32,6 @@
                 <span asp-validation-for="Command.Name" class="text-danger"></span>
             </div>
         </div>
-
-        <span class="text-danger">NOTE: The following options will not change the assignment settings in Canvas!</span>
 
         <div class="form-group row">
             <label asp-for="Command.DueDate" class="col-md-2">Due Date</label>
