@@ -50,10 +50,20 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             await UpdateViewModel(viewModel);
 
             var courses = await _mediator.Send(new GetCoursesForDropdownSelectionQuery());
-            //viewModel.CoursesList = new SelectList(courses, nameof(CourseForDropdownSelection.Id), nameof(CourseForDropdownSelection.DisplayName), null, nameof(CourseForDropdownSelection.Faculty));
             viewModel.CourseName = courses.FirstOrDefault(course => course.Id == viewModel.Command.CourseId)?.DisplayName;
 
-            viewModel.Assignments = await _mediator.Send(new GetAssignmentsFromCourseForDropdownSelectionQuery { CourseId = viewModel.Command.CourseId });
+            var canvasAssignments = await _mediator.Send(new GetAssignmentsFromCourseForDropdownSelectionQuery { CourseId = viewModel.Command.CourseId });
+            if (!canvasAssignments.IsValidResponse)
+            {
+                viewModel.CoursesList = new SelectList(courses, nameof(CourseForDropdownSelection.Id), nameof(CourseForDropdownSelection.DisplayName), null, nameof(CourseForDropdownSelection.Faculty));
+
+                foreach (var error in canvasAssignments.Errors)
+                    ModelState.AddModelError("", error);
+
+                return View("Create_Step1", viewModel);
+            }
+
+            viewModel.Assignments = canvasAssignments.Result;
             viewModel.AssignmentsList = viewModel.Assignments.Select(a => new SelectListItem { Text = a.Name, Value = a.CanvasId.ToString(), Disabled = a.ExistsInDatabase }).ToList();
 
             return View(viewModel);
@@ -66,11 +76,10 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             await UpdateViewModel(viewModel);
 
             var courses = await _mediator.Send(new GetCoursesForDropdownSelectionQuery());
-            //viewModel.CoursesList = new SelectList(courses, nameof(CourseForDropdownSelection.Id), nameof(CourseForDropdownSelection.DisplayName), null, nameof(CourseForDropdownSelection.Faculty));
             viewModel.CourseName = courses.FirstOrDefault(course => course.Id == viewModel.Command.CourseId)?.DisplayName;
 
-            viewModel.Assignments = await _mediator.Send(new GetAssignmentsFromCourseForDropdownSelectionQuery { CourseId = viewModel.Command.CourseId });
-            //viewModel.AssignmentsList = new SelectList(viewModel.Assignments, nameof(AssignmentFromCourseForDropdownSelection.CanvasId), nameof(AssignmentFromCourseForDropdownSelection.Name));
+            var canvasAssignments = await _mediator.Send(new GetAssignmentsFromCourseForDropdownSelectionQuery { CourseId = viewModel.Command.CourseId });
+            viewModel.Assignments = canvasAssignments.Result;
 
             var selectedAssignment = viewModel.Assignments.FirstOrDefault(assignment => assignment.CanvasId == viewModel.Command.CanvasId);
 
@@ -86,7 +95,27 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         [HttpPost]
         public async Task<IActionResult> Create_Step4(CreateViewModel viewModel)
         {
-            await _mediator.Send(viewModel.Command);
+            var result = await _mediator.Send(viewModel.Command);
+
+            if (!result.IsValidResponse)
+            {
+                await UpdateViewModel(viewModel);
+
+                var courses = await _mediator.Send(new GetCoursesForDropdownSelectionQuery());
+                viewModel.CourseName = courses.FirstOrDefault(course => course.Id == viewModel.Command.CourseId)?.DisplayName;
+
+                var canvasAssignments = await _mediator.Send(new GetAssignmentsFromCourseForDropdownSelectionQuery { CourseId = viewModel.Command.CourseId });
+                viewModel.Assignments = canvasAssignments.Result;
+
+                var selectedAssignment = viewModel.Assignments.FirstOrDefault(assignment => assignment.CanvasId == viewModel.Command.CanvasId);
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error);
+                }
+
+                return View("Create_Step3", viewModel);
+            }
 
             return RedirectToAction("Index");
         }

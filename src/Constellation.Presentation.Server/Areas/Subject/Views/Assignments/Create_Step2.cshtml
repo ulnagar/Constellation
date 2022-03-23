@@ -16,6 +16,7 @@
 <form asp-area="Subject" asp-controller="Assignments" asp-action="Create_Step3" method="post">
     <div class="form-horizontal">
         <input type="hidden" asp-for="Command.CourseId" />
+        <div asp-validation-summary="All" class="text-danger"></div>
 
         <div class="form-group row">
             <label asp-for="Command.CourseId" class="col-md-2">Course</label>

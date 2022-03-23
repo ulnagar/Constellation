@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Constellation.Application.Common.Mapping;
+using Constellation.Application.Common.ValidationRules;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
@@ -15,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Application.Common.CQRS.Subject.Assignments.Queries
 {
-    public class GetAssignmentsFromCourseForDropdownSelectionQuery : IRequest<ICollection<AssignmentFromCourseForDropdownSelection>>
+    public class GetAssignmentsFromCourseForDropdownSelectionQuery : IRequest<ValidateableResponse<ICollection<AssignmentFromCourseForDropdownSelection>>>, IValidatable
     {
         public int CourseId { get; set; }
     }
@@ -39,7 +40,7 @@ namespace Constellation.Application.Common.CQRS.Subject.Assignments.Queries
         }
     }
 
-    public class GetAssignmentsFromCourseForDropdownSelectionQueryHandler : IRequestHandler<GetAssignmentsFromCourseForDropdownSelectionQuery, ICollection<AssignmentFromCourseForDropdownSelection>>
+    public class GetAssignmentsFromCourseForDropdownSelectionQueryHandler : IRequestHandler<GetAssignmentsFromCourseForDropdownSelectionQuery, ValidateableResponse<ICollection<AssignmentFromCourseForDropdownSelection>>>
     {
         private readonly IAppDbContext _context;
         private readonly ICanvasGateway _canvasGateway;
@@ -51,13 +52,13 @@ namespace Constellation.Application.Common.CQRS.Subject.Assignments.Queries
             _canvasGateway = canvasGateway;
             _mapper = mapper;
         }
-        public async Task<ICollection<AssignmentFromCourseForDropdownSelection>> Handle(GetAssignmentsFromCourseForDropdownSelectionQuery request, CancellationToken cancellationToken)
+        public async Task<ValidateableResponse<ICollection<AssignmentFromCourseForDropdownSelection>>> Handle(GetAssignmentsFromCourseForDropdownSelectionQuery request, CancellationToken cancellationToken)
         {
             var offering = await _context.Offerings
                 .FirstOrDefaultAsync(offering => offering.CourseId == request.CourseId && offering.EndDate >= DateTime.Now, cancellationToken);
 
             if (offering == null)
-                return new List<AssignmentFromCourseForDropdownSelection>();
+                return new ValidateableResponse<ICollection<AssignmentFromCourseForDropdownSelection>>(new List<AssignmentFromCourseForDropdownSelection>(), new List<string> { "Could not find a valid offering for this course!" });
 
             var canvasCourseId = $"{offering.EndDate.Year}-{offering.Name.Substring(0, offering.Name.Length - 1)}";
 
@@ -69,7 +70,7 @@ namespace Constellation.Application.Common.CQRS.Subject.Assignments.Queries
                 if (await _context.CanvasAssignments.AnyAsync(a => a.CanvasId == assignment.CanvasId))
                     assignment.ExistsInDatabase = true;
 
-            return assignmentDtos;
+            return new ValidateableResponse<ICollection<AssignmentFromCourseForDropdownSelection>>(assignmentDtos, null);
         }
     }
 }

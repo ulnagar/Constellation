@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Application.Common.CQRS.Partners.Schools.Commands
 {
-    public class UpsertSchool : IRequest
+    public class UpsertSchool : IRequest<ValidateableResponse>, IValidatable
     {
         public string Code { get; set; }
         public string Name { get; set; }
@@ -35,7 +35,7 @@ namespace Constellation.Application.Common.CQRS.Partners.Schools.Commands
         }
     }
 
-    public class UpsertSchoolHandler : IRequestHandler<UpsertSchool>
+    public class UpsertSchoolHandler : IRequestHandler<UpsertSchool, ValidateableResponse>
     {
         private readonly IAppDbContext _context;
 
@@ -44,7 +44,7 @@ namespace Constellation.Application.Common.CQRS.Partners.Schools.Commands
             _context = context;
         }
 
-        public async Task<Unit> Handle(UpsertSchool request, CancellationToken cancellationToken)
+        public async Task<ValidateableResponse> Handle(UpsertSchool request, CancellationToken cancellationToken)
         {
             var entity = await _context.Schools.SingleOrDefaultAsync(school => school.Code == request.Code, cancellationToken);
             var newSchool = false;
@@ -73,7 +73,7 @@ namespace Constellation.Application.Common.CQRS.Partners.Schools.Commands
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            return Unit.Value;
+            return new ValidateableResponse();
         }
     }
 }

@@ -2,6 +2,8 @@
 
 <h2>Canvas Assignments</h2>
 
+<a asp-area="Subject" asp-controller="Assignments" asp-action="Create_Step1" class="btn btn-warning">Reset</a>
+
 <hr />
 
 <div class="jumbotron jumbotron-fluid">
@@ -17,6 +19,7 @@
     <div class="form-horizontal">
         <input type="hidden" asp-for="Command.CourseId" />
         <input type="hidden" asp-for="Command.CanvasId" />
+        <div asp-validation-summary="All" class="text-danger"></div>
 
         <div class="form-group row">
             <label asp-for="Command.CourseId" class="col-md-2">Course</label>
