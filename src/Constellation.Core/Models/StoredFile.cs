@@ -4,6 +4,8 @@ namespace Constellation.Core.Models
 {
     public class StoredFile
     {
+        public const string CanvasAssignmentSubmission = "Canvas Assignment Submission";
+
         public int Id { get; set; }
         public string Name { get; set; }
         public string FileType { get; set; }

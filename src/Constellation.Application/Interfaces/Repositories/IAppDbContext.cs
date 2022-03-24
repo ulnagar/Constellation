@@ -2,6 +2,7 @@
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -43,5 +44,6 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<CanvasAssignmentSubmission> CanvasAssignmentsSubmissions { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+        DatabaseFacade Database { get; }
     }
 }

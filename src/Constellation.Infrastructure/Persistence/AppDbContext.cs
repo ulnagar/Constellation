@@ -4,6 +4,7 @@ using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Reflection;
 using System.Threading;
@@ -62,5 +63,7 @@ namespace Constellation.Infrastructure.Persistence
 
             base.OnModelCreating(builder);
         }
+
+        public override DatabaseFacade Database => base.Database;
     }
 }

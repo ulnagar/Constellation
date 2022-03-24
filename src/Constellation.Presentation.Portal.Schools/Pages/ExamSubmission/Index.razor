@@ -1,4 +1,6 @@
 ﻿@page "/Exams/"
+@using Constellation.Application.Common.CQRS.Portal.School.Assignment.Commands
+@using Constellation.Application.Common.CQRS.Portal.School.Assignment.Queries
 @attribute [Authorize]
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -6,21 +8,65 @@
 
 <h1>Exam Uploads!</h1>
 
+    <div class="row">
+        <div class="col-6 border border-info">
+            <EditForm Model="Command">
+                @if (string.IsNullOrWhiteSpace(SelectedStudentId))
+                {
+                    // Show Student Dropdown
+                } 
+                else
+                {
+                    // Show Student Name
+                }
+
+                @if (SelectedCourseId == 0 && string.IsNullOrWhiteSpace(SelectedStudentId))
+                {
+                    // Show blank space
+                } 
+                else if (SelectedCourseId == 0 && !string.IsNullOrWhiteSpace(SelectedStudentId))
+                {
+                    // Show Course Dropdown
+                } 
+                else
+                {
+                    // Show Course Name
+                }
+
+                @if (SelectedAssignmentId == new Guid() && SelectedCourseId == 0)
+                {
+                    // Show blank space
+                }
+                else if (SelectedAssignmentId == new Guid() && SelectedCourseId > 0)
+                {
+                    // Show Assignment Dropdown
+                }
+                else
+                {
+                    // Show Assignment Name
+                }
+            </EditForm>
+        </div>
+    </div>
+
+
 @code {
     [CascadingParameter]
     public SchoolDto SelectedSchool { get; set; }
 
-    public ICollection<StudentDto> Students { get; set; }
+    public ICollection<StudentFromSchoolForDropdownSelection> Students { get; set; }
 
-    public StudentDto SelectedStudent { get; set; }
+    public string SelectedStudentId { get; set; }
 
-    public ICollection<CourseDto> Courses { get; set; }
+    public ICollection<StudentCoursesForDropdownSelection> Courses { get; set; }
 
-    public CourseDto SelectedCourse { get; set; }
+    public int SelectedCourseId { get; set; }
 
-    public ICollection<CanvasAssignmentDto> Assignments { get; set; }
+    public ICollection<StudentAssignmentsForCourse> Assignments { get; set; }
 
-    public CanvasAssignmentDto SelectedAssignment { get; set; }
+    public Guid SelectedAssignmentId { get; set; }
+
+    public UploadStudentAssignmentSubmissionCommand Command { get; set; } = new UploadStudentAssignmentSubmissionCommand();
 
     // Allow user to select:
     // 1. A Student
@@ -34,35 +80,35 @@
     {
         if (SelectedSchool != null)
         {
-            var students = await mediator.Send(new GetStudentsFromSchoolQuery { SchoolCode = SelectedSchool.Code });
-            Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();    
+            var students = await mediator.Send(new GetStudentsFromSchoolForSelectionQuery { SchoolCode = SelectedSchool.Code });
+            Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
         } else
         {
-            Students = new List<StudentDto>();
+            Students = new List<StudentFromSchoolForDropdownSelection>();
         }
     }
 
-    //private async Task GetCoursesForSelectedStudent()
-    //{
-    //    if (SelectedStudent != null)
-    //    {
-    //        var courses = await mediator.Send(new GetCoursesForStudentQuery { StudentId = SelectedStudent.StudentId });
-    //        Courses = courses.OrderBy(course => course.Name).ToList();
-    //    } else
-    //    {
-    //        Courses = new List<CourseDto>();
-    //    }
-    //}
+    private async Task GetCoursesForSelectedStudent()
+    {
+        if (!string.IsNullOrWhiteSpace(SelectedStudentId))
+        {
+            var courses = await mediator.Send(new GetCoursesForStudentQuery { StudentId = SelectedStudentId });
+            Courses = courses.OrderBy(course => course.Name).ToList();
+        } else
+        {
+            Courses = new List<StudentCoursesForDropdownSelection>();
+        }
+    }
 
-    //private async Task GetAssignmentsForSelectedCourse()
-    //{
-    //    if (SelectedCourse != null)
-    //    {
-    //        var assignments = await mediator.Send(new GetAssignmentsForCourseQuery { CourseId = SelectedCourse.Id });
-    //        Assignments = assignments.OrderBy(assignment => assignment.DueDate);
-    //    } else
-    //    {
-    //        Assignments = new List<CanvasAssignmentDto>();
-    //    }
-    //}
+    private async Task GetAssignmentsForSelectedCourse()
+    {
+        if (SelectedCourseId != 0)
+        {
+            var assignments = await mediator.Send(new GetAssignmentsForCourseQuery { CourseId = SelectedCourseId });
+            Assignments = assignments.OrderBy(assignment => assignment.DueDate).ToList();
+        } else
+        {
+            Assignments = new List<StudentAssignmentsForCourse>();
+        }
+    }
 }
