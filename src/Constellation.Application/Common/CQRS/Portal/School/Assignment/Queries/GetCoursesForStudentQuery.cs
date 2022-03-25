@@ -13,12 +13,12 @@ using System.Threading.Tasks;
 
 namespace Constellation.Application.Common.CQRS.Portal.School.Assignment.Queries
 {
-    public class GetCoursesForStudentQuery : IRequest<ICollection<StudentCoursesForDropdownSelection>>
+    public class GetCoursesForStudentQuery : IRequest<ICollection<StudentCourseForDropdownSelection>>
     {
         public string StudentId { get; set; }
     }
 
-    public class StudentCoursesForDropdownSelection : IMapFrom<Course>
+    public class StudentCourseForDropdownSelection : IMapFrom<Course>
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -26,7 +26,7 @@ namespace Constellation.Application.Common.CQRS.Portal.School.Assignment.Queries
         public string DisplayName => $"{Grade} {Name}";
     }
 
-    public class GetCoursesForStudentQueryHandler : IRequestHandler<GetCoursesForStudentQuery, ICollection<StudentCoursesForDropdownSelection>>
+    public class GetCoursesForStudentQueryHandler : IRequestHandler<GetCoursesForStudentQuery, ICollection<StudentCourseForDropdownSelection>>
     {
         private readonly IAppDbContext _context;
         private readonly IMapper _mapper;
@@ -36,14 +36,15 @@ namespace Constellation.Application.Common.CQRS.Portal.School.Assignment.Queries
             _context = context;
             _mapper = mapper;
         }
-        public async Task<ICollection<StudentCoursesForDropdownSelection>> Handle(GetCoursesForStudentQuery request, CancellationToken cancellationToken)
+        public async Task<ICollection<StudentCourseForDropdownSelection>> Handle(GetCoursesForStudentQuery request, CancellationToken cancellationToken)
         {
             var courses = await _context.Enrolments
                 .Where(enrolment => 
                     enrolment.StudentId == request.StudentId &&
                     !enrolment.IsDeleted &&
                     enrolment.Offering.EndDate >= DateTime.Now)
-                .ProjectTo<StudentCoursesForDropdownSelection>(_mapper.ConfigurationProvider)
+                .Select(enrolment => enrolment.Offering.Course)
+                .ProjectTo<StudentCourseForDropdownSelection>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 
             return courses;

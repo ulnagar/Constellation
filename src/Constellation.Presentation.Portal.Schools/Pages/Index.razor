@@ -23,8 +23,8 @@
 
     public List<Claim> Claims { get; set; }
 
-    public List<StudentDto> Students { get; set; }
-    
+    public List<StudentDto> Students { get; set; } = new List<StudentDto>();
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();

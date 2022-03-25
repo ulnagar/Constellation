@@ -1,6 +1,5 @@
 ﻿@page "/Exams/"
-@using Constellation.Application.Common.CQRS.Portal.School.Assignment.Commands
-@using Constellation.Application.Common.CQRS.Portal.School.Assignment.Queries
+
 @attribute [Authorize]
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -11,40 +10,75 @@
     <div class="row">
         <div class="col-6 border border-info">
             <EditForm Model="Command">
-                @if (string.IsNullOrWhiteSpace(SelectedStudentId))
-                {
-                    // Show Student Dropdown
-                } 
-                else
-                {
-                    // Show Student Name
-                }
 
-                @if (SelectedCourseId == 0 && string.IsNullOrWhiteSpace(SelectedStudentId))
-                {
-                    // Show blank space
-                } 
-                else if (SelectedCourseId == 0 && !string.IsNullOrWhiteSpace(SelectedStudentId))
-                {
-                    // Show Course Dropdown
-                } 
-                else
-                {
-                    // Show Course Name
-                }
+                <div class="form-group row mt-3">
+                    <div class="col-3"><label>Student</label></div>
+                    <div class="col font-weight-bold">
+                        @if (SelectedStudent == null)
+                        {
+                            <select class="form-control" @onchange="SelectNewStudent">
+                                <option value="">-- Select --</option>
+                                @foreach (var student in Students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName))
+                                {
+                                    <option value="@student.StudentId">(@student.CurrentGrade) @student.DisplayName</option>
+                                }
+                            </select>
+                        } 
+                        else
+                        {
+                            <label>@SelectedStudent.DisplayName</label>
+                        }
+                    </div>
+                </div>
 
-                @if (SelectedAssignmentId == new Guid() && SelectedCourseId == 0)
-                {
-                    // Show blank space
-                }
-                else if (SelectedAssignmentId == new Guid() && SelectedCourseId > 0)
-                {
-                    // Show Assignment Dropdown
-                }
-                else
-                {
-                    // Show Assignment Name
-                }
+                <div class="form-group row mt-3">
+                    <div class="col-3"><label>Course</label></div>
+                    <div class="col font-weight-bold">
+                        @if (SelectedStudent == null)
+                        {
+                            
+                        } 
+                        else if (SelectedCourse == null && SelectedStudent != null)
+                        {
+                            <select class="form-control" @onchange="SelectNewCourse">
+                                <option value="">-- Select --</option>
+                                @foreach (var course in Courses)
+                                {
+                                <option value="@course.Id">@course.DisplayName</option>
+                                }
+                            </select>
+                        } 
+                        else
+                        {
+                            <label>@SelectedCourse.DisplayName</label>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group row mt-3">
+                    <div class="col-3"><label>Assignment</label></div>
+                    <div class="col font-weight-bold">
+                        @if (SelectedCourse == null)
+                        {
+                            
+                        } 
+                        else if (SelectedAssignment == null)
+                        {
+                            <select class="form-control" @onchange="SelectNewAssignment">
+                                <option value="">-- Select --</option>
+                                @foreach (var assignment in Assignments)
+                                {
+                                <option value="@assignment.Id">@assignment.Name (Due: @assignment.DueDate.ToShortDateString())</option>
+                                }
+                            </select>
+                        } 
+                        else
+                        {
+                            <label>@SelectedAssignment.Name (Due: @SelectedAssignment.DueDate.ToShortDateString())</label>
+                        }
+                    </div>
+                </div>
+
             </EditForm>
         </div>
     </div>
@@ -54,17 +88,17 @@
     [CascadingParameter]
     public SchoolDto SelectedSchool { get; set; }
 
-    public ICollection<StudentFromSchoolForDropdownSelection> Students { get; set; }
+    public ICollection<StudentFromSchoolForDropdownSelection> Students { get; set; } = new List<StudentFromSchoolForDropdownSelection>();
 
-    public string SelectedStudentId { get; set; }
+    public StudentFromSchoolForDropdownSelection SelectedStudent { get; set; }
 
-    public ICollection<StudentCoursesForDropdownSelection> Courses { get; set; }
+    public ICollection<StudentCourseForDropdownSelection> Courses { get; set; } = new List<StudentCourseForDropdownSelection>();
 
-    public int SelectedCourseId { get; set; }
+    public StudentCourseForDropdownSelection SelectedCourse { get; set; }
 
-    public ICollection<StudentAssignmentsForCourse> Assignments { get; set; }
+    public ICollection<StudentAssignmentForCourse> Assignments { get; set; } = new List<StudentAssignmentForCourse>();
 
-    public Guid SelectedAssignmentId { get; set; }
+    public StudentAssignmentForCourse SelectedAssignment { get; set; }
 
     public UploadStudentAssignmentSubmissionCommand Command { get; set; } = new UploadStudentAssignmentSubmissionCommand();
 
@@ -90,25 +124,58 @@
 
     private async Task GetCoursesForSelectedStudent()
     {
-        if (!string.IsNullOrWhiteSpace(SelectedStudentId))
+        if (SelectedStudent != null)
         {
-            var courses = await mediator.Send(new GetCoursesForStudentQuery { StudentId = SelectedStudentId });
+            var courses = await mediator.Send(new GetCoursesForStudentQuery { StudentId = SelectedStudent.StudentId });
             Courses = courses.OrderBy(course => course.Name).ToList();
         } else
         {
-            Courses = new List<StudentCoursesForDropdownSelection>();
+            Courses = new List<StudentCourseForDropdownSelection>();
         }
     }
 
     private async Task GetAssignmentsForSelectedCourse()
     {
-        if (SelectedCourseId != 0)
+        if (SelectedCourse != null)
         {
-            var assignments = await mediator.Send(new GetAssignmentsForCourseQuery { CourseId = SelectedCourseId });
+            var assignments = await mediator.Send(new GetAssignmentsForCourseQuery { CourseId = SelectedCourse.Id });
             Assignments = assignments.OrderBy(assignment => assignment.DueDate).ToList();
         } else
         {
-            Assignments = new List<StudentAssignmentsForCourse>();
+            Assignments = new List<StudentAssignmentForCourse>();
         }
+    }
+
+    private async Task SelectNewStudent(ChangeEventArgs e)
+    {
+        var studentId = e.Value.ToString();
+
+        SelectedStudent = Students.First(student => student.StudentId == studentId);
+
+        SelectedCourse = null;
+
+        SelectedAssignment = null;
+
+        await GetCoursesForSelectedStudent();
+    }
+
+    private async Task SelectNewCourse(ChangeEventArgs e)
+    {
+        var courseId = Int32.Parse(e.Value.ToString());
+
+        SelectedCourse = Courses.First(course => course.Id == courseId);
+
+        SelectedAssignment = null;
+
+        await GetAssignmentsForSelectedCourse();
+    }
+
+    private async Task SelectNewAssignment(ChangeEventArgs e)
+    {
+        var assignmentId = new Guid(e.Value.ToString());
+
+        SelectedAssignment = Assignments.First(assignment => assignment.Id == assignmentId);
+
+        // Show the upload box!
     }
 }

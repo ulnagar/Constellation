@@ -24,6 +24,7 @@ namespace Constellation.Application.Common.CQRS.Portal.School.Home.Queries
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string CurrentGrade { get; set; }
+        public string DisplayName => $"{FirstName} {LastName}";
     }
 
     public class GetStudentsFromSchoolForSelectionQueryHandler : IRequestHandler<GetStudentsFromSchoolForSelectionQuery, ICollection<StudentFromSchoolForDropdownSelection>>
