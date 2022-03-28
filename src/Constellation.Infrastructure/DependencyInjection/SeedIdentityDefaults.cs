@@ -1,6 +1,7 @@
 ﻿using Constellation.Application.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Constellation.Infrastructure.DependencyInjection
 {
@@ -21,58 +22,69 @@ namespace Constellation.Infrastructure.DependencyInjection
                 AuthRoles.CoverRecipient
             };
 
-            foreach (var role in roleList)
+            var existingRoles = roleManager.Roles.ToList();
+
+            foreach (var roleName in roleList)
             {
-                if (!roleManager.RoleExistsAsync(role).Result)
+                if (!existingRoles.Any(role => role.Name == roleName))
                 {
-                    var newRole = new AppRole
+                    var role = new AppRole
                     {
-                        Name = role
+                        Name = roleName
                     };
 
-                    var result = roleManager.CreateAsync(newRole).Result;
+                    var result = roleManager.CreateAsync(role).Result;
                 }
             }
         }
 
         public static void SeedUsers(UserManager<AppUser> userManager)
         {
-            var adminUser = new AppUser
-            {
-                Email = "auroracollegeitsupport@det.nsw.edu.au",
-                UserName = "auroracollegeitsupport@det.nsw.edu.au",
-                FirstName = "Admin",
-                LastName = "User",
-            };
+            var checkUser = userManager.FindByEmailAsync("auroracollegeitsupport@det.nsw.edu.au").Result;
 
-            var adminSuccess = userManager.CreateAsync(adminUser).Result;
-
-            if (adminSuccess.Succeeded)
+            if (checkUser == null)
             {
-                _ = userManager.AddToRoleAsync(adminUser, AuthRoles.Admin).Result;
-                var adminPasswordToken = userManager.GeneratePasswordResetTokenAsync(adminUser).Result;
-                var adminPasswordSuccess = userManager.ResetPasswordAsync(adminUser, adminPasswordToken, "P@ssw0rd").Result;
-                var adminEmailToken = userManager.GenerateEmailConfirmationTokenAsync(adminUser).Result;
-                _ = userManager.ConfirmEmailAsync(adminUser, adminEmailToken).Result;
+                var adminUser = new AppUser
+                {
+                    Email = "auroracollegeitsupport@det.nsw.edu.au",
+                    UserName = "auroracollegeitsupport@det.nsw.edu.au",
+                    FirstName = "Admin",
+                    LastName = "User",
+                };
+                var adminSuccess = userManager.CreateAsync(adminUser).Result;
+
+                if (adminSuccess.Succeeded)
+                {
+                    _ = userManager.AddToRoleAsync(adminUser, AuthRoles.Admin).Result;
+                    var adminPasswordToken = userManager.GeneratePasswordResetTokenAsync(adminUser).Result;
+                    var adminPasswordSuccess = userManager.ResetPasswordAsync(adminUser, adminPasswordToken, "P@ssw0rd").Result;
+                    var adminEmailToken = userManager.GenerateEmailConfirmationTokenAsync(adminUser).Result;
+                    _ = userManager.ConfirmEmailAsync(adminUser, adminEmailToken).Result;
+                }
             }
 
-            var guestUser = new AppUser
-            {
-                Email = "noemail@here.com",
-                UserName = "noemail@here.com",
-                FirstName = "Guest",
-                LastName = "User",
-            };
+            checkUser = userManager.FindByEmailAsync("noemail@here.com").Result;
 
-            var guestSuccess = userManager.CreateAsync(guestUser).Result;
-
-            if (guestSuccess.Succeeded)
+            if (checkUser == null)
             {
-                _ = userManager.AddToRoleAsync(guestUser, AuthRoles.User).Result;
-                var guestPasswordToken = userManager.GeneratePasswordResetTokenAsync(guestUser).Result;
-                var guestPasswordSuccess = userManager.ResetPasswordAsync(guestUser, guestPasswordToken, "P@ssw0rd").Result;
-                var guestEmailToken = userManager.GenerateEmailConfirmationTokenAsync(guestUser).Result;
-                _ = userManager.ConfirmEmailAsync(guestUser, guestEmailToken).Result;
+                var guestUser = new AppUser
+                {
+                    Email = "noemail@here.com",
+                    UserName = "noemail@here.com",
+                    FirstName = "Guest",
+                    LastName = "User",
+                };
+
+                var guestSuccess = userManager.CreateAsync(guestUser).Result;
+
+                if (guestSuccess.Succeeded)
+                {
+                    _ = userManager.AddToRoleAsync(guestUser, AuthRoles.User).Result;
+                    var guestPasswordToken = userManager.GeneratePasswordResetTokenAsync(guestUser).Result;
+                    var guestPasswordSuccess = userManager.ResetPasswordAsync(guestUser, guestPasswordToken, "P@ssw0rd").Result;
+                    var guestEmailToken = userManager.GenerateEmailConfirmationTokenAsync(guestUser).Result;
+                    _ = userManager.ConfirmEmailAsync(guestUser, guestEmailToken).Result;
+                }
             }
         }
     }

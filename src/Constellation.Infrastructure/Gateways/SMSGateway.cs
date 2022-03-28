@@ -2,6 +2,7 @@
 using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Infrastructure.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Net;
@@ -24,13 +25,14 @@ namespace Constellation.Infrastructure.Gateways
         private readonly string _version;
         private readonly string _key;
         private readonly string _secret;
+        private readonly ILogger<ISMSGateway> _logger;
 
         /// <summary>
         /// Initialize the SmsService
         /// </summary>
         /// <param name="key">smsglobal.com Account Key</param>
         /// <param name="secret">smsglobal.com Account Secret</param>
-        public SMSGateway(ISMSGatewayConfiguration configuration)
+        public SMSGateway(ISMSGatewayConfiguration configuration, ILogger<ISMSGateway> logger)
         {
             _host = "api.smsglobal.com";
             _port = "443";
@@ -49,6 +51,7 @@ namespace Constellation.Infrastructure.Gateways
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             _client = new HttpClient(config);
+            _logger = logger;
         }
 
         /// <summary>
@@ -71,17 +74,30 @@ namespace Constellation.Infrastructure.Gateways
         /// <returns>Task</returns>
         public async Task<SMSMessageCollectionDto> SendSmsAsync(Object payload)
         {
+            var messageId = Guid.NewGuid();
+            _logger.LogInformation("{id}: Sending SMS {sms}", messageId, payload);
+
             try
             {
                 HttpResponseMessage response = await RequestAsync("sms", payload);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("{id}: Failed to send sms with error {error}", messageId, response.ReasonPhrase);
+                } else
+                {
+                    _logger.LogInformation("{id}: Sent successfully", messageId);
+                }
 
                 var content = await response.Content.ReadAsStringAsync();
                 var collection = JsonConvert.DeserializeObject<SentMessages>(content);
 
                 return ConvertToDto(collection);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogWarning("{id}: FAILED with error {ex}", messageId, ex.Message);
+
                 var data = new SentMessages
                 {
                     messages = Array.Empty<SentMessage>()

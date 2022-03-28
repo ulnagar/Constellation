@@ -212,7 +212,12 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .Include(absence => absence.Offering.Course.HeadTeacher)
                 .Include(absence => absence.Offering.Sessions)
                 .ThenInclude(session => session.Teacher)
-                .Where(absence => absence.DateScanned == scanDate && absence.Type == Absence.Whole && absence.Offering.Course.Name != "Tutorial")
+                .Where(absence => 
+                    absence.DateScanned == scanDate && 
+                    absence.Type == Absence.Whole && 
+                    absence.Offering.Course.Name != "Tutorial" && 
+                    absence.Offering.Course.Grade != Grade.Y05 && 
+                    absence.Offering.Course.Grade != Grade.Y06)
                 .ToListAsync();
         }
 

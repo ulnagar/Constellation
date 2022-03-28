@@ -55,6 +55,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .Include(operation => ((StudentAdobeConnectOperation)operation).Student)
                 .Include(operation => ((TeacherAdobeConnectOperation)operation).Teacher)
                 .Include(operation => ((CasualAdobeConnectOperation)operation).Casual)
+                .Include(operation => ((TeacherAdobeConnectGroupOperation)operation).Teacher)
                 .Where(operation => operation.DateScheduled == DateTime.Today &&
                     operation.IsCompleted == false &&
                     operation.IsDeleted == false)
@@ -68,6 +69,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .Include(operation => ((StudentAdobeConnectOperation)operation).Student)
                 .Include(operation => ((TeacherAdobeConnectOperation)operation).Teacher)
                 .Include(operation => ((CasualAdobeConnectOperation)operation).Casual)
+                .Include(operation => ((TeacherAdobeConnectGroupOperation)operation).Teacher)
                 .Where(operation => operation.DateScheduled < DateTime.Today &&
                     operation.IsCompleted == false &&
                     operation.IsDeleted == false)

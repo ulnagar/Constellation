@@ -48,7 +48,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
             {
                 var viewModel = new LessonDto
                 {
-                    Id = roll.Lesson.Id,
+                    Id = roll.Id,
                     Name = roll.Lesson.Name,
                     CourseName = roll.Lesson.Offerings.First().Course.Name,
                     DueDate = roll.Lesson.DueDate,
