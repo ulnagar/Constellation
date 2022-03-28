@@ -39,5 +39,6 @@ namespace Constellation.Application.Interfaces.Repositories
         void Remove<TEntity>(TEntity entity) where TEntity : class;
         void Add<TEntity>(TEntity entity) where TEntity : class;
         Task CompleteAsync();
+        void ClearTrackerDb();
     }
 }

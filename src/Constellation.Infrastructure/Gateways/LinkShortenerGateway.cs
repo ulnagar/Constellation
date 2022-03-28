@@ -45,6 +45,9 @@ namespace Constellation.Infrastructure.Gateways
             linkInfo.suffix.option = DynamicLinkSuffix.Short;
 
             _logger.LogInformation("{id}: Using object : {object}", requestId, JsonConvert.SerializeObject(linkInfo));
+#if DEBUG
+            return url;
+#else
             var response = await _client.PostAsJsonAsync($"{_settings.ApiEndpoint}?key={_settings.ApiKey}", linkInfo);
             if (response.IsSuccessStatusCode)
             {
@@ -57,6 +60,7 @@ namespace Constellation.Infrastructure.Gateways
                 response.EnsureSuccessStatusCode();
                 return null;
             }
+#endif
         }
 
         private class ShortLinkInfo

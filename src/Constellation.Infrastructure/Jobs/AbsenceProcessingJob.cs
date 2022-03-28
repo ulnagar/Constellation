@@ -1,4 +1,5 @@
-﻿using Constellation.Application.DTOs;
+﻿using Constellation.Application.Common.CQRS.Jobs.AbsenceMonitor.Queries;
+using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
@@ -8,6 +9,7 @@ using Constellation.Application.Models;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -21,24 +23,27 @@ namespace Constellation.Infrastructure.Jobs
         private readonly ISentralGateway _sentralService;
         private readonly IEmailService _emailService;
         private readonly ILogger<IAbsenceMonitorJob> _logger;
+        private readonly IMediator _mediator;
         private readonly IUnitOfWork _unitOfWork;
-        private Student _student;
-        private List<DateTime> _excludedDates = new List<DateTime>(); 
+        private StudentForAbsenceScan _student;
+        private List<DateTime> _excludedDates = new(); 
         private AppSettings.AbsencesModule _appSettings;
 
         public AbsenceProcessingJob(IUnitOfWork unitOfWork, ISentralGateway sentralService,
-            IEmailService emailService, ILogger<IAbsenceMonitorJob> logger)
+            IEmailService emailService, ILogger<IAbsenceMonitorJob> logger, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _sentralService = sentralService;
             _emailService = emailService;
             _logger = logger;
+            _mediator = mediator;
         }
 
-        public async Task<ICollection<Absence>> StartJob(Student student)
+        public async Task<ICollection<Absence>> StartJob(StudentForAbsenceScan student)
         {
             _student = student;
-            _appSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
+            if (_appSettings == null)
+                _appSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
             _logger.LogInformation(" Scanning student {student} ({grade})", student.DisplayName, student.CurrentGrade);
 
@@ -55,12 +60,13 @@ namespace Constellation.Infrastructure.Jobs
                 if (string.IsNullOrWhiteSpace(sentralId))
                 {
                     // Send warning email to Technology Support Team
-                    await _emailService.SendAdminAbsenceSentralAlert(student);
+                    await _emailService.SendAdminAbsenceSentralAlert(student.DisplayName);
                     return returnAbsences;
                 }
             }
 
-            _excludedDates = await _sentralService.GetExcludedDatesFromCalendar(DateTime.Today.Year.ToString());
+            if (!_excludedDates.Any())
+                _excludedDates = await _sentralService.GetExcludedDatesFromCalendar(DateTime.Today.Year.ToString());
 
             var pxpAbsences = await _sentralService.GetAbsenceDataAsync(sentralId);
             var attendanceAbsences = await _sentralService.GetPartialAbsenceDataAsync(sentralId);
@@ -87,20 +93,12 @@ namespace Constellation.Infrastructure.Jobs
                 var cycleDay = group.Key.Date.GetDayNumber();
 
                 // Get all enrolments for this student that were active on that date using the day of the cycle we identified above
-                var courseEnrolments = student.Enrolments
-                    .Where(enrol =>
-                        enrol.DateCreated < group.Key.Date &&
-                        (!enrol.IsDeleted || enrol.DateDeleted.Value.Date > group.Key.Date) &&
-                        enrol.Offering.EndDate > group.Key.Date &&
-                        enrol.Offering.Sessions.Any(session =>
-                            session.DateCreated < group.Key.Date &&
-                            (!session.IsDeleted || session.DateDeleted.Value.Date > group.Key.Date) &&
-                            session.Period.Day == cycleDay))
-                    .ToList();
+                // Use Mediator
+                var courseEnrolments = await _mediator.Send(new GetStudentEnrolmentsForAbsenceScanQuery { StudentId = student.StudentId, InstanceDate = group.Key.Date, PeriodDay = cycleDay });
 
                 foreach (var courseEnrolment in courseEnrolments)
                 {
-                    if (!courseEnrolment.Offering.Name.Contains(group.First().ClassName))
+                    if (!courseEnrolment.Name.Contains(group.First().ClassName))
                     {
                         // The PxP absence is for a different class than the courseEnrolment
                         // therefore it should not be processed here.
@@ -110,14 +108,8 @@ namespace Constellation.Infrastructure.Jobs
                     }
 
                     // Get list of periods for this class on this day
-                    var periods = courseEnrolment.Offering
-                        .Sessions
-                        .Where(session => session.DateCreated < group.Key.Date &&
-                                          (!session.IsDeleted || session.DateDeleted.Value.Date > group.Key.Date) &&
-                                          session.Period.Day == cycleDay)
-                        .Select(session => session.Period)
-                        .OrderBy(period => period.StartTime)
-                        .ToList();
+                    // Use Mediator
+                    var periods = await _mediator.Send(new GetOfferingPeriodsForAbsenceScanQuery { OfferingId = courseEnrolment.Id, InstanceDate = group.Key.Date, PeriodDay = cycleDay });
 
                     // Find all contiguous periods
                     var periodGroups = periods.GroupConsecutive();
@@ -155,7 +147,7 @@ namespace Constellation.Infrastructure.Jobs
                         if (totalBlockMinutes == totalAbsenceTime)
                         {
                             // These absences grouped together form a Whole Absence
-                            var absenceRecord = ProcessWholeAbsence(absencesToProcess, attendanceAbsences, courseEnrolment, periodGroup.ToList(), totalAbsenceTime);
+                            var absenceRecord = await ProcessWholeAbsence(absencesToProcess, attendanceAbsences, courseEnrolment.Id, periodGroup.ToList(), totalAbsenceTime);
 
                             if (absenceRecord != null)
                             {
@@ -178,7 +170,7 @@ namespace Constellation.Infrastructure.Jobs
 
                         foreach (var absence in absencesToProcess)
                         {
-                            var absenceRecord = ProcessPartialAbsence(absence, attendanceAbsences, courseEnrolment, periodGroup.ToList());
+                            var absenceRecord = ProcessPartialAbsence(absence, attendanceAbsences, courseEnrolment.Id, periodGroup.ToList());
 
                             if (absenceRecord != null)
                                 detectedAbsences.Add(absenceRecord);
@@ -211,7 +203,7 @@ namespace Constellation.Infrastructure.Jobs
                         foreach (var newAbsence in detectedAbsences.Where(absence => absence.AbsenceLength > _appSettings.PartialLengthThreshold).ToList())
                         {
                             // Check database for all matching absences already known
-                            if (IsNewAbsence(newAbsence, student, _appSettings.DiscountedPartialReasons))
+                            if (await IsNewAbsence(newAbsence, student, _appSettings.DiscountedPartialReasons))
                             {
                                 // Add the absence to the database
                                 if (newAbsence.Explained)
@@ -223,11 +215,16 @@ namespace Constellation.Infrastructure.Jobs
                             }
                         }
                     }
+
+                    periods?.Clear();
                 }
+
+                courseEnrolments?.Clear();
             }
 
             pxpAbsences = null;
             attendanceAbsences = null;
+            _student = null;
 
             return returnAbsences;
         }
@@ -244,7 +241,7 @@ namespace Constellation.Infrastructure.Jobs
             }
         }
 
-        private void CalculatePxPAbsenceTimes(SentralPeriodAbsenceDto absence, IList<TimetablePeriod> periodGroup)
+        private static void CalculatePxPAbsenceTimes(SentralPeriodAbsenceDto absence, IList<TimetablePeriod> periodGroup)
         {
             var period = (absence.Period.Contains('S'))
                 ? periodGroup.FirstOrDefault(pg => pg.Name.Contains(absence.Period.Remove(0, 1)))
@@ -270,7 +267,7 @@ namespace Constellation.Infrastructure.Jobs
             }
         }
 
-        private void CalculateWebAttendAbsencePeriod(SentralPeriodAbsenceDto absence, IList<TimetablePeriod> periodGroup)
+        private static void CalculateWebAttendAbsencePeriod(SentralPeriodAbsenceDto absence, IList<TimetablePeriod> periodGroup)
         {
             foreach (var period in periodGroup)
             {
@@ -473,7 +470,7 @@ namespace Constellation.Infrastructure.Jobs
             };
         }
 
-        private Absence ProcessPartialAbsence(SentralPeriodAbsenceDto absence, IList<SentralPeriodAbsenceDto> webAttendAbsences, Enrolment courseEnrolment, IList<TimetablePeriod> periodGroup)
+        private Absence ProcessPartialAbsence(SentralPeriodAbsenceDto absence, IList<SentralPeriodAbsenceDto> webAttendAbsences, int courseEnrolmentId, IList<TimetablePeriod> periodGroup)
         {
             // Can we figure out when the (PxP) absence starts and ends?
             CalculatePxPAbsenceTimes(absence, periodGroup);
@@ -484,7 +481,7 @@ namespace Constellation.Infrastructure.Jobs
                 return null;
 
             // Create an object to save this data to the database.
-            var absenceRecord = CreateAbsence(new List<SentralPeriodAbsenceDto> { absence }, courseEnrolment, Absence.Partial, absence.MinutesAbsent, absence.Reason, periodGroup);
+            var absenceRecord = CreateAbsence(new List<SentralPeriodAbsenceDto> { absence }, courseEnrolmentId, Absence.Partial, absence.MinutesAbsent, absence.Reason, periodGroup);
 
             if (attendanceAbsence.Timeframe == "Whole Day")
             {
@@ -530,17 +527,17 @@ namespace Constellation.Infrastructure.Jobs
             return absenceRecord;
         }
 
-        private Absence ProcessWholeAbsence(IList<SentralPeriodAbsenceDto> absencesToProcess, IList<SentralPeriodAbsenceDto> webAttendAbsences, Enrolment courseEnrolment, IList<TimetablePeriod> periodGroup, int totalAbsenceTime)
+        private async Task<Absence> ProcessWholeAbsence(IList<SentralPeriodAbsenceDto> absencesToProcess, IList<SentralPeriodAbsenceDto> webAttendAbsences, int courseEnrolmentId, IList<TimetablePeriod> periodGroup, int totalAbsenceTime)
         {
             if (absencesToProcess.First().Date < GetEarliestDate())
                 return null;
 
             // Calculate acceptable reason
             var reasons = absencesToProcess.Select(absence => absence.Reason).Distinct().ToList();
-            var reason = (reasons.Count() == 1) ? reasons.First() : FindWorstAbsenceReason(reasons);
+            var reason = (reasons.Count == 1) ? reasons.First() : FindWorstAbsenceReason(reasons);
 
             // Create an object to save this data to the database.
-            var absenceRecord = CreateAbsence(absencesToProcess, courseEnrolment, Absence.Whole, totalAbsenceTime, reason, periodGroup);
+            var absenceRecord = CreateAbsence(absencesToProcess, courseEnrolmentId, Absence.Whole, totalAbsenceTime, reason, periodGroup);
 
             // Find a webAttend absence that covers this set
             var attendanceAbsence = SelectBestWebAttendEntryForWholeAbsence(absencesToProcess, webAttendAbsences, absenceRecord);
@@ -550,7 +547,7 @@ namespace Constellation.Infrastructure.Jobs
                 // it doesn't exist in there as an UNEXPLAINED absence, which will trigger a reminder email later.
 
                 // We don't actually care IF it is a new absence, only that existing absences will be updated with the explanation if appropriate.
-                IsNewAbsence(absenceRecord, _student, _appSettings.DiscountedWholeReasons);
+                await IsNewAbsence(absenceRecord, _student, _appSettings.DiscountedWholeReasons);
 
                 return null;
             }
@@ -569,7 +566,7 @@ namespace Constellation.Infrastructure.Jobs
             }
 
             // Detect duplicates in database and process accordingly
-            if (IsNewAbsence(absenceRecord, _student, _appSettings.DiscountedWholeReasons))
+            if (await IsNewAbsence(absenceRecord, _student, _appSettings.DiscountedWholeReasons))
             {
                 if (absenceRecord.Explained)
                     _logger.LogInformation("  Found new externally explained {Type} absence on {Date} - {PeriodName}", absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName);
@@ -614,13 +611,13 @@ namespace Constellation.Infrastructure.Jobs
             return "Unknown";
         }
 
-        private Absence CreateAbsence(IList<SentralPeriodAbsenceDto> absencesToProcess, Enrolment courseEnrolment, string type, int length, string reason, IList<TimetablePeriod> periodGroup)
+        private Absence CreateAbsence(IList<SentralPeriodAbsenceDto> absencesToProcess, int courseEnrolmentId, string type, int length, string reason, IList<TimetablePeriod> periodGroup)
         {
             var absenceRecord = new Absence
             {
                 Date = absencesToProcess.First().Date,
-                OfferingId = courseEnrolment.OfferingId,
-                StudentId = courseEnrolment.StudentId,
+                OfferingId = courseEnrolmentId,
+                StudentId = _student.StudentId,
                 Type = type,
                 AbsenceLength = length,
                 AbsenceReason = reason,
@@ -628,7 +625,7 @@ namespace Constellation.Infrastructure.Jobs
                 LastSeen = DateTime.Today
             };
 
-            if (periodGroup.Count() > 1)
+            if (periodGroup.Count > 1)
             {
                 absenceRecord.PeriodName = $"{periodGroup.First().Name} - {periodGroup.Last().Name}";
                 absenceRecord.PeriodTimeframe = $"{periodGroup.First().StartTime.As12HourTime()} - {periodGroup.Last().EndTime.As12HourTime()}";
@@ -648,18 +645,16 @@ namespace Constellation.Infrastructure.Jobs
             return absenceRecord;
         }
 
-        private bool IsNewAbsence(Absence absence, Student student, string acceptedReasons)
+        private async Task<bool> IsNewAbsence(Absence absence, StudentForAbsenceScan student, string acceptedReasons)
         {
-            var existingAbsences = student.Absences
-                .Where(existingAbsence =>
-                    existingAbsence.Date == absence.Date &&
-                    existingAbsence.OfferingId == absence.OfferingId &&
-                    existingAbsence.AbsenceTimeframe == absence.AbsenceTimeframe)
-                .ToList();
+            //Use Mediator
+            var absenceCount = await _mediator.Send(new GetCountMatchingStudentAbsencesQuery { StudentId = student.StudentId, AbsenceDate = absence.Date, AbsenceOffering = absence.OfferingId, AbsenceTimeframe = absence.AbsenceTimeframe });
 
             // If there are any
-            if (existingAbsences.Count > 0)
+            if (absenceCount > 0)
             {
+                var existingAbsences = await _mediator.Send(new GetMatchingStudentAbsencesQuery { StudentId = student.StudentId, AbsenceDate = absence.Date, AbsenceOffering = absence.OfferingId, AbsenceTimeframe = absence.AbsenceTimeframe });
+
                 foreach (var existingAbsence in existingAbsences)
                 {
                     // Update the last seen property with today's date
@@ -675,6 +670,7 @@ namespace Constellation.Infrastructure.Jobs
                     }
                 }
 
+                existingAbsences?.Clear();
                 // Since it already exists, we don't want to add it to the database, get the next absence instead!
                 return false;
             }

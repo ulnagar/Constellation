@@ -53,34 +53,17 @@ namespace Constellation.Infrastructure.Gateways
             var uri = new Uri($"{_url}/{path}");
 
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
-
-            HttpResponseMessage response;
-
-            switch (action)
+            HttpResponseMessage response = action switch
             {
-                case HttpVerb.Get:
-                    response = await _client.GetAsync(uri.ToString());
-
-                    break;
-                case HttpVerb.Post:
-                    response = await _client.PostAsJsonAsync(uri.ToString(), payload);
-
-                    break;
-                case HttpVerb.Put:
-                    response = await _client.PutAsJsonAsync(uri.ToString(), payload);
-
-                    break;
-                case HttpVerb.Delete:
-                    response = await _client.DeleteAsync(uri.ToString());
-
-                    break;
-                default:
-                    response = new HttpResponseMessage();
-                    response.StatusCode = HttpStatusCode.BadRequest;
-
-                    break;
-            }
-
+                HttpVerb.Get => await _client.GetAsync(uri.ToString()),
+                HttpVerb.Post => await _client.PostAsJsonAsync(uri.ToString(), payload),
+                HttpVerb.Put => await _client.PutAsJsonAsync(uri.ToString(), payload),
+                HttpVerb.Delete => await _client.DeleteAsync(uri.ToString()),
+                _ => new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.BadRequest
+                },
+            };
             return response;
         }
 
@@ -161,7 +144,7 @@ namespace Constellation.Infrastructure.Gateways
                 {
                     CanvasId = assignment.Id,
                     Name = assignment.Name,
-                    DueDate = (assignment.DueDate.HasValue ? assignment.DueDate.Value : DateTime.Today),
+                    DueDate = (assignment.DueDate ?? DateTime.Today),
                     LockDate = assignment.LockDate,
                     UnlockDate = assignment.UnlockDate,
                     AllowedAttempts = assignment.AllowedAttempts

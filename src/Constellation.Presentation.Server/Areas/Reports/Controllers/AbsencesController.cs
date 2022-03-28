@@ -42,7 +42,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
             _exportService = exportService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return RedirectToAction("FilterSelection");
         }
@@ -100,7 +100,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
 
             if (string.IsNullOrWhiteSpace(absence.Student.SentralStudentId))
             {
-                await _emailService.SendAdminAbsenceSentralAlert(absence.Student);
+                await _emailService.SendAdminAbsenceSentralAlert(absence.Student.DisplayName);
                 return RedirectToAction("FilterSelection");
             }
 

@@ -137,7 +137,7 @@ namespace Constellation.Infrastructure.Jobs
             if (emailAddresses == null || emailAddresses.Count == 0)
             {
                 _logger.LogWarning($"  Could not identify parent email address for {student.DisplayName} ({student.CurrentGrade})");
-                await _emailService.SendAdminAbsenceContactAlert(student);
+                await _emailService.SendAdminAbsenceContactAlert(student.DisplayName);
                 return;
             }
 

@@ -4,8 +4,10 @@ using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -65,5 +67,18 @@ namespace Constellation.Infrastructure.Persistence
         }
 
         public override DatabaseFacade Database => base.Database;
+
+        public override EntityEntry Add(object entity) => base.Add(entity);
+
+        public void ClearTrackerDb()
+        {
+            var changedEntriesCopy = base.ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Added ||
+                    e.State == EntityState.Modified ||
+                    e.State == EntityState.Deleted)
+                .ToList();
+
+            base.ChangeTracker.Clear();
+        }
     }
 }

@@ -35,15 +35,12 @@ namespace Constellation.Infrastructure.Services
 
         public async Task<bool> SendAttendanceReport(AttendanceReportEmail notification)
         {
-            switch (notification.NotificationType)
+            return notification.NotificationType switch
             {
-                case AttendanceReportEmail.NotificationSequence.Student:
-                    return await SendParentAttendanceReportEmail(notification);
-                case AttendanceReportEmail.NotificationSequence.School:
-                    return await SendSchoolAttendanceReportEmail(notification);
-            }
-
-            return false;
+                AttendanceReportEmail.NotificationSequence.Student => await SendParentAttendanceReportEmail(notification),
+                AttendanceReportEmail.NotificationSequence.School => await SendSchoolAttendanceReportEmail(notification),
+                _ => false,
+            };
         }
 
         private async Task<bool> SendParentAttendanceReportEmail(AttendanceReportEmail notification)
@@ -340,9 +337,9 @@ namespace Constellation.Infrastructure.Services
 
         }
 
-        public async Task SendAdminAbsenceSentralAlert(Student student)
+        public async Task SendAdminAbsenceSentralAlert(string studentName)
         {
-            var viewModel = $"<p>{student.DisplayName} cannot be located in the Sentral Users list and does not currently have a Sentral Student Id specified.</p>";
+            var viewModel = $"<p>{studentName} cannot be located in the Sentral Users list and does not currently have a Sentral Student Id specified.</p>";
 
             var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
@@ -354,9 +351,9 @@ namespace Constellation.Infrastructure.Services
             await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", "[Aurora College] Student absence notification", body, null);
         }
 
-        public async Task SendAdminAbsenceContactAlert(Student student)
+        public async Task SendAdminAbsenceContactAlert(string studentName)
         {
-            var viewModel = $"<p>Parent contact details for {student.DisplayName} cannot be located in Sentral.";
+            var viewModel = $"<p>Parent contact details for {studentName} cannot be located in Sentral.";
 
             var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
@@ -766,8 +763,10 @@ namespace Constellation.Infrastructure.Services
                 WorkDescription = notification.Description
             };
 
-            var toRecipients = new Dictionary<string, string>();
-            toRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
+            var toRecipients = new Dictionary<string, string>
+            {
+                { teacher.DisplayName, teacher.EmailAddress }
+            };
 
             var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MissedWork/StudentMissedWorkNotificationEmail.cshtml", viewModel);
 

@@ -45,8 +45,8 @@ namespace Constellation.Application.Interfaces.Services
 
         // Service Emails
         Task SendServiceLogEmail(ServiceLogEmail notification);
-        Task SendAdminAbsenceContactAlert(Student student);
-        Task SendAdminAbsenceSentralAlert(Student student);
+        Task SendAdminAbsenceContactAlert(string studentName);
+        Task SendAdminAbsenceSentralAlert(string studentName);
         Task SendAdminLowCreditAlert(double credit);
         Task SendAdminClassworkNotificationContactAlert(Student student, Staff teacher, ClassworkNotification notification);
     }

@@ -77,6 +77,9 @@ namespace Constellation.Infrastructure.Gateways
             var messageId = Guid.NewGuid();
             _logger.LogInformation("{id}: Sending SMS {sms}", messageId, payload);
 
+#if DEBUG
+            return new SMSMessageCollectionDto();
+#else
             try
             {
                 HttpResponseMessage response = await RequestAsync("sms", payload);
@@ -105,6 +108,7 @@ namespace Constellation.Infrastructure.Gateways
 
                 return ConvertToDto(data);
             }
+#endif
         }
 
         /// <summary>

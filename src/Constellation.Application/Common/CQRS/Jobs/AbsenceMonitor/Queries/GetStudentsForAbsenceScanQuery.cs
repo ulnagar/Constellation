@@ -16,6 +16,7 @@ namespace Constellation.Application.Common.CQRS.Jobs.AbsenceMonitor.Queries
 {
     public class GetStudentsForAbsenceScanQuery : IRequest<ICollection<StudentForAbsenceScan>>
     {
+        public Grade Grade { get; set; }
     }
 
     public class StudentForAbsenceScan : IMapFrom<Student>
@@ -25,8 +26,11 @@ namespace Constellation.Application.Common.CQRS.Jobs.AbsenceMonitor.Queries
         public string LastName { get; set; }
         public string DisplayName => $"{FirstName} {LastName}";
         public Grade CurrentGrade { get; set; }
-        public string StudentSentralId { get; set; }
+        public string SentralStudentId { get; set; }
         public DateTime? AbsenceNotificationStartDate { get; set; }
+        public string PortalUsername { get; set; }
+        public string EmailAddress => $"{PortalUsername}@education.nsw.gov.au";
+        public string SchoolName { get; set; }
     }
 
     public class GetStudentsForAbsenceScanQueryHandler : IRequestHandler<GetStudentsForAbsenceScanQuery, ICollection<StudentForAbsenceScan>>
@@ -43,9 +47,9 @@ namespace Constellation.Application.Common.CQRS.Jobs.AbsenceMonitor.Queries
         public async Task<ICollection<StudentForAbsenceScan>> Handle(GetStudentsForAbsenceScanQuery request, CancellationToken cancellationToken)
         {
             var students = await _context.Students
-                .Where(student => student.IncludeInAbsenceNotifications && !student.IsDeleted)
+                .Where(student => student.IncludeInAbsenceNotifications && !student.IsDeleted && student.CurrentGrade == request.Grade)
                 .ProjectTo<StudentForAbsenceScan>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+                .ToListAsync(cancellationToken: cancellationToken);
 
             return students;
         }

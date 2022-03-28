@@ -92,5 +92,10 @@ namespace Constellation.Infrastructure.Persistence.Repositories
         {
             await _context.SaveChangesAsync();
         }
+
+        public void ClearTrackerDb()
+        {
+            _context.ClearTrackerDb();
+        }
     }
 }

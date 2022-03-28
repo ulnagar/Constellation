@@ -10,7 +10,7 @@ namespace Constellation.Application.Extensions
         {
             var more = false;
 
-            src.OrderBy(period => period.Day).ThenBy(period => period.StartTime).ToList();
+            src = src.OrderBy(period => period.Day).ThenBy(period => period.StartTime);
 
             IEnumerable<TimetablePeriod> ConsecutiveSequence(IEnumerator<TimetablePeriod> csi)
             {
@@ -33,50 +33,24 @@ namespace Constellation.Application.Extensions
         {
             var grid = period.Timetable.Substring(0, 3).ToUpper();
             var weekNo = (period.Day - 1) / 5;
-            var weekName = "";
-            switch (weekNo)
+            var weekName = weekNo switch
             {
-                case 0:
-                    weekName = "Week A";
-                    break;
-                case 1:
-                    weekName = "Week B";
-                    break;
-                case 2:
-                    weekName = "Week C";
-                    break;
-                case 4:
-                    weekName = "Week D";
-                    break;
-                default:
-                    weekName = "";
-                    break;
-            }
-
+                0 => "Week A",
+                1 => "Week B",
+                2 => "Week C",
+                4 => "Week D",
+                _ => "",
+            };
             var dayNo = period.Day % 5;
-            var dayName = "";
-            switch (dayNo)
+            var dayName = dayNo switch
             {
-                case 1:
-                    dayName = "Monday";
-                    break;
-                case 2:
-                    dayName = "Tuesday";
-                    break;
-                case 3:
-                    dayName = "Wednesday";
-                    break;
-                case 4:
-                    dayName = "Thursday";
-                    break;
-                case 0:
-                    dayName = "Friday";
-                    break;
-                default:
-                    dayName = "";
-                    break;
-            }
-
+                1 => "Monday",
+                2 => "Tuesday",
+                3 => "Wednesday",
+                4 => "Thursday",
+                0 => "Friday",
+                _ => "",
+            };
             return $"{grid} {weekName} {dayName}";
         }
 
