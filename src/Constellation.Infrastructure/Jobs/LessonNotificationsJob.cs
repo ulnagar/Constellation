@@ -133,6 +133,7 @@ namespace Constellation.Infrastructure.Jobs
                 var finalWarning = schoolItem.Lessons.Where(lesson => lesson.OverdueSeverity == 4).ToList();
                 var alert = schoolItem.Lessons.Where(lesson => lesson.OverdueSeverity >= 5).ToList();
 
+                _logger.Log(LogSeverity.Information, $"");
                 _logger.Log(LogSeverity.Information, $"Emails for {school.Name} to be delivered to:");
 
                 foreach (var contact in spt)

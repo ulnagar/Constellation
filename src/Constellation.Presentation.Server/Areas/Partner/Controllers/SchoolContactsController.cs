@@ -183,10 +183,10 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
                 var user = new UserTemplateDto
                 {
-                    FirstName = result.Entity.FirstName,
-                    LastName = result.Entity.LastName,
-                    Email = result.Entity.EmailAddress,
-                    Username = result.Entity.EmailAddress,
+                    FirstName = result.Entity.FirstName.Trim(' '),
+                    LastName = result.Entity.LastName.Trim(' '),
+                    Email = result.Entity.EmailAddress.Trim(' '),
+                    Username = result.Entity.EmailAddress.Trim(' '),
                     IsSchoolContact = true,
                     SchoolContactId = result.Entity.Id
                 };
@@ -209,10 +209,10 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
                 var newUser = new UserTemplateDto
                 {
-                    FirstName = result.Entity.FirstName,
-                    LastName = result.Entity.LastName,
-                    Email = result.Entity.EmailAddress,
-                    Username = result.Entity.EmailAddress,
+                    FirstName = result.Entity.FirstName.Trim(' '),
+                    LastName = result.Entity.LastName.Trim(' '),
+                    Email = result.Entity.EmailAddress.Trim(' '),
+                    Username = result.Entity.EmailAddress.Trim(' '),
                     IsSchoolContact = true,
                     SchoolContactId = result.Entity.Id
                 };

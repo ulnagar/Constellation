@@ -511,10 +511,10 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
                 // Existing Coordinator needs to be updated
                 var contactResource = new SchoolContactDto
                 {
-                    FirstName = vm.FirstName,
-                    LastName = vm.LastName,
+                    FirstName = vm.FirstName.Trim(' '),
+                    LastName = vm.LastName.Trim(' '),
                     PhoneNumber = vm.PhoneNumber,
-                    EmailAddress = vm.EmailAddress
+                    EmailAddress = vm.EmailAddress.Trim(' ')
                 };
 
                 var contactResult = await _schoolContactService.UpdateContact(contactResource);
@@ -548,10 +548,10 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
                 {
                     var contactResource = new SchoolContactDto
                     {
-                        FirstName = vm.FirstName,
-                        LastName = vm.LastName,
+                        FirstName = vm.FirstName.Trim(' '),
+                        LastName = vm.LastName.Trim(' '),
                         PhoneNumber = vm.PhoneNumber,
-                        EmailAddress = vm.EmailAddress
+                        EmailAddress = vm.EmailAddress.Trim(' ')
                     };
 
                     var contactResult = await _schoolContactService.CreateContact(contactResource);
