@@ -27,6 +27,15 @@ PARENT CONTACTS:
 TRACKITSYNC JOB:
 	Convert to individual MEDIATR actions, to allow for calling immediately when relevant records change
 
+CLEANARCH:
+	Move CQRS handlers to Infrastructure project
+
+BUD GRAPHS:
+	Complete migration of api endpoints to allow for graphs to be saved at end of day
+
+EMAILS:
+	Convert all images to use BASE64 values instead of linked files
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~
