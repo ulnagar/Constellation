@@ -2,10 +2,12 @@
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
+using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -122,6 +124,67 @@ namespace Constellation.Infrastructure.Gateways
             var assignments = JsonConvert.DeserializeObject<List<AssignmentResult>>(responseText);
 
             return assignments;
+        }
+
+        public async Task<bool> UploadAssignmentSubmission(string CourseId, int CanvasAssignmentId, string StudentId, StoredFile file)
+        {
+            var stepOnePath = $"courses/sis_course_id:{CourseId}/assignments/{CanvasAssignmentId}/submissions/sis_user_id:{StudentId}/files";
+
+            var stepOnePayload = new
+            {
+                name = file.Name,
+                size = file.FileData.Length,
+                content_type = file.FileType,
+                on_duplicate = "overwrite"
+            };
+
+            var stepOneResponse = await RequestAsync(stepOnePath, HttpVerb.Post, stepOnePayload);
+            if (!stepOneResponse.IsSuccessStatusCode)
+                return false;
+
+            var stepOneResponseText = await stepOneResponse.Content.ReadAsStringAsync();
+            var fileUploadLocation = JsonConvert.DeserializeObject<FileUploadLocationResult>(stepOneResponseText);
+
+            int fileId = 0;
+
+            // MultipartFormDataContent code taken from https://makolyte.com/csharp-how-to-send-a-file-with-httpclient/
+            using (var stepTwoContent = new MultipartFormDataContent())
+            {
+                stepTwoContent.Add(new StringContent(file.Name), name: "filename");
+                stepTwoContent.Add(new StringContent(file.FileType), name: "content_type");
+
+                var fileStream = new MemoryStream(file.FileData);
+                var fileStreamContent = new StreamContent(fileStream);
+                fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(file.FileType);
+                stepTwoContent.Add(fileStreamContent, name: "file", fileName: file.Name);
+
+                var stepTwoResponse = await _client.PostAsync(fileUploadLocation.UploadUrl, stepTwoContent);
+                if (!stepTwoResponse.IsSuccessStatusCode)
+                    return false;
+
+                var stepTwoResponseText = await stepTwoResponse.Content.ReadAsStringAsync();
+                var fileUploadConfirmation = JsonConvert.DeserializeObject<FileUploadConfirmationResult>(stepTwoResponseText);
+                fileId = fileUploadConfirmation.Id;
+            }
+
+            var canvasUserId = await SearchForUser(StudentId);
+
+            var stepThreePath = $"/courses/sis_course_id:{CourseId}/assignments/{CanvasAssignmentId}/submissions";
+            var stepThreePayload = new
+            {
+                submission = new
+                {
+                    submission_type = "online_upload",
+                    file_ids = new[] { fileId },
+                    user_id = canvasUserId
+                }
+            };
+
+            var stepThreeResponse = await RequestAsync(stepThreePath, HttpVerb.Post, stepThreePayload);
+            if (!stepThreeResponse.IsSuccessStatusCode)
+                return false;
+
+            return true;
         }
 
         public async Task<List<CanvasAssignmentDto>> GetAllCourseAssignments(string CourseId)
@@ -326,20 +389,6 @@ namespace Constellation.Infrastructure.Gateways
             return false;
         }
 
-        public async Task<bool> UploadFileForAssignment()
-        {
-            // Need:
-            // - File
-            // - Student
-            // - Assignment
-
-            // Store assignment in database as ID, SIS_COURSE_ID, NAME, DUEDATE, VISIBLEDATE
-
-
-
-            return false;
-        }
-
         private class UserResult
         {
             [JsonProperty("id")]
@@ -439,6 +488,18 @@ namespace Constellation.Infrastructure.Gateways
             public ICollection<string> SubmissionTypes { get; set; }
             [JsonProperty("published")]
             public bool IsPublished { get; set; }
+        }
+
+        private class FileUploadLocationResult
+        {
+            [JsonProperty("upload_url")]
+            public string UploadUrl { get; set; }
+        }
+
+        private class FileUploadConfirmationResult
+        {
+            [JsonProperty("id")]
+            public int Id { get; set; }
         }
     }
 }

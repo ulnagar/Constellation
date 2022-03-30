@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Core.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,5 +14,6 @@ namespace Constellation.Application.Interfaces.Gateways
         Task<bool> UnenrolUser(string UserId, string CourseId);
         Task<bool> DeleteUser(string UserId);
         Task<List<CanvasAssignmentDto>> GetAllCourseAssignments(string CourseId);
+        Task<bool> UploadAssignmentSubmission(string CourseId, int CanvasAssignmentId, string StudentId, StoredFile file);
     }
 }

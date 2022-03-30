@@ -20,6 +20,10 @@ LINK SHORTENER:
 MISSED CLASSWORK:
 	Periodic report for HTs on what hasn't been completed
 
+PARENT CONTACTS:
+	Sync parent contacts from Sentral once per day
+		Do not replace local details if the source is blank/missing from Sentral
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~
