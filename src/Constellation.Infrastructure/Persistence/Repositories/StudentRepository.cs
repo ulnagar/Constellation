@@ -140,6 +140,13 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .ToListAsync();
         }
 
+        public async Task<ICollection<Student>> ForTrackItSync()
+        {
+            return await _context.Students
+                .Where(student => !student.IsDeleted)
+                .ToListAsync();
+        }
+
         public async Task<Student> ForEditAsync(string studentId)
         {
             return await _context.Students

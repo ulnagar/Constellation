@@ -4,6 +4,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.Persistence;
 using Constellation.Infrastructure.Persistence.Repositories;
+using Constellation.Infrastructure.Persistence.TrackIt;
 using Constellation.Infrastructure.Templates.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -23,6 +24,11 @@ namespace Constellation.Infrastructure.DependencyInjection
                 options.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
+            });
+
+            services.AddDbContext<TrackItContext>(options =>
+            {
+                options.UseSqlServer(configuration.GetConnectionString("TrackItConnection"));
             });
 
             services.AddScoped<IAppDbContext, AppDbContext>();

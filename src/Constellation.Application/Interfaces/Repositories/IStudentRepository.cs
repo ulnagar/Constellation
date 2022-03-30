@@ -29,5 +29,6 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<ICollection<Student>> ForAttendanceReports();
         Task<ICollection<Student>> WithoutAdobeConnectDetailsForUpdate();
         Task<ICollection<Student>> ForAbsenceScan(Grade grade);
+        Task<ICollection<Student>> ForTrackItSync();
     }
 }

@@ -28,5 +28,6 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<bool> AnyWithId(string id);
         Task<ICollection<School>> ForBulkUpdate();
         IList<MapLayer> GetForMapping(IList<string> schoolCodes);
+        Task<ICollection<School>> ForTrackItSync();
     }
 }

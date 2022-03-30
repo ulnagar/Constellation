@@ -57,10 +57,12 @@ namespace Constellation.Presentation.Server.Helpers.DependencyInjection
             if (jobActivations.All(job => job.JobName != lessonNotificationsRecord.JobName))
                 _unitOfWork.Add(lessonNotificationsRecord);
 
-            // AttendanceReports for Term 1 2022 (specific dates)
-            _jobManager.AddOrUpdate<IAttendanceReportJob>($"{nameof(IAttendanceReportJob)} - 28/02/22", (job) => job.StartJob(true), "0 13 28 2 1", TimeZoneInfo.Local);
-            _jobManager.AddOrUpdate<IAttendanceReportJob>($"{nameof(IAttendanceReportJob)} - 14/03/22", (job) => job.StartJob(true), "0 13 14 3 1", TimeZoneInfo.Local);
-            _jobManager.AddOrUpdate<IAttendanceReportJob>($"{nameof(IAttendanceReportJob)} - 28/03/22", (job) => job.StartJob(true), "0 13 28 3 1", TimeZoneInfo.Local);
+            _jobManager.AddOrUpdate<ITrackItSyncJob>(nameof(ITrackItSyncJob), (job) => job.StartJob(true), "30 17 * * *", TimeZoneInfo.Local);
+            var trackItSyncRecord = new JobActivation { JobName = nameof(ITrackItSyncJob) };
+            if (jobActivations.All(job => job.JobName != trackItSyncRecord.JobName))
+                _unitOfWork.Add(trackItSyncRecord);
+
+            _jobManager.AddOrUpdate<IAttendanceReportJob>(nameof(IAttendanceReportJob), (job) => job.StartJob(true), "0 12 29 2 *", TimeZoneInfo.Local);
             var attendanceReportRecord = new JobActivation { JobName = nameof(IAttendanceReportJob) };
             if (jobActivations.All(job => job.JobName != attendanceReportRecord.JobName))
                 _unitOfWork.Add(attendanceReportRecord);

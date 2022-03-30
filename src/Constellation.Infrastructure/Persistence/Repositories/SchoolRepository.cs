@@ -167,6 +167,13 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .AnyAsync(school => school.Code == id);
         }
 
+        public async Task<ICollection<School>> ForTrackItSync()
+        {
+            return await _context.Schools
+                .Where(school => school.Students.Any() || school.Staff.Any())
+                .ToListAsync();
+        }
+
         public async Task<ICollection<School>> ForBulkUpdate()
         {
             return await _context.Schools

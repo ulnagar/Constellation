@@ -74,6 +74,10 @@ namespace Constellation.Application.Common.CQRS.Admin.HangfireDashboard.Commands
                     var attendanceReport = _serviceProvider.GetService<IAttendanceReportJob>();
                     await attendanceReport.StartJob(false);
                     break;
+                case "ITrackItSyncJob":
+                    var trackItSync = _serviceProvider.GetService<ITrackItSyncJob>();
+                    await trackItSync.StartJob(false);
+                    break;
 
                 default:
                     break;

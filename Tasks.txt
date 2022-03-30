@@ -24,6 +24,9 @@ PARENT CONTACTS:
 	Sync parent contacts from Sentral once per day
 		Do not replace local details if the source is blank/missing from Sentral
 
+TRACKITSYNC JOB:
+	Convert to individual MEDIATR actions, to allow for calling immediately when relevant records change
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~

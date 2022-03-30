@@ -16,7 +16,7 @@ namespace Constellation.Infrastructure.Persistence
 {
     public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>, IAppDbContext
     {
-        public AppDbContext(DbContextOptions options)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
         }
