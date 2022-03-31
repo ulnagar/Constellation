@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Infrastructure.DependencyInjection;
@@ -10,6 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -734,6 +736,75 @@ namespace Constellation.Infrastructure.Gateways
             }
 
             return list;
+        }
+
+        public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport()
+        {
+            var data = new List<FamilyDetailsDto>();
+            
+            var page = await GetPageAsync($"{_settings.Server}/enquiry/export/view_export?name=complete&inputs[class]=&inputs[roll_class]=&inputs[schyear]=&format=csv&headings=1&action=Download");
+
+            if (page == null)
+                return data;
+
+            var list = page.DocumentNode.InnerHtml.Split('\u000A').ToList();
+
+            // Remove first and last entry
+            list.RemoveAt(0);
+            list.RemoveAt(list.Count - 1);
+
+            foreach (var entry in list)
+            {
+                //var split = entry.Split(',');
+
+                var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+                var split = CSVParser.Split(entry);
+
+                if (split.Length != 90)
+                {
+                    split = entry.Split(',');
+
+                    if (split.Length != 90)
+                        continue;
+                }
+
+                var familyId = split[4].RemoveQuotes().RemoveWhitespace();
+
+                if (data.Any(detail => detail.FamilyId == familyId))
+                {
+                    // Update existing family with additional StudentId
+                    var detail = data.First(detail => detail.FamilyId == familyId);
+                    detail.StudentIds.Add(split[0].RemoveQuotes().RemoveWhitespace());
+
+                    continue;
+                } else
+                {
+                    var detail = new FamilyDetailsDto
+                    {
+                        FamilyId = split[4].RemoveQuotes().RemoveWhitespace(),
+                        FatherTitle = split[49].RemoveQuotes().RemoveWhitespace(),
+                        FatherFirstName = split[50].RemoveQuotes().RemoveWhitespace(),
+                        FatherLastName = split[51].RemoveQuotes().RemoveWhitespace(),
+                        FatherMobile = split[53].RemoveQuotes().RemoveWhitespace(),
+                        MotherTitle = split[61].RemoveQuotes().RemoveWhitespace(),
+                        MotherFirstName = split[62].RemoveQuotes().RemoveWhitespace(),
+                        MotherLastName = split[63].RemoveQuotes().RemoveWhitespace(),
+                        MotherMobile = split[65].RemoveQuotes().RemoveWhitespace(),
+                        FamilyEmail = split[82].RemoveQuotes().RemoveWhitespace(),
+                        AddressName = split[83].RemoveQuotes().RemoveWhitespace(),
+                        AddressLine1 = split[85].RemoveQuotes().RemoveWhitespace(),
+                        AddressLine2 = split[86].RemoveQuotes().RemoveWhitespace(),
+                        AddressTown = split[88].RemoveQuotes().RemoveWhitespace(),
+                        AddressPostCode = split[89].RemoveQuotes().RemoveWhitespace()
+                    };
+
+                    detail.StudentIds.Add(split[0].RemoveQuotes().RemoveWhitespace());
+
+                    data.Add(detail);
+                }
+            }
+
+            return data;
         }
     }
 }

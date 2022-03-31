@@ -17,6 +17,8 @@ namespace Constellation.Infrastructure.Persistence.EntityConfigurations
                 .WithMany(s => s.Students);
 
             builder.HasMany(s => s.AdobeConnectOperations);
+
+            builder.HasOne(s => s.Family).WithMany(s => s.Students);
         }
     }
 }

@@ -22,5 +22,15 @@ namespace Constellation.Application.Extensions
 
             return oString;
         }
+
+        public static string RemoveQuotes(this string content)
+        {
+            return content.TrimStart('"').TrimEnd('"');
+        }
+
+        public static string RemoveWhitespace(this string content)
+        {
+            return content.TrimStart(' ').TrimEnd(' ');
+        }
     }
 }
