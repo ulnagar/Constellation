@@ -62,7 +62,12 @@ namespace Constellation.Presentation.Server.Helpers.DependencyInjection
             if (jobActivations.All(job => job.JobName != trackItSyncRecord.JobName))
                 _unitOfWork.Add(trackItSyncRecord);
 
-            _jobManager.AddOrUpdate<IAttendanceReportJob>(nameof(IAttendanceReportJob), (job) => job.StartJob(true), "0 12 29 2 *", TimeZoneInfo.Local);
+            _jobManager.AddOrUpdate<ISentralFamilyDetailsSyncJob>(nameof(ISentralFamilyDetailsSyncJob), (job) => job.StartJob(true), "0 9 * * 1-6", TimeZoneInfo.Local);
+            var familySyncRecord = new JobActivation { JobName = nameof(ISentralFamilyDetailsSyncJob) };
+            if (jobActivations.All(job => job.JobName != familySyncRecord.JobName))
+                _unitOfWork.Add(familySyncRecord);
+
+            _jobManager.AddOrUpdate<IAttendanceReportJob>(nameof(IAttendanceReportJob), (job) => job.StartJob(true), "0 12 29 2 1", TimeZoneInfo.Local);
             var attendanceReportRecord = new JobActivation { JobName = nameof(IAttendanceReportJob) };
             if (jobActivations.All(job => job.JobName != attendanceReportRecord.JobName))
                 _unitOfWork.Add(attendanceReportRecord);

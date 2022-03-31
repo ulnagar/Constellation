@@ -1,6 +1,3 @@
-CANVAS:
-	Paper Exam Submission Portal => take file uploads from ACC and proxy it up to CANVAS as student submission of assignment
-
 TEAMS:
 	Cache team ids in database to prevent needing to search for teams at start of operations
 
@@ -21,8 +18,7 @@ MISSED CLASSWORK:
 	Periodic report for HTs on what hasn't been completed
 
 PARENT CONTACTS:
-	Sync parent contacts from Sentral once per day
-		Do not replace local details if the source is blank/missing from Sentral
+	Convert all parent contact jobs to use the local contact details before attempting to reach out to Sentral
 
 TRACKITSYNC JOB:
 	Convert to individual MEDIATR actions, to allow for calling immediately when relevant records change
@@ -36,6 +32,8 @@ BUD GRAPHS:
 EMAILS:
 	Convert all images to use BASE64 values instead of linked files
 
+CHANGE LOG:
+	Include link in footer to changelog for current release
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,3 +43,11 @@ ERROR:
 
 EMAILS:
 	Make sure every email process dedups the list of contacts before added them.
+
+CANVAS:
+	Paper Exam Submission Portal => take file uploads from ACC and proxy it up to CANVAS as student submission of assignment
+
+PARENT CONTACTS:
+	https://admin.aurora.dec.nsw.gov.au/enquiry/export/view_export?name=complete&inputs[class]=&inputs[roll_class]=&inputs[schyear]=&format=csv&headings=1&action=Download
+	Sync parent contacts from Sentral once per day
+		Do not replace local details if the source is blank/missing from Sentral

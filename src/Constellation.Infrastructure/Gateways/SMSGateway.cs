@@ -75,7 +75,7 @@ namespace Constellation.Infrastructure.Gateways
         public async Task<SMSMessageCollectionDto> SendSmsAsync(Object payload)
         {
             var messageId = Guid.NewGuid();
-            _logger.LogInformation("{id}: Sending SMS {sms}", messageId, payload);
+            _logger.LogInformation("{id}: Sending SMS {sms}", messageId, JsonConvert.SerializeObject(payload));
 
 #if DEBUG
             return new SMSMessageCollectionDto();

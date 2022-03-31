@@ -29,6 +29,7 @@ namespace Constellation.Infrastructure.Persistence
         public DbSet<SchoolContact> SchoolContacts { get; set; }
         public DbSet<SchoolContactRole> SchoolContactRoles { get; set; }
         public DbSet<Student> Students { get; set; }
+        public DbSet<StudentFamily> StudentFamilies { get; set;}
         public DbSet<Staff> Staff { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<CourseOffering> Offerings { get; set; }
@@ -61,7 +62,8 @@ namespace Constellation.Infrastructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly(),
+                t => !t.GetTypeInfo().FullName.Contains("TrackIt")); // Exclude the TrackIt configurations
 
             base.OnModelCreating(builder);
         }

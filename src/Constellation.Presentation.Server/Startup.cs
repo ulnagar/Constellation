@@ -95,6 +95,11 @@ namespace Constellation.Presentation.Server
                 })
                 .WriteTo.Logger(config =>
                 {
+                    config.WriteTo.File("logs/FamilyDetailsSync.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
+                    config.Filter.ByIncludingOnly(Matching.FromSource<ISentralFamilyDetailsSyncJob>());
+                })
+                .WriteTo.Logger(config =>
+                {
                     config.WriteTo.File("logs/System.log", Serilog.Events.LogEventLevel.Debug, rollingInterval: RollingInterval.Day);
                     config.Filter.ByExcluding(Matching.FromSource<IClassMonitorJob>());
                     config.Filter.ByExcluding(Matching.FromSource<IPermissionUpdateJob>());

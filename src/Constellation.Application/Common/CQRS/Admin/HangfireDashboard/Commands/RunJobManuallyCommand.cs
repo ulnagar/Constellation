@@ -78,6 +78,10 @@ namespace Constellation.Application.Common.CQRS.Admin.HangfireDashboard.Commands
                     var trackItSync = _serviceProvider.GetService<ITrackItSyncJob>();
                     await trackItSync.StartJob(false);
                     break;
+                case "ISentralFamilyDetailsSyncJob":
+                    var familySync = _serviceProvider.GetService<ISentralFamilyDetailsSyncJob>();
+                    await familySync.StartJob(false);
+                    break;
 
                 default:
                     break;

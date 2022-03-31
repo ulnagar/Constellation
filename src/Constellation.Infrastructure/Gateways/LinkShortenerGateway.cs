@@ -51,9 +51,12 @@ namespace Constellation.Infrastructure.Gateways
             var response = await _client.PostAsJsonAsync($"{_settings.ApiEndpoint}?key={_settings.ApiKey}", linkInfo);
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation("{id}: Successfully shortened url : {url}", requestId, url);
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<ShortLinkInfo>(content).ShortLink;
+                var link = JsonConvert.DeserializeObject<ShortLinkInfo>(content).ShortLink;
+                
+                _logger.LogInformation("{id}: Successfully shortened url to {url}", requestId, link);
+
+                return link;
             } else
             {
                 _logger.LogWarning("{id}: Failed to shorten url : {url}. Failed with error {error}", requestId, url, response.ReasonPhrase);
