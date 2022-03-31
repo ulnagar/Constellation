@@ -178,8 +178,8 @@ namespace Constellation.Presentation.Server
             var jobManager = new HangfireJobRegistration(unitOfWork, manager);
             jobManager.RegisterJobs();
 
-            IdentityDefaults.SeedRoles(roleManager);
-            IdentityDefaults.SeedUsers(userManager);
+            //IdentityDefaults.SeedRoles(roleManager);
+            //IdentityDefaults.SeedUsers(userManager);
 
             app.UseEndpoints(endpoints =>
             {
