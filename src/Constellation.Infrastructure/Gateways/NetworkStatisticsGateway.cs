@@ -256,31 +256,37 @@ namespace Constellation.Infrastructure.Gateways
                 BandwidthDisplay = site.BandwidthDisplay
             };
 
-            foreach (var standard in site.Standards)
+            if (site.Standards != null)
             {
-                data.Standards.Add(new NetworkStatisticsSiteDto.SiteStandard
+                foreach (var standard in site?.Standards)
                 {
-                    Id = standard.Id,
-                    Name = standard.Name
-                });
+                    data.Standards.Add(new NetworkStatisticsSiteDto.SiteStandard
+                    {
+                        Id = standard.Id,
+                        Name = standard.Name
+                    });
+                }
             }
 
-            foreach (var item in site.WANData)
+            if (site.WANData != null)
             {
-                data.WANData.Add(new NetworkStatisticsSiteDto.PointOfTimeUsage
+                foreach (var item in site?.WANData)
                 {
-                    Time = item.Time,
-                    INTInbound = item.INTInbound,
-                    INTInboundDisplay = item.INTInboundDisplay,
-                    INTOutbound = item.INTOutbound,
-                    INTOutboundDisplay = item.INTOutboundDisplay,
-                    WANInbound = item.WANInbound,
-                    WANInboundDisplay = item.WANInboundDisplay,
-                    WANOutbound = item.WANOutbound,
-                    WANOutboundDisplay = item.WANOutboundDisplay
-                });
+                    data.WANData.Add(new NetworkStatisticsSiteDto.PointOfTimeUsage
+                    {
+                        Time = item.Time,
+                        INTInbound = item.INTInbound,
+                        INTInboundDisplay = item.INTInboundDisplay,
+                        INTOutbound = item.INTOutbound,
+                        INTOutboundDisplay = item.INTOutboundDisplay,
+                        WANInbound = item.WANInbound,
+                        WANInboundDisplay = item.WANInboundDisplay,
+                        WANOutbound = item.WANOutbound,
+                        WANOutboundDisplay = item.WANOutboundDisplay
+                    });
+                }
             }
-
+            
             return data;
         }
 

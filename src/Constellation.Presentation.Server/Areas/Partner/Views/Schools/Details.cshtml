@@ -413,7 +413,7 @@
                 MyChart.destroy();
             }
 
-            GraphFileName = data.graphSiteName + ' ' + data.graphIntlDate + '.png';
+            GraphFileName = data.siteName + ' ' + data.intlDate + '.png';
 
             var dataSet = {
                 type: 'line',
@@ -422,19 +422,20 @@
                     datasets: [
                         {
                             label: "Student Lessons",
-                            backgroundColor: ['rgba(230,168,59,0.2)'],
+                            backgroundColor: 'rgba(230,168,59,0.2)',
                             //backgroundColor: ['rgba(240,159,20,0.33)'],
-                            borderColor: ['rgba(0,0,0,0)'],
+                            borderColor: 'rgba(0,0,0,0)',
                             borderRadius: 0,
                             pointRadius: 0,
                             pointHitRadius: 0,
                             stepped: true,
+                            fill: 'start',
                             data: []
                         },
                         {
                             label: "WAN Connection Maximum",
-                            backgroundColor: ['rgba(0,0,0,0)'],
-                            borderColor: ['rgba(250, 216, 89, 1)'],
+                            backgroundColor: 'rgba(0,0,0,0)',
+                            borderColor: 'rgba(250, 216, 89, 1)',
                             borderRadius: 4,
                             pointRadius: 0,
                             pointHitRadius: 0,
@@ -442,8 +443,8 @@
                         },
                         {
                             label: "WAN Inbound (download)",
-                            backgroundColor: ['rgba(200, 99, 132, .2)'],
-                            borderColor: ['rgba(200, 99, 132, .7)'],
+                            backgroundColor: 'rgba(200, 99, 132, .2)',
+                            borderColor: 'rgba(200, 99, 132, .7)',
                             borderWidth: 2,
                             pointRadius: 0,
                             pointHitRadius: 7,
@@ -451,8 +452,8 @@
                         },
                         {
                             label: "WAN Outbound (upload)",
-                            backgroundColor: ['rgba(0, 10, 130, .2)'],
-                            borderColor: ['rgba(0, 10, 130, .7)'],
+                            backgroundColor: 'rgba(0, 10, 130, .2)',
+                            borderColor: 'rgba(0, 10, 130, .7)',
                             borderWidth: 2,
                             pointRadius: 0,
                             pointHitRadius: 7,
@@ -460,8 +461,8 @@
                         },
                         {
                             label: "INT Connection Maximum",
-                            backgroundColor: ['rgba(0,0,0,0)'],
-                            borderColor: ['rgba(122, 249, 86, 1)'],
+                            backgroundColor: 'rgba(0,0,0,0)',
+                            borderColor: 'rgba(122, 249, 86, 1)',
                             borderRadius: 4,
                             pointRadius: 0,
                             pointHitRadius: 0,
@@ -469,8 +470,8 @@
                         },
                         {
                             label: "INT Inbound (download)",
-                            backgroundColor: ['rgba(0, 127, 53, .2)'],
-                            borderColor: ['rgba(0, 127, 53, .7)'],
+                            backgroundColor: 'rgba(0, 127, 53, .2)',
+                            borderColor: 'rgba(0, 127, 53, .7)',
                             borderWidth: 2,
                             pointRadius: 0,
                             pointHitRadius: 7,
@@ -478,8 +479,8 @@
                         },
                         {
                             label: "INT Outbound (upload)",
-                            backgroundColor: ['rgba(127, 53, 0, .2)'],
-                            borderColor: ['rgba(127, 53, 0, .7)'],
+                            backgroundColor: 'rgba(127, 53, 0, .2)',
+                            borderColor: 'rgba(127, 53, 0, .7)',
                             borderWidth: 2,
                             pointRadius: 0,
                             pointHitRadius: 7,
@@ -499,7 +500,7 @@
                             afterDataLimits: function(axis) {
                                 var chartDataSet = axis.chart.config.data.datasets[0];
                                 chartDataSet.data.forEach(function(item, i) {
-                                    if (item != 0) chartDataSet.data[i] = axis.end;
+                                    if (item != 0) chartDataSet.data[i] = axis.max;
                                 });
                             }
                         },
@@ -509,13 +510,13 @@
                     },
                     title: {
                         display: true,
-                        text: data.GraphSiteName + " - " + data.GraphDate,
+                        text: data.siteName + " - " + data.date,
                         fontSize: 16
                     }
                 }
             };
 
-            data.graphData.sort(function(a, b) {
+            data.data.sort(function(a, b) {
                 var timeA = a.time;
                 var timeB = b.time;
 
@@ -529,7 +530,7 @@
                 return comparison;
             });
 
-            $.each(data.graphData,
+            $.each(data.data,
                 function(index, point) {
                     dataSet["data"]["labels"].push(point.time);
 

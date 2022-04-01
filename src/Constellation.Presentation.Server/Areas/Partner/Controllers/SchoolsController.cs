@@ -1,13 +1,12 @@
-﻿using Constellation.Application.DTOs;
-using Constellation.Application.Extensions;
-using Constellation.Application.Interfaces.Gateways;
+﻿using Constellation.Application.Common.CQRS.API.Schools.Queries;
+using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
-using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -23,15 +22,15 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ISchoolService _schoolService;
-        private readonly INetworkStatisticsGateway _budService;
+        private readonly IMediator _mediator;
 
         public SchoolsController(IUnitOfWork unitOfWork, ISchoolService schoolService,
-            INetworkStatisticsGateway budService)
+            IMediator mediator)
             : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _schoolService = schoolService;
-            _budService = budService;
+            _mediator = mediator;
         }
 
         public async Task<IActionResult> Index()
@@ -102,68 +101,9 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
         public async Task<IActionResult> _GetGraphData(string id, int day)
         {
-            var school = _unitOfWork.Schools.WithDetails(id);
-            if (school == null)
-                return null;
+            var data = await _mediator.Send(new GetGraphDataForSchoolQuery { SchoolCode = id, Day = day });
 
-            var data = await _budService.GetSiteDetails(id);
-            await _budService.GetSiteUsage(data, day);
-
-            // What day is the graph representing?
-            var dateDay = data.WANData.First().Time.Date;
-
-            // What day of the cycle is this?
-            var cyclicalDay = dateDay.GetDayNumber();
-
-            var periods = new List<TimetablePeriod>();
-
-            // Get the periods for all students at this school
-            foreach (var student in school.Students)
-            {
-                periods.AddRange(_unitOfWork.Periods.AllForStudent(student.StudentId));
-            }
-
-            // Which of these periods are on the right day?
-            periods = periods.Where(p => p.Day == cyclicalDay).ToList();
-
-            var returnData = new School_GraphData
-            {
-                GraphDate = dateDay.ToString("D"),
-                GraphSiteName = data.SiteName,
-                GraphIntlDate = dateDay.ToString("yyyy-MM-dd")
-            };
-
-            foreach (var dataPoint in data.WANData)
-            {
-                var classSession = periods.Any(p => p.StartTime <= dataPoint.Time.TimeOfDay && p.EndTime >= dataPoint.Time.TimeOfDay);
-
-                var point = new School_GraphDataPoint
-                {
-                    Time = dataPoint.Time.ToString("HH:mm"),
-                    Lesson = classSession,
-                    Networks = new List<School_GraphDataPointDetail>
-                    {
-                        new School_GraphDataPointDetail
-                        {
-                            Network = "WAN",
-                            Connection = data.WANBandwidth.IfNotNull(c => c / 1000000),
-                            Inbound = decimal.Round(dataPoint.WANInbound, 2),
-                            Outbound = decimal.Round(dataPoint.WANOutbound, 2),
-                        },
-                        new School_GraphDataPointDetail
-                        {
-                            Network = "INT",
-                            Connection = data.INTBandwidth.IfNotNull(c => c / 1000000),
-                            Inbound = decimal.Round(dataPoint.INTInbound, 2),
-                            Outbound = decimal.Round(dataPoint.INTOutbound, 2),
-                        }
-                    }
-                };
-
-                returnData.GraphData.Add(point);
-            }
-
-            return Json(returnData);
+            return Json(data);
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]

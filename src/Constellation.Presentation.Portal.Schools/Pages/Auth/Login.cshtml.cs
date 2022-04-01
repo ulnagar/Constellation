@@ -95,7 +95,7 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
 
 #if DEBUG
                 var claimList = new List<Claim>();
-                claimList.Add(new Claim("Schools", "8146,8155"));
+                claimList.Add(new Claim("Schools", "8146,8155,8343"));
 
                 await _signInManager.SignInWithClaimsAsync(user, false, claimList);
 

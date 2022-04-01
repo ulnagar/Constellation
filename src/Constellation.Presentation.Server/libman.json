@@ -12,7 +12,7 @@
       "destination": "wwwroot/lib/select2-theme-bootstrap4/"
     },
     {
-      "library": "Chart.js@3.6.0",
+      "library": "Chart.js@3.7.1",
       "destination": "wwwroot/lib/Chart.js/"
     },
     {
