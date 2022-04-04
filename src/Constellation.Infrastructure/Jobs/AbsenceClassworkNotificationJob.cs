@@ -1,10 +1,12 @@
-﻿using Constellation.Application.DTOs.EmailRequests;
+﻿using Constellation.Application.Common.CQRS.Jobs.AbsenceMonitor.Queries;
+using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -19,14 +21,17 @@ namespace Constellation.Infrastructure.Jobs
         private readonly IEmailService _emailService;
         private readonly ISentralGateway _sentralService;
         private readonly ILogger<IAbsenceMonitorJob> _logger;
+        private readonly IMediator _mediator;
 
         public AbsenceClassworkNotificationJob(IUnitOfWork unitOfWork, IEmailService emailService,
-            ISentralGateway sentralService, ILogger<IAbsenceMonitorJob> logger)
+            ISentralGateway sentralService, ILogger<IAbsenceMonitorJob> logger,
+            IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _emailService = emailService;
             _sentralService = sentralService;
             _logger = logger;
+            _mediator = mediator;
         }
 
         public async Task StartJob(DateTime scanDate)
@@ -121,8 +126,8 @@ namespace Constellation.Infrastructure.Jobs
                         {
                             check.Absences.Add(absence);
 
-                            var parentEmails = await _sentralService.GetContactEmailsAsync(absence.Student.SentralStudentId);
-                            await _emailService.SendStudentClassworkNotification(absence, check, parentEmails);
+                            var parentEmails = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = absence.StudentId });
+                            await _emailService.SendStudentClassworkNotification(absence, check, parentEmails.ToList());
                         }
                     }
                     else

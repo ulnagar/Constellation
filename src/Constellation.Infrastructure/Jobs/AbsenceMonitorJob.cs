@@ -20,7 +20,6 @@ namespace Constellation.Infrastructure.Jobs
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAbsenceProcessingJob _absenceProcessor;
-        private readonly ISentralGateway _sentralService;
         private readonly IEmailService _emailService;
         private readonly ISMSService _smsService;
         private readonly IAbsenceClassworkNotificationJob _classworkNotifier;
@@ -28,13 +27,11 @@ namespace Constellation.Infrastructure.Jobs
         private readonly IMediator _mediator;
 
         public AbsenceMonitorJob(IUnitOfWork unitOfWork, IAbsenceProcessingJob absenceProcessor, 
-            ISentralGateway sentralService, IEmailService emailService, 
-            ISMSService smsService, IAbsenceClassworkNotificationJob classworkNotifier,
+            IEmailService emailService, ISMSService smsService, IAbsenceClassworkNotificationJob classworkNotifier,
             ILogger<IAbsenceMonitorJob> logger, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _absenceProcessor = absenceProcessor;
-            _sentralService = sentralService;
             _emailService = emailService;
             _smsService = smsService;
             _classworkNotifier = classworkNotifier;
@@ -130,11 +127,11 @@ namespace Constellation.Infrastructure.Jobs
 
             if (parentDigestAbsences.Any())
             {
-                var emailAddresses = await _sentralService.GetContactEmailsAsync(student.SentralStudentId);
+                var emailAddresses = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = student.StudentId });
 
                 if (emailAddresses.Any())
                 {
-                    var sentmessage = await _emailService.SendParentWholeAbsenceDigest(parentDigestAbsences.ToList(), emailAddresses);
+                    var sentmessage = await _emailService.SendParentWholeAbsenceDigest(parentDigestAbsences.ToList(), emailAddresses.ToList());
 
                     if (sentmessage == null)
                         return;
@@ -165,8 +162,8 @@ namespace Constellation.Infrastructure.Jobs
 
         private async Task SendParentNotifications(StudentForAbsenceScan student)
         {
-            var phoneNumbers = await _sentralService.GetContactNumbersAsync(student.SentralStudentId);
-            var emailAddresses = await _sentralService.GetContactEmailsAsync(student.SentralStudentId);
+            var phoneNumbers = await _mediator.Send(new GetStudentFamilyMobileNumbersQuery { StudentId = student.StudentId });
+            var emailAddresses = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = student.StudentId });
 
             var recentWholeAbsences = await _mediator.Send(new GetRecentAbsencesForStudentQuery { StudentId = student.StudentId, AbsenceType = Absence.Whole });
 
@@ -179,7 +176,7 @@ namespace Constellation.Infrastructure.Jobs
                 {
                     if (phoneNumbers.Any() && group.Key.Date == DateTime.Today.AddDays(-1).Date)
                     {
-                        var sentMessages = await _smsService.SendAbsenceNotificationAsync(group.ToList(), phoneNumbers);
+                        var sentMessages = await _smsService.SendAbsenceNotificationAsync(group.ToList(), phoneNumbers.ToList());
 
                         if (sentMessages == null)
                         {
@@ -188,7 +185,7 @@ namespace Constellation.Infrastructure.Jobs
 
                             if (emailAddresses.Any())
                             {
-                                var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses);
+                                var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses.ToList());
 
                                 foreach (var absence in group)
                                     await _mediator.Send(new AddNewAbsenceNotificationCommand 
@@ -228,7 +225,7 @@ namespace Constellation.Infrastructure.Jobs
                     }
                     else if (emailAddresses.Any())
                     {
-                        var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses);
+                        var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses.ToList());
 
                         foreach (var absence in group)
                             await _mediator.Send(new AddNewAbsenceNotificationCommand

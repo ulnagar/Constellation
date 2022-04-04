@@ -30,7 +30,7 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<ICollection<SchoolContact>> AllWithStudentsInGradeAsync(Grade grade);
         Task<ICollection<SchoolContact>> AllWithRoleAsync(string role);
         Task<SchoolContact> ForEditAsync(int id);
-        Task<ICollection<string>> EmailAddressesOfAllInRoleAtSchool(string schoolCode, string role);
+        Task<ICollection<string>> EmailAddressesOfAllInRoleAtSchool(string studentId, string role);
         Task<bool> AnyWithId(int id);
         Task<SchoolContact> ForEditFromEmail(string email);
         Task<ICollection<SchoolContact>> ForBulkUpdate();

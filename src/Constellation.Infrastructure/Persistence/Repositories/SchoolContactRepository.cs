@@ -214,8 +214,13 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .SingleOrDefaultAsync(contact => contact.EmailAddress == email);
         }
 
-        public async Task<ICollection<string>> EmailAddressesOfAllInRoleAtSchool(string schoolCode, string role)
+        public async Task<ICollection<string>> EmailAddressesOfAllInRoleAtSchool(string studentId, string role)
         {
+            var schoolCode = await _context.Students
+                .Where(student => student.StudentId == studentId)
+                .Select(student => student.SchoolCode)
+                .FirstOrDefaultAsync();
+            
             return await _context.SchoolContactRoles
                 .Where(assignment => assignment.SchoolCode == schoolCode && assignment.Role == role && !assignment.IsDeleted)
                 .Select(assignment => assignment.SchoolContact.EmailAddress)

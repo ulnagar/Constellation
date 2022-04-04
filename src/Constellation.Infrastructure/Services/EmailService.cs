@@ -289,7 +289,7 @@ namespace Constellation.Infrastructure.Services
 
         public async Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(List<Absence> absences)
         {
-            var coordinators = await _unitOfWork.SchoolContacts.EmailAddressesOfAllInRoleAtSchool(absences.First().Student.SchoolCode, SchoolContactRole.Coordinator);
+            var coordinators = await _unitOfWork.SchoolContacts.EmailAddressesOfAllInRoleAtSchool(absences.First().StudentId, SchoolContactRole.Coordinator);
 
             coordinators = coordinators.Distinct().ToList();
 

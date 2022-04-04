@@ -29,6 +29,9 @@ namespace Constellation.Application.Common.CQRS.Jobs.AbsenceMonitor.Queries
         public async Task<ICollection<Absence>> Handle(GetUnexplainedAbsencesForDigestQuery request, CancellationToken cancellationToken)
         {
             var coordinatorDigestAbsences = await _context.Absences
+                .Include(absence => absence.Student)
+                .ThenInclude(student => student.School)
+                .Include(absence => absence.Offering)
                 .Where(absence => absence.StudentId == request.StudentId &&
                     absence.Type == request.Type &&
                     (absence.Responses.Any(response =>
