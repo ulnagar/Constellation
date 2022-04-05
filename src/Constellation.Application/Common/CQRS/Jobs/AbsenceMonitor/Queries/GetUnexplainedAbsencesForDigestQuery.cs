@@ -32,14 +32,15 @@ namespace Constellation.Application.Common.CQRS.Jobs.AbsenceMonitor.Queries
                 .Include(absence => absence.Student)
                 .ThenInclude(student => student.School)
                 .Include(absence => absence.Offering)
-                .Where(absence => absence.StudentId == request.StudentId &&
-                    absence.Type == request.Type &&
-                    (absence.Responses.Any(response =>
+                .Where(absence => absence.StudentId == request.StudentId)
+                .Where(absence => absence.Type == request.Type)
+                .Where(absence => !(absence.Responses.Any(response =>
                         (response.Type == AbsenceResponse.Student && response.VerificationStatus == AbsenceResponse.Verified) ||
-                        (response.Type == AbsenceResponse.Parent || response.Type == AbsenceResponse.Coordinator)) ||
-                    absence.ExternallyExplained) &&
-                    absence.DateScanned >= DateTime.Today.AddDays(request.AgeInWeeks * -7) &&
-                    absence.DateScanned <= DateTime.Today.AddDays(((request.AgeInWeeks -1) * -7) - 1))
+                        response.Type == AbsenceResponse.Parent || 
+                        response.Type == AbsenceResponse.Coordinator) ||
+                    absence.ExternallyExplained))
+                .Where(absence => absence.DateScanned >= DateTime.Today.AddDays(request.AgeInWeeks * -7))
+                .Where(absence => absence.DateScanned <= DateTime.Today.AddDays(((request.AgeInWeeks -1) * -7) - 1))
                 .ToListAsync(cancellationToken);
 
             return coordinatorDigestAbsences;
