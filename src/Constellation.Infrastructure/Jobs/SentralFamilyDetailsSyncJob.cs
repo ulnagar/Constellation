@@ -48,6 +48,9 @@ namespace Constellation.Infrastructure.Jobs
             {
                 _logger.LogInformation(" Checking family: {name} ({id})", family.AddressName, family.FamilyId);
 
+                family.MotherMobile = family.MotherMobile.Replace(" ", "");
+                family.FatherMobile = family.FatherMobile.Replace(" ", "");
+
                 // Check family exists in database
                 var entry = await _context.StudentFamilies
                     .Include(family => family.Students)
