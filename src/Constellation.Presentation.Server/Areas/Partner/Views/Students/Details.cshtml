@@ -94,6 +94,11 @@
 <div>
     <ul class="nav nav-pills">
         <li class="nav-item">
+            <a class="nav-link" href="#family" data-toggle="tab" role="tab">
+                Family
+            </a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link active" href="#studentClasses" data-toggle="tab" role="tab">
                 Enrolled classes
                 @if (Model.Enrolments.Any())
@@ -134,6 +139,94 @@
     </ul>
 
     <div class="tab-content">
+        <div id="family" class="tab-pane">
+            <h3>Family Details</h3>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <label asp-for="Family.Parent1" class="col-md-2">Parent 1</label>
+                    </div>
+
+                    <div class="row">
+                        <label asp-for="Family.Parent1.Title" class="col-md-4">Title</label>
+                        <div class="col-md-8">
+                            @Html.DisplayFor(model => model.Family.Parent1.Title, new {htmlAttributes = new {@class = "form-control"}})
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label asp-for="Family.Parent1.FirstName" class="col-md-4">First Name</label>
+                        <div class="col-md-8">
+                            @Html.DisplayFor(model => model.Family.Parent1.FirstName, new {htmlAttributes = new {@class = "form-control"}})
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label asp-for="Family.Parent1.LastName" class="col-md-4">Last Name</label>
+                        <div class="col-md-8">
+                            @Html.DisplayFor(model => model.Family.Parent1.LastName, new {htmlAttributes = new {@class = "form-control"}})
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label asp-for="Family.Parent1.MobileNumber" class="col-md-4">Mobile Number</label>
+                        <div class="col-md-8">
+                            @Html.DisplayFor(model => model.Family.Parent1.MobileNumber, "PhoneNumber", new {htmlAttributes = new {@class = "form-control"}})
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label asp-for="Family.Parent1.EmailAddress" class="col-md-4">Email Address</label>
+                        <div class="col-md-8">
+                            @Html.DisplayFor(model => model.Family.Parent1.EmailAddress, "EmailAddress", new {htmlAttributes = new {@class = "form-control"}})
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="row">
+                        <label asp-for="Family.Parent2" class="col-md-2">Parent 2</label>
+                    </div>
+
+                    <div class="row">
+                        <label asp-for="Family.Parent2.Title" class="col-md-4">Title</label>
+                        <div class="col-md-8">
+                            @Html.DisplayFor(model => model.Family.Parent2.Title, new {htmlAttributes = new {@class = "form-control"}})
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label asp-for="Family.Parent2.FirstName" class="col-md-4">First Name</label>
+                        <div class="col-md-8">
+                            @Html.DisplayFor(model => model.Family.Parent2.FirstName, new {htmlAttributes = new {@class = "form-control"}})
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label asp-for="Family.Parent2.LastName" class="col-md-4">Last Name</label>
+                        <div class="col-md-8">
+                            @Html.DisplayFor(model => model.Family.Parent2.LastName, new {htmlAttributes = new {@class = "form-control"}})
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label asp-for="Family.Parent2.MobileNumber" class="col-md-4">Mobile Number</label>
+                        <div class="col-md-8">
+                            @Html.DisplayFor(model => model.Family.Parent2.MobileNumber, "PhoneNumber", new {htmlAttributes = new {@class = "form-control"}})
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label asp-for="Family.Parent2.EmailAddress" class="col-md-4">Email Address</label>
+                        <div class="col-md-8">
+                            @Html.DisplayFor(model => model.Family.Parent2.EmailAddress, "EmailAddress", new {htmlAttributes = new {@class = "form-control"}})
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="studentClasses" class="tab-pane active">
             <h3>Active enrolments</h3>
             

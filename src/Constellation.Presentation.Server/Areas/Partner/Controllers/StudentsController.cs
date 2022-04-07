@@ -226,6 +226,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             viewModel.Equipment = student.Devices.Select(Student_DetailsViewModel.AllocationDto.ConvertFromDeviceAllocation).ToList();
             viewModel.Absences = student.Absences.Select(Student_DetailsViewModel.AbsenceDto.ConvertFromAbsence).ToList();
             viewModel.OfferingList = new SelectList(allOfferings.OrderBy(offering => offering.Name), "Id", "Name", null);
+            viewModel.Family = student.Family;
 
             foreach (var session in courseSessions)
             {

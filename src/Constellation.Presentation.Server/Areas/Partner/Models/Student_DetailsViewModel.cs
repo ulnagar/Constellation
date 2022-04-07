@@ -13,6 +13,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
     public class Student_DetailsViewModel : BaseViewModel
     {
         public StudentDto Student { get; set; }
+        public StudentFamily Family { get; set; }
         public List<OfferingDto> Enrolments { get; set; }
         public List<SessionDto> Sessions { get; set; }
         public List<AllocationDto> Equipment { get; set; }

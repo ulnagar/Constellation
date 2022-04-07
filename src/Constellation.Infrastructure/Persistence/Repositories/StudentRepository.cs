@@ -48,6 +48,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .ThenInclude(enrol => enrol.Offering)
                 .ThenInclude(offering => offering.Sessions)
                 .ThenInclude(session => session.Room)
+                .Include(student => student.Family)
                 .SingleOrDefaultAsync(student => student.StudentId == id);
         }
 
