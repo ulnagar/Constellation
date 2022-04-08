@@ -1,5 +1,5 @@
-﻿using Constellation.Application.Common.CQRS.API.Schools.Queries;
-using Constellation.Application.DTOs;
+﻿using Constellation.Application.DTOs;
+using Constellation.Application.Features.API.Schools.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;

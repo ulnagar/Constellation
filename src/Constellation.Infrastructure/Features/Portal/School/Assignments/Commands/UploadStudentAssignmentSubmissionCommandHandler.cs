@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.Common.ValidationRules;
+using Constellation.Application.Features.Gateways.CanvasGateway.Notifications;
 using Constellation.Application.Features.Portal.School.Assignments.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;

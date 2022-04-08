@@ -1,6 +1,6 @@
-﻿using Constellation.Application.Common.CQRS.Subject.Assignments.Queries;
-using Constellation.Application.Common.CQRS.Subject.Courses.Queries;
+﻿using Constellation.Application.Features.Subject.Assignments.Queries;
 using Constellation.Application.Features.Subject.Courses.Models;
+using Constellation.Application.Features.Subject.Courses.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.Areas.Subject.Models.Assignments;

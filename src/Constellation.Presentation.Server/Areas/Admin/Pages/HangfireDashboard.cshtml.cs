@@ -1,11 +1,10 @@
-using Constellation.Application.Common.CQRS.Admin.HangfireDashboard.Commands;
-using Constellation.Application.Common.CQRS.Admin.HangfireDashboard.Queries;
+using Constellation.Application.Features.Admin.HangfireDashboard.Commands;
+using Constellation.Application.Features.Admin.HangfireDashboard.Queries;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

@@ -1,4 +1,4 @@
-﻿using Constellation.Application.Common.CQRS.Partners.Schools.Commands;
+﻿using Constellation.Application.Features.Partners.Schools.Commands;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;

@@ -1,5 +1,4 @@
-﻿using Constellation.Application.Common.CQRS.Subject.Assignments.Queries;
-using Constellation.Application.DTOs;
+﻿using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Core.Models;

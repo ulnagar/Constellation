@@ -1,5 +1,5 @@
-using Constellation.Application.Common.CQRS.Portal.School.Assignment.Commands;
-using Constellation.Application.Common.CQRS.Portal.School.Assignment.Queries;
+using Constellation.Application.Features.Portal.School.Assignments.Commands;
+using Constellation.Application.Features.Portal.School.Assignments.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;

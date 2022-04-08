@@ -1,7 +1,6 @@
-﻿using Constellation.Application.Common.CQRS.Jobs.AbsenceMonitor.Command;
-using Constellation.Application.Common.CQRS.Jobs.AbsenceMonitor.Queries;
+﻿using Constellation.Application.Features.Jobs.AbsenceMonitor.Commands;
 using Constellation.Application.Features.Jobs.AbsenceMonitor.Models;
-using Constellation.Application.Interfaces.Gateways;
+using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
