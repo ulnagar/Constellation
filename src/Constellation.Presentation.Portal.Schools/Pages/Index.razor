@@ -1,20 +1,25 @@
 ﻿@page "/"
+
+@using Constellation.Presentation.Portal.Schools.Components
+
 @attribute [Authorize]
 
-@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject SignInManager<AppUser> SignInManager
 @inject IMediator mediator
 
 <h1>Aurora College Schools Portal</h1>
 
-@foreach (var student in Students)
+@foreach (var group in Students.GroupBy(student => student.CurrentGrade))
 {
-    <div class="card w-25 m-3 float-left">
-        <img class="card-img-top" src="">
-        <div class="card-body">
-            <h5 class="card-title">@student.FirstName @student.LastName</h5>
-            <p class="card-text">Grade: @student.CurrentGrade</p>
-        </div>
+    var yearTitle = $"Year {(int)group.Key}";
+
+    <TitleDivider Title="@yearTitle" />
+
+    <div class="flex-row">
+        @foreach (var student in group)
+        {
+            <StudentCard Student="student" />
+        }
     </div>
 }
 
@@ -23,27 +28,7 @@
     public SchoolDto SelectedSchool { get; set; }
     public SchoolDto CurrentlySelectedSchool { get; set; }
 
-    public List<Claim> Claims { get; set; }
-
     public List<StudentDto> Students { get; set; } = new List<StudentDto>();
-
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity.IsAuthenticated)
-        {
-            Claims = user.Claims.ToList();
-        }
-        else
-        {
-            if (SignInManager.IsSignedIn(user))
-            {
-                await SignInManager.SignOutAsync();
-            }
-        }
-    }
 
     protected override async Task OnParametersSetAsync()
     {

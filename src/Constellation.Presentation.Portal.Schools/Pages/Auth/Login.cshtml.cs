@@ -93,14 +93,14 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
                     return Page();
                 }
 
-//#if DEBUG
-//                var claimList = new List<Claim>();
-//                claimList.Add(new Claim("Schools", "8146,8155,8343"));
+#if DEBUG
+                var claimList = new List<Claim>();
+                claimList.Add(new Claim("Schools", "8146,8155,8343"));
 
-//                await _signInManager.SignInWithClaimsAsync(user, false, claimList);
+                await _signInManager.SignInWithClaimsAsync(user, false, claimList);
 
-//                return LocalRedirect(returnUrl);
-//#else
+                return LocalRedirect(returnUrl);
+#else
 #pragma warning disable CA1416 // Validate platform compatibility
                 var context = new PrincipalContext(ContextType.Domain, "DETNSW.WIN");
                 //var success = context.ValidateCredentials(Input.Email, Input.Password);
@@ -115,7 +115,7 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
 
                     return LocalRedirect(returnUrl);
                 }
-//#endif
+#endif
             }
 
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");

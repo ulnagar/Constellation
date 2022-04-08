@@ -140,6 +140,15 @@ namespace Constellation.Infrastructure.Gateways
             return null;
         }
 
+        public async Task<byte[]> GetSentralStudentPhoto(string studentId)
+        {
+            await Login();
+
+            var response = await _client.GetAsync($"{_settings.Server}/_common/lib/photo?type=student&id={studentId}&w=250&h=250");
+
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+
         public async Task<string> GetSentralStudentIdFromSRN(string srn, string grade)
         {
             var page = await GetPageAsync($"{_settings.Server}/admin/datasync/students?year={grade}&type=active");

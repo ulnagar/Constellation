@@ -94,6 +94,7 @@
 @code {
     [CascadingParameter]
     public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
 
     public ICollection<StudentFromSchoolForDropdownSelection> Students { get; set; } = new List<StudentFromSchoolForDropdownSelection>();
 
@@ -121,13 +122,12 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (SelectedSchool != null)
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
         {
+            CurrentlySelectedSchool = SelectedSchool;
+
             var students = await mediator.Send(new GetStudentsFromSchoolForSelectionQuery { SchoolCode = SelectedSchool.Code });
             Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
-        } else
-        {
-            Students = new List<StudentFromSchoolForDropdownSelection>();
         }
     }
 

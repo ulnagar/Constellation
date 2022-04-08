@@ -42,6 +42,8 @@ namespace Constellation.Core.Models
         public DateTime? AbsenceNotificationStartDate { get; set; }
         public string DisplayName => FirstName.Trim() + " " + LastName.Trim();
         public string EmailAddress => PortalUsername + "@education.nsw.gov.au";
+        public byte[] Photo { get; set; }
+
         public StudentFamily Family { get; set; }
         public ICollection<Enrolment> Enrolments { get; set; }
         public ICollection<DeviceAllocation> Devices { get; set; }

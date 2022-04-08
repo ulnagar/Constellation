@@ -28,10 +28,10 @@ namespace Constellation.Infrastructure.DependencyInjection
                     b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
             });
 
-            services.AddDbContext<TrackItContext>(options =>
-            {
-                options.UseSqlServer(configuration.GetConnectionString("TrackItConnection"));
-            });
+            //services.AddDbContext<TrackItContext>(options =>
+            //{
+            //    options.UseSqlServer(configuration.GetConnectionString("TrackItConnection"));
+            //});
 
             services.AddScoped<IAppDbContext, AppDbContext>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();

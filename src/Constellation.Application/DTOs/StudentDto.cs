@@ -1,5 +1,6 @@
 ﻿using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Application.DTOs
@@ -30,6 +31,8 @@ namespace Constellation.Application.DTOs
         [Required]
         public string SchoolCode { get; set; }
 
+        public string PhotoSrc { get; set; }
+
         public static StudentDto ConvertFromStudent(Student student)
         {
             var viewModel = new StudentDto
@@ -43,7 +46,8 @@ namespace Constellation.Application.DTOs
                 EnrolledGrade = student.EnrolledGrade,
                 CurrentGrade = student.CurrentGrade,
                 Gender = student.Gender,
-                SchoolCode = student.SchoolCode
+                SchoolCode = student.SchoolCode,
+                PhotoSrc = $"data:image/jpg;base64,{Convert.ToBase64String(student.Photo)}"
             };
 
             return viewModel;

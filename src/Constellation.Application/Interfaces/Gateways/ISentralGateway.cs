@@ -17,5 +17,6 @@ namespace Constellation.Application.Interfaces.Gateways
         Task<List<DateTime>> GetExcludedDatesFromCalendar(string year);
         Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateTime date);
         Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport();
+        Task<byte[]> GetSentralStudentPhoto(string studentId);
     }
 }
