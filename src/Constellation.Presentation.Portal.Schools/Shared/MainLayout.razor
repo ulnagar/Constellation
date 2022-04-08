@@ -14,7 +14,7 @@
                 <div class="col-md-8">
                 @if (ShowChangeSchoolBox)
                 {
-                    <select class="form-control" @onchange="ChangeSchool">
+                    <select class="form-control" @onchange="ChangeSchool" @onblur="RestoreSchoolLabel">
                         @foreach (var school in Schools)
                         {
                             var selected = SelectedSchool.Code == school.Code;
@@ -79,6 +79,11 @@
     private void ToggleChangeSchoolBox()
     {
         ShowChangeSchoolBox = true;
+    }
+
+    private void RestoreSchoolLabel()
+    {
+        ShowChangeSchoolBox = false;
     }
 
     private void ChangeSchool(ChangeEventArgs e)

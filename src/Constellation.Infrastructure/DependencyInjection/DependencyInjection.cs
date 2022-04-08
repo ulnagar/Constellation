@@ -6,12 +6,14 @@ using Constellation.Infrastructure.Persistence;
 using Constellation.Infrastructure.Persistence.Repositories;
 using Constellation.Infrastructure.Persistence.TrackIt;
 using Constellation.Infrastructure.Templates.Services;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Reflection;
 
 namespace Constellation.Infrastructure.DependencyInjection
 {
@@ -33,6 +35,8 @@ namespace Constellation.Infrastructure.DependencyInjection
 
             services.AddScoped<IAppDbContext, AppDbContext>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddMediatR(Assembly.GetExecutingAssembly());
 
             services.Scan(scan => scan
                 .FromAssemblyOf<IApplicationService>()

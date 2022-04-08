@@ -2,6 +2,7 @@
 @attribute [Authorize]
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SignInManager<AppUser> SignInManager
 @inject IMediator mediator
 
 <h1>Aurora College Schools Portal</h1>
@@ -36,7 +37,10 @@
         }
         else
         {
-            Claims = new List<Claim>();
+            if (SignInManager.IsSignedIn(user))
+            {
+                await SignInManager.SignOutAsync();
+            }
         }
     }
 
