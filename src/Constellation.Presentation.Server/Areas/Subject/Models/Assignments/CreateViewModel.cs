@@ -1,5 +1,5 @@
-﻿using Constellation.Application.Common.CQRS.Subject.Assignments.Commands;
-using Constellation.Application.Common.CQRS.Subject.Assignments.Queries;
+﻿using Constellation.Application.Features.Subject.Assignments.Commands;
+using Constellation.Application.Features.Subject.Assignments.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;

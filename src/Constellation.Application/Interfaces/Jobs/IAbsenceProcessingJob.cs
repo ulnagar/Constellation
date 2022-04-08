@@ -1,4 +1,4 @@
-﻿using Constellation.Application.Common.CQRS.Jobs.AbsenceMonitor.Queries;
+﻿using Constellation.Application.Features.Jobs.AbsenceMonitor.Models;
 using Constellation.Core.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;

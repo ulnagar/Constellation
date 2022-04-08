@@ -1,4 +1,4 @@
-﻿using Constellation.Application.Common.CQRS.Partners.Schools.Commands;
+﻿using Constellation.Application.Features.Partners.Schools.Commands;
 using System.Text.Json.Serialization;
 
 namespace Constellation.Application.DTOs.Json
