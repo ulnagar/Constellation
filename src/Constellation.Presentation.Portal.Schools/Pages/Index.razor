@@ -21,6 +21,7 @@
 @code{
     [CascadingParameter]
     public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
 
     public List<Claim> Claims { get; set; }
 
@@ -46,14 +47,12 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (SelectedSchool != null)
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
         {
+            CurrentlySelectedSchool = SelectedSchool;
+
             var students = await mediator.Send(new GetStudentsFromSchoolQuery { SchoolCode = SelectedSchool.Code });
             Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();    
-        } else
-        {
-            Students = new List<StudentDto>();
         }
-
     }
 }

@@ -1,0 +1,14 @@
+﻿.selected {
+    /*"bg-info text-white";*/
+    background-color: cornflowerblue;
+    color: white;
+}
+
+.unselected {
+    /*"bg-light";*/
+    background-color: white;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}

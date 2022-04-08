@@ -1,0 +1,127 @@
+﻿@page "/Absences/"
+@using static Constellation.Application.Features.Portal.School.Absences.Queries.GetUnProcessedAbsencesFromSchoolQuery
+
+@attribute [Authorize]
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SignInManager<AppUser> SignInManager
+@inject IMediator mediator
+
+<h1>Student Absences</h1>
+
+<div class="d-flex flex-row justify-content-around mt-3 mb-3">
+    <div class="cursor-pointer border border-secondary rounded p-3 h-100 text-center @(AbsencesType == AbsenceCategory.UnexplainedPartials ? "selected" : "unselected")" @onclick="() => ChangeAbsenceType(AbsenceCategory.UnexplainedPartials)">
+        <div>Unexplained Partial Absences</div>
+        <div>@UnexplainedPartialsCount</div>
+    </div>
+
+    <div class="cursor-pointer border border-secondary rounded p-3 h-100 text-center @(AbsencesType == AbsenceCategory.UnverifiedPartials ? "selected" : "unselected")" @onclick="() => ChangeAbsenceType(AbsenceCategory.UnverifiedPartials)">
+        <div>Unverified Partial Absences</div>
+        <div>@UnverifiedPartialsCount</div>
+    </div>
+
+    <div class="cursor-pointer border border-secondary rounded p-3 h-100 text-center @(AbsencesType == AbsenceCategory.UnexplainedWholes ? "selected" : "unselected")" @onclick="() => ChangeAbsenceType(AbsenceCategory.UnexplainedWholes)">
+        <div>Unexplained Whole Absences</div>
+        <div>@UnexplainedWholesCount</div>
+    </div>
+</div>
+
+    <div>
+        <h3>Table Heading</h3>
+
+        <table class="table table-striped custom-data-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Period</th>
+                    <th>Length</th>
+                    <th>Class</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in FilteredAbsences)
+                {
+                    <tr>
+                        <td>@entry.StudentName @entry.StudentCurrentGrade</td>
+                        <td>@entry.Date.ToShortDateString()</td>
+                        <td>@entry.AbsenceTimeframe</td>
+                        <td>@entry.PeriodName (@entry.PeriodTimeframe)</td>
+                        <td>@entry.AbsenceLength</td>
+                        <td>@entry.OfferingName</td>
+                        <td></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    public int UnexplainedPartialsCount { get; set; }
+    public int UnverifiedPartialsCount { get; set; }
+    public int UnexplainedWholesCount { get; set; }
+
+    public ICollection<AbsenceForPortalList> Absences { get; set; } = new List<AbsenceForPortalList>();
+    public ICollection<AbsenceForPortalList> FilteredAbsences { get; set; } = new List<AbsenceForPortalList>();
+    public AbsenceCategory AbsencesType { get; set; } = AbsenceCategory.UnverifiedPartials;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            Absences = await mediator.Send(new GetUnProcessedAbsencesFromSchoolQuery { SchoolCode = SelectedSchool.Code });
+
+            UnexplainedPartialsCount = Absences.Count(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.ReasonId == null);
+            UnverifiedPartialsCount = Absences.Count(absence =>  absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.ReasonId != null);
+            UnexplainedWholesCount = Absences.Count(absence => absence.AbsenceTimeframe == absence.PeriodTimeframe);
+
+            FilterAbsences();
+        }
+    }
+
+    public enum AbsenceCategory
+    {
+        UnexplainedPartials,
+        UnverifiedPartials,
+        UnexplainedWholes
+    }
+
+    private void ChangeAbsenceType(AbsenceCategory type)
+    {
+        AbsencesType = type;
+
+        FilterAbsences();
+    }
+
+    private void FilterAbsences()
+    {
+        switch (AbsencesType)
+        {
+            case AbsenceCategory.UnexplainedPartials:
+                FilteredAbsences = Absences
+                    .Where(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.ReasonId == null)
+                    .ToList();
+                break;
+            case AbsenceCategory.UnexplainedWholes:
+                FilteredAbsences = Absences
+                    .Where(absence => absence.AbsenceTimeframe == absence.PeriodTimeframe)
+                    .ToList();
+                break;
+            case AbsenceCategory.UnverifiedPartials:
+                FilteredAbsences = Absences
+                    .Where(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.ReasonId != null)
+                    .ToList();
+                break;
+        }
+
+        FilteredAbsences = FilteredAbsences.OrderBy(absence => absence.StudentCurrentGrade).ThenBy(absence => absence.StudentLastName).ThenBy(absence => absence.StudentFirstName).ToList();
+    }
+}
