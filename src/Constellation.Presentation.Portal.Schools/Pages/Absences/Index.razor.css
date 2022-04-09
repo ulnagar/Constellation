@@ -13,3 +13,7 @@
     cursor: pointer;
     user-select: none;
 }
+
+.mode-explanation {
+    margin-top: 1rem;
+}

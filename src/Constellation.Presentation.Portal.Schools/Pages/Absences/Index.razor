@@ -1,11 +1,11 @@
 ﻿@page "/Absences/"
+
 @using static Constellation.Application.Features.Portal.School.Absences.Queries.GetUnProcessedAbsencesFromSchoolQuery
 
 @attribute [Authorize]
 
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject SignInManager<AppUser> SignInManager
 @inject IMediator mediator
+@inject NavigationManager NavigationManager
 
 <h1>Student Absences</h1>
 
@@ -26,37 +26,64 @@
     </div>
 </div>
 
+<div class="mode-explanation">
+    @if (AbsencesType == AbsenceCategory.UnexplainedPartials)
+    {
+        <h3>Unexplained Partial Absences</h3>
+        <span>
+            These absences are where a student was not present for a portion of a lesson. Students are sent an email requesting a reason for their absence, which is then forwarded to you for verification. You cannot verify these absences yet as the student has not provided the explanation.
+        </span>
+    }
+
+    @if (AbsencesType == AbsenceCategory.UnverifiedPartials)
+    {
+        <h3>Unverified Partial Absences</h3>
+        <span>
+            These absences are where a student was not present for a portion of a lesson. Students have provided an reason for their absence, which is then forwarded to you for verification. Please review and verify or reject each explanation as appropriate.
+        </span>
+    }
+
+    @if (AbsencesType == AbsenceCategory.UnexplainedWholes)
+    {
+        <h3>Unexplained Whole Absences</h3>
+        <span>
+            These absences are where a student was not present for an entire lesson. Parents are requested to provide an explanation for the absence, however if your school has received an explanation, please submit it here.
+        </span>
+    }
+</div>
+
 <div>
     <div class="mt-3">
-        <h3>Table Heading</h3>
-
-        <table class="table table-striped custom-data-table">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Period</th>
-                    <th>Length</th>
-                    <th>Class</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var entry in FilteredAbsences)
-                {
-                    <tr>
-                        <td>@entry.StudentName @entry.StudentCurrentGrade</td>
-                        <td>@entry.Date.ToShortDateString()</td>
-                        <td>@entry.AbsenceTimeframe</td>
-                        <td>@entry.PeriodName (@entry.PeriodTimeframe)</td>
-                        <td>@entry.AbsenceLength</td>
-                        <td>@entry.OfferingName</td>
-                        <td></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <GroupedDataTable Items="FilteredAbsences.GroupBy(student => student.StudentName).ToList()" TItem="AbsenceForPortalList" TKey="string">
+            <TableHeader>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Period</th>
+                <th>Length</th>
+                <th>Class</th>
+                <th>Action</th>
+            </TableHeader>
+            <GroupRowTemplate Context="entry">
+                <td colspan="6">@entry.StudentName @entry.StudentCurrentGrade</td>
+            </GroupRowTemplate>
+            <RowTemplate Context="entry">
+                <td>@entry.Date.ToShortDateString()</td>
+                <td>@entry.AbsenceTimeframe</td>
+                <td>@entry.PeriodName (@entry.PeriodTimeframe)</td>
+                <td>@entry.AbsenceLength</td>
+                <td>@entry.OfferingName</td>
+                <td>
+                    @if (AbsencesType == AbsenceCategory.UnverifiedPartials)
+                    {
+                        <button class="btn btn-info btn-show-hover" @onclick="() => GoToPartialVerification(entry.ReasonId.Value)">Verify</button>
+                    }
+                    @if (AbsencesType == AbsenceCategory.UnexplainedWholes)
+                    {
+                        <button class="btn btn-info btn-show-hover" @onclick="() => GoToWholeExplanation(entry.Id)">Explain</button>
+                    }
+                </td>
+            </RowTemplate>
+        </GroupedDataTable>
     </div>
 </div>
 
@@ -125,5 +152,15 @@
         }
 
         FilteredAbsences = FilteredAbsences.OrderBy(absence => absence.StudentCurrentGrade).ThenBy(absence => absence.StudentLastName).ThenBy(absence => absence.StudentFirstName).ToList();
+    }
+
+    private void GoToPartialVerification(Guid responseId)
+    {
+        NavigationManager.NavigateTo($"Absences/Partial/{responseId}/Verify");
+    }
+
+    private void GoToWholeExplanation(Guid absenceId)
+    {
+        NavigationManager.NavigateTo($"Absences/Whole/{absenceId}/Explain");
     }
 }
