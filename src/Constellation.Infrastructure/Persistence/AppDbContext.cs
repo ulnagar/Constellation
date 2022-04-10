@@ -44,6 +44,7 @@ namespace Constellation.Infrastructure.Persistence
         public DbSet<Casual> Casuals { get; set; }
         public DbSet<ClassCover> Covers { get; set; }
         public DbSet<Absence> Absences { get; set; }
+        public DbSet<AbsenceResponse> AbsenceResponse { get; set; }
         public DbSet<StudentWholeAbsence> WholeAbsences { get; set; }
         public DbSet<StudentPartialAbsence> PartialAbsences { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
