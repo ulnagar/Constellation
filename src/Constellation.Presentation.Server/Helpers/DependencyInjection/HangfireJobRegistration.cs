@@ -77,6 +77,11 @@ namespace Constellation.Presentation.Server.Helpers.DependencyInjection
             if (jobActivations.All(job => job.JobName != sentralPhotoSync.JobName))
                 _unitOfWork.Add(sentralPhotoSync);
 
+            _jobManager.AddOrUpdate<ISentralReportSyncJob>(nameof(ISentralReportSyncJob), (job) => job.StartJob(true), "* 18 * * 1-6", TimeZoneInfo.Local);
+            var sentralReportSync = new JobActivation { JobName = nameof(ISentralReportSyncJob) };
+            if (jobActivations.All(job => job.JobName != sentralReportSync.JobName))
+                _unitOfWork.Add(sentralReportSync);
+
             _unitOfWork.CompleteAsync();
         }
     }

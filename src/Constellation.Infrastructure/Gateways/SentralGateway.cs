@@ -140,6 +140,96 @@ namespace Constellation.Infrastructure.Gateways
             return null;
         }
 
+        public async Task<ICollection<SentralReportDto>> GetStudentReportList(string sentralStudentId)
+        {
+            HtmlNode reportTable = null;
+            var page = await GetPageAsync($"{_settings.Server}/profiles/students/{sentralStudentId}/academic-history");
+
+            var dataList = new List<SentralReportDto>();
+
+            if (page == null)
+                return dataList;
+
+            var menuItems = page.DocumentNode.SelectNodes("//*[@id='reporting_period']/option");
+
+            if (menuItems == null || menuItems.Count == 0)
+                return dataList;
+
+            foreach (var menuItem in menuItems)
+            {
+                var linkRef = menuItem.GetAttributeValue("value", "");
+                if (string.IsNullOrWhiteSpace(linkRef))
+                    continue;
+
+                var reportPage = await GetPageAsync($"{_settings.Server}/profiles/students/{sentralStudentId}/academic-history?type=sreport&page=printed_report&reporting_period={linkRef}");
+                reportTable = reportPage.DocumentNode.SelectSingleNode("//*[@id='layout-2col-content']/div/div/div[2]/table/tbody");
+
+                if (reportTable != null)
+                    break;
+            }
+
+            if (reportTable != null)
+            {
+                foreach (var row in reportTable.Descendants("tr"))
+                {
+                    var cellNumber = 0;
+
+                    var entry = new SentralReportDto();
+
+                    // Process Row!
+                    foreach (var cell in row.Descendants("td"))
+                    {
+                        cellNumber++;
+
+                        switch (cellNumber)
+                        {
+                            case 1:
+                                // Report Period Name
+                                entry.Name = cell.InnerText.Trim();
+                                break;
+                            case 2:
+                                // Report Semester
+                                break;
+                            case 3:
+                                // Report Year
+                                entry.Year = cell.InnerText.Trim();
+                                break;
+                            case 4:
+                                // Report Layout
+                                break;
+                            case 5:
+                                // Report Download link
+                                var link = cell.FirstChild.GetAttributeValue("onclick", "downloadFile(0)");
+                                entry.PublishId = link.Split('(')[1].Split(')')[0];
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    dataList.Add(entry);
+                }
+            }
+
+            return dataList;
+        }
+
+        public async Task<byte[]> GetStudentReport(string sentralStudentId, string reportId)
+        {
+            await Login();
+
+            var formData = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("file_id", reportId),
+                new KeyValuePair<string, string>("action", "download_file")
+            };
+            var formDataEncoded = new FormUrlEncodedContent(formData);
+
+            var response = await _client.PostAsync($"{_settings.Server}/profiles/students/{sentralStudentId}/academic-history?type=sreport&page=printed_report", formDataEncoded);
+
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+
         public async Task<byte[]> GetSentralStudentPhoto(string studentId)
         {
             await Login();

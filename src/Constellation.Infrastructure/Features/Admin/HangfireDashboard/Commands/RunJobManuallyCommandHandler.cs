@@ -82,6 +82,10 @@ namespace Constellation.Infrastructure.Features.Admin.HangfireDashboard.Commands
                     var photoSync = _serviceProvider.GetService<ISentralPhotoSyncJob>();
                     await photoSync.StartJob(false);
                     break;
+                case "ISentralReportSyncJob":
+                    var reportSync = _serviceProvider.GetService<ISentralReportSyncJob>();
+                    await reportSync.StartJob(false);
+                    break;
 
                 default:
                     break;

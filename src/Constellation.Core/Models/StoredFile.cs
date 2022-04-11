@@ -5,6 +5,7 @@ namespace Constellation.Core.Models
     public class StoredFile
     {
         public const string CanvasAssignmentSubmission = "Canvas Assignment Submission";
+        public const string StudentReport = "Student Report";
 
         public int Id { get; set; }
         public string Name { get; set; }

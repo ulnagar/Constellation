@@ -18,5 +18,7 @@ namespace Constellation.Application.Interfaces.Gateways
         Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateTime date);
         Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport();
         Task<byte[]> GetSentralStudentPhoto(string studentId);
+        Task<ICollection<SentralReportDto>> GetStudentReportList(string sentralStudentId);
+        Task<byte[]> GetStudentReport(string sentralStudentId, string reportId);
     }
 }

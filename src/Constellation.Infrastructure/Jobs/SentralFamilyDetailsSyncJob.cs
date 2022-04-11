@@ -27,7 +27,7 @@ namespace Constellation.Infrastructure.Jobs
         {
             if (automated)
             {
-                var jobStatus = await _context.JobActivations.FirstOrDefaultAsync(job => job.JobName == nameof(ITrackItSyncJob));
+                var jobStatus = await _context.JobActivations.FirstOrDefaultAsync(job => job.JobName == nameof(ISentralFamilyDetailsSyncJob));
                 if (jobStatus == null || !jobStatus.IsActive)
                 {
                     _logger.LogInformation("Stopped due to job being set inactive.");
