@@ -1,4 +1,6 @@
-﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿@model Constellation.Infrastructure.Templates.Views.Shared.EmailLayoutBaseViewModel
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 
 <head>
@@ -152,7 +154,7 @@
                                 <tr>
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
                                     <a href="https://aurora.nsw.edu.au" target="_blank">
-                                      <img align="center" border="0" src="https://acos.aurora.nsw.edu.au/school-logo.png" alt="Aurora College School Logo" title="Aurora College School Logo" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 100%;max-width: 480px;"
+                                      <img align="center" border="0" src="@Model.SchoolLogo" alt="Aurora College School Logo" title="Aurora College School Logo" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 100%;max-width: 480px;"
                                         width="480" />
                                     </a>
                                   </td>

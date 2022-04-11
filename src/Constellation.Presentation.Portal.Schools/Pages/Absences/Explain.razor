@@ -1,0 +1,95 @@
+﻿@page "/Absences/Whole/{AbsenceId:guid}/Explain"
+
+@attribute [Authorize]
+
+@inject IMediator mediator
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h1>Whole Absence Explanation</h1>
+
+<div class="form-horizontal">
+    <EditForm Model="Command" OnValidSubmit="SubmitResponse">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group row">
+            <label class="col-md-2">Absence Date</label>
+            <div class="col-md-6">@Absence?.Date.ToShortDateString()</div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-2">Student Name</label>
+            <div class="col-md-6">@Absence?.StudentName</div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-2">Class Name</label>
+            <div class="col-md-6">@Absence?.ClassName</div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-2">Period Name</label>
+            <div class="col-md-6">@Absence?.PeriodName</div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-2">Absence Timeframe</label>
+            <div class="col-md-6">@Absence?.AbsenceTimeframe</div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-2">Comment</label>
+            <div class="col-md-6">
+                <InputTextArea @bind-Value="Command.Comment" rows="5" cols="100" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="offset-1 col-md-3">
+                <button class="btn btn-success btn-block btn-lg" type="submit">Submit</button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public Guid AbsenceId { get; set; }
+    public Guid CurrentAbsenceId { get; set; }
+
+    public WholeAbsenceForSchoolExplanation Absence { get; set; }
+
+    public ProvideSchoolAbsenceExplanationCommand Command { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (AbsenceId != Guid.NewGuid())
+        {
+            if (AbsenceId != CurrentAbsenceId)
+            {
+                Absence = await mediator.Send(new GetAbsenceForSchoolExplanationQuery { Id = AbsenceId });
+                Command = new();
+
+                Command.AbsenceId = AbsenceId;
+            }
+
+            CurrentAbsenceId = AbsenceId;
+        } else
+        {
+            Absence = new();
+            Command = new();
+        }
+    }
+
+    private async Task SubmitResponse()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        Command.UserEmail = authState.User.Identity.Name;
+
+        await mediator.Send(Command);
+
+        NavigationManager.NavigateTo("Absences");
+    }
+}

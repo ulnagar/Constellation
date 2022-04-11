@@ -64,7 +64,7 @@ namespace Constellation.Presentation.Server.Areas.Utility.Controllers
 
             var resultStream = await _excelService.CreateAwardsCalculationFile(stream);
 
-            var fileName = $"Awards {DateTime.Now.ToString("yyyy-MM-dd")}.xlsx";
+            var fileName = $"Awards {DateTime.Now:yyyy-MM-dd}.xlsx";
             var contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
             return File(resultStream, contentType, fileName);
