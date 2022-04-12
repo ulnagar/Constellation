@@ -1,5 +1,112 @@
-﻿<h3>Submit</h3>
+﻿@page "/ScienceRolls/{RollId:guid}/Submit"
+
+@attribute [Authorize]
+
+@inject IMediator mediator
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h2>Science Practical Roll</h2>
+
+<div class="mt-3">
+    <div class="form-horizontal">
+        <EditForm Model="Roll" OnValidSubmit="SubmitResponse">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group row">
+                <label class="col-md-2">Lesson Name</label>
+                <div class="col-md-6">@Roll.LessonName</div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-md-2">Due Date</label>
+                <div class="col-md-6">@Roll.LessonDueDate.ToShortDateString()</div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-md-2">Date Delivered</label>
+                <div class="col-md-6">
+                    <InputDate @bind-Value="Roll.LessonDate" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-md-2">Comment</label>
+                <div class="col-md-6">
+                    <InputTextArea @bind-Value="Roll.Comment" rows="3" cols="100" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row form-group">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <td class="col-md-4"><label>Name</label></td>
+                        <td><label>Present?</label></td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var student in Roll.Attendance)
+                    {
+                        <tr>
+                            <td><span class="control-label text-only">@student.StudentName</span></td>
+                            <td>
+                                <span class="control-label text-only">
+                                    <InputCheckbox @bind-Value="student.Present" />
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="form-group row">
+                <div class="offset-1 col-md-3">
+                    <button class="btn btn-success btn-block btn-lg" type="submit">Submit</button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+</div>
 
 @code {
+    [Parameter]
+    public Guid RollId { get; set; }
+    public Guid CurrentRollId { get; set; }
 
+    public ScienceLessonRollForSubmit Roll { get; set; } = new();
+
+    public SubmitScienceLessonRollCommand Command { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (RollId != Guid.Empty && RollId != CurrentRollId)
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+            CurrentRollId = RollId;
+
+            Roll = await mediator.Send(new GetScienceLessonRollForSubmitQuery { RollId = RollId });
+            Roll.LessonDate = DateTime.Today;
+
+            Command = new SubmitScienceLessonRollCommand();
+            Command.RollId = RollId;
+            Command.UserEmail = authState.User.Identity.Name;
+        }
+    }
+
+    public async Task SubmitResponse()
+    {
+        Command.LessonDate = Roll.LessonDate;
+        Command.Comment = Roll.Comment;
+
+        foreach (var entry in Roll.Attendance)
+        {
+            Command.Attendance.Add(entry.Id, entry.Present);
+        }
+
+        await mediator.Send(Command);
+    }
 }
