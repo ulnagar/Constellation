@@ -1,0 +1,94 @@
+﻿@page "/ScienceRolls/{RollId:guid}"
+
+@attribute [Authorize]
+
+@inject IMediator mediator
+@inject NavigationManager NavigationManager
+
+<h2>Science Practical Roll</h2>
+
+<div class="row">
+    <a href="ScienceRolls" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<div class="mt-3">
+    <div class="form-horizontal">
+        <div class="row form-group">
+            <label class="col-md-2">Lesson</label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@MarkedRoll.LessonName</span>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <label class="col-md-2">Due Date</label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@MarkedRoll.LessonDueDate.ToShortDateString()</span>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <label class="col-md-2">Date Delivered</label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@MarkedRoll.LessonDate?.ToShortDateString()</span>
+            </div>
+        </div>
+                    
+        <div class="row form-group">
+            <label class="col-md-2">Delivered By</label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@MarkedRoll.SchoolContactName</span>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <label class="col-md-2">Comment</label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@MarkedRoll.Comment</span>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <table class="table">
+                <thead>
+                <tr>
+                    <td class="col-md-4"><label>Name</label></td>
+                    <td><label>Present?</label></td>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var student in MarkedRoll.Attendance)
+                {
+                    <tr>
+                        <td><span class="control-label text-only">@student.StudentName</span></td>
+                        <td><span class="control-label text-only">@(student.Present ? "Yes" : "No")</span></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    [Parameter]
+    public Guid RollId { get; set; }
+
+    public ScienceLessonRollForDetails MarkedRoll { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            MarkedRoll = await mediator.Send(new GetScienceLessonRollForDisplayQuery { RollId = RollId });
+        }
+    }
+}
