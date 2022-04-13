@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Extensions;
+using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
@@ -7,6 +8,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Presentation.Server.Areas.Reports.Models;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -27,10 +29,12 @@ namespace Constellation.Infrastructure.Jobs
         private readonly IRazorViewToStringRenderer _renderService;
         private readonly ISentralGateway _sentralGateway;
         private readonly ILogger<IAttendanceReportJob> _logger;
+        private readonly IMediator _mediator;
 
         public AttendanceReportJob(IUnitOfWork unitOfWork, IEmailService emailService,
             IPDFService pdfService, IRazorViewToStringRenderer renderService,
-            ISentralGateway sentralGateway, ILogger<IAttendanceReportJob> logger)
+            ISentralGateway sentralGateway, ILogger<IAttendanceReportJob> logger,
+            IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _emailService = emailService;
@@ -38,6 +42,7 @@ namespace Constellation.Infrastructure.Jobs
             _renderService = renderService;
             _sentralGateway = sentralGateway;
             _logger = logger;
+            _mediator = mediator;
         }
 
         public async Task StartJob(bool automated)
@@ -132,7 +137,7 @@ namespace Constellation.Infrastructure.Jobs
         private async Task SendParentEmail(MemoryStream pdfStream, string filename, Student student, DateTime dateToReport)
         {
             // Email the file to the parents
-            var emailAddresses = await _sentralGateway.GetContactEmailsAsync(student.SentralStudentId);
+            var emailAddresses = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = student.StudentId });
 
             if (emailAddresses == null || emailAddresses.Count == 0)
             {

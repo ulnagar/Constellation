@@ -13,7 +13,7 @@ namespace Constellation.Infrastructure.Templates.Views.Emails.Absences
 
         public string StudentName { get; set; }
         public string SchoolName { get; set; }
-        public string PortalLink { get; set; }
+        public string PortalLink => $"https://acos.aurora.nsw.edu.au/Portal/School/";
         public ICollection<AbsenceExplanation> ClassList { get; set; }
 
         public class AbsenceExplanation

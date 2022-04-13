@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.Extensions;
+using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -7,6 +8,7 @@ using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Reports.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -28,10 +30,12 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
         private readonly ISentralGateway _sentralGateway;
         private readonly IRazorViewToStringRenderer _renderService;
         private readonly IExportService _exportService;
+        private readonly IMediator _mediator;
 
         public AbsencesController(IUnitOfWork unitOfWork, IEmailService emailService, 
             ISMSService smsService, ISentralGateway sentralGateway,
-            IRazorViewToStringRenderer renderService, IExportService exportService)
+            IRazorViewToStringRenderer renderService, IExportService exportService,
+            IMediator mediator)
             : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -40,6 +44,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
             _sentralGateway = sentralGateway;
             _renderService = renderService;
             _exportService = exportService;
+            _mediator = mediator;
         }
 
         public IActionResult Index()
@@ -108,8 +113,8 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
             {
                 case AbsenceNotification.SMS:
                     {
-                        var phoneNumbers = await _sentralGateway.GetContactNumbersAsync(absence.Student.SentralStudentId);
-                        var sentMessage = await _smsService.SendAbsenceNotificationAsync(absences, phoneNumbers);
+                        var phoneNumbers = await _mediator.Send(new GetStudentFamilyMobileNumbersQuery { StudentId = absence.Student.SentralStudentId });
+                        var sentMessage = await _smsService.SendAbsenceNotificationAsync(absences, phoneNumbers.ToList());
 
                         if (sentMessage.Messages.Count > 0)
                         {
@@ -128,8 +133,8 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
 
                 case AbsenceNotification.Email:
                     {
-                        var emailAddresses = await _sentralGateway.GetContactEmailsAsync(absence.Student.SentralStudentId);
-                        var sentMessage = await _emailService.SendParentWholeAbsenceAlert(absences, emailAddresses);
+                        var emailAddresses = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = absence.Student.StudentId });
+                        var sentMessage = await _emailService.SendParentWholeAbsenceAlert(absences, emailAddresses.ToList());
 
                         absence.Notifications.Add(new AbsenceNotification
                         {

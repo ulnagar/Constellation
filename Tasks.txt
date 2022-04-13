@@ -17,25 +17,31 @@ LINK SHORTENER:
 MISSED CLASSWORK:
 	Periodic report for HTs on what hasn't been completed
 
-PARENT CONTACTS:
-	Convert all parent contact jobs to use the local contact details before attempting to reach out to Sentral
-
 TRACKITSYNC JOB:
 	Convert to individual MEDIATR actions, to allow for calling immediately when relevant records change
 
 STUDENTS:
 	Add process for student moving school that updates Lesson Rolls
 
-CHANGE LOG:
-	Include link in footer to changelog for current release
+GRADES:
+	Migrate from ENUM to object
+
+ACTIONS:
+	Migrate to AccessRight concept
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 R1.1:
+	CHANGE LOG:
+		Include link in footer to changelog for current release
+
+	PARENT CONTACTS:
+		Convert all parent contact jobs to use the local contact details before attempting to reach out to Sentral
+
 	CLEANARCH:
-	Move CQRS handlers to Infrastructure project
+		Move CQRS handlers to Infrastructure project
 
 	BUD GRAPHS:
 		Complete migration of api endpoints to allow for graphs to be saved at end of day
@@ -43,7 +49,9 @@ R1.1:
 	EMAILS:
 		Convert all images to use BASE64 values instead of linked files
 
-R1.0:
+	SCHOOL PORTAL:
+		Migrate functions to school portal
+
 	ERROR:
 		Modify error page to give some information on what is happening.
 

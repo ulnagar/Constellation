@@ -70,6 +70,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
         {
             return await _context.Students
                 .Include(student => student.School)
+                .Include(student => student.Family)
                 .OrderBy(s => s.CurrentGrade)
                 .ThenBy(s => s.LastName)
                 .Where(s => !s.IsDeleted)

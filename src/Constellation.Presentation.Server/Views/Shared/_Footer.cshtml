@@ -10,4 +10,6 @@
     @Html.Raw(String.Format("Build Version: {0}. &copy; {1} - Aurora College, NSW",
         lastWriteTime.ToString("yyMM.d"),
         DateTime.Now.Year))
+
+    <a asp-page="/ChangeLog" class="btn btn-sm btn-warning ml-3">What's new?</a>
 </div>

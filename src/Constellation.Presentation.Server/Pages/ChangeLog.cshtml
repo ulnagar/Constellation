@@ -1,0 +1,129 @@
+﻿@page
+@using System.Reflection
+
+@model Constellation.Presentation.Server.Pages.ChangeLogModel
+
+@{
+    var file = Assembly.GetExecutingAssembly().Location;
+    var lastWriteTime = System.IO.File.GetLastWriteTime(file);
+    var version = $"{lastWriteTime.ToString("yyMM.d")}";
+}
+
+<style>
+   .changelog ul li {
+       font-size: 1.3rem;
+       font-weight: bolder;
+   }
+
+   .changelog ul li ul li {
+       font-size: 1.15rem;
+       font-weight: bold;
+   }
+
+   .changelog ul li ul li ul li {
+       font-size: 1rem;
+       font-weight: normal;
+   }
+</style>
+
+<h1>Constellation Changelog</h1>
+
+<h3>Current version: Release V1.1 (Build @version)</h3>
+
+<div class="changelog">
+    <ul>
+        <li>Schools Portal
+            <ul>
+                <li>Home section
+                    <ul>
+                        <li>Log in using DoE credentials (e.g email address and portal password)</li>
+                        <li>View all currently active students registered from the school</li>
+                        <li>If linked to multiple schools, change the currently selected school</li>
+                    </ul>
+                </li>
+                <li>Absence section
+                    <ul>
+                        <li>View pending partial absences awaiting explanation from students</li>
+                        <li>View and action pending partial absences awaiting verification from ACC</li>
+                        <li>View and action pending whole absences awaiting explanation from parents or ACC</li>
+                    </ul>
+                </li>
+                <li>Science Rolls section
+                    <ul>
+                        <li>View and submit attendance rolls for Partner School lead Science Practical Lessons</li>
+                    </ul>
+                </li>
+                <li>Reports section
+                    <ul>
+                        <li>List and download reports published by Aurora College for students</li>
+                    </ul>
+                </li>
+                <li>Exam Uploads section
+                    <ul>
+                        <li>Upload paper based exams undertaken by students for marking</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Constellation Web
+            <ul>
+                <li>Partners/Students section
+                    <ul>
+                        <li>Student family details, including parent mobile and email contacts, now synced from Sentral</li>
+                    </ul>
+                </li>
+                <li>Subjects/Assignments section
+                    <ul>
+                        <li>Sync assignment details from Canvas, allowing ACCs to upload paper based exams</li>
+                    </ul>
+                </li>
+                <li>Error page
+                    <ul>
+                        <li>Redesign page to include error details where possible</li>
+                    </ul>
+                </li>
+                <li>Changelog
+                    <ul>
+                        <li>Added this Changelog page</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Constellation Infrastructure
+            <ul>
+                <li>Persistence (Database)
+                    <ul>
+                        <li>Included ability to store documents (pdf, jpg) in database</li>
+                    </ul>
+                </li>
+                <li>Gateways
+                    <ul>
+                        <li>Canvas gateway is now able to retrive details of assignments, and submit assignments on behalf of students</li>
+                        <li>Sentral gateway is now able to retrieve supplementary student data such as photo, reports, family contact details</li>
+                    </ul>
+                </li>
+                <li>Jobs (Recurring scheduled tasks)
+                    <ul>
+                        <li>Created job to sync Student Photos from Sentral</li>
+                        <li>Created job to sync Student Reports from Sentral</li>
+                        <li>Created job to sync contact (Student, Staff, School) details to TrackIt</li>
+                        <li>Bug fixes to the Absence Monitor job</li>
+                    </ul>
+                </li>
+                <li>APIs
+                    <ul>
+                        <li>Migrated endpoints from ACOS to allow for school bandwidth graphs to be downloaded each day</li>
+                    </ul>
+                </li>
+                <li>Email Templates
+                    <ul>
+                        <li>Converted templates to use embedded BASE64 image for school logo instead of linking to the website</li>
+                        <li>All email templates now automatically remove duplicate email addresses before sending</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+

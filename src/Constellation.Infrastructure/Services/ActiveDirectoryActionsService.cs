@@ -20,7 +20,14 @@ namespace Constellation.Infrastructure.Services
         public ActiveDirectoryActionsService(IAppDbContext context)
         {
             _context = context;
-            _adContext = new PrincipalContext(ContextType.Domain, "DETNSW.WIN");
+            try
+            {
+                _adContext = new PrincipalContext(ContextType.Domain, "DETNSW.WIN");
+            }
+            catch (Exception)
+            {
+                //
+            }
         }
 
         public async Task<List<string>> GetLinkedSchoolsFromAD(string emailAddress)
