@@ -58,6 +58,10 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
     [Parameter]
     public Guid ResponseId { get; set; }
     public Guid CurrentResponseId { get; set; }
@@ -69,6 +73,16 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool == null)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+        }
+
+        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool != null)
+        {
+            NavigationManager.NavigateTo("Absences");
+        }
+
         if (ResponseId != Guid.NewGuid())
         {
             if (ResponseId != CurrentResponseId)

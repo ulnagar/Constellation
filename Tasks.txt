@@ -23,31 +23,37 @@ PARENT CONTACTS:
 TRACKITSYNC JOB:
 	Convert to individual MEDIATR actions, to allow for calling immediately when relevant records change
 
-CLEANARCH:
-	Move CQRS handlers to Infrastructure project
-
-BUD GRAPHS:
-	Complete migration of api endpoints to allow for graphs to be saved at end of day
-
-EMAILS:
-	Convert all images to use BASE64 values instead of linked files
+STUDENTS:
+	Add process for student moving school that updates Lesson Rolls
 
 CHANGE LOG:
 	Include link in footer to changelog for current release
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-ERROR:
-	Modify error page to give some information on what is happening.
+R1.1:
+	CLEANARCH:
+	Move CQRS handlers to Infrastructure project
 
-EMAILS:
-	Make sure every email process dedups the list of contacts before added them.
+	BUD GRAPHS:
+		Complete migration of api endpoints to allow for graphs to be saved at end of day
 
-CANVAS:
-	Paper Exam Submission Portal => take file uploads from ACC and proxy it up to CANVAS as student submission of assignment
+	EMAILS:
+		Convert all images to use BASE64 values instead of linked files
 
-PARENT CONTACTS:
-	https://admin.aurora.dec.nsw.gov.au/enquiry/export/view_export?name=complete&inputs[class]=&inputs[roll_class]=&inputs[schyear]=&format=csv&headings=1&action=Download
-	Sync parent contacts from Sentral once per day
-		Do not replace local details if the source is blank/missing from Sentral
+R1.0:
+	ERROR:
+		Modify error page to give some information on what is happening.
+
+	EMAILS:
+		Make sure every email process dedups the list of contacts before added them.
+
+	CANVAS:
+		Paper Exam Submission Portal => take file uploads from ACC and proxy it up to CANVAS as student submission of assignment
+
+	PARENT CONTACTS:
+		https://admin.aurora.dec.nsw.gov.au/enquiry/export/view_export?name=complete&inputs[class]=&inputs[roll_class]=&inputs[schyear]=&format=csv&headings=1&action=Download
+		Sync parent contacts from Sentral once per day
+			Do not replace local details if the source is blank/missing from Sentral

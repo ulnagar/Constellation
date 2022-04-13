@@ -84,11 +84,16 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool == null)
         {
             CurrentlySelectedSchool = SelectedSchool;
 
             MarkedRoll = await mediator.Send(new GetScienceLessonRollForDisplayQuery { RollId = RollId });
+        }
+
+        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool != null)
+        {
+            NavigationManager.NavigateTo("ScienceRolls");
         }
     }
 }

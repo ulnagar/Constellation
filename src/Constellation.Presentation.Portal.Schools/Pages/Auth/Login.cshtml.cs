@@ -1,5 +1,9 @@
+using Constellation.Application.Features.Auth.Command;
+using Constellation.Application.Features.Auth.Queries;
 using Constellation.Application.Features.Portal.School.Home.Queries;
+using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
+using Constellation.Presentation.Portal.Schools.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -24,13 +28,15 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
         private readonly IMediator _mediator;
+        private readonly IActiveDirectoryActionsService _adService;
 
         public LoginModel(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager,
-            IMediator mediator)
+            IMediator mediator, IActiveDirectoryActionsService adService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _mediator = mediator;
+            _adService = adService;
         }
 
         [BindProperty]
@@ -46,6 +52,7 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
         {
             [Required]
             [EmailAddress]
+            [RegularExpression(@"^\w+([-+.']\w+)*@det.nsw.edu.au$", ErrorMessage = "Invalid Email.")]
             public string Email { get; set; }
 
             [Required]
@@ -85,6 +92,16 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
 
             if (ModelState.IsValid)
             {
+                // Check AD for user account
+                //  If exists - continue
+                //  else return error
+                // Search for user in database
+                //  If exists - continue
+                //  else check SchoolContacts for old user
+                //   If exists - reactivate user and continue login
+                //   else register user with data from AD and continue login
+
+#if DEBUG
                 var user = await _userManager.FindByEmailAsync(Input.Email);
 
                 if (user == null)
@@ -93,7 +110,6 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
                     return Page();
                 }
 
-#if DEBUG
                 var claimList = new List<Claim>();
                 claimList.Add(new Claim("Schools", "8146,8155,8343"));
 
@@ -103,107 +119,54 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
 #else
 #pragma warning disable CA1416 // Validate platform compatibility
                 var context = new PrincipalContext(ContextType.Domain, "DETNSW.WIN");
-                //var success = context.ValidateCredentials(Input.Email, Input.Password);
-#pragma warning restore CA1416 // Validate platform compatibility
-                var success = true;
-                
-                if (success)
+                var success = context.ValidateCredentials(Input.Email, Input.Password);
+
+                if (!success)
                 {
-                    List<Claim> claimList = await DetermineUserSchools(user, context, Input.Email);
-
-                    await _signInManager.SignInWithClaimsAsync(user, false, claimList);
-
-                    return LocalRedirect(returnUrl);
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return Page();
                 }
+
+                var adUserAccount = UserPrincipal.FindByIdentity(context, IdentityType.UserPrincipalName, Input.Email);
+                var dbUserAccount = await _userManager.FindByEmailAsync(Input.Email);
+
+                if (dbUserAccount == null)
+                {
+                    var dbContact = await _mediator.Send(new GetSchoolContactByEmailAddressQuery { EmailAddress = Input.Email });
+
+                    if (dbContact == null)
+                    {
+                        // Check that user is linked to valid school first.
+                        var adSchools = await _adService.GetLinkedSchoolsFromAD(Input.Email);
+
+                        if (adSchools != null && adSchools.Count > 0)
+                        {
+                            // Send to registration
+                            await _mediator.Send(new RegisterADUserAsSchoolContactCommand { EmailAddress = Input.Email });
+                            dbUserAccount = await _userManager.FindByEmailAsync(Input.Email);
+                        } else
+                        {
+                            throw new PortalAppAuthenticationException("Could not find valid Partner School to link new user with.");
+                        }
+                    } else
+                    {
+                        // Recreate user account based on SchoolContact entry
+                        await _mediator.Send(new RepairSchoolContactUserCommand { SchoolContactId = dbContact.Id });
+                        dbUserAccount = await _userManager.FindByEmailAsync(Input.Email);
+                    }
+                }
+
+                // Build/rebuild schools claim
+                await _mediator.Send(new UpdateUserSchoolsClaimCommand { EmailAddress = Input.Email });
+
+                await _signInManager.SignInAsync(dbUserAccount, false);
+                return LocalRedirect(returnUrl);
+#pragma warning restore CA1416 // Validate platform compatibility
 #endif
             }
 
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return Page();
-        }
-
-        private async Task<List<Claim>> DetermineUserSchools(AppUser user, PrincipalContext context, string emailAddress)
-        {
-            var linkedSchools = new List<string>();
-
-            var claims = await _userManager.GetClaimsAsync(user);
-            var dbClaim = claims.FirstOrDefault(claim => claim.Type == "Schools");
-
-#pragma warning disable CA1416 // Validate platform compatibility
-            var userAccount = UserPrincipal.FindByIdentity(context, IdentityType.UserPrincipalName, emailAddress);
-            using (DirectoryEntry adAccount = userAccount.GetUnderlyingObject() as DirectoryEntry)
-            {
-                // detAttribute12 is the staff attribute that lists linked school codes
-                // detAttribute3 is the staff attribute that contains the employee number
-
-                try
-                {
-                    // Get list of users linked schools from AD
-                    var adAttributeValue = adAccount.Properties["detAttribute12"].Value;
-                    var adSchoolList = new List<string>();
-
-                    // If the adAttributeValue is a string, it is a single school link
-                    // If the adAttributeValue is an array, it is multiple school links
-
-                    if (adAttributeValue.GetType() == typeof(string))
-                        adSchoolList.Add(adAttributeValue as string);
-                    else
-                    {
-                        foreach (var entry in adAttributeValue as Array)
-                        {
-                            adSchoolList.Add(entry as string);
-                        }
-                    }
-
-                    // Check each school against the DB to ensure it is an active partner school with students
-                    // Add any matching entries to the user claims
-                    foreach (var code in adSchoolList)
-                    {
-                        if (await _mediator.Send(new IsPartnerSchoolWithStudentsQuery { SchoolCode = code }) && linkedSchools.All(entry => entry != code))
-                            linkedSchools.Add(code);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw;
-                }
-            }
-#pragma warning restore CA1416 // Validate platform compatibility
-
-            // Get list of users linked schools from DB
-            var dbUserSchools = await _mediator.Send(new GetLinkedSchoolCodesForUserQuery { UserEmail = emailAddress });
-
-            // Check each school against the DB to ensure it is an active partner school with students
-            // Add any matching entries to the user claims
-            foreach (var code in dbUserSchools)
-            {
-                if (await _mediator.Send(new IsPartnerSchoolWithStudentsQuery { SchoolCode = code }) && linkedSchools.All(entry => entry != code))
-                    linkedSchools.Add(code);
-            }
-
-            var claim = new Claim("Schools", string.Join(",", linkedSchools));
-
-            // If the claim is not in the database: add it.
-            // If the claim is different from what is in the database: remove and re-add with the correct information
-            if (dbClaim == null)
-            {
-                await _userManager.AddClaimAsync(user, claim);
-            } 
-            else
-            {
-                if (dbClaim.Value != claim.Value)
-                {
-                    await _userManager.RemoveClaimAsync(user, dbClaim);
-                    await _userManager.AddClaimAsync(user, claim);
-                }
-            }
-
-            var claimList = new List<Claim>
-            {
-                claim
-            };
-
-            return claimList;
         }
     }
 }
