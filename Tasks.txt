@@ -1,6 +1,3 @@
-TEAMS:
-	Cache team ids in database to prevent needing to search for teams at start of operations
-
 OPERATIONS:
 	Return more meaningful errors to log for troubleshooting
 
@@ -36,6 +33,9 @@ DONE
 R1.1:
 	CHANGE LOG:
 		Include link in footer to changelog for current release
+
+	TEAMS:
+		Cache team ids in database to prevent needing to search for teams at start of operations
 
 	PARENT CONTACTS:
 		Convert all parent contact jobs to use the local contact details before attempting to reach out to Sentral

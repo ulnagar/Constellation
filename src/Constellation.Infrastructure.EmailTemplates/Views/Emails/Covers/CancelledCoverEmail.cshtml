@@ -16,10 +16,10 @@
 <ul>
     @foreach (var pair in Model.ClassWithLink)
     {
-        <li>@pair.Key - <a rel="noopener" href="@pair.Value" target="_blank">@pair.Value</a></li>
+        <li>@pair.Key</li>
     }
 
-    <li>Microsoft Teams - <a rel="noopener" href="https://teams.microsoft.com/" target="_blank">https://teams.microsoft.com/</a></li>
+    @*<li>Microsoft Teams - <a rel="noopener" href="https://teams.microsoft.com/" target="_blank">https://teams.microsoft.com/</a></li>*@
 </ul>
 <p>Access to the resources will be automatically removed if already granted.</p>
 <br />

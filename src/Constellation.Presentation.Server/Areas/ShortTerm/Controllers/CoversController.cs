@@ -44,7 +44,7 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
 
         public async Task<IActionResult> Upcoming()
         {
-            var covers = await _unitOfWork.Covers.ForListAsync(cover => cover.EndDate >= DateTime.Today);
+            var covers = await _unitOfWork.Covers.ForListAsync(cover => cover.EndDate >= DateTime.Today && !cover.IsDeleted);
 
             var viewModel = await CreateViewModel<Covers_ViewModel>();
             viewModel.Covers = covers.Select(Covers_ViewModel.CoverDto.ConvertFromCover).ToList();
@@ -171,8 +171,8 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
                 return RedirectToAction("Index");
             }
 
-            var casualCover = _unitOfWork.CasualClassCovers.WithDetails(id);
-            var teacherCover = _unitOfWork.TeacherClassCovers.WithDetails(id);
+            var casualCover = await _unitOfWork.CasualClassCovers.ForEditAsync(id);
+            var teacherCover = await _unitOfWork.TeacherClassCovers.ForEditAsync(id);
 
             if (casualCover == null && teacherCover == null)
             {
@@ -267,7 +267,6 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
             if (type == "Casual")
             {
                 await _coverService.RemoveCasualCover(id);
-                await _unitOfWork.CompleteAsync();
 
                 return RedirectToAction("Index");
             }
@@ -275,7 +274,6 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
             if (type == "Teacher")
             {
                 await _coverService.RemoveTeacherCover(id);
-                await _unitOfWork.CompleteAsync();
 
                 return RedirectToAction("Index");
             }

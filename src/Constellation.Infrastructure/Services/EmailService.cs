@@ -244,8 +244,7 @@ namespace Constellation.Infrastructure.Services
                 SenderTitle = absenceSettings.AbsenceCoordinatorTitle,
                 Title = "Partial Absence Verification Request",
                 StudentName = emailDto.PartialAbsences.First().Student.DisplayName,
-                SchoolName = emailDto.PartialAbsences.First().Student.School.Name,
-                PortalLink = "https://acos.aurora.nsw.edu.au/Portal/Absences/School"
+                SchoolName = emailDto.PartialAbsences.First().Student.School.Name
             };
 
             foreach (var absence in emailDto.PartialAbsences)
@@ -306,7 +305,6 @@ namespace Constellation.Infrastructure.Services
                 Title = "Absence Explanation Request",
                 StudentName = absences.First().Student.DisplayName,
                 SchoolName = absences.First().Student.School.Name,
-                Link = "https://acos.aurora.nsw.edu.au/Portal/Absences/School",
                 Absences = absences.Select(CoordinatorAbsenceDigestEmailViewModel.AbsenceEntry.ConvertFromAbsence).ToList()
             };
 

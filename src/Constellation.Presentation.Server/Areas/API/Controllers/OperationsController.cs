@@ -1,7 +1,10 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Features.API.Operations.Commands;
+using Constellation.Application.Features.API.Operations.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Presentation.Server.Areas.API.Models;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,10 +16,12 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
     public class OperationsController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMediator _mediator;
 
-        public OperationsController(IUnitOfWork unitOfWork)
+        public OperationsController(IUnitOfWork unitOfWork, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
+            _mediator = mediator;
         }
 
         // GET api/Operations/Due
@@ -25,7 +30,7 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
         {
             var operations = await _unitOfWork.MSTeamOperations.ToProcess();
 
-            return BuildOperations(operations);
+            return await BuildOperations(operations);
         }
 
 
@@ -35,10 +40,10 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
         {
             var operations = await _unitOfWork.MSTeamOperations.OverdueToProcess();
 
-            return BuildOperations(operations);
+            return await BuildOperations(operations);
         }
 
-        private ICollection<TeamsOperation> BuildOperations(MSTeamOperationsList operations)
+        private async Task<ICollection<TeamsOperation>> BuildOperations(MSTeamOperationsList operations)
         {
             var returnData = new List<TeamsOperation>();
 
@@ -76,6 +81,8 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
                         teamOperation.Role = "Owner";
                         break;
                 }
+
+                teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
 
                 returnData.Add(teamOperation);
             }
@@ -115,6 +122,8 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
                         break;
                 }
 
+                teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
+
                 returnData.Add(teamOperation);
             }
 
@@ -153,6 +162,8 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
                         break;
                 }
 
+                teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
+
                 returnData.Add(teamOperation);
             }
 
@@ -165,6 +176,8 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
                     Action = "Group",
                     Faculty = operation.Faculty.ToString()
                 };
+
+                teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
 
                 returnData.Add(teamOperation);
             }
@@ -205,6 +218,8 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
                         break;
                 }
 
+                teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.TeamName, Year = operation.TeamName });
+
                 returnData.Add(teamOperation);
             }
 
@@ -244,6 +259,8 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
                         break;
                 }
 
+                teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.TeamName, Year = operation.TeamName });
+
                 returnData.Add(teamOperation);
             }
 
@@ -282,6 +299,8 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
                         break;
                 }
 
+                teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.TeamName, Year = operation.TeamName });
+
                 returnData.Add(teamOperation);
             }
 
@@ -300,6 +319,21 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
                 operation.Complete();
                 await _unitOfWork.CompleteAsync();
             }
+        }
+
+        // POST api/v1/Operations/RegisterTeam
+        [Route("RegisterTeam")]
+        [HttpPost]
+        public async Task RegisterTeam([FromBody]RegisterTeam team)
+        {
+            var command = new CreateTeamCommand
+            {
+                Id = team.Id,
+                Name = team.Name,
+                ChannelId = team.GeneralChannelId
+            };
+
+            await _mediator.Send(command);
         }
     }
 }

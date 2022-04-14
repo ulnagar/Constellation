@@ -94,6 +94,9 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .Include(cover => cover.Offering)
                 .ThenInclude(offering => offering.Sessions)
                 .ThenInclude(session => session.Teacher)
+                .Include(cover => (cover as TeacherClassCover).AdobeConnectOperations)
+                .Include(cover => (cover as TeacherClassCover).MSTeamOperations)
+                .Include(cover => (cover as TeacherClassCover).Staff)
                 .SingleOrDefaultAsync(cover => cover.Id == id) as TeacherClassCover;
         }
 

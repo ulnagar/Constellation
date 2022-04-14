@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
+using Constellation.Application.Features.ShortTerm.Covers.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
@@ -7,6 +8,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Templates.Views.Documents.Covers;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,16 +23,19 @@ namespace Constellation.Infrastructure.Services
         private readonly IEmailService _emailService;
         private readonly IPDFService _pdfService;
         private readonly IRazorViewToStringRenderer _razorService;
+        private readonly IMediator _mediator;
         private readonly IOperationService _operationService;
 
         public CoverService(IUnitOfWork unitOfWork, IOperationService operationService,
-            IEmailService emailService, IPDFService pdfService, IRazorViewToStringRenderer razorService)
+            IEmailService emailService, IPDFService pdfService,
+            IRazorViewToStringRenderer razorService, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _operationService = operationService;
             _emailService = emailService;
             _pdfService = pdfService;
             _razorService = razorService;
+            _mediator = mediator;
         }
 
         public async Task<ServiceOperationResult<ICollection<ClassCover>>> BulkCreateCovers(CoverDto coverResource)
@@ -50,9 +55,13 @@ namespace Constellation.Infrastructure.Services
                     var cover = new CoverClassSchedule
                     {
                         Offering = offering,
-                        RoomName = offering.Sessions.First().Room.Name,
-                        RoomLink = offering.Sessions.First().Room.UrlPath
+                        RoomName = offering.Sessions.First().Room.Name
                     };
+
+                    // Adobe Connect Link
+                    //RoomLink = offering.Sessions.First().Room.UrlPath
+                    // MS Team Link
+                    cover.RoomLink = await _mediator.Send(new GetTeamLinkForOfferingQuery { ClassName = offering.Name, Year = offering.EndDate.Year.ToString() });
 
                     cover.Teachers.Add(await _unitOfWork.Staff.GetForExistCheck(coverResource.TeacherId));
 
@@ -91,9 +100,13 @@ namespace Constellation.Infrastructure.Services
                 {
                     Offering = offering,
                     RoomName = offering.Sessions.First().Room.Name,
-                    RoomLink = offering.Sessions.First().Room.UrlPath,
                     Teachers = await _unitOfWork.CourseOfferings.AllTeachersForCoverCreationAsync(entry)
                 };
+
+                // Adobe Connect Link
+                //RoomLink = offering.Sessions.First().Room.UrlPath
+                // MS Team Link
+                cover.RoomLink = await _mediator.Send(new GetTeamLinkForOfferingQuery { ClassName = offering.Name, Year = offering.EndDate.Year.ToString() });
 
                 foreach (var day in coverResource.StartDate.Range(coverResource.EndDate))
                 {
@@ -260,7 +273,7 @@ namespace Constellation.Infrastructure.Services
             var result = new ServiceOperationResult<CasualClassCover>();
 
             // Validate entries
-            var cover = await _unitOfWork.Covers.ForUpdate(coverResource.Id) as CasualClassCover;
+            var cover = await _unitOfWork.CasualClassCovers.ForEditAsync(coverResource.Id);
 
             if (cover == null)
             {
@@ -293,13 +306,13 @@ namespace Constellation.Infrastructure.Services
             {
                 cover.StartDate = coverResource.StartDate;
 
-                foreach (var operation in cover.AdobeConnectOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == AdobeConnectOperationAction.Add))
+                foreach (var operation in cover.AdobeConnectOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == AdobeConnectOperationAction.Add).ToList())
                 {
                     await _operationService.CancelAdobeConnectOperation(operation.Id);
                     await _operationService.CreateCasualAdobeConnectAccess(cover.CasualId, operation.ScoId, cover.StartDate.AddDays(-1), cover.Id);
                 }
 
-                foreach (var operation in cover.MSTeamOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == MSTeamOperationAction.Add))
+                foreach (var operation in cover.MSTeamOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == MSTeamOperationAction.Add).ToList())
                 {
                     await _operationService.CancelMSTeamOperation(operation.Id);
                     await _operationService.CreateCasualMSTeamOwnerAccess(cover.CasualId, cover.OfferingId, cover.Id, cover.StartDate.AddDays(-1));
@@ -310,13 +323,13 @@ namespace Constellation.Infrastructure.Services
             {
                 cover.EndDate = coverResource.EndDate;
 
-                foreach (var operation in cover.AdobeConnectOperations.Where(o => (!o.IsCompleted || !o.IsDeleted) && o.Action == AdobeConnectOperationAction.Remove))
+                foreach (var operation in cover.AdobeConnectOperations.Where(o => (!o.IsCompleted || !o.IsDeleted) && o.Action == AdobeConnectOperationAction.Remove).ToList())
                 {
                     await _operationService.CancelAdobeConnectOperation(operation.Id);
                     await _operationService.RemoveCasualAdobeConnectAccess(cover.CasualId, operation.ScoId, cover.EndDate.AddDays(1), cover.Id);
                 }
 
-                foreach (var operation in cover.MSTeamOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == MSTeamOperationAction.Remove))
+                foreach (var operation in cover.MSTeamOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == MSTeamOperationAction.Remove).ToList())
                 {
                     await _operationService.CancelMSTeamOperation(operation.Id);
                     await _operationService.RemoveCasualMSTeamAccess(cover.CasualId, cover.OfferingId, cover.Id, cover.EndDate.AddDays(-1));
@@ -329,6 +342,8 @@ namespace Constellation.Infrastructure.Services
 
             result.Success = true;
             result.Entity = cover;
+
+            await _unitOfWork.CompleteAsync();
 
             return result;
         }
@@ -346,13 +361,13 @@ namespace Constellation.Infrastructure.Services
             // Has the cover already started? Do we need to remove access?
             if (cover.StartDate < DateTime.Now)
             {
-                foreach (var operation in cover.AdobeConnectOperations.Where(o => (!o.IsCompleted || !o.IsDeleted) && o.Action == AdobeConnectOperationAction.Remove))
+                foreach (var operation in cover.AdobeConnectOperations.Where(o => (!o.IsCompleted || !o.IsDeleted) && o.Action == AdobeConnectOperationAction.Remove).ToList())
                 {
                     await _operationService.CancelAdobeConnectOperation(operation.Id);
                     await _operationService.RemoveCasualAdobeConnectAccess(cover.CasualId, operation.ScoId, DateTime.Now, cover.Id);
                 }
 
-                foreach (var operation in cover.MSTeamOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == MSTeamOperationAction.Remove))
+                foreach (var operation in cover.MSTeamOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == MSTeamOperationAction.Remove).ToList())
                 {
                     await _operationService.CancelMSTeamOperation(operation.Id);
                     await _operationService.RemoveCasualMSTeamAccess(cover.CasualId, cover.OfferingId, cover.Id, DateTime.Now);
@@ -360,12 +375,12 @@ namespace Constellation.Infrastructure.Services
             }
             else
             {
-                foreach (var operation in cover.AdobeConnectOperations.Where(o => !o.IsDeleted || !o.IsCompleted))
+                foreach (var operation in cover.AdobeConnectOperations.Where(o => !o.IsDeleted || !o.IsCompleted).ToList())
                 {
                     await _operationService.CancelAdobeConnectOperation(operation.Id);
                 }
 
-                foreach (var operation in cover.MSTeamOperations.Where(o => !o.IsDeleted || !o.IsCompleted))
+                foreach (var operation in cover.MSTeamOperations.Where(o => !o.IsDeleted || !o.IsCompleted).ToList())
                 {
                     await _operationService.CancelMSTeamOperation(operation.Id);
                 }
@@ -373,6 +388,8 @@ namespace Constellation.Infrastructure.Services
 
             var resource = await CreateCancelledCoverEmail(cover);
             await _emailService.SendCancelledCoverEmail(resource);
+
+            await _unitOfWork.CompleteAsync();
         }
 
         public async Task<ServiceOperationResult<TeacherClassCover>> CreateTeacherCover(TeacherCoverDto coverResource)
@@ -456,7 +473,7 @@ namespace Constellation.Infrastructure.Services
             var result = new ServiceOperationResult<TeacherClassCover>();
 
             // Validate entries
-            var cover = await _unitOfWork.Covers.ForUpdate(coverResource.Id) as TeacherClassCover;
+            var cover = await _unitOfWork.TeacherClassCovers.ForEditAsync(coverResource.Id);
 
             if (cover == null)
             {
@@ -489,13 +506,13 @@ namespace Constellation.Infrastructure.Services
             {
                 cover.StartDate = coverResource.StartDate;
 
-                foreach (var operation in cover.AdobeConnectOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == AdobeConnectOperationAction.Add))
+                foreach (var operation in cover.AdobeConnectOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == AdobeConnectOperationAction.Add).ToList())
                 {
                     await _operationService.CancelAdobeConnectOperation(operation.Id);
                     await _operationService.CreateTeacherAdobeConnectAccess(cover.StaffId, operation.ScoId, cover.StartDate.AddDays(-1), cover.Id);
                 }
 
-                foreach (var operation in cover.MSTeamOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == MSTeamOperationAction.Add))
+                foreach (var operation in cover.MSTeamOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == MSTeamOperationAction.Add).ToList())
                 {
                     await _operationService.CancelMSTeamOperation(operation.Id);
                     await _operationService.CreateTeacherMSTeamOwnerAccess(cover.StaffId, cover.OfferingId, cover.StartDate.AddDays(-1), cover.Id);
@@ -506,13 +523,13 @@ namespace Constellation.Infrastructure.Services
             {
                 cover.EndDate = coverResource.EndDate;
 
-                foreach (var operation in cover.AdobeConnectOperations.Where(o => (!o.IsCompleted || !o.IsDeleted) && o.Action == AdobeConnectOperationAction.Remove))
+                foreach (var operation in cover.AdobeConnectOperations.Where(o => (!o.IsCompleted || !o.IsDeleted) && o.Action == AdobeConnectOperationAction.Remove).ToList())
                 {
                     await _operationService.CancelAdobeConnectOperation(operation.Id);
                     await _operationService.RemoveTeacherAdobeConnectAccess(cover.StaffId, operation.ScoId, cover.EndDate.AddDays(1), cover.Id);
                 }
 
-                foreach (var operation in cover.MSTeamOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == MSTeamOperationAction.Remove))
+                foreach (var operation in cover.MSTeamOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == MSTeamOperationAction.Remove).ToList())
                 {
                     await _operationService.CancelMSTeamOperation(operation.Id);
                     await _operationService.RemoveTeacherMSTeamAccess(cover.StaffId, cover.OfferingId, cover.EndDate.AddDays(1), cover.Id);
@@ -526,13 +543,15 @@ namespace Constellation.Infrastructure.Services
             result.Success = true;
             result.Entity = cover;
 
+            await _unitOfWork.CompleteAsync();
+
             return result;
         }
 
         public async Task RemoveTeacherCover(int coverId)
         {
             // Validate entries
-            var cover = await _unitOfWork.Covers.ForUpdate(coverId) as TeacherClassCover;
+            var cover = await _unitOfWork.TeacherClassCovers.ForEditAsync(coverId);
 
             if (cover == null)
                 return;
@@ -542,13 +561,13 @@ namespace Constellation.Infrastructure.Services
             // Has the cover already started? Do we need to remove access?
             if (cover.StartDate < DateTime.Now)
             {
-                foreach (var operation in cover.AdobeConnectOperations.Where(o => (!o.IsCompleted || !o.IsDeleted) && o.Action == AdobeConnectOperationAction.Remove))
+                foreach (var operation in cover.AdobeConnectOperations.Where(o => (!o.IsCompleted || !o.IsDeleted) && o.Action == AdobeConnectOperationAction.Remove).ToList())
                 {
                     await _operationService.CancelAdobeConnectOperation(operation.Id);
                     await _operationService.RemoveTeacherAdobeConnectAccess(cover.StaffId, operation.ScoId, DateTime.Now, cover.Id);
                 }
 
-                foreach (var operation in cover.MSTeamOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == MSTeamOperationAction.Remove))
+                foreach (var operation in cover.MSTeamOperations.Where(o => (!o.IsDeleted || !o.IsCompleted) && o.Action == MSTeamOperationAction.Remove).ToList())
                 {
                     await _operationService.CancelMSTeamOperation(operation.Id);
                     await _operationService.RemoveTeacherMSTeamAccess(cover.StaffId, cover.OfferingId, DateTime.Now, cover.Id);
@@ -556,12 +575,12 @@ namespace Constellation.Infrastructure.Services
             }
             else
             {
-                foreach (var operation in cover.AdobeConnectOperations.Where(o => !o.IsDeleted || !o.IsCompleted))
+                foreach (var operation in cover.AdobeConnectOperations.Where(o => !o.IsDeleted || !o.IsCompleted).ToList())
                 {
                     await _operationService.CancelAdobeConnectOperation(operation.Id);
                 }
 
-                foreach (var operation in cover.MSTeamOperations.Where(o => !o.IsDeleted || !o.IsCompleted))
+                foreach (var operation in cover.MSTeamOperations.Where(o => !o.IsDeleted || !o.IsCompleted).ToList())
                 {
                     await _operationService.CancelMSTeamOperation(operation.Id);
                 }
@@ -569,6 +588,8 @@ namespace Constellation.Infrastructure.Services
 
             var resource = await CreateCancelledCoverEmail(cover);
             await _emailService.SendCancelledCoverEmail(resource);
+
+            await _unitOfWork.CompleteAsync();
         }
 
         private class CoverClassSchedule
@@ -696,6 +717,16 @@ namespace Constellation.Infrastructure.Services
 
         private async Task<EmailDtos.CoverEmail> CreateUpdatedCoverEmail(CasualClassCover cover)
         {
+            var resource = new EmailDtos.CoverEmail()
+            {
+                CoveringTeacherName = cover.Casual.DisplayName,
+                CoveringTeacherEmail = cover.Casual.EmailAddress,
+                CoveringTeacherAdobeAccount = string.IsNullOrWhiteSpace(cover.Casual.AdobeConnectPrincipalId),
+
+                StartDate = cover.StartDate,
+                EndDate = cover.EndDate
+            };
+
             var secondaryRecipients = new[] { new { cover.Offering.Course.HeadTeacher.DisplayName, cover.Offering.Course.HeadTeacher.EmailAddress } }.ToList();
             var roleUsers = await _unitOfWork.Identities.UsersInRole(AuthRoles.CoverRecipient);
             foreach (var user in roleUsers)
@@ -706,20 +737,15 @@ namespace Constellation.Infrastructure.Services
                 }
             }
 
-            var resource = new EmailDtos.CoverEmail()
+            var teachers = cover.Offering.Sessions.Select(session => session.Teacher).Distinct().ToList();
+            foreach (var teacher in teachers)
             {
-                CoveringTeacherName = cover.Casual.DisplayName,
-                CoveringTeacherEmail = cover.Casual.EmailAddress,
-                CoveringTeacherAdobeAccount = string.IsNullOrWhiteSpace(cover.Casual.AdobeConnectPrincipalId),
+                resource.ClassroomTeachers.Add(teacher.DisplayName, teacher.EmailAddress);
+            }
 
-                ClassroomTeachers = (IDictionary<string, string>)cover.Offering.Sessions.Select(session => session.Teacher).Distinct().Select(teacher => new { teacher.DisplayName, teacher.EmailAddress }),
-                SecondaryRecipients = (IDictionary<string, string>)secondaryRecipients,
-
-                ClassesIncluded = (IDictionary<string, string>)cover.Offering.Sessions.Select(session => session.Room).Distinct().Select(room => new { room.Name, room.UrlPath }),
-                StartDate = cover.StartDate,
-                EndDate = cover.EndDate,
-
-            };
+            var className = cover.Offering.Name;
+            var classLink = await _mediator.Send(new GetTeamLinkForOfferingQuery { ClassName = className, Year = cover.Offering.EndDate.Year.ToString() });
+            resource.ClassesIncluded = new Dictionary<string, string> { { className, classLink } };
 
             // Create Roll
             var offering = await _unitOfWork.CourseOfferings.ForRollCreationAsync(cover.Offering.Id);
@@ -738,6 +764,16 @@ namespace Constellation.Infrastructure.Services
 
         private async Task<EmailDtos.CoverEmail> CreateUpdatedCoverEmail(TeacherClassCover cover)
         {
+            var resource = new EmailDtos.CoverEmail()
+            {
+                CoveringTeacherName = cover.Staff.DisplayName,
+                CoveringTeacherEmail = cover.Staff.EmailAddress,
+                CoveringTeacherAdobeAccount = string.IsNullOrWhiteSpace(cover.Staff.AdobeConnectPrincipalId),
+
+                StartDate = cover.StartDate,
+                EndDate = cover.EndDate
+            };
+
             var secondaryRecipients = new[] { new { cover.Offering.Course.HeadTeacher.DisplayName, cover.Offering.Course.HeadTeacher.EmailAddress } }.ToList();
             var roleUsers = await _unitOfWork.Identities.UsersInRole(AuthRoles.CoverRecipient);
             foreach (var user in roleUsers)
@@ -748,56 +784,31 @@ namespace Constellation.Infrastructure.Services
                 }
             }
 
-            var resource = new EmailDtos.CoverEmail()
+            var teachers = cover.Offering.Sessions.Select(session => session.Teacher).Distinct().ToList();
+            foreach (var teacher in teachers)
             {
-                CoveringTeacherName = cover.Staff.DisplayName,
-                CoveringTeacherEmail = cover.Staff.EmailAddress,
-                CoveringTeacherAdobeAccount = string.IsNullOrWhiteSpace(cover.Staff.AdobeConnectPrincipalId),
+                resource.ClassroomTeachers.Add(teacher.DisplayName, teacher.EmailAddress);
+            }
 
-                ClassroomTeachers = (IDictionary<string, string>)cover.Offering.Sessions.Select(session => session.Teacher).Distinct().Select(teacher => new { teacher.DisplayName, teacher.EmailAddress }),
-                SecondaryRecipients = (IDictionary<string, string>)secondaryRecipients,
-
-                ClassesIncluded = (IDictionary<string, string>)cover.Offering.Sessions.Select(session => session.Room).Distinct().Select(room => new { room.Name, room.UrlPath }),
-                StartDate = cover.StartDate,
-                EndDate = cover.EndDate,
-
-            };
+            var className = cover.Offering.Name;
+            var classLink = await _mediator.Send(new GetTeamLinkForOfferingQuery { ClassName = className, Year = cover.Offering.EndDate.Year.ToString() });
+            resource.ClassesIncluded = new Dictionary<string, string> { { className, classLink } };
 
             return resource;
         }
 
         private async Task<EmailDtos.CoverEmail> CreateCancelledCoverEmail(CasualClassCover cover)
         {
-            var secondaryRecipients = new[] { new { cover.Offering.Course.HeadTeacher.DisplayName, cover.Offering.Course.HeadTeacher.EmailAddress } }.ToList();
-            var roleUsers = await _unitOfWork.Identities.UsersInRole(AuthRoles.CoverRecipient);
-            foreach (var user in roleUsers)
-            {
-                if (!secondaryRecipients.Any(recipient => recipient.EmailAddress == user.Email))
-                {
-                    secondaryRecipients.Add(new { user.DisplayName, EmailAddress = user.Email });
-                }
-            }
-
             var resource = new EmailDtos.CoverEmail()
             {
                 CoveringTeacherName = cover.Casual.DisplayName,
                 CoveringTeacherEmail = cover.Casual.EmailAddress,
                 CoveringTeacherAdobeAccount = string.IsNullOrWhiteSpace(cover.Casual.AdobeConnectPrincipalId),
 
-                ClassroomTeachers = (IDictionary<string, string>)cover.Offering.Sessions.Select(session => session.Teacher).Distinct().Select(teacher => new { teacher.DisplayName, teacher.EmailAddress }),
-                SecondaryRecipients = (IDictionary<string, string>)secondaryRecipients,
-
-                ClassesIncluded = (IDictionary<string, string>)cover.Offering.Sessions.Select(session => session.Room).Distinct().Select(room => new { room.Name, room.UrlPath }),
                 StartDate = cover.StartDate,
-                EndDate = cover.EndDate,
-
+                EndDate = cover.EndDate
             };
 
-            return resource;
-        }
-
-        private async Task<EmailDtos.CoverEmail> CreateCancelledCoverEmail(TeacherClassCover cover)
-        {
             var secondaryRecipients = new[] { new { cover.Offering.Course.HeadTeacher.DisplayName, cover.Offering.Course.HeadTeacher.EmailAddress } }.ToList();
             var roleUsers = await _unitOfWork.Identities.UsersInRole(AuthRoles.CoverRecipient);
             foreach (var user in roleUsers)
@@ -808,20 +819,56 @@ namespace Constellation.Infrastructure.Services
                 }
             }
 
+            foreach (var user in secondaryRecipients)
+            {
+                resource.SecondaryRecipients.Add(user.DisplayName, user.EmailAddress);
+            }
+
+            //resource.ClassroomTeachers = (IDictionary<string, string>)cover.Offering.Sessions.Select(session => session.Teacher).Distinct().Select(teacher => new { teacher.DisplayName, teacher.EmailAddress }),
+            var teachers = cover.Offering.Sessions.Select(session => session.Teacher).Distinct().ToList();
+            foreach (var teacher in teachers)
+            {
+                resource.ClassroomTeachers.Add(teacher.DisplayName, teacher.EmailAddress);
+            }
+
+            var className = cover.Offering.Sessions.First().Room.Name;
+            //var classLink = await _mediator.Send(new GetTeamLinkForOfferingQuery { ClassName = className, Year = cover.Offering.EndDate.Year.ToString() });
+            resource.ClassesIncluded = new Dictionary<string, string> { { className, "" } };
+
+            return resource;
+        }
+
+        private async Task<EmailDtos.CoverEmail> CreateCancelledCoverEmail(TeacherClassCover cover)
+        {
             var resource = new EmailDtos.CoverEmail()
             {
                 CoveringTeacherName = cover.Staff.DisplayName,
                 CoveringTeacherEmail = cover.Staff.EmailAddress,
                 CoveringTeacherAdobeAccount = string.IsNullOrWhiteSpace(cover.Staff.AdobeConnectPrincipalId),
 
-                ClassroomTeachers = (IDictionary<string, string>)cover.Offering.Sessions.Select(session => session.Teacher).Distinct().Select(teacher => new { teacher.DisplayName, teacher.EmailAddress }),
-                SecondaryRecipients = (IDictionary<string, string>)secondaryRecipients,
-
-                ClassesIncluded = (IDictionary<string, string>)cover.Offering.Sessions.Select(session => session.Room).Distinct().Select(room => new { room.Name, room.UrlPath }),
                 StartDate = cover.StartDate,
-                EndDate = cover.EndDate,
-
+                EndDate = cover.EndDate
             };
+
+            var secondaryRecipients = new[] { new { cover.Offering.Course.HeadTeacher.DisplayName, cover.Offering.Course.HeadTeacher.EmailAddress } }.ToList();
+            var roleUsers = await _unitOfWork.Identities.UsersInRole(AuthRoles.CoverRecipient);
+            foreach (var user in roleUsers)
+            {
+                if (!secondaryRecipients.Any(recipient => recipient.EmailAddress == user.Email))
+                {
+                    secondaryRecipients.Add(new { user.DisplayName, EmailAddress = user.Email });
+                }
+            }
+
+            var teachers = cover.Offering.Sessions.Select(session => session.Teacher).Distinct().ToList();
+            foreach (var teacher in teachers)
+            {
+                resource.ClassroomTeachers.Add(teacher.DisplayName, teacher.EmailAddress);
+            }
+
+            var className = cover.Offering.Name;
+            var classLink = await _mediator.Send(new GetTeamLinkForOfferingQuery { ClassName = className, Year = cover.Offering.EndDate.Year.ToString() });
+            resource.ClassesIncluded = new Dictionary<string, string> { { className, classLink } };
 
             return resource;
         }

@@ -56,6 +56,7 @@ namespace Constellation.Infrastructure.Persistence
         public DbSet<CanvasAssignment> CanvasAssignments { get; set; }
         public DbSet<CanvasAssignmentSubmission> CanvasAssignmentsSubmissions { get; set; }
         public DbSet<StudentReport> StudentReports { get; set; }
+        public DbSet<Team> Teams { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {

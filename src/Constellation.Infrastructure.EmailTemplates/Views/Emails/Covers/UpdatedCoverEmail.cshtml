@@ -16,12 +16,14 @@
 <ul>
     @foreach (var pair in Model.ClassWithLink)
     {
-        <li>@pair.Key - <a rel="noopener" href="@pair.Value" target="_blank">@pair.Value</a></li>
+        <li>@pair.Key 
+            <a href="@pair.Value" target="_blank" class="button"><span style="display:block;padding:10px 20px;line-height:120%;"><span style="font-size: 14px; line-height: 16.8px;">Open Team</span></span></a>
+        </li>
     }
 
-    <li>Microsoft Teams - <a rel="noopener" href="https://teams.microsoft.com/" target="_blank">https://teams.microsoft.com/</a></li>
+    @*<li>Microsoft Teams - <a rel="noopener" href="https://teams.microsoft.com/" target="_blank">https://teams.microsoft.com/</a></li>*@
 </ul>
 <p>Access to the resources will be automatically provided on @Model.StartDate.AddDays(-1).ToShortDateString()., and automatically removed on @Model.EndDate.AddDays(1).ToShortDateString().</p>
 <p>It is important that you attempt to access all class resources required before the start of class, and if you are having any difficulty, please get in touch urgently.</p>
-<br />
-<p>For tips on how to operate an Adobe Connect classroom, please read the instructions at the following link: <a rel="noopener" href="https://education.nsw.gov.au/technology/how-to-guides/learning-and-collaboration-tools/adobe-connect" target="_blank">https://education.nsw.gov.au/technology/how-to-guides/learning-and-collaboration-tools/adobe-connect</a></p>
+@*<br />*@
+@*<p>For tips on how to operate an Adobe Connect classroom, please read the instructions at the following link: <a rel="noopener" href="https://education.nsw.gov.au/technology/how-to-guides/learning-and-collaboration-tools/adobe-connect" target="_blank">https://education.nsw.gov.au/technology/how-to-guides/learning-and-collaboration-tools/adobe-connect</a></p>*@

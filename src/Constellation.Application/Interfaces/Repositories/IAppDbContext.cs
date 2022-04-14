@@ -46,6 +46,7 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<StoredFile> StoredFiles { get; set; }
         DbSet<CanvasAssignment> CanvasAssignments { get; set; }
         DbSet<CanvasAssignmentSubmission> CanvasAssignmentsSubmissions { get; set; }
+        DbSet<Team> Teams { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         DatabaseFacade Database { get; }
