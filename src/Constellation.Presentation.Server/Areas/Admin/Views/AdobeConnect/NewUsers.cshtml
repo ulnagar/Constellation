@@ -1,0 +1,27 @@
+﻿@model Constellation.Presentation.Server.Areas.Admin.Models.AdobeConnect.ActionsViewModel
+
+<h2>Adobe Connect Actions - User Scan</h2>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Users)
+        {
+            <tr>
+                <td>@Html.DisplayFor(model => item.UserId)</td>
+                <td>@Html.DisplayFor(model => item.DisplayName)</td>
+                <td>@Html.DisplayFor(model => item.UserType)</td>
+                <td>@Html.ActionLink("More Info...", "Details", item.UserType, new {area = "Partner", id = item.UserId}, new {@class="btn btn-sm btn-info btn-show-hover"})</td>
+            </tr>
+        }
+    </tbody>
+</table>

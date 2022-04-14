@@ -2,6 +2,7 @@
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.Areas.Admin.Models;
+using Constellation.Presentation.Server.Areas.Admin.Models.AdobeConnect;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -39,14 +40,14 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
 
         public async Task<IActionResult> Actions()
         {
-            var viewModel = await CreateViewModel<AdobeConnect_ActionsViewModel>();
+            var viewModel = await CreateViewModel<ActionsViewModel>();
 
             return View(viewModel);
         }
 
         public async Task<IActionResult> GetNewRooms(string scoId)
         {
-            var viewModel = await CreateViewModel<AdobeConnect_ActionsViewModel>();
+            var viewModel = await CreateViewModel<ActionsViewModel>();
             viewModel.Rooms = await _adobeConnectService.UpdateRooms("3229451");
 
             return View("NewRooms", viewModel);
@@ -54,7 +55,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
 
         public async Task<IActionResult> UpdateUsers()
         {
-            var viewModel = await CreateViewModel<AdobeConnect_ActionsViewModel>();
+            var viewModel = await CreateViewModel<ActionsViewModel>();
             viewModel.Users = await _adobeConnectService.UpdateUsers();
 
             return View("NewUsers", viewModel);

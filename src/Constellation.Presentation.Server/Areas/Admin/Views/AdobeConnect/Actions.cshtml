@@ -1,0 +1,30 @@
+﻿@model Constellation.Presentation.Server.Areas.Admin.Models.AdobeConnect.ActionsViewModel
+
+<h2>Adobe Connect Actions</h2>
+
+<hr />
+
+<div class="row">
+    <h3>Import from server</h3>
+</div>
+<div class="row margin-top-5">
+    <div class="col-md-8">
+        <h4>New Classrooms</h4>
+        Use this option to force the application to check for new classrooms created on the Adobe Connect server.
+    </div>
+    <div class="col-md-4">
+        @Html.ActionLink("Go", "GetNewRooms", "AdobeConnect", null, new {@class="btn btn-secondary"})
+    </div>
+</div>
+
+<div class="row margin-top-5">
+    <div class="col-md-8">
+        <h4>Update Users</h4>
+        Use this option to force the check the Adobe Connect server for users that should be linked to our application.
+    </div>
+    <div class="col-md-4">
+        @Html.ActionLink("Go", "UpdateUsers", "AdobeConnect", null, new { @class = "btn btn-secondary" })
+    </div>
+</div>
+
+<hr />

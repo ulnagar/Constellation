@@ -1,7 +1,9 @@
-﻿using Constellation.Application.Interfaces.Repositories;
+﻿using Constellation.Application.Features.Auth.Queries;
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -21,14 +23,18 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<IAuthService> _logger;
+        private readonly IMediator _mediator;
         private readonly SignInManager<AppUser> _signInManager;
-
-        public LoginModel(SignInManager<AppUser> signInManager, IUnitOfWork unitOfWork, UserManager<AppUser> userManager, ILogger<IAuthService> logger)
+        
+        public LoginModel(SignInManager<AppUser> signInManager, IUnitOfWork unitOfWork,
+            UserManager<AppUser> userManager, ILogger<IAuthService> logger,
+            IMediator mediator)
             : base()
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _logger = logger;
+            _mediator = mediator;
             _signInManager = signInManager;
         }
 
@@ -106,6 +112,13 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                 } else
                 {
                     _logger.LogInformation($" - Found user {user.Id} for email {Input.Email}");
+                }
+
+                var isStaffMember = await _mediator.Send(new IsUserASchoolStaffMemberQuery { EmailAddress = Input.Email });
+
+                if (!isStaffMember)
+                {
+                    return RedirectToPage("PortalRedirect");
                 }
 
                 var result = new LoginResult();

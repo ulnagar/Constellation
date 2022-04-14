@@ -5,9 +5,6 @@ COVERS:
 	Add calendar appointment to single day covers
 	Add timetable sheet to multi-day covers
 
-ADOBE CONNECT ACTIONS:
-	Complete migration of action to scan for new rooms
-
 LINK SHORTENER:
 	Provide interface for custom shortening of long URLs on custom domain
 
@@ -33,6 +30,9 @@ DONE
 R1.1:
 	CHANGE LOG:
 		Include link in footer to changelog for current release
+	
+	ADOBE CONNECT ACTIONS:
+		Complete migration of action to scan for new rooms
 
 	TEAMS:
 		Cache team ids in database to prevent needing to search for teams at start of operations

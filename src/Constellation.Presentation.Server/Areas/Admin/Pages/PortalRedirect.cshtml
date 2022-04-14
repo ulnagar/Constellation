@@ -1,0 +1,16 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.Admin.Pages.PortalRedirectModel
+
+<div class="text-center mt-3">
+    <h3>Sorry! It looks like you're in the wrong place.</h3>
+    <h4>Please wait and we'll take you to the Schools Portal.</h4>
+</div>
+@{
+}
+
+<script>
+    let tID = setTimeout(function () {
+        window.location.href = "https://acos.aurora.nsw.edu.au/Portal/School";
+        window.clearTimeout(tID);		// clear time out.
+    }, 7000);
+</script>
