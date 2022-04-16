@@ -64,13 +64,13 @@ namespace Constellation.Infrastructure.Jobs
 
             foreach (var school in studentsBySchool)
             {
-                _logger.LogInformation($"Processing School: {school.First().School.Name}");
+                _logger.LogInformation("Processing School: {name}", school.First().School.Name);
 
                 var studentFiles = new Dictionary<string, string>();
 
                 foreach (var student in school)
                 {
-                    _logger.LogInformation($" Creating Report for {student.DisplayName}");
+                    _logger.LogInformation(" Creating Report for {name}", student.DisplayName);
                     // Get Data from server
                     var definition = new { header = "", body = "" };
 
@@ -86,7 +86,7 @@ namespace Constellation.Infrastructure.Jobs
                     await SendParentEmail(pdfStream, filename, student, dateToReport);
                 }
 
-                _logger.LogInformation($" Sending reports to school...");
+                _logger.LogInformation(" Sending reports to school...");
 
                 // Email all the files to the school
                 var attachmentList = new List<Attachment>();
@@ -123,7 +123,7 @@ namespace Constellation.Infrastructure.Jobs
                 // Email the file to the parents
                 await SendSchoolEmailAsync(school.Key, attachmentList, dateToReport);
 
-                _logger.LogInformation($" Cleaning up temporary files");
+                _logger.LogInformation(" Cleaning up temporary files");
 
                 // Delete all temp files
                 foreach (var entry in studentFiles)
@@ -141,7 +141,7 @@ namespace Constellation.Infrastructure.Jobs
 
             if (emailAddresses == null || emailAddresses.Count == 0)
             {
-                _logger.LogWarning($"  Could not identify parent email address for {student.DisplayName} ({student.CurrentGrade})");
+                _logger.LogWarning("  Could not identify parent email address for {DisplayName} ({CurrentGrade})", student.DisplayName, student.CurrentGrade);
                 await _emailService.SendAdminAbsenceContactAlert(student.DisplayName);
                 return;
             }
@@ -162,12 +162,12 @@ namespace Constellation.Infrastructure.Jobs
             if (success)
             {
                 foreach (var email in emailAddresses)
-                    _logger.LogInformation($"  Message sent via Email to {email} with attachment: {filename}");
+                    _logger.LogInformation("  Message sent via Email to {email} with attachment: {filename}", email, filename);
             }
             else
             {
                 foreach (var email in emailAddresses)
-                    _logger.LogInformation($"  FAILED to send email to {email} with attachment: {filename}");
+                    _logger.LogInformation("  FAILED to send email to {email} with attachment: {filename}", email, filename);
             }
         }
 
@@ -192,12 +192,12 @@ namespace Constellation.Infrastructure.Jobs
             if (success)
             {
                 foreach (var email in contacts)
-                    _logger.LogInformation($"  Message sent via Email to {email} with Attendance Reports for {school.Name}");
+                    _logger.LogInformation("  Message sent via Email to {email} with Attendance Reports for {school}", email, school.Name);
             }
             else
             {
                 foreach (var email in contacts)
-                    _logger.LogInformation($"  FAILED to send email to {email} with Attendance Reports for {school.Name}");
+                    _logger.LogError("  FAILED to send email to {email} with Attendance Reports for {school}", email, school.Name);
             }
         }
 

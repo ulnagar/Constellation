@@ -43,10 +43,10 @@ namespace Constellation.Infrastructure.Jobs
             }
 
             var scanTime = DateTime.Now;
-            _logger.LogInformation($"Starting room monitor scan at {scanTime}");
+            _logger.LogInformation("Starting room monitor scan at {scanTime}", scanTime);
 
             _cache = await _monitorCacheService.GetData();
-            _logger.LogInformation($"Found {_cache.Courses.Count} rooms to check");
+            _logger.LogInformation("Found {courses} rooms to check", _cache.Courses.Count);
 
             var taskList = new List<Task>();
             foreach (var course in _cache.Courses)
@@ -56,11 +56,11 @@ namespace Constellation.Infrastructure.Jobs
 
             await Task.WhenAll(taskList);
 
-            _logger.LogInformation($"Scanning of rooms complete.");
+            _logger.LogInformation("Scanning of rooms complete.");
 
             _monitorCacheService.UpdateScan(_cache.Courses);
 
-            _logger.LogInformation($"Stopping room monitor scan at {DateTime.Now}");
+            _logger.LogInformation("Stopping room monitor scan at {time}", DateTime.Now);
         }
 
         private async Task<ClassMonitorDtos.MonitorCourse> ScanRoom(ClassMonitorDtos.MonitorCourse listCourse)
@@ -69,7 +69,7 @@ namespace Constellation.Infrastructure.Jobs
 
             var course = listCourse;
 
-            _logger.LogInformation($"{course.Name} - Starting scan");
+            _logger.LogInformation("{course} - Starting scan", course.Name);
 
             course.LastScanTime = DateTime.Now;
 
@@ -92,7 +92,7 @@ namespace Constellation.Infrastructure.Jobs
 
             if (string.IsNullOrWhiteSpace(assetId))
             {
-                _logger.LogInformation($"{course.Name} - Stopping scan - No current session detected");
+                _logger.LogInformation("{course} - Stopping scan - No current session detected", course.Name);
 
                 _semaphore.Release();
 
@@ -103,7 +103,7 @@ namespace Constellation.Infrastructure.Jobs
 
             if (attendees == null)
             {
-                _logger.LogInformation($"{course.Name} - Stopping scan - No attendees detected");
+                _logger.LogInformation("{course} - Stopping scan - No attendees detected", course.Name);
 
                 _semaphore.Release();
 
@@ -121,7 +121,7 @@ namespace Constellation.Infrastructure.Jobs
             if ((course.Teachers.Count(teacher => teacher.IsPresent) + course.OtherStaff.Count) > 0)
                 course.StatusCode += ClassMonitorDtos.MonitorCourse.TeachersPresent;
 
-            _logger.LogInformation($"{course.Name} - Stopping scan");
+            _logger.LogInformation("{course} - Stopping scan", course.Name);
 
             _semaphore.Release();
 
@@ -148,13 +148,13 @@ namespace Constellation.Infrastructure.Jobs
                     var student = course.Enrolments.FirstOrDefault(enrol => enrol.StudentId == user.Id);
                     if (student != null)
                     {
-                        _logger.LogInformation($"{course.Name} - Detected enrolled student - {student.StudentDisplayName}");
+                        _logger.LogInformation("{course} - Detected enrolled student - {student}", course.Name, student.StudentDisplayName);
 
                         student.IsPresent = true;
                     }
                     else
                     {
-                        _logger.LogInformation($"{course.Name} - Detected non-enrolled student - {user.DisplayName}");
+                        _logger.LogInformation("{course} - Detected non-enrolled student - {user}", course.Name, user.DisplayName);
 
                         course.OtherAttendees.Add(new ClassMonitorDtos.MonitorCourseEnrolment
                         {
@@ -171,13 +171,13 @@ namespace Constellation.Infrastructure.Jobs
                     var staff = course.Teachers.FirstOrDefault(teacher => teacher.Id == user.Id);
                     if (staff != null)
                     {
-                        _logger.LogInformation($"{course.Name} - Detected linked teacher - {staff.DisplayName}");
+                        _logger.LogInformation("{course} - Detected linked teacher - {staff}", course.Name, staff.DisplayName);
 
                         staff.IsPresent = true;
                     }
                     else
                     {
-                        _logger.LogInformation($"{course.Name} - Detected non-linked teacher - {user.DisplayName}");
+                        _logger.LogInformation("{course} - Detected non-linked teacher - {user}", course.Name, user.DisplayName);
 
                         course.OtherStaff.Add(new ClassMonitorDtos.MonitorCourseTeacher
                         {
@@ -190,7 +190,7 @@ namespace Constellation.Infrastructure.Jobs
 
                     break;
                 case "Casual":
-                    _logger.LogInformation($"{course.Name} - Detected casual teacher - {user.DisplayName}");
+                    _logger.LogInformation("{course} - Detected casual teacher - {user}", course.Name, user.DisplayName);
 
                     course.OtherStaff.Add(new ClassMonitorDtos.MonitorCourseTeacher
                     {

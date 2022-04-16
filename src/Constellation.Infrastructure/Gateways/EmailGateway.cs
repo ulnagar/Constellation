@@ -27,7 +27,7 @@ namespace Constellation.Infrastructure.Gateways
         {
             var id = Guid.NewGuid();
 
-            _logger.LogInformation($"Sending email {id}");
+            _logger.LogInformation("Sending email {id}", id);
 
             var message = new MimeMessage();
 
@@ -38,25 +38,25 @@ namespace Constellation.Infrastructure.Gateways
 
             foreach (var recipient in toAddresses)
             {
-                _logger.LogInformation($"{id}: Adding {recipient.Key} ({recipient.Value}) to TO field.");
+                _logger.LogInformation("{id}: Adding {name} ({email}) to TO field.", id, recipient.Key, recipient.Value);
                 message.To.Add(new MailboxAddress(recipient.Key, recipient.Value));
             }
 
             if (ccAddresses != null)
                 foreach (var recipient in ccAddresses)
                 {
-                    _logger.LogInformation($"{id}: Adding {recipient.Key} ({recipient.Value}) to CC field.");
+                    _logger.LogInformation("{id}: Adding {name} ({email}) to CC field.", id, recipient.Key, recipient.Value);
                     message.Cc.Add(new MailboxAddress(recipient.Key, recipient.Value));
                 }
 
             if (bccAddresses != null)
                 foreach (var recipient in bccAddresses)
                 {
-                    _logger.LogInformation($"{id}: Adding {recipient.Key} ({recipient.Value}) to BCC field.");
+                    _logger.LogInformation("{id}: Adding {name} ({email}) to BCC field.", id, recipient.Key, recipient.Value);
                     message.Bcc.Add(new MailboxAddress(recipient.Key, recipient.Value));
                 }
 
-            _logger.LogInformation($"{id}: Setting Subject to \"{subject}\"");
+            _logger.LogInformation("{id}: Setting Subject to \"{subject}\"", id, subject);
             message.Subject = subject;
             
             var textPartBody = new TextPart(TextFormat.Html)
@@ -79,7 +79,7 @@ namespace Constellation.Infrastructure.Gateways
                         FileName = item.Name
                     };
 
-                    _logger.LogInformation($"{id}: Adding attachment {item.Name}");
+                    _logger.LogInformation("{id}: Adding attachment {name}", id, item.Name);
 
                     multipart.Add(attachment);
                 }
@@ -90,7 +90,7 @@ namespace Constellation.Infrastructure.Gateways
                 message.Body = textPartBody;
             }
 
-            _logger.LogInformation($"{id}: Sending...");
+            _logger.LogInformation("{id}: Sending...", id);
             await PushToServer(message);
 
             return message;

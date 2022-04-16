@@ -40,22 +40,22 @@ namespace Constellation.Infrastructure.Jobs
                 }
             }
 
-            _logger.LogInformation($"Searching for users without Adobe Connect Principal Id information...");
+            _logger.LogInformation("Searching for users without Adobe Connect Principal Id information...");
             var updatedUsers = await _adobeConnectService.UpdateUsers();
-            _logger.LogInformation($"Found information for {updatedUsers.Count()} users.");
+            _logger.LogInformation("Found information for {count} users.", updatedUsers.Count());
 
             _logger.LogInformation("");
-            _logger.LogInformation($"Searching for operations...");
+            _logger.LogInformation("Searching for operations...");
             var operations = await _unitOfWork.AdobeConnectOperations.AllToProcess();
             var canvasOperations = await _unitOfWork.CanvasOperations.AllToProcess();
-            _logger.LogInformation($"Found {operations.Count} operations to process.");
+            _logger.LogInformation("Found {count} operations to process.", operations.Count);
 
             foreach (var operation in operations)
                 await ProcessOperation(operation);
 
-            _logger.LogInformation($"Searching for overdue operations...");
+            _logger.LogInformation("Searching for overdue operations...");
             operations = await _unitOfWork.AdobeConnectOperations.AllOverdue();
-            _logger.LogInformation($"Found {operations.Count} overdue operations to process.");
+            _logger.LogInformation("Found {count} overdue operations to process.", operations.Count);
 
             foreach (var operation in operations)
                 await ProcessOperation(operation);
@@ -66,9 +66,9 @@ namespace Constellation.Infrastructure.Jobs
             await _unitOfWork.CompleteAsync();
 
             _logger.LogInformation("");
-            _logger.LogInformation($"Fixing old and outdated operation entries...");
+            _logger.LogInformation("Fixing old and outdated operation entries...");
             await PruneAdobeConnectOperations();
-            _logger.LogInformation($"Completed");
+            _logger.LogInformation("Completed");
         }
 
         private async Task PruneAdobeConnectOperations()
@@ -87,7 +87,7 @@ namespace Constellation.Infrastructure.Jobs
                 }
             }
 
-            _logger.LogInformation($" Found {operationCount} perations to update!");
+            _logger.LogInformation(" Found {operationCount} perations to update!", operationCount);
 
             await _unitOfWork.CompleteAsync();
         }

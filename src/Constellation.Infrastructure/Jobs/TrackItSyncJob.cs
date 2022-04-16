@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
-    public class TrackItSyncJob : ITrackItSyncJob//, IScopedService
+    public class TrackItSyncJob : ITrackItSyncJob, IScopedService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly TrackItContext _tiContext;

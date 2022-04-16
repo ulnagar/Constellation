@@ -37,13 +37,13 @@ namespace Constellation.Infrastructure.Jobs
 
             _logger.LogInformation("Starting job");
             var staff = await _unitOfWork.Staff.ForListAsync(staff => !staff.IsDeleted);
-            _logger.LogInformation($"Found {staff.Count} Staff Members to check...");
+            _logger.LogInformation("Found {count} Staff Members to check...", staff.Count);
 
             foreach (var member in staff)
                 await CreateUser(member.EmailAddress, member.FirstName, member.LastName, AuthRoles.User);
 
             var contacts = await _unitOfWork.SchoolContacts.AllWithActiveRoleAsync();
-            _logger.LogInformation($"Found {contacts.Count} School Contacts to check...");
+            _logger.LogInformation("Found {count} School Contacts to check...", contacts.Count);
 
             foreach (var contact in contacts)
                 await CreateUser(contact.EmailAddress, contact.FirstName, contact.LastName, AuthRoles.LessonsUser);
@@ -51,7 +51,7 @@ namespace Constellation.Infrastructure.Jobs
 
         private async Task CreateUser(string emailAddress, string firstName, string lastName, string defaultRole)
         {
-            _logger.LogInformation($"Checking {emailAddress}");
+            _logger.LogInformation("Checking {emailAddress}", emailAddress);
             var existingUser = await _userManager.FindByEmailAsync(emailAddress);
 
             if (existingUser != null)
@@ -94,7 +94,7 @@ namespace Constellation.Infrastructure.Jobs
                 existingUser = user;
             }
 
-            _logger.LogInformation($" Adding user to {defaultRole} role.");
+            _logger.LogInformation(" Adding user to {defaultRole} role.", defaultRole);
             // Add to default role
             var groupSuccess = await _userManager.AddToRoleAsync(existingUser, defaultRole);
 

@@ -1,7 +1,4 @@
-using Constellation.Application.Interfaces.Gateways;
-using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Presentation.Server.Helpers.DependencyInjection;
@@ -15,7 +12,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using Serilog.Filters;
 using System;
 
 namespace Constellation.Presentation.Server
@@ -26,98 +22,7 @@ namespace Constellation.Presentation.Server
         {
             Configuration = configuration;
 
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/ClassMonitor.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Day);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<IClassMonitorJob>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/PermissionUpdate.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Day);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<IPermissionUpdateJob>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/LessonNotifications.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Day);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<ILessonNotificationsJob>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/AttendanceReports.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<IAttendanceReportJob>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/AbsenceMonitor.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<IAbsenceMonitorJob>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/RollMarkingReport.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<IRollMarkingReportJob>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/SchoolRegister.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<ISchoolRegisterJob>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/UserManager.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<IUserManagerJob>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/EmailGateway.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<IEmailGateway>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/Authentication.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Day);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<IAuthService>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/LinkShortenerGateway.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Day);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<ILinkShortenerGateway>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/SMSGateway.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Day);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<ISMSGateway>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/TrackItSync.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<ITrackItSyncJob>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/FamilyDetailsSync.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<ISentralFamilyDetailsSyncJob>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/StudentReportSync.log", Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Month);
-                    config.Filter.ByIncludingOnly(Matching.FromSource<ISentralReportSyncJob>());
-                })
-                .WriteTo.Logger(config =>
-                {
-                    config.WriteTo.File("logs/System.log", Serilog.Events.LogEventLevel.Debug, rollingInterval: RollingInterval.Day);
-                    config.Filter.ByExcluding(Matching.FromSource<IClassMonitorJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<IPermissionUpdateJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<ILessonNotificationsJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<IAttendanceReportJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<IAbsenceMonitorJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<IRollMarkingReportJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<ISchoolRegisterJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<IUserManagerJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<IEmailGateway>());
-                    config.Filter.ByExcluding(Matching.FromSource<IAuthService>());
-                })
-                .CreateLogger();
+            LoggingConfiguration.SetupLogging();
         }
 
         public IConfiguration Configuration { get; }
@@ -126,15 +31,10 @@ namespace Constellation.Presentation.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddInfrastructure(Configuration);
-#if DEBUG
-            services.AddStandardAuthentication(Configuration);
-#else
             services.AddMainAppAuthentication(Configuration);
-#endif
 
             services.AddRazorPages();
             services.AddMvc().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
-            //services.AddServerSideBlazor();
 
             services.AddHangfire(c => c.UseSqlServerStorage(Configuration.GetConnectionString("Hangfire")));
             GlobalConfiguration.Configuration.UseSqlServerStorage(Configuration.GetConnectionString("Hangfire"), new SqlServerStorageOptions
@@ -161,6 +61,8 @@ namespace Constellation.Presentation.Server
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseSerilogRequestLogging();
 
             //app.UseHttpsRedirection();
             app.UseStaticFiles();
@@ -193,7 +95,6 @@ namespace Constellation.Presentation.Server
                     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
                 );
 
-                //endpoints.MapBlazorHub();
                 endpoints.MapControllers();
                 endpoints.MapRazorPages();
             });

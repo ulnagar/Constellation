@@ -46,7 +46,7 @@ namespace Constellation.Infrastructure.Jobs
             if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
                 return;
 
-            _logger.LogInformation($"Checking Date: {date.ToShortDateString()}");
+            _logger.LogInformation("Checking Date: {date}", date.ToShortDateString());
             var entries = await _sentralService.GetRollMarkingReportAsync(date);
 
             var unsubmitted = entries.Where(entry => !entry.Submitted).ToList();
