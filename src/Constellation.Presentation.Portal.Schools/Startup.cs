@@ -18,6 +18,8 @@ namespace Constellation.Presentation.Portal.Schools
         {
             Configuration = configuration;
             _env = env;
+
+            LoggingConfiguration.SetupLogging();
         }
 
         public IConfiguration Configuration { get; }

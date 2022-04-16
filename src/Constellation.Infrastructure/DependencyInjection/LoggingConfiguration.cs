@@ -4,7 +4,7 @@ using Constellation.Application.Interfaces.Services;
 using Serilog;
 using Serilog.Filters;
 
-namespace Constellation.Presentation.Server.Helpers.DependencyInjection
+namespace Constellation.Infrastructure.DependencyInjection
 {
     public static class LoggingConfiguration
     {
