@@ -1,0 +1,132 @@
+﻿@page "/Absences/Reports/"
+
+@attribute [Authorize]
+
+@inject IMediator mediator
+@inject NavigationManager NavigationManager
+
+<h1>Attendance Report</h1>
+
+<span>Reports for a single student will be downloaded as PDF files. Reports for all students will be downloaded as a zip file.</span>
+
+<div class="form-horizontal">
+    <EditForm Model="@formModel" OnValidSubmit="ProcessForm">
+        <div class="form-group row mt-3">
+            <div class="col-3"><label>Student(s)</label></div>
+            <div class="col-5 font-weight-bold">
+                <select class="form-control" @bind="StudentSelect">
+                    <option value="">-- Select Student --</option>
+                    <option value="GRADE-ALL" class="text-bold"> -- All Students</option>
+                    @foreach (var group in StudentsToSelect.GroupBy(student => student.CurrentGrade))
+                    {
+                        <option value="GRADE-@group.Key.AsNumber()" class="text-bold"> -- @group.Key.AsName()</option>
+                        foreach (var student in group)
+                        {
+                            <option value="@student.StudentId">@student.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row mt-3">
+            <div class="col-8">
+                <h5>
+                    @foreach (var student in SelectedStudents)
+                    {
+                        <span class="badge badge-info no-select" @onclick="() => RemoveStudent(student)"> @student.Name </span>
+                    }
+                </h5>
+            </div>
+        </div>
+
+        <div class="form-group row mt-3">
+            <div class="col-3"><label>Date to report</label></div>
+            <div class="col-5 font-weight-bold">
+                <InputDate @bind-Value="formModel.StartDate" class="form-control"></InputDate>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="offset-1 col-md-3">
+                <button class="btn btn-success btn-block btn-lg" type="submit">Submit</button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    public List<StudentDto> AllStudents { get; set; } = new List<StudentDto>();
+    public List<StudentDto> StudentsToSelect { get; set; } = new();
+    public List<StudentDto> SelectedStudents { get; set; } = new();
+
+    public FormModel formModel { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            var students = await mediator.Send(new GetStudentsFromSchoolQuery { SchoolCode = SelectedSchool.Code });
+            AllStudents = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+            StudentsToSelect = AllStudents;
+        }
+    }
+
+    string StudentSelect
+    {
+        get => string.Empty;
+        set => AddStudent(value);
+    }
+
+    public class FormModel
+    {
+        public ICollection<string> Students { get; set; }
+        public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    }
+
+    private void AddStudent(string studentId)
+    {
+        // Get value of selected student but reset the ui
+        // https://stackoverflow.com/questions/58193797/canceling-event-onchange-or-retrieving-the-old-value-in-blazor
+
+        if (studentId.Contains("GRADE"))
+        {
+            // A grade was selected, not an individual student
+            var grade = studentId.Split('-').Last();
+            var students = StudentsToSelect.Where(student => student.CurrentGrade.AsNumber() == grade).ToList();
+            if (grade == "ALL")
+                students = StudentsToSelect.ToList();
+
+            foreach (var student in students)
+            {
+                SelectedStudents.Add(student);
+                StudentsToSelect.Remove(student);
+            }
+        }
+        else
+        {
+            var student = StudentsToSelect.First(student => student.StudentId == studentId);
+            SelectedStudents.Add(student);
+            StudentsToSelect.Remove(student);
+        }
+
+        SelectedStudents = SelectedStudents.Distinct().OrderBy(student => student.Name).ToList();
+    }
+
+    private void RemoveStudent(StudentDto student)
+    {
+        StudentsToSelect.Add(student);
+        SelectedStudents.Remove(student);
+    }
+
+    private void ProcessForm()
+    {
+        
+    }
+}

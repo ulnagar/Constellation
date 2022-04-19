@@ -7,7 +7,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
-using Constellation.Presentation.Server.Areas.Reports.Models;
+using Constellation.Infrastructure.Templates.Views.Documents.Attendance;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;

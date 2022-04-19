@@ -1,11 +1,10 @@
-using Constellation.Application.Features.Attendance.Queries;
+using Constellation.Application.Features.Portal.School.Reports.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System;
 using System.Threading.Tasks;
 
-namespace Constellation.Presentation.Portal.Schools.Pages.Absences
+namespace Constellation.Presentation.Portal.Schools.Pages.Reports
 {
     public class DownloadModel : PageModel
     {
@@ -17,13 +16,11 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Absences
         }
 
         [BindProperty(SupportsGet = true)]
-        public string StudentId { get; set; }
-        [BindProperty(SupportsGet = true)]
-        public DateTime StartDate { get; set; }
+        public string ReportId { get; set; }
 
         public async Task<IActionResult> OnGet()
         {
-            var file = await _mediator.Send(new GetStudentAttendanceReportQuery { StudentId = StudentId, StartDate = StartDate });
+            var file = await _mediator.Send(new GetFileFromDatabaseQuery { LinkType = Core.Models.StoredFile.StudentReport, LinkId = ReportId.ToString() });
 
             return File(file.FileData, file.FileType, file.Name);
         }

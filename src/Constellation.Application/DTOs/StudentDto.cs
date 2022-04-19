@@ -15,6 +15,7 @@ namespace Constellation.Application.DTOs
 
         [Required]
         public string LastName { get; set; }
+        public string Name => $"{FirstName} {LastName}";
 
         // Not required but highly desirable
         public string PortalUsername { get; set; }

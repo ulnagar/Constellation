@@ -8,5 +8,10 @@ namespace Constellation.Application.Extensions
         {
             return ((int)grade).ToString();
         }
+
+        public static string AsName(this Grade grade)
+        {
+            return $"Year {((int)grade).ToString().PadLeft(2, '0')}";
+        }
     }
 }
