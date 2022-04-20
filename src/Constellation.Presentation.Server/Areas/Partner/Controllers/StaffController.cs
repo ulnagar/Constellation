@@ -102,7 +102,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             var schools = await _unitOfWork.Schools.ForSelectionAsync();
 
             var viewModel = await CreateViewModel<Staff_UpdateViewModel>();
-            viewModel.Staff = new StaffDto
+            viewModel.Staff = new Staff_UpdateViewModel.LocalStaffDto
             {
                 StaffId = staff.StaffId,
                 FirstName = staff.FirstName,

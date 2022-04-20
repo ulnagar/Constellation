@@ -3,8 +3,11 @@
 
 @foreach (Faculty item in Enum.GetValues(typeof(Faculty)))
 {
+    var fieldName = ViewData.TemplateInfo.GetFullHtmlFieldName(item.ToString());
+    var fieldId = Html.GenerateIdFromName(fieldName);
+
     <div class="custom-control custom-switch">
-        <input type="checkbox" id="@(Html.GenerateIdFromName(ViewData.TemplateInfo.GetFullHtmlFieldName(item.ToString())))" name="@(ViewData.TemplateInfo.GetFullHtmlFieldName(item.ToString()))" value="@item" @Html.Raw((Model & item) == item ? "checked=\"checked\"" : "") class="custom-control-input" />
-        <label class="custom-control-label" for="@(Html.GenerateIdFromName(ViewData.TemplateInfo.GetFullHtmlFieldName(item.ToString())))">@item</label>
+        <input type="checkbox" id="@fieldId" name="@fieldName" value="@item" @Html.Raw((Model & item) == item ? "checked=\"checked\"" : "") class="custom-control-input" />
+        <label class="custom-control-label" for="@fieldId">@item</label>
     </div>
 }

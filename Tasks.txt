@@ -34,6 +34,9 @@ R1.1:
 	CHANGE LOG:
 		Include link in footer to changelog for current release
 	
+	STAFF:
+		Fix bug where faculty membership was not being saved to the database
+
 	ADOBE CONNECT ACTIONS:
 		Complete migration of action to scan for new rooms
 

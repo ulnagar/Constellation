@@ -21,6 +21,6 @@ namespace Constellation.Application.DTOs
         [Required]
         public string SchoolCode { get; set; }
         [Required]
-        public Faculty Faculty { get; set; }
+        public virtual Faculty Faculty { get; set; }
     }
 }
