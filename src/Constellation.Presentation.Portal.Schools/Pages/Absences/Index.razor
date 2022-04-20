@@ -9,18 +9,11 @@
 
 <h1>Student Absences</h1>
 
-@*
-TODO:
-    Add Button to open Modal
-    Create Modal where user can select "individual student and date" or "all students and date"
-    Modal submission goes to Download page which returns file
-    Create code path in Download page that handles multiple selected students ("all students and date")
-    
-OR:
-    Add Button to open Download page
-    Download page prompts for "individual student and date" or "all students and date"
-    Post handler on Download page handles the file creation and returns file 
-*@
+<div class="row">
+    <a href="Absences/Reports" class="btn btn-warning">Attendance Reports</a>
+</div>
+
+<hr />
 
 <div class="d-flex flex-row justify-content-around mt-3 mb-3">
     <div class="cursor-pointer border border-secondary rounded p-3 h-100 text-center @(AbsencesType == AbsenceCategory.UnexplainedPartials ? "selected" : "unselected")" @onclick="() => ChangeAbsenceType(AbsenceCategory.UnexplainedPartials)">

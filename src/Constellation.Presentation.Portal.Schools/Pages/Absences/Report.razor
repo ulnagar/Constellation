@@ -1,9 +1,14 @@
 ﻿@page "/Absences/Reports/"
 
+@using Newtonsoft.Json
+@using System.Text
+@using System.ComponentModel.DataAnnotations
+
 @attribute [Authorize]
 
 @inject IMediator mediator
 @inject NavigationManager NavigationManager
+@inject HttpClient httpClient
 
 <h1>Attendance Report</h1>
 
@@ -60,11 +65,11 @@
     public SchoolDto SelectedSchool { get; set; }
     public SchoolDto CurrentlySelectedSchool { get; set; }
 
-    public List<StudentDto> AllStudents { get; set; } = new List<StudentDto>();
+    public List<StudentDto> AllStudents { get; set; } = new();
     public List<StudentDto> StudentsToSelect { get; set; } = new();
     public List<StudentDto> SelectedStudents { get; set; } = new();
 
-    public FormModel formModel { get; set; } = new();
+    public AttendanceReportSelectForm formModel { get; set; } = new();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -75,6 +80,7 @@
             var students = await mediator.Send(new GetStudentsFromSchoolQuery { SchoolCode = SelectedSchool.Code });
             AllStudents = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
             StudentsToSelect = AllStudents;
+            SelectedStudents = new();
         }
     }
 
@@ -82,12 +88,6 @@
     {
         get => string.Empty;
         set => AddStudent(value);
-    }
-
-    public class FormModel
-    {
-        public ICollection<string> Students { get; set; }
-        public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     }
 
     private void AddStudent(string studentId)
@@ -116,7 +116,11 @@
             StudentsToSelect.Remove(student);
         }
 
-        SelectedStudents = SelectedStudents.Distinct().OrderBy(student => student.Name).ToList();
+        SelectedStudents = SelectedStudents.Distinct()
+            .OrderBy(student => student.CurrentGrade)
+            .ThenBy(student => student.LastName)
+            .ThenBy(student => student.FirstName)
+            .ToList();
     }
 
     private void RemoveStudent(StudentDto student)
@@ -127,6 +131,20 @@
 
     private void ProcessForm()
     {
-        
+        var uri = $"?StartDate={formModel.StartDate.ToString("yyyy-MM-dd")}";
+        foreach (var student in SelectedStudents)
+        {
+            uri += $"&Students={student.StudentId}";
+        }
+
+        NavigationManager.NavigateTo($"Absences/Reports/Download{uri}", true);
+    }
+
+    public class AttendanceReportSelectForm
+    {
+        [Required]
+        public List<string> Students { get; set; } = new();
+        [Required]
+        public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     }
 }

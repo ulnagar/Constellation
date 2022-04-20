@@ -37,6 +37,8 @@ namespace Constellation.Presentation.Portal.Schools
                 opts.DetailedErrors = _env.IsDevelopment();
             });
 
+            services.AddHttpClient();
+
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<AppUser>>();
         }
 

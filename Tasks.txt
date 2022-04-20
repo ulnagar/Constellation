@@ -23,6 +23,9 @@ GRADES:
 ACTIONS:
 	Migrate to AccessRight concept
 
+ABSENCES:
+	Migrate Externally Explained to an actual Response record instead of top level fields
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~

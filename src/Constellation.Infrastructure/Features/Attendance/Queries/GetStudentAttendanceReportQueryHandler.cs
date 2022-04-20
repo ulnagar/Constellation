@@ -47,10 +47,11 @@ namespace Constellation.Infrastructure.Features.Attendance.Queries
             };
 
             var endDate = viewModel.StartDate.AddDays(12);
-            viewModel.Absences = await _context.Absences
+            var absences = await _context.Absences
                 .Where(absence => absence.StudentId == student.StudentId && absence.Date <= endDate && absence.Date >= viewModel.StartDate)
-                .ProjectTo<AttendanceReportViewModel.AbsenceDto>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
+
+            viewModel.Absences = absences.Select(AttendanceReportViewModel.AbsenceDto.ConvertFromAbsence).ToList();
 
             var ReportableDates = viewModel.StartDate.Range(endDate).ToList();
             foreach (var date in ReportableDates)
