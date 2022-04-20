@@ -221,10 +221,99 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         }
 
         [Authorize]
-        [HttpPost]
+        [HttpPost("/Partner/Schools/Map")]
         public async Task<IActionResult> ViewMap(IList<string> schoolCodes)
         {
             var vm = await CreateViewModel<School_MapViewModel>();
+
+            vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
+
+            return View("Map", vm);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("/Partner/Schools/Map/All")]
+        public async Task<IActionResult> ViewCompleteMap()
+        {
+            var vm = await CreateViewModel<School_MapViewModel>();
+
+            var schools = await _unitOfWork.Schools
+                .ForListAsync(school => school.Students.Any(student => !student.IsDeleted) || school.Staff.Any(staff => !staff.IsDeleted));
+
+            var schoolCodes = schools.Select(school => school.Code).ToList();
+
+            vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
+
+            return View("Map", vm);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("/Partner/Schools/Map/OC")]
+        public async Task<IActionResult> ViewOCMap()
+        {
+            var vm = await CreateViewModel<School_MapViewModel>();
+
+            var schools = await _unitOfWork.Schools
+                .ForListAsync(school =>
+                    school.Students.Any(student =>
+                        !student.IsDeleted &&
+                        (student.CurrentGrade == Core.Enums.Grade.Y05 || student.CurrentGrade == Core.Enums.Grade.Y06)));
+
+            var schoolCodes = schools.Select(school => school.Code).ToList();
+
+            vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
+
+            return View("Map", vm);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("/Partner/Schools/Map/Stage45")]
+        public async Task<IActionResult> ViewStage45Map()
+        {
+            var vm = await CreateViewModel<School_MapViewModel>();
+
+            var schools = await _unitOfWork.Schools
+                .ForListAsync(school =>
+                    school.Students.Any(student =>
+                        !student.IsDeleted &&
+                        (student.CurrentGrade == Core.Enums.Grade.Y07 || student.CurrentGrade == Core.Enums.Grade.Y08 || student.CurrentGrade == Core.Enums.Grade.Y09 || student.CurrentGrade == Core.Enums.Grade.Y10)));
+
+            var schoolCodes = schools.Select(school => school.Code).ToList();
+
+            vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
+
+            return View("Map", vm);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("/Partner/Schools/Map/Stage6")]
+        public async Task<IActionResult> ViewStage6Map()
+        {
+            var vm = await CreateViewModel<School_MapViewModel>();
+
+            var schools = await _unitOfWork.Schools
+                .ForListAsync(school =>
+                    school.Students.Any(student =>
+                        !student.IsDeleted &&
+                        (student.CurrentGrade == Core.Enums.Grade.Y11 || student.CurrentGrade == Core.Enums.Grade.Y11)));
+
+            var schoolCodes = schools.Select(school => school.Code).ToList();
+
+            vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
+
+            return View("Map", vm);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("/Partner/Schools/Map/Staff")]
+        public async Task<IActionResult> ViewStaffMap()
+        {
+            var vm = await CreateViewModel<School_MapViewModel>();
+
+            var schools = await _unitOfWork.Schools
+                .ForListAsync(school => school.Staff.Any(staff => !staff.IsDeleted));
+
+            var schoolCodes = schools.Select(school => school.Code).ToList();
 
             vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
 
