@@ -19,7 +19,7 @@ namespace Constellation.Presentation.Portal.Schools
             Configuration = configuration;
             _env = env;
 
-            LoggingConfiguration.SetupLogging();
+            LoggingConfiguration.SetupLogging(configuration);
         }
 
         public IConfiguration Configuration { get; }

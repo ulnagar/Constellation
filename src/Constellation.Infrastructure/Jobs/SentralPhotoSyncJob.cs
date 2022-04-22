@@ -1,13 +1,11 @@
-﻿using Constellation.Application.Interfaces.Gateways;
+﻿using Constellation.Application.Extensions;
+using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Infrastructure.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
@@ -25,7 +23,6 @@ namespace Constellation.Infrastructure.Jobs
             _logger = logger;
         }
 
-
         public async Task StartJob(bool automated)
         {
             if (automated)
@@ -40,12 +37,20 @@ namespace Constellation.Infrastructure.Jobs
 
             var students = await _context.Students.Where(student => !student.IsDeleted).ToListAsync();
 
-            foreach (var student in students)
+            foreach (var student in students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName))
             {
-                student.Photo = await _gateway.GetSentralStudentPhoto(student.StudentId);
-            }
+                _logger.LogInformation("Checking student {student} ({grade}) for photo", student.DisplayName, student.CurrentGrade.AsName());
 
-            await _context.SaveChangesAsync(new System.Threading.CancellationToken());
+                var photo = await _gateway.GetSentralStudentPhoto(student.StudentId);
+
+                if (student.Photo != photo)
+                {
+                    _logger.LogInformation("Found new photo for {student} ({grade})", student.DisplayName, student.CurrentGrade.AsName());
+
+                    student.Photo = photo;
+                    await _context.SaveChangesAsync(new System.Threading.CancellationToken());
+                }
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Services;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Filters;
 
@@ -8,9 +9,14 @@ namespace Constellation.Infrastructure.DependencyInjection
 {
     public static class LoggingConfiguration
     {
-        public static void SetupLogging()
+        public static void SetupLogging(IConfiguration configuration)
         {
-            Log.Logger = new LoggerConfiguration()
+            var seqServer = configuration["AppSettings:LoggingServer:ServerUrl"];
+            var seqKey = configuration["AppSettings:LoggingServer:ApiKey"];
+
+            //Log.Logger = 
+
+            var logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .Enrich.FromLogContext()
                 .WriteTo.Logger(config =>
@@ -133,7 +139,7 @@ namespace Constellation.Infrastructure.DependencyInjection
                         rollingInterval: RollingInterval.Month);
                     config.Filter.ByIncludingOnly(Matching.FromSource<ISentralReportSyncJob>());
                 })
-                .WriteTo.Logger(config =>
+               .WriteTo.Logger(config =>
                 {
                     config.WriteTo.File("logs/System.log",
                         Serilog.Events.LogEventLevel.Warning,
@@ -154,8 +160,17 @@ namespace Constellation.Infrastructure.DependencyInjection
                     config.Filter.ByExcluding(Matching.FromSource<ITrackItSyncJob>());
                     config.Filter.ByExcluding(Matching.FromSource<ISentralFamilyDetailsSyncJob>());
                     config.Filter.ByExcluding(Matching.FromSource<ISentralReportSyncJob>());
-                })
-                .CreateLogger();
+                });
+
+            if (!string.IsNullOrWhiteSpace(seqServer) && !string.IsNullOrWhiteSpace(seqKey))
+            {
+                logger.WriteTo.Logger(config =>
+                {
+                    config.WriteTo.Seq(seqServer, apiKey: seqKey);
+                });
+            }
+
+            Log.Logger = logger.CreateLogger();
         }
     }
 }
