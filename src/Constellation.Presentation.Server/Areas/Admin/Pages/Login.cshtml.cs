@@ -99,33 +99,35 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                 var localAuth = Input.Email.Contains("~");
                 Input.Email = Input.Email.Replace("~", "");
 
-                _logger.LogInformation($"Starting Login Attempt by {Input.Email}");
+                _logger.LogInformation("Starting Login Attempt by {Email}", Input.Email);
 
                 var user = await _userManager.FindByEmailAsync(Input.Email);
 
                 if (user == null)
                 {
-                    _logger.LogWarning($" - No user found for email {Input.Email}");
+                    _logger.LogWarning(" - No user found for email {Email}", Input.Email);
 
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
                 } else
                 {
-                    _logger.LogInformation($" - Found user {user.Id} for email {Input.Email}");
+                    _logger.LogInformation(" - Found user {user} for email {email}", user.Id, Input.Email);
                 }
 
-                var isStaffMember = await _mediator.Send(new IsUserASchoolStaffMemberQuery { EmailAddress = Input.Email });
+                // Temporarily turned off as Schools Portal is not working
+                //var isStaffMember = await _mediator.Send(new IsUserASchoolStaffMemberQuery { EmailAddress = Input.Email });
 
-                if (!isStaffMember)
-                {
-                    return RedirectToPage("PortalRedirect");
-                }
+                //if (!isStaffMember)
+                //{
+                //    _logger.LogInformation(" - User is not a staff member - redirecting to Schools Portal");
+                //    return RedirectToPage("PortalRedirect");
+                //}
 
                 var result = new LoginResult();
 
                 if (!localAuth)
                 {
-                    _logger.LogInformation($" - Attempting domain login by {Input.Email}");
+                    _logger.LogInformation(" - Attempting domain login by {Email}", Input.Email);
 
 #pragma warning disable CA1416 // Validate platform compatibility
                     var context = new PrincipalContext(ContextType.Domain, "DETNSW.WIN");
@@ -134,22 +136,22 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
 
                     if (!success)
                     {
-                        _logger.LogWarning($" - Domain login failed for {Input.Email}");
+                        _logger.LogWarning(" - Domain login failed for {Email}", Input.Email);
 
                         ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                         return Page();
                     } else
                     {
-                        _logger.LogInformation($" - Domain login succeeded for {Input.Email}");
+                        _logger.LogInformation(" - Domain login succeeded for {Email}", Input.Email);
                     }
 
                     await _signInManager.SignInAsync(user, false);
                     result.Succeeded = true;
                 } else
                 {
-                    _logger.LogInformation($" - Attempting local login by {Input.Email}");
+                    _logger.LogInformation(" - Attempting local login by {Email}", Input.Email);
 #if DEBUG
-                    _logger.LogInformation($" - DEBUG code found. Bypass login check.");
+                    _logger.LogInformation(" - DEBUG code found. Bypass login check.");
                     await _signInManager.SignInAsync(user, false);
                     result.Succeeded = true;
 #else
@@ -157,12 +159,12 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                     
                     if (!passwordResult.Succeeded)
                     {
-                        _logger.LogWarning($" - Local login failed for {Input.Email}");
+                        _logger.LogWarning(" - Local login failed for {Email}", Input.Email);
                     }
                     else
                     {
                         result.Succeeded = passwordResult.Succeeded;
-                        _logger.LogInformation($" - Local login suceeded for {Input.Email}");
+                        _logger.LogInformation(" - Local login suceeded for {Email}", Input.Email);
                     }
 #endif
                 }
