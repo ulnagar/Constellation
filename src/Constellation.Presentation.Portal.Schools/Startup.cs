@@ -19,7 +19,7 @@ namespace Constellation.Presentation.Portal.Schools
             Configuration = configuration;
             _env = env;
 
-            LoggingConfiguration.SetupLogging(configuration);
+            LoggingConfiguration.SetupLogging(configuration, Serilog.Events.LogEventLevel.Debug);
         }
 
         public IConfiguration Configuration { get; }
@@ -34,7 +34,8 @@ namespace Constellation.Presentation.Portal.Schools
             services.AddRazorPages();
             services.AddServerSideBlazor().AddCircuitOptions(opts =>
             {
-                opts.DetailedErrors = _env.IsDevelopment();
+                opts.DetailedErrors = true;
+                //opts.DetailedErrors = _env.IsDevelopment();
             });
 
             services.AddHttpClient();

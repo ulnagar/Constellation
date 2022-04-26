@@ -3,18 +3,17 @@ using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+using Serilog.Events;
 using Serilog.Filters;
 
 namespace Constellation.Infrastructure.DependencyInjection
 {
     public static class LoggingConfiguration
     {
-        public static void SetupLogging(IConfiguration configuration)
+        public static void SetupLogging(IConfiguration configuration, LogEventLevel minimumFileLogLevel)
         {
             var seqServer = configuration["AppSettings:LoggingServer:ServerUrl"];
             var seqKey = configuration["AppSettings:LoggingServer:ApiKey"];
-
-            //Log.Logger = 
 
             var logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
@@ -142,7 +141,7 @@ namespace Constellation.Infrastructure.DependencyInjection
                .WriteTo.Logger(config =>
                 {
                     config.WriteTo.File("logs/System.log",
-                        Serilog.Events.LogEventLevel.Warning,
+                        minimumFileLogLevel,
                         outputTemplate: "[{Timestamp} {Level:u3} {SourceContext}] {Message}\n{Exception}",
                         rollingInterval: RollingInterval.Day);
                     config.Filter.ByExcluding(Matching.FromSource<IClassMonitorJob>());

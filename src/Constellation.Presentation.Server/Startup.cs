@@ -22,7 +22,7 @@ namespace Constellation.Presentation.Server
         {
             Configuration = configuration;
 
-            LoggingConfiguration.SetupLogging(configuration);
+            LoggingConfiguration.SetupLogging(configuration, Serilog.Events.LogEventLevel.Warning);
         }
 
         public IConfiguration Configuration { get; }
