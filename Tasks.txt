@@ -20,11 +20,23 @@ STUDENTS:
 GRADES:
 	Migrate from ENUM to object
 
+FACULTY:
+	Migrate from ENUM to object
+
 ACTIONS:
 	Migrate to AccessRight concept
 
 ABSENCES:
 	Migrate Externally Explained to an actual Response record instead of top level fields
+
+SCHOOL CONTACTS:
+	Search function needs to be deduped before showing
+
+SCHOOL PORTAL:
+	Show list and tally of awards listings per student
+
+PARENT CONTACTS:
+	Report any empty email addresses to school administration for investigation
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
