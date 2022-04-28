@@ -144,21 +144,21 @@ namespace Constellation.Infrastructure.DependencyInjection
                         minimumFileLogLevel,
                         outputTemplate: "[{Timestamp} {Level:u3} {SourceContext}] {Message}\n{Exception}",
                         rollingInterval: RollingInterval.Day);
-                    config.Filter.ByExcluding(Matching.FromSource<IClassMonitorJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<IPermissionUpdateJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<ILessonNotificationsJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<IAttendanceReportJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<IAbsenceMonitorJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<IRollMarkingReportJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<ISchoolRegisterJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<IUserManagerJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<IEmailGateway>());
-                    config.Filter.ByExcluding(Matching.FromSource<IAuthService>());
-                    config.Filter.ByExcluding(Matching.FromSource<ILinkShortenerGateway>());
-                    config.Filter.ByExcluding(Matching.FromSource<ISMSGateway>());
-                    config.Filter.ByExcluding(Matching.FromSource<ITrackItSyncJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<ISentralFamilyDetailsSyncJob>());
-                    config.Filter.ByExcluding(Matching.FromSource<ISentralReportSyncJob>());
+                    //config.Filter.ByExcluding(Matching.FromSource<IClassMonitorJob>());
+                    //config.Filter.ByExcluding(Matching.FromSource<IPermissionUpdateJob>());
+                    //config.Filter.ByExcluding(Matching.FromSource<ILessonNotificationsJob>());
+                    //config.Filter.ByExcluding(Matching.FromSource<IAttendanceReportJob>());
+                    //config.Filter.ByExcluding(Matching.FromSource<IAbsenceMonitorJob>());
+                    //config.Filter.ByExcluding(Matching.FromSource<IRollMarkingReportJob>());
+                    //config.Filter.ByExcluding(Matching.FromSource<ISchoolRegisterJob>());
+                    //config.Filter.ByExcluding(Matching.FromSource<IUserManagerJob>());
+                    //config.Filter.ByExcluding(Matching.FromSource<IEmailGateway>());
+                    //config.Filter.ByExcluding(Matching.FromSource<IAuthService>());
+                    //config.Filter.ByExcluding(Matching.FromSource<ILinkShortenerGateway>());
+                    //config.Filter.ByExcluding(Matching.FromSource<ISMSGateway>());
+                    //config.Filter.ByExcluding(Matching.FromSource<ITrackItSyncJob>());
+                    //config.Filter.ByExcluding(Matching.FromSource<ISentralFamilyDetailsSyncJob>());
+                    //config.Filter.ByExcluding(Matching.FromSource<ISentralReportSyncJob>());
                 });
 
             if (!string.IsNullOrWhiteSpace(seqServer) && !string.IsNullOrWhiteSpace(seqKey))

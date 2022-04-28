@@ -1,5 +1,3 @@
-using Constellation.Application.Features.Admin.HangfireDashboard.Commands;
-using Constellation.Application.Features.Admin.HangfireDashboard.Queries;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
@@ -34,37 +32,15 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
 
         public async Task OnGet()
         {
-            var records = await _mediator.Send(new GetJobActivatorRecordsQuery());
-
-            foreach (var record in records)
-            {
-                JobStatuses.Add(new JobActivationDto
-                {
-                    Id = record.Id,
-                    JobName = record.JobName,
-                    IsActive = record.IsActive,
-                    InactiveUntil = record.InactiveUntil
-                });
-            }
-
-            JobStatuses.Add(new JobActivationDto
-            {
-                Id = Guid.Parse("ae24398b-2e82-4509-a743-ff60631215a2"),
-                JobName = "IAbsenceClassworkNotificationJob"
-            });
         }
 
         public async Task<IActionResult> OnPostToggleJob(Guid Id)
         {
-            await _mediator.Send(new ToggleJobActivationCommand { Id = Id });
-
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostRunJob(Guid Id)
         {
-            await _mediator.Send(new RunJobManuallyCommand { Id = Id });
-
             return RedirectToPage();
         }
     }

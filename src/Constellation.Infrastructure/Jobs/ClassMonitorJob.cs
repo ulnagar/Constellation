@@ -30,7 +30,7 @@ namespace Constellation.Infrastructure.Jobs
             _unitOfWork = unitOfWork;
         }
 
-        public async Task StartJob(bool automated)
+        public async Task StartJob(bool automated, CancellationToken token)
         {
             if (automated)
             {

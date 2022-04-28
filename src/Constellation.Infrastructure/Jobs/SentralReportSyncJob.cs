@@ -8,11 +8,12 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
-    public class SentralReportSyncJob : ISentralReportSyncJob, IScopedService
+    public class SentralReportSyncJob : ISentralReportSyncJob, IScopedService, IHangfireJob
     {
         private readonly IAppDbContext _context;
         private readonly IMediator _mediator;
@@ -27,7 +28,7 @@ namespace Constellation.Infrastructure.Jobs
             _gateway = gateway;
         }
 
-        public async Task StartJob(bool automated)
+        public async Task StartJob(bool automated, CancellationToken token)
         {
             if (automated)
             {

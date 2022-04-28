@@ -6,11 +6,12 @@ using Constellation.Infrastructure.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
-    public class SentralPhotoSyncJob : ISentralPhotoSyncJob, IScopedService
+    public class SentralPhotoSyncJob : ISentralPhotoSyncJob, IScopedService, IHangfireJob
     {
         private readonly IAppDbContext _context;
         private readonly ISentralGateway _gateway;
@@ -23,7 +24,7 @@ namespace Constellation.Infrastructure.Jobs
             _logger = logger;
         }
 
-        public async Task StartJob(bool automated)
+        public async Task StartJob(bool automated, CancellationToken token)
         {
             if (automated)
             {

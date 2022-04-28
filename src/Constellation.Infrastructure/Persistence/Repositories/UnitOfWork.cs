@@ -2,6 +2,7 @@
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Microsoft.AspNetCore.Identity;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Persistence.Repositories
@@ -86,6 +87,11 @@ namespace Constellation.Infrastructure.Persistence.Repositories
         public void Add<TEntity>(TEntity entity) where TEntity : class
         {
             _context.Set<TEntity>().Add(entity);
+        }
+
+        public async Task CompleteAsync(CancellationToken token = new CancellationToken())
+        {
+            await _context.SaveChangesAsync(token);
         }
 
         public async Task CompleteAsync()

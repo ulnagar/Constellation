@@ -15,11 +15,12 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
-    public class AbsenceProcessingJob : IAbsenceProcessingJob, IScopedService, IHangfireJob
+    public class AbsenceProcessingJob : IAbsenceProcessingJob, IScopedService
     {
         private readonly ISentralGateway _sentralService;
         private readonly IEmailService _emailService;
@@ -40,194 +41,199 @@ namespace Constellation.Infrastructure.Jobs
             _mediator = mediator;
         }
 
-        public async Task<ICollection<Absence>> StartJob(StudentForAbsenceScan student)
+        public async Task<ICollection<Absence>> StartJob(StudentForAbsenceScan student, CancellationToken cancellationToken)
         {
-            _student = student;
-            if (_appSettings == null)
-                _appSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
-
-            _logger.LogInformation(" Scanning student {student} ({grade})", student.DisplayName, student.CurrentGrade);
-
-            var returnAbsences = new List<Absence>();
-
-            var sentralId = student.SentralStudentId;
-            if (string.IsNullOrWhiteSpace(sentralId))
+            while (!cancellationToken.IsCancellationRequested)
             {
-                // This student doesn't have an identified sentral id!
-                student.SentralStudentId = await _sentralService.GetSentralStudentIdFromSRN(student.StudentId, ((int)student.CurrentGrade).ToString());
+                _student = student;
+                if (_appSettings == null)
+                    _appSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
-                sentralId = student.SentralStudentId;
+                _logger.LogInformation(" Scanning student {student} ({grade})", student.DisplayName, student.CurrentGrade);
 
+                var returnAbsences = new List<Absence>();
+
+                var sentralId = student.SentralStudentId;
                 if (string.IsNullOrWhiteSpace(sentralId))
                 {
-                    // Send warning email to Technology Support Team
-                    await _emailService.SendAdminAbsenceSentralAlert(student.DisplayName);
-                    return returnAbsences;
+                    // This student doesn't have an identified sentral id!
+                    student.SentralStudentId = await _sentralService.GetSentralStudentIdFromSRN(student.StudentId, ((int)student.CurrentGrade).ToString());
+
+                    sentralId = student.SentralStudentId;
+
+                    if (string.IsNullOrWhiteSpace(sentralId))
+                    {
+                        // Send warning email to Technology Support Team
+                        await _emailService.SendAdminAbsenceSentralAlert(student.DisplayName);
+                        return returnAbsences;
+                    }
                 }
-            }
 
-            if (!_excludedDates.Any())
-                _excludedDates = await _sentralService.GetExcludedDatesFromCalendar(DateTime.Today.Year.ToString());
+                if (!_excludedDates.Any())
+                    _excludedDates = await _sentralService.GetExcludedDatesFromCalendar(DateTime.Today.Year.ToString());
 
-            var pxpAbsences = await _sentralService.GetAbsenceDataAsync(sentralId);
-            var attendanceAbsences = await _sentralService.GetPartialAbsenceDataAsync(sentralId);
+                var pxpAbsences = await _sentralService.GetAbsenceDataAsync(sentralId);
+                var attendanceAbsences = await _sentralService.GetPartialAbsenceDataAsync(sentralId);
 
-            foreach (var attendAbsence in attendanceAbsences.Where(aa => !aa.WholeDay))
-            {
-                var absenceLength = attendAbsence.EndTime.Subtract(attendAbsence.StartTime).TotalMinutes;
-
-                attendAbsence.MinutesAbsent = Convert.ToInt32(absenceLength);
-            }
-
-            if (pxpAbsences == null || pxpAbsences.Count == 0)
-                return returnAbsences;
-
-            var groupedPxpAbsences = pxpAbsences.GroupBy(a => a.Date.Date);
-
-            foreach (var group in groupedPxpAbsences)
-            {
-                if (group.Key.Date < GetEarliestDate())
-                    continue;
-
-                // Get the timetable for the day
-                // Given the date, figure out what day of the cycle we are looking at.
-                var cycleDay = group.Key.Date.GetDayNumber();
-
-                // Get all enrolments for this student that were active on that date using the day of the cycle we identified above
-                // Use Mediator
-                var courseEnrolments = await _mediator.Send(new GetStudentEnrolmentsForAbsenceScanQuery { StudentId = student.StudentId, InstanceDate = group.Key.Date, PeriodDay = cycleDay });
-
-                foreach (var courseEnrolment in courseEnrolments)
+                foreach (var attendAbsence in attendanceAbsences.Where(aa => !aa.WholeDay))
                 {
-                    if (!courseEnrolment.Name.Contains(group.First().ClassName))
-                    {
-                        // The PxP absence is for a different class than the courseEnrolment
-                        // therefore it should not be processed here.
-                        //_logger.LogInformation($"-- Enrolment Class {courseEnrolment.Offering.Name} does not match PxP Absence Class {group.First().ClassName}");
+                    var absenceLength = attendAbsence.EndTime.Subtract(attendAbsence.StartTime).TotalMinutes;
 
-                        continue;
-                    }
-
-                    // Get list of periods for this class on this day
-                    // Use Mediator
-                    var periods = await _mediator.Send(new GetOfferingPeriodsForAbsenceScanQuery { OfferingId = courseEnrolment.Id, InstanceDate = group.Key.Date, PeriodDay = cycleDay });
-
-                    // Find all contiguous periods
-                    var periodGroups = periods.GroupConsecutive();
-
-                    foreach (var periodGroup in periodGroups)
-                    {
-                        var coursePeriods = periodGroup.OrderBy(period => period.StartTime).ToList();
-
-                        var totalBlockMinutes = coursePeriods.Select(period => (int)period.EndTime.Subtract(period.StartTime).TotalMinutes).Sum();
-
-                        // This should be a single contiguous block of periods for the day.
-                        // Find all absences from the day (group) that occur during this periodGroup
-                        var absencesToProcess = group.Where(absence => coursePeriods.Any(period => period.GetPeriodDescriptor() == absence.Period)).ToList();
-
-                        if (absencesToProcess.Count == 0)
-                            continue;
-
-                        // Ignore absences from TODAY only
-                        if (absencesToProcess.First().Date.Date == DateTime.Today.Date)
-                            continue;
-
-                        var totalAbsenceTime = 0;
-
-                        foreach (var absenceTime in absencesToProcess.ToList())
-                        {
-                            if (absenceTime.Type == SentralPeriodAbsenceDto.Whole)
-                            {
-                                var period = coursePeriods.First(timetableperiod => timetableperiod.GetPeriodDescriptor() == absenceTime.Period);
-                                absenceTime.MinutesAbsent = (int)period.EndTime.Subtract(period.StartTime).TotalMinutes;
-                            }
-
-                            totalAbsenceTime += absenceTime.MinutesAbsent;
-                        }
-
-                        if (totalBlockMinutes == totalAbsenceTime)
-                        {
-                            // These absences grouped together form a Whole Absence
-                            var absenceRecord = await ProcessWholeAbsence(absencesToProcess, attendanceAbsences, courseEnrolment.Id, periodGroup.ToList(), totalAbsenceTime);
-
-                            if (absenceRecord != null)
-                            {
-                                returnAbsences.Add(absenceRecord);
-                            }
-
-                            continue;
-                        }
-
-                        // These absences cannot be grouped together, therefore are partial
-                        var detectedAbsences = new List<Absence>();
-
-                        // If the absence is too early, skip
-                        if (absencesToProcess.First().Date < GetEarliestDate())
-                            continue;
-
-                        // If there are no AttendanceAbsences to match to, Partials cannot be created, Skip
-                        if (attendanceAbsences.Count == 0)
-                            continue;
-
-                        foreach (var absence in absencesToProcess)
-                        {
-                            var absenceRecord = ProcessPartialAbsence(absence, attendanceAbsences, courseEnrolment.Id, periodGroup.ToList());
-
-                            if (absenceRecord != null)
-                                detectedAbsences.Add(absenceRecord);
-                        }
-
-                        // Detect consecutive absences and combine
-                        foreach (var resource in detectedAbsences.OrderBy(absence => absence.StartTime).ToList())
-                        {
-                            // If no other detected absence starts when this one finishes, it is not contiguous with anything else
-                            if (detectedAbsences.All(absence => absence.StartTime != resource.EndTime))
-                                continue;
-
-                            var firstAbsence = resource;
-                            var secondAbsence = detectedAbsences.First(absence => absence.StartTime == firstAbsence.EndTime);
-
-                            // Ignore if only one of the absences has been detected as explained
-                            if ((resource.Explained && !secondAbsence.Explained) || (!resource.Explained && secondAbsence.Explained))
-                                continue;
-
-                            // Remove the second absence and update the first to cover the extended time frame.
-                            detectedAbsences.Remove(secondAbsence);
-
-                            firstAbsence.AbsenceReason = FindWorstAbsenceReason(new List<string> { firstAbsence.AbsenceReason, secondAbsence.AbsenceReason });
-
-                            firstAbsence.EndTime = secondAbsence.EndTime;
-                            firstAbsence.AbsenceTimeframe = $"{firstAbsence.StartTime.As12HourTime()} - {secondAbsence.EndTime.As12HourTime()}";
-                            firstAbsence.AbsenceLength += secondAbsence.AbsenceLength;
-                        }
-
-                        foreach (var newAbsence in detectedAbsences.Where(absence => absence.AbsenceLength > _appSettings.PartialLengthThreshold).ToList())
-                        {
-                            // Check database for all matching absences already known
-                            if (await IsNewAbsence(newAbsence, student, _appSettings.DiscountedPartialReasons))
-                            {
-                                // Add the absence to the database
-                                if (newAbsence.Explained)
-                                    _logger.LogInformation("  Found new externally explained {Type} absence on {Date} - {PeriodName}", newAbsence.Type, newAbsence.Date.ToShortDateString(), newAbsence.PeriodName);
-                                else
-                                    _logger.LogInformation("  Found new unexplained {Type} absence on {Date} - {PeriodName} - {AbsenceReason}", newAbsence.Type, newAbsence.Date.ToShortDateString(), newAbsence.PeriodName, newAbsence.AbsenceReason);
-
-                                returnAbsences.Add(newAbsence);
-                            }
-                        }
-                    }
-
-                    periods?.Clear();
+                    attendAbsence.MinutesAbsent = Convert.ToInt32(absenceLength);
                 }
 
-                courseEnrolments?.Clear();
+                if (pxpAbsences == null || pxpAbsences.Count == 0)
+                    return returnAbsences;
+
+                var groupedPxpAbsences = pxpAbsences.GroupBy(a => a.Date.Date);
+
+                foreach (var group in groupedPxpAbsences)
+                {
+                    if (group.Key.Date < GetEarliestDate())
+                        continue;
+
+                    // Get the timetable for the day
+                    // Given the date, figure out what day of the cycle we are looking at.
+                    var cycleDay = group.Key.Date.GetDayNumber();
+
+                    // Get all enrolments for this student that were active on that date using the day of the cycle we identified above
+                    // Use Mediator
+                    var courseEnrolments = await _mediator.Send(new GetStudentEnrolmentsForAbsenceScanQuery { StudentId = student.StudentId, InstanceDate = group.Key.Date, PeriodDay = cycleDay });
+
+                    foreach (var courseEnrolment in courseEnrolments)
+                    {
+                        if (!courseEnrolment.Name.Contains(group.First().ClassName))
+                        {
+                            // The PxP absence is for a different class than the courseEnrolment
+                            // therefore it should not be processed here.
+                            //_logger.LogInformation($"-- Enrolment Class {courseEnrolment.Offering.Name} does not match PxP Absence Class {group.First().ClassName}");
+
+                            continue;
+                        }
+
+                        // Get list of periods for this class on this day
+                        // Use Mediator
+                        var periods = await _mediator.Send(new GetOfferingPeriodsForAbsenceScanQuery { OfferingId = courseEnrolment.Id, InstanceDate = group.Key.Date, PeriodDay = cycleDay });
+
+                        // Find all contiguous periods
+                        var periodGroups = periods.GroupConsecutive();
+
+                        foreach (var periodGroup in periodGroups)
+                        {
+                            var coursePeriods = periodGroup.OrderBy(period => period.StartTime).ToList();
+
+                            var totalBlockMinutes = coursePeriods.Select(period => (int)period.EndTime.Subtract(period.StartTime).TotalMinutes).Sum();
+
+                            // This should be a single contiguous block of periods for the day.
+                            // Find all absences from the day (group) that occur during this periodGroup
+                            var absencesToProcess = group.Where(absence => coursePeriods.Any(period => period.GetPeriodDescriptor() == absence.Period)).ToList();
+
+                            if (absencesToProcess.Count == 0)
+                                continue;
+
+                            // Ignore absences from TODAY only
+                            if (absencesToProcess.First().Date.Date == DateTime.Today.Date)
+                                continue;
+
+                            var totalAbsenceTime = 0;
+
+                            foreach (var absenceTime in absencesToProcess.ToList())
+                            {
+                                if (absenceTime.Type == SentralPeriodAbsenceDto.Whole)
+                                {
+                                    var period = coursePeriods.First(timetableperiod => timetableperiod.GetPeriodDescriptor() == absenceTime.Period);
+                                    absenceTime.MinutesAbsent = (int)period.EndTime.Subtract(period.StartTime).TotalMinutes;
+                                }
+
+                                totalAbsenceTime += absenceTime.MinutesAbsent;
+                            }
+
+                            if (totalBlockMinutes == totalAbsenceTime)
+                            {
+                                // These absences grouped together form a Whole Absence
+                                var absenceRecord = await ProcessWholeAbsence(absencesToProcess, attendanceAbsences, courseEnrolment.Id, periodGroup.ToList(), totalAbsenceTime);
+
+                                if (absenceRecord != null)
+                                {
+                                    returnAbsences.Add(absenceRecord);
+                                }
+
+                                continue;
+                            }
+
+                            // These absences cannot be grouped together, therefore are partial
+                            var detectedAbsences = new List<Absence>();
+
+                            // If the absence is too early, skip
+                            if (absencesToProcess.First().Date < GetEarliestDate())
+                                continue;
+
+                            // If there are no AttendanceAbsences to match to, Partials cannot be created, Skip
+                            if (attendanceAbsences.Count == 0)
+                                continue;
+
+                            foreach (var absence in absencesToProcess)
+                            {
+                                var absenceRecord = ProcessPartialAbsence(absence, attendanceAbsences, courseEnrolment.Id, periodGroup.ToList());
+
+                                if (absenceRecord != null)
+                                    detectedAbsences.Add(absenceRecord);
+                            }
+
+                            // Detect consecutive absences and combine
+                            foreach (var resource in detectedAbsences.OrderBy(absence => absence.StartTime).ToList())
+                            {
+                                // If no other detected absence starts when this one finishes, it is not contiguous with anything else
+                                if (detectedAbsences.All(absence => absence.StartTime != resource.EndTime))
+                                    continue;
+
+                                var firstAbsence = resource;
+                                var secondAbsence = detectedAbsences.First(absence => absence.StartTime == firstAbsence.EndTime);
+
+                                // Ignore if only one of the absences has been detected as explained
+                                if ((resource.Explained && !secondAbsence.Explained) || (!resource.Explained && secondAbsence.Explained))
+                                    continue;
+
+                                // Remove the second absence and update the first to cover the extended time frame.
+                                detectedAbsences.Remove(secondAbsence);
+
+                                firstAbsence.AbsenceReason = FindWorstAbsenceReason(new List<string> { firstAbsence.AbsenceReason, secondAbsence.AbsenceReason });
+
+                                firstAbsence.EndTime = secondAbsence.EndTime;
+                                firstAbsence.AbsenceTimeframe = $"{firstAbsence.StartTime.As12HourTime()} - {secondAbsence.EndTime.As12HourTime()}";
+                                firstAbsence.AbsenceLength += secondAbsence.AbsenceLength;
+                            }
+
+                            foreach (var newAbsence in detectedAbsences.Where(absence => absence.AbsenceLength > _appSettings.PartialLengthThreshold).ToList())
+                            {
+                                // Check database for all matching absences already known
+                                if (await IsNewAbsence(newAbsence, student, _appSettings.DiscountedPartialReasons))
+                                {
+                                    // Add the absence to the database
+                                    if (newAbsence.Explained)
+                                        _logger.LogInformation("  Found new externally explained {Type} absence on {Date} - {PeriodName}", newAbsence.Type, newAbsence.Date.ToShortDateString(), newAbsence.PeriodName);
+                                    else
+                                        _logger.LogInformation("  Found new unexplained {Type} absence on {Date} - {PeriodName} - {AbsenceReason}", newAbsence.Type, newAbsence.Date.ToShortDateString(), newAbsence.PeriodName, newAbsence.AbsenceReason);
+
+                                    returnAbsences.Add(newAbsence);
+                                }
+                            }
+                        }
+
+                        periods?.Clear();
+                    }
+
+                    courseEnrolments?.Clear();
+                }
+
+                pxpAbsences = null;
+                attendanceAbsences = null;
+                _student = null;
+
+                return returnAbsences;
             }
 
-            pxpAbsences = null;
-            attendanceAbsences = null;
-            _student = null;
-
-            return returnAbsences;
+            return new List<Absence>();
         }
 
         private DateTime GetEarliestDate()

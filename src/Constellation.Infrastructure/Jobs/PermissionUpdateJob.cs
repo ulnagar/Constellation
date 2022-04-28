@@ -5,6 +5,7 @@ using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
@@ -28,7 +29,7 @@ namespace Constellation.Infrastructure.Jobs
             _logger = logger;
         }
 
-        public async Task StartJob(bool automated)
+        public async Task StartJob(bool automated, CancellationToken token)
         {
             if (automated)
             {

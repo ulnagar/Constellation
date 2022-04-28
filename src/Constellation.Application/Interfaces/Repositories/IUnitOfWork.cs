@@ -1,4 +1,5 @@
 ﻿using Constellation.Core.Models;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
@@ -38,6 +39,7 @@ namespace Constellation.Application.Interfaces.Repositories
 
         void Remove<TEntity>(TEntity entity) where TEntity : class;
         void Add<TEntity>(TEntity entity) where TEntity : class;
+        Task CompleteAsync(CancellationToken token = new CancellationToken());
         Task CompleteAsync();
         void ClearTrackerDb();
     }

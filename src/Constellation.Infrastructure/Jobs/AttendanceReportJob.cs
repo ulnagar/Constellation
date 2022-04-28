@@ -17,6 +17,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Mail;
 using System.Net.Mime;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
@@ -45,7 +46,7 @@ namespace Constellation.Infrastructure.Jobs
             _mediator = mediator;
         }
 
-        public async Task StartJob(bool automated)
+        public async Task StartJob(bool automated, CancellationToken token)
         {
             if (automated)
             {

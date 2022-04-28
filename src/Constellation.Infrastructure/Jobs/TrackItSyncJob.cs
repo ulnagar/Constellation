@@ -8,11 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
-    public class TrackItSyncJob : ITrackItSyncJob, IScopedService
+    public class TrackItSyncJob : ITrackItSyncJob, IScopedService, IHangfireJob
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly TrackItContext _tiContext;
@@ -27,7 +28,7 @@ namespace Constellation.Infrastructure.Jobs
             _logger = logger;
         }
 
-        public async Task StartJob(bool automated)
+        public async Task StartJob(bool automated, CancellationToken token)
         {
             if (automated)
             {

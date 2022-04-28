@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
@@ -39,62 +40,55 @@ namespace Constellation.Infrastructure.Jobs
             _mediator = mediator;
         }
 
-        public async Task StartJob(bool automated)
+        public async Task StartJob(Guid jobId, CancellationToken cancellationToken)
         {
-            if (automated)
+            _logger.LogInformation("{id}: Starting Absence Monitor Scan.", jobId);
+
+            while (!cancellationToken.IsCancellationRequested)
             {
-                var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IAbsenceMonitorJob));
-                if (jobStatus == null || !jobStatus.IsActive)
+                foreach (Grade grade in Enum.GetValues(typeof(Grade)))
                 {
-                    _logger.LogInformation("Stopped due to job being set inactive.");
-                    return;
-                }
-            }
+                    _logger.LogInformation("{id}: Getting students from {grade}", jobId, grade);
 
-            _logger.LogInformation("Starting Absence Monitor Scan.");
-
-            foreach (Grade grade in Enum.GetValues(typeof(Grade)))
-            {
-                _logger.LogInformation("Getting students from {grade}", grade);
-
-                var students = await _mediator.Send(new GetStudentsForAbsenceScanQuery { Grade = grade });
+                    var students = await _mediator.Send(new GetStudentsForAbsenceScanQuery { Grade = grade }, cancellationToken);
                 
-                students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+                    students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
 
-                _logger.LogInformation("Found {students} students to scan.", students.Count);
+                    _logger.LogInformation("{id}: Found {students} students to scan.", jobId, students.Count);
 
-                foreach (var student in students)
-                {
-                    var absences = await _absenceProcessor.StartJob(student);
-
-                    if (absences.Any())
+                    foreach (var student in students)
                     {
-                        await _mediator.Send(new AddNewStudentAbsencesCommand { Absences = absences });
+                        var absences = await _absenceProcessor.StartJob(student, cancellationToken);
 
-                        if (string.IsNullOrWhiteSpace(student.SentralStudentId))
-                            continue;
+                        if (absences.Any())
+                        {
+                            await _mediator.Send(new AddNewStudentAbsencesCommand { Absences = absences }, cancellationToken);
 
-                        await SendStudentNotifications(student);
-                        await SendParentNotifications(student);
+                            if (string.IsNullOrWhiteSpace(student.SentralStudentId))
+                                continue;
+
+                            await SendStudentNotifications(jobId, student);
+                            await SendParentNotifications(jobId, student);
+                        }
+
+                        if (DateTime.Now.DayOfWeek == DayOfWeek.Monday)
+                        {
+                            await SendParentDigests(jobId, student);
+                            await SendCoordinatorDigests(jobId, student);
+                        }
+
+                        absences?.Clear();
+                        //_unitOfWork.ClearTrackerDb();
                     }
-
-                    if (DateTime.Now.DayOfWeek == DayOfWeek.Monday)
-                    {
-                        await SendParentDigests(student);
-                        await SendCoordinatorDigests(student);
-                    }
-
-                    absences?.Clear();
-                    //_unitOfWork.ClearTrackerDb();
                 }
+
+                await _classworkNotifier.StartJob(DateTime.Today);
+
+                await _unitOfWork.CompleteAsync(cancellationToken);
             }
-
-            await _classworkNotifier.StartJob(DateTime.Today);
-
-            await _unitOfWork.CompleteAsync();
         }
 
-        private async Task SendCoordinatorDigests(StudentForAbsenceScan student)
+        private async Task SendCoordinatorDigests(Guid jobId, StudentForAbsenceScan student)
         {
             var coordinatorDigestAbsences = await _mediator.Send(new GetUnexplainedAbsencesForDigestQuery { StudentId = student.StudentId, Type = Absence.Whole, AgeInWeeks = 2 });
 
@@ -115,13 +109,13 @@ namespace Constellation.Infrastructure.Jobs
                         MessageId = message.id
                     });
 
-                _logger.LogInformation("  School digest sent to {School} for {student}", student.SchoolName, student.DisplayName);
+                _logger.LogInformation("{id}: School digest sent to {School} for {student}", jobId, student.SchoolName, student.DisplayName);
 
                 coordinatorDigestAbsences?.Clear();
             }
         }
 
-        private async Task SendParentDigests(StudentForAbsenceScan student)
+        private async Task SendParentDigests(Guid jobId, StudentForAbsenceScan student)
         {
             var parentDigestAbsences = await _mediator.Send(new GetUnexplainedAbsencesForDigestQuery { StudentId = student.StudentId, Type = Absence.Whole, AgeInWeeks = 1 });
 
@@ -148,7 +142,7 @@ namespace Constellation.Infrastructure.Jobs
 
                     foreach (var address in emailAddresses)
                     {
-                        _logger.LogInformation("  Parent digest sent to {address} for {student}", address, student.DisplayName);
+                        _logger.LogInformation("{id}: Parent digest sent to {address} for {student}", jobId, address, student.DisplayName);
                     }
                 }
                 else
@@ -160,7 +154,7 @@ namespace Constellation.Infrastructure.Jobs
             }
         }
 
-        private async Task SendParentNotifications(StudentForAbsenceScan student)
+        private async Task SendParentNotifications(Guid jobId, StudentForAbsenceScan student)
         {
             var phoneNumbers = await _mediator.Send(new GetStudentFamilyMobileNumbersQuery { StudentId = student.StudentId });
             var emailAddresses = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = student.StudentId });
@@ -181,7 +175,7 @@ namespace Constellation.Infrastructure.Jobs
                         if (sentMessages == null)
                         {
                             // SMS Gateway failed. Send via email instead.
-                            _logger.LogWarning("  SMS Sending Failed! Fallback to Email notifications.");
+                            _logger.LogWarning("{id}: SMS Sending Failed! Fallback to Email notifications.", jobId);
 
                             if (emailAddresses.Any())
                             {
@@ -198,11 +192,11 @@ namespace Constellation.Infrastructure.Jobs
                                     });
 
                                 foreach (var email in emailAddresses)
-                                    _logger.LogInformation("  Message sent via Email to {email} for Whole Absence on {Date}", email, group.Key.Date.ToShortDateString());
+                                    _logger.LogInformation("{id}: Message sent via Email to {email} for Whole Absence on {Date}", jobId, email, group.Key.Date.ToShortDateString());
                             }
                             else
                             {
-                                _logger.LogError("  Email addresses not found! Parents have not been notified!");
+                                _logger.LogError("{id}: Email addresses not found! Parents have not been notified!", jobId);
                             }
                         }
 
@@ -220,7 +214,7 @@ namespace Constellation.Infrastructure.Jobs
                                 });
 
                             foreach (var number in phoneNumbers)
-                                _logger.LogInformation("  Message sent via SMS to {number} for Whole Absence on {Date}", number, group.Key.Date.ToShortDateString());
+                                _logger.LogInformation("{id}: Message sent via SMS to {number} for Whole Absence on {Date}", jobId, number, group.Key.Date.ToShortDateString());
                         }
                     }
                     else if (emailAddresses.Any())
@@ -238,7 +232,7 @@ namespace Constellation.Infrastructure.Jobs
                             });
 
                         foreach (var email in emailAddresses)
-                            _logger.LogInformation("  Message sent via Email to {email} for Whole Absence on {Date}", email, group.Key.Date.ToShortDateString());
+                            _logger.LogInformation("{id}: Message sent via Email to {email} for Whole Absence on {Date}", jobId, email, group.Key.Date.ToShortDateString());
                     }
                     else
                     {
@@ -252,7 +246,7 @@ namespace Constellation.Infrastructure.Jobs
             recentWholeAbsences?.Clear();
         }
 
-        private async Task SendStudentNotifications(StudentForAbsenceScan student)
+        private async Task SendStudentNotifications(Guid jobId, StudentForAbsenceScan student)
         {
             var recentPartialAbsences = await _mediator.Send(new GetRecentAbsencesForStudentQuery { StudentId = student.StudentId, AbsenceType = Absence.Partial });
 
@@ -276,7 +270,7 @@ namespace Constellation.Infrastructure.Jobs
                 }
 
                 foreach (var email in recipients)
-                    _logger.LogInformation("  Message sent via Email to {email} for Partial Absence on {Date}", email, recentPartialAbsences.First().Date.ToShortDateString());
+                    _logger.LogInformation("{id}: Message sent via Email to {email} for Partial Absence on {Date}", jobId, email, recentPartialAbsences.First().Date.ToShortDateString());
 
                 recentPartialAbsences?.Clear();
             }

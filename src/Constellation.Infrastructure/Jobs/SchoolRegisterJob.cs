@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Infrastructure.DependencyInjection;
 using MediatR;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
@@ -23,7 +24,7 @@ namespace Constellation.Infrastructure.Jobs
             _unitOfWork = unitOfWork;
         }
 
-        public async Task StartJob(bool automated)
+        public async Task StartJob(bool automated, CancellationToken token)
         {
             if (automated)
             {

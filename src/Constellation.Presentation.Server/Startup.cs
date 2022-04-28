@@ -22,7 +22,7 @@ namespace Constellation.Presentation.Server
         {
             Configuration = configuration;
 
-            LoggingConfiguration.SetupLogging(configuration, Serilog.Events.LogEventLevel.Warning);
+            LoggingConfiguration.SetupLogging(configuration, Serilog.Events.LogEventLevel.Debug);
         }
 
         public IConfiguration Configuration { get; }
@@ -33,19 +33,24 @@ namespace Constellation.Presentation.Server
             services.AddInfrastructure(Configuration);
             services.AddMainAppAuthentication(Configuration);
 
+            services.AddHangfire((provider, configuration) => configuration
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(Configuration.GetConnectionString("Hangfire"), new SqlServerStorageOptions
+                {
+                    CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                    SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                    QueuePollInterval = TimeSpan.Zero,
+                    UseRecommendedIsolationLevel = true,
+                    DisableGlobalLocks = true
+                }));
+            GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
+
+            services.AddHangfireServer();
+
             services.AddRazorPages();
             services.AddMvc().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
-
-            services.AddHangfire(c => c.UseSqlServerStorage(Configuration.GetConnectionString("Hangfire")));
-            GlobalConfiguration.Configuration.UseSqlServerStorage(Configuration.GetConnectionString("Hangfire"), new SqlServerStorageOptions
-            {
-                CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
-                SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-                QueuePollInterval = TimeSpan.Zero,
-                UseRecommendedIsolationLevel = true,
-                DisableGlobalLocks = true
-            });
-            services.AddHangfireServer();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -82,7 +87,7 @@ namespace Constellation.Presentation.Server
                 }
             });
 
-            var jobManager = new HangfireJobRegistration(unitOfWork, manager);
+            var jobManager = new HangfireJobRegistration(manager);
             jobManager.RegisterJobs();
 
             //IdentityDefaults.SeedRoles(roleManager);
