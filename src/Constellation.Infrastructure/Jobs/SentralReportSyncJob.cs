@@ -2,11 +2,10 @@
 using Constellation.Application.Features.Jobs.SentralReportSync.Queries;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Infrastructure.DependencyInjection;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,32 +14,20 @@ namespace Constellation.Infrastructure.Jobs
 {
     public class SentralReportSyncJob : ISentralReportSyncJob, IScopedService, IHangfireJob
     {
-        private readonly IAppDbContext _context;
         private readonly IMediator _mediator;
         private readonly ILogger<ISentralReportSyncJob> _logger;
         private readonly ISentralGateway _gateway;
 
-        public SentralReportSyncJob(IAppDbContext context, IMediator mediator, ILogger<ISentralReportSyncJob> logger, ISentralGateway gateway)
+        public SentralReportSyncJob(IMediator mediator, ILogger<ISentralReportSyncJob> logger, ISentralGateway gateway)
         {
-            _context = context;
             _mediator = mediator;
             _logger = logger;
             _gateway = gateway;
         }
 
-        public async Task StartJob(bool automated, CancellationToken token)
-        {
-            if (automated)
-            {
-                var jobStatus = await _context.JobActivations.FirstOrDefaultAsync(job => job.JobName == nameof(ISentralReportSyncJob));
-                if (jobStatus == null || !jobStatus.IsActive)
-                {
-                    _logger.LogInformation("Stopped due to job being set inactive.");
-                    return;
-                }
-            }
-
-            _logger.LogInformation("Starting Sentral Student Report Scan.");
+        public async Task StartJob(Guid jobId, CancellationToken token)
+        { 
+            _logger.LogInformation("{id}: Starting Sentral Student Report Scan.", jobId);
 
             //foreach student
             // download list of reports
@@ -51,26 +38,26 @@ namespace Constellation.Infrastructure.Jobs
 
             var students = await _mediator.Send(new GetStudentsForReportDownloadQuery());
 
-            _logger.LogInformation("Found {students} students to scan", students.Count());
+            _logger.LogInformation("{id}: Found {students} students to scan", jobId, students.Count());
 
             foreach (var student in students.OrderBy(student => student.Grade).ThenBy(student => student.LastName))
             {
-                _logger.LogInformation("Scanning {student} ({grade})", student.Name, student.Grade);
+                _logger.LogInformation("{id}: Scanning {student} ({grade})", jobId, student.Name, student.Grade);
 
                 var reportList = await _gateway.GetStudentReportList(student.SentralStudentId);
 
-                _logger.LogInformation("Found {reports} reports", reportList.Count());
+                _logger.LogInformation("{id}: Found {reports} reports for {student} ({grade})", jobId, reportList.Count(), student.Name, student.Grade);
 
                 foreach (var report in reportList)
                 {
-                    _logger.LogInformation("Checking report #{publishId} ({reportName})", report.PublishId, report.Name);
+                    _logger.LogInformation("{id}: Checking report #{publishId} ({reportName}) for {student} ({grade})", jobId, report.PublishId, report.Name, student.Name, student.Grade);
 
                     var existingReport = student.Reports.FirstOrDefault(r => r.Year == report.Year && r.ReportingPeriod == report.Name);
 
                     if (existingReport == null)
                     {
                         // Does not exist, save it to the database.
-                        _logger.LogInformation("Report does not exist in database, adding");
+                        _logger.LogInformation("{id}: Report #{publishId} ({reportName}) for {student} ({grade}) does not exist in database, adding", jobId, report.PublishId, report.Name, student.Name, student.Grade);
 
                         var file = await _gateway.GetStudentReport(student.SentralStudentId, report.PublishId);
 
@@ -84,15 +71,14 @@ namespace Constellation.Infrastructure.Jobs
                             FileName = $"{student.LastName}, {student.FirstName} - {report.Name}.pdf"
                         };
 
-                        await _mediator.Send(command);
+                        await _mediator.Send(command, token);
                     }
                     else if (existingReport.PublishId != report.PublishId)
                     {
                         // Exists in database but is older.
                         // Remove the older version and save the newer version.
 
-                        _logger.LogInformation("Existing version found in database: Old Version {old} - New Version {new}", existingReport.PublishId, report.PublishId);
-                        _logger.LogInformation("Replacing existing report");
+                        _logger.LogInformation("{id}: Existing version of report #{publishId} ({reportName}) for {student} ({grade}) found in database and will be replaced: Old Version {old} - New Version {new}", jobId, report.PublishId, report.Name, student.Name, student.Grade, existingReport.PublishId, report.PublishId);
 
                         var file = await _gateway.GetStudentReport(student.SentralStudentId, report.PublishId);
 
@@ -103,11 +89,11 @@ namespace Constellation.Infrastructure.Jobs
                             File = file
                         };
 
-                        await _mediator.Send(command);
+                        await _mediator.Send(command, token);
                     }
                     else
                     {
-                        _logger.LogInformation("Report already exists and does not need updating");
+                        _logger.LogInformation("{id}: Report #{publishId} ({reportName}) for {student} ({grade}) already exists and does not need updating", jobId, report.PublishId, report.Name, student.Name, student.Grade);
                     }
                 }
             }

@@ -4,6 +4,7 @@ using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +17,8 @@ namespace Constellation.Infrastructure.Jobs
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<IUserManagerJob> _logger;
 
+        private Guid JobId { get; set; }
+
         public UserManagerJob(UserManager<AppUser> userManager, IUnitOfWork unitOfWork,
             ILogger<IUserManagerJob> logger)
         {
@@ -24,27 +27,17 @@ namespace Constellation.Infrastructure.Jobs
             _logger = logger;
         }
 
-        public async Task StartJob(bool automated, CancellationToken token)
+        public async Task StartJob(Guid jobId, CancellationToken token)
         {
-            if (automated)
-            {
-                var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IUserManagerJob));
-                if (jobStatus == null || !jobStatus.IsActive)
-                {
-                    _logger.LogWarning("Stopped due to job being set inactive.");
-                    return;
-                }
-            }
-
-            _logger.LogInformation("Starting job");
+            _logger.LogInformation("{id}: Starting job", jobId);
             var staff = await _unitOfWork.Staff.ForListAsync(staff => !staff.IsDeleted);
-            _logger.LogInformation("Found {count} Staff Members to check...", staff.Count);
+            _logger.LogInformation("{id}: Found {count} Staff Members to check...", jobId, staff.Count);
 
             foreach (var member in staff)
                 await CreateUser(member.EmailAddress, member.FirstName, member.LastName, AuthRoles.User);
 
             var contacts = await _unitOfWork.SchoolContacts.AllWithActiveRoleAsync();
-            _logger.LogInformation("Found {count} School Contacts to check...", contacts.Count);
+            _logger.LogInformation("{id}: Found {count} School Contacts to check...", jobId, contacts.Count);
 
             foreach (var contact in contacts)
                 await CreateUser(contact.EmailAddress, contact.FirstName, contact.LastName, AuthRoles.LessonsUser);
@@ -52,16 +45,16 @@ namespace Constellation.Infrastructure.Jobs
 
         private async Task CreateUser(string emailAddress, string firstName, string lastName, string defaultRole)
         {
-            _logger.LogInformation("Checking {emailAddress}", emailAddress);
+            _logger.LogInformation("{id}: Checking {emailAddress}", JobId, emailAddress);
             var existingUser = await _userManager.FindByEmailAsync(emailAddress);
 
             if (existingUser != null)
             {
-                _logger.LogInformation(" User already exists!");
+                _logger.LogInformation("{id}: {emailAddress}: User already exists!", JobId, emailAddress);
             }
             else
             {
-                _logger.LogInformation(" User not found. Creating user.");
+                _logger.LogInformation("{id}: {emailAddress}: User not found. Creating user.", JobId, emailAddress);
 
                 var user = new AppUser
                 {
@@ -75,36 +68,36 @@ namespace Constellation.Infrastructure.Jobs
 
                 if (!result.Succeeded)
                 {
-                    _logger.LogInformation("  FAILED!!!!!");
+                    _logger.LogWarning("{id}: {emailAddress}: Failed to create user", JobId, emailAddress);
 
                     return;
                 }
 
-                _logger.LogInformation("  Success!");
+                _logger.LogInformation("{id}: {emailAddress}: Successfully created user", JobId, emailAddress);
 
-                _logger.LogInformation(" Confirming email address.");
+                _logger.LogInformation("{id}: {emailAddress}: Confirming email address.", JobId, emailAddress);
                 // Confirm email to allow login
                 var adminEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 var emailConfirmSuccss = await _userManager.ConfirmEmailAsync(user, adminEmailToken);
 
                 if (emailConfirmSuccss.Succeeded)
-                    _logger.LogInformation("  Success!");
+                    _logger.LogInformation("{id}: {emailAddress}: Successfully confirmed email address", JobId, emailAddress);
                 else
-                    _logger.LogInformation("  FAILED!!!!!");
+                    _logger.LogWarning("{id}: {emailAddress}: Failed to confirm email address", JobId, emailAddress);
 
                 existingUser = user;
             }
 
-            _logger.LogInformation(" Adding user to {defaultRole} role.", defaultRole);
+            _logger.LogInformation("{id}: {emailAddress}: Adding user to {defaultRole} role.", JobId, emailAddress, defaultRole);
             // Add to default role
             var groupSuccess = await _userManager.AddToRoleAsync(existingUser, defaultRole);
 
             if (groupSuccess.Succeeded)
-                _logger.LogInformation("  Success!");
+                _logger.LogInformation("{id}: {emailAddress}: Successfully added user to {defaultRole} role", JobId, emailAddress, defaultRole);
             else if (groupSuccess.Errors.Any(error => error.Code == "UserAlreadyInRole"))
-                _logger.LogInformation("  Already in role");
+                _logger.LogInformation("{id}: {emailAddress}: User already present in role {defaultRole}", JobId, emailAddress, defaultRole);
             else
-                _logger.LogInformation("  FAILED!!!!!");
+                _logger.LogWarning("{id}: {emailAddress}: Failed to add user to role {defaultRole}", JobId, emailAddress, defaultRole);
         }
     }
 }

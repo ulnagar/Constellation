@@ -32,6 +32,8 @@ namespace Constellation.Infrastructure.Jobs
         private readonly ILogger<IAttendanceReportJob> _logger;
         private readonly IMediator _mediator;
 
+        private Guid JobId { get; set; }
+
         public AttendanceReportJob(IUnitOfWork unitOfWork, IEmailService emailService,
             IPDFService pdfService, IRazorViewToStringRenderer renderService,
             ISentralGateway sentralGateway, ILogger<IAttendanceReportJob> logger,
@@ -46,17 +48,9 @@ namespace Constellation.Infrastructure.Jobs
             _mediator = mediator;
         }
 
-        public async Task StartJob(bool automated, CancellationToken token)
+        public async Task StartJob(Guid jobId, CancellationToken token)
         {
-            if (automated)
-            {
-                var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IAttendanceReportJob));
-                if (jobStatus == null || !jobStatus.IsActive)
-                {
-                    _logger.LogWarning("Stopped due to job being set inactive.");
-                    return;
-                }
-            }
+            JobId = jobId;
 
             var dateToReport = DateTime.Today.AddDays(-1).VerifyStartOfFortnight();
 
@@ -65,13 +59,13 @@ namespace Constellation.Infrastructure.Jobs
 
             foreach (var school in studentsBySchool)
             {
-                _logger.LogInformation("Processing School: {name}", school.First().School.Name);
+                _logger.LogInformation("{id}: Processing School: {name}", JobId, school.First().School.Name);
 
                 var studentFiles = new Dictionary<string, string>();
 
                 foreach (var student in school)
                 {
-                    _logger.LogInformation(" Creating Report for {name}", student.DisplayName);
+                    _logger.LogInformation("{id}: Creating Report for {name}", JobId, student.DisplayName);
                     // Get Data from server
                     var definition = new { header = "", body = "" };
 
@@ -87,7 +81,7 @@ namespace Constellation.Infrastructure.Jobs
                     await SendParentEmail(pdfStream, filename, student, dateToReport);
                 }
 
-                _logger.LogInformation(" Sending reports to school...");
+                _logger.LogInformation("{id}: Sending reports to school {school}", JobId, school.First().School.Name);
 
                 // Email all the files to the school
                 var attachmentList = new List<Attachment>();
@@ -124,7 +118,7 @@ namespace Constellation.Infrastructure.Jobs
                 // Email the file to the parents
                 await SendSchoolEmailAsync(school.Key, attachmentList, dateToReport);
 
-                _logger.LogInformation(" Cleaning up temporary files");
+                _logger.LogInformation("{id}: Cleaning up temporary files created for {school}", JobId, school.First().School.Name);
 
                 // Delete all temp files
                 foreach (var entry in studentFiles)
@@ -142,7 +136,7 @@ namespace Constellation.Infrastructure.Jobs
 
             if (emailAddresses == null || emailAddresses.Count == 0)
             {
-                _logger.LogWarning("  Could not identify parent email address for {DisplayName} ({CurrentGrade})", student.DisplayName, student.CurrentGrade);
+                _logger.LogWarning("{id}: Could not identify parent email address for {DisplayName} ({CurrentGrade})", JobId, student.DisplayName, student.CurrentGrade);
                 await _emailService.SendAdminAbsenceContactAlert(student.DisplayName);
                 return;
             }
@@ -163,12 +157,12 @@ namespace Constellation.Infrastructure.Jobs
             if (success)
             {
                 foreach (var email in emailAddresses)
-                    _logger.LogInformation("  Message sent via Email to {email} with attachment: {filename}", email, filename);
+                    _logger.LogInformation("{id}: Message sent via Email to {email} with attachment: {filename}", JobId, email, filename);
             }
             else
             {
                 foreach (var email in emailAddresses)
-                    _logger.LogInformation("  FAILED to send email to {email} with attachment: {filename}", email, filename);
+                    _logger.LogInformation("{id}: FAILED to send email to {email} with attachment: {filename}", JobId, email, filename);
             }
         }
 
@@ -193,12 +187,12 @@ namespace Constellation.Infrastructure.Jobs
             if (success)
             {
                 foreach (var email in contacts)
-                    _logger.LogInformation("  Message sent via Email to {email} with Attendance Reports for {school}", email, school.Name);
+                    _logger.LogInformation("{id}: Message sent via Email to {email} with Attendance Reports for {school}", JobId, email, school.Name);
             }
             else
             {
                 foreach (var email in contacts)
-                    _logger.LogError("  FAILED to send email to {email} with Attendance Reports for {school}", email, school.Name);
+                    _logger.LogError("{id}: FAILED to send email to {email} with Attendance Reports for {school}", JobId, email, school.Name);
             }
         }
 

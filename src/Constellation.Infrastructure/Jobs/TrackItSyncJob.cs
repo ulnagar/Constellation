@@ -21,6 +21,8 @@ namespace Constellation.Infrastructure.Jobs
         private static int _newCustomerSequence;
         private static int _newLocationSequence;
 
+        private Guid JobId { get; set; }
+
         public TrackItSyncJob(IUnitOfWork unitOfWork, TrackItContext tiContext, ILogger<ITrackItSyncJob> logger)
         {
             _unitOfWork = unitOfWork;
@@ -28,17 +30,9 @@ namespace Constellation.Infrastructure.Jobs
             _logger = logger;
         }
 
-        public async Task StartJob(bool automated, CancellationToken token)
+        public async Task StartJob(Guid jobId, CancellationToken token)
         {
-            if (automated)
-            {
-                var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(ITrackItSyncJob));
-                if (jobStatus == null || !jobStatus.IsActive)
-                {
-                    _logger.LogInformation("Stopped due to job being set inactive.");
-                    return;
-                }
-            }
+            JobId = jobId;
 
             var acosStudents = await _unitOfWork.Students.ForTrackItSync();
             var acosStaff = await _unitOfWork.Staff.AllActiveAsync();
@@ -49,18 +43,16 @@ namespace Constellation.Infrastructure.Jobs
 
             foreach (var acosSchool in acosSchools)
             {
-                _logger.LogInformation("School: Name {school} - Code {code}", acosSchool.Name, acosSchool.Code);
+                _logger.LogInformation("{id}: School: Name {school} - Code {code}", jobId, acosSchool.Name, acosSchool.Code);
                 var tiLocation = tiLocations.FirstOrDefault(c => c.Note == acosSchool.Code);
                 if (tiLocation != null)
                 {
                     CheckExistingLocationDetail(tiLocation, acosSchool);
-                    _logger.LogInformation("Updated!");
                 }
                 else
                 {
                     var location = CreateLocationFromSchool(acosSchool);
                     _tiContext.Locations.Add(location);
-                    _logger.LogInformation("Created!");
                 }
             }
 
@@ -77,19 +69,17 @@ namespace Constellation.Infrastructure.Jobs
 
             foreach (var acosStudent in acosStudents)
             {
-                _logger.LogInformation("Student: Name {student} - Email {emailAddress}", acosStudent.DisplayName, acosStudent.EmailAddress);
+                _logger.LogInformation("{id}: Student: Name {student} - Email {emailAddress}", jobId, acosStudent.DisplayName, acosStudent.EmailAddress);
                 var customerEmailId = ConvertEmailToEmailId(acosStudent.EmailAddress);
                 var tiCustomer = tiCustomers.FirstOrDefault(c => c.Client == CreateClientFromPortalUsername(acosStudent.PortalUsername) || c.Emailid == customerEmailId);
                 if (tiCustomer != null)
                 {
                     CheckExistingCustomerDetail(tiCustomer, acosStudent);
-                    _logger.LogInformation("Updated!");
                 }
                 else
                 {
                     var customer = CreateCustomerFromStudent(acosStudent);
                     _tiContext.Customers.Add(customer);
-                    _logger.LogInformation("Created!");
                 }
             }
 
@@ -98,19 +88,17 @@ namespace Constellation.Infrastructure.Jobs
 
             foreach (var acosStaffMember in acosStaff)
             {
-                _logger.LogInformation("Teacher: Name {teacher} - Email {emailAddress}", acosStaffMember.DisplayName, acosStaffMember.EmailAddress);
+                _logger.LogInformation("{id}: Teacher: Name {teacher} - Email {emailAddress}", jobId, acosStaffMember.DisplayName, acosStaffMember.EmailAddress);
                 var customerEmailId = ConvertEmailToEmailId(acosStaffMember.EmailAddress);
                 var tiCustomer = tiCustomers.FirstOrDefault(c => c.Client == CreateClientFromPortalUsername(acosStaffMember.PortalUsername) || c.Emailid == customerEmailId);
                 if (tiCustomer != null)
                 {
                     CheckExistingCustomerDetail(tiCustomer, acosStaffMember);
-                    _logger.LogInformation("Updated!");
                 }
                 else
                 {
                     var customer = CreateCustomerFromStaff(acosStaffMember);
                     _tiContext.Customers.Add(customer);
-                    _logger.LogInformation("Created!");
                 }
             }
 
@@ -121,25 +109,42 @@ namespace Constellation.Infrastructure.Jobs
         private void CheckExistingLocationDetail(Location location, School school)
         {
             if (location.Name != ConvertSchoolNameToLocationName(school.Name))
+            {
                 location.Name = school.Name;
+                _logger.LogInformation("{id}: School: Name {school} - Code {code}: Name updated to {newName}", JobId, school.Name, school.Code, location.Name);
+            }
 
             if (location.Address != school.Address)
+            {
                 location.Address = school.Address;
+                _logger.LogInformation("{id}: School: Name {school} - Code {code}: Address updated to {newAddress}", JobId, school.Name, school.Code, location.Address);
+            }
 
             if (location.City != school.Town)
+            {
                 location.City = school.Town;
+                _logger.LogInformation("{id}: School: Name {school} - Code {code}: City updated to {newCity}", JobId, school.Name, school.Code, location.City);
+            }
 
             if (location.Zip != school.PostCode)
+            {
                 location.Zip = school.PostCode;
+                _logger.LogInformation("{id}: School: Name {school} - Code {code}: PostCode updated to {newPostCode}", JobId, school.Name, school.Code, location.Zip);
+            }
 
             if (location.Phone != school.PhoneNumber)
+            {
                 location.Phone = school.PhoneNumber;
+                _logger.LogInformation("{id}: School: Name {school} - Code {code}: PhoneNumber updated to {newPhone}", JobId, school.Name, school.Code, location.Phone);
+            }
 
             var acc = school.StaffAssignments.FirstOrDefault(s => s.Role == SchoolContactRole.Coordinator)?.SchoolContact;
             if (acc != null)
             {
                 location.MainContact = acc.DisplayName;
                 location.Maincontctphone = acc.PhoneNumber;
+
+                _logger.LogInformation("{id}: School: Name {school} - Code {code}: ACC updated to {newACC}", JobId, school.Name, school.Code, acc.DisplayName);
             }
             else
             {
@@ -162,11 +167,16 @@ namespace Constellation.Infrastructure.Jobs
                 Phone = school.PhoneNumber
             };
 
+            _logger.LogInformation("{id}: School: Name {school} - Code {code}: Created new record", JobId, school.Name, school.Code);
+
+
             var acc = school.StaffAssignments.FirstOrDefault(s => s.Role == SchoolContactRole.Coordinator)?.SchoolContact;
             if (acc != null)
             {
                 location.MainContact = acc.DisplayName;
                 location.Maincontctphone = acc.PhoneNumber;
+
+                _logger.LogInformation("{id}: School: Name {school} - Code {code}: ACC updated to {newACC}", JobId, school.Name, school.Code, acc.DisplayName);
             }
 
             location.Sequence = GetNextLocationSequence();
@@ -232,10 +242,18 @@ namespace Constellation.Infrastructure.Jobs
             customer.Emailid = ConvertEmailToEmailId(student.EmailAddress);
 
             if (customer.Fname != student.FirstName)
+            {
                 customer.Fname = student.FirstName;
 
+                _logger.LogInformation("{id}: Student: Name {student} - Email {emailAddress}: FirstName updated to {newName}", JobId, student.DisplayName, student.EmailAddress, student.FirstName);
+            }
+
             if (customer.Name != student.LastName)
+            {
                 customer.Name = student.LastName;
+
+                _logger.LogInformation("{id}: Student: Name {student} - Email {emailAddress}: LastName updated to {newName}", JobId, student.DisplayName, student.EmailAddress, student.LastName);
+            }
 
             var department = _tiContext.Departments.ToList().FirstOrDefault(c => c.Name == "Students");
             customer.Dept = department?.Sequence;
@@ -254,10 +272,18 @@ namespace Constellation.Infrastructure.Jobs
             customer.Emailid = ConvertEmailToEmailId(staff.EmailAddress);
 
             if (customer.Fname != staff.FirstName)
+            {
                 customer.Fname = staff.FirstName;
 
+                _logger.LogInformation("{id}: Staff: Name {staff} - Email {emailAddress}: FirstName updated to {newName}", JobId, staff.DisplayName, staff.EmailAddress, staff.FirstName);
+            }
+
             if (customer.Name != staff.LastName)
+            {
                 customer.Name = staff.LastName;
+
+                _logger.LogInformation("{id}: Staff: Name {student} - Email {emailAddress}: LastName updated to {newName}", JobId, staff.DisplayName, staff.EmailAddress, staff.LastName);
+            }
 
             var faculty = staff.Faculty.ToString();
             if (faculty.Contains(","))
@@ -283,6 +309,8 @@ namespace Constellation.Infrastructure.Jobs
                 Name = student.LastName
             };
 
+            _logger.LogInformation("{id}: Student: Name {student} - Email {emailAddress}: Created new record", JobId, student.DisplayName, student.EmailAddress);
+
             var department = _tiContext.Departments.ToList().FirstOrDefault(c => c.Name == "Students");
             customer.Dept = department?.Sequence;
 
@@ -305,6 +333,8 @@ namespace Constellation.Infrastructure.Jobs
                 Fname = staff.FirstName,
                 Name = staff.LastName
             };
+
+            _logger.LogInformation("{id}: Staff: Name {staff} - Email {emailAddress}: Created new record", JobId, staff.DisplayName, staff.EmailAddress);
 
             var faculty = staff.Faculty.ToString();
             if (faculty.Contains(","))

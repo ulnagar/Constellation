@@ -14,28 +14,15 @@ namespace Constellation.Infrastructure.Jobs
     {
         private readonly ISchoolRegisterGateway _schoolRegisterGateway;
         private readonly IMediator _mediator;
-        private readonly IUnitOfWork _unitOfWork;
 
-        public SchoolRegisterJob(ISchoolRegisterGateway schoolRegisterGateway, IMediator mediator,
-            IUnitOfWork unitOfWork)
+        public SchoolRegisterJob(ISchoolRegisterGateway schoolRegisterGateway, IMediator mediator)
         {
             _schoolRegisterGateway = schoolRegisterGateway;
             _mediator = mediator;
-            _unitOfWork = unitOfWork;
         }
 
-        public async Task StartJob(bool automated, CancellationToken token)
+        public async Task StartJob(Guid jobId, CancellationToken token)
         {
-            if (automated)
-            {
-                var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(ISchoolRegisterJob));
-                if (jobStatus == null || !jobStatus.IsActive)
-                {
-                    Console.WriteLine("Stopped due to job being set inactive.");
-                    return;
-                }
-            }
-
             await _schoolRegisterGateway.UpdateSchoolDetails();
 
             // Do not update Principal data as this might overwrite custom data updates

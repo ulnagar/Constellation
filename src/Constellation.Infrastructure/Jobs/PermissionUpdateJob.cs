@@ -4,6 +4,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,8 @@ namespace Constellation.Infrastructure.Jobs
         private readonly ICanvasService _canvasService;
         private readonly ILogger<IPermissionUpdateJob> _logger;
 
+        private Guid JobId { get; set; }
+
         public PermissionUpdateJob(IUnitOfWork unitOfWork, IAdobeConnectService adobeConnectService,
             IOperationService operationsService, ICanvasService canvasService,
             ILogger<IPermissionUpdateJob> logger)
@@ -29,34 +32,25 @@ namespace Constellation.Infrastructure.Jobs
             _logger = logger;
         }
 
-        public async Task StartJob(bool automated, CancellationToken token)
+        public async Task StartJob(Guid jobId, CancellationToken token)
         {
-            if (automated)
-            {
-                var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IPermissionUpdateJob));
-                if (jobStatus == null || !jobStatus.IsActive)
-                {
-                    _logger.LogWarning("Stopped due to job being set inactive.");
-                    return;
-                }
-            }
+            JobId = jobId;
 
-            _logger.LogInformation("Searching for users without Adobe Connect Principal Id information...");
+            _logger.LogInformation("{id}: Searching for users without Adobe Connect Principal Id information...", jobId);
             var updatedUsers = await _adobeConnectService.UpdateUsers();
-            _logger.LogInformation("Found information for {count} users.", updatedUsers.Count());
+            _logger.LogInformation("{id}: Found Adobe Connect Principal Id information for {count} users.", jobId, updatedUsers.Count());
 
-            _logger.LogInformation("");
-            _logger.LogInformation("Searching for operations...");
+            _logger.LogInformation("{id}: Searching for operations...", jobId);
             var operations = await _unitOfWork.AdobeConnectOperations.AllToProcess();
             var canvasOperations = await _unitOfWork.CanvasOperations.AllToProcess();
-            _logger.LogInformation("Found {count} operations to process.", operations.Count);
+            _logger.LogInformation("{id}: Found {count} operations to process.", jobId, operations.Count);
 
             foreach (var operation in operations)
                 await ProcessOperation(operation);
 
-            _logger.LogInformation("Searching for overdue operations...");
+            _logger.LogInformation("{id}: Searching for overdue operations...", jobId);
             operations = await _unitOfWork.AdobeConnectOperations.AllOverdue();
-            _logger.LogInformation("Found {count} overdue operations to process.", operations.Count);
+            _logger.LogInformation("{id}: Found {count} overdue operations to process.", jobId, operations.Count);
 
             foreach (var operation in operations)
                 await ProcessOperation(operation);
@@ -64,15 +58,14 @@ namespace Constellation.Infrastructure.Jobs
             foreach (var operation in canvasOperations)
                 await ProcessOperation(operation);
 
-            await _unitOfWork.CompleteAsync();
+            await _unitOfWork.CompleteAsync(token);
 
-            _logger.LogInformation("");
-            _logger.LogInformation("Fixing old and outdated operation entries...");
-            await PruneAdobeConnectOperations();
-            _logger.LogInformation("Completed");
+            _logger.LogInformation("{id}: Fixing old and outdated operation entries...", jobId);
+            await PruneAdobeConnectOperations(token);
+            _logger.LogInformation("{id}: Completed", jobId);
         }
 
-        private async Task PruneAdobeConnectOperations()
+        private async Task PruneAdobeConnectOperations(CancellationToken token)
         {
             var covers = await _unitOfWork.Covers.ForOperationCancellation();
             var operationCount = 0;
@@ -88,9 +81,9 @@ namespace Constellation.Infrastructure.Jobs
                 }
             }
 
-            _logger.LogInformation(" Found {operationCount} perations to update!", operationCount);
+            _logger.LogInformation("{id}: Found {operationCount} operations to cancel!", JobId, operationCount);
 
-            await _unitOfWork.CompleteAsync();
+            await _unitOfWork.CompleteAsync(token);
         }
 
         private async Task ProcessOperation(AdobeConnectOperation operation)
@@ -99,14 +92,14 @@ namespace Constellation.Infrastructure.Jobs
             if (result.Success)
                 await _operationsService.MarkAdobeConnectOperationComplete(operation.Id);
             foreach (var line in result.Errors)
-                _logger.LogInformation(line);
+                _logger.LogInformation("{id}: {operation}: {line}", JobId, operation, line);
         }
 
         private async Task ProcessOperation(CanvasOperation operation)
         {
             var result = await _canvasService.ProcessOperation(operation);
             foreach (var line in result.Errors)
-                _logger.LogInformation(line);
+                _logger.LogInformation("{id}: {operation}: {line}", JobId, operation, line);
         }
     }
 }

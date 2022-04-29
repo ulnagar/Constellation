@@ -30,18 +30,8 @@ namespace Constellation.Infrastructure.Jobs
             _unitOfWork = unitOfWork;
         }
 
-        public async Task StartJob(bool automated, CancellationToken token)
-        {
-            if (automated)
-            {
-                var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IClassMonitorJob));
-                if (jobStatus == null || !jobStatus.IsActive)
-                {
-                    _logger.LogWarning("Stopped due to job being set inactive.");
-                    return;
-                }
-            }
-
+        public async Task StartJob(Guid jobId, CancellationToken token)
+        { 
             var scanTime = DateTime.Now;
             _logger.LogInformation("Starting room monitor scan at {scanTime}", scanTime);
 

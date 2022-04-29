@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Infrastructure.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,32 +25,22 @@ namespace Constellation.Infrastructure.Jobs
             _logger = logger;
         }
 
-        public async Task StartJob(bool automated, CancellationToken token)
+        public async Task StartJob(Guid jobId, CancellationToken token)
         {
-            if (automated)
-            {
-                var jobStatus = await _context.JobActivations.FirstOrDefaultAsync(job => job.JobName == nameof(ISentralPhotoSyncJob));
-                if (jobStatus == null || !jobStatus.IsActive)
-                {
-                    _logger.LogInformation("Stopped due to job being set inactive.");
-                    return;
-                }
-            }
-
-            var students = await _context.Students.Where(student => !student.IsDeleted).ToListAsync();
+            var students = await _context.Students.Where(student => !student.IsDeleted).ToListAsync(token);
 
             foreach (var student in students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName))
             {
-                _logger.LogInformation("Checking student {student} ({grade}) for photo", student.DisplayName, student.CurrentGrade.AsName());
+                _logger.LogInformation("{id}: Checking student {student} ({grade}) for photo", jobId, student.DisplayName, student.CurrentGrade.AsName());
 
                 var photo = await _gateway.GetSentralStudentPhoto(student.StudentId);
 
                 if (student.Photo != photo)
                 {
-                    _logger.LogInformation("Found new photo for {student} ({grade})", student.DisplayName, student.CurrentGrade.AsName());
+                    _logger.LogInformation("{id}: Found new photo for {student} ({grade})", jobId, student.DisplayName, student.CurrentGrade.AsName());
 
                     student.Photo = photo;
-                    await _context.SaveChangesAsync(new System.Threading.CancellationToken());
+                    await _context.SaveChangesAsync(token);
                 }
             }
         }

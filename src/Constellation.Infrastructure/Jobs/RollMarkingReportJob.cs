@@ -30,24 +30,14 @@ namespace Constellation.Infrastructure.Jobs
             _logger = logger;
         }
 
-        public async Task StartJob(bool automated, CancellationToken token)
+        public async Task StartJob(Guid jobId, CancellationToken token)
         {
-            if (automated)
-            {
-                var jobStatus = await _unitOfWork.JobActivations.GetForJob(nameof(IRollMarkingReportJob));
-                if (jobStatus == null || !jobStatus.IsActive)
-                {
-                    _logger.LogWarning("Stopped due to job being set inactive.");
-                    return;
-                }
-            }
-
             var date = DateTime.Today;
 
             if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
                 return;
 
-            _logger.LogInformation("Checking Date: {date}", date.ToShortDateString());
+            _logger.LogInformation("{id}: Checking Date: {date}", jobId, date.ToShortDateString());
             var entries = await _sentralService.GetRollMarkingReportAsync(date);
 
             var unsubmitted = entries.Where(entry => !entry.Submitted).ToList();
@@ -101,7 +91,7 @@ namespace Constellation.Infrastructure.Jobs
 
                             var infoString = $"{entry.Date.ToShortDateString()} - Unsubmitted Roll for {entry.ClassName} ({entry.Teacher}) in Period {entry.Period} covered by {entry.CoveredBy} ({entry.CoverType})";
 
-                            _logger.LogInformation(infoString);
+                            _logger.LogInformation("{id}: {infoString}", jobId, infoString);
                             entry.Description = infoString;
                         }
                     }
@@ -127,7 +117,7 @@ namespace Constellation.Infrastructure.Jobs
                             infoString += $" by {entry.Teacher}";
                         infoString += $" in Period {entry.Period}";
 
-                        _logger.LogInformation(infoString);
+                        _logger.LogInformation("{id}: {infoString}", jobId, infoString);
                         entry.Description = infoString;
                     }
                 }
@@ -159,7 +149,7 @@ namespace Constellation.Infrastructure.Jobs
             {
                 var infoString = $"{date.ToShortDateString()} - No Unsubmitted Rolls found!";
 
-                _logger.LogInformation(infoString);
+                _logger.LogInformation("{id}: {infoString}", jobId, infoString);
             }
 
             if (unsubmitted.Any())
