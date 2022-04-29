@@ -36,7 +36,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
             _operationsService = operationsService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             if (User.Identity.IsAuthenticated)
             {

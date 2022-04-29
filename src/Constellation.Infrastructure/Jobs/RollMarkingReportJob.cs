@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -46,6 +45,9 @@ namespace Constellation.Infrastructure.Jobs
             {
                 foreach (var entry in unsubmitted.OrderBy(item => item.ClassName).ThenBy(item => item.Period))
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     var offeringName = entry.ClassName.StartsWith("5") || entry.ClassName.StartsWith("6") ? entry.ClassName.PadLeft(7, '0') : entry.ClassName.PadLeft(6, '0');
                     entry.ClassName = offeringName;
 
@@ -126,6 +128,9 @@ namespace Constellation.Infrastructure.Jobs
 
                 foreach (var group in groupedByRecipient)
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     // Email the relevant person (as outlined in the EmailSentTo field
                     var orderedEntries = group.OrderBy(item => item.Date).ThenBy(item => item.ClassName).ThenBy(item => item.Period).ToList();
 
@@ -136,6 +141,9 @@ namespace Constellation.Infrastructure.Jobs
 
                 foreach (var group in groupedByFaculty)
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     // Email the relevant person (as outlined in the EmailSentTo field
                     var orderedEntries = group.OrderBy(item => item.Date).ThenBy(item => item.ClassName).ThenBy(item => item.Period).ToList();
 
@@ -153,7 +161,12 @@ namespace Constellation.Infrastructure.Jobs
             }
 
             if (unsubmitted.Any())
+            {
+                if (token.IsCancellationRequested)
+                    return;
+
                 await _emailService.SendDailyRollMarkingReport(unsubmitted, true, false);
+            }
         }
     }
 }

@@ -17,14 +17,12 @@ namespace Constellation.Infrastructure.Features.Auth.Commands
     public class RegisterADUserAsSchoolContactCommandHandler : IRequestHandler<RegisterADUserAsSchoolContactCommand>
     {
         private readonly IAppDbContext _context;
-        private readonly UserManager<AppUser> _userManager;
         private readonly IMediator _mediator;
         private readonly PrincipalContext _adContext;
 
-        public RegisterADUserAsSchoolContactCommandHandler(IAppDbContext context, UserManager<AppUser> userManager, IMediator mediator)
+        public RegisterADUserAsSchoolContactCommandHandler(IAppDbContext context, IMediator mediator)
         {
             _context = context;
-            _userManager = userManager;
             _mediator = mediator;
             _adContext = new PrincipalContext(ContextType.Domain, "DETNSW.WIN");
         }
@@ -49,7 +47,7 @@ namespace Constellation.Infrastructure.Features.Auth.Commands
 
                     contact.EmailAddress = request.EmailAddress;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     throw;
                 }
@@ -58,7 +56,7 @@ namespace Constellation.Infrastructure.Features.Auth.Commands
             _context.Add(contact);
             await _context.SaveChangesAsync(cancellationToken);
 
-            await _mediator.Send(new SchoolContactCreatedNotification { Id = contact.Id });
+            await _mediator.Send(new SchoolContactCreatedNotification { Id = contact.Id }, cancellationToken);
 
             return Unit.Value;
         }

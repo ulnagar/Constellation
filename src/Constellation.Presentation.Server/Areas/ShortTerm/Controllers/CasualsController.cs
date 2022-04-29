@@ -26,7 +26,7 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
             _casualService = casualService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return RedirectToAction("Active");
         }

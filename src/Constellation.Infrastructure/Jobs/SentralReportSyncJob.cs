@@ -36,7 +36,7 @@ namespace Constellation.Infrastructure.Jobs
             //  if old version present, delete and download and store the new version
             //  if present, skip
 
-            var students = await _mediator.Send(new GetStudentsForReportDownloadQuery());
+            var students = await _mediator.Send(new GetStudentsForReportDownloadQuery(), token);
 
             _logger.LogInformation("{id}: Found {students} students to scan", jobId, students.Count());
 

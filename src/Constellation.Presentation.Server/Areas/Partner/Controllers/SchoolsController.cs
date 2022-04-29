@@ -33,7 +33,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             _mediator = mediator;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return RedirectToAction("WithEither");
         }

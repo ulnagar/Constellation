@@ -1,7 +1,5 @@
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
-using Constellation.Presentation.Server.Helpers.DependencyInjection;
 using Constellation.Presentation.Server.Infrastructure;
 using Hangfire;
 using Hangfire.SqlServer;
@@ -54,7 +52,7 @@ namespace Constellation.Presentation.Server
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserManager<AppUser> userManager, RoleManager<AppRole> roleManager, IUnitOfWork unitOfWork, IRecurringJobManager manager)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -86,12 +84,6 @@ namespace Constellation.Presentation.Server
                     new HangfireAuthorizationFilter()
                 }
             });
-
-            var jobManager = new HangfireJobRegistration(manager);
-            jobManager.RegisterJobs();
-
-            //IdentityDefaults.SeedRoles(roleManager);
-            //IdentityDefaults.SeedUsers(userManager);
 
             app.UseEndpoints(endpoints =>
             {

@@ -34,7 +34,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             _operationService = operationService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return RedirectToAction("Active");
         }

@@ -28,7 +28,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             _offeringService = offeringService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return RedirectToAction("WithClasses");
         }

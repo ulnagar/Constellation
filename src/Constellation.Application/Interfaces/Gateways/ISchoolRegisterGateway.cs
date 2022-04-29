@@ -1,10 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using Constellation.Application.DTOs.CSV;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Gateways
 {
     public interface ISchoolRegisterGateway
     {
         Task GetSchoolPrincipals();
-        Task UpdateSchoolDetails();
+        Task<ICollection<CSVSchool>> GetSchoolList();
     }
 }

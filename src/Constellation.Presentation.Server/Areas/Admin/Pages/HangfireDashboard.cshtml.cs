@@ -45,7 +45,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
             };
         }
 
-        public async Task OnGet()
+        public void OnGet()
         {
         }
 
@@ -95,8 +95,6 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
         public void OnPostAddJob(string actionName, string cronExpression)
         {
             var typeName = $"Constellation.Application.Interfaces.Services.IJobDispatcherService`1[[Constellation.Application.Interfaces.Jobs.{actionName}, Constellation.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Constellation.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
-
-            var realTypeName = typeof(IJobDispatcherService<IPermissionUpdateJob>);
 
             var type = Type.GetType(typeName);
 

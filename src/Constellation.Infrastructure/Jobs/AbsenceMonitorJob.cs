@@ -40,52 +40,64 @@ namespace Constellation.Infrastructure.Jobs
             _mediator = mediator;
         }
 
-        public async Task StartJob(Guid jobId, CancellationToken cancellationToken)
+        public async Task StartJob(Guid jobId, CancellationToken token)
         {
             _logger.LogInformation("{id}: Starting Absence Monitor Scan.", jobId);
 
-            while (!cancellationToken.IsCancellationRequested)
+            foreach (Grade grade in Enum.GetValues(typeof(Grade)))
             {
-                foreach (Grade grade in Enum.GetValues(typeof(Grade)))
-                {
-                    _logger.LogInformation("{id}: Getting students from {grade}", jobId, grade);
+                if (token.IsCancellationRequested)
+                    return;
 
-                    var students = await _mediator.Send(new GetStudentsForAbsenceScanQuery { Grade = grade }, cancellationToken);
+                _logger.LogInformation("{id}: Getting students from {grade}", jobId, grade);
+
+                var students = await _mediator.Send(new GetStudentsForAbsenceScanQuery { Grade = grade }, token);
                 
-                    students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+                students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
 
-                    _logger.LogInformation("{id}: Found {students} students to scan.", jobId, students.Count);
+                _logger.LogInformation("{id}: Found {students} students to scan.", jobId, students.Count);
 
-                    foreach (var student in students)
+                foreach (var student in students)
+                {
+                    if (token.IsCancellationRequested)
+                        return;
+
+                    var absences = await _absenceProcessor.StartJob(jobId, student, token);
+
+                    if (absences.Any())
                     {
-                        var absences = await _absenceProcessor.StartJob(student, cancellationToken);
+                        if (token.IsCancellationRequested)
+                            return;
 
-                        if (absences.Any())
-                        {
-                            await _mediator.Send(new AddNewStudentAbsencesCommand { Absences = absences }, cancellationToken);
+                        await _mediator.Send(new AddNewStudentAbsencesCommand { Absences = absences }, token);
 
-                            if (string.IsNullOrWhiteSpace(student.SentralStudentId))
-                                continue;
+                        if (string.IsNullOrWhiteSpace(student.SentralStudentId))
+                            continue;
 
-                            await SendStudentNotifications(jobId, student);
-                            await SendParentNotifications(jobId, student);
-                        }
+                        if (token.IsCancellationRequested)
+                            return;
 
-                        if (DateTime.Now.DayOfWeek == DayOfWeek.Monday)
-                        {
-                            await SendParentDigests(jobId, student);
-                            await SendCoordinatorDigests(jobId, student);
-                        }
-
-                        absences?.Clear();
-                        //_unitOfWork.ClearTrackerDb();
+                        await SendStudentNotifications(jobId, student);
+                        await SendParentNotifications(jobId, student);
                     }
+
+                    if (DateTime.Now.DayOfWeek == DayOfWeek.Monday)
+                    {
+                        if (token.IsCancellationRequested)
+                            return;
+
+                        await SendParentDigests(jobId, student);
+                        await SendCoordinatorDigests(jobId, student);
+                    }
+
+                    absences?.Clear();
+                    //_unitOfWork.ClearTrackerDb();
                 }
-
-                await _classworkNotifier.StartJob(DateTime.Today);
-
-                await _unitOfWork.CompleteAsync(cancellationToken);
             }
+
+            await _classworkNotifier.StartJob(jobId, DateTime.Today, token);
+
+            await _unitOfWork.CompleteAsync(token);
         }
 
         private async Task SendCoordinatorDigests(Guid jobId, StudentForAbsenceScan student)

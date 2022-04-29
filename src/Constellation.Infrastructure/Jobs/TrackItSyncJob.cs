@@ -38,11 +38,14 @@ namespace Constellation.Infrastructure.Jobs
             var acosStaff = await _unitOfWork.Staff.AllActiveAsync();
             var acosSchools = await _unitOfWork.Schools.ForTrackItSync();
 
-            var tiCustomers = await _tiContext.Customers.ToListAsync();
-            var tiLocations = await _tiContext.Locations.ToListAsync();
+            var tiCustomers = await _tiContext.Customers.ToListAsync(token);
+            var tiLocations = await _tiContext.Locations.ToListAsync(token);
 
             foreach (var acosSchool in acosSchools)
             {
+                if (token.IsCancellationRequested)
+                    return;
+
                 _logger.LogInformation("{id}: School: Name {school} - Code {code}", jobId, acosSchool.Name, acosSchool.Code);
                 var tiLocation = tiLocations.FirstOrDefault(c => c.Note == acosSchool.Code);
                 if (tiLocation != null)
@@ -57,18 +60,24 @@ namespace Constellation.Infrastructure.Jobs
             }
 
             SetNextLocationSequence();
-            await _tiContext.SaveChangesAsync();
+            await _tiContext.SaveChangesAsync(token);
 
             foreach (var customer in tiCustomers)
             {
+                if (token.IsCancellationRequested)
+                    return;
+
                 if (customer.Emailid != null)
                     customer.Emailid = ConvertEmailToEmailId(ConvertEmailIdToEmail(customer.Emailid));
             }
 
-            _tiContext.SaveChanges();
+            await _tiContext.SaveChangesAsync(token);
 
             foreach (var acosStudent in acosStudents)
             {
+                if (token.IsCancellationRequested)
+                    return;
+
                 _logger.LogInformation("{id}: Student: Name {student} - Email {emailAddress}", jobId, acosStudent.DisplayName, acosStudent.EmailAddress);
                 var customerEmailId = ConvertEmailToEmailId(acosStudent.EmailAddress);
                 var tiCustomer = tiCustomers.FirstOrDefault(c => c.Client == CreateClientFromPortalUsername(acosStudent.PortalUsername) || c.Emailid == customerEmailId);
@@ -84,10 +93,13 @@ namespace Constellation.Infrastructure.Jobs
             }
 
             SetNextCustomerSequence();
-            await _tiContext.SaveChangesAsync();
+            await _tiContext.SaveChangesAsync(token);
 
             foreach (var acosStaffMember in acosStaff)
             {
+                if (token.IsCancellationRequested)
+                    return;
+
                 _logger.LogInformation("{id}: Teacher: Name {teacher} - Email {emailAddress}", jobId, acosStaffMember.DisplayName, acosStaffMember.EmailAddress);
                 var customerEmailId = ConvertEmailToEmailId(acosStaffMember.EmailAddress);
                 var tiCustomer = tiCustomers.FirstOrDefault(c => c.Client == CreateClientFromPortalUsername(acosStaffMember.PortalUsername) || c.Emailid == customerEmailId);
@@ -103,7 +115,7 @@ namespace Constellation.Infrastructure.Jobs
             }
 
             SetNextCustomerSequence();
-            await _tiContext.SaveChangesAsync();
+            await _tiContext.SaveChangesAsync(token);
         }
 
         private void CheckExistingLocationDetail(Location location, School school)
@@ -188,7 +200,7 @@ namespace Constellation.Infrastructure.Jobs
         {
             if (portalUsername.Length > 15)
             {
-                return portalUsername.Substring(0, 15);
+                return portalUsername[..15];
             }
 
             return portalUsername;
@@ -215,9 +227,9 @@ namespace Constellation.Infrastructure.Jobs
                 return locationName;
             }
 
-            if (locationName.Length > 50 && locationName.Contains(","))
+            if (locationName.Length > 50 && locationName.Contains(','))
             {
-                locationName = locationName.Substring(locationName.IndexOf(",") + 2);
+                locationName = locationName[(locationName.IndexOf(",") + 2)..];
                 return locationName;
             }
 
@@ -226,7 +238,7 @@ namespace Constellation.Infrastructure.Jobs
 
         private static string ConvertEmailIdToEmail(string emailId)
         {
-            return emailId.Substring(emailId.LastIndexOf("}") + 1).ToLower();
+            return emailId[(emailId.LastIndexOf("}") + 1)..].ToLower();
         }
 
         private static string ConvertEmailToEmailId(string email)
@@ -286,8 +298,8 @@ namespace Constellation.Infrastructure.Jobs
             }
 
             var faculty = staff.Faculty.ToString();
-            if (faculty.Contains(","))
-                faculty = faculty.Substring(0, faculty.IndexOf(","));
+            if (faculty.Contains(','))
+                faculty = faculty[..faculty.IndexOf(",")];
             var department = _tiContext.Departments.ToList().FirstOrDefault(c => c.Name.Contains(faculty));
             customer.Dept = department?.Sequence;
 
@@ -337,8 +349,8 @@ namespace Constellation.Infrastructure.Jobs
             _logger.LogInformation("{id}: Staff: Name {staff} - Email {emailAddress}: Created new record", JobId, staff.DisplayName, staff.EmailAddress);
 
             var faculty = staff.Faculty.ToString();
-            if (faculty.Contains(","))
-                faculty = faculty.Substring(0, faculty.IndexOf(","));
+            if (faculty.Contains(','))
+                faculty = faculty[..faculty.IndexOf(",")];
             var department = _tiContext.Departments.ToList().FirstOrDefault(c => c.Name.Contains(faculty));
             customer.Dept = department?.Sequence;
 

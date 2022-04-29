@@ -39,8 +39,10 @@ namespace Constellation.Presentation.Server.Areas.Utility.Controllers
             var htmlString = await _renderService.RenderViewToStringAsync("/Views/Documents/Attendance/AttendanceReport.cshtml", data);
 
             var pdfStream = _pdfService.StringToPdfStream(htmlString, headerString);
-            var fs = new FileStreamResult(pdfStream, MediaTypeNames.Application.Pdf);
-            fs.FileDownloadName = title;
+            var fs = new FileStreamResult(pdfStream, MediaTypeNames.Application.Pdf)
+            {
+                FileDownloadName = title
+            };
 
             return fs;
         }

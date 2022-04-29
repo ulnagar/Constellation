@@ -65,7 +65,7 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages
                 command.FileData = target.ToArray();
             }
 
-            var id = await _mediator.Send(command);
+            await _mediator.Send(command);
 
             return Page();
         }

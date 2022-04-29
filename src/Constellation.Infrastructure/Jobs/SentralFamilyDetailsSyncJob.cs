@@ -38,6 +38,9 @@ namespace Constellation.Infrastructure.Jobs
             // Check objects against database
             foreach (var family in families)
             {
+                if (token.IsCancellationRequested)
+                    return;
+
                 _logger.LogInformation("{id}: Checking family: {name} ({id})", jobId, family.AddressName, family.FamilyId);
 
                 family.MotherMobile = family.MotherMobile.Replace(" ", "");

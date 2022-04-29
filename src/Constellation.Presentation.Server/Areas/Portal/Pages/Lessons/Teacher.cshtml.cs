@@ -61,39 +61,39 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Lessons
             switch (Filter)
             {
                 case FilterDto.All:
-                    await FilterAll();
+                    FilterAll();
                     break;
                 case FilterDto.Overdue:
-                    await FilterOverdue();
+                    FilterOverdue();
                     break;
                 case FilterDto.Complete:
-                    await FilterComplete();
+                    FilterComplete();
                     break;
                 case FilterDto.Pending:
                 default:
-                    await FilterPending();
+                    FilterPending();
                     break;
             }
 
             return Page();
         }
 
-        public async Task FilterComplete()
+        public void FilterComplete()
         {
             FilteredLessons = AllLessons.Where(lesson => lesson.Roll.Submitted).ToList();
         }
 
-        public async Task FilterOverdue()
+        public void FilterOverdue()
         {
             FilteredLessons = AllLessons.Where(lesson => lesson.Overdue && !lesson.Roll.Submitted).ToList();
         }
 
-        public async Task FilterAll()
+        public void FilterAll()
         {
             FilteredLessons = AllLessons;
         }
 
-        public async Task FilterPending()
+        public void FilterPending()
         {
             FilteredLessons = AllLessons.Where(lesson => !lesson.Roll.Submitted).ToList();
         }

@@ -40,7 +40,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         }
 
         // GET: Subject/Classes
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return RedirectToAction("Active");
         }

@@ -23,6 +23,9 @@ namespace Constellation.Infrastructure.Features.Partners.Schools.Commands
 
             foreach (var jsonObject in jsonObjects)
             {
+                if (cancellationToken.IsCancellationRequested)
+                    return Unit.Value;
+
                 var command = jsonObject.ConvertToCommand();
                 await _mediator.Send(command, cancellationToken);
             }

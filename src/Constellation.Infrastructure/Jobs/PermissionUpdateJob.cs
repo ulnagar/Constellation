@@ -46,19 +46,37 @@ namespace Constellation.Infrastructure.Jobs
             _logger.LogInformation("{id}: Found {count} operations to process.", jobId, operations.Count);
 
             foreach (var operation in operations)
+            {
+                if (token.IsCancellationRequested)
+                    return;
+
                 await ProcessOperation(operation);
+            }
 
             _logger.LogInformation("{id}: Searching for overdue operations...", jobId);
             operations = await _unitOfWork.AdobeConnectOperations.AllOverdue();
             _logger.LogInformation("{id}: Found {count} overdue operations to process.", jobId, operations.Count);
 
             foreach (var operation in operations)
+            {
+                if (token.IsCancellationRequested)
+                    return;
+
                 await ProcessOperation(operation);
+            }
 
             foreach (var operation in canvasOperations)
+            {
+                if (token.IsCancellationRequested)
+                    return;
+
                 await ProcessOperation(operation);
+            }
 
             await _unitOfWork.CompleteAsync(token);
+
+            if (token.IsCancellationRequested)
+                return;
 
             _logger.LogInformation("{id}: Fixing old and outdated operation entries...", jobId);
             await PruneAdobeConnectOperations(token);

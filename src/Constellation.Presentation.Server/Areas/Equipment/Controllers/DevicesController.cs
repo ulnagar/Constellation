@@ -30,7 +30,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         }
 
         // GET: Device/Devices
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return RedirectToAction("Active");
         }

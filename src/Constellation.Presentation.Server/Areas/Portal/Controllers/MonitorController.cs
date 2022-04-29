@@ -16,12 +16,12 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
             _classMonitorCacheService = classMonitorCacheService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return View();
         }
 
-        public async Task<IActionResult> Dashboard()
+        public IActionResult Dashboard()
         {
             return RedirectToAction("Index");
         }

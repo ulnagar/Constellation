@@ -27,7 +27,7 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
             _coverService = coverService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return RedirectToAction("Upcoming");
         }

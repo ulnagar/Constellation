@@ -854,6 +854,7 @@ namespace Constellation.Infrastructure.Services
             {
                 // Send the Absence Coordinator
                 toRecipients.Add(absenceSettings.AbsenceCoordinatorName, absenceSettings.ForwardingEmailAbsenceCoordinator);
+                toRecipients.Add("Scott New", "scott.new@det.nsw.edu.au");
             }
             
             if (sendToFacultyHeadTeacher)

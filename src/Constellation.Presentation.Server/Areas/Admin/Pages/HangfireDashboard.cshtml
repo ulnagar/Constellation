@@ -3,18 +3,19 @@
 
 <h3>Hangfire Job Activator</h3>
 
-<!-- Button to add all default jobs with default settings -->
+<form asp-page-handler="AddDefault" method="post">
+    <button class="btn btn-primary">Add All Jobs with Default Settings</button>
+</form>
 
-<!-- Table of all job definitions with options to add with default setting, add with custom cron expression, trigger, and remove -->
+<hr />
 
 <table class="table-striped table-hover data-table">
     <thead>
     <tr>
         <th>Name</th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
+        <th>Add</th>
+        <th>Trigger</th>
+        <th>Remove</th>
     </tr>
     </thead>
     <tbody>
@@ -29,14 +30,17 @@
                     @if (!isActive)
                     {
                         <form asp-page-handler="AddJob" method="post">
-                            <input type="hidden" name="actionName" value="@item.Key" />
-                            <input type="hidden" name="cronExpression" value="@item.Value" />
-                            <button class="btn btn-primary">Add Job</button>
+                            <div class="form-row">
+                                <div class="col">
+                                    <input type="hidden" name="actionName" value="@item.Key" />
+                                    <input type="text" name="cronExpression" value="@item.Value" class="form-control" />
+                                </div>
+                                <div class="col">
+                                    <button class="btn btn-primary">Add</button>
+                                </div>
+                            </div>
                         </form>
                     }
-                </td>
-                <td>
-                    <!-- Add with custom expression button -->
                 </td>
                 <td>
                     <!-- Trigger button -->
@@ -44,7 +48,7 @@
                     {
                         <form asp-page-handler="TriggerJob" method="post">
                             <input type="hidden" name="actionName" value="@item.Key" />
-                            <button class="btn btn-success" disabled="@(!isActive)">Run Job</button>
+                            <button class="btn btn-success" disabled="@(!isActive)">Trigger</button>
                         </form>                        
                     }
                 </td>

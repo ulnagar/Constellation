@@ -50,8 +50,14 @@ namespace Constellation.Infrastructure.Jobs
 
             foreach (var lesson in lessons)
             {
+                if (token.IsCancellationRequested)
+                    return;
+
                 foreach (var roll in lesson.Rolls.Where(roll => roll.Status == LessonStatus.Active))
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     var course = lesson.Offerings.First().Course;
 
                     var description = $"{course.Grade} {lesson.Name}";
@@ -89,6 +95,9 @@ namespace Constellation.Infrastructure.Jobs
             // Email this list to the contacts of each school.
             foreach (var schoolItem in schools.OrderBy(email => email.SchoolName))
             {
+                if (token.IsCancellationRequested)
+                    return;
+
                 // who are the school contacts to send the emails to?
                 var contacts = _unitOfWork.SchoolContactRoles.AllFromSchool(schoolItem.SchoolCode);
 
@@ -142,6 +151,9 @@ namespace Constellation.Infrastructure.Jobs
 
                 if (firstWarning.Any())
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     foreach (var lesson in firstWarning)
                         _logger.Log(LogSeverity.Information, $" (1W) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
 
@@ -158,6 +170,9 @@ namespace Constellation.Infrastructure.Jobs
 
                 if (secondWarning.Any())
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     foreach (var lesson in secondWarning)
                         _logger.Log(LogSeverity.Information, $" (2W) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
 
@@ -174,6 +189,9 @@ namespace Constellation.Infrastructure.Jobs
 
                 if (thirdWarning.Any())
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     foreach (var lesson in thirdWarning)
                         _logger.Log(LogSeverity.Information, $" (3W) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
 
@@ -190,6 +208,9 @@ namespace Constellation.Infrastructure.Jobs
 
                 if (finalWarning.Any())
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     foreach (var lesson in finalWarning)
                         _logger.Log(LogSeverity.Information, $" (4W) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
 
@@ -206,6 +227,9 @@ namespace Constellation.Infrastructure.Jobs
 
                 if (alert.Any())
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     foreach (var lesson in alert)
                         _logger.Log(LogSeverity.Information, $" (FW) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
 
@@ -227,6 +251,9 @@ namespace Constellation.Infrastructure.Jobs
                 Source = Assembly.GetEntryAssembly().GetName().Name,
                 Recipients = facultyContacts
             };
+
+            if (token.IsCancellationRequested)
+                return;
 
             await _emailService.SendServiceLogEmail(logNotification);
         }

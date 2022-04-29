@@ -34,13 +34,23 @@ namespace Constellation.Infrastructure.Jobs
             _logger.LogInformation("{id}: Found {count} Staff Members to check...", jobId, staff.Count);
 
             foreach (var member in staff)
+            {
+                if (token.IsCancellationRequested)
+                    return;
+
                 await CreateUser(member.EmailAddress, member.FirstName, member.LastName, AuthRoles.User);
+            }
 
             var contacts = await _unitOfWork.SchoolContacts.AllWithActiveRoleAsync();
             _logger.LogInformation("{id}: Found {count} School Contacts to check...", jobId, contacts.Count);
 
             foreach (var contact in contacts)
+            {
+                if (token.IsCancellationRequested)
+                    return;
+
                 await CreateUser(contact.EmailAddress, contact.FirstName, contact.LastName, AuthRoles.LessonsUser);
+            }
         }
 
         private async Task CreateUser(string emailAddress, string firstName, string lastName, string defaultRole)

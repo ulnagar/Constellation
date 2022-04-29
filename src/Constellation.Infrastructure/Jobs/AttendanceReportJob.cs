@@ -59,12 +59,18 @@ namespace Constellation.Infrastructure.Jobs
 
             foreach (var school in studentsBySchool)
             {
+                if (token.IsCancellationRequested)
+                    return;
+
                 _logger.LogInformation("{id}: Processing School: {name}", JobId, school.First().School.Name);
 
                 var studentFiles = new Dictionary<string, string>();
 
                 foreach (var student in school)
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     _logger.LogInformation("{id}: Creating Report for {name}", JobId, student.DisplayName);
                     // Get Data from server
                     var definition = new { header = "", body = "" };
@@ -78,13 +84,16 @@ namespace Constellation.Infrastructure.Jobs
                     var filename = $"{student.LastName}, {student.FirstName} - {dateToReport:yyyy-MM-dd} - Attendance Report.pdf";
                     studentFiles.Add(tempFile, filename);
 
-                    await SendParentEmail(pdfStream, filename, student, dateToReport);
+                    await SendParentEmail(pdfStream, filename, student, dateToReport, token);
                 }
 
                 _logger.LogInformation("{id}: Sending reports to school {school}", JobId, school.First().School.Name);
 
                 // Email all the files to the school
                 var attachmentList = new List<Attachment>();
+
+                if (token.IsCancellationRequested)
+                    return;
 
                 // Create ZIP file of all attachments, if # of attachments is greater than 4
                 if (studentFiles.Count > 4)
@@ -129,10 +138,10 @@ namespace Constellation.Infrastructure.Jobs
             }
         }
 
-        private async Task SendParentEmail(MemoryStream pdfStream, string filename, Student student, DateTime dateToReport)
+        private async Task SendParentEmail(MemoryStream pdfStream, string filename, Student student, DateTime dateToReport, CancellationToken token)
         {
             // Email the file to the parents
-            var emailAddresses = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = student.StudentId });
+            var emailAddresses = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = student.StudentId }, token);
 
             if (emailAddresses == null || emailAddresses.Count == 0)
             {

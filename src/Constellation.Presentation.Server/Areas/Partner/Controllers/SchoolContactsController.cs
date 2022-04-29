@@ -36,7 +36,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         }
 
         // GET: Partner/SchoolContact
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return RedirectToAction("All");
         }

@@ -5,7 +5,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
 {
     public class PortalRedirectModel : BasePageModel
     {
-        public async Task OnGet()
+        public void OnGet()
         {
         }
     }

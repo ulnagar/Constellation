@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.DTOs.CSV;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -11,6 +12,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Gateways
@@ -116,125 +118,7 @@ namespace Constellation.Infrastructure.Gateways
             }
         }
 
-        public async Task UpdateSchoolDetails()
-        {
-            // Get csv file from https://datacollections.det.nsw.edu.au/listofschools/csv/listofschool_all.csv
-            // Read entries into a collection of objects
-            var csvSchools = await GetSchoolList();
-
-            // Filter out all closed/proposed schools
-            var openSchools = csvSchools.Where(school => school.Status == "Open").ToList();
-
-            // Match entries with database
-            var dbSchools = await _unitOfWork.Schools.ForBulkUpdate();
-
-            foreach (var csvSchool in openSchools)
-            {
-                Console.WriteLine($"Processing School {csvSchool.Name} ({csvSchool.SchoolCode})");
-                var dbSchool = dbSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
-
-                if (dbSchool == null)
-                {
-                    Console.WriteLine($" New school - Adding to database");
-                    // Doesn't exist in database! Create!
-                    var newSchool = new School
-                    {
-                        Code = csvSchool.SchoolCode,
-                        Name = csvSchool.Name,
-                        Address = csvSchool.Address,
-                        Town = csvSchool.Town,
-                        State = "NSW",
-                        PostCode = csvSchool.PostCode,
-                        PhoneNumber = csvSchool.PhoneNumber,
-                        FaxNumber = csvSchool.FaxNumber,
-                        EmailAddress = csvSchool.EmailAddress,
-                        Division = csvSchool.Division,
-                        HeatSchool = csvSchool.HeatSchool,
-                        Electorate = csvSchool.Electorate,
-                        PrincipalNetwork = csvSchool.PrincipalNetwork
-                    };
-
-                    _unitOfWork.Add(newSchool);
-                } else
-                {
-                    // Update database entry if required
-                    if (dbSchool.Name != csvSchool.Name)
-                    {
-                        LogChange("Name", dbSchool.Name, csvSchool.Name);
-                        dbSchool.Name = csvSchool.Name;
-                    }
-
-                    if (dbSchool.Address != csvSchool.Address)
-                    {
-                        LogChange("Address", dbSchool.Address, csvSchool.Address);    
-                        dbSchool.Address = csvSchool.Address;
-                    }
-
-                    if (dbSchool.Town != csvSchool.Town)
-                    {
-                        LogChange("Town", dbSchool.Town, csvSchool.Town);
-                        dbSchool.Town = csvSchool.Town;
-                    }
-
-                    if (dbSchool.PostCode != csvSchool.PostCode)
-                    {
-                        LogChange("PostCode", dbSchool.PostCode, csvSchool.PostCode);
-                        dbSchool.PostCode = csvSchool.PostCode;
-                    }
-
-                    if (dbSchool.Electorate != csvSchool.Electorate)
-                    {
-                        LogChange("Electorate", dbSchool.Electorate, csvSchool.Electorate);
-                        dbSchool.Electorate = csvSchool.Electorate;
-                    }
-
-                    if (dbSchool.PrincipalNetwork != csvSchool.PrincipalNetwork)
-                    {
-                        LogChange("PrincipalNetwork", dbSchool.PrincipalNetwork, csvSchool.PrincipalNetwork);
-                        dbSchool.PrincipalNetwork = csvSchool.PrincipalNetwork;
-                    }
-
-                    if (dbSchool.Division != csvSchool.Division)
-                    {
-                        LogChange("Division", dbSchool.Division, csvSchool.Division);
-                        dbSchool.Division = csvSchool.Division;
-                    }
-
-                    if (dbSchool.PhoneNumber != csvSchool.PhoneNumber)
-                    {
-                        LogChange("PhoneNumber", dbSchool.PhoneNumber, csvSchool.PhoneNumber);
-                        dbSchool.PhoneNumber = csvSchool.PhoneNumber;
-                    }
-
-                    if (dbSchool.EmailAddress != csvSchool.EmailAddress)
-                    {
-                        LogChange("EmailAddress", dbSchool.EmailAddress, csvSchool.EmailAddress);
-                        dbSchool.EmailAddress = csvSchool.EmailAddress;
-                    }
-
-                    if (dbSchool.FaxNumber != csvSchool.FaxNumber)
-                    {
-                        LogChange("FaxNumber", dbSchool.FaxNumber, csvSchool.FaxNumber);
-                        dbSchool.FaxNumber = csvSchool.FaxNumber;
-                    }
-
-                    if (dbSchool.HeatSchool != csvSchool.HeatSchool)
-                    {
-                        LogChange("HeatSchool", dbSchool.HeatSchool.ToString(), csvSchool.HeatSchool.ToString());
-                        dbSchool.HeatSchool = csvSchool.HeatSchool;
-                    }
-                }
-
-                await _unitOfWork.CompleteAsync();
-            }
-        }
-
-        private void LogChange(string property, string oldValue, string newValue)
-        {
-            Console.WriteLine($" Updating {property} from {oldValue} to {newValue}");
-        }
-
-        private async Task<ICollection<CSVSchool>> GetSchoolList()
+        public async Task<ICollection<CSVSchool>> GetSchoolList()
         {
             var response = await _client.GetAsync("https://datacollections.det.nsw.edu.au/listofschools/csv/listofschool_all.csv");
             response.EnsureSuccessStatusCode();
@@ -299,42 +183,6 @@ namespace Constellation.Infrastructure.Gateways
             }
 
             return list;
-        }
-
-        private class CSVSchool
-        {
-            //Column 0
-            public string SchoolCode { get; set; }
-            //Column 1
-            public string Name { get; set; }
-            //Column 3
-            public string Address { get; set; }
-            //Column 4
-            public string Town { get; set; }
-            //Column 5
-            public string PostCode { get; set; }
-            //Column 9
-            public string Status { get; set; }
-            //Column 17
-            public string Electorate { get; set; }
-            //Column 24
-            public string PrincipalNetwork { get; set; }
-            //Column 21
-            public string Division { get; set; }
-            //Column 43
-            public string PhoneNumber { get; set; }
-            //Column 46
-            public string EmailAddress { get; set; }
-            //Column 47
-            public string FaxNumber { get; set; }
-            //Column 50
-            public bool HeatSchool { get; set; }
-            //Column 73
-            public string PrincipalName { get; set; }
-            public string PrincipalFirstName { get; set; }
-            public string PrincipalLastName { get; set; }
-            //Column 74
-            public string PrincipalEmail { get; set; }
         }
     }
 }

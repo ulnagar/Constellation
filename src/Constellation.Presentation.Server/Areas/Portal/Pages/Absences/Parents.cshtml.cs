@@ -74,7 +74,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
             return Page();
         }
 
-        public async Task<IActionResult> OnPostReport()
+        public IActionResult OnPostReport()
         {
             return RedirectToAction("AttendanceReportDownload", "Absences", new { area = "Reports", studentId = StudentId, startDate = ReportDate });
         }

@@ -1,6 +1,5 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Infrastructure.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,47 +18,64 @@ namespace Constellation.Infrastructure.Jobs
         private readonly IClassMonitorCacheService _monitorCacheService;
         private readonly IAdobeConnectService _adobeConnectService;
         private readonly ILogger<IClassMonitorJob> _logger;
-        private readonly IUnitOfWork _unitOfWork;
+
+        private Guid JobId { get; set; }    
 
         public ClassMonitorJob(IClassMonitorCacheService monitorCacheService, IAdobeConnectService adobeConnectService,
-            ILogger<IClassMonitorJob> logger, IUnitOfWork unitOfWork)
+            ILogger<IClassMonitorJob> logger)
         {
             _monitorCacheService = monitorCacheService;
             _adobeConnectService = adobeConnectService;
             _logger = logger;
-            _unitOfWork = unitOfWork;
         }
 
         public async Task StartJob(Guid jobId, CancellationToken token)
         { 
+            JobId = jobId;
+
             var scanTime = DateTime.Now;
-            _logger.LogInformation("Starting room monitor scan at {scanTime}", scanTime);
+            _logger.LogInformation("{id}: Starting room monitor scan at {scanTime}", jobId, scanTime);
+
+            if (token.IsCancellationRequested)
+                return;
 
             _cache = await _monitorCacheService.GetData();
-            _logger.LogInformation("Found {courses} rooms to check", _cache.Courses.Count);
+            _logger.LogInformation("{id}: Found {courses} rooms to check", jobId, _cache.Courses.Count);
 
             var taskList = new List<Task>();
             foreach (var course in _cache.Courses)
             {
-                taskList.Add(ScanRoom(course));
+                if (token.IsCancellationRequested)
+                    return;
+
+                taskList.Add(ScanRoom(course, token));
             }
+
+            if (token.IsCancellationRequested)
+                return;
 
             await Task.WhenAll(taskList);
 
-            _logger.LogInformation("Scanning of rooms complete.");
+            _logger.LogInformation("{id}: Scanning of rooms complete.", jobId);
+
+            if (token.IsCancellationRequested)
+                return;
 
             _monitorCacheService.UpdateScan(_cache.Courses);
 
-            _logger.LogInformation("Stopping room monitor scan at {time}", DateTime.Now);
+            _logger.LogInformation("{id}: Stopping room monitor scan at {time}", jobId, DateTime.Now);
         }
 
-        private async Task<ClassMonitorDtos.MonitorCourse> ScanRoom(ClassMonitorDtos.MonitorCourse listCourse)
+        private async Task<ClassMonitorDtos.MonitorCourse> ScanRoom(ClassMonitorDtos.MonitorCourse listCourse, CancellationToken token)
         {
-            await _semaphore.WaitAsync();
+            await _semaphore.WaitAsync(token);
+
+            if (token.IsCancellationRequested)
+                return listCourse;
 
             var course = listCourse;
 
-            _logger.LogInformation("{course} - Starting scan", course.Name);
+            _logger.LogInformation("{id}: {course} - Starting scan", JobId, course.Name);
 
             course.LastScanTime = DateTime.Now;
 
@@ -78,14 +94,26 @@ namespace Constellation.Infrastructure.Jobs
             if (course.Covers.Any(cover => cover.IsCurrent))
                 course.StatusCode += ClassMonitorDtos.MonitorCourse.Covered;
 
+            if (token.IsCancellationRequested)
+            {
+                _semaphore.Release();
+                return course;
+            }
+
             var assetId = await _adobeConnectService.GetCurrentSessionAsync(course.RoomScoId);
 
             if (string.IsNullOrWhiteSpace(assetId))
             {
-                _logger.LogInformation("{course} - Stopping scan - No current session detected", course.Name);
+                _logger.LogInformation("{id}: {course} - Stopping scan - No current session detected", JobId, course.Name);
 
                 _semaphore.Release();
 
+                return course;
+            }
+
+            if (token.IsCancellationRequested)
+            {
+                _semaphore.Release();
                 return course;
             }
 
@@ -93,7 +121,7 @@ namespace Constellation.Infrastructure.Jobs
 
             if (attendees == null)
             {
-                _logger.LogInformation("{course} - Stopping scan - No attendees detected", course.Name);
+                _logger.LogInformation("{id}: {course} - Stopping scan - No attendees detected", JobId, course.Name);
 
                 _semaphore.Release();
 
@@ -102,6 +130,12 @@ namespace Constellation.Infrastructure.Jobs
 
             foreach (var attendee in attendees)
             {
+                if (token.IsCancellationRequested)
+                {
+                    _semaphore.Release();
+                    return course;
+                }
+
                 IdentifyUser(course, attendee);
             }
 
@@ -111,7 +145,7 @@ namespace Constellation.Infrastructure.Jobs
             if ((course.Teachers.Count(teacher => teacher.IsPresent) + course.OtherStaff.Count) > 0)
                 course.StatusCode += ClassMonitorDtos.MonitorCourse.TeachersPresent;
 
-            _logger.LogInformation("{course} - Stopping scan", course.Name);
+            _logger.LogInformation("{id}: {course} - Stopping scan", JobId, course.Name);
 
             _semaphore.Release();
 
@@ -138,13 +172,13 @@ namespace Constellation.Infrastructure.Jobs
                     var student = course.Enrolments.FirstOrDefault(enrol => enrol.StudentId == user.Id);
                     if (student != null)
                     {
-                        _logger.LogInformation("{course} - Detected enrolled student - {student}", course.Name, student.StudentDisplayName);
+                        _logger.LogInformation("{id}: {course} - Detected enrolled student - {student}", JobId, course.Name, student.StudentDisplayName);
 
                         student.IsPresent = true;
                     }
                     else
                     {
-                        _logger.LogInformation("{course} - Detected non-enrolled student - {user}", course.Name, user.DisplayName);
+                        _logger.LogInformation("{id}: {course} - Detected non-enrolled student - {user}", JobId, course.Name, user.DisplayName);
 
                         course.OtherAttendees.Add(new ClassMonitorDtos.MonitorCourseEnrolment
                         {
@@ -161,13 +195,13 @@ namespace Constellation.Infrastructure.Jobs
                     var staff = course.Teachers.FirstOrDefault(teacher => teacher.Id == user.Id);
                     if (staff != null)
                     {
-                        _logger.LogInformation("{course} - Detected linked teacher - {staff}", course.Name, staff.DisplayName);
+                        _logger.LogInformation("{id}: {course} - Detected linked teacher - {staff}", JobId, course.Name, staff.DisplayName);
 
                         staff.IsPresent = true;
                     }
                     else
                     {
-                        _logger.LogInformation("{course} - Detected non-linked teacher - {user}", course.Name, user.DisplayName);
+                        _logger.LogInformation("{id}: {course} - Detected non-linked teacher - {user}", JobId, course.Name, user.DisplayName);
 
                         course.OtherStaff.Add(new ClassMonitorDtos.MonitorCourseTeacher
                         {
@@ -180,7 +214,7 @@ namespace Constellation.Infrastructure.Jobs
 
                     break;
                 case "Casual":
-                    _logger.LogInformation("{course} - Detected casual teacher - {user}", course.Name, user.DisplayName);
+                    _logger.LogInformation("{id}: {course} - Detected casual teacher - {user}", JobId, course.Name, user.DisplayName);
 
                     course.OtherStaff.Add(new ClassMonitorDtos.MonitorCourseTeacher
                     {

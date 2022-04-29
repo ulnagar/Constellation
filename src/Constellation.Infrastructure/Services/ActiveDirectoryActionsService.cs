@@ -70,7 +70,7 @@ namespace Constellation.Infrastructure.Services
                             linkedSchools.Add(code);
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     throw;
                 }
