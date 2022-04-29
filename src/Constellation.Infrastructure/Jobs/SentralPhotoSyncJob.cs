@@ -31,6 +31,9 @@ namespace Constellation.Infrastructure.Jobs
 
             foreach (var student in students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName))
             {
+                if (token.IsCancellationRequested)
+                    return;
+
                 _logger.LogInformation("{id}: Checking student {student} ({grade}) for photo", jobId, student.DisplayName, student.CurrentGrade.AsName());
 
                 var photo = await _gateway.GetSentralStudentPhoto(student.StudentId);

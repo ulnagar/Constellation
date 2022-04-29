@@ -38,6 +38,10 @@ SCHOOL PORTAL:
 PARENT CONTACTS:
 	Report any empty email addresses to school administration for investigation
 
+JOBS:
+	Confirm that cancellation token implementation will exit jobs
+	Add log text when cancelled
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~

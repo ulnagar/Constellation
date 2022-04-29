@@ -42,6 +42,9 @@ namespace Constellation.Infrastructure.Jobs
 
             foreach (var student in students.OrderBy(student => student.Grade).ThenBy(student => student.LastName))
             {
+                if (token.IsCancellationRequested)
+                    return;
+
                 _logger.LogInformation("{id}: Scanning {student} ({grade})", jobId, student.Name, student.Grade);
 
                 var reportList = await _gateway.GetStudentReportList(student.SentralStudentId);
@@ -50,6 +53,9 @@ namespace Constellation.Infrastructure.Jobs
 
                 foreach (var report in reportList)
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     _logger.LogInformation("{id}: Checking report #{publishId} ({reportName}) for {student} ({grade})", jobId, report.PublishId, report.Name, student.Name, student.Grade);
 
                     var existingReport = student.Reports.FirstOrDefault(r => r.Year == report.Year && r.ReportingPeriod == report.Name);

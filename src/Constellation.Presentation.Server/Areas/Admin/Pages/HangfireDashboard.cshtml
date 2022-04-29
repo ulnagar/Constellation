@@ -3,40 +3,62 @@
 
 <h3>Hangfire Job Activator</h3>
 
-<table>
-    @foreach (var job in Model.JobStatuses.OrderBy(status => status.JobName)) 
-    {
-        <tr>
-            <td style="width: 30%"><span class="heading">@job.JobName (@(job.IsActive ? "Active" : "Inactive"))</span></td>
-            <td>
-                <form asp-page-handler="ToggleJob" method="post">
-                    <input type="hidden" name="id" value="@job.Id" />
-                    @if (job.IsActive)
+<!-- Button to add all default jobs with default settings -->
+
+<!-- Table of all job definitions with options to add with default setting, add with custom cron expression, trigger, and remove -->
+
+<table class="table-striped table-hover data-table">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.JobDefinitions.OrderBy(def => def.Key))
+        {
+            var isActive = Model.GetJobStatus(item.Key);
+
+            <tr>
+                <td>@item.Key</td>
+                <td>
+                    <!-- Add button -->
+                    @if (!isActive)
                     {
-                        <button class="btn btn-danger">Disable</button>
-                    } else
-                    {
-                        <button class="btn btn-success">Enable</button>
+                        <form asp-page-handler="AddJob" method="post">
+                            <input type="hidden" name="actionName" value="@item.Key" />
+                            <input type="hidden" name="cronExpression" value="@item.Value" />
+                            <button class="btn btn-primary">Add Job</button>
+                        </form>
                     }
-                </form>
-            </td>
-        </tr>
-    }
-</table>
-
-<h3>Manual Job Activator</h3>
-
-<table>
-    @foreach (var job in Model.JobStatuses.OrderBy(status => status.JobName)) 
-    {
-        <tr>
-            <td style="width: 30%"><span class="heading">@job.JobName</span></td>
-            <td>
-                <form asp-page-handler="RunJob" method="post">
-                    <input type="hidden" name="id" value="@job.Id" />
-                    <button class="btn btn-danger">Run Now</button>
-                </form>
-            </td>
-        </tr>
-    }
+                </td>
+                <td>
+                    <!-- Add with custom expression button -->
+                </td>
+                <td>
+                    <!-- Trigger button -->
+                    @if (isActive)
+                    {
+                        <form asp-page-handler="TriggerJob" method="post">
+                            <input type="hidden" name="actionName" value="@item.Key" />
+                            <button class="btn btn-success" disabled="@(!isActive)">Run Job</button>
+                        </form>                        
+                    }
+                </td>
+                <td>
+                    <!-- Remove button -->
+                    @if (isActive)
+                    {
+                       <form asp-page-handler="RemoveJob" method="post">
+                            <input type="hidden" name="actionName" value="@item.Key" />
+                            <button class="btn btn-warning" disabled="@(!isActive)">Remove</button>
+                        </form> 
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
 </table>
