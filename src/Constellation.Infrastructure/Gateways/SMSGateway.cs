@@ -175,6 +175,27 @@ namespace Constellation.Infrastructure.Gateways
             return $"id=\"{_key}\", ts=\"{timestamp}\", nonce=\"{nonce}\", mac=\"{mac}\"";
         }
 
+        private SMSMessageCollectionDto ConvertToDto(SentMessages collection)
+        {
+            var data = new SMSMessageCollectionDto();
+
+            foreach (var message in collection.messages)
+            {
+                data.Messages.Add(new SMSMessageCollectionDto.Message
+                {
+                    Id = message.id,
+                    Destination = message.destination,
+                    MessageBody = message.message,
+                    Origin = message.origin,
+                    OutgoingId = message.outgoing_id,
+                    Status = message.status,
+                    Timestamp = message.dateTime
+                });
+            }
+
+            return data;
+        }
+
         private class Response
         {
             public override string ToString()

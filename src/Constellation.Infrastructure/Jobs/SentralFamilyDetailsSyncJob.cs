@@ -41,7 +41,7 @@ namespace Constellation.Infrastructure.Jobs
                 if (token.IsCancellationRequested)
                     return;
 
-                _logger.LogInformation("{id}: Checking family: {name} ({id})", jobId, family.AddressName, family.FamilyId);
+                _logger.LogInformation("{id}: Checking family: {name} ({code})", jobId, family.AddressName, family.FamilyId);
 
                 family.MotherMobile = family.MotherMobile.Replace(" ", "");
                 family.FatherMobile = family.FatherMobile.Replace(" ", "");
@@ -53,7 +53,7 @@ namespace Constellation.Infrastructure.Jobs
 
                 if (entry == null)
                 {
-                    _logger.LogInformation("{id}: No existing entry for {name} ({id}). Creating new family.", jobId, family.AddressName, family.FamilyId);
+                    _logger.LogInformation("{id}: No existing entry for {name} ({code}). Creating new family.", jobId, family.AddressName, family.FamilyId);
                     // New Family... Add to database
                     entry = new StudentFamily
                     {
@@ -95,7 +95,7 @@ namespace Constellation.Infrastructure.Jobs
                         var student = await _context.Students.FirstOrDefaultAsync(student => student.StudentId == studentId, token);
                         if (student != null)
                         {
-                            _logger.LogInformation("{id}: Adding student {name} to family {family} ({id})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
+                            _logger.LogInformation("{id}: Adding student {name} to family {family} ({code})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
 
                             entry.Students.Add(student);
                         }
@@ -105,33 +105,33 @@ namespace Constellation.Infrastructure.Jobs
 
                 } else
                 {
-                    _logger.LogInformation("{id}: Found existing entry for {family} ({id}). Updating details.",jobId, family.AddressName, family.FamilyId);
+                    _logger.LogInformation("{id}: Found existing entry for {family} ({code}). Updating details.", jobId, family.AddressName, family.FamilyId);
 
                     // Existing family... Check details
                     if (entry.Parent1.Title != family.FatherTitle)
                     {
-                        _logger.LogInformation("{id}: {family} ({id}): Updated Parent 1 Title from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.Title, family.FatherTitle);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Parent 1 Title from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.Title, family.FatherTitle);
                         
                         entry.Parent1.Title = family.FatherTitle;
                     }
 
                     if (entry.Parent1.FirstName != family.FatherFirstName)
                     {
-                        _logger.LogInformation("{id}: {family} ({id}): Updated Parent 1 First Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.FirstName, family.FatherFirstName);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Parent 1 First Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.FirstName, family.FatherFirstName);
 
                         entry.Parent1.FirstName = family.FatherFirstName;
                     }
 
                     if (entry.Parent1.LastName != family.FatherLastName)
                     {
-                        _logger.LogInformation("{id}: {family} ({id}): Updated Parent 1 Last Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.LastName, family.FatherLastName);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Parent 1 Last Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.LastName, family.FatherLastName);
                         
                         entry.Parent1.LastName = family.FatherLastName;
                     }
 
                     if (entry.Parent1.MobileNumber != family.FatherMobile)
                     {
-                        _logger.LogInformation("{id}: {family} ({id}): Updated Parent 1 Mobile from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.MobileNumber, family.FatherMobile);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Parent 1 Mobile from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.MobileNumber, family.FatherMobile);
                         
                         entry.Parent1.MobileNumber = family.FatherMobile;
                     }
@@ -140,7 +140,7 @@ namespace Constellation.Infrastructure.Jobs
                     {
                         if (!string.IsNullOrWhiteSpace(family.FamilyEmail))
                         {
-                            _logger.LogInformation("{id}: {family} ({id}): Updated Parent 1 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.EmailAddress, family.FamilyEmail);
+                            _logger.LogInformation("{id}: {family} ({code}): Updated Parent 1 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.EmailAddress, family.FamilyEmail);
 
                             entry.Parent1.EmailAddress = family.FamilyEmail;
                         }
@@ -148,28 +148,28 @@ namespace Constellation.Infrastructure.Jobs
 
                     if (entry.Parent2.Title != family.MotherTitle)
                     {
-                        _logger.LogInformation("{id}: {family} ({id}): Updated Parent 2 Title from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.Title, family.MotherTitle);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 Title from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.Title, family.MotherTitle);
 
                         entry.Parent2.Title = family.MotherTitle;
                     }
 
                     if (entry.Parent2.FirstName != family.MotherFirstName)
                     {
-                        _logger.LogInformation("{id}: {family} ({id}): Updated Parent 2 First Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.FirstName, family.MotherFirstName);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 First Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.FirstName, family.MotherFirstName);
 
                         entry.Parent2.FirstName = family.MotherFirstName;
                     }
 
                     if (entry.Parent2.LastName != family.MotherLastName)
                     {
-                        _logger.LogInformation("{id}: {family} ({id}): Updated Parent 2 Last Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.LastName, family.MotherLastName);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 Last Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.LastName, family.MotherLastName);
 
                         entry.Parent2.LastName = family.MotherLastName;
                     }
 
                     if (entry.Parent2.MobileNumber != family.MotherMobile)
                     {
-                        _logger.LogInformation("{id}: {family} ({id}): Updated Parent 2 Mobile from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.MobileNumber, family.MotherMobile);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 Mobile from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.MobileNumber, family.MotherMobile);
 
                         entry.Parent2.MobileNumber = family.MotherMobile;
                     }
@@ -178,7 +178,7 @@ namespace Constellation.Infrastructure.Jobs
                     {
                         if (!string.IsNullOrWhiteSpace(family.FamilyEmail))
                         {
-                            _logger.LogInformation("{id}: {family} ({id}): Updated Parent 2 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.EmailAddress, family.FamilyEmail);
+                            _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.EmailAddress, family.FamilyEmail);
 
                             entry.Parent2.EmailAddress = family.FamilyEmail;
                         }
@@ -186,35 +186,35 @@ namespace Constellation.Infrastructure.Jobs
 
                     if (entry.Address.Title != family.AddressName)
                     {
-                        _logger.LogInformation("{id}: {family} ({id}): Updated Address Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Title, family.AddressName);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Address Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Title, family.AddressName);
 
                         entry.Address.Title = family.AddressName;
                     }
 
                     if (entry.Address.Line1 != family.AddressLine1)
                     {
-                        _logger.LogInformation("{id}: {family} ({id}): Updated Address Line 1 from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Line1, family.AddressLine1);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Address Line 1 from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Line1, family.AddressLine1);
 
                         entry.Address.Line1 = family.AddressLine1;
                     }
 
                     if (entry.Address.Line2 != family.AddressLine2)
                     {
-                        _logger.LogInformation("{id}: {family} ({id}): Updated Address Line 2 from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Line2, family.AddressLine2);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Address Line 2 from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Line2, family.AddressLine2);
 
                         entry.Address.Line2 = family.AddressLine2;
                     }
 
                     if (entry.Address.Town != family.AddressTown)
                     {
-                        _logger.LogInformation("{id}: {family} ({id}): Updated Address Town from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Town, family.AddressTown);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Address Town from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Town, family.AddressTown);
 
                         entry.Address.Town = family.AddressTown;
                     }
 
                     if (entry.Address.PostCode != family.AddressPostCode)
                     {
-                        _logger.LogInformation("{id}: {family} ({id}): Updated Address PostCode from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.PostCode, family.AddressPostCode);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Address PostCode from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.PostCode, family.AddressPostCode);
 
                         entry.Address.PostCode = family.AddressPostCode;
                     }
@@ -233,7 +233,7 @@ namespace Constellation.Infrastructure.Jobs
                             var student = await _context.Students.FirstOrDefaultAsync(student => student.StudentId == studentId, token);
                             if (student != null)
                             {
-                                _logger.LogInformation("{id}: Adding student {name} to family {family} ({id})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
+                                _logger.LogInformation("{id}: Adding student {name} to family {family} ({code})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
 
                                 entry.Students.Add(student);
                             }
@@ -245,7 +245,7 @@ namespace Constellation.Infrastructure.Jobs
                     {
                         if (!family.StudentIds.Contains(student.StudentId))
                         {
-                            _logger.LogInformation("{id}: Removing student {name} to family {family} ({id})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
+                            _logger.LogInformation("{id}: Removing student {name} to family {family} ({code})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
 
                             // Student should not be linked
                             entry.Students.Remove(student);

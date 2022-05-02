@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Features.Partners.Students.Notifications;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -8,6 +9,7 @@ using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
@@ -24,14 +26,16 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStudentService _studentService;
         private readonly IOperationService _operationService;
+        private readonly IMediator _mediator;
 
         public StudentsController(IUnitOfWork unitOfWork, IStudentService studentService,
-            IOperationService operationService)
+            IOperationService operationService, IMediator mediator)
             : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _studentService = studentService;
             _operationService = operationService;
+            _mediator = mediator;
         }
 
         public IActionResult Index()
@@ -336,26 +340,9 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         public async Task<IActionResult> Withdraw(string id)
         {
             if (string.IsNullOrEmpty(id))
-            {
                 return RedirectToAction("Index");
-            }
 
-            var student = await _unitOfWork.Students.ForEditAsync(id);
-
-            if (student == null)
-            {
-                return RedirectToAction("Index");
-            }
-
-            if (student.IsDeleted)
-            {
-                return RedirectToAction("Index");
-            }
-
-            await _operationService.RemoveStudentEnrollmentMSTeamAccess(student.StudentId);
-            await _operationService.DisableCanvasUser(student.StudentId);
-            await _studentService.RemoveStudent(student.StudentId);
-            await _unitOfWork.CompleteAsync();
+            await _mediator.Publish(new StudentWithdrawnNotification { StudentId = id });
 
             return RedirectToAction("Details", new { id });
         }
