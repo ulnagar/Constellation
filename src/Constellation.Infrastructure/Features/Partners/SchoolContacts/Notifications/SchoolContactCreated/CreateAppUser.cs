@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifications
 {
-    public class SchoolContactCreatedNotification_CreateAppUserHandler : MediatR.INotificationHandler<SchoolContactCreatedNotification>
+    public class CreateAppUser : MediatR.INotificationHandler<SchoolContactCreatedNotification>
     {
         private readonly IAppDbContext _context;
         private readonly UserManager<AppUser> _userManager;
 
-        public SchoolContactCreatedNotification_CreateAppUserHandler(IAppDbContext context, UserManager<AppUser> userManager)
+        public CreateAppUser(IAppDbContext context, UserManager<AppUser> userManager)
         {
             _context = context;
             _userManager = userManager;

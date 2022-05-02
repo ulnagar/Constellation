@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifications
 {
-    public class SchoolContactCreatedNotification_AddMSTeamOperationHandler : MediatR.INotificationHandler<SchoolContactCreatedNotification>
+    public class AddMSTeamOperation : MediatR.INotificationHandler<SchoolContactCreatedNotification>
     {
         private readonly IAppDbContext _context;
 
-        public SchoolContactCreatedNotification_AddMSTeamOperationHandler(IAppDbContext context)
+        public AddMSTeamOperation(IAppDbContext context)
         {
             _context = context;
         }
