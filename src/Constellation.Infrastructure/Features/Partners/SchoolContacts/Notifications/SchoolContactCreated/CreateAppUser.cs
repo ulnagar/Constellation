@@ -1,6 +1,7 @@
 ﻿using Constellation.Application.Features.Partners.SchoolContacts.Notifications;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifications
 {
-    public class CreateAppUser : MediatR.INotificationHandler<SchoolContactCreatedNotification>
+    public class CreateAppUser : INotificationHandler<SchoolContactCreatedNotification>
     {
         private readonly IAppDbContext _context;
         private readonly UserManager<AppUser> _userManager;

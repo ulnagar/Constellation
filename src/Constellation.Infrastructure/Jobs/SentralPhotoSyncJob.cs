@@ -38,7 +38,7 @@ namespace Constellation.Infrastructure.Jobs
 
                 var photo = await _gateway.GetSentralStudentPhoto(student.StudentId);
 
-                if (student.Photo != photo)
+                if (!student.Photo.SequenceEqual(photo))
                 {
                     _logger.LogInformation("{id}: Found new photo for {student} ({grade})", jobId, student.DisplayName, student.CurrentGrade.AsName());
 

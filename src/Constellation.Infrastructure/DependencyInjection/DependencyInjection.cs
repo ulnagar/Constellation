@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Serilog.Core;
 using System;
 using System.Reflection;
 
@@ -32,6 +34,8 @@ namespace Constellation.Infrastructure.DependencyInjection
             {
                 options.UseSqlServer(configuration.GetConnectionString("TrackItConnection"));
             });
+
+            services.AddSingleton(Log.Logger);
 
             services.AddScoped<IAppDbContext, AppDbContext>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();

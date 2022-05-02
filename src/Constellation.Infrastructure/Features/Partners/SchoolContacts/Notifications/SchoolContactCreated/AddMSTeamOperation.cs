@@ -3,6 +3,7 @@ using Constellation.Application.Features.Partners.SchoolContacts.Notifications;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifications
 {
-    public class AddMSTeamOperation : MediatR.INotificationHandler<SchoolContactCreatedNotification>
+    public class AddMSTeamOperation : INotificationHandler<SchoolContactCreatedNotification>
     {
         private readonly IAppDbContext _context;
 
