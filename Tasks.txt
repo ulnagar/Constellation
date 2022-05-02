@@ -11,7 +11,6 @@ LINK SHORTENER:
 MISSED CLASSWORK:
 	Periodic report for HTs on what hasn't been completed
 	Provide option to HT for cancellation/mark done of a notification without sending an email
-	Remove outstanding entries when students withdraw
 
 TRACKITSYNC JOB:
 	Convert to individual MEDIATR actions, to allow for calling immediately when relevant records change
@@ -44,12 +43,17 @@ JOBS:
 	Confirm that cancellation token implementation will exit jobs
 	Add log text when cancelled
 
-SENTRALPHOTOSYNC:
-	Photos are always being replaced in database. Resolve check for uniqueness first.
-
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+R1.2:
+	SENTRALPHOTOSYNC:
+		Photos are always being replaced in database. Resolve check for uniqueness first.
+
+	MISSED CLASSWORK:
+		Remove outstanding entries when students withdraw
+
 
 R1.1:
 	CHANGE LOG:
