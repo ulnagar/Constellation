@@ -4,6 +4,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System;
 using System.Linq;
 using System.Threading;
@@ -14,17 +15,24 @@ namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.
     public class RemoveClassEnrolments : INotificationHandler<StudentWithdrawnNotification>
     {
         private readonly IAppDbContext _context;
+        private readonly ILogger _logger;
 
-        public RemoveClassEnrolments(IAppDbContext context)
+        public RemoveClassEnrolments(IAppDbContext context, ILogger logger)
         {
             _context = context;
+            _logger = logger.ForContext<StudentWithdrawnNotification>();
         }
 
         public async Task Handle(StudentWithdrawnNotification notification, CancellationToken cancellationToken)
         {
             using var dbContextTransaction = _context.Database.BeginTransactionAsync(cancellationToken);
 
+            _logger.Information("Attempting to unenroll student {studentId} from classes due to withdrawal", notification.StudentId);
+
             var enrolments = await _context.Enrolments
+                .Include(enrolment => enrolment.Offering)
+                .ThenInclude(offering => offering.Sessions)
+                .ThenInclude(session => session.Room)
                 .Where(enrolment => enrolment.StudentId == notification.StudentId && !enrolment.IsDeleted)
                 .ToListAsync(cancellationToken);
 
@@ -70,6 +78,8 @@ namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.
                 _context.Add(canvasOperation);
 
                 await _context.SaveChangesAsync(cancellationToken);
+
+                _logger.Information("Student {studentId} removed from class {class}", notification.StudentId, enrolment.Offering.Name);
             }
 
             await _context.Database.CommitTransactionAsync(cancellationToken);

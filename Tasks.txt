@@ -39,15 +39,16 @@ SCHOOL PORTAL:
 PARENT CONTACTS:
 	Report any empty email addresses to school administration for investigation
 
-JOBS:
-	Confirm that cancellation token implementation will exit jobs
-	Add log text when cancelled
-
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 R1.2:
+	JOBS:
+		Confirm that only one copy of a job can be queued at a single time. Subsequent jobs are stopped and not left queued.
+		Add log text when cancelled
+		Confirm that cancellation token implementation will exit jobs
+
 	SENTRALPHOTOSYNC:
 		Photos are always being replaced in database. Resolve check for uniqueness first.
 

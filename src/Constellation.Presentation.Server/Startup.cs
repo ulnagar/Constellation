@@ -67,7 +67,7 @@ namespace Constellation.Presentation.Server
 
             app.UseSerilogRequestLogging();
 
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();

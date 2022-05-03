@@ -32,7 +32,13 @@ namespace Constellation.Infrastructure.Services
             }
 
             _logger.LogInformation("Attempt to start job {job} ({id}) waiting for available lock", typeof(T).Name, jobId);
-            await _semaphore.WaitAsync(token);
+            var solo = await _semaphore.WaitAsync(0, token);
+            if (!solo)
+            {
+                _logger.LogInformation("Available lock not found for job {job} ({id}) indicating it is already running", typeof(T).Name, jobId);
+                return;
+            }
+
             _logger.LogInformation("Available lock found and taken for job {job} ({id})", typeof(T).Name, jobId);
 
             if (!token.IsCancellationRequested)
@@ -41,7 +47,15 @@ namespace Constellation.Infrastructure.Services
                 try
                 {
                     await _service.StartJob(jobId, token);
-                    _logger.LogInformation("Job {job} ({id}) finished", typeof(T).Name, jobId);
+
+                    if (token.IsCancellationRequested)
+                    {
+                        _logger.LogWarning("Job {job} ({id}) cancelled", typeof(T).Name, jobId);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Job {job} ({id}) finished", typeof(T).Name, jobId);
+                    }
                 }
                 catch (Exception e)
                 {

@@ -17,7 +17,7 @@ namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.
         public WithdrawStudentInDatabase(IAppDbContext context, ILogger logger)
         {
             _context = context;
-            _logger = logger;
+            _logger = logger.ForContext<StudentWithdrawnNotification>();
         }
 
         public async Task Handle(StudentWithdrawnNotification notification, CancellationToken cancellationToken)
@@ -29,7 +29,7 @@ namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.
 
             if (student == null)
             {
-                _logger.Warning("Cannot process student withdrawal ({notification}) as the student cannot be found in the database.", notification);
+                _logger.Warning("Cannot process student withdrawal ({notification}) as the student cannot be found in the database.", notification.StudentId);
 
                 return;
             }
@@ -39,7 +39,7 @@ namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            _logger.Information("Successfully deleted student {student} from database.", student);
+            _logger.Information("Successfully deleted student {student} from database.", notification.StudentId);
         }
     }
 }

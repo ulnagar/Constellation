@@ -17,7 +17,7 @@ namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.
         public RemoveOutstandingLessonRolls(IAppDbContext context, ILogger logger)
         {
             _context = context;
-            _logger = logger;
+            _logger = logger.ForContext<StudentWithdrawnNotification>();
         }
 
         public async Task Handle(StudentWithdrawnNotification notification, CancellationToken cancellationToken)
