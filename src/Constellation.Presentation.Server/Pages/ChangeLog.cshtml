@@ -28,7 +28,58 @@
 
 <h1>Constellation Changelog</h1>
 
-<h3>Current version: Release V1.1 (Build @version)</h3>
+<h3>Current version: Release V1.2 (Build @version)</h3>
+
+<div class="changelog">
+    <ul>
+        <li>Constellation Web
+            <ul>
+                <li>Log In
+                    <ul>
+                        <li>Added validation rules to highlight incorrect email addresses as they are entered</li>
+                    </ul>
+                </li>
+                <li>Partners/Students section
+                    <ul>
+                        <li>Send notification to School Administration if a parent email address is detected missing</li>
+                        <li>Absence explanations found in Sentral are now created as Responses instead of using custom top-level attributes</li>
+                        <li>Missed classwork notifications are now removed when the student is marked as withdrawn</li>
+                        <li>Lesson rolls are updated when a student has transferred between partner schools</li>
+                    </ul>
+                </li>
+                <li>Partners/SchoolContacts section
+                    <ul>
+                        <li>Duplicate entries are removed when performing a custom search</li>
+                    </ul>
+                </li>
+                <li>Portals/Lessons section
+                    <ul>
+                        <li>Admin lesson search now correctly displays the grade in the course name field</li>
+                    </ul>
+                </li>
+                <li>Reports section
+                    <ul>
+                        <li>FTE Calculation report now includes breakdown by gender per grade</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Constellation Infrastructure
+            <ul>
+                <li>Jobs (Recurring scheduled tasks)
+                    <ul>
+                        <li>Limit jobs to one concurrent instance at a time to prevent a job being started mulitple times</li>
+                        <li>Add log information for all lifecycle events for jobs</li>
+                        <li>Add graceful cancellation paths for all jobs</li>
+                        <li>Confirm photos are different from current copy before downloading in SentralPhotoSyncJob</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<h3>Previous version: Release V1.1 (Build 2205.2)</h3>
 
 <div class="changelog">
     <ul>
@@ -157,5 +208,3 @@
         </li>
     </ul>
 </div>
-
-
