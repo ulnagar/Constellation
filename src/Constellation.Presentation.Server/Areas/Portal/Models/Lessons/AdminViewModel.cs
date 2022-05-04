@@ -45,12 +45,12 @@ namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
             }
 
             public static LessonDto ConvertFromRoll(LessonRoll roll)
-            {
+            { 
                 var viewModel = new LessonDto
                 {
                     Id = roll.Id,
                     Name = roll.Lesson.Name,
-                    CourseName = roll.Lesson.Offerings.First().Course.Name,
+                    CourseName = $"{roll.Lesson.Offerings.First().Course.Grade} {roll.Lesson.Offerings.First().Course.Name}",
                     DueDate = roll.Lesson.DueDate,
                     Overdue = roll.Lesson.DueDate < DateTime.Today && roll.Status != LessonStatus.Completed && roll.Status != LessonStatus.Cancelled,
                     AttendanceStatistics = $"{roll.Attendance.Count(a => a.Present)}/{roll.Attendance.Count}",

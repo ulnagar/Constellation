@@ -61,6 +61,7 @@ R1.2:
 
 	LESSON ROLLS:
 		Trigger update of Lesson Rolls when a student is moved between schools
+		Update Admin Portal to include grade in search results
 
 R1.1:
 	CHANGE LOG:
