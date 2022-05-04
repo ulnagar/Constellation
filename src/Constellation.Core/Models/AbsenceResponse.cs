@@ -8,6 +8,7 @@ namespace Constellation.Core.Models
         public const string Coordinator = "Coordinator";
         public const string Parent = "Parent";
         public const string Student = "Student";
+        public const string System = "System";
 
         // Accepted values for VerificationStatus
         public const string NotRequired = "Not Required";

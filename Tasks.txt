@@ -27,9 +27,6 @@ FACULTY:
 ACTIONS:
 	Migrate to AccessRight concept
 
-ABSENCES:
-	Migrate Externally Explained to an actual Response record instead of top level fields
-
 SCHOOL PORTAL:
 	Show list and tally of awards listings per student
 
@@ -58,6 +55,9 @@ R1.2:
 
 	SCHOOL CONTACTS:
 		Remove duplicate entries in search results before showing
+		
+	ABSENCES:
+		Migrate Externally Explained to an actual Response record instead of top level fields
 
 R1.1:
 	CHANGE LOG:
