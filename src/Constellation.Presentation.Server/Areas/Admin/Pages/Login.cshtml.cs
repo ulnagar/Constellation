@@ -52,6 +52,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
         {
             [Required]
             [EmailAddress]
+            [RegularExpression(@"^\w+([-+.']\w+)*@det.nsw.edu.au$", ErrorMessage = "Invalid Email.")]
             public string Email { get; set; }
 
             [Required]

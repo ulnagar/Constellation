@@ -1,8 +1,10 @@
-﻿using Constellation.Application.Interfaces.Gateways;
+﻿using Constellation.Application.Features.Jobs.SentralFamilyDetailsSync.Notifications;
+using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -17,12 +19,15 @@ namespace Constellation.Infrastructure.Jobs
         private readonly IAppDbContext _context;
         private readonly ILogger<ISentralFamilyDetailsSyncJob> _logger;
         private readonly ISentralGateway _gateway;
+        private readonly IMediator _mediator;
 
-        public SentralFamilyDetailsSyncJob(IAppDbContext context, ILogger<ISentralFamilyDetailsSyncJob> logger, ISentralGateway gateway)
+        public SentralFamilyDetailsSyncJob(IAppDbContext context, ILogger<ISentralFamilyDetailsSyncJob> logger, 
+            ISentralGateway gateway, IMediator mediator)
         {
             _context = context;
             _logger = logger;
             _gateway = gateway;
+            _mediator = mediator;
         }
 
         public async Task StartJob(Guid jobId, CancellationToken token)
@@ -87,7 +92,7 @@ namespace Constellation.Infrastructure.Jobs
                     // Check if email is blank and alert admin
                     if (string.IsNullOrEmpty(family.FamilyEmail))
                     {
-                        // TODO: Send email
+                        await _mediator.Publish(new FamilyWithoutValidEmailAddressFoundNotification { FamilyId = family.FamilyId });
                     }
 
                     foreach (var studentId in family.StudentIds)
@@ -222,7 +227,7 @@ namespace Constellation.Infrastructure.Jobs
                     // Check if email is blank and alert admin
                     if (string.IsNullOrEmpty(family.FamilyEmail))
                     {
-                        // TODO: Send email
+                        await _mediator.Publish(new FamilyWithoutValidEmailAddressFoundNotification { FamilyId = family.FamilyId });
                     }
 
                     foreach (var studentId in family.StudentIds)
