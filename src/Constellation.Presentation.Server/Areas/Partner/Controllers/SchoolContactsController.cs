@@ -103,7 +103,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 }
             }
 
-            var contactList = filteredContacts.Select(SchoolStaff_ViewModel.ContactDto.ConvertFromAssignment).ToList();
+            var contactList = filteredContacts.Distinct().Select(SchoolStaff_ViewModel.ContactDto.ConvertFromAssignment).ToList();
 
             var viewModel = await CreateViewModel<SchoolStaff_ViewModel>();
             viewModel.Contacts = contactList.OrderBy(contact => contact.Name).ToList();

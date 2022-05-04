@@ -30,9 +30,6 @@ ACTIONS:
 ABSENCES:
 	Migrate Externally Explained to an actual Response record instead of top level fields
 
-SCHOOL CONTACTS:
-	Search function needs to be deduped before showing
-
 SCHOOL PORTAL:
 	Show list and tally of awards listings per student
 
@@ -59,6 +56,8 @@ R1.2:
 	MISSED CLASSWORK:
 		Remove outstanding entries when students withdraw
 
+	SCHOOL CONTACTS:
+		Remove duplicate entries in search results before showing
 
 R1.1:
 	CHANGE LOG:
