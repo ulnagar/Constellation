@@ -4,6 +4,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -16,23 +17,29 @@ namespace Constellation.Infrastructure.Features.Jobs.SentralFamilyDetailsSync.No
         private readonly IAppDbContext _context;
         private readonly IEmailGateway _emailSender;
         private readonly IRazorViewToStringRenderer _razorService;
+        private readonly ILogger _logger;
 
         public SendEmailToSchoolAdministration(IAppDbContext context, IEmailGateway emailSender,
-            IRazorViewToStringRenderer razorService)
+            IRazorViewToStringRenderer razorService, ILogger logger)
         {
             _context = context;
             _emailSender = emailSender;
             _razorService = razorService;
+            _logger = logger.ForContext<FamilyWithoutValidEmailAddressFoundNotification>();
         }
 
         public async Task Handle(FamilyWithoutValidEmailAddressFoundNotification notification, CancellationToken cancellationToken)
         {
+            _logger.Information("Detected family {familyId} without email address. Sending notification to school admin.", notification.FamilyId);
+            
             var family = await _context.StudentFamilies
                 .Include(family => family.Students)
                 .FirstOrDefaultAsync(family => family.Id == notification.FamilyId, cancellationToken);
 
             if (family == null)
             {
+                _logger.Warning("Could not find family {familyId} in database.", notification.FamilyId);
+
                 return;
             }
 
@@ -53,6 +60,8 @@ namespace Constellation.Infrastructure.Features.Jobs.SentralFamilyDetailsSync.No
             };
 
             await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", "Student Family email address missing", body, null);
+
+            _logger.Information("Email sent to school admin regarding missing email address for {family}.", family.Address.Title);
         }
     }
 }
