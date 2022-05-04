@@ -1,9 +1,11 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Features.Partners.Students.Notifications;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
+using MediatR;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,15 +16,18 @@ namespace Constellation.Infrastructure.Services
     public class StudentService : IStudentService, IScopedService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMediator _mediator;
+
         private IEnrolmentService _enrolService { get; set; }
         private IDeviceService _deviceService { get; set; }
 
         public StudentService(IUnitOfWork unitOfWork, IEnrolmentService enrolmentService,
-            IDeviceService deviceService)
+            IDeviceService deviceService, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _enrolService = enrolmentService;
             _deviceService = deviceService;
+            _mediator = mediator;
         }
 
         public async Task<ServiceOperationResult<Student>> CreateStudent(StudentDto studentResource)
@@ -175,7 +180,13 @@ namespace Constellation.Infrastructure.Services
                 student.Gender = studentResource.Gender;
 
             if (!string.IsNullOrWhiteSpace(studentResource.SchoolCode))
-                student.SchoolCode = studentResource.SchoolCode;
+            {
+                if (student.SchoolCode != studentResource.SchoolCode)
+                {
+                    await _mediator.Publish(new StudentMovedSchoolsNotification { StudentId = student.StudentId, OldSchoolCode = student.SchoolCode, NewSchoolCode = studentResource.SchoolCode });
+                    student.SchoolCode = studentResource.SchoolCode;
+                }
+            }
 
             result.Success = true;
             result.Entity = student;

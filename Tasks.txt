@@ -15,9 +15,6 @@ MISSED CLASSWORK:
 TRACKITSYNC JOB:
 	Convert to individual MEDIATR actions, to allow for calling immediately when relevant records change
 
-STUDENTS:
-	Add process for student moving school that updates Lesson Rolls
-
 GRADES:
 	Migrate from ENUM to object
 
@@ -29,6 +26,9 @@ ACTIONS:
 
 SCHOOL PORTAL:
 	Show list and tally of awards listings per student
+
+FTE CALCULATION:
+	Breakdown by gender as well
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,6 +58,9 @@ R1.2:
 		
 	ABSENCES:
 		Migrate Externally Explained to an actual Response record instead of top level fields
+
+	LESSON ROLLS:
+		Trigger update of Lesson Rolls when a student is moved between schools
 
 R1.1:
 	CHANGE LOG:

@@ -75,6 +75,11 @@ namespace Constellation.Infrastructure.Persistence
 
         public override EntityEntry Add(object entity) => base.Add(entity);
 
+        public override EntityEntry Remove(object entity)
+        {
+            return base.Remove(entity);
+        }
+
         public void ClearTrackerDb()
         {
             var changedEntriesCopy = base.ChangeTracker.Entries()
