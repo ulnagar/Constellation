@@ -11,7 +11,16 @@
 <table class="table-striped table-hover data-table">
     <thead>
         <tr>
-            <th>Grade</th>
+            <th rowspan="2">Grade</th>
+            <th colspan="2">Male</th>
+            <th colspan="2">Female</th>
+            <th colspan="2">Total</th>
+        </tr>
+        <tr>
+            <th># Students</th>
+            <th>FTE</th>
+            <th># Students</th>
+            <th>FTE</th>
             <th># Students</th>
             <th>FTE</th>
         </tr>
@@ -21,14 +30,22 @@
             {
                 <tr>
                     <td>@grade.Grade</td>
-                    <td>@grade.Enrolments</td>
-                    <td>@grade.EnrolmentFTE</td>
+                    <td>@grade.MaleEnrolments</td>
+                    <td>@grade.MaleEnrolmentFTE</td>
+                    <td>@grade.FemaleEnrolments</td>
+                    <td>@grade.FemaleEnrolmentFTE</td>
+                    <td>@grade.TotalEnrolments</td>
+                    <td>@grade.TotalEnrolmentFTE</td>
                 </tr>
             }
     </tbody>
     <tfoot>
         <tr>
             <th>Total</th>
+            <th>@Model.TotalMaleEnrolments</th>
+            <th>@Model.TotalMaleEnrolmentFTE</th>
+            <th>@Model.TotalFemaleEnrolments</th>
+            <th>@Model.TotalFemaleEnrolmentFTE</th>
             <th>@Model.TotalEnrolments</th>
             <th>@Model.TotalEnrolmentFTE</th>
         </tr>

@@ -48,21 +48,31 @@ namespace ACOS.Web.Areas.Reports.Controllers
                 var gradeEntry = new Student_FTEBreakdown_ViewModel.GradeEntry
                 {
                     Grade = $"Year {grade.Key.AsNumber().PadLeft(2, '0')}",
-                    Enrolments = grade.Count()
+                    MaleEnrolments = grade.Count(student => student.Gender == "M"),
+                    FemaleEnrolments = grade.Count(student => student.Gender == "F")
                 };
 
                 var enrolments = grade.SelectMany(student => student.Enrolments.Where(enrol => !enrol.IsDeleted));
 
                 foreach (var enrolment in enrolments)
                 {
-                    gradeEntry.EnrolmentFTE += enrolment.Offering.Course.FullTimeEquivalentValue;
+                    if (enrolment.Student.Gender == "M")
+                        gradeEntry.MaleEnrolmentFTE += enrolment.Offering.Course.FullTimeEquivalentValue;
+
+                    if (enrolment.Student.Gender == "F")
+                        gradeEntry.FemaleEnrolmentFTE += enrolment.Offering.Course.FullTimeEquivalentValue;
                 }
 
                 viewModel.Grades.Add(gradeEntry);
             }
 
-            viewModel.TotalEnrolments = viewModel.Grades.Sum(grade => grade.Enrolments);
-            viewModel.TotalEnrolmentFTE = viewModel.Grades.Sum(grade => grade.EnrolmentFTE);
+            viewModel.TotalMaleEnrolments = viewModel.Grades.Sum(grade => grade.MaleEnrolments);
+            viewModel.TotalMaleEnrolmentFTE = viewModel.Grades.Sum(grade => grade.MaleEnrolmentFTE);
+            viewModel.TotalFemaleEnrolments = viewModel.Grades.Sum(grade => grade.FemaleEnrolments);
+            viewModel.TotalFemaleEnrolmentFTE = viewModel.Grades.Sum(grade => grade.FemaleEnrolmentFTE);
+
+            viewModel.TotalEnrolments = viewModel.Grades.Sum(grade => grade.TotalEnrolments);
+            viewModel.TotalEnrolmentFTE = viewModel.Grades.Sum(grade => grade.TotalEnrolmentFTE);
 
             return View(viewModel);
         }

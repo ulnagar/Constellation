@@ -11,6 +11,10 @@ namespace Constellation.Presentation.Server.Areas.Reports.Models
         }
 
         public ICollection<GradeEntry> Grades { get; set; }
+        public int TotalMaleEnrolments { get; set; }
+        public decimal TotalMaleEnrolmentFTE { get; set; }
+        public int TotalFemaleEnrolments { get; set; }
+        public decimal TotalFemaleEnrolmentFTE { get; set; }
         public int TotalEnrolments { get; set; }
         public decimal TotalEnrolmentFTE { get; set; }
 
@@ -18,8 +22,13 @@ namespace Constellation.Presentation.Server.Areas.Reports.Models
         public class GradeEntry
         {
             public string Grade { get; set; }
-            public int Enrolments { get; set; }
-            public decimal EnrolmentFTE { get; set; }
+            public int MaleEnrolments { get; set; }
+            public decimal MaleEnrolmentFTE { get; set; }
+            public int FemaleEnrolments { get; set; }
+            public decimal FemaleEnrolmentFTE { get; set; }
+
+            public int TotalEnrolments => MaleEnrolments + FemaleEnrolments;
+            public decimal TotalEnrolmentFTE => MaleEnrolmentFTE + FemaleEnrolmentFTE;
         }
     }
 }
