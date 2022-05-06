@@ -14,8 +14,8 @@ namespace Constellation.Infrastructure.Templates.Views.Emails.Absences
 
         public string StudentName { get; set; }
         public string SchoolName { get; set; }
-        //public string Link => $"https://acos.aurora.nsw.edu.au/Portal/School/";
-        public string Link => $"https://acos.aurora.nsw.edu.au/";
+        public string Link => $"https://acos-int.aurora.nsw.edu.au/Portal/School/";
+        //public string Link => $"https://acos.aurora.nsw.edu.au/";
         public ICollection<AbsenceEntry> Absences { get; set; }
 
         public class AbsenceEntry

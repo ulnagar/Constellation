@@ -585,7 +585,7 @@ namespace Constellation.Infrastructure.Services
                 SenderName = settings.LessonsCoordinatorName,
                 SenderTitle = settings.LessonsCoordinatorTitle,
                 Title = "[Aurora College] Science Practical Lesson Overdue",
-                Link = "https://acos.aurora.nsw.edu.au/Portal/Lessons",
+                Link = "https://acos-int.aurora.nsw.edu.au/Portal/School",
                 SchoolName = notification.SchoolName,
                 Lessons = notification.Lessons.Select(FirstWarningEmailViewModel.LessonEntry.ConvertFromLessonItem).ToList()
             };
@@ -610,7 +610,7 @@ namespace Constellation.Infrastructure.Services
                 SenderName = settings.LessonsCoordinatorName,
                 SenderTitle = settings.LessonsCoordinatorTitle,
                 Title = "[Aurora College] Science Practical Lesson Overdue",
-                Link = "https://acos.aurora.nsw.edu.au/Portal/Lessons",
+                Link = "https://acos-int.aurora.nsw.edu.au/Portal/School",
                 SchoolName = notification.SchoolName,
                 Lessons = notification.Lessons.Select(SecondWarningEmailViewModel.LessonEntry.ConvertFromLessonItem).ToList()
             };
@@ -635,7 +635,7 @@ namespace Constellation.Infrastructure.Services
                 SenderName = settings.LessonsCoordinatorName,
                 SenderTitle = settings.LessonsCoordinatorTitle,
                 Title = "[Aurora College] Science Practical Lesson Overdue",
-                Link = "https://acos.aurora.nsw.edu.au/Portal/Lessons",
+                Link = "https://acos-int.aurora.nsw.edu.au/Portal/School",
                 SchoolName = notification.SchoolName,
                 Lessons = notification.Lessons.Select(SecondWarningEmailViewModel.LessonEntry.ConvertFromLessonItem).ToList()
             };
@@ -660,7 +660,7 @@ namespace Constellation.Infrastructure.Services
                 SenderName = settings.LessonsCoordinatorName,
                 SenderTitle = settings.LessonsCoordinatorTitle,
                 Title = "[Aurora College] Science Practical Lesson Overdue",
-                Link = "https://acos.aurora.nsw.edu.au/Portal/Lessons",
+                Link = "https://acos-int.aurora.nsw.edu.au/Portal/School",
                 SchoolName = notification.SchoolName,
                 Lessons = notification.Lessons.Select(FinalWarningEmailViewModel.LessonEntry.ConvertFromLessonItem).ToList()
             };
