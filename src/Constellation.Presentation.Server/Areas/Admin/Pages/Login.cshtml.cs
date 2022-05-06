@@ -116,13 +116,13 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                 }
 
                 // Temporarily turned off as Schools Portal is not working
-                //var isStaffMember = await _mediator.Send(new IsUserASchoolStaffMemberQuery { EmailAddress = Input.Email });
+                var isStaffMember = await _mediator.Send(new IsUserASchoolStaffMemberQuery { EmailAddress = Input.Email });
 
-                //if (!isStaffMember)
-                //{
-                //    _logger.LogInformation(" - User is not a staff member - redirecting to Schools Portal");
-                //    return RedirectToPage("PortalRedirect");
-                //}
+                if (!isStaffMember)
+                {
+                    _logger.LogInformation(" - User is not a staff member - redirecting to Schools Portal");
+                    return RedirectToPage("PortalRedirect");
+                }
 
                 var result = new LoginResult();
 
