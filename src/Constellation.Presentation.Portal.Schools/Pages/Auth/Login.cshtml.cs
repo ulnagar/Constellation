@@ -108,16 +108,17 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
                 _logger.LogInformation($"Starting Login Attempt by {Input.Email}");
 
 #if DEBUG
-                var user = await _userManager.FindByEmailAsync(Input.Email);
 
-                if (user == null)
-                {
-                    _logger.LogWarning($" - No user found for email {Input.Email}");
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return Page();
-                }
+                //var user = await _userManager.FindByEmailAsync(Input.Email);
 
-                _logger.LogInformation($" - Found user {user.Id} for email {Input.Email}");
+                //if (user == null)
+                //{
+                //    _logger.LogWarning($" - No user found for email {Input.Email}");
+                //    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                //    return Page();
+                //}
+
+                //_logger.LogInformation($" - Found user {user.Id} for email {Input.Email}");
 
                 // Test with dummy claims
                 //var claimList = new List<Claim>();
@@ -169,7 +170,7 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
                 await _mediator.Send(new UpdateUserSchoolsClaimCommand { EmailAddress = Input.Email });
 
                 _logger.LogInformation($" - DEBUG code found. Bypass login check.");
-                await _signInManager.SignInAsync(user, false);
+                await _signInManager.SignInAsync(dbUserAccount, false);
 
                 return LocalRedirect(returnUrl);
 #else

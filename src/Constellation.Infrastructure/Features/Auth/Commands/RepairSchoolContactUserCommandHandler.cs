@@ -53,7 +53,7 @@ namespace Constellation.Infrastructure.Features.Auth.Commands
                     SchoolContactId = contact.Id
                 };
 
-                var result = await _userManager.CreateAsync(user);
+                var result = await _userManager.CreateAsync(newUser);
             }
             else if (user.IsSchoolContact == false)
             {
