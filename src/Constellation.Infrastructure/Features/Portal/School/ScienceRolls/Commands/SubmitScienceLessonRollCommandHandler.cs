@@ -26,6 +26,7 @@ namespace Constellation.Infrastructure.Features.Portal.School.ScienceRolls.Comma
                 .FirstOrDefaultAsync(contact => contact.EmailAddress == request.UserEmail, cancellationToken);
 
             var roll = await _context.LessonRolls
+                .Include(roll => roll.Attendance)
                 .FirstOrDefaultAsync(roll => roll.Id == request.RollId, cancellationToken);
 
             roll.LessonDate = request.LessonDate;

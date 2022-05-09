@@ -27,6 +27,12 @@ ACTIONS:
 SCHOOL PORTAL:
 	Show list and tally of awards listings per student
 
+HANGFIRE DASHBOARD:
+	Add TRIGGER NOW button for one-off job registration
+
+SCHOOLS:
+	Add titles to set school maps pages
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~
