@@ -29,37 +29,40 @@ namespace Constellation.Infrastructure.Features.Jobs.AbsenceMonitor.Queries
 
             var emailAddresses = new List<string>();
 
+            if (studentFamily == null)
+                return emailAddresses;
+
             switch (_settings.ContactPreference)
             {
                 case ISentralGatewayConfiguration.ContactPreferenceOptions.MotherFirstThenFather:
-                    if (!string.IsNullOrWhiteSpace(studentFamily.Parent2.EmailAddress))
+                    if (!string.IsNullOrWhiteSpace(studentFamily?.Parent2?.EmailAddress))
                     {
                         emailAddresses.Add(studentFamily.Parent2.EmailAddress);
                     }
-                    else if (!string.IsNullOrWhiteSpace(studentFamily.Parent1.EmailAddress))
+                    else if (!string.IsNullOrWhiteSpace(studentFamily?.Parent1?.EmailAddress))
                     {
                         emailAddresses.Add(studentFamily.Parent1.EmailAddress);
                     }
 
                     break;
                 case ISentralGatewayConfiguration.ContactPreferenceOptions.FatherFirstThenMother:
-                    if (!string.IsNullOrWhiteSpace(studentFamily.Parent1.EmailAddress))
+                    if (!string.IsNullOrWhiteSpace(studentFamily?.Parent1?.EmailAddress))
                     {
                         emailAddresses.Add(studentFamily.Parent1.EmailAddress);
                     }
-                    else if (!string.IsNullOrWhiteSpace(studentFamily.Parent2.EmailAddress))
+                    else if (!string.IsNullOrWhiteSpace(studentFamily?.Parent2?.EmailAddress))
                     {
                         emailAddresses.Add(studentFamily.Parent2.EmailAddress);
                     }
 
                     break;
                 case ISentralGatewayConfiguration.ContactPreferenceOptions.BothParentsIfPresent:
-                    if (!string.IsNullOrWhiteSpace(studentFamily.Parent2.EmailAddress))
+                    if (!string.IsNullOrWhiteSpace(studentFamily?.Parent2?.EmailAddress))
                     {
                         emailAddresses.Add(studentFamily.Parent2.EmailAddress);
                     }
 
-                    if (!string.IsNullOrWhiteSpace(studentFamily.Parent1.EmailAddress))
+                    if (!string.IsNullOrWhiteSpace(studentFamily?.Parent1?.EmailAddress))
                     {
                         emailAddresses.Add(studentFamily.Parent1.EmailAddress);
                     }

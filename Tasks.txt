@@ -29,9 +29,17 @@ SCHOOL PORTAL:
 
 HANGFIRE DASHBOARD:
 	Add TRIGGER NOW button for one-off job registration
+	Add TRIGGER OUTSIDE HANGFIRE button for interactive sessions
+	Manage once-per-day job continuation
 
 SCHOOLS:
 	Add titles to set school maps pages
+
+SCHOOLS PORTAL LOGIN:
+	Return status from MEDIATR find user action, so that an error message can be displayed as appropriate when an inactive user is detected
+
+ATTENDANCE REPORT JOB:
+	Save generated files to database
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE

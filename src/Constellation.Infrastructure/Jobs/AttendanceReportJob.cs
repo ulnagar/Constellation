@@ -57,7 +57,7 @@ namespace Constellation.Infrastructure.Jobs
             var students = await _unitOfWork.Students.AllActiveAsync();
             var studentsBySchool = students.OrderBy(s => s.School.Name).GroupBy(s => s.SchoolCode).ToList();
 
-            foreach (var school in studentsBySchool)
+            foreach (var school in studentsBySchool.Skip(67))
             {
                 if (token.IsCancellationRequested)
                     return;
