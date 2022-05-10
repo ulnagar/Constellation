@@ -56,7 +56,8 @@ namespace Constellation.Infrastructure.Features.Jobs.SentralFamilyDetailsSync.No
 
             var toRecipients = new Dictionary<string, string>
             {
-                { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
+                { "Aurora College IT Support", "auroracollegeitsupport@det.nsw.edu.au" },
+                { "Aurora College", "auroracoll-h.school@det.nsw.edu.au" }
             };
 
             await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", "Student Family email address missing", body, null);
