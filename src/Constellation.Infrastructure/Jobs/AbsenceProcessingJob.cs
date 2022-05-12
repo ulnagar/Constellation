@@ -697,9 +697,9 @@ namespace Constellation.Infrastructure.Jobs
                     if (existingAbsences.All(innerabsence => !innerabsence.Explained) && acceptedReasons.Contains(absence.AbsenceReason))
                     {
                         _logger.LogInformation("{id}: Student {student} ({grade}): Found external explaination for {Type} absence on {Date} - {PeriodName}", JobId, student.DisplayName, student.CurrentGrade.AsName(), absence.Type, absence.Date.ToShortDateString(), absence.PeriodName);
-                        //existingAbsence.ExternallyExplained = true;
-                        //existingAbsence.ExternalExplanation = absence.ExternalExplanation;
-                        //existingAbsence.ExternalExplanationSource = absence.ExternalExplanationSource;
+                        existingAbsence.ExternallyExplained = true;
+                        existingAbsence.ExternalExplanation = absence.ExternalExplanation;
+                        existingAbsence.ExternalExplanationSource = absence.ExternalExplanationSource;
 
                         var response = new AbsenceResponse
                         {
