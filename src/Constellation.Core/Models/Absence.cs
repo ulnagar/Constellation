@@ -43,9 +43,7 @@ namespace Constellation.Core.Models
         public string ExternalExplanationSource { get; set; }
 
         public bool Explained => (Responses.Any(response =>
-            (response.Type == AbsenceResponse.Student && response.VerificationStatus == AbsenceResponse.Verified) ||
-            (response.Type == AbsenceResponse.Parent || response.Type == AbsenceResponse.Coordinator)) ||
-            ExternallyExplained);
+            (response.Type == AbsenceResponse.Student && response.VerificationStatus == AbsenceResponse.Verified) || true));
 
         public ICollection<AbsenceNotification> Notifications { get; set; }
         public ICollection<AbsenceResponse> Responses { get; set; }

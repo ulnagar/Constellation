@@ -30,9 +30,7 @@ namespace Constellation.Infrastructure.Features.Jobs.AbsenceMonitor.Queries
                 .Where(absence => absence.Type == request.Type)
                 .Where(absence => !(absence.Responses.Any(response =>
                         response.Type == AbsenceResponse.Student && response.VerificationStatus == AbsenceResponse.Verified ||
-                        response.Type == AbsenceResponse.Parent ||
-                        response.Type == AbsenceResponse.Coordinator) ||
-                    absence.ExternallyExplained))
+                        true)))
                 .Where(absence => absence.DateScanned >= DateTime.Today.AddDays(request.AgeInWeeks * -7))
                 .Where(absence => absence.DateScanned <= DateTime.Today.AddDays((request.AgeInWeeks - 1) * -7 - 1))
                 .ToListAsync(cancellationToken);

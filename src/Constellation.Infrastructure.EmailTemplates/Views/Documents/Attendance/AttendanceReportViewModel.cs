@@ -47,18 +47,23 @@ namespace Constellation.Infrastructure.Templates.Views.Documents.Attendance
 
             public static string CalculateExplanationString(Absence absence)
             {
-                if (absence.ExternallyExplained && string.IsNullOrWhiteSpace(absence.ExternalExplanation))
-                    return $"<br />Explained via Sentral";
-
-                if (absence.ExternallyExplained && !string.IsNullOrWhiteSpace(absence.ExternalExplanation))
-                    return $"<br />Explained via Sentral: {absence.ExternalExplanation} ({absence.ExternalExplanationSource})";
-
                 if (absence.Responses.Any())
                 {
                     var text = "";
                     foreach (var response in absence.Responses)
                     {
-                        text += $"<br />Explained via Portal: {response.Explanation} ({response.From})";
+                        if (response.Type == AbsenceResponse.System && string.IsNullOrWhiteSpace(response.Explanation))
+                        {
+                            text += $"<br />Explained via Sentral";
+                        }
+                        else if (response.Type == AbsenceResponse.System && !string.IsNullOrWhiteSpace(response.Explanation))
+                        {
+                            text += $"<br />Explained via Sentral: {response.Explanation} ({response.From})";
+                        }
+                        else
+                        {
+                            text += $"<br />Explained via Portal: {response.Explanation} ({response.From})";
+                        }
                     }
 
                     return text;
@@ -80,21 +85,9 @@ namespace Constellation.Infrastructure.Templates.Views.Documents.Attendance
                     Type = absence.Type,
                     AbsenceReason = absence.AbsenceReason,
                     AbsenceTimeframe = absence.AbsenceTimeframe,
-                    Explained = absence.Explained
+                    Explained = absence.Explained,
+                    ExplanationString = CalculateExplanationString(absence)
                 };
-
-                if (absence.ExternallyExplained && string.IsNullOrWhiteSpace(absence.ExternalExplanation))
-                    viewModel.ExplanationString = $"<br />Explained via Sentral";
-
-                if (absence.ExternallyExplained && !string.IsNullOrWhiteSpace(absence.ExternalExplanation))
-                    viewModel.ExplanationString = $"<br />Explained via Sentral: {absence.ExternalExplanation} ({absence.ExternalExplanationSource})";
-
-                if (absence.Responses.Any())
-                    foreach (var response in absence.Responses)
-                        viewModel.ExplanationString += $"<br />Explained via Portal: {response.Explanation} ({response.From})";
-
-                if (!absence.Explained)
-                    viewModel.ExplanationString = "<br />No explanation provided yet.";
 
                 return viewModel;
             }

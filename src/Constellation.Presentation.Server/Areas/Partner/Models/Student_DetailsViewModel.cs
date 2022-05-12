@@ -171,7 +171,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
                     OfferingName = absence.Offering.Name,
                     NotificationCount = absence.Notifications.Count,
                     ResponsesCount = absence.Responses.Count,
-                    Explained = absence.Explained || absence.ExternallyExplained
+                    Explained = absence.Explained
                 };
 
                 return viewModel;

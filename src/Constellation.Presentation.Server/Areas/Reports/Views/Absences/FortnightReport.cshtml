@@ -1,4 +1,5 @@
 ﻿@using Constellation.Application.Extensions
+@using Constellation.Core.Models
 @model Absence_FortnightReportViewModel
 @{
     Layout = null;
@@ -140,17 +141,17 @@
 
                                                     if (absence.Explained)
                                                     {
-                                                        if (absence.ExternallyExplained && string.IsNullOrWhiteSpace(absence.ExternalExplanation))
+                                                        foreach (var response in absence.Responses)
                                                         {
-                                                            @:<br />Explained via Sentral
-                                                        }
-                                                        else if (absence.ExternallyExplained)
-                                                        {
-                                                            @:<br />Explained via Sentral: @absence.ExternalExplanation (@absence.ExternalExplanationSource)
-                                                        }
-                                                        else
-                                                        {
-                                                            foreach (var response in absence.Responses)
+                                                            if (response.Type == AbsenceResponse.System && string.IsNullOrWhiteSpace(response.Explanation))
+                                                            {
+                                                                @:<br />Explained via Sentral
+                                                            }
+                                                            else if (response.Type == AbsenceResponse.System && !string.IsNullOrWhiteSpace(response.Explanation))
+                                                            {
+                                                                @:<br />Explained via Sentral: @response.Explanation (@response.From)
+                                                            }
+                                                            else
                                                             {
                                                                 @:<br />Explained via Portal: @response.Explanation (@response.From)
                                                             }
@@ -230,17 +231,17 @@
 
                                                     if (absence.Explained)
                                                     {
-                                                        if (absence.ExternallyExplained && string.IsNullOrWhiteSpace(absence.ExternalExplanation))
+                                                        foreach (var response in absence.Responses)
                                                         {
-                                                            @:<br />Explained via Sentral
-                                                        }
-                                                        else if (absence.ExternallyExplained)
-                                                        {
-                                                            @:<br />Explained via Sentral: @absence.ExternalExplanation (@absence.ExternalExplanationSource)
-                                                        }
-                                                        else
-                                                        {
-                                                            foreach (var response in absence.Responses)
+                                                            if (response.Type == AbsenceResponse.System && string.IsNullOrWhiteSpace(response.Explanation))
+                                                            {
+                                                                @:<br />Explained via Sentral
+                                                            }
+                                                            else if (response.Type == AbsenceResponse.System && !string.IsNullOrWhiteSpace(response.Explanation))
+                                                            {
+                                                                @:<br />Explained via Sentral: @response.Explanation (@response.From)
+                                                            }
+                                                            else
                                                             {
                                                                 @:<br />Explained via Portal: @response.Explanation (@response.From)
                                                             }

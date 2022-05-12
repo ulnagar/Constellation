@@ -7,6 +7,9 @@ using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Test.Pages
@@ -14,14 +17,12 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages
     public class IndexModel : BasePageModel
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMediator _mediator;
-        private readonly IJobDispatcherService<IAttendanceReportJob> _jobDispatcher;
+        private readonly IAppDbContext _context;
 
-        public IndexModel(IUnitOfWork unitOfWork, IMediator mediator, IJobDispatcherService<IAttendanceReportJob> jobDispatcher)
+        public IndexModel(IUnitOfWork unitOfWork, IAppDbContext context)
         {
             _unitOfWork = unitOfWork;
-            _mediator = mediator;
-            _jobDispatcher = jobDispatcher;
+            _context = context;
         }
 
         public async Task OnGetAsync()
@@ -31,7 +32,28 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages
 
         public async Task<IActionResult> OnPostAsync()
         {
-            await _jobDispatcher.StartJob(new System.Threading.CancellationToken());
+            var absences = await _context.Absences
+                .Include(absence => absence.Responses)
+                .Where(absence => 
+                    absence.ExternallyExplained && 
+                    absence.ExternalExplanation != null && 
+                    absence.Responses.Any(response => response.VerificationStatus != AbsenceResponse.Pending))
+                .ToListAsync();
+
+            foreach (var absence in absences)
+            {
+                var response = new AbsenceResponse
+                {
+                    Explanation = absence.ExternalExplanation,
+                    From = absence.ExternalExplanationSource,
+                    ReceivedAt = absence.LastSeen,
+                    Type = AbsenceResponse.System
+                };
+
+                absence.Responses.Add(response);
+
+                await _context.SaveChangesAsync(new CancellationToken());
+            }
 
             return Page();
         }

@@ -28,9 +28,7 @@ namespace Constellation.Infrastructure.Features.Jobs.AbsenceMonitor.Queries
                 .Where(absence => absence.StudentId == request.StudentId &&
                     absence.Type == request.AbsenceType &&
                     !(absence.Responses.Any(response =>
-                        response.Type == AbsenceResponse.Student && response.VerificationStatus == AbsenceResponse.Verified ||
-                        response.Type == AbsenceResponse.Parent || response.Type == AbsenceResponse.Coordinator) ||
-                    absence.ExternallyExplained) &&
+                        response.Type == AbsenceResponse.Student && response.VerificationStatus == AbsenceResponse.Verified || true)) &&
                     absence.DateScanned.Date == DateTime.Today)
                 .ToListAsync(cancellationToken);
 

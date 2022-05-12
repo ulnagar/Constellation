@@ -42,13 +42,9 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
                 OfferingName = absence.Offering.Name,
                 PeriodName = absence.PeriodName,
                 PeriodTimeframe = absence.PeriodTimeframe,
-                IsExplained = absence.Explained
+                IsExplained = absence.Explained,
+                Reason = absence.Responses.First().Explanation
             };
-
-            if (absence.Responses.Any())
-                Absence.Reason = absence.Responses.First().Explanation;
-            else if (absence.ExternallyExplained)
-                Absence.Reason = absence.ExternalExplanation;
 
             return Page();
         }

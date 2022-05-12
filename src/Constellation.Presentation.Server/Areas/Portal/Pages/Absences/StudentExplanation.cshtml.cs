@@ -56,12 +56,6 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
                 Absence.VerifiedBy = response.Verifier;
                 Absence.IsVerified = true;
             } 
-            else if (absence.ExternallyExplained)
-            {
-                Absence.Reason = absence.ExternalExplanation;
-                Absence.VerifiedBy = absence.ExternalExplanationSource;
-                Absence.IsVerified = true;
-            }
             else
             {
                 Absence.IsVerified = false;
