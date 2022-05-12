@@ -4,6 +4,7 @@ OPERATIONS:
 COVERS:
 	Add calendar appointment to single day covers
 	Add timetable sheet to multi-day covers
+	Add link landing page that checks access dates before sending people to the actual teams link
 
 LINK SHORTENER:
 	Provide interface for custom shortening of long URLs on custom domain
@@ -26,6 +27,7 @@ ACTIONS:
 
 SCHOOL PORTAL:
 	Show list and tally of awards listings per student
+	Show student timetables, including download pdf
 
 HANGFIRE DASHBOARD:
 	Add TRIGGER NOW button for one-off job registration
@@ -40,6 +42,9 @@ SCHOOLS PORTAL LOGIN:
 
 ATTENDANCE REPORT JOB:
 	Save generated files to database
+
+ABSENCES:
+	Externally explained absences created as Response records are being created every scan. Need to update detection so they are recognised as an explained absence.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE

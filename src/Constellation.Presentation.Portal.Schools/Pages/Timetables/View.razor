@@ -1,0 +1,122 @@
+﻿@page "/Timetables/View/{StudentId}"
+
+@attribute [Authorize]
+
+@inject IMediator mediator
+@inject NavigationManager NavigationManager
+
+<h2>Student Timetables</h2>
+
+<hr />
+
+@StudentTimetableData.StudentName <br/>
+@StudentTimetableData.StudentGrade <br />
+@StudentTimetableData.StudentSchool
+
+<div>
+    @{
+        var timetables = StudentTimetableData.Timetables.OrderBy(data => data.TimetableName).GroupBy(data => data.TimetableName);
+
+        @foreach (var block in timetables)
+        {
+            var dayList = block.Select(data => data.Day).Distinct().ToList();
+            var weekList = dayList.Max();
+            var numWeeks = weekList / 5;
+            int currentDay = 1;
+            int currentPeriod = 1;
+            int currentWeek = 1;
+
+            <div>
+                @for (currentWeek = 1; currentWeek <= numWeeks; currentWeek++)
+                {
+                    <div class="Timetable-Week">
+                        <div class="Timetable-Day">
+                            <div class="Timetable-Day-Title"></div>
+                            @foreach (var period in block.Where(data => data.Day == currentDay).OrderBy(data => data.StartTime))
+                            {
+                                <div class="Timetable-Day-Period">
+                                    @period.Name<br />
+                                    @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()
+                                </div>
+                            }
+                        </div>
+
+                        @for (currentDay = 1; currentDay <= currentWeek * 5 && currentDay > (currentWeek -1) * 5; currentDay++)
+                        {
+                            <div class="Timetable-Day">
+                                <div class="Timetable-Day-Title">
+                                    @{
+                                        var weekName = currentWeek switch
+                                        {
+                                            0 => "Week A",
+                                            1 => "Week B",
+                                            2 => "Week C",
+                                            4 => "Week D",
+                                            _ => ""
+                                        };
+
+                                        var dayName = currentDay switch
+                                        {
+                                            1 => "Monday",
+                                            2 => "Tuesday",
+                                            3 => "Wednesday",
+                                            4 => "Thursday",
+                                            5 => "Friday",
+                                            _ => ""
+                                        };
+                                    }
+                                    @weekName - @dayName
+                                </div>
+                                @foreach (var period in block.Where(data => data.Day == currentDay).OrderBy(data => data.StartTime))
+                                {
+                                    if (string.IsNullOrWhiteSpace(period.ClassName))
+                                    {
+                                        <div class="Timetable-Day-Period-Inactive"></div>
+                                    }
+                                    else
+                                    {
+                                        <div class="Timetable-Day-Period-Active">
+                                            @period.ClassName<br />
+                                            @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    [Parameter]
+    public string StudentId { get; set; }
+
+    public StudentTimetableDataDto StudentTimetableData { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool == null)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            StudentTimetableData = await mediator.Send(new GetStudentTimetableDataQuery { StudentId = StudentId });
+        }
+
+        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool != null)
+        {
+            NavigationManager.NavigateTo("Timetables");
+        }
+    }
+
+    public void ViewTimetable(string studentId)
+    {
+        NavigationManager.NavigateTo($"Timetables/View/{studentId}");
+    }
+}

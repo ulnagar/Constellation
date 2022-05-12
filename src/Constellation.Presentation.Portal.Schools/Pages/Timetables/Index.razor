@@ -1,0 +1,49 @@
+﻿@page "/Timetables/"
+
+@attribute [Authorize]
+
+@inject IMediator mediator
+@inject NavigationManager NavigationManager
+
+<h2>Student Timetables</h2>
+
+<hr />
+
+<DataTable Items="Students" TItem="StudentDto" TKey="string">
+    <TableHeader>
+        <th></th>
+        <th>Name</th>
+        <th>Grade</th>
+        <th></th>
+    </TableHeader>
+    <RowTemplate Context="entry">
+        <td></td>
+        <td>@entry.Name</td>
+        <td>@entry.CurrentGrade.AsName()</td>
+        <td><button class="btn btn-sm btn-primary" @onclick="() => ViewTimetable(entry.StudentId)">View Timetable</button></td>
+    </RowTemplate>
+</DataTable>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    public List<StudentDto> Students { get; set; } = new List<StudentDto>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            var students = await mediator.Send(new GetStudentsFromSchoolQuery { SchoolCode = SelectedSchool.Code });
+            Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();    
+        }
+    }
+
+    public void ViewTimetable(string studentId)
+    {
+        NavigationManager.NavigateTo($"Timetables/View/{studentId}");
+    }
+}
