@@ -11,7 +11,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using MediatR;
-using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +24,7 @@ namespace Constellation.Infrastructure.Jobs
     {
         private readonly ISentralGateway _sentralService;
         private readonly IEmailService _emailService;
-        private readonly ILogger<IAbsenceMonitorJob> _logger;
+        private readonly ILogger _logger;
         private readonly IMediator _mediator;
         private readonly IUnitOfWork _unitOfWork;
         private StudentForAbsenceScan _student;
@@ -34,12 +34,12 @@ namespace Constellation.Infrastructure.Jobs
         private Guid JobId { get; set; }
 
         public AbsenceProcessingJob(IUnitOfWork unitOfWork, ISentralGateway sentralService,
-            IEmailService emailService, ILogger<IAbsenceMonitorJob> logger, IMediator mediator)
+            IEmailService emailService, ILogger logger, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _sentralService = sentralService;
             _emailService = emailService;
-            _logger = logger;
+            _logger = logger.ForContext<IAbsenceMonitorJob>();
             _mediator = mediator;
         }
 
@@ -51,31 +51,36 @@ namespace Constellation.Infrastructure.Jobs
             if (_appSettings == null)
                 _appSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
-            _logger.LogInformation("{id}: Scanning student {student} ({grade})", JobId, student.DisplayName, student.CurrentGrade.AsName());
+            _logger.Information("{id}: Scanning student {student} ({grade})", JobId, student.DisplayName, student.CurrentGrade.AsName());
 
             var returnAbsences = new List<Absence>();
 
             var sentralId = student.SentralStudentId;
             if (string.IsNullOrWhiteSpace(sentralId))
             {
-                if (token.IsCancellationRequested)
-                    return returnAbsences;
+                sentralId = await _mediator.Send(new GetStudentSentralIdQuery { StudentId = student.StudentId }, token);
 
-                // This student doesn't have an identified sentral id!
-                student.SentralStudentId = await _sentralService.GetSentralStudentIdFromSRN(student.StudentId, ((int)student.CurrentGrade).ToString());
-
-                sentralId = student.SentralStudentId;
-
-                if (string.IsNullOrWhiteSpace(sentralId))
+                if (sentralId == null)
                 {
-                    // Send warning email to Technology Support Team
-                    await _emailService.SendAdminAbsenceSentralAlert(student.DisplayName);
+                    _logger.Warning("{id}: Could not identify Sentral ID for student {student}.", JobId, student.DisplayName);
+
                     return returnAbsences;
                 }
             }
 
             if (!_excludedDates.Any())
-                _excludedDates = await _sentralService.GetExcludedDatesFromCalendar(DateTime.Today.Year.ToString());
+            {
+                try
+                {
+                    _excludedDates = await _sentralService.GetExcludedDatesFromCalendar(DateTime.Today.Year.ToString());
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error("{id}: Error trying to retrieve Excluded Dates from Sentral: {message}", JobId, ex.Message, ex);
+                }
+            }
+
+            !!!!!
 
             var pxpAbsences = await _sentralService.GetAbsenceDataAsync(sentralId);
             var attendanceAbsences = await _sentralService.GetPartialAbsenceDataAsync(sentralId);
