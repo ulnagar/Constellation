@@ -78,7 +78,7 @@ namespace Constellation.Infrastructure.Services
             var notificationEmail = new EmailDtos.AbsenceResponseEmail();
 
             if (absence == null)
-                return;
+                return; 
 
             var response = new AbsenceResponse()
             {

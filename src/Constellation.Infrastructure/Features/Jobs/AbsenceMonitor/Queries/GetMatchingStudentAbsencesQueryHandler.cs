@@ -22,6 +22,7 @@ namespace Constellation.Infrastructure.Features.Jobs.AbsenceMonitor.Queries
         public async Task<ICollection<Absence>> Handle(GetMatchingStudentAbsencesQuery request, CancellationToken cancellationToken)
         {
             var existingAbsences = await _context.Absences
+                .Include(absence => absence.Responses)
                 .Where(absence => absence.StudentId == request.StudentId &&
                     absence.Date == request.AbsenceDate &&
                     absence.OfferingId == request.AbsenceOffering &&

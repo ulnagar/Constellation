@@ -434,7 +434,7 @@ namespace Constellation.Infrastructure.Services
                     Explanation = absence.Responses.First().Explanation,
                     Source = reportedBy,
                     Type = absence.Type,
-                    AbsenceTime = absence.AbsenceTimeframe
+                    AbsenceTime = absence.AbsenceTimeframe 
                 });
             }
 
