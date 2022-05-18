@@ -159,7 +159,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             if (returnModel.IsNew)
             {
-                //TODO: Convert services to async code
                 await _schoolService.CreateSchool(returnModel.Resource);
             }
             else
@@ -227,6 +226,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             var vm = await CreateViewModel<School_MapViewModel>();
 
             vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
+            vm.PageHeading = "Map of Schools";
 
             return View("Map", vm);
         }
@@ -243,6 +243,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             var schoolCodes = schools.Select(school => school.Code).ToList();
 
             vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
+            vm.PageHeading = "All Partner Schools";
 
             return View("Map", vm);
         }
@@ -262,6 +263,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             var schoolCodes = schools.Select(school => school.Code).ToList();
 
             vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
+            vm.PageHeading = "Primary Partner Schools";
 
             return View("Map", vm);
         }
@@ -281,6 +283,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             var schoolCodes = schools.Select(school => school.Code).ToList();
 
             vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
+            vm.PageHeading = "Stage 4 & 5 Partner Schools";
 
             return View("Map", vm);
         }
@@ -300,6 +303,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             var schoolCodes = schools.Select(school => school.Code).ToList();
 
             vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
+            vm.PageHeading = "Stage 6 Partner Schools";
 
             return View("Map", vm);
         }
@@ -316,6 +320,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             var schoolCodes = schools.Select(school => school.Code).ToList();
 
             vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
+            vm.PageHeading = "Staff Locations";
 
             return View("Map", vm);
         }

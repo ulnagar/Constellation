@@ -453,7 +453,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
 
         [Roles(AuthRoles.Admin, AuthRoles.LessonsEditor)]
         [Route("Admin/Teachers/Delete/{id?}")]
-        public async Task<IActionResult> AdminDeleteTeachers(int? id)
+        public async Task<IActionResult> AdminDeleteTeacher(int? id)
         {
             // value of ID is the School Contact id, not the school contact id
             if (id.HasValue)

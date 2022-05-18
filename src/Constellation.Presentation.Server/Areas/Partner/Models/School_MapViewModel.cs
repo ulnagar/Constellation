@@ -12,5 +12,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
         }
 
         public IList<MapLayer> Layers { get; set; }
+
+        public string PageHeading { get; set; }
     }
 }
