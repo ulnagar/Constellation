@@ -27,15 +27,11 @@ ACTIONS:
 
 SCHOOL PORTAL:
 	Show list and tally of awards listings per student
-	Show student timetables, including download pdf
 
 HANGFIRE DASHBOARD:
 	Add TRIGGER NOW button for one-off job registration
 	Add TRIGGER OUTSIDE HANGFIRE button for interactive sessions
 	Manage once-per-day job continuation
-
-SCHOOLS:
-	Add titles to set school maps pages
 
 SCHOOLS PORTAL LOGIN:
 	Return status from MEDIATR find user action, so that an error message can be displayed as appropriate when an inactive user is detected
@@ -49,6 +45,13 @@ ABSENCES:
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+R1.3:
+	SCHOOLS PORTAL:
+		Add timetables view and download options
+
+	SCHOOLS:
+		Add titles to set school maps pages
 
 R1.2:
 	WEB LOGON:

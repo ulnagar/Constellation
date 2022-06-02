@@ -12,7 +12,7 @@ namespace Constellation.Application.Features.Portal.School.Timetables.Models
         public string StudentName { get; set; }
         public string StudentSchool { get; set; }
         public string StudentGrade { get; set; }
-        public ICollection<TimetableData> Timetables { get; set; }
+        public ICollection<TimetableData> Timetables { get; set; } = new List<TimetableData>();
 
         public class TimetableData
         {

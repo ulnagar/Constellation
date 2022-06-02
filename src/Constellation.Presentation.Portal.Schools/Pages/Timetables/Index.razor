@@ -9,20 +9,21 @@
 
 <hr />
 
-<DataTable Items="Students" TItem="StudentDto" TKey="string">
+<GroupedDataTable Items="Students.GroupBy(student => student.CurrentGrade).ToList()" TItem="StudentDto" TKey="Core.Enums.Grade">
     <TableHeader>
         <th></th>
         <th>Name</th>
-        <th>Grade</th>
         <th></th>
     </TableHeader>
+    <GroupRowTemplate Context="entry">
+        <td colspan="3">@entry.CurrentGrade.AsName()</td>
+    </GroupRowTemplate>
     <RowTemplate Context="entry">
         <td></td>
         <td>@entry.Name</td>
-        <td>@entry.CurrentGrade.AsName()</td>
         <td><button class="btn btn-sm btn-primary" @onclick="() => ViewTimetable(entry.StudentId)">View Timetable</button></td>
     </RowTemplate>
-</DataTable>
+</GroupedDataTable>
 
 @code {
     [CascadingParameter]

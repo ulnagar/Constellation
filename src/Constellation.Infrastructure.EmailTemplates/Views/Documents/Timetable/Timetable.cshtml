@@ -1,30 +1,86 @@
-﻿@page "/Timetables/View/{StudentId}"
+﻿@using Constellation.Application.Extensions
+@using Constellation.Application.Features.Portal.School.Timetables.Models
+@model StudentTimetableDataDto
+@{
+    Layout = null;
+}
 
-@attribute [Authorize]
+<!DOCTYPE html>
 
-@inject IMediator mediator
-@inject NavigationManager NavigationManager
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+    <style>
+        .Timetable-Week {
+            /*margin-top: 1rem;*/
+            /*margin-left: 5%;*/
+            /*border: 1px solid red;*/
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            align-content: stretch;
+        }
 
-<h2>Student Timetables</h2>
+        .Timetable-Day {
+            /*border: 1px solid green;*/
+            /*margin: 2px;*/
+            display: flex;
+            padding: 5px 0;
+            flex-direction: column;
+            align-items: stretch;
+            align-content: stretch;
+            width: 175px;
+        }
 
-<div class="row">
-    <a onclick="@Download" class="btn btn-primary">Download</a>
+        .Timetable-Day-Title {
+            height: 20px;
+            text-align: center;
+            font-weight: bolder;
+            margin: 2px 1px;
+        }
 
-    <a href="Timetables" class="btn btn-danger btn-pull-right">Go Back</a>
-</div>
+        .Timetable-Day-Period {
+            border: 1px solid green;
+            height: 4rem;
+            margin: 2px;
+            padding: 0.5rem;
+            text-align: center;
+            /*width: 10vw;*/
+            background-color: azure;
+        }
 
-<hr />
+        .Timetable-Day-Period.Inactive {
+            /*background-color: cornflowerblue;*/
+        }
 
-@StudentTimetableData.StudentName <br/>
-@StudentTimetableData.StudentGrade <br />
-@StudentTimetableData.StudentSchool
+        .Timetable-Day-Period.Active {
+            background-color: darkseagreen;
+            font-weight: bold;
+        }
 
-<div>
+        .Timetable-Day-Period.Break {
+            background-color: lightyellow;
+        }
+
+        .Timetable-Day-Period.Other {
+            background-color: lightgray;
+        }
+
+        .Page {
+            margin-left: 3%;
+            margin-right: 3%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="Page">
     @{
         IEnumerable<IGrouping<string, StudentTimetableDataDto.TimetableData>> timetables = new List<IGrouping<string, StudentTimetableDataDto.TimetableData>>();
-        if (StudentTimetableData.Timetables != null)
+        if (Model.Timetables != null)
         {
-            timetables = StudentTimetableData.Timetables.OrderBy(data => data.TimetableName).GroupBy(data => data.TimetableName);
+            timetables = Model.Timetables.OrderBy(data => data.TimetableName).GroupBy(data => data.TimetableName);
         }
 
         @foreach (var block in timetables)
@@ -38,6 +94,11 @@
             <div>
                 @for (currentWeek = 1; currentWeek <= numWeeks; currentWeek++)
                 {
+                    if (currentWeek > 1)
+                    {
+                        <div style="page-break-after: always; border: none;"></div>
+                    }
+
                     <div class="Timetable-Week">
                         <div class="Timetable-Day">
                             <div class="Timetable-Day-Title"></div>
@@ -120,35 +181,7 @@
             </div>
         }
     }
-</div>
+    </div>
 
-@code {
-    [CascadingParameter]
-    public SchoolDto SelectedSchool { get; set; }
-    public SchoolDto CurrentlySelectedSchool { get; set; }
-
-    [Parameter]
-    public string StudentId { get; set; }
-
-    public StudentTimetableDataDto StudentTimetableData { get; set; } = new StudentTimetableDataDto();
-
-    protected override async Task OnParametersSetAsync()
-    {
-        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool == null)
-        {
-            CurrentlySelectedSchool = SelectedSchool;
-
-            StudentTimetableData = await mediator.Send(new GetStudentTimetableDataQuery { StudentId = StudentId });
-        }
-
-        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool != null)
-        {
-            NavigationManager.NavigateTo("Timetables");
-        }
-    }
-
-    private void Download()
-    {
-        NavigationManager.NavigateTo($"Timetables/{StudentTimetableData.StudentId}/Download", true);
-    }
-}
+</body>
+</html>
