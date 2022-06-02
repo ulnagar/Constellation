@@ -701,15 +701,19 @@ namespace Constellation.Infrastructure.Jobs
                         existingAbsence.ExternalExplanation = absence.ExternalExplanation;
                         existingAbsence.ExternalExplanationSource = absence.ExternalExplanationSource;
 
-                        var response = new AbsenceResponse
+                        // Is there an existing SYSTEM response? If not, create one
+                        if (existingAbsence.Responses.All(response => response.Type != AbsenceResponse.System))
                         {
-                            Explanation = absence.ExternalExplanation,
-                            From = absence.ExternalExplanationSource,
-                            ReceivedAt = DateTime.Now,
-                            Type = AbsenceResponse.System
-                        };
+                            var response = new AbsenceResponse
+                            {
+                                Explanation = absence.ExternalExplanation,
+                                From = absence.ExternalExplanationSource,
+                                ReceivedAt = DateTime.Now,
+                                Type = AbsenceResponse.System
+                            };
 
-                        existingAbsence.Responses.Add(response);
+                            existingAbsence.Responses.Add(response);
+                        }
                     }
                 }
 

@@ -108,69 +108,14 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
                 _logger.LogInformation($"Starting Login Attempt by {Input.Email}");
 
 #if DEBUG
-
-                //var user = await _userManager.FindByEmailAsync(Input.Email);
-
-                //if (user == null)
-                //{
-                //    _logger.LogWarning($" - No user found for email {Input.Email}");
-                //    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                //    return Page();
-                //}
-
-                //_logger.LogInformation($" - Found user {user.Id} for email {Input.Email}");
-
-                // Test with dummy claims
-                //var claimList = new List<Claim>();
-                //claimList.Add(new Claim("Schools", "8146,8155,8343"));
+                // Detected local login with claims bypass
+                var claimList = new List<Claim>();
+                claimList.Add(new Claim("Schools", "8360,8155,8343"));
 
                 var dbUserAccount = await _userManager.FindByEmailAsync(Input.Email);
 
-                if (dbUserAccount == null)
-                {
-                    _logger.LogWarning(" - No user found for email {user}", Input.Email);
-
-                    var dbContact = await _mediator.Send(new GetSchoolContactByEmailAddressQuery { EmailAddress = Input.Email });
-
-                    if (dbContact == null)
-                    {
-                        _logger.LogWarning(" - No Contact Record found for email {user}", Input.Email);
-
-                        // Check that user is linked to valid school first.
-                        var adSchools = await _adService.GetLinkedSchoolsFromAD(Input.Email);
-
-                        if (adSchools != null && adSchools.Count > 0)
-                        {
-                            _logger.LogWarning(" - Found valid linked school in AD Records for user {user}", Input.Email);
-
-                            // Send to registration
-                            await _mediator.Send(new RegisterADUserAsSchoolContactCommand { EmailAddress = Input.Email });
-                            dbUserAccount = await _userManager.FindByEmailAsync(Input.Email);
-
-                            _logger.LogWarning(" - User created for email {user}", Input.Email);
-                        }
-                        else
-                        {
-                            _logger.LogWarning(" - No valid linked school found for non-existing user {user}", Input.Email);
-                            throw new PortalAppAuthenticationException("Could not find valid Partner School to link new user with.");
-                        }
-                    }
-                    else
-                    {
-                        _logger.LogWarning(" - Found inactive user for email {user}", Input.Email);
-                        // Recreate user account based on SchoolContact entry
-                        await _mediator.Send(new RepairSchoolContactUserCommand { SchoolContactId = dbContact.Id });
-                        dbUserAccount = await _userManager.FindByEmailAsync(Input.Email);
-
-                        _logger.LogWarning(" - Inactive user reactivated for email {user}", Input.Email);
-                    }
-                }
-
-                // Build/rebuild schools claim
-                await _mediator.Send(new UpdateUserSchoolsClaimCommand { EmailAddress = Input.Email });
-
                 _logger.LogInformation($" - DEBUG code found. Bypass login check.");
-                await _signInManager.SignInAsync(dbUserAccount, false);
+                await _signInManager.SignInWithClaimsAsync(dbUserAccount, false, claimList);
 
                 return LocalRedirect(returnUrl);
 #else
