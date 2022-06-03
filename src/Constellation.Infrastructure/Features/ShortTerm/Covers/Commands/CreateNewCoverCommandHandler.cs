@@ -3,7 +3,6 @@ using Constellation.Application.Features.ShortTerm.Covers.Notifications;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using MediatR;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,22 +33,25 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Commands
             if (casualCover && !staffCover)
             {
                 // This is a casualCover
-                Int32.TryParse(request.CoverDto.UserId, out int intId);
+                var conversion = int.TryParse(request.CoverDto.UserId, out int intId);
 
-                foreach (var @class in request.CoverDto.SelectedClasses)
+                if (conversion)
                 {
-                    var entry = new CasualClassCover
+                    foreach (var @class in request.CoverDto.SelectedClasses)
                     {
-                        CasualId = intId,
-                        OfferingId = @class,
-                        StartDate = request.CoverDto.StartDate,
-                        EndDate = request.CoverDto.EndDate
-                    };
+                        var entry = new CasualClassCover
+                        {
+                            CasualId = intId,
+                            OfferingId = @class,
+                            StartDate = request.CoverDto.StartDate,
+                            EndDate = request.CoverDto.EndDate
+                        };
 
-                    _context.Add(entry);
-                    await _context.SaveChangesAsync(cancellationToken);
+                        _context.Add(entry);
+                        await _context.SaveChangesAsync(cancellationToken);
 
-                    await _mediator.Publish(new CasualCoverCreatedNotification { CoverId = entry.Id });
+                        await _mediator.Publish(new CasualCoverCreatedNotification { CoverId = entry.Id }, cancellationToken);
+                    }
                 }
             }
 
@@ -69,7 +71,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Commands
                     _context.Add(entry);
                     await _context.SaveChangesAsync(cancellationToken);
 
-                    await _mediator.Publish(new StaffCoverCreatedNotification { CoverId = entry.Id });
+                    await _mediator.Publish(new StaffCoverCreatedNotification { CoverId = entry.Id }, cancellationToken);
                 }
             }
 
