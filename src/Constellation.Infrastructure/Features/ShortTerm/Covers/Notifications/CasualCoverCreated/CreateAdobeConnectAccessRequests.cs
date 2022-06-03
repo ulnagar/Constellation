@@ -1,10 +1,11 @@
 ﻿using Constellation.Application.Features.ShortTerm.Covers.Notifications;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Enums;
+using Constellation.Core.Models;
 using MediatR;
-using System;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,26 +22,46 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
 
         public async Task Handle(CasualCoverCreatedNotification notification, CancellationToken cancellationToken)
         {
-            foreach (var room in offering.Sessions.Where(s => !s.IsDeleted).Select(s => s.RoomId).Distinct())
+            var cover = (CasualClassCover)await _context.Covers
+                .FirstOrDefaultAsync(cover => cover.Id == notification.CoverId, cancellationToken);
+
+            if (cover == null)
             {
-                await _operationService.CreateCasualAdobeConnectAccess(cover.CasualId, room, cover.StartDate.AddDays(-1), cover.Id);
-                await _operationService.RemoveCasualAdobeConnectAccess(cover.CasualId, room, cover.EndDate.AddDays(1), cover.Id);
+                // Log error
+                return;
             }
 
-            await _operationService.CreateCasualMSTeamOwnerAccess(cover.CasualId, cover.OfferingId, cover.Id, cover.StartDate.AddDays(-1));
-            await _operationService.RemoveCasualMSTeamAccess(cover.CasualId, cover.OfferingId, cover.Id, cover.EndDate.AddDays(1));
-
-            // Add the Casual Coordinators to the Team as well
-            if (!offering.Sessions.Any(session => session.StaffId == "1030937" && !session.IsDeleted)) //Cathy Crouch
+            var rooms = await _context.Offerings
+                .Where(offering => offering.Id == cover.OfferingId)
+                .SelectMany(offering => offering.Sessions.Where(session => !session.IsDeleted))
+                .Select(session => session.Room)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+                
+            foreach (var room in rooms)
             {
-                await _operationService.CreateTeacherMSTeamOwnerAccess("1030937", cover.OfferingId, cover.StartDate.AddDays(-1), null);
-                await _operationService.RemoveTeacherMSTeamAccess("1030937", cover.OfferingId, cover.EndDate.AddDays(1), null);
-            }
+                var addOperation = new CasualAdobeConnectOperation
+                {
+                    ScoId = room.ScoId,
+                    CasualId = cover.CasualId,
+                    Action = AdobeConnectOperationAction.Add,
+                    DateScheduled = cover.StartDate.AddDays(-1),
+                    CoverId = cover.Id
+                };
 
-            if (!offering.Sessions.Any(session => session.StaffId == "735422017" && !session.IsDeleted) && !offering.Course.Faculty.HasFlag(Faculty.Mathematics)) //Karen Bellamy
-            {
-                await _operationService.CreateTeacherMSTeamOwnerAccess("735422017", cover.OfferingId, cover.StartDate.AddDays(-1), null);
-                await _operationService.RemoveTeacherMSTeamAccess("735422017", cover.OfferingId, cover.EndDate.AddDays(1), null);
+                var removeOperation = new CasualAdobeConnectOperation
+                {
+                    ScoId = room.ScoId,
+                    CasualId = cover.CasualId,
+                    Action = AdobeConnectOperationAction.Remove,
+                    DateScheduled = cover.EndDate.AddDays(1),
+                    CoverId = cover.Id
+                };
+
+                _context.Add(addOperation );
+                _context.Add(removeOperation);
+
+                await _context.SaveChangesAsync(cancellationToken);
             }
         }
     }
