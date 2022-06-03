@@ -5,11 +5,14 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.Areas.Subject.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,10 +29,11 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         private readonly IAdobeConnectService _adobeConnectService;
         private readonly IOperationService _operationsService;
         private readonly IStudentService _studentService;
+        private readonly IAppDbContext _context;
 
         public ClassesController(IUnitOfWork unitOfWork, ICourseOfferingService offeringService,
             IAdobeConnectService adobeConnectService, IOperationService operationsService,
-            IStudentService studentService)
+            IStudentService studentService, IAppDbContext context)
             : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -37,6 +41,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             _adobeConnectService = adobeConnectService;
             _operationsService = operationsService;
             _studentService = studentService;
+            _context = context;
         }
 
         // GET: Subject/Classes
@@ -254,6 +259,34 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             viewModel.CourseList = new SelectList(courseList, "Id", "Name", null, "Grouping");
 
             return View("Update", viewModel);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Map(int id)
+        {
+            var vm = await CreateViewModel<School_MapViewModel>();
+
+            var offering = await _unitOfWork.CourseOfferings.ForEditAsync(id);
+
+            var schoolCodes = await _context.Enrolments
+                .Where(enrolment => enrolment.OfferingId == id && !enrolment.IsDeleted)
+                .Select(enrolment => enrolment.Student.SchoolCode)
+                .Distinct()
+                .ToListAsync();
+
+            var teacherCodes = await _context.Sessions
+                .Where(session => session.OfferingId == id && !session.IsDeleted)
+                .Select(session => session.Teacher.SchoolCode)
+                .Distinct()
+                .ToListAsync();
+
+            schoolCodes.AddRange(teacherCodes);
+            schoolCodes = schoolCodes.Distinct().ToList();
+
+            vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
+            vm.PageHeading = $"Map of {offering.Name}";
+
+            return View("Map", vm);
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
