@@ -60,7 +60,7 @@ namespace Constellation.Infrastructure.Features.Jobs.SentralFamilyDetailsSync.No
                 { "Aurora College", "auroracoll-h.school@det.nsw.edu.au" }
             };
 
-            await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", "Student Family email address missing", body, null);
+            await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "Student Family email address missing", body);
 
             _logger.Information("Email sent to school admin regarding missing email address for {family}.", family.Address.Title);
         }

@@ -23,7 +23,56 @@ namespace Constellation.Infrastructure.Gateways
             _logger = logger;
         }
 
-        public async Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments)
+        public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, string fromAddress, string subject, string body)
+        {
+            return SendAll(toAddresses, null, null, fromAddress, subject, body, null, null);
+        }
+        public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments)
+        {
+            return SendAll(toAddresses, null, null, fromAddress, subject, body, attachments, null);
+        }
+        public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, string fromAddress, string subject, string body)
+        {
+            return SendAll(toAddresses, ccAddresses, null, fromAddress, subject, body, null, null);
+        }
+        public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments)
+        {
+            return SendAll(toAddresses, ccAddresses, null, fromAddress, subject, body, attachments, null);
+        }
+        public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body)
+        {
+            return SendAll(toAddresses, ccAddresses, bccAddresses, fromAddress, subject, body, null, null);
+        }
+        public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments)
+        {
+            return SendAll(toAddresses, ccAddresses, bccAddresses, fromAddress, subject, body, attachments, null);
+        }
+        public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, string fromAddress, string subject, string body, string calendarInfo)
+        {
+            return SendAll(toAddresses, null, null, fromAddress, subject, body, null, calendarInfo);
+        }
+        public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, string calendarInfo)
+        {
+            return SendAll(toAddresses, null, null, fromAddress, subject, body, attachments, calendarInfo);
+        }
+        public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, string fromAddress, string subject, string body, string calendarInfo)
+        {
+            return SendAll(toAddresses, ccAddresses, null, fromAddress, subject, body, null, calendarInfo);
+        }
+        public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, string calendarInfo)
+        {
+            return SendAll(toAddresses, ccAddresses, null, fromAddress, subject, body, attachments, calendarInfo);
+        }
+        public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body, string calendarInfo)
+        {
+            return SendAll(toAddresses, ccAddresses, bccAddresses, fromAddress, subject, body, null, calendarInfo);
+        }
+        public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, string calendarInfo)
+        {
+            return SendAll(toAddresses, ccAddresses, bccAddresses, fromAddress, subject, body, attachments, calendarInfo);
+        }
+
+        private async Task<MimeMessage> SendAll(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, string calendarInfo)
         {
             var id = Guid.NewGuid();
 
@@ -64,24 +113,42 @@ namespace Constellation.Infrastructure.Gateways
                 Text = body
             };
 
-            if (attachments != null)
+            if (attachments != null || calendarInfo != null)
             {
                 var multipart = new Multipart("mixed");
                 multipart.Add(textPartBody);
 
-                foreach (var item in attachments)
+                if (attachments != null)
                 {
-                    var attachment = new MimePart
+                    foreach (var item in attachments)
                     {
-                        Content = new MimeContent(item.ContentStream, ContentEncoding.Default),
-                        ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                        var attachment = new MimePart
+                        {
+                            Content = new MimeContent(item.ContentStream, ContentEncoding.Default),
+                            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                            ContentTransferEncoding = ContentEncoding.Base64,
+                            FileName = item.Name
+                        };
+
+                        _logger.LogInformation("{id}: Adding attachment {name}", id, item.Name);
+
+                        multipart.Add(attachment);
+                    }
+                }
+
+                if (calendarInfo != null)
+                {
+                    var ical = new TextPart("calendar")
+                    {
                         ContentTransferEncoding = ContentEncoding.Base64,
-                        FileName = item.Name
+                        Text = calendarInfo
                     };
 
-                    _logger.LogInformation("{id}: Adding attachment {name}", id, item.Name);
+                    ical.ContentType.Parameters.Add("method", "REQUEST");
 
-                    multipart.Add(attachment);
+                    _logger.LogInformation("{id}: Adding calendar appointment info", id);
+
+                    multipart.Add(ical);
                 }
 
                 message.Body = multipart;

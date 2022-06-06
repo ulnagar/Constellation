@@ -38,6 +38,32 @@ namespace Constellation.Infrastructure.Services
             return attachment;
         }
 
+        public Attachment StringToPdfAttachment(string input, string header, string filename)
+        {
+            var converter = new HtmlToPdf();
+
+            if (!string.IsNullOrEmpty(header))
+            {
+                converter.Options.DisplayHeader = true;
+                converter.Header.DisplayOnFirstPage = true;
+                converter.Header.DisplayOnEvenPages = true;
+                converter.Header.DisplayOnOddPages = true;
+                converter.Header.Height = 100;
+                var headerSection = new PdfHtmlSection(header, "");
+                headerSection.AutoFitHeight = HtmlToPdfPageFitMode.AutoFit;
+                converter.Header.Add(headerSection);
+            }
+
+            var doc = converter.ConvertHtmlString(input);
+            var pdfStream = new MemoryStream();
+            doc.Save(pdfStream);
+            pdfStream.Position = 0;
+            var attachment = new Attachment(pdfStream, filename);
+            doc.Close();
+
+            return attachment;
+        }
+
         public MemoryStream StringToPdfStream(string input, string header)
         {
             var converter = new HtmlToPdf();

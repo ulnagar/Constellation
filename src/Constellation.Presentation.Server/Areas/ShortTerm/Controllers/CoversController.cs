@@ -1,10 +1,12 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Features.ShortTerm.Covers.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.Areas.ShortTerm.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
@@ -19,12 +21,14 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICoverService _coverService;
+        private readonly IMediator _mediator;
 
-        public CoversController(IUnitOfWork unitOfWork, ICoverService coverService)
+        public CoversController(IUnitOfWork unitOfWork, ICoverService coverService, IMediator mediator)
             : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _coverService = coverService;
+            _mediator = mediator;
         }
 
         public IActionResult Index()
@@ -139,28 +143,10 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
                 return View(viewModel);
             }
 
-            var result = await _coverService.BulkCreateCovers(viewModel.Cover);
-
-            if (result.Success)
-            {
-                await _unitOfWork.CompleteAsync();
-                return RedirectToAction("Index");
-            } else
-            {
-                var teachers = await _unitOfWork.Staff.ForSelectionAsync();
-                var casuals = await _unitOfWork.Casuals.ForSelectionAsync();
-                var classes = await _unitOfWork.CourseOfferings.ForSelectionAsync();
-
-                var userList = teachers.Select(teacher => new { Id = teacher.StaffId, Name = teacher.DisplayName, Group = "Teachers" }).ToList();
-                userList.AddRange(casuals.Select(casuals => new { Id = casuals.Id.ToString(), Name = casuals.DisplayName, Group = "Casuals" }));
-
-                viewModel.UserList = new SelectList(userList, "Id", "Name", null, "Group");
-                viewModel.ClassList = new SelectList(classes, "Id", "Name");
-                viewModel.TeacherList = new SelectList(teachers, "StaffId", "DisplayName");
-                viewModel.MultiClassList = new MultiSelectList(classes, "Id", "Name");
-
-                return View(viewModel);
-            }
+            await _mediator.Send(new CreateNewCoverCommand { CoverDto = viewModel.Cover });
+            
+            await _unitOfWork.CompleteAsync();
+            return RedirectToAction("Index");
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.CoverEditor)]

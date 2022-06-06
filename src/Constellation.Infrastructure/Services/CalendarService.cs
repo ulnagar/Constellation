@@ -20,7 +20,7 @@ namespace Constellation.Infrastructure.Services
             // Start with basic ICS format
             sb.AppendLine("BEGIN:VCALENDAR");
             sb.AppendLine("VERSION:2.0");
-            sb.AppendLine("PRODID:AuroraCollege//AOCS//1.5");
+            sb.AppendLine("PRODID:AuroraCollege//ACOS//1.5");
             sb.AppendLine("CALSCALE:GREGORIAN");
             sb.AppendLine("METHOD:PUBLISH");
 
@@ -50,6 +50,8 @@ namespace Constellation.Infrastructure.Services
             sb.AppendLine("UID:" + uid + "@aurora.nsw.edu.au");
             sb.AppendLine("DTSTART;TZID=Australia/Sydney:" + start.ToString("yyyyMMddTHHmm00"));
             sb.AppendLine("DTEND;TZID=Australia/Sydney:" + end.ToString("yyyyMMddTHHmm00"));
+            sb.AppendLine($"ATTENDEE;CN=\"{0}\";RSVP=TRUE:mailto:{1}", string.Join(",", toUsers), string.Join(",", toUsers)));
+            // https://stackoverflow.com/questions/45076896/send-email-as-calendar-invite-appointment-in-sendgrid-c-sharp
 
             if (repeats > 0)
             {

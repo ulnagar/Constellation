@@ -4,14 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Constellation.Application.Features.Portal.School.Timetables.Models
+namespace Constellation.Application.DTOs
 {
-    public class StudentTimetableDataDto
+    public abstract class TimetableDataDto
     {
-        public string StudentId { get; set; }
-        public string StudentName { get; set; }
-        public string StudentSchool { get; set; }
-        public string StudentGrade { get; set; }
         public ICollection<TimetableData> Timetables { get; set; } = new List<TimetableData>();
 
         public class TimetableData
@@ -26,5 +22,18 @@ namespace Constellation.Application.Features.Portal.School.Timetables.Models
             public string ClassName { get; set; }
             public string ClassTeacher { get; set; }
         }
+    }
+
+    public class StudentTimetableDataDto : TimetableDataDto
+    {
+        public string StudentId { get; set; }
+        public string StudentName { get; set; }
+        public string StudentSchool { get; set; }
+        public string StudentGrade { get; set; }
+    }
+
+    public class ClassTimetableDataDto : TimetableDataDto
+    {
+        public string ClassName { get; set; }
     }
 }

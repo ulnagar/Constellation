@@ -1,5 +1,5 @@
-﻿using Constellation.Application.Extensions;
-using Constellation.Application.Features.Portal.School.Timetables.Models;
+﻿using Constellation.Application.DTOs;
+using Constellation.Application.Extensions;
 using Constellation.Application.Features.Portal.School.Timetables.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using MediatR;
