@@ -170,7 +170,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
                     timetableData.Timetables.Add(entry);
                 }
 
-                var timetableHeaderString = await _razorService.RenderViewToStringAsync("/Views/Documents/Timetable/StudentTimetableHeader.cshtml", timetableData);
+                var timetableHeaderString = await _razorService.RenderViewToStringAsync("/Views/Documents/Timetable/ClassTimetableHeader.cshtml", timetableData);
                 var timetableBodyString = await _razorService.RenderViewToStringAsync("/Views/Documents/Timetable/Timetable.cshtml", timetableData);
 
                 var timetableAttachment = _pdfService.StringToPdfAttachment(timetableBodyString, timetableHeaderString, $"{offering.Name} Timetable.pdf");
