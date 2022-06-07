@@ -8,6 +8,7 @@ using MimeKit.Text;
 using System;
 using System.Collections.Generic;
 using System.Net.Mail;
+using System.Net.Mime;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Gateways
@@ -49,27 +50,85 @@ namespace Constellation.Infrastructure.Gateways
         }
         public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, string fromAddress, string subject, string body, string calendarInfo)
         {
-            return SendAll(toAddresses, null, null, fromAddress, subject, body, null, calendarInfo);
+            return SendCalendarInvite(toAddresses, null, null, fromAddress, subject, body, null, calendarInfo);
         }
         public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, string calendarInfo)
         {
-            return SendAll(toAddresses, null, null, fromAddress, subject, body, attachments, calendarInfo);
+            return SendCalendarInvite(toAddresses, null, null, fromAddress, subject, body, attachments, calendarInfo);
         }
         public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, string fromAddress, string subject, string body, string calendarInfo)
         {
-            return SendAll(toAddresses, ccAddresses, null, fromAddress, subject, body, null, calendarInfo);
+            return SendCalendarInvite(toAddresses, ccAddresses, null, fromAddress, subject, body, null, calendarInfo);
         }
         public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, string calendarInfo)
         {
-            return SendAll(toAddresses, ccAddresses, null, fromAddress, subject, body, attachments, calendarInfo);
+            return SendCalendarInvite(toAddresses, ccAddresses, null, fromAddress, subject, body, attachments, calendarInfo);
         }
         public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body, string calendarInfo)
         {
-            return SendAll(toAddresses, ccAddresses, bccAddresses, fromAddress, subject, body, null, calendarInfo);
+            return SendCalendarInvite(toAddresses, ccAddresses, bccAddresses, fromAddress, subject, body, null, calendarInfo);
         }
         public Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, string calendarInfo)
         {
-            return SendAll(toAddresses, ccAddresses, bccAddresses, fromAddress, subject, body, attachments, calendarInfo);
+            return SendCalendarInvite(toAddresses, ccAddresses, bccAddresses, fromAddress, subject, body, attachments, calendarInfo);
+        }
+
+        private async Task<MimeMessage> SendCalendarInvite(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, string calendarInfo)
+        {
+            var id = Guid.NewGuid();
+
+            _logger.LogInformation("Sending email {id}", id);
+
+            var message = new MailMessage();
+
+            if (fromAddress == null)
+                message.From = new MailAddress("auroracoll-h.school@det.nsw.edu.au", "Aurora College");
+            else
+                message.From = new MailAddress(fromAddress, "Aurora College");
+
+            foreach (var recipient in toAddresses)
+            {
+                _logger.LogInformation("{id}: Adding {name} ({email}) to TO field.", id, recipient.Key, recipient.Value);
+                message.To.Add(new MailAddress(recipient.Value, recipient.Key));
+            }
+
+            if (ccAddresses != null)
+                foreach (var recipient in ccAddresses)
+                {
+                    _logger.LogInformation("{id}: Adding {name} ({email}) to CC field.", id, recipient.Key, recipient.Value);
+                    message.CC.Add(new MailAddress(recipient.Value, recipient.Key));
+                }
+
+            if (bccAddresses != null)
+                foreach (var recipient in bccAddresses)
+                {
+                    _logger.LogInformation("{id}: Adding {name} ({email}) to BCC field.", id, recipient.Key, recipient.Value);
+                    message.Bcc.Add(new MailAddress(recipient.Value, recipient.Key));
+                }
+
+            _logger.LogInformation("{id}: Setting Subject to \"{subject}\"", id, subject);
+            message.Subject = subject;
+
+            var html = AlternateView.CreateAlternateViewFromString(body, null, MediaTypeNames.Text.Html);
+            message.AlternateViews.Add(html);
+
+            var contentType = new System.Net.Mime.ContentType("text/calendar");
+            contentType.Parameters.Add("method", "REQUEST");
+            contentType.Parameters.Add("name", "Meeting.ics");
+            AlternateView ical = AlternateView.CreateAlternateViewFromString(calendarInfo, contentType);
+            message.AlternateViews.Add(ical);
+            message.Headers.Add("Content-class", "urn:content-classes:calendarmessage");
+
+            _logger.LogInformation("{id}: Sending...", id);
+            var client = new SmtpClient
+            {
+                Host = _configuration.Server,
+                Port = _configuration.Port
+            };
+
+            client.Send(message);
+
+            return new MimeMessage();
         }
 
         private async Task<MimeMessage> SendAll(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, string calendarInfo)
@@ -125,7 +184,7 @@ namespace Constellation.Infrastructure.Gateways
                         var attachment = new MimePart
                         {
                             Content = new MimeContent(item.ContentStream, ContentEncoding.Default),
-                            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                            ContentDisposition = new MimeKit.ContentDisposition(MimeKit.ContentDisposition.Attachment),
                             ContentTransferEncoding = ContentEncoding.Base64,
                             FileName = item.Name
                         };
@@ -145,10 +204,13 @@ namespace Constellation.Infrastructure.Gateways
                     };
 
                     ical.ContentType.Parameters.Add("method", "REQUEST");
+                    ical.ContentType.Parameters.Add("name", "meeting.ics");
 
                     _logger.LogInformation("{id}: Adding calendar appointment info", id);
 
                     multipart.Add(ical);
+
+                    message.Headers.Add("Content-class", "urn:content-classes:calendarmessage");
                 }
 
                 message.Body = multipart;

@@ -217,7 +217,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
                 var appointmentStart = cover.StartDate.Add(appointmentStartTime);
                 var appointmentEnd = cover.EndDate.Add(appointmentEndTime);
 
-                icsData = _calendarService.CreateEvent(uid, summary, location, description, appointmentStart, appointmentEnd, 0);
+                icsData = _calendarService.CreateInvite(uid, casual.DisplayName, casual.EmailAddress, summary, location, description, appointmentStart, appointmentEnd, 0);
 
                 //attachments.Add(Attachment.CreateAttachmentFromString(icsData, $"{uid}.ics", Encoding.ASCII, "text/calendar"));
             }
