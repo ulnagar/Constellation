@@ -109,9 +109,11 @@ namespace Constellation.Infrastructure.Gateways
             _logger.LogInformation("{id}: Setting Subject to \"{subject}\"", id, subject);
             message.Subject = subject;
 
+            // Body
             var html = AlternateView.CreateAlternateViewFromString(body, null, MediaTypeNames.Text.Html);
             message.AlternateViews.Add(html);
 
+            // Calendar Invite
             var contentType = new System.Net.Mime.ContentType("text/calendar");
             contentType.Parameters.Add("method", "REQUEST");
             contentType.Parameters.Add("name", "Meeting.ics");
@@ -119,14 +121,25 @@ namespace Constellation.Infrastructure.Gateways
             message.AlternateViews.Add(ical);
             message.Headers.Add("Content-class", "urn:content-classes:calendarmessage");
 
-            _logger.LogInformation("{id}: Sending...", id);
-            var client = new SmtpClient
+            // Attachments
+            if (attachments != null)
             {
-                Host = _configuration.Server,
-                Port = _configuration.Port
-            };
+                foreach (var attachment in attachments)
+                {
+                    message.Attachments.Add(attachment);
+                }
+            }
 
-            client.Send(message);
+            _logger.LogInformation("{id}: Sending...", id);
+            //var client = new SmtpClient
+            //{
+            //    Host = _configuration.Server,
+            //    Port = _configuration.Port
+            //};
+
+            //client.Send(message);
+
+            await Send(message);
 
             return new MimeMessage();
         }
@@ -225,7 +238,7 @@ namespace Constellation.Infrastructure.Gateways
             return message;
         }
 
-        public async Task Send(MailMessage message)
+        private async Task Send(MailMessage message)
         {
             var mailKitMessage = (MimeMessage)message;
 

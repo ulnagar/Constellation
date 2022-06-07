@@ -192,12 +192,10 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
                 ClassWithLink = new Dictionary<string, string> { { teamLink.Name, teamLink.Link } }
             };
 
-            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverEmail.cshtml", viewModel);
-
-            var icsData = "";
-
             if (singleDayCover)
             {
+                var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverAppointment.cshtml", viewModel);
+
                 // Create and add ICS files
                 var uid = $"{cover.Id}-{cover.Offering.Id}-{cover.StartDate:yyyyMMdd}";
                 var summary = $"Aurora College Cover - {cover.Offering.Name}";
@@ -217,17 +215,15 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
                 var appointmentStart = cover.StartDate.Add(appointmentStartTime);
                 var appointmentEnd = cover.EndDate.Add(appointmentEndTime);
 
-                icsData = _calendarService.CreateInvite(uid, casual.DisplayName, casual.EmailAddress, summary, location, description, appointmentStart, appointmentEnd, 0);
+                var icsData = _calendarService.CreateInvite(uid, casual.DisplayName, casual.EmailAddress, summary, location, description, appointmentStart, appointmentEnd, 0);
 
-                //attachments.Add(Attachment.CreateAttachmentFromString(icsData, $"{uid}.ics", Encoding.ASCII, "text/calendar"));
-            }
-
-            //await _emailGateway.Send(primaryRecipients, secondaryRecipients, null, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments);
-
-            if (!string.IsNullOrWhiteSpace(icsData))
                 await _emailGateway.Send(new Dictionary<string, string> { { "Ben Hillsley", "benjamin.hillsley@det.nsw.edu.au" } }, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData);
-            else
+            } else
+            {
+                var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverEmail.cshtml", viewModel);
+
                 await _emailGateway.Send(new Dictionary<string, string> { { "Ben Hillsley", "benjamin.hillsley@det.nsw.edu.au" } }, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments);
+            }
         }
     }
 }
