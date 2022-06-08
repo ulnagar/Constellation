@@ -33,9 +33,59 @@ namespace Constellation.Infrastructure.Services
             sb.AppendLine("DTEND:" + end.ToUniversalTime().ToString("yyyyMMddTHHmm00"));
             sb.AppendLine("SEQUENCE:0");
             sb.AppendLine("SUMMARY:" + summary + "");
-            sb.AppendLine("LOCATION: Microsoft Teams");
+            sb.AppendLine("LOCATION:Microsoft Teams");
             sb.AppendLine("DESCRIPTION:" + summary + "");
             sb.AppendLine("PRIORITY:3");
+
+            sb.AppendLine("ORGANIZER;CN=Aurora College:mailto:auroracoll-h.school@det.nsw.edu.au");
+            sb.AppendLine($"ATTENDEE;CN={attendeeName};RSVP=FALSE:mailto:{attendeeEmail}");
+            //// https://stackoverflow.com/questions/45076896/send-email-as-calendar-invite-appointment-in-sendgrid-c-sharp
+
+            if (repeats > 0)
+            {
+                sb.AppendLine("RRULE:FREQ=WEEKLY;INTERVAL=2;WKST=MO;COUNT=" + repeats + "");
+            }
+
+            // Add the alarm
+            sb.AppendLine("BEGIN:VALARM");
+            sb.AppendLine("TRIGGER:-PT5M");
+            sb.AppendLine("ACTION:DISPLAY");
+            sb.AppendLine("DESCRIPTION:" + summary + "");
+            sb.AppendLine("END:VALARM");
+
+            // End the event
+            sb.AppendLine("END:VEVENT");
+
+            // End the calendar item
+            sb.AppendLine("END:VCALENDAR");
+
+            return sb.ToString();
+        }
+
+        public string CancelInvite(string uid, string attendeeName, string attendeeEmail, string summary, string location, string description, DateTime start, DateTime end, int repeats = 0)
+        {
+            var sb = new StringBuilder();
+
+            // Start with basic ICS format
+            sb.AppendLine("BEGIN:VCALENDAR");
+            sb.AppendLine("VERSION:2.0");
+            sb.AppendLine("PRODID:AuroraCollege//ACOS//1.5");
+            sb.AppendLine("METHOD:CANCEL");
+
+            // Add the specific event
+            sb.AppendLine("BEGIN:VEVENT");
+            sb.AppendLine("DTSTAMP:" + DateTime.UtcNow.ToString("yyyyMMddTHHmm00"));
+            sb.AppendLine("LAST-MODIFIED:" + DateTime.UtcNow.ToString("yyyyMMddTHHmm00"));
+            sb.AppendLine("UID:" + uid + "@aurora.nsw.edu.au");
+
+            sb.AppendLine("DTSTART:" + start.ToUniversalTime().ToString("yyyyMMddTHHmm00"));
+            sb.AppendLine("DTEND:" + end.ToUniversalTime().ToString("yyyyMMddTHHmm00"));
+            sb.AppendLine("SEQUENCE:99");
+            sb.AppendLine("SUMMARY:" + summary + "");
+            sb.AppendLine("LOCATION:Microsoft Teams");
+            sb.AppendLine("DESCRIPTION:" + summary + "");
+            sb.AppendLine("PRIORITY:3");
+            sb.AppendLine("STATUS:CANCELLED");
 
             sb.AppendLine("ORGANIZER;CN=Aurora College:mailto:auroracoll-h.school@det.nsw.edu.au");
             sb.AppendLine($"ATTENDEE;CN={attendeeName};RSVP=FALSE:mailto:{attendeeEmail}");

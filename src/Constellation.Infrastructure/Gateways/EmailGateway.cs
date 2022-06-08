@@ -115,7 +115,17 @@ namespace Constellation.Infrastructure.Gateways
 
             // Calendar Invite
             var contentType = new System.Net.Mime.ContentType("text/calendar");
-            contentType.Parameters.Add("method", "REQUEST");
+
+            var method = "";
+            foreach (var line in calendarInfo.Split(Environment.NewLine))
+            {
+                if (line.StartsWith("METHOD"))
+                {
+                    var details = line.Split(':');
+                    method = details[1];
+                }
+            }
+            contentType.Parameters.Add("method", method);
             contentType.Parameters.Add("name", "Meeting.ics");
             AlternateView ical = AlternateView.CreateAlternateViewFromString(calendarInfo, contentType);
             message.AlternateViews.Add(ical);

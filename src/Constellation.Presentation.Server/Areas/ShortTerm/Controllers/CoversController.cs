@@ -248,21 +248,7 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
 
         public async Task<IActionResult> Cancel(int id)
         {
-            var type = await _unitOfWork.Covers.CoverTypeForCancellationAsync(id);
-
-            if (type == "Casual")
-            {
-                await _coverService.RemoveCasualCover(id);
-
-                return RedirectToAction("Index");
-            }
-
-            if (type == "Teacher")
-            {
-                await _coverService.RemoveTeacherCover(id);
-
-                return RedirectToAction("Index");
-            }
+            await _mediator.Send(new CancelCoverCommand { CoverId = id });
 
             return RedirectToAction("Index");
         }
