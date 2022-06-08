@@ -682,17 +682,22 @@ namespace Constellation.Infrastructure.Gateways
             if (page == null || emailPage == null)
                 return data;
 
-            var list = page.DocumentNode.InnerHtml.Split('\u000A').ToList();
+            var rawPage = page.DocumentNode.InnerHtml;
+            rawPage = Regex.Replace(rawPage, "\n(?<![0-9]{4}\n)", " ");
+
+            var list = rawPage.Split('\u000A').ToList();
 
             // Remove first and last entry
             list.RemoveAt(0);
             list.RemoveAt(list.Count - 1);
 
-            foreach (var entry in list)
+            for (var i = 0; i < list.Count; i++)
             {
-                //var split = entry.Split(',');
+                var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))"); // does not recognise properly when quotes are unbalanced
 
-                var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+                // Perhaps use the rawPage above with the CSVHelper code?
+
+                var entry = list[i];
                 var split = CSVParser.Split(entry);
 
                 if (split.Length != 90)
@@ -700,7 +705,9 @@ namespace Constellation.Infrastructure.Gateways
                     split = entry.Split(',');
 
                     if (split.Length != 90)
+                    {
                         continue;
+                    }
                 }
 
                 var familyId = split[4].RemoveQuotes().RemoveWhitespace();
@@ -712,7 +719,8 @@ namespace Constellation.Infrastructure.Gateways
                     detail.StudentIds.Add(split[0].RemoveQuotes().RemoveWhitespace());
 
                     continue;
-                } else
+                }
+                else
                 {
                     var detail = new FamilyDetailsDto
                     {
