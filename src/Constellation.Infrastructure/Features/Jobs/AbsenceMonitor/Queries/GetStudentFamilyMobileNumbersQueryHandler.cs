@@ -29,6 +29,9 @@ namespace Constellation.Infrastructure.Features.Jobs.AbsenceMonitor.Queries
 
             var phoneNumbers = new List<string>();
 
+            if (studentFamily == null)
+                return phoneNumbers;
+
             switch (_settings.ContactPreference)
             {
                 case ISentralGatewayConfiguration.ContactPreferenceOptions.MotherFirstThenFather:

@@ -36,7 +36,7 @@ namespace Constellation.Infrastructure.Jobs
 
             // Get the CSV file from Sentral
             // Convert to temporary objects
-            var families = await _gateway.GetFamilyDetailsReport();
+            var families = await _gateway.GetFamilyDetailsReport(_logger);
 
             _logger.LogInformation("{id}: Found {count} families", jobId, families.Count);
 
@@ -69,7 +69,7 @@ namespace Constellation.Infrastructure.Jobs
                             FirstName = family.FatherFirstName,
                             LastName = family.FatherLastName,
                             MobileNumber = family.FatherMobile,
-                            EmailAddress = family.FamilyEmail
+                            EmailAddress = family.FatherEmail
                         },
                         Parent2 = new StudentFamily.Parent
                         {
@@ -77,7 +77,7 @@ namespace Constellation.Infrastructure.Jobs
                             FirstName = family.MotherFirstName,
                             LastName = family.MotherLastName,
                             MobileNumber = family.MotherMobile,
-                            EmailAddress = family.FamilyEmail
+                            EmailAddress = family.MotherEmail
                         },
                         Address = new StudentFamily.MailingAddress
                         {
@@ -141,14 +141,11 @@ namespace Constellation.Infrastructure.Jobs
                         entry.Parent1.MobileNumber = family.FatherMobile;
                     }
 
-                    if (entry.Parent1.EmailAddress != family.FamilyEmail)
+                    if (entry.Parent1.EmailAddress != family.FatherEmail && !string.IsNullOrWhiteSpace(family.FatherEmail))
                     {
-                        if (!string.IsNullOrWhiteSpace(family.FamilyEmail))
-                        {
-                            _logger.LogInformation("{id}: {family} ({code}): Updated Parent 1 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.EmailAddress, family.FamilyEmail);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Parent 1 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.EmailAddress, family.FatherEmail);
 
-                            entry.Parent1.EmailAddress = family.FamilyEmail;
-                        }
+                        entry.Parent1.EmailAddress = family.FatherEmail;
                     }
 
                     if (entry.Parent2.Title != family.MotherTitle)
@@ -179,14 +176,11 @@ namespace Constellation.Infrastructure.Jobs
                         entry.Parent2.MobileNumber = family.MotherMobile;
                     }
 
-                    if (entry.Parent2.EmailAddress != family.FamilyEmail)
+                    if (entry.Parent2.EmailAddress != family.MotherEmail && !string.IsNullOrWhiteSpace(family.MotherEmail))
                     {
-                        if (!string.IsNullOrWhiteSpace(family.FamilyEmail))
-                        {
-                            _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.EmailAddress, family.FamilyEmail);
+                        _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.EmailAddress, family.MotherEmail);
 
-                            entry.Parent2.EmailAddress = family.FamilyEmail;
-                        }
+                        entry.Parent2.EmailAddress = family.MotherEmail;
                     }
 
                     if (entry.Address.Title != family.AddressName)
@@ -225,7 +219,7 @@ namespace Constellation.Infrastructure.Jobs
                     }
 
                     // Check if email is blank and alert admin
-                    if (string.IsNullOrEmpty(family.FamilyEmail))
+                    if (string.IsNullOrEmpty(family.FatherEmail) && string.IsNullOrEmpty(family.MotherEmail))
                     {
                         await _mediator.Publish(new FamilyWithoutValidEmailAddressFoundNotification { FamilyId = family.FamilyId });
                     }

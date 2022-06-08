@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace Constellation.Application.Interfaces.Gateways
         Task<IDictionary<string, IDictionary<string, string>>> GetParentContactEntry(string sentralStudentId);
         Task<List<DateTime>> GetExcludedDatesFromCalendar(string year);
         Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateTime date);
-        Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport();
+        Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(ILogger logger);
         Task<byte[]> GetSentralStudentPhoto(string studentId);
         Task<ICollection<SentralReportDto>> GetStudentReportList(string sentralStudentId);
         Task<byte[]> GetStudentReport(string sentralStudentId, string reportId);

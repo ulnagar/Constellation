@@ -4,6 +4,7 @@ using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Infrastructure.DependencyInjection;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -671,13 +672,14 @@ namespace Constellation.Infrastructure.Gateways
             return list;
         }
 
-        public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport()
+        public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(ILogger logger)
         {
             var data = new List<FamilyDetailsDto>();
             
             var page = await GetPageAsync($"{_settings.Server}/enquiry/export/view_export?name=complete&inputs[class]=&inputs[roll_class]=&inputs[schyear]=&format=csv&headings=1&action=Download");
+            var emailPage = await GetPageAsync($"{_settings.Server}/enquiry/export/view_export?name=email&inputs[only_eldest]=no&inputs[addresses]=all&format=csv&headings=1&action=Download");
 
-            if (page == null)
+            if (page == null || emailPage == null)
                 return data;
 
             var list = page.DocumentNode.InnerHtml.Split('\u000A').ToList();
@@ -734,6 +736,52 @@ namespace Constellation.Infrastructure.Gateways
                     detail.StudentIds.Add(split[0].RemoveQuotes().RemoveWhitespace());
 
                     data.Add(detail);
+                }
+            }
+
+            list = emailPage.DocumentNode.InnerHtml.Split('\u000A').ToList();
+
+            // Remove first and last entry
+            list.RemoveAt(0);
+            list.RemoveAt(list.Count - 1);
+
+            foreach (var entry in list)
+            {
+                var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+                var split = CSVParser.Split(entry);
+
+                if (split.Length != 11)
+                {
+                    split = entry.Split(',');
+
+                    if (split.Length != 11)
+                        continue;
+                }
+
+                var studentId = split[0].RemoveQuotes().RemoveWhitespace();
+                var dataItem = data.FirstOrDefault(item => item.StudentIds.Contains(studentId));
+
+                if (dataItem == null)
+                {
+                    // This student is not part of a family?
+                    logger.LogWarning("Student {studentId} is not found in any active family", studentId);
+
+                    continue;
+                }
+
+                if (dataItem.FatherFirstName != null && dataItem.MotherFirstName == null)
+                {
+                    // Single parent family, father has custody
+                    dataItem.FatherEmail = split[9].RemoveQuotes().RemoveWhitespace();
+                } else if (dataItem.FatherFirstName == null && dataItem.MotherFirstName != null)
+                {
+                    // Single parent family, mother has custody
+                    dataItem.MotherEmail = split[9].RemoveQuotes().RemoveWhitespace();
+                } else
+                {
+                    // Dual parent family, mother first, then father
+                    dataItem.MotherEmail = split[9].RemoveQuotes().RemoveWhitespace();
+                    dataItem.FatherEmail = split[10].RemoveQuotes().RemoveWhitespace();
                 }
             }
 

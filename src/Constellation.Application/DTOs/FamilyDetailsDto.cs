@@ -10,10 +10,12 @@ namespace Constellation.Application.DTOs
         public string FatherFirstName { get; set; }
         public string FatherLastName { get; set; }
         public string FatherMobile { get; set; }
+        public string FatherEmail { get; set; }
         public string MotherTitle { get; set; }
         public string MotherFirstName { get; set; }
         public string MotherLastName { get; set; }
         public string MotherMobile { get; set; }
+        public string MotherEmail { get; set; }
         public string FamilyEmail { get; set; }
         public string AddressName { get; set; }
         public string AddressLine1 { get; set; }
