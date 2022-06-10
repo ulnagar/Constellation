@@ -132,7 +132,7 @@ namespace Constellation.Infrastructure.Services
                 if (!toRecipients.Any(recipient => recipient.Value == entry))
                     toRecipients.Add(entry, entry);
 
-            var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
+            var message = await _emailSender.Send(toRecipients, null, viewModel.Title, body);
 
             // Perhaps used for future where message file (.eml) is saved to database
             //var messageStream = new MemoryStream();
@@ -173,7 +173,7 @@ namespace Constellation.Infrastructure.Services
                 if (!toRecipients.Any(recipient => recipient.Value == entry))
                     toRecipients.Add(entry, entry);
 
-            var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
+            var message = await _emailSender.Send(toRecipients, null, viewModel.Title, body);
 
             // Perhaps used for future where message file (.eml) is saved to database
             //var messageStream = new MemoryStream();
@@ -214,7 +214,7 @@ namespace Constellation.Infrastructure.Services
                 if (!toRecipients.Any(recipient => recipient.Value == entry))
                     toRecipients.Add(entry, entry);
 
-            var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
+            var message = await _emailSender.Send(toRecipients, null, viewModel.Title, body);
 
             // Perhaps used for future where message file (.eml) is saved to database
             //var messageStream = new MemoryStream();
@@ -267,7 +267,7 @@ namespace Constellation.Infrastructure.Services
                 if (!toRecipients.Any(recipient => recipient.Value == entry))
                     toRecipients.Add(entry, entry);
 
-            var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
+            var message = await _emailSender.Send(toRecipients, null, viewModel.Title, body);
 
             // Perhaps used for future where message file (.eml) is saved to database
             //var messageStream = new MemoryStream();
@@ -315,7 +315,7 @@ namespace Constellation.Infrastructure.Services
                 if (!toRecipients.Any(recipient => recipient.Value == entry))
                     toRecipients.Add(entry, entry);
 
-            var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
+            var message = await _emailSender.Send(toRecipients, null, viewModel.Title, body);
 
             // Perhaps used for future where message file (.eml) is saved to database
             //var messageStream = new MemoryStream();
@@ -346,7 +346,7 @@ namespace Constellation.Infrastructure.Services
                 { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
             };
 
-            await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", "[Aurora College] Student absence notification", body, null);
+            await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "[Aurora College] Student absence notification", body);
         }
 
         public async Task SendAdminAbsenceContactAlert(string studentName)
@@ -360,7 +360,7 @@ namespace Constellation.Infrastructure.Services
                 { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
             };
 
-            await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", "[Aurora College] Constellation Data Issue Identified", body, null);
+            await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "[Aurora College] Constellation Data Issue Identified", body);
         }
 
         public async Task SendAdminClassworkNotificationContactAlert(Student student, Staff teacher, ClassworkNotification notification)
@@ -375,7 +375,7 @@ namespace Constellation.Infrastructure.Services
                 { teacher.DisplayName, teacher.EmailAddress }
             };
 
-            await _emailSender.Send(toRecipients, null, null, null, "[Aurora College] Constellation Data Issue Identified", body, null);
+            await _emailSender.Send(toRecipients, null, "[Aurora College] Constellation Data Issue Identified", body);
         }
 
         public async Task SendAdminLowCreditAlert(double credit)
@@ -390,7 +390,7 @@ namespace Constellation.Infrastructure.Services
                 { "auroracoll-h.school@det.nsw.edu.au", "auroracoll-h.school@det.nsw.edu.au" }
             };
 
-            await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", "[Aurora College] SMS Gateway Low Balance Alert", body, null);
+            await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "[Aurora College] SMS Gateway Low Balance Alert", body);
         }
 
 
@@ -445,7 +445,7 @@ namespace Constellation.Infrastructure.Services
                 if (!toRecipients.Any(recipient => recipient.Value == entry))
                     toRecipients.Add(entry, entry);
 
-            await _emailSender.Send(toRecipients, null, null, null, $"Absence Explanation Received - {viewModel.StudentName}", body, null);
+            await _emailSender.Send(toRecipients, null, $"Absence Explanation Received - {viewModel.StudentName}", body);
         }
 
         public async Task SendNewCoverEmail(EmailDtos.CoverEmail resource)
@@ -597,7 +597,7 @@ namespace Constellation.Infrastructure.Services
                 if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
                     toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
+            await _emailSender.Send(toRecipients, settings.LessonsCoordinatorEmail, viewModel.Title, body);
         }
 
         private async Task SendSecondLessonWarningEmail(LessonMissedNotificationEmail notification)
@@ -622,7 +622,7 @@ namespace Constellation.Infrastructure.Services
                 if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
                     toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
+            await _emailSender.Send(toRecipients, settings.LessonsCoordinatorEmail, viewModel.Title, body);
         }
 
         private async Task SendThirdLessonWarningEmail(LessonMissedNotificationEmail notification)
@@ -647,7 +647,7 @@ namespace Constellation.Infrastructure.Services
                 if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
                     toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
+            await _emailSender.Send(toRecipients, settings.LessonsCoordinatorEmail, viewModel.Title, body);
         }
 
         private async Task SendFinalLessonWarningEmail(LessonMissedNotificationEmail notification)
@@ -672,7 +672,7 @@ namespace Constellation.Infrastructure.Services
                 if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
                     toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
+            await _emailSender.Send(toRecipients, settings.LessonsCoordinatorEmail, viewModel.Title, body);
         }
 
         private async Task SendLessonAlertEmail(LessonMissedNotificationEmail notification)
@@ -696,7 +696,7 @@ namespace Constellation.Infrastructure.Services
                 if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
                     toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, settings.LessonsCoordinatorEmail, viewModel.Title, body, null);
+            await _emailSender.Send(toRecipients, settings.LessonsCoordinatorEmail, viewModel.Title, body);
         }
 
         public async Task SendServiceLogEmail(ServiceLogEmail notification)
@@ -716,7 +716,7 @@ namespace Constellation.Infrastructure.Services
                 if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
                     toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, "noreply@aurora.nsw.edu.au", $"[Aurora College] Service Log Output - {notification.Source}", body, null);
+            await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", $"[Aurora College] Service Log Output - {notification.Source}", body);
         }
 
         public async Task SendTeacherClassworkNotificationRequest(ClassworkNotificationTeacherEmail notification)
@@ -743,7 +743,7 @@ namespace Constellation.Infrastructure.Services
                 if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
                     toRecipients.Add(entry.Name, entry.Email);
 
-            await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
+            await _emailSender.Send(toRecipients, null, viewModel.Title, body);
         }
 
         public async Task SendTeacherClassworkNotificationCopy(Absence absence, ClassworkNotification notification, Staff teacher)
@@ -768,7 +768,7 @@ namespace Constellation.Infrastructure.Services
 
             var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MissedWork/StudentMissedWorkNotificationEmail.cshtml", viewModel);
 
-            await _emailSender.Send(toRecipients, null, null, notification.CompletedBy.EmailAddress, viewModel.Title, body, null);
+            await _emailSender.Send(toRecipients, notification.CompletedBy.EmailAddress, viewModel.Title, body);
         }
 
         public async Task SendStudentClassworkNotification(Absence absence, ClassworkNotification notification, List<string> parentEmails)
@@ -805,7 +805,7 @@ namespace Constellation.Infrastructure.Services
 
             var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MissedWork/StudentMissedWorkNotificationEmail.cshtml", viewModel);
 
-            await _emailSender.Send(toRecipients, null, null, notification.CompletedBy.EmailAddress, viewModel.Title, body, null);
+            await _emailSender.Send(toRecipients, notification.CompletedBy.EmailAddress, viewModel.Title, body);
         }
 
         private async Task SendParentClassworkNotification(Absence absence, ClassworkNotification notification, List<string> parentEmails)
@@ -831,7 +831,7 @@ namespace Constellation.Infrastructure.Services
                 if (!toRecipients.Any(recipient => recipient.Value == entry))
                     toRecipients.Add(entry, entry);
 
-            await _emailSender.Send(toRecipients, null, null, notification.CompletedBy.EmailAddress, viewModel.Title, body, null);
+            await _emailSender.Send(toRecipients, notification.CompletedBy.EmailAddress, viewModel.Title, body);
         }
 
         public async Task SendDailyRollMarkingReport(List<RollMarkReportDto> orderedEntries, bool sendToAbsenceCoordinator, bool sendToFacultyHeadTeacher)
@@ -868,7 +868,7 @@ namespace Constellation.Infrastructure.Services
                 toRecipients.Add(orderedEntries.First().EmailSentTo, orderedEntries.First().EmailSentTo);
             }
 
-            await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, null);
+            await _emailSender.Send(toRecipients, null, viewModel.Title, body);
         }
     }
 }

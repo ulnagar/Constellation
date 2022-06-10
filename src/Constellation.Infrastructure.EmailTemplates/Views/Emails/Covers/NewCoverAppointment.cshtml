@@ -1,0 +1,25 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Covers
+@model NewCoverEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Alert"] = "Please note that declining this calendar appointment does not cancel the cover. If you are unable to teach this class, you must contact the school on 1300 287 629 as soon as possible.";
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>@Model.ToName</p>
+<br />
+<p>This email is to advise you that a cover has been added to our system for the classes below. This cover is active @Model.DateBlock.</p>
+<ul>
+    @foreach (var pair in Model.ClassWithLink)
+    {
+        <li>@pair.Key - 
+            <a href="@pair.Value" target="_blank" class="button"><span style="display:block;padding:10px 20px;line-height:120%;"><span style="font-size: 14px; line-height: 16.8px;">Open Team</span></span></a>
+        </li>
+    }
+</ul>
+<p>Access to the resources will be automatically provided on @Model.StartDate.AddDays(-1).ToShortDateString()., and automatically removed on @Model.EndDate.AddDays(1).ToShortDateString().</p>
+<p>It is important that you attempt to access all class resources required before the start of class, and if you are having any difficulty, please get in touch urgently.</p>

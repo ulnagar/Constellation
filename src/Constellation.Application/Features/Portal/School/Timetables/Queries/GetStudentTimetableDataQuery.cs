@@ -1,4 +1,4 @@
-﻿using Constellation.Application.Features.Portal.School.Timetables.Models;
+﻿using Constellation.Application.DTOs;
 using MediatR;
 
 namespace Constellation.Application.Features.Portal.School.Timetables.Queries

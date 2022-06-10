@@ -2,8 +2,6 @@ OPERATIONS:
 	Return more meaningful errors to log for troubleshooting
 
 COVERS:
-	Add calendar appointment to single day covers
-	Add timetable sheet to multi-day covers
 	Add link landing page that checks access dates before sending people to the actual teams link
 
 LINK SHORTENER:
@@ -52,6 +50,10 @@ R1.3:
 
 	SCHOOLS:
 		Add titles to set school maps pages
+
+	COVERS:
+		Send calendar appointment for notification of single day covers
+		Add timetable sheet to multi-day covers
 
 R1.2:
 	WEB LOGON:

@@ -23,7 +23,7 @@ namespace Constellation.Infrastructure.Features.Portal.School.Timetables.Queries
         {
             var fileName = $"{request.Data.StudentName} Timetable.pdf";
 
-            var headerString = await _renderService.RenderViewToStringAsync("/Views/Documents/Timetable/TimetableHeader.cshtml", request.Data);
+            var headerString = await _renderService.RenderViewToStringAsync("/Views/Documents/Timetable/StudentTimetableHeader.cshtml", request.Data);
             var htmlString = await _renderService.RenderViewToStringAsync("/Views/Documents/Timetable/Timetable.cshtml", request.Data);
 
             var pdfStream = _pdfService.StringToPdfStream(htmlString, headerString);
