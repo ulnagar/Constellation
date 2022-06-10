@@ -55,6 +55,9 @@ R1.3:
 		Send calendar appointment for notification of single day covers
 		Add timetable sheet to multi-day covers
 
+	SENTRAL FAMILY DETAILS SYNC JOB:
+		Migrate to using different sources to make it more reliable and take advantage of the new 3PI data
+
 R1.2:
 	WEB LOGON:
 		Add client-side validation rules to ensure email address uses correct domain
