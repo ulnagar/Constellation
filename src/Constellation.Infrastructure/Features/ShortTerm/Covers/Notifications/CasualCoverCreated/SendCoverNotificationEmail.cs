@@ -77,7 +77,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
             foreach (var teacher in teachers)
             {
                 if (!primaryRecipients.Any(recipient => recipient.Value == teacher.EmailAddress))
-                    primaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
+                    secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
             }
 
             foreach (var teacher in headTeacher)
@@ -217,12 +217,12 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
 
                 var icsData = _calendarService.CreateInvite(uid, casual.DisplayName, casual.EmailAddress, summary, location, description, appointmentStart, appointmentEnd, 0);
 
-                await _emailGateway.Send(new Dictionary<string, string> { { "Ben Hillsley", "benjamin.hillsley@det.nsw.edu.au" } }, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData);
+                await _emailGateway.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData);
             } else
             {
                 var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverEmail.cshtml", viewModel);
 
-                await _emailGateway.Send(new Dictionary<string, string> { { "Ben Hillsley", "benjamin.hillsley@det.nsw.edu.au" } }, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments);
+                await _emailGateway.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments);
             }
         }
     }

@@ -71,7 +71,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.S
             foreach (var teacher in teachers)
             {
                 if (!primaryRecipients.Any(recipient => recipient.Value == teacher.EmailAddress))
-                    primaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
+                    secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
             }
 
             foreach (var teacher in headTeacher)
@@ -96,7 +96,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.S
             var viewModel = new CancelledCoverEmailViewModel
             {
                 ToName = staff.DisplayName,
-                Title = $"Aurora Class Cover - {offering.Name}",
+                Title = $"Cancelled Aurora Class Cover - {offering.Name}",
                 SenderName = "Ben Hillsley",
                 SenderTitle = "Learning Technologies Support Officer",
                 StartDate = cover.StartDate,
@@ -131,13 +131,13 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.S
 
                 var icsData = _calendarService.CancelInvite(uid, staff.DisplayName, staff.EmailAddress, summary, location, description, appointmentStart, appointmentEnd, 0);
 
-                await _emailGateway.Send(new Dictionary<string, string> { { "Ben Hillsley", "benjamin.hillsley@det.nsw.edu.au" } }, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData);
+                await _emailGateway.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData);
             }
             else
             {
                 var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverEmail.cshtml", viewModel);
 
-                await _emailGateway.Send(new Dictionary<string, string> { { "Ben Hillsley", "benjamin.hillsley@det.nsw.edu.au" } }, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments);
+                await _emailGateway.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments);
             }
         }
     }
