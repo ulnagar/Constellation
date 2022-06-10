@@ -23,11 +23,11 @@ namespace Constellation.Infrastructure.Features.Jobs.AbsenceMonitor.Queries
 
         public async Task<ICollection<string>> Handle(GetStudentFamilyMobileNumbersQuery request, CancellationToken cancellationToken)
         {
+            var phoneNumbers = new List<string>();
+
             var studentFamily = await _context.StudentFamilies
                 .Where(family => family.Students.Any(student => student.StudentId == request.StudentId))
                 .FirstOrDefaultAsync(cancellationToken);
-
-            var phoneNumbers = new List<string>();
 
             if (studentFamily == null)
                 return phoneNumbers;

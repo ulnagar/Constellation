@@ -23,6 +23,16 @@ namespace Constellation.Application.Extensions
             return oString;
         }
 
+        public static string FormatField(this string content)
+        {
+            return content.RemoveQuotes().RemoveWhitespace();
+        }
+
+        public static string FormatEmail(this string content)
+        {
+            return content.RemoveQuotes().RemoveWhitespace().ToLower();
+        }
+
         public static string RemoveQuotes(this string content)
         {
             return content.TrimStart('"').TrimEnd('"');

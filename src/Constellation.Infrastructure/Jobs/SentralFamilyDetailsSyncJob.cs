@@ -148,6 +148,11 @@ namespace Constellation.Infrastructure.Jobs
                         entry.Parent1.EmailAddress = family.FatherEmail;
                     }
 
+                    if (string.IsNullOrEmpty(entry.Parent1.FirstName))
+                    {
+                        entry.Parent1.EmailAddress = null;
+                    }
+
                     if (entry.Parent2.Title != family.MotherTitle)
                     {
                         _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 Title from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.Title, family.MotherTitle);
@@ -181,6 +186,11 @@ namespace Constellation.Infrastructure.Jobs
                         _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.EmailAddress, family.MotherEmail);
 
                         entry.Parent2.EmailAddress = family.MotherEmail;
+                    }
+
+                    if (string.IsNullOrEmpty(entry.Parent1.FirstName))
+                    {
+                        entry.Parent1.EmailAddress = null;
                     }
 
                     if (entry.Address.Title != family.AddressName)

@@ -676,16 +676,13 @@ namespace Constellation.Infrastructure.Gateways
         {
             var data = new List<FamilyDetailsDto>();
             
-            var page = await GetPageAsync($"{_settings.Server}/enquiry/export/view_export?name=complete&inputs[class]=&inputs[roll_class]=&inputs[schyear]=&format=csv&headings=1&action=Download");
+            var familiesPage = await GetPageAsync($"{_settings.Server}/enquiry/export/view_export?name=families&format=csv&headings=1&action=Download");
             var emailPage = await GetPageAsync($"{_settings.Server}/enquiry/export/view_export?name=email&inputs[only_eldest]=no&inputs[addresses]=all&format=csv&headings=1&action=Download");
 
-            if (page == null || emailPage == null)
+            if (familiesPage == null || emailPage == null)
                 return data;
 
-            var rawPage = page.DocumentNode.InnerHtml;
-            rawPage = Regex.Replace(rawPage, "\n(?<![0-9]{4}\n)", " ");
-
-            var list = rawPage.Split('\u000A').ToList();
+            var list = familiesPage.DocumentNode.InnerHtml.Split('\u000A').ToList();
 
             // Remove first and last entry
             list.RemoveAt(0);
@@ -695,53 +692,44 @@ namespace Constellation.Infrastructure.Gateways
             {
                 var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))"); // does not recognise properly when quotes are unbalanced
 
-                // Perhaps use the rawPage above with the CSVHelper code?
-
                 var entry = list[i];
                 var split = CSVParser.Split(entry);
 
-                if (split.Length != 90)
+                if (split.Length != 41)
                 {
                     split = entry.Split(',');
 
-                    if (split.Length != 90)
+                    if (split.Length != 41)
                     {
                         continue;
                     }
                 }
 
-                var familyId = split[4].RemoveQuotes().RemoveWhitespace();
+                var familyId = split[0].FormatField();
 
                 if (data.Any(detail => detail.FamilyId == familyId))
                 {
-                    // Update existing family with additional StudentId
-                    var detail = data.First(detail => detail.FamilyId == familyId);
-                    detail.StudentIds.Add(split[0].RemoveQuotes().RemoveWhitespace());
-
                     continue;
                 }
                 else
                 {
                     var detail = new FamilyDetailsDto
                     {
-                        FamilyId = split[4].RemoveQuotes().RemoveWhitespace(),
-                        FatherTitle = split[49].RemoveQuotes().RemoveWhitespace(),
-                        FatherFirstName = split[50].RemoveQuotes().RemoveWhitespace(),
-                        FatherLastName = split[51].RemoveQuotes().RemoveWhitespace(),
-                        FatherMobile = split[53].RemoveQuotes().RemoveWhitespace(),
-                        MotherTitle = split[61].RemoveQuotes().RemoveWhitespace(),
-                        MotherFirstName = split[62].RemoveQuotes().RemoveWhitespace(),
-                        MotherLastName = split[63].RemoveQuotes().RemoveWhitespace(),
-                        MotherMobile = split[65].RemoveQuotes().RemoveWhitespace(),
-                        FamilyEmail = split[82].RemoveQuotes().RemoveWhitespace(),
-                        AddressName = split[83].RemoveQuotes().RemoveWhitespace(),
-                        AddressLine1 = split[85].RemoveQuotes().RemoveWhitespace(),
-                        AddressLine2 = split[86].RemoveQuotes().RemoveWhitespace(),
-                        AddressTown = split[88].RemoveQuotes().RemoveWhitespace(),
-                        AddressPostCode = split[89].RemoveQuotes().RemoveWhitespace()
+                        FamilyId = split[0].FormatField(),
+                        FatherTitle = split[9].FormatField(),
+                        FatherFirstName = split[10].FormatField(),
+                        FatherLastName = split[11].FormatField(),
+                        FatherMobile = split[13].FormatField(),
+                        MotherTitle = split[21].FormatField(),
+                        MotherFirstName = split[22].FormatField(),
+                        MotherLastName = split[23].FormatField(),
+                        MotherMobile = split[25].FormatField(),
+                        AddressName = split[1].FormatField(),
+                        AddressLine1 = split[2].FormatField(),
+                        AddressLine2 = split[3].FormatField(),
+                        AddressTown = split[4].FormatField(),
+                        AddressPostCode = split[5].FormatField()
                     };
-
-                    detail.StudentIds.Add(split[0].RemoveQuotes().RemoveWhitespace());
 
                     data.Add(detail);
                 }
@@ -766,8 +754,9 @@ namespace Constellation.Infrastructure.Gateways
                         continue;
                 }
 
-                var studentId = split[0].RemoveQuotes().RemoveWhitespace();
-                var dataItem = data.FirstOrDefault(item => item.StudentIds.Contains(studentId));
+                var studentId = split[0].FormatField();
+                var familyTitle = split[6].FormatField();
+                var dataItem = data.FirstOrDefault(item => item.AddressName == familyTitle);
 
                 if (dataItem == null)
                 {
@@ -777,23 +766,28 @@ namespace Constellation.Infrastructure.Gateways
                     continue;
                 }
 
+                dataItem.StudentIds.Add(studentId);
+                dataItem.FamilyEmail = split[8].FormatEmail();
+
                 if (dataItem.FatherFirstName != null && dataItem.MotherFirstName == null)
                 {
                     // Single parent family, father has custody
-                    dataItem.FatherEmail = split[9].RemoveQuotes().RemoveWhitespace();
+                    dataItem.FatherEmail = split[9].FormatEmail();
                 } else if (dataItem.FatherFirstName == null && dataItem.MotherFirstName != null)
                 {
                     // Single parent family, mother has custody
-                    dataItem.MotherEmail = split[9].RemoveQuotes().RemoveWhitespace();
+                    dataItem.MotherEmail = split[9].FormatEmail();
                 } else
                 {
                     // Dual parent family, mother first, then father
-                    dataItem.MotherEmail = split[9].RemoveQuotes().RemoveWhitespace();
-                    dataItem.FatherEmail = split[10].RemoveQuotes().RemoveWhitespace();
+                    dataItem.MotherEmail = split[9].FormatEmail();
+                    dataItem.FatherEmail = split[10].FormatEmail();
                 }
             }
 
-            return data;
+            var noStudents = data.Where(entry => !entry.StudentIds.Any()).ToList();
+
+            return data.Where(entry => entry.StudentIds.Any()).ToList();
         }
     }
 }
