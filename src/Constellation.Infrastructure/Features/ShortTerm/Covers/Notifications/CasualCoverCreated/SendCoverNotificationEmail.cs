@@ -57,11 +57,13 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
             var teachers = await _context.Sessions
                 .Where(session => !session.IsDeleted && session.OfferingId == cover.OfferingId)
                 .Select(session => session.Teacher)
+                .Distinct()
                 .ToListAsync(cancellationToken);
 
             var headTeacher = await _context.Courses
                 .Where(course => course.Offerings.Any(offering => offering.Id == cover.OfferingId))
                 .Select(course => course.HeadTeacher)
+                .Distinct()
                 .ToListAsync(cancellationToken);
 
             var additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
@@ -76,7 +78,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
 
             foreach (var teacher in teachers)
             {
-                if (!primaryRecipients.Any(recipient => recipient.Value == teacher.EmailAddress))
+                if (!primaryRecipients.Any(recipient => recipient.Value == teacher.EmailAddress) && !secondaryRecipients.Any(recipient => recipient.Value == teacher.EmailAddress))
                     secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
             }
 

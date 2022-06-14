@@ -34,10 +34,11 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.S
             var existingRequests = await _context.MSTeamOperations
                 .OfType<TeacherMSTeamOperation>()
                 .Where(operation => operation.Id == notification.CoverId)
-                .GroupBy(operation => operation.StaffId)
                 .ToListAsync(cancellationToken);
 
-            foreach (var group in existingRequests)
+            var groupedRequests = existingRequests.GroupBy(operation => operation.StaffId).ToList();
+
+            foreach (var group in groupedRequests)
             {
                 if (group.Any(operation => operation.Action == MSTeamOperationAction.Add && operation.IsCompleted) &&
                     group.Any(operation => operation.Action == MSTeamOperationAction.Remove && !operation.IsCompleted))
