@@ -675,11 +675,14 @@ namespace Constellation.Infrastructure.Gateways
         public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(ILogger logger)
         {
             var data = new List<FamilyDetailsDto>();
-            
+
+            var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+
             var familiesPage = await GetPageAsync($"{_settings.Server}/enquiry/export/view_export?name=families&format=csv&headings=1&action=Download");
             var emailPage = await GetPageAsync($"{_settings.Server}/enquiry/export/view_export?name=email&inputs[only_eldest]=no&inputs[addresses]=all&format=csv&headings=1&action=Download");
+            var linkPage = await GetPageAsync($"{_settings.Server}/enquiry/export/view_export?name=advstudent&inputs%5Bclass%5D=&inputs%5Broll_class%5D=&format=csv&headings=1&action=Download");
 
-            if (familiesPage == null || emailPage == null)
+            if (familiesPage == null || emailPage == null || linkPage == null)
                 return data;
 
             var list = familiesPage.DocumentNode.InnerHtml.Split('\u000A').ToList();
@@ -690,8 +693,6 @@ namespace Constellation.Infrastructure.Gateways
 
             for (var i = 0; i < list.Count; i++)
             {
-                var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))"); // does not recognise properly when quotes are unbalanced
-
                 var entry = list[i];
                 var split = CSVParser.Split(entry);
 
@@ -735,6 +736,25 @@ namespace Constellation.Infrastructure.Gateways
                 }
             }
 
+            var linkList = linkPage.DocumentNode.InnerHtml.Split('\u000A').ToList();
+            linkList.RemoveAt(0);
+            linkList.RemoveAt(linkList.Count - 1);
+
+            var familyLink = new Dictionary<string, string>();
+
+            foreach (var link in linkList)
+            {
+                var splitLink = CSVParser.Split(link);
+
+                if (splitLink.Length < 4)
+                    continue;
+
+                if (!familyLink.ContainsKey(splitLink[0]))
+                {
+                    familyLink.Add(splitLink[0], splitLink[3]);
+                }
+            }
+
             list = emailPage.DocumentNode.InnerHtml.Split('\u000A').ToList();
 
             // Remove first and last entry
@@ -743,7 +763,6 @@ namespace Constellation.Infrastructure.Gateways
 
             foreach (var entry in list)
             {
-                var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
                 var split = CSVParser.Split(entry);
 
                 if (split.Length != 11)
@@ -755,8 +774,18 @@ namespace Constellation.Infrastructure.Gateways
                 }
 
                 var studentId = split[0].FormatField();
-                var familyTitle = split[6].FormatField();
-                var dataItem = data.FirstOrDefault(item => item.AddressName == familyTitle);
+
+                var familyLinkItem = familyLink.FirstOrDefault(item => item.Key == studentId);
+
+                if (familyLinkItem.Value == null)
+                {
+                    // Family was not found. Why?
+                    logger.LogWarning("Student {studentId} is not found in any active family", studentId);
+
+                    continue;
+                }
+
+                var dataItem = data.FirstOrDefault(item => item.FamilyId == familyLinkItem.Value);
 
                 if (dataItem == null)
                 {
