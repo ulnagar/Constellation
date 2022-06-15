@@ -185,8 +185,8 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
             {
                 ToName = casual.DisplayName,
                 Title = $"Aurora Class Cover - {offering.Name}",
-                SenderName = "Ben Hillsley",
-                SenderTitle = "Learning Technologies Support Officer",
+                SenderName = "Cathy Crouch",
+                SenderTitle = "Casual Coordinator",
                 StartDate = cover.StartDate,
                 EndDate = cover.EndDate,
                 HasAdobeAccount = true,

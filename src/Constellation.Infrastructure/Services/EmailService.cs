@@ -454,8 +454,8 @@ namespace Constellation.Infrastructure.Services
             {
                 ToName = resource.CoveringTeacherName,
                 Title = "Class Cover Information",
-                SenderName = "Ben Hillsley",
-                SenderTitle = "Learning Technologies Support Officer",
+                SenderName = "Cathy Crouch",
+                SenderTitle = "Casual Coordinator",
                 StartDate = resource.StartDate,
                 EndDate = resource.EndDate,
                 HasAdobeAccount = resource.CoveringTeacherAdobeAccount,
@@ -480,7 +480,7 @@ namespace Constellation.Infrastructure.Services
                 if (!ccRecipients.Any(recipient => recipient.Value == entry.Value))
                     ccRecipients.Add(entry.Key, entry.Value);
 
-            await _emailSender.Send(toRecipients, ccRecipients, null, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
+            await _emailSender.Send(toRecipients, ccRecipients, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
         }
 
         public async Task SendUpdatedCoverEmail(EmailDtos.CoverEmail resource)
@@ -489,8 +489,8 @@ namespace Constellation.Infrastructure.Services
             {
                 ToName = resource.CoveringTeacherName,
                 Title = "[UPDATED] Class Cover Information",
-                SenderName = "Ben Hillsley",
-                SenderTitle = "Learning Technologies Support Officer",
+                SenderName = "Cathy Crouch",
+                SenderTitle = "Casual Coordinator",
                 StartDate = resource.StartDate,
                 EndDate = resource.EndDate,
                 HasAdobeAccount = resource.CoveringTeacherAdobeAccount,
@@ -515,7 +515,7 @@ namespace Constellation.Infrastructure.Services
                 if (!ccRecipients.Any(recipient => recipient.Value == entry.Value))
                     ccRecipients.Add(entry.Key, entry.Value);
 
-            await _emailSender.Send(toRecipients, ccRecipients, null, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
+            await _emailSender.Send(toRecipients, ccRecipients, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
         }
 
         public async Task SendCancelledCoverEmail(EmailDtos.CoverEmail resource)
@@ -524,8 +524,8 @@ namespace Constellation.Infrastructure.Services
             {
                 ToName = resource.CoveringTeacherName,
                 Title = "[CANCELLED] Class Cover Information",
-                SenderName = "Ben Hillsley",
-                SenderTitle = "Learning Technologies Support Officer",
+                SenderName = "Cathy Crouch",
+                SenderTitle = "Casual Coordinator",
                 StartDate = resource.StartDate,
                 EndDate = resource.EndDate,
                 HasAdobeAccount = resource.CoveringTeacherAdobeAccount,
@@ -550,7 +550,7 @@ namespace Constellation.Infrastructure.Services
                 if (!ccRecipients.Any(recipient => recipient.Value == entry.Value))
                     ccRecipients.Add(entry.Key, entry.Value);
 
-            await _emailSender.Send(toRecipients, ccRecipients, null, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
+            await _emailSender.Send(toRecipients, ccRecipients, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
         }
 
         public async Task SendLessonMissedEmail(LessonMissedNotificationEmail notification)
