@@ -110,7 +110,7 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
 #if DEBUG
                 // Detected local login with claims bypass
                 var claimList = new List<Claim>();
-                claimList.Add(new Claim("Schools", "8360,8155,8343"));
+                claimList.Add(new Claim("Schools", "8371"));
 
                 var dbUserAccount = await _userManager.FindByEmailAsync(Input.Email);
 

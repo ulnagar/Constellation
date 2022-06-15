@@ -110,45 +110,65 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
                 return RedirectToAction("FilterSelection");
             }
 
-            switch (method)
+            if (absence.Type == Absence.Whole)
             {
-                case AbsenceNotification.SMS:
-                    {
-                        var phoneNumbers = await _mediator.Send(new GetStudentFamilyMobileNumbersQuery { StudentId = absence.Student.SentralStudentId });
-                        var sentMessage = await _smsService.SendAbsenceNotificationAsync(absences, phoneNumbers.ToList());
-
-                        if (sentMessage.Messages.Count > 0)
+                switch (method)
+                {
+                    case AbsenceNotification.SMS:
                         {
-                            absence.Notifications.Add(new AbsenceNotification
+                            var phoneNumbers = await _mediator.Send(new GetStudentFamilyMobileNumbersQuery { StudentId = absence.Student.SentralStudentId });
+                            var sentMessage = await _smsService.SendAbsenceNotificationAsync(absences, phoneNumbers.ToList());
+
+                            if (sentMessage.Messages.Count > 0)
                             {
-                                Type = AbsenceNotification.SMS,
-                                SentAt = DateTime.Now,
-                                Message = sentMessage.Messages.First().MessageBody,
-                                Recipients = phoneNumbers.Collapse('|'),
-                                OutgoingId = sentMessage.Messages.First().OutgoingId
-                            });
+                                absence.Notifications.Add(new AbsenceNotification
+                                {
+                                    Type = AbsenceNotification.SMS,
+                                    SentAt = DateTime.Now,
+                                    Message = sentMessage.Messages.First().MessageBody,
+                                    Recipients = phoneNumbers.Collapse('|'),
+                                    OutgoingId = sentMessage.Messages.First().OutgoingId
+                                });
+                            }
+
+                            break;
                         }
 
-                        break;
-                    }
-
-                case AbsenceNotification.Email:
-                    {
-                        var emailAddresses = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = absence.Student.StudentId });
-                        var sentMessage = await _emailService.SendParentWholeAbsenceAlert(absences, emailAddresses.ToList());
-
-                        absence.Notifications.Add(new AbsenceNotification
+                    case AbsenceNotification.Email:
                         {
-                            Type = AbsenceNotification.Email,
-                            SentAt = DateTime.Now,
-                            Message = sentMessage.message,
-                            Recipients = emailAddresses.Collapse('|'),
-                            OutgoingId = sentMessage.id
-                        });
+                            var emailAddresses = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = absence.Student.StudentId });
+                            var sentMessage = await _emailService.SendParentWholeAbsenceAlert(absences, emailAddresses.ToList());
 
-                        break;
-                    }
+                            absence.Notifications.Add(new AbsenceNotification
+                            {
+                                Type = AbsenceNotification.Email,
+                                SentAt = DateTime.Now,
+                                Message = sentMessage.message,
+                                Recipients = emailAddresses.Collapse('|'),
+                                OutgoingId = sentMessage.id
+                            });
+
+                            break;
+                        }
+                }
             }
+
+            if (absence.Type == Absence.Partial)
+            {
+                var recipients = new List<string> { absence.Student.EmailAddress };
+                var sentMessage = await _emailService.SendStudentPartialAbsenceExplanationRequest(absences, recipients.ToList());
+
+                absence.Notifications.Add(new AbsenceNotification
+                {
+                    Type = AbsenceNotification.Email,
+                    SentAt = DateTime.Now,
+                    Message = sentMessage.message,
+                    Recipients = recipients.Collapse('|'),
+                    OutgoingId = sentMessage.id
+                });
+            }
+
+            await _unitOfWork.CompleteAsync();
 
             return RedirectToAction("FilterSelection");
         }
