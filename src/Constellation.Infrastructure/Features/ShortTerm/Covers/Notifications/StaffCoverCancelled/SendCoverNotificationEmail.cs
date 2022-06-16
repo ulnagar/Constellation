@@ -70,7 +70,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.S
 
             foreach (var teacher in teachers)
             {
-                if (!primaryRecipients.Any(recipient => recipient.Value == teacher.EmailAddress))
+                if (!primaryRecipients.Any(recipient => recipient.Value == teacher.EmailAddress) && !secondaryRecipients.Any(recipient => recipient.Value == teacher.EmailAddress))
                     secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
             }
 
