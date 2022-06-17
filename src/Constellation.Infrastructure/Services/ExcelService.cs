@@ -20,7 +20,7 @@ namespace Constellation.Infrastructure.Services
             var worksheet = excel.Workbook.Worksheets.Add("PTO");
             var headerRow = new List<string[]>()
             {
-                new string[] { "SCD", "SFN", "SSN", "PCD1", "PTI1", "PFN1", "PEM1", "PCD2", "PTI2", "PFN2", "PEM2", "PCD3", "PTI3", "PFN3", "PEM3", "PCD4", "PTI4", "PFN4", "PEM4", "CCD", "CGN", "CLS", "TCD", "TTI", "TFN", "TSN", "TEM"}
+                new string[] { "SCD", "SFN", "SSN", "PCD1", "PTI1", "PFN1", "PSN1", "PEM1", "PCD2", "PTI2", "PFN2", "PSN2", "PEM2", "CCD", "CGN", "CLS", "TCD", "TTI", "TFN", "TSN", "TEM"}
             };
 
             //var headerRange = "A1:" + char.ConvertFromUtf32(headerRow[0].Length + 64) + "1";
@@ -46,8 +46,12 @@ namespace Constellation.Infrastructure.Services
                     row.Add(parent.ParentEmailAddress);
                 }
 
-                for (var i = 0; i <= (3 - line.Parents.Count) * 5; i++)
+                if (line.Parents.Count == 1)
                 {
+                    row.Add("");
+                    row.Add("");
+                    row.Add("");
+                    row.Add("");
                     row.Add("");
                 }
 

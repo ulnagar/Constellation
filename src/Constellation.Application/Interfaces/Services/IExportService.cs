@@ -7,7 +7,7 @@ namespace Constellation.Application.Interfaces.Services
 {
     public interface IExportService
     {
-        Task<List<InterviewExportDto>> CreatePTOExport(ICollection<Student> students);
+        List<InterviewExportDto> CreatePTOExport(ICollection<Student> students, bool perFamily);
         Task<List<AbsenceExportDto>> CreateAbsenceExport(AbsenceFilterDto filter);
     }
 }

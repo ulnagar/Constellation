@@ -46,7 +46,7 @@ namespace Constellation.Presentation.Server.Areas.Utility.Controllers
         {
             var data = await _unitOfWork.Students.ForInterviewsExportAsync(filter);
 
-            var exportDto = await _exportService.CreatePTOExport(data);
+            var exportDto = _exportService.CreatePTOExport(data, filter.PerFamily);
 
             var stream = await _excelService.CreatePTOFile(exportDto);
 

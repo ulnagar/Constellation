@@ -16,29 +16,20 @@ namespace Constellation.Infrastructure.Services
     public class ExportService : IExportService, IScopedService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ISentralService _sentralService;
-        private readonly ISentralGateway _sentralGateway;
 
-        public ExportService(IUnitOfWork unitOfWork, ISentralService sentralService,
-            ISentralGateway sentralGateway)
+        public ExportService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _sentralService = sentralService;
-            _sentralGateway = sentralGateway;
         }
 
-        public async Task<List<InterviewExportDto>> CreatePTOExport(ICollection<Student> students)
+        public List<InterviewExportDto> CreatePTOExport(ICollection<Student> students, bool perFamily)
         {
             var result = new List<InterviewExportDto>();
 
             foreach (var student in students)
             {
                 var validEnrolments = student.Enrolments.Where(enrol => !enrol.IsDeleted && enrol.Offering.IsCurrent()).ToList();
-
-                var sentralId = await _sentralService.UpdateSentralStudentId(student.StudentId);
-
-                var parents = await _sentralGateway.GetParentContactEntry(sentralId);
-
+                 
                 foreach (var enrolment in validEnrolments)
                 {
                     var course = enrolment.Offering.Course;
@@ -63,26 +54,69 @@ namespace Constellation.Infrastructure.Services
                         TeacherEmailAddress = teacher.EmailAddress
                     };
 
-                    foreach (var parent in parents)
+                    if (perFamily)
                     {
-                        var entry = new InterviewExportDto.Parent();
-                        entry.ParentCode = parent.Key;
+                        var lastName = student.Family.Address.Title.Split(' ').Last();
+                        var firstName = student.Family.Address.Title.Substring(0, student.Family.Address.Title.Length - lastName.Length).Trim();
+                        var email = student.Family.Parent1.EmailAddress ?? student.Family.Parent2.EmailAddress;
 
-                        foreach (var detail in parent.Value)
+                        var entry = new InterviewExportDto.Parent
                         {
-                            switch (detail.Key)
-                            {
-                                case "FirstName":
-                                    entry.ParentFirstName = detail.Value;
-                                    break;
-                                case "LastName":
-                                    entry.ParentLastName = detail.Value;
-                                    break;
-                                case "EmailAddress":
-                                    entry.ParentEmailAddress = detail.Value;
-                                    break;
-                            }
-                        }
+                            ParentCode = email,
+                            ParentFirstName = firstName,
+                            ParentLastName = lastName,
+                            ParentEmailAddress = email
+                        };
+
+                        dto.Parents.Add(entry);
+
+                        result.Add(dto);
+                        continue;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(student.Family.Parent1.FirstName) && !string.IsNullOrWhiteSpace(student.Family.Parent2.FirstName) && student.Family.Parent1.EmailAddress == student.Family.Parent2.EmailAddress)
+                    {
+                        // Create single family login
+
+                        var lastName = student.Family.Address.Title.Split(' ').Last();
+                        var firstName = student.Family.Address.Title.Substring(0, student.Family.Address.Title.Length - lastName.Length).Trim();
+
+                        var entry = new InterviewExportDto.Parent
+                        {
+                            ParentCode = student.Family.Parent1.EmailAddress,
+                            ParentFirstName = firstName,
+                            ParentLastName = lastName,
+                            ParentEmailAddress = student.Family.Parent1.EmailAddress
+                        };
+
+                        dto.Parents.Add(entry);
+
+                        result.Add(dto);
+                        continue;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(student.Family.Parent1.FirstName))
+                    {
+                        var entry = new InterviewExportDto.Parent
+                        {
+                            ParentCode = student.Family.Parent1.EmailAddress,
+                            ParentFirstName = student.Family.Parent1.FirstName,
+                            ParentLastName = student.Family.Parent1.LastName,
+                            ParentEmailAddress = student.Family.Parent1.EmailAddress
+                        };
+
+                        dto.Parents.Add(entry);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(student.Family.Parent2.FirstName))
+                    {
+                        var entry = new InterviewExportDto.Parent
+                        {
+                            ParentCode = student.Family.Parent2.EmailAddress,
+                            ParentFirstName = student.Family.Parent2.FirstName,
+                            ParentLastName = student.Family.Parent2.LastName,
+                            ParentEmailAddress = student.Family.Parent2.EmailAddress
+                        };
 
                         dto.Parents.Add(entry);
                     }

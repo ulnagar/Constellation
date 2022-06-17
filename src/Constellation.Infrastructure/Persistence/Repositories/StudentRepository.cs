@@ -189,6 +189,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                     .ThenInclude(enrol => enrol.Offering)
                         .ThenInclude(offering => offering.Sessions)
                             .ThenInclude(session => session.Teacher)
+                .Include(student => student.Family)
                 .OrderBy(student => student.CurrentGrade)
                 .ThenBy(student => student.LastName)
                 .Where(student => !student.IsDeleted)

@@ -45,6 +45,12 @@ DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 R1.3:
+	PTO EXPORT FILE:
+		Update to use Student Families instead of pulling from Sentral each time
+		Update to create a single parent entry for families with a single email address
+		Update to support separate parent accounts for families with different email addresses
+		Update to support selectable per-family or per-parent details export
+
 	SCHOOLS PORTAL:
 		Add timetables view and download options
 
