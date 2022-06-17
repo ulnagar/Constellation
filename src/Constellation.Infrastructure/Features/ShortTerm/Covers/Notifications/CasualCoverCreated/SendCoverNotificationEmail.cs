@@ -209,8 +209,9 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
                 // Extract start and end times for the periods to use in the appointment
                 var cycleDay = cover.StartDate.GetDayNumber();
                 var periods = await _context.Periods
-                    .Where(period => period.Day == cycleDay && period.OfferingSessions.Any(session => !session.IsDeleted && session.OfferingId == cover.OfferingId))
+                    .Where(period => period.Day == cycleDay && period.OfferingSessions.Any(session => !session.IsDeleted && session.OfferingId == cover.OfferingId) && period.Type != "Other")
                     .ToListAsync(cancellationToken);
+
                 var appointmentStartTime = periods.Min(period => period.StartTime);
                 var appointmentEndTime = periods.Max(period => period.EndTime);
 
