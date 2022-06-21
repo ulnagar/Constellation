@@ -42,7 +42,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
                 return RedirectToPage("School", new { area = "Portal" });
 
             var absence = await _unitOfWork.Absences.ForExplanationFromParent(Id);
-            if (absence == null || absence.Type == Absence.Partial)
+            if (absence == null || absence.Type == Absence.Types.Partial)
                 return RedirectToPage("School", new { area = "Portal" });
 
             DisplayAbsence = AbsenceDto.ConvertFromAbsence(absence);

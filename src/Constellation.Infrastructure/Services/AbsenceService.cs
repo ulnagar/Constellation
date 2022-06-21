@@ -82,8 +82,8 @@ namespace Constellation.Infrastructure.Services
 
             var response = new AbsenceResponse()
             {
-                Type = AbsenceResponse.Parent,
-                From = AbsenceResponse.Parent,
+                Type = AbsenceResponse.Types.Parent,
+                From = AbsenceResponse.Types.Parent,
                 ReceivedAt = DateTime.Now,
                 Explanation = explanation
             };
@@ -119,7 +119,7 @@ namespace Constellation.Infrastructure.Services
 
             var response = new AbsenceResponse()
             {
-                Type = AbsenceResponse.Coordinator,
+                Type = AbsenceResponse.Types.Coordinator,
                 From = userName,
                 ReceivedAt = DateTime.Now,
                 Explanation = explanation
@@ -148,11 +148,11 @@ namespace Constellation.Infrastructure.Services
             {
                 Absence = absence,
                 AbsenceId = absence.Id,
-                Type = AbsenceResponse.Student,
-                From = AbsenceResponse.Student,
+                Type = AbsenceResponse.Types.Student,
+                From = AbsenceResponse.Types.Student,
                 ReceivedAt = DateTime.Now,
                 Explanation = explanation,
-                VerificationStatus = AbsenceResponse.Pending,
+                VerificationStatus = AbsenceResponse.VerificationStatuses.Pending,
                 VerifiedAt = DateTime.Now
             };
 
@@ -181,7 +181,7 @@ namespace Constellation.Infrastructure.Services
                 OutgoingId = email.id,
                 Type = "Email",
                 Message = email.message,
-                Recipients = email.recipients,
+                Recipients = notificationEmail.Recipients,
                 SentAt = DateTime.Now,
             };
 
@@ -198,9 +198,9 @@ namespace Constellation.Infrastructure.Services
                 return;
 
             if (isVerified)
-                response.VerificationStatus = AbsenceResponse.Verified;
+                response.VerificationStatus = AbsenceResponse.VerificationStatuses.Verified;
             else
-                response.VerificationStatus = AbsenceResponse.Rejected;
+                response.VerificationStatus = AbsenceResponse.VerificationStatuses.Rejected;
 
             response.Verifier = username;
             response.VerificationComment = comment;

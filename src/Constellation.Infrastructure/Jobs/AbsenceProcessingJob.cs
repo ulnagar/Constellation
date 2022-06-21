@@ -514,7 +514,7 @@ namespace Constellation.Infrastructure.Jobs
                 return null;
 
             // Create an object to save this data to the database.
-            var absenceRecord = CreateAbsence(new List<SentralPeriodAbsenceDto> { absence }, courseEnrolmentId, Absence.Partial, absence.MinutesAbsent, absence.Reason, periodGroup);
+            var absenceRecord = CreateAbsence(new List<SentralPeriodAbsenceDto> { absence }, courseEnrolmentId, Absence.Types.Partial, absence.MinutesAbsent, absence.Reason, periodGroup);
 
             if (attendanceAbsence.Timeframe == "Whole Day")
             {
@@ -547,14 +547,25 @@ namespace Constellation.Infrastructure.Jobs
             // If this absence was explained using an Accepted Partial Absence Reason, then the absence should be created as explained
             if (_appSettings.DiscountedPartialReasons.Contains(absence.Reason))
             {
+                var response = new AbsenceResponse
+                {
+                    Type = AbsenceResponse.Types.System,
+                    ReceivedAt = DateTime.Now,
+                };
+
+                if (attendanceAbsence == null)
+                {
+                    response.Explanation = absence.Reason;
+                }
+
                 // This absence has been externally explained
                 if (attendanceAbsence != null)
                 {
-                    absenceRecord.ExternalExplanation = attendanceAbsence.ExternalExplanation;
-                    absenceRecord.ExternalExplanationSource = attendanceAbsence.ExternalExplanationSource;
+                    response.Explanation = attendanceAbsence.ExternalExplanation;
+                    response.From = attendanceAbsence.ExternalExplanationSource;
                 }
 
-                absenceRecord.ExternallyExplained = true;
+                absenceRecord.Responses.Add(response);
             }
 
             return absenceRecord;
@@ -570,7 +581,7 @@ namespace Constellation.Infrastructure.Jobs
             var reason = (reasons.Count == 1) ? reasons.First() : FindWorstAbsenceReason(reasons);
 
             // Create an object to save this data to the database.
-            var absenceRecord = CreateAbsence(absencesToProcess, courseEnrolmentId, Absence.Whole, totalAbsenceTime, reason, periodGroup);
+            var absenceRecord = CreateAbsence(absencesToProcess, courseEnrolmentId, Absence.Types.Whole, totalAbsenceTime, reason, periodGroup);
 
             // Find a webAttend absence that covers this set
             var attendanceAbsence = SelectBestWebAttendEntryForWholeAbsence(absencesToProcess, webAttendAbsences, absenceRecord);
@@ -589,13 +600,25 @@ namespace Constellation.Infrastructure.Jobs
             if (absencesToProcess.All(absence => absence.Reason == "Shared Enrolment") || absencesToProcess.Any(absence => _appSettings.DiscountedWholeReasons.Contains(absence.Reason)))
             {
                 // This absence has been externally explained
-                if (attendanceAbsence != null)
+                var response = new AbsenceResponse
                 {
-                    absenceRecord.ExternalExplanation = attendanceAbsence.ExternalExplanation;
-                    absenceRecord.ExternalExplanationSource = attendanceAbsence.ExternalExplanationSource;
+                    Type = AbsenceResponse.Types.System,
+                    ReceivedAt = DateTime.Now,
+                };
+
+                if (attendanceAbsence == null)
+                {
+                    response.Explanation = absencesToProcess.First().Reason;
                 }
 
-                absenceRecord.ExternallyExplained = true;
+                // This absence has been externally explained
+                if (attendanceAbsence != null)
+                {
+                    response.Explanation = attendanceAbsence.ExternalExplanation;
+                    response.From = attendanceAbsence.ExternalExplanationSource;
+                }
+
+                absenceRecord.Responses.Add(response);
             }
 
             // Detect duplicates in database and process accordingly
@@ -694,25 +717,27 @@ namespace Constellation.Infrastructure.Jobs
                     existingAbsence.LastSeen = DateTime.Now;
 
                     // If the new absence is explained with an accepted reason, and the existing absences are not, then update them to signify they were changed on Sentral
-                    if (existingAbsences.All(innerabsence => !innerabsence.Explained) && acceptedReasons.Contains(absence.AbsenceReason))
+                    if (existingAbsences.All(existingAbsence => !existingAbsence.Explained) && acceptedReasons.Contains(absence.AbsenceReason))
                     {
                         _logger.LogInformation("{id}: Student {student} ({grade}): Found external explaination for {Type} absence on {Date} - {PeriodName}", JobId, student.DisplayName, student.CurrentGrade.AsName(), absence.Type, absence.Date.ToShortDateString(), absence.PeriodName);
-                        existingAbsence.ExternallyExplained = true;
-                        existingAbsence.ExternalExplanation = absence.ExternalExplanation;
-                        existingAbsence.ExternalExplanationSource = absence.ExternalExplanationSource;
-
                         // Is there an existing SYSTEM response? If not, create one
-                        if (existingAbsence.Responses.All(response => response.Type != AbsenceResponse.System))
+                        if (existingAbsence.Responses.All(response => response.Type != AbsenceResponse.Types.System))
                         {
-                            var response = new AbsenceResponse
-                            {
-                                Explanation = absence.ExternalExplanation,
-                                From = absence.ExternalExplanationSource,
-                                ReceivedAt = DateTime.Now,
-                                Type = AbsenceResponse.System
-                            };
+                            var response = absence.Responses.FirstOrDefault();
 
-                            existingAbsence.Responses.Add(response);
+                            if (response != null)
+                                existingAbsence.Responses.Add(response);
+                            else
+                            {
+                                var newResponse = new AbsenceResponse
+                                {
+                                    Type = AbsenceResponse.Types.System,
+                                    ReceivedAt = DateTime.Now,
+                                    Explanation = absence.AbsenceReason
+                                };
+
+                                existingAbsence.Responses.Add(response);
+                            }
                         }
                     }
                 }

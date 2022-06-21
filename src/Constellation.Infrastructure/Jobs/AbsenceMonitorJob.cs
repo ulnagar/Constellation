@@ -102,7 +102,7 @@ namespace Constellation.Infrastructure.Jobs
 
         private async Task SendCoordinatorDigests(Guid jobId, StudentForAbsenceScan student)
         {
-            var coordinatorDigestAbsences = await _mediator.Send(new GetUnexplainedAbsencesForDigestQuery { StudentId = student.StudentId, Type = Absence.Whole, AgeInWeeks = 2 });
+            var coordinatorDigestAbsences = await _mediator.Send(new GetUnexplainedAbsencesForDigestQuery { StudentId = student.StudentId, Type = Absence.Types.Whole, AgeInWeeks = 2 });
 
             if (coordinatorDigestAbsences.Any())
             {
@@ -115,7 +115,7 @@ namespace Constellation.Infrastructure.Jobs
                     await _mediator.Send(new AddNewAbsenceNotificationCommand
                     {
                         AbsenceId = absence.Id,
-                        Type = AbsenceNotification.Email,
+                        Type = AbsenceNotification.Types.Email,
                         MessageBody = message.message,
                         Recipients = new List<string> { "School Contacts" },
                         MessageId = message.id
@@ -129,7 +129,7 @@ namespace Constellation.Infrastructure.Jobs
 
         private async Task SendParentDigests(Guid jobId, StudentForAbsenceScan student)
         {
-            var parentDigestAbsences = await _mediator.Send(new GetUnexplainedAbsencesForDigestQuery { StudentId = student.StudentId, Type = Absence.Whole, AgeInWeeks = 1 });
+            var parentDigestAbsences = await _mediator.Send(new GetUnexplainedAbsencesForDigestQuery { StudentId = student.StudentId, Type = Absence.Types.Whole, AgeInWeeks = 1 });
 
             if (parentDigestAbsences.Any())
             {
@@ -146,7 +146,7 @@ namespace Constellation.Infrastructure.Jobs
                         await _mediator.Send(new AddNewAbsenceNotificationCommand
                         {
                             AbsenceId = absence.Id,
-                            Type = AbsenceNotification.Email,
+                            Type = AbsenceNotification.Types.Email,
                             MessageBody = sentmessage.message,
                             Recipients = new List<string> { "School Contacts" },
                             MessageId = sentmessage.id
@@ -171,7 +171,7 @@ namespace Constellation.Infrastructure.Jobs
             var phoneNumbers = await _mediator.Send(new GetStudentFamilyMobileNumbersQuery { StudentId = student.StudentId });
             var emailAddresses = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = student.StudentId });
 
-            var recentWholeAbsences = await _mediator.Send(new GetRecentAbsencesForStudentQuery { StudentId = student.StudentId, AbsenceType = Absence.Whole });
+            var recentWholeAbsences = await _mediator.Send(new GetRecentAbsencesForStudentQuery { StudentId = student.StudentId, AbsenceType = Absence.Types.Whole });
 
             // Send SMS or emails to parents
             if (recentWholeAbsences.Any())
@@ -197,7 +197,7 @@ namespace Constellation.Infrastructure.Jobs
                                     await _mediator.Send(new AddNewAbsenceNotificationCommand 
                                     { 
                                         AbsenceId = absence.Id, 
-                                        Type = AbsenceNotification.Email, 
+                                        Type = AbsenceNotification.Types.Email, 
                                         MessageBody = message.message, 
                                         MessageId = message.id, 
                                         Recipients = emailAddresses 
@@ -219,7 +219,7 @@ namespace Constellation.Infrastructure.Jobs
                                 await _mediator.Send(new AddNewAbsenceNotificationCommand
                                 {
                                     AbsenceId = absence.Id,
-                                    Type = AbsenceNotification.SMS,
+                                    Type = AbsenceNotification.Types.SMS,
                                     MessageBody = sentMessages.Messages.First().MessageBody,
                                     MessageId = sentMessages.Messages.First().OutgoingId,
                                     Recipients = phoneNumbers
@@ -237,7 +237,7 @@ namespace Constellation.Infrastructure.Jobs
                             await _mediator.Send(new AddNewAbsenceNotificationCommand
                             {
                                 AbsenceId = absence.Id,
-                                Type = AbsenceNotification.Email,
+                                Type = AbsenceNotification.Types.Email,
                                 MessageBody = message.message,
                                 MessageId = message.id,
                                 Recipients = emailAddresses
@@ -260,7 +260,7 @@ namespace Constellation.Infrastructure.Jobs
 
         private async Task SendStudentNotifications(Guid jobId, StudentForAbsenceScan student)
         {
-            var recentPartialAbsences = await _mediator.Send(new GetRecentAbsencesForStudentQuery { StudentId = student.StudentId, AbsenceType = Absence.Partial });
+            var recentPartialAbsences = await _mediator.Send(new GetRecentAbsencesForStudentQuery { StudentId = student.StudentId, AbsenceType = Absence.Types.Partial });
 
             // Send emails to students
             if (recentPartialAbsences.Any())
@@ -274,7 +274,7 @@ namespace Constellation.Infrastructure.Jobs
                     await _mediator.Send(new AddNewAbsenceNotificationCommand
                     {
                         AbsenceId = absence.Id,
-                        Type = AbsenceNotification.Email,
+                        Type = AbsenceNotification.Types.Email,
                         MessageBody = sentEmail.message,
                         MessageId = sentEmail.id,
                         Recipients = recipients

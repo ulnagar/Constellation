@@ -42,7 +42,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Models
                     StudentGrade = absence.Student.CurrentGrade,
                     SchoolName = absence.Student.School.Name,
                     SortName = $"{absence.Student.LastName} {absence.Student.FirstName}",
-                    IsExplained = absence.Explained || absence.ExternallyExplained,
+                    IsExplained = absence.Explained,
                     Type = absence.Type,
                     Date = absence.Date,
                     AbsenceTimeframe = absence.AbsenceTimeframe,

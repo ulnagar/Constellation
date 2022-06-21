@@ -1,15 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Constellation.Core.Models
 {
     public class AbsenceNotification
     {
-        public const string SMS = "SMS";
-        public const string Email = "Email";
-
-        public AbsenceNotification()
+        public class Types
         {
-            Id = Guid.Empty;
+            public const string SMS = "SMS";
+            public const string Email = "Email";
         }
 
         public Guid Id { get; set; }
@@ -21,9 +20,6 @@ namespace Constellation.Core.Models
         public string OutgoingId { get; set; }
         public DateTime SentAt { get; set; }
         public string Message { get; set; }
-        public string Recipients { get; set; }
-        public bool ConfirmedDelivered { get; set; }
-        public DateTime? DeliveredAt { get; set; }
-        public string DeliveredMessageIds { get; set; }
+        public ICollection<string> Recipients { get; set; }
     }
 }

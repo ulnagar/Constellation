@@ -43,7 +43,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
                 return RedirectToPage("School", new { area = "Portal" });
 
             var response = await _unitOfWork.Absences.AsResponseForVerificationByCoordinator(Id);
-            if (response == null || response.Absence.Type != Absence.Partial)
+            if (response == null || response.Absence.Type != Absence.Types.Partial)
                 return RedirectToPage("School", new { area = "Portal" });
 
             DisplayAbsence = AbsenceDto.ConvertFromAbsenceResponse(response);

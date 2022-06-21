@@ -27,8 +27,8 @@ namespace Constellation.Application.Features.Portal.School.Absences.Models
             profile.CreateMap<Absence, AbsenceForPortalList>()
                 .ForMember(dest => dest.ReasonId, opt => 
                 {
-                    opt.PreCondition(src => src.Responses.Any(response => response.VerificationStatus == AbsenceResponse.Pending));
-                    opt.MapFrom(src => src.Responses.First(response => response.VerificationStatus == AbsenceResponse.Pending).Id);
+                    opt.PreCondition(src => src.Responses.Any(response => response.VerificationStatus == AbsenceResponse.VerificationStatuses.Pending));
+                    opt.MapFrom(src => src.Responses.First(response => response.VerificationStatus == AbsenceResponse.VerificationStatuses.Pending).Id);
                 });
         }
     }

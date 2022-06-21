@@ -27,10 +27,9 @@ namespace Constellation.Infrastructure.Features.Jobs.AbsenceMonitor.Queries
                 .Include(absence => absence.Offering)
                 .Where(absence => absence.StudentId == request.StudentId &&
                     absence.Type == request.AbsenceType &&
-                    !(absence.Responses.Any(response =>
-                        response.Type == AbsenceResponse.Student && response.VerificationStatus == AbsenceResponse.Verified ||
-                        response.Type == AbsenceResponse.Parent || response.Type == AbsenceResponse.Coordinator) ||
-                    absence.ExternallyExplained) &&
+                    !absence.Responses.Any(response =>
+                        response.Type == AbsenceResponse.Types.Student && response.VerificationStatus == AbsenceResponse.VerificationStatuses.Verified ||
+                        response.Type == AbsenceResponse.Types.Parent || response.Type == AbsenceResponse.Types.Coordinator) &&
                     absence.DateScanned.Date == DateTime.Today)
                 .ToListAsync(cancellationToken);
 

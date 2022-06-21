@@ -47,8 +47,6 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
 
             if (absence.Responses.Any())
                 Absence.Reason = absence.Responses.First().Explanation;
-            else if (absence.ExternallyExplained)
-                Absence.Reason = absence.ExternalExplanation;
 
             return Page();
         }

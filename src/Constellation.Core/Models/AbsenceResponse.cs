@@ -4,21 +4,20 @@ namespace Constellation.Core.Models
 {
     public class AbsenceResponse
     {
-        // Accepted values for Type
-        public const string Coordinator = "Coordinator";
-        public const string Parent = "Parent";
-        public const string Student = "Student";
-        public const string System = "System";
-
-        // Accepted values for VerificationStatus
-        public const string NotRequired = "Not Required";
-        public const string Pending = "Pending";
-        public const string Rejected = "Rejected";
-        public const string Verified = "Verified";
-
-        public AbsenceResponse()
+        public class Types
         {
-            Id = Guid.Empty;
+            public const string Coordinator = "Coordinator";
+            public const string Parent = "Parent";
+            public const string Student = "Student";
+            public const string System = "System";
+        }
+        
+        public class VerificationStatuses
+        {
+            public const string NotRequired = "Not Required";
+            public const string Pending = "Pending";
+            public const string Rejected = "Rejected";
+            public const string Verified = "Verified";
         }
 
         public Guid Id { get; set; }

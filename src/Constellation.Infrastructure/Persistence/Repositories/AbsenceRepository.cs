@@ -59,14 +59,14 @@ namespace Constellation.Infrastructure.Persistence.Repositories
         public Absence WholeWithFilter(Expression<Func<Absence, bool>> predicate)
         {
             return Collection()
-                .Where(absence => absence.Type == Absence.Whole)
+                .Where(absence => absence.Type == Absence.Types.Whole)
                 .FirstOrDefault(predicate);
         }
 
         public ICollection<Absence> AllWholeWithFilter(Expression<Func<Absence, bool>> predicate)
         {
             return Collection()
-                .Where(absence => absence.Type == Absence.Whole)
+                .Where(absence => absence.Type == Absence.Types.Whole)
                 .Where(predicate)
                 .ToList();
         }
@@ -74,28 +74,28 @@ namespace Constellation.Infrastructure.Persistence.Repositories
         public ICollection<Absence> AllWhole()
         {
             return Collection()
-                .Where(absence => absence.Type == Absence.Whole)
+                .Where(absence => absence.Type == Absence.Types.Whole)
                 .ToList();
         }
 
         public Absence PartialWithDetails(string id)
         {
             return Collection()
-                .Where(absence => absence.Type == Absence.Partial)
+                .Where(absence => absence.Type == Absence.Types.Partial)
                 .SingleOrDefault(s => s.Id.ToString() == id);
         }
 
         public Absence PartialWithFilter(Expression<Func<Absence, bool>> predicate)
         {
             return Collection()
-                .Where(absence => absence.Type == Absence.Partial)
+                .Where(absence => absence.Type == Absence.Types.Partial)
                 .FirstOrDefault(predicate);
         }
 
         public ICollection<Absence> AllPartialWithFilter(Expression<Func<Absence, bool>> predicate)
         {
             return Collection()
-                .Where(absence => absence.Type == Absence.Partial)
+                .Where(absence => absence.Type == Absence.Types.Partial)
                 .Where(predicate)
                 .ToList();
         }
@@ -103,7 +103,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
         public ICollection<Absence> AllPartial()
         {
             return Collection()
-                .Where(absence => absence.Type == Absence.Partial)
+                .Where(absence => absence.Type == Absence.Types.Partial)
                 .ToList();
         }
         
@@ -214,7 +214,7 @@ namespace Constellation.Infrastructure.Persistence.Repositories
                 .ThenInclude(session => session.Teacher)
                 .Where(absence => 
                     absence.DateScanned == scanDate && 
-                    absence.Type == Absence.Whole && 
+                    absence.Type == Absence.Types.Whole && 
                     absence.Offering.Course.Name != "Tutorial" && 
                     absence.Offering.Course.Grade != Grade.Y05 && 
                     absence.Offering.Course.Grade != Grade.Y06)

@@ -1,4 +1,5 @@
 ﻿@using Constellation.Application.Extensions
+@using Constellation.Core.Models
 @model Absence_FortnightReportViewModel
 @{
     Layout = null;
@@ -140,13 +141,15 @@
 
                                                     if (absence.Explained)
                                                     {
-                                                        if (absence.ExternallyExplained && string.IsNullOrWhiteSpace(absence.ExternalExplanation))
+                                                        if (absence.Responses.Any(response => response.Type == AbsenceResponse.Types.System && string.IsNullOrWhiteSpace(response.Explanation)))
                                                         {
                                                             @:<br />Explained via Sentral
                                                         }
-                                                        else if (absence.ExternallyExplained)
+                                                        else if (absence.Responses.Any(response => response.Type == AbsenceResponse.Types.System && !string.IsNullOrWhiteSpace(response.Explanation)))
                                                         {
-                                                            @:<br />Explained via Sentral: @absence.ExternalExplanation (@absence.ExternalExplanationSource)
+                                                            var response = absence.Responses.First(response => response.Type == AbsenceResponse.Types.System && !string.IsNullOrWhiteSpace(response.Explanation));
+
+                                                            @:<br />Explained via Sentral: @response.Explanation (@response.From)
                                                         }
                                                         else
                                                         {
@@ -230,13 +233,15 @@
 
                                                     if (absence.Explained)
                                                     {
-                                                        if (absence.ExternallyExplained && string.IsNullOrWhiteSpace(absence.ExternalExplanation))
+                                                        if (absence.Responses.Any(response => response.Type == AbsenceResponse.Types.System && string.IsNullOrWhiteSpace(response.Explanation)))
                                                         {
                                                             @:<br />Explained via Sentral
                                                         }
-                                                        else if (absence.ExternallyExplained)
+                                                        else if (absence.Responses.Any(response => response.Type == AbsenceResponse.Types.System && !string.IsNullOrWhiteSpace(response.Explanation)))
                                                         {
-                                                            @:<br />Explained via Sentral: @absence.ExternalExplanation (@absence.ExternalExplanationSource)
+                                                            var response = absence.Responses.First(response => response.Type == AbsenceResponse.Types.System && !string.IsNullOrWhiteSpace(response.Explanation));
+
+                                                            @:<br />Explained via Sentral: @response.Explanation (@response.From)
                                                         }
                                                         else
                                                         {

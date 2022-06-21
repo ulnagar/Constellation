@@ -41,9 +41,9 @@ namespace Constellation.Infrastructure.Features.Portal.School.Absences.Queries
             return await _context.Absences
                 .Where(absence => absence.Student.SchoolCode == request.SchoolCode && !absence.Student.IsDeleted && absence.Date.Year == DateTime.Today.Year)
                 .Where(absence =>
-                    !absence.ExternallyExplained &&
-                    ((absence.Type == Absence.Partial && absence.Responses.Count(response => response.VerificationStatus != AbsenceResponse.Pending) == 0) ||
-                    (absence.Type == Absence.Whole && absence.Responses.Count == 0)))
+                    !absence.Responses.Any(response => response.Type == AbsenceResponse.Types.System) &&
+                    ((absence.Type == Absence.Types.Partial && absence.Responses.All(response => response.VerificationStatus != AbsenceResponse.VerificationStatuses.Pending)) ||
+                    (absence.Type == Absence.Types.Whole && absence.Responses.Count == 0)))
                 .ProjectTo<AbsenceForPortalList>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
         }

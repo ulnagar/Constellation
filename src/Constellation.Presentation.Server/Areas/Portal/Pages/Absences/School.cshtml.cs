@@ -68,9 +68,9 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
 
             schoolData = schoolData.Where(absence => absence.Date.Year == DateTime.Now.Year).ToList();
 
-            bool unexplainedPartialsPredicate(Absence absence) => !absence.Responses.Any() && !absence.Explained && absence.Type == Absence.Partial;
-            bool unverifiedPartialsPredicate(Absence absence) => absence.Type == Absence.Partial && absence.Responses.Any(response => response.VerificationStatus == AbsenceResponse.Pending) && !absence.Explained;
-            bool unexplainedWholesPredicate(Absence absence) => !absence.Responses.Any() && !absence.Explained && absence.Type == Absence.Whole;
+            bool unexplainedPartialsPredicate(Absence absence) => !absence.Responses.Any() && !absence.Explained && absence.Type == Absence.Types.Partial;
+            bool unverifiedPartialsPredicate(Absence absence) => absence.Type == Absence.Types.Partial && absence.Responses.Any(response => response.VerificationStatus == AbsenceResponse.VerificationStatuses.Pending) && !absence.Explained;
+            bool unexplainedWholesPredicate(Absence absence) => !absence.Responses.Any() && !absence.Explained && absence.Type == Absence.Types.Whole;
 
             Data.UnexplainedPartials = schoolData.Count(unexplainedPartialsPredicate);
             Data.UnverifiedPartials = schoolData.Count(unverifiedPartialsPredicate);
@@ -132,7 +132,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
                 var viewModel = new AbsenceDto
                 {
                     AbsenceId = absence.Id,
-                    AbsenceReasonId = absence.Responses.FirstOrDefault(response => response.VerificationStatus == AbsenceResponse.Pending)?.Id,
+                    AbsenceReasonId = absence.Responses.FirstOrDefault(response => response.VerificationStatus == AbsenceResponse.VerificationStatuses.Pending)?.Id,
                     StudentName = absence.Student.DisplayName,
                     AbsenceDate = absence.Date,
                     ClassName = absence.Offering.Name,
@@ -140,7 +140,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
                     PeriodTimeframe = absence.PeriodTimeframe,
                     AbsenceLength = absence.AbsenceLength,
                     AbsenceTimeframe = absence.AbsenceTimeframe,
-                    Explanation = absence.Responses.FirstOrDefault(response => response.VerificationStatus == AbsenceResponse.Pending)?.Explanation
+                    Explanation = absence.Responses.FirstOrDefault(response => response.VerificationStatus == AbsenceResponse.VerificationStatuses.Pending)?.Explanation
                 };
 
                 return viewModel;

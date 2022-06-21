@@ -25,7 +25,7 @@ namespace Constellation.Infrastructure.Features.Jobs.AbsenceMonitor.Commands
                 Type = request.Type,
                 Message = request.MessageBody,
                 SentAt = DateTime.Now,
-                Recipients = string.Join(", ", request.Recipients),
+                Recipients = request.Recipients,
                 OutgoingId = request.MessageId
             };
 

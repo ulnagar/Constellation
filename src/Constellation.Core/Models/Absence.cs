@@ -16,9 +16,12 @@ namespace Constellation.Core.Models
             Id = Guid.Empty;
         }
 
-        public const string Partial = "Partial";
-        public const string Whole = "Whole";
-
+        public class Types
+        {
+            public const string Partial = "Partial";
+            public const string Whole = "Whole";
+        }
+        
         public Guid Id { get; set; }
         public string Type { get; set; }
 
@@ -38,14 +41,10 @@ namespace Constellation.Core.Models
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
 
-        public bool ExternallyExplained { get; set; }
-        public string ExternalExplanation { get; set; }
-        public string ExternalExplanationSource { get; set; }
-
-        public bool Explained => (Responses.Any(response =>
-            (response.Type == AbsenceResponse.Student && response.VerificationStatus == AbsenceResponse.Verified) ||
-            (response.Type == AbsenceResponse.Parent || response.Type == AbsenceResponse.Coordinator)) ||
-            ExternallyExplained);
+        public bool Explained => Responses.Any(response =>
+            (response.Type == AbsenceResponse.Types.Student && response.VerificationStatus == AbsenceResponse.VerificationStatuses.Verified) ||
+            response.Type == AbsenceResponse.Types.Parent || 
+            response.Type == AbsenceResponse.Types.Coordinator);
 
         public ICollection<AbsenceNotification> Notifications { get; set; }
         public ICollection<AbsenceResponse> Responses { get; set; }

@@ -48,7 +48,8 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
                 AbsenceTimeframe = absence.AbsenceTimeframe
             };
 
-            var response = absence.Responses.FirstOrDefault(re => re.VerificationStatus == AbsenceResponse.Verified);
+            var response = absence.Responses.FirstOrDefault(re => re.VerificationStatus == AbsenceResponse.VerificationStatuses.Verified);
+            var systemResponse = absence.Responses.FirstOrDefault(response => response.Type == AbsenceResponse.Types.System);
 
             if (response != null)
             {
@@ -56,10 +57,10 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
                 Absence.VerifiedBy = response.Verifier;
                 Absence.IsVerified = true;
             } 
-            else if (absence.ExternallyExplained)
+            else if (systemResponse != null)
             {
-                Absence.Reason = absence.ExternalExplanation;
-                Absence.VerifiedBy = absence.ExternalExplanationSource;
+                Absence.Reason = systemResponse.Explanation;
+                Absence.VerifiedBy = systemResponse.From;
                 Absence.IsVerified = true;
             }
             else

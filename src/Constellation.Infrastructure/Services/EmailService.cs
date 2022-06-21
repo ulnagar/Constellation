@@ -412,13 +412,13 @@ namespace Constellation.Infrastructure.Services
                 var reportedBy = "UNKNOWN SOURCE";
                 var response = absence.Responses.First();
 
-                if (response.Type == AbsenceResponse.Coordinator)
+                if (response.Type == AbsenceResponse.Types.Coordinator)
                     reportedBy = $"Reported by {response.From} (ACC)";
-                else if (response.Type == AbsenceResponse.Parent)
+                else if (response.Type == AbsenceResponse.Types.Parent)
                     reportedBy = "Reported by Parent";
-                else if (response.Type == AbsenceResponse.Student)
+                else if (response.Type == AbsenceResponse.Types.Student)
                 {
-                    var status = (response.VerificationStatus == AbsenceResponse.Verified) ? "verified" : "rejected";
+                    var status = (response.VerificationStatus == AbsenceResponse.VerificationStatuses.Verified) ? "verified" : "rejected";
 
                     reportedBy = $"Reported by Student and <strong>{status}</strong> by {response.Verifier} (ACC)";
 
