@@ -1,6 +1,7 @@
 ﻿using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Stocktake;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -47,6 +48,8 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<CanvasAssignment> CanvasAssignments { get; set; }
         DbSet<CanvasAssignmentSubmission> CanvasAssignmentsSubmissions { get; set; }
         DbSet<Team> Teams { get; set; }
+        DbSet<StocktakeEvent> StocktakeEvents { get; set; }
+        DbSet<StocktakeSighting> StocktakeSightings { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         DatabaseFacade Database { get; }

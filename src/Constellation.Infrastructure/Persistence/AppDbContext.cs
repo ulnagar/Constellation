@@ -2,6 +2,7 @@
 using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Stocktake;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -57,6 +58,8 @@ namespace Constellation.Infrastructure.Persistence
         public DbSet<CanvasAssignmentSubmission> CanvasAssignmentsSubmissions { get; set; }
         public DbSet<StudentReport> StudentReports { get; set; }
         public DbSet<Team> Teams { get; set; }
+        public DbSet<StocktakeEvent> StocktakeEvents { get; set; }
+        public DbSet<StocktakeSighting> StocktakeSightings { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
