@@ -1,0 +1,65 @@
+﻿@page "/Stocktake/"
+
+@attribute [Authorize]
+
+@inject IMediator mediator
+@inject NavigationManager NavigationManager
+
+<h2>Stocktake Data Collection</h2>
+
+<div>
+    <a onclick="@(() => SubmitSighting(CurrentlySelectedStocktake.Id))" class="btn btn-primary">Download</a>
+</div>
+
+<hr />
+
+Stocktake details/dates/selector
+
+<hr />
+
+<DataTable Items="Sightings.ToList()" TItem="StocktakeSightingsForList">
+    <TableHeader>
+            <th>Serial / Asset</th>
+            <th>Description</th>
+            <th>User</th>
+            <th>Sighted</th>
+    </TableHeader>
+    <RowTemplate Context="entry">
+        <td>@entry.SerialNumber / @entry.AssetNumber</td>
+        <td>@entry.Description</td>
+        <td>@entry.UserName</td>
+        <td>@entry.SightedBy (@entry.SightedAt.ToShortDateString())</td>
+    </RowTemplate>
+</DataTable>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    public ICollection<StocktakeEventsForList> StocktakeEvents { get; set; } = new List<StocktakeEventsForList>();
+    public StocktakeEventsForList CurrentlySelectedStocktake { get; set; }
+    public ICollection<StocktakeSightingsForList> Sightings { get; set; } = new List<StocktakeSightingsForList>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            StocktakeEvents = await mediator.Send(new GetCurrentStocktakeEventsQuery());
+
+            CurrentlySelectedStocktake = StocktakeEvents.FirstOrDefault();
+
+            if (CurrentlySelectedStocktake != null)
+            {
+                Sightings = await mediator.Send(new GetStocktakeSightingsForSchoolQuery { SchoolCode = SelectedSchool.Code, StocktakeEvent = CurrentlySelectedStocktake.Id });
+            }
+        }
+    }
+
+    private void SubmitSighting(Guid StocktakeId)
+    {
+        NavigationManager.NavigateTo($"Stocktake/Submit/{StocktakeId}");
+    }
+}
