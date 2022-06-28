@@ -1,0 +1,78 @@
+﻿@using Constellation.Application.Models.Identity
+@using Constellation.Presentation.Server.Areas.Equipment.Models.Stocktake
+@model StocktakeEventDetailsViewModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.EquipmentEditor) || User.IsInRole(AuthRoles.Admin));
+}
+
+<h2>Stocktake details</h2>
+
+@if (authorised)
+{
+    <div>
+        <a asp-action="Update" asp-controller="Stocktake" asp-area="Equipment" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    </div>
+} else
+{
+    <div class="row">
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+    </div>
+}
+
+<hr/>
+
+<div>
+    <div class="row">
+        <label asp-for="Name" class="col-md-2"></label>
+        <div class="col-md-8">
+            @Html.DisplayFor(model => model.Name, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="StartDate" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.StartDate, "ShortDate")
+        </div>
+
+        <label asp-for="EndDate" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.EndDate, "ShortDate")
+        </div>
+    </div>
+
+    <div class="row">
+        @*Graph area*@
+    </div>
+</div>
+
+<hr />
+
+<div>
+    <table class="table-hover data-table">
+        <thead>
+            <tr>
+                <th>Serial / Asset</th>
+                <th>Description</th>
+                <th>Location</th>
+                <th>User</th>
+                <th>Sighted</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.Sightings)
+        {
+            <tr>
+                <td>@Html.DisplayFor(model => item.SerialNumber) / @Html.DisplayFor(model => item.AssetNumber)</td>
+                <td>@Html.DisplayFor(model => item.Description)</td>
+                <td>@Html.DisplayFor(model => item.Location)</td>
+                <td>@Html.DisplayFor(model => item.User)</td>
+                <td>@Html.DisplayFor(model => item.SightedBy) (@Html.DisplayFor(model => item.SightedOn, "ShortDate"))</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
