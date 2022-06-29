@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Constellation.Application.Common.Mapping;
+using Constellation.Core.Models.Stocktake;
+using System;
 
 namespace Constellation.Application.Features.Portal.School.Stocktake.Models
 {
-    public class StocktakeSightingsForList
+    public class StocktakeSightingsForList : IMapFrom<StocktakeSighting>
     {
         public string SerialNumber { get; set; }
         public string AssetNumber { get; set; }

@@ -12,8 +12,15 @@ namespace Constellation.Core.Models.Stocktake
         public string Description { get; set; }
         public string LocationCategory { get; set; }
         public string LocationName { get; set; }
+        // If the LocationCategory is LocationCategories.PublicSchool, populate with school code for lookup
+        public string LocationCode { get; set; }
         public string UserType { get; set; }
         public string UserName { get; set; }
+        // If the UserType is UserTypes.Student, populate with the student id for lookup
+        // If the UserType is UserTypes.Staff, populate with the staff id for lookup
+        // If the UserType is UserTypes.School, populate with the school code for lookup
+        public string UserCode { get; set; }
+        public string Comment { get; set; }
         public string SightedBy { get; set; }
         public DateTime SightedAt { get; set; }
 

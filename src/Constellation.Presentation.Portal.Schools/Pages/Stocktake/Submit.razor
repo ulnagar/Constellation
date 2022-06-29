@@ -1,0 +1,197 @@
+﻿@page "/Stocktake/Submit/{StocktakeId:guid}"
+
+@using Constellation.Core.Models.Stocktake
+
+@attribute [Authorize]
+
+@inject IMediator mediator
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h2>Stocktake Device Sighting</h2>
+
+<div class="form-horizontal">
+    <EditForm Model="Command" OnValidSubmit="SubmitResponse">
+        <FluentValidationValidator />
+        <ValidationSummary />
+
+        <div class="form-group row">
+            <label class="col-md-2">Asset Number</label>
+            <div class="col-md-6">
+                <InputText @bind-Value="Command.AssetNumber" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-2">Serial Number</label>
+            <div class="col-md-6">
+                <InputText @bind-Value="Command.SerialNumber" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-2">Device Description</label>
+            <div class="col-md-6">
+                <InputText @bind-Value="Command.Description" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-2">User Type</label>
+            <div class="col-md-6">
+                <select @onchange="UpdateUserType" class="form-control">
+                    <option value="">-- Select --</option>
+                    <option value="@StocktakeSighting.UserTypes.Student">@StocktakeSighting.UserTypes.Student</option>
+                    <option value="@StocktakeSighting.UserTypes.Staff">@StocktakeSighting.UserTypes.Staff</option>
+                    <option value="@StocktakeSighting.UserTypes.School">@StocktakeSighting.UserTypes.School</option>
+                    <option value="@StocktakeSighting.UserTypes.CommunityMember">@StocktakeSighting.UserTypes.CommunityMember</option>
+                    <option value="@StocktakeSighting.UserTypes.Other">@StocktakeSighting.UserTypes.Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-2">User</label>
+            <div class="col-md-6">
+                @if (Command.UserType == StocktakeSighting.UserTypes.Student)
+                {
+                    // Show student list
+                    <select @onchange="UpdateStudentUser" class="form-control">
+                        <option value="">-- Select --</option>
+                        @foreach (var student in Students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName))
+                        {
+                            <option value="@student.DisplayName">@student.DisplayName (@student.CurrentGrade)</option>
+                        }
+                    </select>
+                } else if (Command.UserType == StocktakeSighting.UserTypes.Staff)
+                {
+                    // Show staff list
+                    <select @onchange="UpdateStaffUser" class="form-control">
+                        <option value="">-- Select --</option>
+                        @foreach (var staff in StaffMembers.OrderBy(staff => staff.LastName))
+                        {
+                            <option value="@staff.DisplayName">@staff.DisplayName</option>
+                        }
+                    </select>
+                } else if (Command.UserType == StocktakeSighting.UserTypes.School)
+                {
+                    // Show school list
+                    <InputText @bind-Value="Command.UserName" class="form-control" />
+                } else if (Command.UserType == StocktakeSighting.UserTypes.CommunityMember || Command.UserType == StocktakeSighting.UserTypes.Other)
+                {
+                    // Show text box
+                    <InputText @bind-Value="Command.UserName" class="form-control" />
+                }
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-2">Comment</label>
+            <div class="col-md-6">
+                <InputTextArea @bind-Value="Command.Comment" rows="5" cols="100" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="offset-1 col-md-3">
+                <button class="btn btn-success btn-block btn-lg" type="submit">Submit</button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    [Parameter]
+    public Guid StocktakeId { get; set; }
+    public Guid CurrentStocktakeId { get; set; }
+
+    public RegisterSightedDeviceForStocktakeCommand Command { get; set; } = new();
+
+    public List<StudentFromSchoolForDropdownSelection> Students { get; set; } = new();
+    public List<StaffFromSchoolForDropdownSelection> StaffMembers { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool == null)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+        }
+
+        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool != null)
+        {
+            NavigationManager.NavigateTo("Stocktake");
+        }
+
+        if (StocktakeId != Guid.NewGuid())
+        {
+            if (StocktakeId != CurrentStocktakeId)
+            {
+                Command = new();
+
+                Command.StocktakeEventId = StocktakeId;
+            }
+
+            CurrentStocktakeId = StocktakeId;
+
+            var students = await mediator.Send(new GetStudentsFromSchoolForSelectionQuery { SchoolCode = CurrentlySelectedSchool.Code });
+            Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+            var staffMembers = await mediator.Send(new GetStaffFromSchoolForSelectionQuery { SchoolCode = CurrentlySelectedSchool.Code });
+            StaffMembers = staffMembers.OrderBy(staff => staff.LastName).ToList();
+
+            Command.LocationCategory = StocktakeSighting.LocationCategories.PublicSchool;
+            Command.LocationName = CurrentlySelectedSchool.Name;
+            Command.LocationCode = CurrentlySelectedSchool.Code;
+        } else
+        {
+            NavigationManager.NavigateTo("Stocktake");
+        }
+    }
+
+    private void UpdateUserType(ChangeEventArgs e)
+    {
+        var userType = e.Value.ToString();
+
+        Command.UserType = userType;
+        Command.UserName = "";
+
+        if (userType == StocktakeSighting.UserTypes.School)
+        {
+            Command.UserName = CurrentlySelectedSchool.Name;
+            Command.UserCode = CurrentlySelectedSchool.Code;        
+        }
+    }
+
+    private void UpdateStudentUser(ChangeEventArgs e)
+    {
+        var userName = e.Value.ToString();
+
+        Command.UserName = userName;
+
+        Command.UserCode = Students.Where(student => student.DisplayName == userName).Select(student => student.StudentId).First();
+    }
+
+    private void UpdateStaffUser(ChangeEventArgs e)
+    {
+        var userName = e.Value.ToString();
+
+        Command.UserName = userName;
+
+        Command.UserCode = StaffMembers.Where(staff => staff.DisplayName == userName).Select(staff => staff.StaffId).First();
+    }
+
+    private async Task SubmitResponse()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        Command.SightedBy = authState.User.Identity.Name;
+        Command.SightedAt = DateTime.Now;
+
+        await mediator.Send(Command);
+
+        NavigationManager.NavigateTo("Stocktake");
+    }
+}

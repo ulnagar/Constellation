@@ -8,12 +8,42 @@
 <h2>Stocktake Data Collection</h2>
 
 <div>
-    <a onclick="@(() => SubmitSighting(CurrentlySelectedStocktake.Id))" class="btn btn-primary">Download</a>
+    <a onclick="@(() => SubmitSighting(CurrentlySelectedStocktake.Id))" class="btn btn-primary">Sight Device</a>
 </div>
 
 <hr />
 
-Stocktake details/dates/selector
+<div class="form-horizontal">
+    <div class="form-group row">
+        <label class="col-md-2">Stocktake</label>
+        <div class="col-md-6">
+            @if (ShowChangeStocktakeBox)
+                {
+                    <select class="form-control" @onchange="ChangeStocktake" @onblur="RestoreStocktakeLabel">
+                        @foreach (var stocktake in StocktakeEvents)
+                        {
+                            var selected = CurrentlySelectedStocktake.Id == stocktake.Id;
+                            <option value="@stocktake.Id" selected="@selected">@stocktake.Name</option>
+                        }
+                    </select>
+                } else
+                {
+                    @CurrentlySelectedStocktake?.Name
+                    @if (StocktakeEvents.Count > 1)
+                    {
+                        <button class="btn btn-sm btn-secondary ml-4" @onclick="ToggleChangeStocktakeBox">Change</button>
+                    }
+                }
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-md-2">Start Date</label>
+        <div class="col-md-3">@CurrentlySelectedStocktake?.StartDate.ToShortDateString()</div>
+        <label class="col-md-2">End Date</label>
+        <div class="col-md-3">@CurrentlySelectedStocktake?.EndDate.ToShortDateString()</div>
+    </div>
+</div>
 
 <hr />
 
@@ -41,6 +71,8 @@ Stocktake details/dates/selector
     public StocktakeEventsForList CurrentlySelectedStocktake { get; set; }
     public ICollection<StocktakeSightingsForList> Sightings { get; set; } = new List<StocktakeSightingsForList>();
 
+    private bool ShowChangeStocktakeBox = false;
+
     protected override async Task OnParametersSetAsync()
     {
         if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
@@ -61,5 +93,23 @@ Stocktake details/dates/selector
     private void SubmitSighting(Guid StocktakeId)
     {
         NavigationManager.NavigateTo($"Stocktake/Submit/{StocktakeId}");
+    }
+
+    private void ToggleChangeStocktakeBox()
+    {
+        ShowChangeStocktakeBox = true;
+    }
+
+    private void RestoreStocktakeLabel()
+    {
+        ShowChangeStocktakeBox = false;
+    }
+
+    private void ChangeStocktake(ChangeEventArgs e)
+    {
+        var stocktakeId = e.Value.ToString();
+        CurrentlySelectedStocktake = StocktakeEvents.First(stocktake => stocktake.Id.ToString() == stocktakeId);
+
+        ShowChangeStocktakeBox = false;
     }
 }

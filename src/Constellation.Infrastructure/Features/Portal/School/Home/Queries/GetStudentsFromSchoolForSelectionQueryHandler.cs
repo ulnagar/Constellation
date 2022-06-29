@@ -29,7 +29,7 @@ namespace Constellation.Infrastructure.Features.Portal.School.Home.Queries
             var students = await _context.Students
                 .Where(student => student.SchoolCode == request.SchoolCode && !student.IsDeleted)
                 .ProjectTo<StudentFromSchoolForDropdownSelection>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return students;
         }
