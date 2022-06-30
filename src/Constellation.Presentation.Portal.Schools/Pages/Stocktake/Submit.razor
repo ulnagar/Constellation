@@ -149,35 +149,41 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        // Is this the first time the page has rendered?
+        // (Selected Site School exists) and (Page School is not Selected Site School) and (Page School is empty)
         if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool == null)
         {
             CurrentlySelectedSchool = SelectedSchool;
         }
 
+        // Has the school been changed at the site level?
+        // (Selected Site School exists) and (Page School is not Selected Site School) and (Page School is no empty)
         if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool != null)
         {
             NavigationManager.NavigateTo("Stocktake");
         }
 
+        // Is there a valid Stocktake Event Id?
         if (StocktakeId != Guid.NewGuid())
         {
+            // Has this Stocktake Event been loaded before?
+            // (Parameter Id is not Page Cached Id)
             if (StocktakeId != CurrentStocktakeId)
             {
                 Command = new();
 
                 Command.StocktakeEventId = StocktakeId;
+                CurrentStocktakeId = StocktakeId;
+
+                var students = await mediator.Send(new GetStudentsFromSchoolForSelectionQuery { SchoolCode = CurrentlySelectedSchool.Code });
+                Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+                var staffMembers = await mediator.Send(new GetStaffFromSchoolForSelectionQuery { SchoolCode = CurrentlySelectedSchool.Code });
+                StaffMembers = staffMembers.OrderBy(staff => staff.LastName).ToList();
+
+                Command.LocationCategory = StocktakeSighting.LocationCategories.PublicSchool;
+                Command.LocationName = CurrentlySelectedSchool.Name;
+                Command.LocationCode = CurrentlySelectedSchool.Code;
             }
-
-            CurrentStocktakeId = StocktakeId;
-
-            var students = await mediator.Send(new GetStudentsFromSchoolForSelectionQuery { SchoolCode = CurrentlySelectedSchool.Code });
-            Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
-            var staffMembers = await mediator.Send(new GetStaffFromSchoolForSelectionQuery { SchoolCode = CurrentlySelectedSchool.Code });
-            StaffMembers = staffMembers.OrderBy(staff => staff.LastName).ToList();
-
-            Command.LocationCategory = StocktakeSighting.LocationCategories.PublicSchool;
-            Command.LocationName = CurrentlySelectedSchool.Name;
-            Command.LocationCode = CurrentlySelectedSchool.Code;
         } else
         {
             NavigationManager.NavigateTo("Stocktake");
