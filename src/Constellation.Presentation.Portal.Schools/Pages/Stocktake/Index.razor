@@ -47,7 +47,12 @@
 
 <hr />
 
-<DataTable Items="Sightings.ToList()" TItem="StocktakeSightingsForList">
+<div class="form-group row">
+    <div class="col-md-6"><h4 class="mt-2 mb-0">Recorded sightings:</h4></div>
+    <div class="offset-1 col-md-3"><input @oninput="ChangeFilter" class="form-control" placeholder="Search" /></div>
+</div>
+
+<DataTable Items="FilteredSightings.ToList()" TItem="StocktakeSightingsForList">
     <TableHeader>
             <th>Serial / Asset</th>
             <th>Description</th>
@@ -70,6 +75,10 @@
     public ICollection<StocktakeEventsForList> StocktakeEvents { get; set; } = new List<StocktakeEventsForList>();
     public StocktakeEventsForList CurrentlySelectedStocktake { get; set; }
     public ICollection<StocktakeSightingsForList> Sightings { get; set; } = new List<StocktakeSightingsForList>();
+    public ICollection<StocktakeSightingsForList> FilteredSightings { get; set; } = new List<StocktakeSightingsForList>();
+
+    public Guid StocktakeEventId { get; set; } = Guid.Empty;
+    public string Filter { get; set; } = "";
 
     private bool ShowChangeStocktakeBox = false;
 
@@ -81,13 +90,55 @@
 
             StocktakeEvents = await mediator.Send(new GetCurrentStocktakeEventsQuery());
 
-            CurrentlySelectedStocktake = StocktakeEvents.FirstOrDefault();
-
-            if (CurrentlySelectedStocktake != null)
+            if (StocktakeEventId == Guid.Empty)
             {
-                Sightings = await mediator.Send(new GetStocktakeSightingsForSchoolQuery { SchoolCode = SelectedSchool.Code, StocktakeEvent = CurrentlySelectedStocktake.Id });
+                CurrentlySelectedStocktake = StocktakeEvents.FirstOrDefault();
+                StocktakeEventId = CurrentlySelectedStocktake.Id;
+            } else
+            {
+                CurrentlySelectedStocktake = StocktakeEvents.First(stocktake => stocktake.Id == StocktakeEventId);
             }
+
+            await UpdateSightings();
         }
+    }
+
+    private async Task UpdateSightings()
+    {
+        if (StocktakeEventId != Guid.Empty)
+        {
+            Sightings = await mediator.Send(new GetStocktakeSightingsForSchoolQuery { SchoolCode = SelectedSchool.Code, StocktakeEvent = StocktakeEventId });
+            FilteredSightings = Sightings;
+        }
+    }
+
+    private void ChangeFilter(ChangeEventArgs e)
+    {
+        Filter = e.Value.ToString();
+
+        Console.WriteLine(Filter);
+
+        FilterSightings();
+    }
+
+    private void FilterSightings()
+    {
+        if (Filter.Length < 3)
+        {
+            Console.WriteLine("Filter too short!");
+            FilteredSightings = Sightings.ToList();
+            return;
+        }
+
+        Console.WriteLine("Filtering...");
+        var filteredSightings = Sightings.Where(sighting =>
+            (sighting.AssetNumber != null && sighting.AssetNumber.Contains(Filter, StringComparison.CurrentCultureIgnoreCase)) ||
+            (sighting.SerialNumber != null && sighting.SerialNumber.Contains(Filter, StringComparison.CurrentCultureIgnoreCase)) ||
+            (sighting.Description != null && sighting.Description.Contains(Filter, StringComparison.CurrentCultureIgnoreCase)) ||
+            (sighting.UserName != null && sighting.UserName.Contains(Filter, StringComparison.CurrentCultureIgnoreCase)) ||
+            (sighting.SightedBy != null && sighting.SightedBy.Contains(Filter, StringComparison.CurrentCultureIgnoreCase)));
+
+        FilteredSightings = filteredSightings.ToList();
     }
 
     private void SubmitSighting(Guid StocktakeId)
@@ -105,10 +156,13 @@
         ShowChangeStocktakeBox = false;
     }
 
-    private void ChangeStocktake(ChangeEventArgs e)
+    private async Task ChangeStocktake(ChangeEventArgs e)
     {
         var stocktakeId = e.Value.ToString();
+
+        StocktakeEventId = Guid.Parse(stocktakeId);
         CurrentlySelectedStocktake = StocktakeEvents.First(stocktake => stocktake.Id.ToString() == stocktakeId);
+        await UpdateSightings();
 
         ShowChangeStocktakeBox = false;
     }

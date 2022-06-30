@@ -25,16 +25,8 @@ namespace Constellation.Infrastructure.Features.Portal.School.Stocktake.Queries
 
         public async Task<ICollection<StocktakeSightingsForList>> Handle(GetStocktakeSightingsForSchoolQuery request, CancellationToken cancellationToken)
         {
-            var locationName = await _context.Schools
-                .Where(school => school.Code == request.SchoolCode)
-                .Select(school => school.Name)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (string.IsNullOrWhiteSpace(locationName))
-                return new List<StocktakeSightingsForList>();
-
             return await _context.StocktakeSightings
-                .Where(sighting => sighting.StocktakeEventId == request.StocktakeEvent && sighting.LocationName == locationName)
+                .Where(sighting => sighting.StocktakeEventId == request.StocktakeEvent && sighting.LocationCode == request.SchoolCode)
                 .ProjectTo<StocktakeSightingsForList>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
         }
