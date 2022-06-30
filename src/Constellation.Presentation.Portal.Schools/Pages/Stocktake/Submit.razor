@@ -16,79 +16,109 @@
         <ValidationSummary />
 
         <div class="form-group row">
+            <div class="col-md-8 alert alert-warning">
+                Please note that the following are not included in the stocktake and do not need to be entered:
+                <ul>
+                    <li>Device accessories, such as chargers or pens</li>
+                    <li>Keyboards and mice</li>
+                    <li>Headsets and webcams</li>
+                    <li>Laptop docks</li>
+                </ul>
+                If you are unsure, please contact the Technology Support Team on <strong>1300 610 733</strong> or at <strong>support@aurora.nsw.edu.au</strong> first.
+            </div>
+        </div>
+
+        <div class="form-group row">
             <label class="col-md-2">Asset Number</label>
-            <div class="col-md-6">
-                <InputText @bind-Value="Command.AssetNumber" class="form-control" />
+            <div class="col-md-3">
+                <InputText @bind-Value="Command.AssetNumber" class="form-control" placeholder="AC00000000" />
+            </div>
+            <div class="col-md-5 alert alert-warning">
+                The Aurora College asset number is on a white label with a black barcode. Asset numbers start with AC and contain eight digits. You only need to enter the digits, without the leading zeroes. E.g. AC00001234 becomes 1234.
             </div>
         </div>
 
         <div class="form-group row">
             <label class="col-md-2">Serial Number</label>
-            <div class="col-md-6">
-                <InputText @bind-Value="Command.SerialNumber" class="form-control" />
+            <div class="col-md-3">
+                <InputText @bind-Value="Command.SerialNumber" class="form-control" placeholder="LT01F123" />
+            </div>
+            <div class="col-md-5 alert alert-warning">
+                The vendor serial number for the equipment. This can be in a range of locations, depending on the vendor. Student laptop serial numbers are usually on a sticker on the bottom of the device.
             </div>
         </div>
 
         <div class="form-group row">
             <label class="col-md-2">Device Description</label>
-            <div class="col-md-6">
-                <InputText @bind-Value="Command.Description" class="form-control" />
+            <div class="col-md-3">
+                <InputText @bind-Value="Command.Description" class="form-control" placeholder="Lenovo Laptop" />
+            </div>
+            <div class="col-md-5 alert alert-warning">
+                A description or the type of the device. E.g. "Lenovo Laptop", or "HP Monitor", etc.
             </div>
         </div>
 
         <div class="form-group row">
-            <label class="col-md-2">User Type</label>
-            <div class="col-md-6">
-                <select @onchange="UpdateUserType" class="form-control">
-                    <option value="">-- Select --</option>
-                    <option value="@StocktakeSighting.UserTypes.Student">@StocktakeSighting.UserTypes.Student</option>
-                    <option value="@StocktakeSighting.UserTypes.Staff">@StocktakeSighting.UserTypes.Staff</option>
-                    <option value="@StocktakeSighting.UserTypes.School">@StocktakeSighting.UserTypes.School</option>
-                    <option value="@StocktakeSighting.UserTypes.CommunityMember">@StocktakeSighting.UserTypes.CommunityMember</option>
-                    <option value="@StocktakeSighting.UserTypes.Other">@StocktakeSighting.UserTypes.Other</option>
-                </select>
+            <div class="col-md-5">
+                <div class="form-group row">
+                    <label class="col-md-5">User Type</label>
+                    <div class="col-md-7 pl-1">
+                        <select @onchange="UpdateUserType" class="form-control">
+                            <option value="">-- Select --</option>
+                            <option value="@StocktakeSighting.UserTypes.Student">@StocktakeSighting.UserTypes.Student</option>
+                            <option value="@StocktakeSighting.UserTypes.Staff">@StocktakeSighting.UserTypes.Staff</option>
+                            <option value="@StocktakeSighting.UserTypes.School">@StocktakeSighting.UserTypes.School</option>
+                            <option value="@StocktakeSighting.UserTypes.CommunityMember">@StocktakeSighting.UserTypes.CommunityMember</option>
+                            <option value="@StocktakeSighting.UserTypes.Other">@StocktakeSighting.UserTypes.Other</option>
+                        </select>
+                    </div>
+                    <div class="w-100"></div>
+                    <label class="col-md-5 mt-3">User</label>
+                    <div class="col-md-7 mt-3 pl-1">
+                        @if (Command.UserType == StocktakeSighting.UserTypes.Student)
+                        {
+                            // Show student list
+                            <select @onchange="UpdateStudentUser" class="form-control">
+                                <option value="">-- Select --</option>
+                                @foreach (var student in Students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName))
+                                {
+                                    <option value="@student.DisplayName">@student.DisplayName (@student.CurrentGrade)</option>
+                                }
+                            </select>
+                        } else if (Command.UserType == StocktakeSighting.UserTypes.Staff)
+                        {
+                            // Show staff list
+                            <select @onchange="UpdateStaffUser" class="form-control">
+                                <option value="">-- Select --</option>
+                                @foreach (var staff in StaffMembers.OrderBy(staff => staff.LastName))
+                                {
+                                    <option value="@staff.DisplayName">@staff.DisplayName</option>
+                                }
+                            </select>
+                        } else if (Command.UserType == StocktakeSighting.UserTypes.School)
+                        {
+                            // Show school list
+                            <InputText @bind-Value="Command.UserName" class="form-control" />
+                        } else if (Command.UserType == StocktakeSighting.UserTypes.CommunityMember || Command.UserType == StocktakeSighting.UserTypes.Other)
+                        {
+                            // Show text box
+                            <InputText @bind-Value="Command.UserName" class="form-control" />
+                        }
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <div class="form-group row">
-            <label class="col-md-2">User</label>
-            <div class="col-md-6">
-                @if (Command.UserType == StocktakeSighting.UserTypes.Student)
-                {
-                    // Show student list
-                    <select @onchange="UpdateStudentUser" class="form-control">
-                        <option value="">-- Select --</option>
-                        @foreach (var student in Students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName))
-                        {
-                            <option value="@student.DisplayName">@student.DisplayName (@student.CurrentGrade)</option>
-                        }
-                    </select>
-                } else if (Command.UserType == StocktakeSighting.UserTypes.Staff)
-                {
-                    // Show staff list
-                    <select @onchange="UpdateStaffUser" class="form-control">
-                        <option value="">-- Select --</option>
-                        @foreach (var staff in StaffMembers.OrderBy(staff => staff.LastName))
-                        {
-                            <option value="@staff.DisplayName">@staff.DisplayName</option>
-                        }
-                    </select>
-                } else if (Command.UserType == StocktakeSighting.UserTypes.School)
-                {
-                    // Show school list
-                    <InputText @bind-Value="Command.UserName" class="form-control" />
-                } else if (Command.UserType == StocktakeSighting.UserTypes.CommunityMember || Command.UserType == StocktakeSighting.UserTypes.Other)
-                {
-                    // Show text box
-                    <InputText @bind-Value="Command.UserName" class="form-control" />
-                }
+            <div class="col-md-5 alert alert-warning">
+                Select the type of user (Student, Aurora College Staff Member, School, Community Member, or Other), and then the relevant user.
             </div>
         </div>
 
         <div class="form-group row">
             <label class="col-md-2">Comment</label>
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <InputTextArea @bind-Value="Command.Comment" rows="5" cols="100" class="form-control" />
+            </div>
+            <div class="col-md-5 alert alert-warning">
+                Any notes you have about the condition of the device. E.g. "Has a cracked screen", or "Missing pen", etc.
             </div>
         </div>
 
@@ -170,6 +200,12 @@
         var userName = e.Value.ToString();
 
         Command.UserName = userName;
+
+        if (string.IsNullOrWhiteSpace(userName))
+        {
+            Command.UserCode = null;
+            return;
+        }
 
         Command.UserCode = Students.Where(student => student.DisplayName == userName).Select(student => student.StudentId).First();
     }

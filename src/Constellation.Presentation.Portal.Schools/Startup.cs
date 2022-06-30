@@ -1,3 +1,4 @@
+using Blazored.Modal;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Presentation.Portal.Schools.Pages.Auth;
@@ -30,6 +31,8 @@ namespace Constellation.Presentation.Portal.Schools
         {
             services.AddInfrastructure(Configuration);
             services.AddSchoolPortalAuthentication();
+
+            services.AddBlazoredModal();
 
             services.AddRazorPages();
             services.AddServerSideBlazor().AddCircuitOptions(opts =>
