@@ -24,6 +24,12 @@ namespace Constellation.Core.Models.Stocktake
         public string SightedBy { get; set; }
         public DateTime SightedAt { get; set; }
 
+        // If the sighting was incorrect for some reason, allow the user to cancel it if they provide a reason
+        public bool IsCancelled { get; set; }
+        public string CancellationComment { get; set; }
+        public string CancelledBy { get; set; }
+        public DateTime CancelledAt { get; set; } = new DateTime();
+
         public class UserTypes
         {
             public const string Student = "Student";

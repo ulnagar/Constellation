@@ -126,6 +126,9 @@
             <div class="offset-1 col-md-3">
                 <button class="btn btn-success btn-block btn-lg" type="submit">Submit</button>
             </div>
+            <div class="col-md-1 ml-3">
+                <button class="btn btn-danger btn-block btn-lg" @onclick="Cancel">Cancel</button>
+            </div>
         </div>
     </EditForm>
 </div>
@@ -180,6 +183,8 @@
             NavigationManager.NavigateTo("Stocktake");
         }
     }
+
+    private void Cancel() => NavigationManager.NavigateTo("Stocktake");
 
     private void UpdateUserType(ChangeEventArgs e)
     {

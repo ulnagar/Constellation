@@ -4,6 +4,7 @@
 
 @inject IMediator mediator
 @inject NavigationManager NavigationManager
+@inject IModalService Modal
 
 <h2>Stocktake Data Collection</h2>
 
@@ -58,12 +59,14 @@
             <th>Description</th>
             <th>User</th>
             <th>Sighted</th>
+            <th></th>
     </TableHeader>
     <RowTemplate Context="entry">
         <td>@entry.SerialNumber / @entry.AssetNumber</td>
         <td>@entry.Description</td>
         <td>@entry.UserName</td>
         <td>@entry.SightedBy (@entry.SightedAt.ToShortDateString())</td>
+        <td><button class="btn btn-sm btn-outline-danger button-hover" @onclick="(() => CancelSighting(entry))">Delete</button></td>
     </RowTemplate>
 </DataTable>
 
@@ -116,8 +119,6 @@
     {
         Filter = e.Value.ToString();
 
-        Console.WriteLine(Filter);
-
         FilterSightings();
     }
 
@@ -125,12 +126,10 @@
     {
         if (Filter.Length < 3)
         {
-            Console.WriteLine("Filter too short!");
             FilteredSightings = Sightings.ToList();
             return;
         }
 
-        Console.WriteLine("Filtering...");
         var filteredSightings = Sightings.Where(sighting =>
             (sighting.AssetNumber != null && sighting.AssetNumber.Contains(Filter, StringComparison.CurrentCultureIgnoreCase)) ||
             (sighting.SerialNumber != null && sighting.SerialNumber.Contains(Filter, StringComparison.CurrentCultureIgnoreCase)) ||
@@ -165,5 +164,26 @@
         await UpdateSightings();
 
         ShowChangeStocktakeBox = false;
+    }
+
+    async Task CancelSighting(StocktakeSightingsForList sighting)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Sighting", sighting);
+
+        var modal = Modal.Show<RemoveStocktakeSightingModal>("Delete Sighting Record", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var success = (bool) result.Data;
+
+            if (success)
+            {
+                Sightings.Remove(sighting);
+            }
+        }
+
+        StateHasChanged();
     }
 }
