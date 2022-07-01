@@ -12,6 +12,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -85,6 +86,38 @@ namespace Constellation.Infrastructure.Gateways
                     await Login();
 
                     var response = await _client.GetAsync(uri);
+
+                    var page = new HtmlDocument();
+                    page.LoadHtml(await response.Content.ReadAsStringAsync());
+
+                    return page;
+                }
+                catch
+                {
+                    // Wait and retry
+                    await Task.Delay(5000);
+                }
+            }
+
+            return null;
+        }
+
+        private async Task<HtmlDocument> PostPageAsync(string uri, List<KeyValuePair<string,string>> payload)
+        {
+            for (int i = 1; i < 6; i++)
+            {
+                try
+                {
+                    await Login();
+
+                    var request = new HttpRequestMessage(HttpMethod.Post, uri)
+                    {
+                        Content = new FormUrlEncodedContent(payload)
+                    };
+
+                    var response = await _client.SendAsync(request);
+
+                    //var response = await _client.PostAsJsonAsync(uri, content);
 
                     var page = new HtmlDocument();
                     page.LoadHtml(await response.Content.ReadAsStringAsync());
@@ -817,6 +850,90 @@ namespace Constellation.Infrastructure.Gateways
             var noStudents = data.Where(entry => !entry.StudentIds.Any()).ToList();
 
             return data.Where(entry => entry.StudentIds.Any()).ToList();
+        }
+
+        public async Task GetAwardsReport()
+        {
+            var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+
+            var payload = new List<KeyValuePair<string, string>>();
+            payload.Add(new KeyValuePair<string, string>("action", "exportStudentAwards"));
+
+            var report = await PostPageAsync($"{_settings.Server}/wellbeing/awards/export", payload);
+
+            if (report == null)
+                return;
+
+            var list = report.DocumentNode.InnerHtml.Split('\u000A').ToList();
+            var data = new List<AwardDetailDto>();
+
+            // Remove first and last entry
+            list.RemoveAt(0);
+            list.RemoveAt(list.Count - 1);
+
+            for (var i = 0; i < list.Count; i++)
+            {
+                var entry = list[i];
+                var split = CSVParser.Split(entry);
+
+                // Index 0 = Award Category
+                // Index 1 = Award Type
+                // Index 2 = Awarded Date
+                // Index 3 = Award Created DateTime
+                // Index 4 = Award Source
+                // Index 5 = Student Id (Sentral)
+                // Index 6 = Student Id (SRN)
+                // Index 7 = First Name
+                // Index 8 = Last Name
+
+                data.Add(AwardDetailDto.ConvertFromFileLine(split));
+            }
+
+            if (data.Count < list.Count)
+            {
+                // Something went wrong!
+            }
+        }
+
+        private class AwardDetailDto
+        {
+            public string AwardCategory { get; set; }
+            public string AwardType { get; set; }
+            public DateTime AwardedDate { get; set; }
+            public DateTime AwardCreated { get; set; }
+            public string AwardSource { get; set; }
+            public string SentralStudentId { get; set; }
+            public string StudentId { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+
+            public static AwardDetailDto ConvertFromFileLine(string[] line)
+            {
+                var viewModel = new AwardDetailDto
+                {
+                    AwardCategory = line[0].FormatField(),
+                    AwardType = line[1].FormatField(),
+                    AwardSource = line[4].FormatField(),
+                    SentralStudentId = line[5].FormatField(),
+                    StudentId = line[6].FormatField(),
+                    FirstName = line[7].FormatField(),
+                    LastName = line[8].FormatField()
+                };
+
+                var test = DateTime.Parse(line[2].FormatField());
+
+                if (DateTime.TryParse(line[2].FormatField(), out DateTime awardedDate))
+                {
+                    viewModel.AwardedDate = awardedDate;
+                }
+                
+                if (DateTime.TryParse(line[3].FormatField(), out DateTime awardCreated))
+                {
+                    viewModel.AwardCreated = awardCreated;
+                }
+
+                return viewModel;
+            }
         }
     }
 }

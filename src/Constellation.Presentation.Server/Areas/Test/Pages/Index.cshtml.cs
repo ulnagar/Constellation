@@ -15,13 +15,13 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMediator _mediator;
-        private readonly IJobDispatcherService<IAttendanceReportJob> _jobDispatcher;
+        private readonly ISentralGateway _sentralGateway;
 
-        public IndexModel(IUnitOfWork unitOfWork, IMediator mediator, IJobDispatcherService<IAttendanceReportJob> jobDispatcher)
+        public IndexModel(IUnitOfWork unitOfWork, IMediator mediator, ISentralGateway sentralGateway)
         {
             _unitOfWork = unitOfWork;
             _mediator = mediator;
-            _jobDispatcher = jobDispatcher;
+            _sentralGateway = sentralGateway;
         }
 
         public async Task OnGetAsync()
@@ -31,7 +31,7 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages
 
         public async Task<IActionResult> OnPostAsync()
         {
-            await _jobDispatcher.StartJob(new System.Threading.CancellationToken());
+            await _sentralGateway.GetAwardsReport();
 
             return Page();
         }

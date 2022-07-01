@@ -19,5 +19,6 @@ namespace Constellation.Application.Interfaces.Gateways
         Task<byte[]> GetSentralStudentPhoto(string studentId);
         Task<ICollection<SentralReportDto>> GetStudentReportList(string sentralStudentId);
         Task<byte[]> GetStudentReport(string sentralStudentId, string reportId);
+        Task GetAwardsReport();
     }
 }
