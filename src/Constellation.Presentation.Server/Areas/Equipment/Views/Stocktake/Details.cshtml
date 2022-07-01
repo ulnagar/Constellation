@@ -52,7 +52,7 @@
 <hr />
 
 <div>
-    <table class="table-hover data-table">
+    <table class="table-hover table-striped data-table">
         <thead>
             <tr>
                 <th>Serial / Asset</th>
@@ -65,12 +65,12 @@
         <tbody>
         @foreach (var item in Model.Sightings)
         {
-            <tr>
+            <tr class="cancelled-@item.IsCancelled">
                 <td>@Html.DisplayFor(model => item.SerialNumber) / @Html.DisplayFor(model => item.AssetNumber)</td>
                 <td>@Html.DisplayFor(model => item.Description)</td>
                 <td>@Html.DisplayFor(model => item.Location)</td>
                 <td>@Html.DisplayFor(model => item.User)</td>
-                <td>@Html.DisplayFor(model => item.SightedBy) (@Html.DisplayFor(model => item.SightedOn, "ShortDate"))</td>
+                <td>@Html.DisplayFor(model => item.SightedBy) (@Html.DisplayFor(model => item.SightedOn,"ShortDate"))</td>
             </tr>
         }
         </tbody>

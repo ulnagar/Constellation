@@ -44,6 +44,17 @@ ABSENCES:
 DONE
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+R1.4:
+	SCHOOLS PORTAL:
+		Add Stocktake function listing all sighted devices for the linked school
+		Add Stocktake sighting function, allowing users to submit stocktake information
+
+	EQUIPMENT:
+		Add Stocktake function to create stocktake events
+		Add Stocktake details view to list all reported device sightings
+		Add Stocktake Staff Dashboard to allow staff to review their sighted devices
+		Add Staff sighting function, allowing staff to submit stocktake information
+
 R1.3:
 	PTO EXPORT FILE:
 		Update to use Student Families instead of pulling from Sentral each time

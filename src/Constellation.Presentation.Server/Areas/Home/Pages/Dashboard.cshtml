@@ -22,6 +22,11 @@
 
 <div class="text-center">
     <h2>Welcome, @Model.UserName</h2>
+
+    <div class="alert alert-info text-left mt-3" role="alert">
+        <h4 class="alert-heading">Stocktake</h4>
+        <p>Please take the time to register your Aurora College equipment in the current stocktake. Click <a class="alert-link" asp-area="Equipment" asp-controller="Stocktake" asp-action="StaffDashboard" asp-route-id="2e5b88d9-03c5-4026-da86-08da58c20465">here</a> to view the stocktake details, or use the stocktake button in the Quick Links section below.</p>
+    </div>
 </div>
 
 <div class="quick-links">
@@ -32,6 +37,8 @@
         <a class="btn btn-success btn-block" href="/hangfire">Hangfire</a>
         <a asp-page="HangfireDashboard" asp-area="Admin" class="btn btn-success btn-block">Job Activation</a>
     }
+
+    <a class="btn btn-warning btn-block" asp-area="Equipment" asp-controller="Stocktake" asp-action="StaffDashboard" asp-route-id="2e5b88d9-03c5-4026-da86-08da58c20465">Stocktake</a>
 
     @foreach (var entry in @Model.Classes.OrderBy(entry => entry.Key))
     {

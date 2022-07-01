@@ -1,6 +1,8 @@
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Presentation.Server.Infrastructure;
+using FluentValidation;
 using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Builder;
@@ -46,6 +48,8 @@ namespace Constellation.Presentation.Server
             GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
 
             services.AddHangfireServer();
+
+            services.AddValidatorsFromAssemblyContaining<IAppDbContext>();
 
             services.AddRazorPages();
             services.AddMvc().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);

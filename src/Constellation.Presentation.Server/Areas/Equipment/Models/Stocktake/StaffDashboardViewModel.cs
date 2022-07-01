@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Constellation.Presentation.Server.Areas.Equipment.Models.Stocktake
 {
-    public class StocktakeEventDetailsViewModel : BaseViewModel
+    public class StaffDashboardViewModel : BaseViewModel
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

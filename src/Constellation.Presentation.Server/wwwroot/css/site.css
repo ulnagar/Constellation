@@ -249,3 +249,8 @@ tr.group,
 tr.group:hover {
     background-color: #ddd !important;
 }
+
+/* Stocktake Styles */
+tr.cancelled-True {
+    text-decoration: line-through;
+}
