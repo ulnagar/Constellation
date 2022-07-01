@@ -1,9 +1,5 @@
-using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
 using Constellation.Application.Interfaces.Gateways;
-using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +27,12 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages
 
         public async Task<IActionResult> OnPostAsync()
         {
-            await _sentralGateway.GetAwardsReport();
+            var details = await _sentralGateway.GetAwardsReport();
+
+            // Process individual students
+            // Tally awards
+            // Calculate expected award levels
+            // Highlight discrepancies
 
             return Page();
         }

@@ -12,14 +12,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 
 namespace Constellation.Infrastructure.Gateways
 {
-    public class SentralGateway : ISentralGateway, IScopedService
+    public partial class SentralGateway : ISentralGateway, IScopedService
     {
         private readonly HttpClient _client;
         private readonly ISentralGatewayConfiguration _settings;
@@ -852,8 +851,10 @@ namespace Constellation.Infrastructure.Gateways
             return data.Where(entry => entry.StudentIds.Any()).ToList();
         }
 
-        public async Task GetAwardsReport()
+        public async Task<ICollection<AwardDetailDto>> GetAwardsReport()
         {
+            var data = new List<AwardDetailDto>();
+
             var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
 
             var payload = new List<KeyValuePair<string, string>>();
@@ -862,10 +863,9 @@ namespace Constellation.Infrastructure.Gateways
             var report = await PostPageAsync($"{_settings.Server}/wellbeing/awards/export", payload);
 
             if (report == null)
-                return;
+                return data;
 
             var list = report.DocumentNode.InnerHtml.Split('\u000A').ToList();
-            var data = new List<AwardDetailDto>();
 
             // Remove first and last entry
             list.RemoveAt(0);
@@ -889,51 +889,7 @@ namespace Constellation.Infrastructure.Gateways
                 data.Add(AwardDetailDto.ConvertFromFileLine(split));
             }
 
-            if (data.Count < list.Count)
-            {
-                // Something went wrong!
-            }
-        }
-
-        private class AwardDetailDto
-        {
-            public string AwardCategory { get; set; }
-            public string AwardType { get; set; }
-            public DateTime AwardedDate { get; set; }
-            public DateTime AwardCreated { get; set; }
-            public string AwardSource { get; set; }
-            public string SentralStudentId { get; set; }
-            public string StudentId { get; set; }
-            public string FirstName { get; set; }
-            public string LastName { get; set; }
-
-            public static AwardDetailDto ConvertFromFileLine(string[] line)
-            {
-                var viewModel = new AwardDetailDto
-                {
-                    AwardCategory = line[0].FormatField(),
-                    AwardType = line[1].FormatField(),
-                    AwardSource = line[4].FormatField(),
-                    SentralStudentId = line[5].FormatField(),
-                    StudentId = line[6].FormatField(),
-                    FirstName = line[7].FormatField(),
-                    LastName = line[8].FormatField()
-                };
-
-                var test = DateTime.Parse(line[2].FormatField());
-
-                if (DateTime.TryParse(line[2].FormatField(), out DateTime awardedDate))
-                {
-                    viewModel.AwardedDate = awardedDate;
-                }
-                
-                if (DateTime.TryParse(line[3].FormatField(), out DateTime awardCreated))
-                {
-                    viewModel.AwardCreated = awardCreated;
-                }
-
-                return viewModel;
-            }
+            return data;
         }
     }
 }
