@@ -27,6 +27,21 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages
         }
 
         public List<string> Messages { get; set; } = new();
+        public List<StudentAwardCalculations> Awards { get; set; } = new();
+
+        public class StudentAwardCalculations
+        {
+            public string StudentId { get; set; }
+            public string StudentName { get; set; }
+            public string StudentGrade { get; set; }
+            public decimal AwardedAstras { get; set; }
+            public decimal AwardedStellars { get; set; }
+            public decimal AwardedGalaxies { get; set; }
+            public decimal AwardedUniversals { get; set; }
+            public decimal CalculatedStellars { get; set; }
+            public decimal CalculatedGalaxies { get; set; }
+            public decimal CalculatedUniversals { get; set; }
+        }
 
         public async Task OnGetAsync()
         {
@@ -44,7 +59,12 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages
 
             foreach (var group in details.GroupBy(detail => detail.StudentId))
             {
+                var entry = new StudentAwardCalculations();
+                
                 var student = await _mediator.Send(new GetStudentWithAwardQuery { StudentId = group.Key });
+                entry.StudentId = student.StudentId;
+                entry.StudentName = student.DisplayName;
+                entry.StudentGrade = student.CurrentGrade.AsName();
 
                 //foreach (var item in group)
                 //{
@@ -65,29 +85,16 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages
                 //var galaxies = student.Awards.Count(award => award.Type == "Galaxy Medal");
                 //var universals = student.Awards.Count(award => award.Type == "Aurora Universal Achiever"); 
                 
-                decimal astras = group.Count(award => award.AwardType == "Astra Award");
-                decimal stellars = group.Count(award => award.AwardType == "Stellar Award");
-                decimal galaxies = group.Count(award => award.AwardType == "Galaxy Medal");
-                decimal universals = group.Count(award => award.AwardType == "Aurora Universal Achiever");
+                entry.AwardedAstras = group.Count(award => award.AwardType == "Astra Award");
+                entry.AwardedStellars = group.Count(award => award.AwardType == "Stellar Award");
+                entry.AwardedGalaxies = group.Count(award => award.AwardType == "Galaxy Medal");
+                entry.AwardedUniversals = group.Count(award => award.AwardType == "Aurora Universal Achiever");
 
-                decimal expectedStellars = Math.Floor(astras / 5);
-                decimal expectedGalaxies = Math.Floor(astras / 25);
-                decimal expectedUniversals = Math.Floor(astras / 125);
+                entry.CalculatedStellars = Math.Floor(entry.AwardedAstras / 5);
+                entry.CalculatedGalaxies = Math.Floor(entry.AwardedAstras / 25);
+                entry.CalculatedUniversals = Math.Floor(entry.AwardedAstras / 125);
 
-                if (universals != expectedUniversals)
-                {
-                    Messages.Add($"{student.DisplayName} ({student.CurrentGrade.AsName()}) - Incorrect number of Universal Achiever awards: has {universals} but should have {expectedUniversals}");
-                }
-
-                if (galaxies != expectedGalaxies)
-                {
-                    Messages.Add($"{student.DisplayName} ({student.CurrentGrade.AsName()}) - Incorrect number of Galaxy awards: has {galaxies} but should have {expectedGalaxies}");
-                }
-
-                if (stellars != expectedStellars)
-                {
-                    Messages.Add($"{student.DisplayName} ({student.CurrentGrade.AsName()}) - Incorrect number of Stellar awards: has {stellars} but should have {expectedStellars}");
-                }
+                Awards.Add(entry);
             }
 
             return Page();
