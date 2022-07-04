@@ -4,3 +4,10 @@
 <form method="post">
     <button type="submit">Submit</button>
 </form>
+
+<ul>
+    @foreach (var message in Model.Messages){
+        <li>@message</li>
+    }
+</ul>
+

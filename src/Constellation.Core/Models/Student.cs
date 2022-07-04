@@ -24,6 +24,7 @@ namespace Constellation.Core.Models
             LessonsAttended = new List<LessonRoll.LessonRollStudentAttendance>();
 
             Reports = new List<StudentReport>();
+            //Awards = new List<StudentAward>();
         }
 
         public string StudentId { get; set; }
@@ -56,6 +57,7 @@ namespace Constellation.Core.Models
         public ICollection<StudentWholeAbsence> WholeAbsences { get; set; }
         public ICollection<LessonRoll.LessonRollStudentAttendance> LessonsAttended { get; set; }
         public ICollection<StudentReport> Reports { get; set; }
+        //public ICollection<StudentAward> Awards { get; set; }
 
         public Task EnableAbsenceNotifications(DateTime startDate)
         {
