@@ -1,0 +1,127 @@
+﻿@page "/Awards/"
+
+@attribute [Authorize]
+
+@inject IMediator mediator
+@inject NavigationManager NavigationManager
+
+<h2>Student Awards</h2>
+
+<div>
+    <div class="mt-3">
+
+        <div class="form-group row mt-3">
+            <div class="col-3"><label>Student</label></div>
+            <div class="col font-weight-bold">
+                <select class="form-control" @onchange="SelectNewStudent">
+                    <option value="">-- Select --</option>
+                    @foreach (var student in Students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName))
+                    {
+                        <option value="@student.StudentId" selected=@(SelectedStudent?.StudentId == student.StudentId)>(@student.CurrentGrade) @student.DisplayName</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+// Student Info
+
+
+// Award Tally
+        <DataTable Items="new List<AwardsCalculation> { AwardTally }" TItem="AwardsCalculation">
+            <TableHeader>
+                <th>Astra Awards</th>
+                <th>Stellar Awards</th>
+                <th>Galaxy Medals</th>
+                <th>Universal Achiever Awards</th>
+            </TableHeader>
+            <RowTemplate Context="entry">
+                <td>@AwardTally.Astras</td>
+                <td>@AwardTally.Stellars</td>
+                <td>@AwardTally.Galaxies</td>
+                <td>@AwardTally.Universals</td>
+            </RowTemplate>
+        </DataTable>
+
+// Last 20 awards issued
+
+        <DataTable Items="Awards.ToList()" TItem="StudentAwardsForList">
+            <TableHeader>
+                <th>Date</th>
+                <th>Type</th>
+            </TableHeader>
+            <RowTemplate Context="entry">
+                <td>@entry.AwardedOn</td>
+                <td>@entry.Type</td>
+            </RowTemplate>
+        </DataTable>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    public ICollection<StudentFromSchoolForDropdownSelection> Students { get; set; } = new List<StudentFromSchoolForDropdownSelection>();
+    public StudentFromSchoolForDropdownSelection SelectedStudent { get; set; }
+
+    public ICollection<StudentAwardsForList> Awards { get; set; } = new List<StudentAwardsForList>();
+    public ICollection<StudentAwardsForList> AwardsForDisplay { get; set; } = new List<StudentAwardsForList>();
+    public AwardsCalculation AwardTally { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            var students = await mediator.Send(new GetStudentsFromSchoolForSelectionQuery { SchoolCode = SelectedSchool.Code });
+            Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+        }
+    }
+
+    private async Task SelectNewStudent(ChangeEventArgs e)
+    {
+        var studentId = e.Value.ToString();
+
+        SelectedStudent = Students.First(student => student.StudentId == studentId);
+
+        await GetAwardsForSelectedStudent();
+    }
+
+    private async Task GetAwardsForSelectedStudent()
+    {
+        if (SelectedStudent != null)
+        {
+            var awards = await mediator.Send(new GetAwardsForStudentQuery { StudentId = SelectedStudent.StudentId });
+            Awards = awards.ToList();
+            AwardsForDisplay = Awards.OrderByDescending(award => award.AwardedOn).Take(20).ToList();
+            AwardTally = new AwardsCalculation(awards);
+        } else
+        {
+            Awards = new List<StudentAwardsForList>();
+            AwardsForDisplay = new List<StudentAwardsForList>();
+            AwardTally = new();
+        }
+    }
+
+    public class AwardsCalculation
+    {
+        public AwardsCalculation()
+        {
+        }
+
+        public AwardsCalculation(ICollection<StudentAwardsForList> awards)
+        {
+            Astras = awards.Count(award => award.Type == "Astra Award");
+            Stellars = awards.Count(award => award.Type == "Stellar Award");
+            Galaxies = awards.Count(award => award.Type == "Galaxy Medal");
+            Universals = awards.Count(award => award.Type == "Aurora Universal Achiever");
+        }
+
+        public decimal Astras { get; set; }
+        public decimal Stellars { get; set; }
+        public decimal Galaxies { get; set; }
+        public decimal Universals { get; set; }
+    }
+}
