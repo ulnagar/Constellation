@@ -1,5 +1,7 @@
-﻿@page
-@model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
+﻿@using Constellation.Presentation.Server.Areas.Reports.Models.Students
+@model AwardsListViewModel
+
+<h2>Student Award Changes</h2>
 
 <style>
     td.Under {
@@ -13,18 +15,8 @@
     }
 </style>
 
-<form method="post">
-    <button type="submit">Submit</button>
-</form>
-
-<ul>
-    @foreach (var message in Model.Messages){
-        <li>@message</li>
-    }
-</ul>
-
 @foreach (var entry in Model.Awards.OrderBy(award => award.StudentGrade)) {
-    <h2>@entry.StudentName (@entry.StudentGrade)</h2>
+    <h4>@entry.StudentName (@entry.StudentGrade)</h4>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -37,14 +29,14 @@
         </thead>
         <tbody>
             <tr>
-                <td>Awarded</td>
+                <th>Awarded</th>
                 <td>@entry.AwardedAstras</td>
                 <td>@entry.AwardedStellars</td>
                 <td>@entry.AwardedGalaxies</td>
                 <td>@entry.AwardedUniversals</td>
             </tr>
             <tr>
-                <td>Calculated</td>
+                <th>Calculated</th>
                 <td></td>
                 @if (entry.CalculatedStellars > entry.AwardedStellars)
                 {

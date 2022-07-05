@@ -57,7 +57,7 @@ namespace Constellation.Core.Models
         public ICollection<StudentWholeAbsence> WholeAbsences { get; set; }
         public ICollection<LessonRoll.LessonRollStudentAttendance> LessonsAttended { get; set; }
         public ICollection<StudentReport> Reports { get; set; }
-        //public ICollection<StudentAward> Awards { get; set; }
+        public ICollection<StudentAward> Awards { get; set; }
 
         public Task EnableAbsenceNotifications(DateTime startDate)
         {
