@@ -27,9 +27,9 @@ namespace Constellation.Infrastructure.Features.Awards.Queries
         {
             return await _context.Students
                 .Where(student => student.StudentId == request.StudentId)
-                .Select(student => student.Awards)
-                .ProjectTo<ICollection<StudentAwardsForList>>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync(cancellationToken);
+                .SelectMany(student => student.Awards)
+                .ProjectTo<StudentAwardsForList>(_mapper.ConfigurationProvider)
+                .ToListAsync(cancellationToken);
         }
     }
 }

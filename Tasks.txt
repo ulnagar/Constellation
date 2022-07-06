@@ -23,9 +23,6 @@ FACULTY:
 ACTIONS:
 	Migrate to AccessRight concept
 
-SCHOOL PORTAL:
-	Show list and tally of awards listings per student
-
 HANGFIRE DASHBOARD:
 	Add TRIGGER NOW button for one-off job registration
 	Add TRIGGER OUTSIDE HANGFIRE button for interactive sessions
@@ -48,12 +45,19 @@ R1.4:
 	SCHOOLS PORTAL:
 		Add Stocktake function listing all sighted devices for the linked school
 		Add Stocktake sighting function, allowing users to submit stocktake information
+		Show list and tally of awards listings per student
 
 	EQUIPMENT:
 		Add Stocktake function to create stocktake events
 		Add Stocktake details view to list all reported device sightings
 		Add Stocktake Staff Dashboard to allow staff to review their sighted devices
 		Add Staff sighting function, allowing staff to submit stocktake information
+
+	REPORTS:
+		Change Awards Report to use locally cached data instead of uploaded Sentral extract
+
+	JOBS:
+		Create new SentralAwardSyncJob to cache student awards locally
 
 R1.3:
 	PTO EXPORT FILE:

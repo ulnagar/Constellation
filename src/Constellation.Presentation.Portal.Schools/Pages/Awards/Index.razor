@@ -23,37 +23,47 @@
             </div>
         </div>
 
-// Student Info
+        <div class="row mt-3">
+            <h4>Total Award Tally</h4>
+            <table class="table table-striped text-center">
+                <thead>
+                    <tr>
+                        <th>Astra Awards</th>
+                        <th>Stellar Awards</th>
+                        <th>Galaxy Medals</th>
+                        <th>Universal Achiever Awards</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Awards.Count == 0)
+                    {
+                        <tr class="group"><td colspan="100%">Nothing to see here!</td></tr>
+                    } else
+                    {
+                        <tr>
+                            <td>@Awards.Count(award => award.Type == "Astra Award")</td>
+                            <td>@Awards.Count(award => award.Type == "Stellar Award")</td>
+                            <td>@Awards.Count(award => award.Type == "Galaxy Medal")</td>
+                            <td>@Awards.Count(award => award.Type == "Aurora Universal Achiever")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
-
-// Award Tally
-        <DataTable Items="new List<AwardsCalculation> { AwardTally }" TItem="AwardsCalculation">
-            <TableHeader>
-                <th>Astra Awards</th>
-                <th>Stellar Awards</th>
-                <th>Galaxy Medals</th>
-                <th>Universal Achiever Awards</th>
-            </TableHeader>
-            <RowTemplate Context="entry">
-                <td>@AwardTally.Astras</td>
-                <td>@AwardTally.Stellars</td>
-                <td>@AwardTally.Galaxies</td>
-                <td>@AwardTally.Universals</td>
-            </RowTemplate>
-        </DataTable>
-
-// Last 20 awards issued
-
-        <DataTable Items="Awards.ToList()" TItem="StudentAwardsForList">
-            <TableHeader>
-                <th>Date</th>
-                <th>Type</th>
-            </TableHeader>
-            <RowTemplate Context="entry">
-                <td>@entry.AwardedOn</td>
-                <td>@entry.Type</td>
-            </RowTemplate>
-        </DataTable>
+        <div class="row mt-3">
+            <h4>Recent Awards</h4>
+            <DataTable Items="AwardsForDisplay.ToList()" TItem="StudentAwardsForList">
+                <TableHeader>
+                    <th>Date</th>
+                    <th>Type</th>
+                </TableHeader>
+                <RowTemplate Context="entry">
+                    <td width="33%">@entry.AwardedOn.ToLongDateString()</td>
+                    <td>@entry.Type</td>
+                </RowTemplate>
+            </DataTable>
+        </div>
     </div>
 </div>
 
@@ -67,7 +77,6 @@
 
     public ICollection<StudentAwardsForList> Awards { get; set; } = new List<StudentAwardsForList>();
     public ICollection<StudentAwardsForList> AwardsForDisplay { get; set; } = new List<StudentAwardsForList>();
-    public AwardsCalculation AwardTally { get; set; } = new();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -77,6 +86,11 @@
 
             var students = await mediator.Send(new GetStudentsFromSchoolForSelectionQuery { SchoolCode = SelectedSchool.Code });
             Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+
+            SelectedStudent = null;
+
+            Awards = new List<StudentAwardsForList>();
+            AwardsForDisplay = new List<StudentAwardsForList>();
         }
     }
 
@@ -95,33 +109,11 @@
         {
             var awards = await mediator.Send(new GetAwardsForStudentQuery { StudentId = SelectedStudent.StudentId });
             Awards = awards.ToList();
-            AwardsForDisplay = Awards.OrderByDescending(award => award.AwardedOn).Take(20).ToList();
-            AwardTally = new AwardsCalculation(awards);
+            AwardsForDisplay = Awards.OrderByDescending(award => award.AwardedOn).Take(10).ToList();
         } else
         {
             Awards = new List<StudentAwardsForList>();
             AwardsForDisplay = new List<StudentAwardsForList>();
-            AwardTally = new();
         }
-    }
-
-    public class AwardsCalculation
-    {
-        public AwardsCalculation()
-        {
-        }
-
-        public AwardsCalculation(ICollection<StudentAwardsForList> awards)
-        {
-            Astras = awards.Count(award => award.Type == "Astra Award");
-            Stellars = awards.Count(award => award.Type == "Stellar Award");
-            Galaxies = awards.Count(award => award.Type == "Galaxy Medal");
-            Universals = awards.Count(award => award.Type == "Aurora Universal Achiever");
-        }
-
-        public decimal Astras { get; set; }
-        public decimal Stellars { get; set; }
-        public decimal Galaxies { get; set; }
-        public decimal Universals { get; set; }
     }
 }

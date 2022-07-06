@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Features.Partners.Students.Notifications;
+using Constellation.Application.Features.Partners.Students.Queries;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -210,29 +211,14 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 return RedirectToAction("Index");
             }
 
-            var student = await _unitOfWork.Students.ForDetailDisplayAsync(id);
-
-            if (student == null)
-            {
-                return RedirectToAction("Index");
-            }
-
-            var studentOfferings = student.Enrolments.Where(e => e.IsDeleted == false).Select(e => e.Offering).ToList();
-            var courseOfferings = studentOfferings.Where(o => o.EndDate > DateTime.Now).ToList();
-            var courseSessions = courseOfferings.SelectMany(o => o.Sessions.Where(s => !s.IsDeleted)).ToList();
+            var viewModel = await CreateViewModel<Student_DetailsViewModel>();
+            viewModel.Student = await _mediator.Send(new GetStudentCompleteDetailsQuery { StudentId = id });
             var allOfferings = await _unitOfWork.CourseOfferings.ForSelectionAsync();
 
             // Build the master form view model
-            var viewModel = await CreateViewModel<Student_DetailsViewModel>();
-            viewModel.Student = Student_DetailsViewModel.StudentDto.ConvertFromStudent(student);
-            viewModel.Enrolments = studentOfferings.Select(Student_DetailsViewModel.OfferingDto.ConvertFromOffering).ToList();
-            viewModel.Sessions = courseSessions.Select(Student_DetailsViewModel.SessionDto.ConvertFromSession).ToList();
-            viewModel.Equipment = student.Devices.Select(Student_DetailsViewModel.AllocationDto.ConvertFromDeviceAllocation).ToList();
-            viewModel.Absences = student.Absences.Select(Student_DetailsViewModel.AbsenceDto.ConvertFromAbsence).ToList();
             viewModel.OfferingList = new SelectList(allOfferings.OrderBy(offering => offering.Name), "Id", "Name", null);
-            viewModel.Family = student.Family;
 
-            foreach (var session in courseSessions)
+            foreach (var session in viewModel.Student.Sessions)
             {
                 viewModel.MinPerFn += session.Period.EndTime.Subtract(session.Period.StartTime).Minutes;
                 viewModel.MinPerFn += session.Period.EndTime.Subtract(session.Period.StartTime).Hours * 60;

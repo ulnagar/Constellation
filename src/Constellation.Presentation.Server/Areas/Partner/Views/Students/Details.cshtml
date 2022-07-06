@@ -10,15 +10,15 @@
 @if (authorised)
 {
     <div>
-        <a asp-action="Update" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Edit</a>
+        <a asp-action="Update" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.Student.StudentId" class="btn btn-warning">Edit</a>
 
-        @if (Model.Student.IsDeleted)
+        @if (Model.Student.Student.IsDeleted)
         {
-            <a asp-action="Reinstate" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-danger">Re-enrol</a>
+            <a asp-action="Reinstate" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.Student.StudentId" class="btn btn-danger">Re-enrol</a>
         }
         else
         {
-            <a asp-action="Withdraw" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-danger">Withdraw</a>
+            <a asp-action="Withdraw" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.Student.StudentId" class="btn btn-danger">Withdraw</a>
         }
 
         <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -34,57 +34,57 @@
 
 <div>
     <div class="row">
-        <label asp-for="Student.StudentId" class="col-md-2"></label>
+        <label asp-for="Student.Student.StudentId" class="col-md-2"></label>
         <div class="col-md-3">
-            @Html.DisplayFor(model => model.Student.StudentId, new {htmlAttributes = new {@class = "form-control"}})
+            @Html.DisplayFor(model => model.Student.Student.StudentId, new {htmlAttributes = new {@class = "form-control"}})
         </div>
 
-        <label asp-for="Student.IsDeleted" class="col-md-2 offset-2"></label>
+        <label asp-for="Student.Student.IsDeleted" class="col-md-2 offset-2"></label>
         <div class="col-md-3">
-            @Html.DisplayFor(model => model.Student.IsDeleted, new {htmlAttributes = new {@class = "form-control"}})
-        </div>
-    </div>
-
-    <div class="row">
-        <label asp-for="Student.DisplayName" class="col-md-2"></label>
-        <div class="col-md-3">
-            @Html.DisplayFor(model => model.Student.DisplayName, new {htmlAttributes = new {@class = "form-control"}})
-        </div>
-
-        <label asp-for="Student.DateEntered" class="col-md-2 offset-2"></label>
-        <div class="col-md-3">
-            @Html.DisplayFor(model => model.Student.DateEntered, "ShortDate", new {htmlAttributes = new {@class = "form-control"}})
+            @Html.DisplayFor(model => model.Student.Student.IsDeleted, new {htmlAttributes = new {@class = "form-control"}})
         </div>
     </div>
 
     <div class="row">
-        <label asp-for="Student.EmailAddress" class="col-md-2"></label>
+        <label asp-for="Student.Student.DisplayName" class="col-md-2"></label>
         <div class="col-md-3">
-            @Html.DisplayFor(model => model.Student.EmailAddress, "EmailAddress", new {htmlAttributes = new {@class = "form-control"}})
+            @Html.DisplayFor(model => model.Student.Student.DisplayName, new {htmlAttributes = new {@class = "form-control"}})
         </div>
 
-        <label asp-for="Student.DateDeleted" class="col-md-2 offset-2"></label>
+        <label asp-for="Student.Student.DateEntered" class="col-md-2 offset-2"></label>
         <div class="col-md-3">
-            @Html.DisplayFor(model => model.Student.DateDeleted, "ShortDate", new {htmlAttributes = new {@class = "form-control"}})
-        </div>
-    </div>
-
-    <div class="row">
-        <label asp-for="Student.SchoolName" class="col-md-2"></label>
-        <div class="col-md-3">
-            @Html.ActionLink(Model.Student.SchoolName, "Details", "Schools", new {area = "Partner", id = Model.Student.SchoolCode}, new {htmlAttributes = new {@class = "form-control"}})
-        </div>
-
-        <label asp-for="Student.AdobeConnectPrincipalId" class="col-md-2 offset-2"></label>
-        <div class="col-md-3">
-            @Html.DisplayFor(model => model.Student.AdobeConnectPrincipalId, new {htmlAttributes = new {@class = "form-control"}})
+            @Html.DisplayFor(model => model.Student.Student.DateEntered, "ShortDate", new {htmlAttributes = new {@class = "form-control"}})
         </div>
     </div>
 
     <div class="row">
-        <label asp-for="Student.CurrentGrade" class="col-md-2"></label>
+        <label asp-for="Student.Student.EmailAddress" class="col-md-2"></label>
         <div class="col-md-3">
-            @Html.DisplayFor(model => model.Student.CurrentGrade, "Grade", new {htmlAttributes = new {@class = "form-control"}})
+            @Html.DisplayFor(model => model.Student.Student.EmailAddress, "EmailAddress", new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+
+        <label asp-for="Student.Student.DateDeleted" class="col-md-2 offset-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Student.Student.DateDeleted, "ShortDate", new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Student.Student.SchoolName" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.ActionLink(Model.Student.Student.SchoolName, "Details", "Schools", new {area = "Partner", id = Model.Student.Student.SchoolCode}, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+
+        <label asp-for="Student.Student.AdobeConnectPrincipalId" class="col-md-2 offset-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Student.Student.AdobeConnectPrincipalId, new {htmlAttributes = new {@class = "form-control"}})
+        </div>
+    </div>
+
+    <div class="row">
+        <label asp-for="Student.Student.CurrentGrade" class="col-md-2"></label>
+        <div class="col-md-3">
+            @Html.DisplayFor(model => model.Student.Student.CurrentGrade, "Grade", new {htmlAttributes = new {@class = "form-control"}})
         </div>
     </div>
 </div>
@@ -101,16 +101,16 @@
         <li class="nav-item">
             <a class="nav-link active" href="#studentClasses" data-toggle="tab" role="tab">
                 Enrolled classes
-                @if (Model.Enrolments.Any())
+                @if (Model.Student.Enrolments.Any())
                 {
-                    <span class="badge">@Model.Enrolments.Count()</span>
+                    <span class="badge">@Model.Student.Enrolments.Count()</span>
                 }
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#sessions" data-toggle="tab" role="tab">
                 Active sessions
-                @if (Model.Sessions.Any())
+                @if (Model.Student.Sessions.Any())
                 {
                     <span class="badge">...</span>
                 }
@@ -119,9 +119,9 @@
         <li class="nav-item">
             <a class="nav-link" href="#studentDevices" data-toggle="tab" role="tab">
                 Assigned devices
-                @if (Model.Equipment.Any(a => !a.Deleted.HasValue))
+                @if (Model.Student.Equipment.Any(a => !a.Deleted.HasValue))
                 {
-                    <span class="badge">@Model.Equipment.Count(a => !a.Deleted.HasValue)</span>
+                    <span class="badge">@Model.Student.Equipment.Count(a => !a.Deleted.HasValue)</span>
                 }
 
             </a>
@@ -129,7 +129,7 @@
         <li class="nav-item">
             <a class="nav-link" href="#studentAbsences" data-toggle="tab" role="tab">
                 Absences
-                @if (Model.Absences.Any())
+                @if (Model.Student.Absences.Any())
                 {
                     <span class="badge">...</span>
                 }
@@ -145,82 +145,82 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="row">
-                        <label asp-for="Family.Parent1" class="col-md-2">Parent 1</label>
+                        <label asp-for="Student.Family.Parent1" class="col-md-2">Parent 1</label>
                     </div>
 
                     <div class="row">
-                        <label asp-for="Family.Parent1.Title" class="col-md-4">Title</label>
+                        <label asp-for="Student.Family.Parent1.Title" class="col-md-4">Title</label>
                         <div class="col-md-8">
-                            @Html.DisplayFor(model => model.Family.Parent1.Title, new {htmlAttributes = new {@class = "form-control"}})
+                            @Html.DisplayFor(model => model.Student.Family.Parent1.Title, new {htmlAttributes = new {@class = "form-control"}})
                         </div>
                     </div>
 
                     <div class="row">
-                        <label asp-for="Family.Parent1.FirstName" class="col-md-4">First Name</label>
+                        <label asp-for="Student.Family.Parent1.FirstName" class="col-md-4">First Name</label>
                         <div class="col-md-8">
-                            @Html.DisplayFor(model => model.Family.Parent1.FirstName, new {htmlAttributes = new {@class = "form-control"}})
+                            @Html.DisplayFor(model => model.Student.Family.Parent1.FirstName, new {htmlAttributes = new {@class = "form-control"}})
                         </div>
                     </div>
 
                     <div class="row">
-                        <label asp-for="Family.Parent1.LastName" class="col-md-4">Last Name</label>
+                        <label asp-for="Student.Family.Parent1.LastName" class="col-md-4">Last Name</label>
                         <div class="col-md-8">
-                            @Html.DisplayFor(model => model.Family.Parent1.LastName, new {htmlAttributes = new {@class = "form-control"}})
+                            @Html.DisplayFor(model => model.Student.Family.Parent1.LastName, new {htmlAttributes = new {@class = "form-control"}})
                         </div>
                     </div>
 
                     <div class="row">
-                        <label asp-for="Family.Parent1.MobileNumber" class="col-md-4">Mobile Number</label>
+                        <label asp-for="Student.Family.Parent1.MobileNumber" class="col-md-4">Mobile Number</label>
                         <div class="col-md-8">
-                            @Html.DisplayFor(model => model.Family.Parent1.MobileNumber, "PhoneNumber", new {htmlAttributes = new {@class = "form-control"}})
+                            @Html.DisplayFor(model => model.Student.Family.Parent1.MobileNumber, "PhoneNumber", new {htmlAttributes = new {@class = "form-control"}})
                         </div>
                     </div>
 
                     <div class="row">
-                        <label asp-for="Family.Parent1.EmailAddress" class="col-md-4">Email Address</label>
+                        <label asp-for="Student.Family.Parent1.EmailAddress" class="col-md-4">Email Address</label>
                         <div class="col-md-8">
-                            @Html.DisplayFor(model => model.Family.Parent1.EmailAddress, "EmailAddress", new {htmlAttributes = new {@class = "form-control"}})
+                            @Html.DisplayFor(model => model.Student.Family.Parent1.EmailAddress, "EmailAddress", new {htmlAttributes = new {@class = "form-control"}})
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
                     <div class="row">
-                        <label asp-for="Family.Parent2" class="col-md-2">Parent 2</label>
+                        <label asp-for="Student.Family.Parent2" class="col-md-2">Parent 2</label>
                     </div>
 
                     <div class="row">
-                        <label asp-for="Family.Parent2.Title" class="col-md-4">Title</label>
+                        <label asp-for="Student.Family.Parent2.Title" class="col-md-4">Title</label>
                         <div class="col-md-8">
-                            @Html.DisplayFor(model => model.Family.Parent2.Title, new {htmlAttributes = new {@class = "form-control"}})
+                            @Html.DisplayFor(model => model.Student.Family.Parent2.Title, new {htmlAttributes = new {@class = "form-control"}})
                         </div>
                     </div>
 
                     <div class="row">
-                        <label asp-for="Family.Parent2.FirstName" class="col-md-4">First Name</label>
+                        <label asp-for="Student.Family.Parent2.FirstName" class="col-md-4">First Name</label>
                         <div class="col-md-8">
-                            @Html.DisplayFor(model => model.Family.Parent2.FirstName, new {htmlAttributes = new {@class = "form-control"}})
+                            @Html.DisplayFor(model => model.Student.Family.Parent2.FirstName, new {htmlAttributes = new {@class = "form-control"}})
                         </div>
                     </div>
 
                     <div class="row">
-                        <label asp-for="Family.Parent2.LastName" class="col-md-4">Last Name</label>
+                        <label asp-for="Student.Family.Parent2.LastName" class="col-md-4">Last Name</label>
                         <div class="col-md-8">
-                            @Html.DisplayFor(model => model.Family.Parent2.LastName, new {htmlAttributes = new {@class = "form-control"}})
+                            @Html.DisplayFor(model => model.Student.Family.Parent2.LastName, new {htmlAttributes = new {@class = "form-control"}})
                         </div>
                     </div>
 
                     <div class="row">
-                        <label asp-for="Family.Parent2.MobileNumber" class="col-md-4">Mobile Number</label>
+                        <label asp-for="Student.Family.Parent2.MobileNumber" class="col-md-4">Mobile Number</label>
                         <div class="col-md-8">
-                            @Html.DisplayFor(model => model.Family.Parent2.MobileNumber, "PhoneNumber", new {htmlAttributes = new {@class = "form-control"}})
+                            @Html.DisplayFor(model => model.Student.Family.Parent2.MobileNumber, "PhoneNumber", new {htmlAttributes = new {@class = "form-control"}})
                         </div>
                     </div>
 
                     <div class="row">
-                        <label asp-for="Family.Parent2.EmailAddress" class="col-md-4">Email Address</label>
+                        <label asp-for="Student.Family.Parent2.EmailAddress" class="col-md-4">Email Address</label>
                         <div class="col-md-8">
-                            @Html.DisplayFor(model => model.Family.Parent2.EmailAddress, "EmailAddress", new {htmlAttributes = new {@class = "form-control"}})
+                            @Html.DisplayFor(model => model.Student.Family.Parent2.EmailAddress, "EmailAddress", new {htmlAttributes = new {@class = "form-control"}})
                         </div>
                     </div>
                 </div>
@@ -232,8 +232,8 @@
             
             @if (authorised)
             {
-                <a asp-action="BulkEnrol" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Bulk Enrol</a>
-                <a asp-action="UnenrolAll" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Bulk Unenrol</a>
+                <a asp-action="BulkEnrol" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.Student.StudentId" class="btn btn-warning">Bulk Enrol</a>
+                <a asp-action="UnenrolAll" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.Student.StudentId" class="btn btn-warning">Bulk Unenrol</a>
             }
             
             <table class="table-striped table-hover data-table">
@@ -246,7 +246,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Enrolments)
+                    @foreach (var item in Model.Student.Enrolments)
                     {
                         <tr>
                             <td>@Html.DisplayFor(model => item.Name)</td>
@@ -260,7 +260,7 @@
                             <td>
                                 @if (authorised)
                                 {
-                                    @Html.ActionLink("Remove", "Unenrol", "Students", new {area = "Partner", id = Model.Student.StudentId, classId = item.OfferingId}, new {@class = "btn btn-sm btn-danger btn-show-hover"})
+                                    @Html.ActionLink("Remove", "Unenrol", "Students", new {area = "Partner", id = Model.Student.Student.StudentId, classId = item.OfferingId}, new {@class = "btn btn-sm btn-danger btn-show-hover"})
                                 }
                             </td>
                         </tr>
@@ -277,7 +277,7 @@
                                 </select>
                                 @*@Html.DropDownList("CourseId", Model.OfferingList, "--Select--", htmlAttributes: new { @class = "form-control combo" })*@
                             </th>
-                            <th><a id="enrolLink" class="btn btn-sm btn-warning" onClick="enrolStudent(@Model.Student.StudentId)">Enrol</a></th>
+                            <th><a id="enrolLink" class="btn btn-sm btn-warning" onClick="enrolStudent(@Model.Student.Student.StudentId)">Enrol</a></th>
                             <th></th>
                         </tr>
                     </tfoot>
@@ -299,7 +299,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Sessions)
+                    @foreach (var item in Model.Student.Sessions)
                     {
                         <tr>
                             <td>@Html.DisplayFor(model => item.Period, "Period")</td>
@@ -334,7 +334,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                @foreach (var item in Model.Equipment)
+                @foreach (var item in Model.Student.Equipment)
                 {
                     <tr>
                         <td>@Html.DisplayFor(model => item.DeviceMake)</td>
@@ -368,7 +368,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Absences.OrderBy(a => a.Date).ThenBy(a => a.PeriodTimeframe))
+                    @foreach (var item in Model.Student.Absences.OrderBy(a => a.Date).ThenBy(a => a.PeriodTimeframe))
                     {
                         <tr>
                             <td>@if (item.Explained)
