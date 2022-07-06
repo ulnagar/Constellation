@@ -146,7 +146,7 @@ namespace Constellation.Infrastructure.Services
                 return result;
             }
 
-            var checkContact = schoolContactRoleResource.SchoolContact ?? await _unitOfWork.SchoolContacts.ForEditAsync(schoolContactRoleResource.SchoolContactId);
+            var checkContact = await _unitOfWork.SchoolContacts.ForEditAsync(schoolContactRoleResource.SchoolContactId);
 
             if (checkContact == null)
             {
@@ -160,26 +160,9 @@ namespace Constellation.Infrastructure.Services
                 await UndeleteContact(checkContact.Id);
             }
 
-            if (schoolContactRoleResource.SchoolContactId is not 0)
-            {
-                var contactRoleWithId = new SchoolContactRole()
-                {
-                    SchoolContactId = schoolContactRoleResource.SchoolContactId,
-                    Role = schoolContactRoleResource.Role,
-                    SchoolCode = schoolContactRoleResource.SchoolCode
-                };
-
-                _unitOfWork.Add(contactRoleWithId);
-
-                result.Success = true;
-                result.Entity = contactRoleWithId;
-
-                return result;
-            }
-
             var contactRole = new SchoolContactRole()
             {
-                SchoolContact = schoolContactRoleResource.SchoolContact,
+                SchoolContactId = schoolContactRoleResource.SchoolContactId,
                 Role = schoolContactRoleResource.Role,
                 SchoolCode = schoolContactRoleResource.SchoolCode
             };

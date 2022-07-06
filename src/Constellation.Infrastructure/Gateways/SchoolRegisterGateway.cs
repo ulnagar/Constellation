@@ -110,7 +110,7 @@ namespace Constellation.Infrastructure.Gateways
                     {
                         Role = SchoolContactRole.Principal,
                         SchoolCode = csvSchool.SchoolCode,
-                        SchoolContact = contact
+                        SchoolContactId = contact.Id
                     });
                 }
 

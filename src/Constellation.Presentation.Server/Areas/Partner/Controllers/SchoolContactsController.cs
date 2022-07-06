@@ -10,6 +10,7 @@ using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -110,6 +111,26 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             viewModel.RoleList = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
 
             return View("Index", viewModel);
+        }
+
+        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
+        public async Task<IActionResult> AddAssignment(int id)
+        {
+            var contact = await _unitOfWork.SchoolContacts.FromIdForExistCheck(id);
+            var roles = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
+
+            var schools = await _unitOfWork.Schools.ForSelectionAsync();
+
+            var viewModel = await CreateViewModel<Contacts_AssignmentViewModel>();
+            viewModel.SchoolList = new SelectList(schools, "Code", "Name");
+            viewModel.ContactRole = new SchoolContactRoleDto
+            {
+                SchoolContactId = id,
+                SchoolContactName = contact.DisplayName
+            };
+            viewModel.RoleList = new SelectList(roles);
+
+            return View(viewModel);
         }
 
         [HttpPost]

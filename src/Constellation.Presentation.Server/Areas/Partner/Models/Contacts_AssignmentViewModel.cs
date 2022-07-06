@@ -9,5 +9,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
         public SchoolContactRoleDto ContactRole { get; set; }
         public SelectList SchoolStaffList { get; set; }
         public SelectList RoleList { get; set; }
+        public SelectList SchoolList { get; set; }
     }
 }
