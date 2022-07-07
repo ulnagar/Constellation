@@ -98,7 +98,14 @@
     {
         var studentId = e.Value.ToString();
 
-        SelectedStudent = Students.First(student => student.StudentId == studentId);
+        if (string.IsNullOrWhiteSpace(studentId))
+        {
+            // The blank --Select-- option has been selected. Blank out data.
+            SelectedStudent = null;
+        } else
+        {
+            SelectedStudent = Students.First(student => student.StudentId == studentId);
+        }
 
         await GetAwardsForSelectedStudent();
     }

@@ -31,16 +31,18 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
         private readonly IMediator _mediator;
         private readonly IActiveDirectoryActionsService _adService;
         private readonly ILogger<IAuthService> _logger;
+        private readonly RoleManager<AppRole> _roleManager;
 
         public LoginModel(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager,
             IMediator mediator, IActiveDirectoryActionsService adService,
-            ILogger<IAuthService> logger)
+            ILogger<IAuthService> logger, RoleManager<AppRole> roleManager)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _mediator = mediator;
             _adService = adService;
             _logger = logger;
+            _roleManager = roleManager;
         }
 
         [BindProperty]
@@ -173,6 +175,26 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
 
                         _logger.LogWarning(" - Inactive user reactivated for email {user}", Input.Email);
                     }
+                }
+
+                // Is user an admin?
+                var roles = await _userManager.GetRolesAsync(dbUserAccount);
+                if (roles.Contains(AuthRoles.Admin))
+                {
+                    var schools = await _mediator.Send(new GetAllPartnerSchoolCodesQuery());
+                    var claimList = new List<Claim>();
+                    foreach (var entry in schools)
+                    {
+                        claimList.Add(new Claim("Schools", entry));
+                    }
+
+                    //claimList.Add(new Claim("Schools", "8371,8146"));
+
+                    _logger.LogInformation($" - Admin access granted. Logging in with system wide access.");
+                    await _signInManager.SignInWithClaimsAsync(dbUserAccount, false, claimList);
+
+                    _logger.LogInformation(" - Login succeeded for {user}", Input.Email);
+                    return LocalRedirect(returnUrl);
                 }
 
                 // Build/rebuild schools claim

@@ -66,13 +66,47 @@
 
         if (User.Identity.IsAuthenticated)
         {
-            var schoolCodeClaim = User.Claims.FirstOrDefault(claim => claim.Type == "Schools");
-            if (schoolCodeClaim != null)
+            var schoolCodeClaims = User.Claims.Where(claim => claim.Type == "Schools").ToList();
+            if (schoolCodeClaims.Count > 0)
             {
-                Schools = await mediator.Send(new ConvertListOfSchoolCodesToSchoolListCommand { SchoolCodes = schoolCodeClaim.Value.Split(",").ToList() });
+                var schoolCodeList = new List<string>();
+                foreach (var item in schoolCodeClaims)
+                {
+                    if (string.IsNullOrWhiteSpace(item.Value))
+                        continue;
+
+                    if (item.Value.Contains(','))
+                    {
+                        var multiCodes = item.Value.Split(",").ToList();
+
+                        foreach(var entry in multiCodes)
+                        {
+                            if (schoolCodeList.All(code => code != entry))
+                                schoolCodeList.Add(entry);
+                        }
+                    } else
+                    {
+                        if (schoolCodeList.All(code => code != item.Value))
+                            schoolCodeList.Add(item.Value);
+                    }
+                }
+
+                Schools = await mediator.Send(new ConvertListOfSchoolCodesToSchoolListCommand { SchoolCodes = schoolCodeList });
 
                 SelectedSchool = Schools.OrderBy(school => school.Code).First();
             }
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        User = authState.User;
+
+        if (!User.Identity.IsAuthenticated)
+        {
+            // Redirect to login page:
+            navManager.NavigateTo("Auth/LogOut");
         }
     }
 
