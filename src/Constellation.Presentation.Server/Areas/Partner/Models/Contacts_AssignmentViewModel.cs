@@ -10,5 +10,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
         public SelectList SchoolStaffList { get; set; }
         public SelectList RoleList { get; set; }
         public SelectList SchoolList { get; set; }
+        public string ReturnUrl { get; set; }
     }
 }

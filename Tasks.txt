@@ -4,10 +4,6 @@ OPERATIONS:
 COVERS:
 	Add link landing page that checks access dates before sending people to the actual teams link
 
-SCHOOL CONTACTS:
-	Add school contact to role from the School Contact view
-	Add new School Contact to role at creation
-
 LINK SHORTENER:
 	Provide interface for custom shortening of long URLs on custom domain
 
@@ -62,6 +58,10 @@ R1.4:
 
 	JOBS:
 		Create new SentralAwardSyncJob to cache student awards locally
+
+	SCHOOL CONTACTS:
+		Add school contact to role from the School Contact view
+		Add new School Contact to role at creation
 
 R1.3:
 	PTO EXPORT FILE:

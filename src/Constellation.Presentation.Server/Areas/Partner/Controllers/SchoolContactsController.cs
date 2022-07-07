@@ -129,6 +129,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 SchoolContactName = contact.DisplayName
             };
             viewModel.RoleList = new SelectList(roles);
+            viewModel.ReturnUrl = Request.GetTypedHeaders().Referer.ToString();
 
             return View(viewModel);
         }
@@ -141,7 +142,10 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             await _schoolContactService.CreateRole(viewModel.ContactRole);
             await _unitOfWork.CompleteAsync();
 
-            return Redirect(Request.GetTypedHeaders().Referer.ToString());
+            if (viewModel.ReturnUrl == null)
+                return Redirect(Request.GetTypedHeaders().Referer.ToString());
+            else 
+                return Redirect(viewModel.ReturnUrl);
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
@@ -213,6 +217,13 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 };
 
                 await _authService.CreateUser(user);
+
+                if (!string.IsNullOrWhiteSpace(viewModel.ContactRole.SchoolCode) && !string.IsNullOrWhiteSpace(viewModel.ContactRole.Role))
+                {
+                    viewModel.ContactRole.SchoolContactId = result.Entity.Id;
+
+                    await _schoolContactService.CreateRole(viewModel.ContactRole);
+                }
             }
             else
             {
@@ -249,9 +260,15 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
         public async Task<IActionResult> Create()
         {
+            var roles = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
+            var schools = await _unitOfWork.Schools.ForSelectionAsync();
+
             var viewModel = await CreateViewModel<SchoolStaff_UpdateViewModel>();
             viewModel.IsNew = true;
-
+            viewModel.ContactRole = new();
+            viewModel.SchoolList = new SelectList(schools, "Code", "Name");
+            viewModel.RoleList = new SelectList(roles);
+            
             return View("Update", viewModel);
         }
 

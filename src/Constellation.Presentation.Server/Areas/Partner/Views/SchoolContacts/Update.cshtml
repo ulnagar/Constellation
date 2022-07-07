@@ -47,6 +47,29 @@
             </div>
         </div>
 
+        @if (Model.IsNew)
+        {
+            <h2>Assign a role:</h2>
+
+            <div class="form-group row">
+                <label asp-for="ContactRole.SchoolCode" class="col-md-2">School</label>
+                <div class="col-md-6">
+                    <select asp-for="ContactRole.SchoolCode" asp-items="@Model.SchoolList" class="combo" style="width:100%">
+                        <option value="">-- Select --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label asp-for="ContactRole.Role" class="col-md-2">Role</label>
+                <div class="col-md-6">
+                    <select asp-for="ContactRole.Role" asp-items="@Model.RoleList" class="combo-with-tag" style="width:100%">
+                        <option value="-- Select or Enter --"></option>
+                    </select>
+                </div>
+            </div>
+        }
+
         <div class="form-group">
             <div class="col-md-offset-2 col-md-3">
                 <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg"/>
