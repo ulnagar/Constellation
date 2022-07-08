@@ -1,9 +1,9 @@
 ﻿using Constellation.Presentation.Server.BaseModels;
 using System.Collections.Generic;
 
-namespace Constellation.Presentation.Server.Areas.Reports.Models.Students
+namespace Constellation.Presentation.Server.Areas.Reports.Models.Awards
 {
-    public class AwardsListViewModel : BaseViewModel
+    public class AwardsChangesListViewModel : BaseViewModel
     {
         public List<AwardRecord> Awards { get; set; } = new();
 

@@ -1,0 +1,39 @@
+﻿@using Constellation.Application.Models.Identity
+@model Constellation.Presentation.Server.Areas.Reports.Models.Awards.RecentAwardsListViewModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin));
+}
+
+<h2>Awards List</h2>
+
+<div>
+    <a asp-action="Dashboard" asp-controller="Awards" asp-area="Reports" class="btn btn-secondary">Dashboard</a>
+    <a asp-action="Changes" asp-controller="Awards" asp-area="Reports" class="btn btn-secondary">Recent Changes</a>
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Student</th>
+        <th>School</th>
+        <th>Award</th>
+        <th>Issued On</th>
+    </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Awards)
+        {
+            <tr>
+                <td></td>
+                <td>@Html.DisplayFor(model => item.StudentName) (@Html.DisplayFor(model => item.StudentGrade))</td>
+                <td>@Html.DisplayFor(model => item.StudentSchool)</td>
+                <td>@Html.DisplayFor(model => item.AwardType)</td>
+                <td>@Html.DisplayFor(model => item.AwardedOn, "ShortDate")</td>
+            </tr>
+        }
+    </tbody>
+</table>

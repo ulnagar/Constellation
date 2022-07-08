@@ -60,6 +60,7 @@ namespace Constellation.Infrastructure.Persistence
         public DbSet<Team> Teams { get; set; }
         public DbSet<StocktakeEvent> StocktakeEvents { get; set; }
         public DbSet<StocktakeSighting> StocktakeSightings { get; set; }
+        public DbSet<StudentAward> StudentAward { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {

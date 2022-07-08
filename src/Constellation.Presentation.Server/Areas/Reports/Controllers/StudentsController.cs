@@ -1,17 +1,13 @@
-﻿using Constellation.Application.DTOs;
-using Constellation.Application.Extensions;
-using Constellation.Application.Features.Awards.Queries;
+﻿using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.Areas.Reports.Models;
-using Constellation.Presentation.Server.Areas.Reports.Models.Students;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,14 +20,12 @@ namespace ACOS.Web.Areas.Reports.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAdobeConnectService _adobeConnectService;
-        private readonly IMediator _mediator;
 
-        public StudentsController(IUnitOfWork unitOfWork, IAdobeConnectService adobeConnectService, IMediator mediator)
+        public StudentsController(IUnitOfWork unitOfWork, IAdobeConnectService adobeConnectService)
             : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _adobeConnectService = adobeConnectService;
-            _mediator = mediator;
         }
 
         public async Task<IActionResult> Index()
@@ -191,38 +185,6 @@ namespace ACOS.Web.Areas.Reports.Controllers
 
             var viewModel = await CreateViewModel<Student_InterviewDetails_ViewModel>();
             viewModel.AllClasses = new SelectList(offerings, "Id", "Name");
-
-            return View(viewModel);
-        }
-
-        public async Task<IActionResult> Awards()
-        {
-            var viewModel = await CreateViewModel<AwardsListViewModel>();
-
-            var students = await _mediator.Send(new GetStudentsWithAwardQuery());
-
-            foreach (var student in students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName))
-            {
-                var entry = new AwardsListViewModel.AwardRecord();
-
-                entry.StudentId = student.StudentId;
-                entry.StudentName = student.DisplayName;
-                entry.StudentGrade = student.CurrentGrade.AsName();
-
-                entry.AwardedAstras = student.Awards.Count(award => award.Type == "Astra Award");
-                entry.AwardedStellars = student.Awards.Count(award => award.Type == "Stellar Award");
-                entry.AwardedGalaxies = student.Awards.Count(award => award.Type == "Galaxy Medal");
-                entry.AwardedUniversals = student.Awards.Count(award => award.Type == "Aurora Universal Achiever");
-
-                entry.CalculatedStellars = Math.Floor(entry.AwardedAstras / 5);
-                entry.CalculatedGalaxies = Math.Floor(entry.AwardedAstras / 25);
-                entry.CalculatedUniversals = Math.Floor(entry.AwardedAstras / 125);
-
-                if (entry.AwardedStellars != entry.CalculatedStellars ||
-                    entry.AwardedGalaxies != entry.CalculatedGalaxies ||
-                    entry.AwardedUniversals != entry.CalculatedUniversals)
-                    viewModel.Awards.Add(entry);
-            }
 
             return View(viewModel);
         }

@@ -50,6 +50,7 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<Team> Teams { get; set; }
         DbSet<StocktakeEvent> StocktakeEvents { get; set; }
         DbSet<StocktakeSighting> StocktakeSightings { get; set; }
+        DbSet<StudentAward> StudentAward { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         DatabaseFacade Database { get; }
