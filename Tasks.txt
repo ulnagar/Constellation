@@ -55,6 +55,7 @@ R1.4:
 
 	REPORTS:
 		Change Awards Report to use locally cached data instead of uploaded Sentral extract
+		Create new Awards Report views, including graph dashboard
 
 	JOBS:
 		Create new SentralAwardSyncJob to cache student awards locally

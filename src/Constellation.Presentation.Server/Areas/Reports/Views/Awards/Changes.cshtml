@@ -14,6 +14,12 @@
     }
 </style>
 
+<div class="row">
+    <a asp-action="Index" asp-controller="Awards" asp-area="Reports" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
 @foreach (var entry in Model.Awards.OrderBy(award => award.StudentGrade)) {
     <h4>@entry.StudentName (@entry.StudentGrade)</h4>
     <table class="table table-striped">

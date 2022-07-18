@@ -45,9 +45,34 @@ namespace Constellation.Infrastructure.Features.Auth.Queries
 
                     var entry = new AwardCountByTypeByGrade
                     {
+                        ReportPeriod = "YTD",
                         Grade = grade.AsName(),
                         AwardType = awardType,
                         Count = awards.Count(award => award.Type == awardType && award.Student.CurrentGrade == grade)
+                    };
+
+                    returnData.Add(entry);
+                }
+            }
+
+            foreach (Grade grade in Enum.GetValues(typeof(Grade)))
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    var awardType = j switch
+                    {
+                        0 => "Astra Award",
+                        1 => "Stellar Award",
+                        2 => "Galaxy Medal",
+                        3 => "Aurora Universal Achiever"
+                    };
+
+                    var entry = new AwardCountByTypeByGrade
+                    {
+                        ReportPeriod = "This Month",
+                        Grade = grade.AsName(),
+                        AwardType = awardType,
+                        Count = awards.Count(award => award.Type == awardType && award.Student.CurrentGrade == grade && award.AwardedOn.Month == DateTime.Today.Month)
                     };
 
                     returnData.Add(entry);

@@ -2,46 +2,92 @@
 @using Newtonsoft.Json
 @model DashboardViewModel
 
-<canvas id="gradeChart" class="canvas-background"></canvas>
+<style>
+    .graph-grid {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        border: 1px solid black;
+    }
 
-<canvas id="monthChart" class="canvas-background"></canvas>
+    .canvas-background {
+        width: 300px;
+        height: 300px;
+        padding-left: 0;
+        padding-right: 0;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+    }
+
+    .title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 2rem;
+    }
+
+    .row-title {
+        font-weight: bold;
+        font-size: 1.5rem;
+    }
+
+    .graph-grid div {
+        text-align: center;
+        border: 1px solid black;
+    }
+</style>
+
+<div class="row">
+    <a asp-action="Index" asp-controller="Awards" asp-area="Reports" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<div class="graph-grid">
+    <div></div>
+    <div class="title">This Month</div>
+    <div class="title">Year To Date</div>
+    <div class="row-title">Astra Awards</div>
+    <div><canvas id="monthAstra" class="canvas-background"></canvas></div>
+    <div><canvas id="ytdAstra" class="canvas-background"></canvas></div>
+    <div class="row-title">Stellar Awards</div>
+    <div><canvas id="monthStellar" class="canvas-background"></canvas></div>
+    <div><canvas id="ytdStellar" class="canvas-background"></canvas></div>
+    <div class="row-title">Galaxy Medals</div>
+    <div><canvas id="monthGalaxy" class="canvas-background"></canvas></div>
+    <div><canvas id="ytdGalaxy" class="canvas-background"></canvas></div>
+    <div class="row-title">Universal Achievers</div>
+    <div><canvas id="monthUA" class="canvas-background"></canvas></div>
+    <div><canvas id="ytdUA" class="canvas-background"></canvas></div>
+</div>
 
 @section scripts {
     <script>
-        var gradeData = ""; //"@JsonConvert.SerializeObject(Model.ByTypeByGrade)";
-        var monthData = ""; //"@JsonConvert.SerializeObject(Model.ByTypeByMonth)";
+        var YTDData;
+        var MonthData;
 
-        var groupBy = function(xs, key) {
-          return xs.reduce(function(rv, x) {
-            (rv[x[key]] = rv[x[key]] || []).push(x);
-            return rv;
-          }, {});
-        };
-
-        //console.log(gradeData, monthData);
-    </script>
-
-    <script>
-        var GradeChart;
-        var MonthChart;
+        var MonthAstra, MonthStellar, MonthGalaxy, MonthUA;
+        var YTDAstra, YTDStellar, YTDGalaxy, YTDUA;
 
         $(document).ready(function() {
-            var ctx = document.getElementById('gradeChart').getContext('2d');
-            canvasLoadingDisplay(ctx);
+            var graphs = document.getElementsByClassName('canvas-background');
+            $.each(graphs, function(index, canvas) {
+                var ctx = canvas.getContext('2d');
+                canvasLoadingDisplay(ctx);
+            })
 
             $.ajax({
                 type: "GET",
                 dataType: "json",
                 url: '@Url.Action("GetDashboardData", "Awards", new { area = "Reports" })',
                 success: function(response) {
-                    gradeData = response;
-                    ShowGradeChart();
+                    YTDData = response.filter(item => item.reportPeriod === "YTD");
+                    MonthData = response.filter(item => item.reportPeriod === "This Month");
+                    ShowCharts();
                 },
                 error: function(error) {
                     console.log(error);
                 }
             });
-
         });
 
         function canvasLoadingDisplay(context) {
@@ -52,179 +98,159 @@
             context.fillStyle = '#fff';
             context.fillRect(0, 0, w, h);
             context.fillStyle = '#000';
-            context.font = '60px sans-serif';
+            context.font = '30px sans-serif';
             context.fillText("Loading...", 15, h / 2 + 35);
         }
 
-        function ShowGradeChart() {
-            if (GradeChart != null) {
-                GradeChart.destroy();
-            }
-
-            var dataSet = {
-                type: 'bar',
+        function ShowCharts() {
+            var dataSetTemplate = {
+                type: 'pie',
                 data: {
-                    labels: ["Astra Award", "Stellar Award", "Galaxy Medal", "Universal Achiever"],
+                    labels: ["Year 05", "Year 06", "Year 07", "Year 08", "Year 09", "Year 10", "Year 11", "Year 12"],
                     datasets: [
                         {
-                            label: "Year 5",
-                            //backgroundColor: 'rgba(230,168,59,0.2)',
-                            //borderColor: 'rgba(0,0,0,0)',
-                            //grouped: true,
-                            data: [577, 102, 5, 0]
-                        },
-                        {
-                            label: "Year 6",
-                            //backgroundColor: 'rgba(0,0,0,0)',
-                            //borderColor: 'rgba(250, 216, 89, 1)',
-                            //grouped: true,
-                            data: [952, 10, 1, 0]
-                        },
-                        {
-                            label: "Year 7",
-                            //backgroundColor: 'rgba(200, 99, 132, .2)',
-                            //borderColor: 'rgba(200, 99, 132, .7)',
-                            //grouped: true,
-                            data: [1570, 90, 30, 2]
-                        },
-                        {
-                            label: "Year 8",
-                            //backgroundColor: 'rgba(0, 10, 130, .2)',
-                            //borderColor: 'rgba(0, 10, 130, .7)',
-                            //grouped: true,
-                            data: [458, 69, 2, 0]
-                        },
-                        {
-                            label: "Year 9",
-                            //backgroundColor: 'rgba(230,168,59,0.2)',
-                            //borderColor: 'rgba(0,0,0,0)',
-                            //grouped: true,
-                            data: [658, 157, 25, 3]
-                        },
-                        {
-                            label: "Year 10",
-                            //backgroundColor: 'rgba(0,0,0,0)',
-                            //borderColor: 'rgba(250, 216, 89, 1)',
-                            //grouped: true,
-                            data: [589, 254, 36, 1]
-                        },
-                        {
-                            label: "Year 11",
-                            //backgroundColor: 'rgba(200, 99, 132, .2)',
-                            //borderColor: 'rgba(200, 99, 132, .7)',
-                            //grouped: true,
-                            data: [369, 25, 1, 0]
-                        },
-                        {
-                            label: "Year 12",
-                            //backgroundColor: 'rgba(0, 10, 130, .2)',
-                            //borderColor: 'rgba(0, 10, 130, .7)',
-                            //grouped: true,
-                            data: [854, 254, 36, 2]
+                            backgroundColor: [
+                                'rgba(178, 34, 34, 1)',
+                                'rgba(255, 140, 0, 1)',
+                                'rgba(255, 215, 0, 1)',
+                                'rgba(128, 0, 0, 1)',
+                                'rgba(34, 139, 34, 1)',
+                                'rgba(64, 224, 208, 1)',
+                                'rgba(100, 149, 237, 1)',
+                                'rgba(128, 0, 128, 1)'
+                            ],
+                            data: []
                         }
                     ]
                 },
                 options: {
-                    //responsive: true,
-                    //interaction: {
-                    //    mode: 'index',
-                    //    intersect: false
-                    //},
-                    //title: {
-                    //    display: true,
-                    //    text: 'Awards by Type by Grade',
-                    //    fontSize: 16
-                    //}
-                    barValueSpacing: 20,
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                min: 0,
-                            }
-                        }]
-                    }
-                }
-            };
-
-            //$.each(groupBy(gradeData, 'grade'),
-            //    function(index, point) {
-
-            //        var dataValues = [];
-
-            //        //dataValues.push(point.find(item => item.awardType === "Astra Award").count);
-            //        //dataValues.push(point.find(item => item.awardType === "Stellar Award").count);
-            //        //dataValues.push(point.find(item => item.awardType === "Galaxy Medal").count);
-            //        //dataValues.push(point.find(item => item.awardType === "Aurora Universal Achiever").count);
-
-            //        dataValues.push(
-            //            [
-            //                [point.find(item => item.awardType === "Astra Award").count],
-            //                [point.find(item => item.awardType === "Stellar Award").count],
-            //                [point.find(item => item.awardType === "Galaxy Medal").count],
-            //                [point.find(item => item.awardType === "Aurora Universal Achiever").count]
-            //            ]
-            //        )
-
-            //        console.log(dataValues);
-
-            //        switch (point[0].grade) {
-            //            case "Year 05":
-            //                dataSet["data"]["datasets"][0]["data"].push(dataValues);
-            //                break;
-            //            case "Year 06":
-            //                dataSet["data"]["datasets"][1]["data"].push(dataValues);
-            //                break;
-            //            case "Year 07":
-            //                dataSet["data"]["datasets"][2]["data"].push(dataValues);
-            //                break;
-            //            case "Year 08":
-            //                dataSet["data"]["datasets"][3]["data"].push(dataValues);
-            //                break;
-            //            case "Year 09":
-            //                dataSet["data"]["datasets"][4]["data"].push(dataValues);
-            //                break;
-            //            case "Year 10":
-            //                dataSet["data"]["datasets"][5]["data"].push(dataValues);
-            //                break;
-            //            case "Year 11":
-            //                dataSet["data"]["datasets"][6]["data"].push(dataValues);
-            //                break;
-            //            case "Year 12":
-            //                dataSet["data"]["datasets"][7]["data"].push(dataValues);
-            //                break;
-            //        }
-            //    });
-
-            console.log(dataSet["data"]["datasets"]);
-
-            var ctx = document.getElementById('gradeChart').getContext('2d');
-            GradeChart = new Chart(ctx, dataSet);
-        }
-
-        function ShowMonthChart() {
-            if (MonthChart != nul) {
-                MonthChart.destroy();
-            }
-
-            var dataSet = {
-                type: 'bar',
-                data: monthData,
-                options: {
-                    responsive: true,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },
-                    title: {
-                        display: true,
-                        text: 'Awards by Type by Month',
-                        fontSize: 16
+                    responsive: false,
+                    plugins: {
+                        legend: {
+                            position: "left"
+                        }
                     }
                 }
             }
 
-            var ctx = document.getElementById('monthChart').getContext('2d');
-            GradeChart = new Chart(ctx, dataSet);
+            if (MonthAstra != null) {
+                MonthAstra.destroy();
+            }
+
+            var MonthAstraData = $.extend(true, {}, dataSetTemplate);
+            PopulateData(MonthAstraData, "Month", "Astra");
+            var MonthAstraCtx = document.getElementById('monthAstra').getContext('2d');
+            MonthAstra = new Chart(MonthAstraCtx, MonthAstraData);
+
+            if (YTDAstra != null) {
+                YTDAstra.destroy();
+            }
+
+            var YtdAstraData = $.extend(true, {}, dataSetTemplate);
+            PopulateData(YtdAstraData, "YTD", "Astra");
+            var YtdAstraCtx = document.getElementById('ytdAstra').getContext('2d');
+            YTDAstra = new Chart(YtdAstraCtx, YtdAstraData);
+
+            if (MonthStellar != null) {
+                MonthStellar.destroy();
+            }
+
+            var MonthStellarData = $.extend(true, {}, dataSetTemplate);
+            PopulateData(MonthStellarData, "Month", "Stellar");
+            var MonthStellarCtx = document.getElementById('monthStellar').getContext('2d');
+            MonthStellar = new Chart(MonthStellarCtx, MonthStellarData);
+
+            if (YTDStellar != null) {
+                YTDStellar.destroy();
+            }
+
+            var YtdStellarData = $.extend(true, {}, dataSetTemplate);
+            PopulateData(YtdStellarData, "YTD", "Stellar");
+            var YtdStellarCtx = document.getElementById('ytdStellar').getContext('2d');
+            YTDStellar = new Chart(YtdStellarCtx, YtdStellarData);
+
+            if (MonthGalaxy != null) {
+                MonthGalaxy.destroy();
+            }
+
+            var MonthGalaxyData = $.extend(true, {}, dataSetTemplate);
+            PopulateData(MonthGalaxyData, "Month", "Galaxy");
+            var MonthGalaxyCtx = document.getElementById('monthGalaxy').getContext('2d');
+            MonthGalaxy = new Chart(MonthGalaxyCtx, MonthGalaxyData);
+
+            if (YTDGalaxy != null) {
+                YTDGalaxy.destroy();
+            }
+
+            var YtdGalaxyData = $.extend(true, {}, dataSetTemplate);
+            PopulateData(YtdGalaxyData, "YTD", "Galaxy");
+            var YtdGalaxyCtx = document.getElementById('ytdGalaxy').getContext('2d');
+            YTDGalaxy = new Chart(YtdGalaxyCtx, YtdGalaxyData);
+
+            if (MonthUA != null) {
+                MonthUA.destroy();
+            }
+
+            var MonthUniversalData = $.extend(true, {}, dataSetTemplate);
+            PopulateData(MonthUniversalData, "Month", "Universal");
+            var MonthUniversalCtx = document.getElementById('monthUA').getContext('2d');
+            MonthUA = new Chart(MonthUniversalCtx, MonthUniversalData);
+
+            if (YTDUA != null) {
+                YTDUA.destroy();
+            }
+
+            var YtdUniversalData = $.extend(true, {}, dataSetTemplate);
+            PopulateData(YtdUniversalData, "YTD", "Universal");
+            var YtdUniversalCtx = document.getElementById('ytdUA').getContext('2d');
+            YTDUA = new Chart(YtdUniversalCtx, YtdUniversalData);
         }
+
+        function PopulateData(data, series, type) {
+            var dataSeries;
+
+            if (series === "Month") {
+                dataSeries = MonthData;
+            } else {
+                dataSeries = YTDData;
+            }
+
+            var awardType;
+            switch (type) {
+                case "Astra":
+                    awardType = "Astra Award";
+                    break;
+                case "Stellar":
+                    awardType = "Stellar Award";
+                    break;
+                case "Galaxy":
+                    awardType = "Galaxy Medal";
+                    break;
+                case "Universal":
+                    awardType = "Aurora Universal Achiever";
+                    break;
+            }
+
+            $.each(groupBy(dataSeries, 'awardType'),
+                function(index, point) {
+                    if (point[0].awardType === awardType) {
+                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 05").count);
+                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 06").count);
+                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 07").count);
+                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 08").count);
+                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 09").count);
+                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 10").count);
+                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 11").count);
+                        data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 12").count);
+                    }
+                });
+        }
+
+        var groupBy = function(xs, key) {
+          return xs.reduce(function(rv, x) {
+            (rv[x[key]] = rv[x[key]] || []).push(x);
+            return rv;
+          }, {});
+        };
     </script>
 }
