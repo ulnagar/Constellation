@@ -14,7 +14,34 @@
     }
 </style>
 
+@{
+    var all_style = "btn-outline-secondary";
+    var additions_style = all_style;
+    var overages_style = all_style;
+    
+    var filterValue = Context.Request.Query["filter"].ToString();
+
+    switch (filterValue)
+    {
+        case "Additions":
+            additions_style = "btn-primary";
+            break;
+        case "Overages":
+            overages_style = "btn-primary";
+            break;
+        default:
+            all_style = "btn-primary";
+            break;
+    }
+}
+
 <div class="row">
+    <div class="btn-group" role="group">
+        <a asp-action="Changes" asp-controller="Awards" asp-area="Reports" asp-route-filter="" class="btn @all_style">All</a>
+        <a asp-action="Changes" asp-controller="Awards" asp-area="Reports" asp-route-filter="Additions" class="btn @additions_style">Additions</a>
+        <a asp-action="Changes" asp-controller="Awards" asp-area="Reports" asp-route-filter="Overages" class="btn @overages_style">Overages</a>
+    </div>
+
     <a asp-action="Index" asp-controller="Awards" asp-area="Reports" class="btn btn-danger btn-pull-right-solo">Go Back</a>
 </div>
 

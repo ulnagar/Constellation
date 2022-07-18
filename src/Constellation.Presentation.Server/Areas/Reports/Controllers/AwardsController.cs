@@ -47,7 +47,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
             return Json(await _mediator.Send(new GetGradeAwardDataForDashboardQuery { Year = DateTime.Today.Year }));
         }
 
-        public async Task<IActionResult> Changes()
+        public async Task<IActionResult> Changes(string filter)
         {
             var viewModel = await CreateViewModel<AwardsChangesListViewModel>();
 
@@ -71,10 +71,25 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
                 entry.CalculatedGalaxies = Math.Floor(entry.AwardedAstras / 25);
                 entry.CalculatedUniversals = Math.Floor(entry.AwardedAstras / 125);
 
-                if (entry.AwardedStellars != entry.CalculatedStellars ||
+                if (filter == "Additions")
+                {
+                    if (entry.AwardedStellars < entry.CalculatedStellars ||
+                    entry.AwardedGalaxies < entry.CalculatedGalaxies ||
+                    entry.AwardedUniversals < entry.CalculatedUniversals)
+                        viewModel.Awards.Add(entry);
+                } else if (filter == "Overages")
+                {
+                    if (entry.AwardedStellars > entry.CalculatedStellars ||
+                    entry.AwardedGalaxies > entry.CalculatedGalaxies ||
+                    entry.AwardedUniversals > entry.CalculatedUniversals)
+                        viewModel.Awards.Add(entry);
+                } else if (string.IsNullOrWhiteSpace(filter))
+                {
+                    if (entry.AwardedStellars != entry.CalculatedStellars ||
                     entry.AwardedGalaxies != entry.CalculatedGalaxies ||
                     entry.AwardedUniversals != entry.CalculatedUniversals)
-                    viewModel.Awards.Add(entry);
+                        viewModel.Awards.Add(entry);
+                }
             }
 
             return View(viewModel);
