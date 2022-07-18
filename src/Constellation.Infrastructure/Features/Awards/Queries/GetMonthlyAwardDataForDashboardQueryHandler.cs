@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Infrastructure.Features.Auth.Queries
+namespace Constellation.Infrastructure.Features.Awards.Queries
 {
     public class GetMonthlyAwardDataForDashboardQueryHandler : IRequestHandler<GetMonthlyAwardDataForDashboardQuery, ICollection<AwardCountByTypeByMonth>>
     {
@@ -68,7 +68,7 @@ namespace Constellation.Infrastructure.Features.Auth.Queries
                     };
 
                     returnData.Add(entry);
-                }   
+                }
             }
 
             return returnData;

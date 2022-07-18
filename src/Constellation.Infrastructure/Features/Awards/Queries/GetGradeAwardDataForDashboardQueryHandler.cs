@@ -11,7 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Infrastructure.Features.Auth.Queries
+namespace Constellation.Infrastructure.Features.Awards.Queries
 {
     public class GetGradeAwardDataForDashboardQueryHandler : IRequestHandler<GetGradeAwardDataForDashboardQuery, ICollection<AwardCountByTypeByGrade>>
     {

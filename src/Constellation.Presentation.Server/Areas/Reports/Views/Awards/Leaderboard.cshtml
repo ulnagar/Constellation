@@ -1,0 +1,59 @@
+﻿@model Constellation.Presentation.Server.Areas.Reports.Models.Awards.AwardsChangesListViewModel
+
+<h2>Student Award Changes</h2>
+
+<style>
+    tbody tr:first-child {
+        background-color: #ffd700;
+    }
+
+    tbody tr:nth-child(4n-2) {
+        background-color: silver;
+    }
+
+    tbody tr:nth-child(6n-3) {
+        background-color: #CD7F32;
+    }
+
+    hr.spacer {
+        margin-bottom: 2rem;
+        margin-top: 2rem;
+    }
+</style>
+
+<div class="row">
+    <a asp-action="Index" asp-controller="Awards" asp-area="Reports" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+@foreach (var grade in Model.Awards.GroupBy(award => award.StudentGrade).OrderBy(item => item.Key))
+{
+    <h4>@grade.Key</h4>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Astras</th>
+                <th>Stellars</th>
+                <th>Galaxies</th>
+                <th>Universals</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var entry in grade.OrderByDescending(award => award.AwardedAstras))
+            {
+                <tr>
+                    <th>@entry.StudentName</th>
+                    <td>@entry.AwardedAstras</td>
+                    <td>@entry.CalculatedStellars</td>
+                    <td>@entry.CalculatedGalaxies</td>
+                    <td>@entry.CalculatedUniversals</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <hr class="spacer" />
+}

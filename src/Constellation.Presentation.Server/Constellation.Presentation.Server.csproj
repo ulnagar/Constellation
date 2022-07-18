@@ -6,12 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Areas\Reports\Models\Students\**" />
     <Compile Remove="emails\**" />
     <Compile Remove="logs\**" />
+    <Content Remove="Areas\Reports\Models\Students\**" />
     <Content Remove="emails\**" />
     <Content Remove="logs\**" />
+    <EmbeddedResource Remove="Areas\Reports\Models\Students\**" />
     <EmbeddedResource Remove="emails\**" />
     <EmbeddedResource Remove="logs\**" />
+    <None Remove="Areas\Reports\Models\Students\**" />
     <None Remove="emails\**" />
     <None Remove="logs\**" />
   </ItemGroup>
@@ -37,7 +41,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Reports\Models\Students\" />
     <Folder Include="Components\" />
     <Folder Include="wwwroot\images\" />
   </ItemGroup>

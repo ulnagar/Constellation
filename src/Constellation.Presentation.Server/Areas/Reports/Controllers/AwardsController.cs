@@ -2,6 +2,7 @@
 using Constellation.Application.Features.Awards.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
+using Constellation.Core.Enums;
 using Constellation.Presentation.Server.Areas.Reports.Models.Awards;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -36,8 +37,6 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
         public async Task<IActionResult> Dashboard()
         {
             var viewModel = await CreateViewModel<DashboardViewModel>();
-            //viewModel.ByTypeByGrade = await _mediator.Send(new GetGradeAwardDataForDashboardQuery { Year = DateTime.Today.Year });
-            //viewModel.ByTypeByMonth = await _mediator.Send(new GetMonthlyAwardDataForDashboardQuery { Months = 12 });
 
             return View(viewModel);
         }
@@ -47,6 +46,39 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
             return Json(await _mediator.Send(new GetGradeAwardDataForDashboardQuery { Year = DateTime.Today.Year }));
         }
 
+        public async Task<IActionResult> Leaderboard()
+        {
+            var viewModel = await CreateViewModel<AwardsChangesListViewModel>();
+
+            var students = await _mediator.Send(new GetStudentsWithAwardQuery());
+
+            foreach (Grade grade in Enum.GetValues(typeof(Grade)))
+            {
+                var studentWinners = students.Where(student => student.CurrentGrade == grade).OrderByDescending(student => student.Awards.Count(award => award.Type == "Astra Award")).Take(5);
+
+                foreach (var student in studentWinners)
+                {
+                    var entry = new AwardsChangesListViewModel.AwardRecord
+                    {
+                        StudentId = student.StudentId,
+                        StudentName = student.DisplayName,
+                        StudentGrade = student.CurrentGrade.AsName(),
+
+                        AwardedAstras = student.Awards.Count(award => award.Type == "Astra Award")
+                    };
+
+                    entry.CalculatedStellars = Math.Floor(entry.AwardedAstras / 5);
+                    entry.CalculatedGalaxies = Math.Floor(entry.AwardedAstras / 25);
+                    entry.CalculatedUniversals = Math.Floor(entry.AwardedAstras / 125);
+
+                    viewModel.Awards.Add(entry);
+                }
+            }
+
+            return View(viewModel);
+        }
+
+        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
         public async Task<IActionResult> Changes(string filter)
         {
             var viewModel = await CreateViewModel<AwardsChangesListViewModel>();
