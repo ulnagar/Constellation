@@ -1,11 +1,13 @@
 ﻿using Constellation.Application.Extensions;
 using Constellation.Application.Features.Awards.Queries;
+using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Enums;
 using Constellation.Presentation.Server.Areas.Reports.Models.Awards;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -19,11 +21,13 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
     public class AwardsController : BaseController
     {
         private readonly IMediator _mediator;
+        private readonly IRecurringJobManager _jobManager;
 
-        public AwardsController(IMediator mediator, IUnitOfWork unitOfWork)
+        public AwardsController(IMediator mediator, IUnitOfWork unitOfWork, IRecurringJobManager jobManager)
             : base(unitOfWork)
         {
             _mediator = mediator;
+            _jobManager = jobManager;
         }
 
         public async Task<IActionResult> Index()
@@ -125,6 +129,14 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
             }
 
             return View(viewModel);
+        }
+
+        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
+        public IActionResult Update()
+        {
+            _jobManager.Trigger(nameof(ISentralAwardSyncJob));
+
+            return RedirectToAction("Index");
         }
     }
 }

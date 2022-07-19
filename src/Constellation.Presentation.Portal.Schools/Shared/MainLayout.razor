@@ -15,7 +15,7 @@
                 @if (ShowChangeSchoolBox)
                 {
                     <select class="form-control" @onchange="ChangeSchool" @onblur="RestoreSchoolLabel">
-                        @foreach (var school in Schools)
+                        @foreach (var school in Schools.OrderBy(school => school.Name))
                         {
                             var selected = SelectedSchool.Code == school.Code;
                             <option value="@school.Code" selected="@selected">@school.Code - @school.Name</option>
