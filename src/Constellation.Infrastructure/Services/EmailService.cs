@@ -853,19 +853,32 @@ namespace Constellation.Infrastructure.Services
             if (sendToAbsenceCoordinator)
             {
                 // Send the Absence Coordinator
-                toRecipients.Add(absenceSettings.AbsenceCoordinatorName, absenceSettings.ForwardingEmailAbsenceCoordinator);
-                toRecipients.Add("Scott New", "scott.new@det.nsw.edu.au");
+                if (!toRecipients.Any(recipient => recipient.Value == absenceSettings.ForwardingEmailAbsenceCoordinator))
+                    toRecipients.Add(absenceSettings.AbsenceCoordinatorName, absenceSettings.ForwardingEmailAbsenceCoordinator);
+
+                if (!toRecipients.Any(recipient => recipient.Value == "scott.new@det.nsw.edu.au"))
+                    toRecipients.Add("Scott New", "scott.new@det.nsw.edu.au");
             }
             
             if (sendToFacultyHeadTeacher)
             {
-                toRecipients.Add(orderedEntries.First().HeadTeacher, orderedEntries.First().HeadTeacherEmail);
+                var headTeacherName = orderedEntries.Select(entry => entry.HeadTeacher).Distinct().First();
+                var headTeacherEmail = orderedEntries.Select(entry => entry.HeadTeacherEmail).Distinct().First();
+
+                if (string.IsNullOrWhiteSpace(headTeacherEmail))
+                {
+                    return;
+                }
+
+                if (!toRecipients.Any(recipient => recipient.Value == headTeacherEmail))
+                    toRecipients.Add(headTeacherName, headTeacherEmail);
             }
-            
+
             if (!sendToFacultyHeadTeacher && !sendToAbsenceCoordinator)
             {
                 // Send to the Classroom Teacher
-                toRecipients.Add(orderedEntries.First().EmailSentTo, orderedEntries.First().EmailSentTo);
+                if (!toRecipients.Any(recipient => recipient.Value == orderedEntries.First().EmailSentTo))
+                    toRecipients.Add(orderedEntries.First().EmailSentTo, orderedEntries.First().EmailSentTo);
             }
 
             await _emailSender.Send(toRecipients, null, viewModel.Title, body);
