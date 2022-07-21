@@ -64,6 +64,10 @@ R1.4:
 		Add school contact to role from the School Contact view
 		Add new School Contact to role at creation
 
+	ASSIGNMENTS:
+		Add details view for Assignments including list of submissions
+		Allow teachers to re-push submissions to Canvas if required
+
 R1.3:
 	PTO EXPORT FILE:
 		Update to use Student Families instead of pulling from Sentral each time
