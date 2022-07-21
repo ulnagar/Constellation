@@ -1,4 +1,5 @@
-﻿using Constellation.Application.Features.Subject.Assignments.Queries;
+﻿using Constellation.Application.Features.Gateways.CanvasGateway.Notifications;
+using Constellation.Application.Features.Subject.Assignments.Queries;
 using Constellation.Application.Features.Subject.Courses.Models;
 using Constellation.Application.Features.Subject.Courses.Queries;
 using Constellation.Application.Interfaces.Repositories;
@@ -9,6 +10,7 @@ using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -119,6 +121,22 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> Details(Guid id)
+        {
+            var viewModel = await CreateViewModel<DetailsViewModel>();
+            viewModel.Assignment = await _mediator.Send(new GetAssignmentQuery { Id = id });
+            viewModel.Submissions = await _mediator.Send(new GetAssignmentSubmissionsQuery { Id = id });
+
+            return View(viewModel);
+        }
+
+        public async Task<IActionResult> ResubmitToCanvas(Guid id)
+        {
+            await _mediator.Publish(new CanvasAssignmentSubmissionUploadedNotification { Id = id });
+
+            return Redirect(Request.Headers["Referer"].ToString());
         }
     }
 }

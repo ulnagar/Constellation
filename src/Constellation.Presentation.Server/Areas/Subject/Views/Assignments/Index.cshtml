@@ -22,7 +22,9 @@
                 <td>@Html.DisplayFor(model => item.CourseDisplayName)</td>
                 <td>@Html.DisplayFor(model => item.Name)</td>
                 <td>@Html.DisplayFor(model => item.DueDate, "ShortDate")</td>
-                <td></td>
+                <td>
+                    <a asp-action="Details" asp-controller="Assignments" asp-area="Subject" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
             </tr>
         }
     </tbody>
