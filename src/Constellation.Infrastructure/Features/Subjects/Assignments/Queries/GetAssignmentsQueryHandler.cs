@@ -27,7 +27,8 @@ namespace Constellation.Infrastructure.Features.Subjects.Assignments.Queries
         public async Task<ICollection<AssignmentForList>> Handle(GetAssignmentsQuery request, CancellationToken cancellationToken)
         {
             return await _context.CanvasAssignments
-                .Where(assignment => assignment.DueDate >= DateTime.Today && (assignment.UnlockDate.HasValue ? assignment.UnlockDate.Value <= DateTime.Today : true))
+                .Where(assignment => (assignment.DueDate >= DateTime.Today || (assignment.LockDate.HasValue ? assignment.LockDate.Value >= DateTime.Today : true)) && 
+                    (assignment.UnlockDate.HasValue ? assignment.UnlockDate.Value <= DateTime.Today : true))
                 .ProjectTo<AssignmentForList>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
         }
