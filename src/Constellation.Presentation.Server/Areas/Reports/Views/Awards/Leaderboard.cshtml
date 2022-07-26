@@ -22,6 +22,30 @@
 </style>
 
 <div class="row">
+    <form asp-action="Leaderboard" asp-controller="Awards" asp-area="Reports" method="post" class="form-inline">
+        <div class="form-row align-items-center">
+            <div class="col-auto">
+                <label asp-for="StartDate">Show From</label>
+            </div>
+            <div class="col-auto">
+                <input asp-for="StartDate" class="form-control" />
+            </div>
+            <div class="col-auto">
+                <label asp-for="EndDate">To</label>
+            </div>
+            <div class="col-auto">
+                <input asp-for="EndDate" class="form-control" />
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary mb-2">Filter</button>
+                @if (Model.IsFiltered)
+                {
+                    <a asp-action="Leaderboard" asp-controller="Awards" asp-area="Reports" class="btn btn-primary ml-3 mb-2">Show All</a>
+                }
+            </div>
+        </div>
+    </form>
+
     <a asp-action="Index" asp-controller="Awards" asp-area="Reports" class="btn btn-danger btn-pull-right-solo">Go Back</a>
 </div>
 

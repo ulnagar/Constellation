@@ -1,11 +1,19 @@
 ﻿using Constellation.Presentation.Server.BaseModels;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Presentation.Server.Areas.Reports.Models.Awards
 {
     public class AwardsChangesListViewModel : BaseViewModel
     {
         public List<AwardRecord> Awards { get; set; } = new();
+
+        public bool IsFiltered { get; set; }
+        [DataType(DataType.Date)]
+        public DateTime StartDate { get; set; }
+        [DataType(DataType.Date)]
+        public DateTime EndDate { get; set; }
 
         public class AwardRecord
         {

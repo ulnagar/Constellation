@@ -54,6 +54,10 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
         {
             var viewModel = await CreateViewModel<AwardsChangesListViewModel>();
 
+            viewModel.IsFiltered = false;
+            viewModel.StartDate = DateTime.Today;
+            viewModel.EndDate = DateTime.Today;
+
             var students = await _mediator.Send(new GetStudentsWithAwardQuery());
 
             foreach (Grade grade in Enum.GetValues(typeof(Grade)))
@@ -69,6 +73,45 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
                         StudentGrade = student.CurrentGrade.AsName(),
 
                         AwardedAstras = student.Awards.Count(award => award.Type == "Astra Award")
+                    };
+
+                    entry.CalculatedStellars = Math.Floor(entry.AwardedAstras / 5);
+                    entry.CalculatedGalaxies = Math.Floor(entry.AwardedAstras / 25);
+                    entry.CalculatedUniversals = Math.Floor(entry.AwardedAstras / 125);
+
+                    viewModel.Awards.Add(entry);
+                }
+            }
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Leaderboard(AwardsChangesListViewModel viewModel)
+        {
+            await UpdateViewModel(viewModel);
+            viewModel.IsFiltered = true;
+
+            var students = await _mediator.Send(new GetStudentsWithAwardQuery());
+
+            foreach (Grade grade in Enum.GetValues(typeof(Grade)))
+            {
+                var studentWinners = students
+                    .Where(student => student.CurrentGrade == grade)
+                    .OrderByDescending(student => student.Awards
+                        .Count(award => award.Type == "Astra Award" && award.AwardedOn.Date >= viewModel.StartDate && award.AwardedOn.Date <= viewModel.EndDate))
+                    .Take(5);
+
+                foreach (var student in studentWinners)
+                {
+                    var entry = new AwardsChangesListViewModel.AwardRecord
+                    {
+                        StudentId = student.StudentId,
+                        StudentName = student.DisplayName,
+                        StudentGrade = student.CurrentGrade.AsName(),
+
+                        AwardedAstras = student.Awards.Count(award => award.Type == "Astra Award" && award.AwardedOn.Date >= viewModel.StartDate && award.AwardedOn.Date <= viewModel.EndDate)
                     };
 
                     entry.CalculatedStellars = Math.Floor(entry.AwardedAstras / 5);
