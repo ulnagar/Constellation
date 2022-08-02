@@ -1,0 +1,23 @@
+﻿@using System.Reflection
+
+@{
+    var file = Assembly.GetExecutingAssembly().Location;
+    var lastWriteTime = File.GetLastWriteTime(file);
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 col-lg-2">
+            <div class="d-grid gap-2">
+                <a asp-page="/ChangeLog" class="btn btn-warning">What's new?</a>
+            </div>
+        </div>
+        <div class="col-md-9 col-lg-10 d-flex align-items-center">
+            <span>
+            @Html.Raw(String.Format("Build Version: {0}. &copy; {1} - Aurora College, NSW",
+                lastWriteTime.ToString("yyMM.d"),
+                DateTime.Now.Year))
+            </span>
+        </div>
+    </div>
+</div>

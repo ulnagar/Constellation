@@ -1,0 +1,35 @@
+﻿@page
+@model SchoolsModel
+
+<h2>Schools</h2>
+
+<div>
+    <button class="btn btn-primary">Filters</button>
+    <button class="btn btn-success">Add</button>
+</div>
+
+<hr />
+
+<table class="table table-striped table-hover datatable">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Town</th>
+            <th>Phone</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Schools.OrderBy(school => school.Code))
+        {
+            <tr>
+                <td>@item.Code</td>
+                <td>@item.Name</td>
+                <td>@item.Town</td>
+                <td>@item.PhoneNumber</td>
+                <td>@Html.DisplayFor(model => item.EmailAddress, "EmailAddress")</td>
+            </tr>
+        }
+    </tbody>
+</table>

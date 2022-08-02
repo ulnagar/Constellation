@@ -1,0 +1,7 @@
+﻿@model string
+
+@{
+    var shortenedText = @Model.Substring(0, @Model.IndexOf('@') + 3);
+}
+
+<a href="mailto:@Model">@shortenedText&#8230;</a>

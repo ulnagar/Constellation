@@ -1,0 +1,39 @@
+﻿@{
+    Layout = "Layouts/_MainLayout";
+}
+<div class="row">
+    <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+        <div class="position-sticky pt-3">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a asp-page="/Overview" asp-area="Partners" class="nav-link" aria-current="page">
+                        <i class="fa-solid fa-gauge-high feather"></i> Overview
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-page="/Schools" asp-area="Partners" class="nav-link" aria-current="page">
+                        <i class="fa-solid fa-school feather"></i> Schools
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-page="/Contacts" asp-area="Partners" class="nav-link" aria-current="page">
+                        <i class="fa-solid fa-people-roof feather"></i> Contacts
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-page="/Students" asp-area="Partners" class="nav-link" aria-current="page">
+                        <i class="fa-solid fa-children feather"></i> Students
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-page="/Staff" asp-area="Partners" class="nav-link" aria-current="page">
+                        <i class="fa-solid fa-person-chalkboard feather"></i> Staff
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        @RenderBody()
+    </main>
+</div>

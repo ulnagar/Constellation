@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Constellation Web</title>
+    <link rel="icon" href="~/images/applogo.svg" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/font-awesome/css/all.min.css" />
+    <link rel="stylesheet" href="~/lib/datatables.net-bs5/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Constellation.Presentation.Staff.styles.css" asp-append-version="true" />
+</head>
+<body class="d-flex flex-column h-100">
+    <header>
+        <partial name="NavBars/_TopNav" />
+    </header>
+
+    <main class="flex-shrink-0">
+        <div class="container-fluid">
+            @RenderBody()
+        </div>
+    </main>
+
+    <footer class="footer fixed-bottom mt-auto py-3 bg-light">
+        <partial name="NavBars/_Footer" />
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/datatables.net/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables.net-bs5/dataTables.bootstrap5.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

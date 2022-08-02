@@ -1,0 +1,31 @@
+﻿<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark box-shadow mb-3 fixed-top">
+    <div class="container-fluid">
+        <div class="col-md-3 col-lg-2 d-md-block justify-content-center">
+            <a class="navbar-brand" asp-area="" asp-page="/Index">
+                <img src="/images/applogo.svg" class="nav-bar-logo d-inline-block align-middle" />Constellation
+            </a>
+        </div>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+            <ul class="navbar-nav flex-grow-1">
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Partners" asp-page="Overview">Partners</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Subjects" asp-page="/Overview">Subjects</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Covers" asp-page="/Overview">Covers</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Equipment" asp-page="/Overview">Equipment</a>
+                </li>
+            </ul>
+            <partial name="_LoginPartial" />
+        </div>
+    </div>
+</nav>

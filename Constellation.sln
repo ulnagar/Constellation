@@ -48,6 +48,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Presentation.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Presentation.Portal.Parents", "src\Constellation.Presentation.Portal.Parents\Constellation.Presentation.Portal.Parents.csproj", "{7A561886-192D-44C3-ABB3-BD2302B5EE3E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Constellation.Presentation.Staff", "src\Constellation.Presentation.Staff\Constellation.Presentation.Staff.csproj", "{11A00216-5123-4428-A524-046BD7692904}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -82,6 +84,10 @@ Global
 		{7A561886-192D-44C3-ABB3-BD2302B5EE3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A561886-192D-44C3-ABB3-BD2302B5EE3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A561886-192D-44C3-ABB3-BD2302B5EE3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11A00216-5123-4428-A524-046BD7692904}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11A00216-5123-4428-A524-046BD7692904}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11A00216-5123-4428-A524-046BD7692904}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11A00216-5123-4428-A524-046BD7692904}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -96,6 +102,7 @@ Global
 		{971D2536-E75B-4D18-851E-B8B424192ACC} = {8E4ACA9A-B3CB-4538-96EE-FC153E53AA1F}
 		{8BCE7325-73BC-488E-A932-4FC31AACC4E9} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
 		{7A561886-192D-44C3-ABB3-BD2302B5EE3E} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
+		{11A00216-5123-4428-A524-046BD7692904} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {266E1BC1-EC70-416D-8B6F-E86CB0C2066C}
