@@ -1,0 +1,117 @@
+﻿@page "/Contacts/"
+
+@attribute [Authorize]
+
+@inject IMediator mediator
+@inject NavigationManager NavigationManager
+@inject IModalService Modal
+
+<h2>School Contact Information</h2>
+
+<hr />
+
+<div class="form-horizontal">
+    <div class="form-group row">
+        <label class="col-md-2 text-bold">School Name</label>
+        <div class="col-md-6">(@SchoolDetails.Code) @SchoolDetails.Name</div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-md-2 text-bold">Address</label>
+        <div class="col-md-3">@SchoolDetails.Address</div>
+        <label class="col-md-2 text-bold">Town</label>
+        <div class="col-md-3">@SchoolDetails.Town @SchoolDetails.PostCode</div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-md-2 text-bold">Phone</label>
+        <div class="col-md-3"><PhoneNumber Number="@SchoolDetails.PhoneNumber" /></div>
+        <label class="col-md-2 text-bold">Fax</label>
+        <div class="col-md-3"><PhoneNumber Number="@SchoolDetails.FaxNumber" /></div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-md-2 text-bold">Email Address</label>
+        <div class="col-md-6"><EmailAddress Email="@SchoolDetails.EmailAddress" /></div>
+    </div>
+</div>
+
+<hr />
+
+<div class="form-group row mt-6">
+    <div class="col-md-6"><h4 class="mt-2 mb-0">Contacts:</h4></div>
+    <div class="offset-1 col-md-3"><button class="btn btn-success" @onclick="NewContact">Add New Contact</button></div>
+</div>
+
+<GroupedDataTable Items="Contacts.GroupBy(contact => contact.Position).ToList()" TItem="ContactWithRoleForList" TKey="string">
+    <TableHeader>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Action</th>
+    </TableHeader>
+    <GroupRowTemplate Context="entry">
+        <td colspan="6">@entry.Position</td>
+    </GroupRowTemplate>
+    <RowTemplate Context="entry">
+        <td>@entry.FirstName @entry.LastName</td>
+        <td><PhoneNumber Number="@entry.PhoneNumber"/></td>
+        <td><EmailAddress Email="@entry.EmailAddress" /></td>
+        <td><button class="btn btn-sm btn-outline-danger button-hover" @onclick="(() => RemoveContact(entry.AssignmentId))">Remove</button></td>
+    </RowTemplate>
+</GroupedDataTable>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    public SchoolContactDetails SchoolDetails { get; set; } = new();
+    public ICollection<ContactWithRoleForList> Contacts { get; set; } = new List<ContactWithRoleForList>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            SchoolDetails = await mediator.Send(new GetSchoolContactDetailsQuery { Code = SelectedSchool.Code });
+            Contacts = await mediator.Send(new GetContactsWithRoleFromSchoolQuery { Code = SelectedSchool.Code });
+            OrderContacts();
+        }
+    }
+
+    void OrderContacts()
+    {
+        Contacts = Contacts.OrderBy(contact => contact.PositionSort()).ThenBy(contact => contact.LastName).ToList();
+    }
+
+    void NewContact()
+    {
+        NavigationManager.NavigateTo($"Contacts/Create");
+    }
+
+    async Task RemoveContact(int assignmentId)
+    {
+        var contact = Contacts.First(contact => contact.AssignmentId == assignmentId);
+
+        var parameters = new ModalParameters();
+        parameters.Add("Contact", contact);
+
+        var modal = Modal.Show<RemoveSchoolContactModal>("Remove School Contact", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var success = (bool) result.Data;
+
+            if (success)
+            {
+                parameters = new ModalParameters();
+                parameters.Add("Text", "A request has been sent to Aurora College for this contact to be removed.");
+
+                modal = Modal.Show<FeedbackModal>("Remove School Contact", parameters);
+            }
+        }
+    }
+}

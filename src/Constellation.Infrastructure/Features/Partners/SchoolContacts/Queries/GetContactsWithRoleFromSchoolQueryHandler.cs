@@ -38,6 +38,7 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Queries
                         AssignmentId = assignment.Id,
                         FirstName = entry.FirstName,
                         LastName = entry.LastName,
+                        PhoneNumber = entry.PhoneNumber,
                         EmailAddress = entry.EmailAddress,
                         Position = assignment.Role
                     };

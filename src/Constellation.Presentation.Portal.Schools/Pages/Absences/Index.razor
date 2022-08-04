@@ -1,8 +1,10 @@
 ﻿@page "/Absences/"
+@using System.Threading
 
 @using static Constellation.Application.Features.Portal.School.Absences.Queries.GetUnProcessedAbsencesFromSchoolQuery
 
 @attribute [Authorize]
+@implements IDisposable
 
 @inject IMediator mediator
 @inject NavigationManager NavigationManager
@@ -106,13 +108,15 @@
     public ICollection<AbsenceForPortalList> FilteredAbsences { get; set; } = new List<AbsenceForPortalList>();
     public AbsenceCategory AbsencesType { get; set; } = AbsenceCategory.UnverifiedPartials;
 
+    public CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
     protected override async Task OnParametersSetAsync()
     {
         if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            Absences = await mediator.Send(new GetUnProcessedAbsencesFromSchoolQuery { SchoolCode = SelectedSchool.Code });
+            Absences = await mediator.Send(new GetUnProcessedAbsencesFromSchoolQuery { SchoolCode = SelectedSchool.Code }, cancellationTokenSource.Token);
 
             UnexplainedPartialsCount = Absences.Count(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.ReasonId == null);
             UnverifiedPartialsCount = Absences.Count(absence =>  absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.ReasonId != null);
@@ -120,6 +124,11 @@
 
             FilterAbsences();
         }
+    }
+
+    void IDisposable.Dispose()
+    {
+        cancellationTokenSource.Cancel(false);
     }
 
     public enum AbsenceCategory
