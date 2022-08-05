@@ -5,8 +5,8 @@ using Constellation.Application.Models.Identity;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Portal.Models.Lessons;
+using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
@@ -16,8 +16,8 @@ using System.Threading.Tasks;
 namespace Constellation.Presentation.Server.Areas.Portal.Controllers
 {
     [Area("Portal")]
-    [Authorize]
-    public class LessonsController : Controller
+    [Roles(AuthRoles.Admin, AuthRoles.LessonsEditor)]
+    public class LessonsController : BaseController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
@@ -28,6 +28,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
         public LessonsController(IUnitOfWork unitOfWork, IAuthService authService,
             ILessonService lessonService, ISchoolContactService schoolContactService,
             IOperationService operationsService)
+            : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;
@@ -36,7 +37,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
             _operationsService = operationsService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             if (User.Identity.IsAuthenticated)
             {
@@ -47,10 +48,9 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
                     return RedirectToAction("AdminLessons");
             }
 
-            var vm = new ErrorViewModel
-            {
-                MainMessage = "There is an error with your account. Please contact the Technology Support Team on 1300 610 733."
-            };
+            var vm = await CreateViewModel<ErrorViewModel>();
+
+            vm.MainMessage = "There is an error with your account. Please contact the Technology Support Team on 1300 610 733.";
 
             return View("Error", vm);
         }
@@ -59,7 +59,8 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
         [Route("Admin/Lessons")]
         public async Task<IActionResult> AdminLessons(string filter = "")
         {
-            var vm = new AdminViewModel { filter = filter };
+            var vm = await CreateViewModel<AdminViewModel>();
+            vm.filter = filter;
 
             var lessons = await _unitOfWork.Lessons.GetAllForPortalAdmin();
 
@@ -119,7 +120,8 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
                 return RedirectToAction("AdminLessons");
             }
 
-            var vm = new AdminViewModel { SearchResult = true };
+            var vm = await CreateViewModel<AdminViewModel>();
+            vm.SearchResult = true;
 
             var schools = await _unitOfWork.Schools.ForSelectionAsync();
             var students = await _unitOfWork.Students.ForSelectionListAsync();
@@ -169,6 +171,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
         {
             var lesson = await _unitOfWork.Lessons.GetWithDetailsForLessonsPortal(id);
             var vm = AdminDetailViewModel.ConvertFromLesson(lesson);
+            await UpdateViewModel(vm);
 
             return View(vm);
         }
@@ -179,10 +182,8 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
         {
             var roll = await _unitOfWork.Lessons.GetRollForPortal(id);
 
-            var vm = new RollViewModel
-            {
-                Roll = LessonRollDto.ConvertFromRoll(roll)
-            };
+            var vm = await CreateViewModel<RollViewModel>();
+            vm.Roll = LessonRollDto.ConvertFromRoll(roll);
 
             if (roll.LessonDate.HasValue && roll.SchoolContactId.HasValue)
                 vm.Roll.TeacherName = roll.SchoolContact.DisplayName;
@@ -202,10 +203,8 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
         {
             var roll = await _unitOfWork.Lessons.GetRollForPortal(id);
 
-            var vm = new RollViewModel
-            {
-                Roll = LessonRollDto.ConvertFromRoll(roll)
-            };
+            var vm = await CreateViewModel<RollViewModel>();
+            vm.Roll = LessonRollDto.ConvertFromRoll(roll);
 
             if (roll.LessonDate.HasValue && roll.SchoolContactId.HasValue)
                 vm.Roll.TeacherName = roll.SchoolContact.DisplayName;
@@ -235,11 +234,9 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
 
             if (serviceSuccess.Success == false)
             {
-                var errorVm = new ErrorViewModel
-                {
-                    MainMessage = "There is an error with your account. Please contact the Technology Support Team on 1300 610 733.",
-                    SecondaryMessages = serviceSuccess.Errors
-                };
+                var errorVm = await CreateViewModel<ErrorViewModel>();
+                errorVm.MainMessage = "There is an error with your account. Please contact the Technology Support Team on 1300 610 733.";
+                errorVm.SecondaryMessages = serviceSuccess.Errors;
 
                 return View("Error", errorVm);
             }
@@ -265,10 +262,8 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
                 return RedirectToAction("AdminLessonDetails", new { id = roll.LessonId });
             }
 
-            var errorVm = new ErrorViewModel
-            {
-                MainMessage = "Cannot cancel roll that has been submitted!"
-            };
+            var errorVm = await CreateViewModel<ErrorViewModel>();
+            errorVm.MainMessage = "Cannot cancel roll that has been submitted!";
 
             return View("Error", errorVm);
         }
@@ -287,10 +282,8 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
                 return RedirectToAction("AdminLessonDetails", new { id = roll.LessonId });
             }
 
-            var errorVm = new ErrorViewModel
-            {
-                MainMessage = "Cannot un-cancel roll that has been not been cancelled!"
-            };
+            var errorVm = await CreateViewModel<ErrorViewModel>();
+            errorVm.MainMessage = "Cannot un-cancel roll that has been not been cancelled!";
 
             return View("Error", errorVm);
         }
@@ -301,7 +294,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
         {
             // Flatten contacts and roles into unique combinations of both.
 
-            var vm = new AdminTeachersViewModel();
+            var vm = await CreateViewModel<AdminTeachersViewModel>();
             var contacts = await _unitOfWork.SchoolContacts.ScienceTeachersForLessonsPortalAdmin();
             foreach (var contact in contacts)
             {
@@ -327,10 +320,8 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
 
             var audit = await _authService.VerifyContactAccess(contact.EmailAddress);
 
-            var vm = new AdminTeacherAuditViewModel
-            {
-                AuditResult = audit
-            };
+            var vm = await CreateViewModel<AdminTeacherAuditViewModel>();
+            vm.AuditResult = audit;
 
             return View(vm);
         }
@@ -343,13 +334,11 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
 
             if (string.IsNullOrWhiteSpace(id))
             {
-                var vm = new AdminUpsertLessonViewModel
+                var vm = await CreateViewModel<AdminUpsertLessonViewModel>();
+                vm.CourseList = new SelectList(courses, "Id", "Name", null, "Grade");
+                vm.Lesson = new LessonDto
                 {
-                    CourseList = new SelectList(courses, "Id", "Name", null, "Grade"),
-                    Lesson = new LessonDto
-                    {
-                        DueDate = DateTime.Today
-                    }
+                    DueDate = DateTime.Today
                 };
 
                 return View(vm);
@@ -371,17 +360,15 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
                     return RedirectToAction("AdminLessons");
                 }
 
-                var vm = new AdminUpsertLessonViewModel
+                var vm = await CreateViewModel<AdminUpsertLessonViewModel>();
+                vm.CourseList = new SelectList(courses, "Id", "Name", null, "Grade");
+                vm.Lesson = new LessonDto
                 {
-                    CourseList = new SelectList(courses, "Id", "Name", null, "Grade"),
-                    Lesson = new LessonDto
-                    {
-                        Id = lesson.Id,
-                        Name = lesson.Name,
-                        DueDate = lesson.DueDate,
-                        CourseId = lesson.Offerings.First().CourseId,
-                        DoNotGenerateRolls = lesson.DoNotGenerateRolls
-                    }
+                    Id = lesson.Id,
+                    Name = lesson.Name,
+                    DueDate = lesson.DueDate,
+                    CourseId = lesson.Offerings.First().CourseId,
+                    DoNotGenerateRolls = lesson.DoNotGenerateRolls
                 };
 
                 return View(vm);
@@ -396,12 +383,14 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
         {
             if (vm.Lesson.CourseId == 0)
             {
+                await UpdateViewModel(vm);
                 ModelState.AddModelError("CourseId", "You must select a course!");
                 return View("AdminUpsertLesson", vm);
             }
 
             if (!ModelState.IsValid)
             {
+                await UpdateViewModel(vm);
                 var courses = await _unitOfWork.Courses.ForSelectionAsync();
                 vm.CourseList = new SelectList(courses, "Id", "Name", vm.Lesson.CourseId, "Grade");
                 return View("AdminUpsertLesson", vm);
@@ -420,6 +409,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
 
                 if (lesson.Rolls.Any(roll => roll.SubmittedDate != null))
                 {
+                    await UpdateViewModel(vm);
                     ModelState.AddModelError("Id", "You cannot modify a lesson that has marked rolls attached!");
                     return View("AdminUpsertLesson", vm);
                 }
@@ -476,10 +466,8 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
 
             if (!id.HasValue)
             {
-                var vm = new AdminUpsertTeacherViewModel
-                {
-                    SchoolList = new SelectList(schools, "Code", "Name")
-                };
+                var vm = await CreateViewModel<AdminUpsertTeacherViewModel>();
+                vm.SchoolList = new SelectList(schools, "Code", "Name");
 
                 return View(vm);
             }
@@ -487,6 +475,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
             {
                 var role = await _unitOfWork.SchoolContactRoles.WithDetails(id.Value);
                 var vm = AdminUpsertTeacherViewModel.ConvertFromContactRole(role);
+                await UpdateViewModel(vm);
 
                 return View(vm);
             }
@@ -502,6 +491,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
 
             if (!ModelState.IsValid)
             {
+                await UpdateViewModel(vm);
                 vm.SchoolList = new SelectList(schools, "Code", "Name", vm.SchoolCode);
                 return View("AdminUpsertTeacher", vm);
             }
@@ -534,6 +524,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
                 }
                 else
                 {
+                    await UpdateViewModel(vm);
                     vm.SchoolList = new SelectList(schools, "Code", "Name", vm.SchoolCode);
                     return View(vm);
                 }
@@ -563,6 +554,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
                     }
                     else
                     {
+                        await UpdateViewModel(vm);
                         vm.SchoolList = new SelectList(schools, "Code", "Name", vm.SchoolCode);
                         return View(vm);
                     }
@@ -594,11 +586,13 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
                     }
                     else
                     {
+                        await UpdateViewModel(vm);
                         vm.SchoolList = new SelectList(schools, "Code", "Name", vm.SchoolCode);
                         return View(vm);
                     }
                 }
 
+                await UpdateViewModel(vm);
                 vm.SchoolList = new SelectList(schools, "Code", "Name");
                 return View(vm);
             }

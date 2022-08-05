@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Constellation.Presentation.Server.BaseModels;
+using System.Collections.Generic;
 
 namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
 {
-    public class ErrorViewModel
+    public class ErrorViewModel : BaseViewModel
     {
         public ErrorViewModel()
         {

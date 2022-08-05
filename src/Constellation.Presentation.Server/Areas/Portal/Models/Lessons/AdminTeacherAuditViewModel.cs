@@ -1,8 +1,9 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Presentation.Server.BaseModels;
 
 namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
 {
-    public class AdminTeacherAuditViewModel
+    public class AdminTeacherAuditViewModel : BaseViewModel
     {
         public AdminTeacherAuditViewModel()
         {

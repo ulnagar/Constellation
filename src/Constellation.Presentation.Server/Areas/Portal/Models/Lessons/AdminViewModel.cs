@@ -1,12 +1,13 @@
 ﻿using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Presentation.Server.BaseModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
 {
-    public class AdminViewModel
+    public class AdminViewModel : BaseViewModel
     {
         public AdminViewModel()
         {

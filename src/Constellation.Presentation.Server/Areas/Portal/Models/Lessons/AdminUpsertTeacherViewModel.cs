@@ -1,11 +1,12 @@
 ﻿using Constellation.Core.Models;
+using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
 {
-    public class AdminUpsertTeacherViewModel
+    public class AdminUpsertTeacherViewModel : BaseViewModel
     {
         public int? Id { get; set; }
         public int? RoleId { get; set; }
