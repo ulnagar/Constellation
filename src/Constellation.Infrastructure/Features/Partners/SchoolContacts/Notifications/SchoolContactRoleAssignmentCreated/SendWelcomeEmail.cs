@@ -7,13 +7,12 @@ using Constellation.Infrastructure.Templates.Views.Emails.Contacts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifications
+namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifications.SchoolContactRoleAssignmentCreated
 {
-    public class SendWelcomeEmail : INotificationHandler<SchoolContactCreatedNotification>
+    public class SendWelcomeEmail : INotificationHandler<SchoolContactRoleAssignmentCreatedNotification>
     {
         private readonly IAppDbContext _context;
         private readonly IEmailGateway _emailSender;
@@ -26,18 +25,16 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifica
             _razorService = razorService;
         }
 
-        public async Task Handle(SchoolContactCreatedNotification notification, CancellationToken cancellationToken)
+        public async Task Handle(SchoolContactRoleAssignmentCreatedNotification notification, CancellationToken cancellationToken)
         {
             // Validate entries
-            var contact = await _context.SchoolContacts
-                .Include(context => context.Assignments)
-                .ThenInclude(assignment => assignment.School)
-                .FirstOrDefaultAsync(contact => contact.Id == notification.Id);
+            var assignment = await _context.SchoolContactRoles
+                .Include(assignment => assignment.SchoolContact)
+                .Include(assignment => assignment.School)
+                .FirstOrDefaultAsync(assignment => assignment.Id == notification.AssignmentId);
 
-            if (contact == null || contact.Assignments.Count == 0 || contact.Assignments.All(assignment => assignment.IsDeleted))
+            if (assignment == null)
                 return;
-
-            var assignment = contact.Assignments.Aggregate((item1, item2) => item1.DateEntered > item2.DateEntered ? item1 : item2);
 
             if (assignment.Role == SchoolContactRole.Coordinator)
             {
@@ -53,7 +50,7 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifica
 
                 var toRecipients = new Dictionary<string, string>
                 {
-                    { contact.DisplayName, contact.EmailAddress }
+                    { assignment.SchoolContact.DisplayName, assignment.SchoolContact.EmailAddress }
                 };
 
                 var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Contacts/NewACCoordinatorEmail.cshtml", viewModel);
@@ -75,7 +72,7 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifica
 
                 var toRecipients = new Dictionary<string, string>
                 {
-                    { contact.DisplayName, contact.EmailAddress }
+                    { assignment.SchoolContact.DisplayName, assignment.SchoolContact.EmailAddress }
                 };
 
                 var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Contacts/NewSciencePracTeacherEmail.cshtml", viewModel);

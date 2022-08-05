@@ -145,8 +145,12 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> _AddAssignment(Contacts_AssignmentViewModel viewModel)
         {
-            await _schoolContactService.CreateRole(viewModel.ContactRole);
-            await _unitOfWork.CompleteAsync();
+            await _mediator.Send(new CreateNewAssignmentForSchoolContactCommand
+            {
+                ContactId = viewModel.ContactRole.SchoolContactId,
+                SchoolCode = viewModel.ContactRole.SchoolCode,
+                Position = viewModel.ContactRole.Role
+            });
 
             if (viewModel.ReturnUrl == null)
                 return Redirect(Request.GetTypedHeaders().Referer.ToString());

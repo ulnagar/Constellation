@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Commands
 {
-    public class CreateNewSchoolContactCommandHandler : IRequestHandler<CreateNewSchoolContactCommand>
+    public class CreateNewSchoolContactCommandHandler : IRequestHandler<CreateNewSchoolContactCommand, int>
     {
         private readonly IAppDbContext _context;
         private readonly IMediator _mediator;
@@ -21,7 +21,7 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Commands
             _mediator = mediator;
         }
 
-        public async Task<Unit> Handle(CreateNewSchoolContactCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(CreateNewSchoolContactCommand request, CancellationToken cancellationToken)
         {
             var contact = await _context.SchoolContacts
                 .FirstOrDefaultAsync(contact => contact.EmailAddress == request.EmailAddress, cancellationToken);
@@ -52,7 +52,7 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Commands
 
             await _mediator.Publish(new SchoolContactCreatedNotification { Id = contact.Id }, cancellationToken);
 
-            return Unit.Value;
+            return contact.Id;
         }
     }
 }

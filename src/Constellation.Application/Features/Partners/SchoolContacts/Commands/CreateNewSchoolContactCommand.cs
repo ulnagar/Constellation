@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Constellation.Application.Features.Partners.SchoolContacts.Commands
 {
-    public class CreateNewSchoolContactCommand : IRequest
+    public class CreateNewSchoolContactCommand : IRequest<int>
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

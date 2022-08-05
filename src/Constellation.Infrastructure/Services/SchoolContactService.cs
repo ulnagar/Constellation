@@ -18,57 +18,6 @@ namespace Constellation.Infrastructure.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<ServiceOperationResult<SchoolContact>> CreateContact(SchoolContactDto schoolContactResource)
-        {
-            // Set up return object
-            var result = new ServiceOperationResult<SchoolContact>();
-
-            // Validate entries
-            if (schoolContactResource.Id != null && schoolContactResource.Id != 0)
-            {
-                if (await _unitOfWork.SchoolContacts.AnyWithId(schoolContactResource.Id.Value))
-                {
-                    result.Success = false;
-                    result.Errors.Add($"A contact with that ID already exists!");
-                    return result;
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(schoolContactResource.EmailAddress))
-            {
-                var dbSchoolContact = await _unitOfWork.SchoolContacts.ForEditFromEmail(schoolContactResource.EmailAddress);
-                if (dbSchoolContact != null)
-                {
-                    if (dbSchoolContact.IsDeleted)
-                    {
-                        dbSchoolContact.IsDeleted = false;
-                        dbSchoolContact.DateDeleted = null;
-                    }
-
-                    result.Success = true;
-                    result.Entity = dbSchoolContact;
-
-                    return result;
-                }
-            }
-
-            var schoolContact = new SchoolContact()
-            {
-                FirstName = schoolContactResource.FirstName,
-                LastName = schoolContactResource.LastName,
-                EmailAddress = schoolContactResource.EmailAddress,
-                PhoneNumber = schoolContactResource.PhoneNumber,
-                SelfRegistered = schoolContactResource.SelfRegistered
-            };
-
-            _unitOfWork.Add(schoolContact);
-
-            result.Success = true;
-            result.Entity = schoolContact;
-
-            return result;
-        }
-
         public async Task<ServiceOperationResult<SchoolContact>> UpdateContact(SchoolContactDto schoolContactResource)
         {
             // Set up return object
@@ -134,46 +83,6 @@ namespace Constellation.Infrastructure.Services
             contact.DateDeleted = DateTime.Now;
         }
 
-        public async Task<ServiceOperationResult<SchoolContactRole>> CreateRole(SchoolContactRoleDto schoolContactRoleResource)
-        {
-            // Set up return object
-            var result = new ServiceOperationResult<SchoolContactRole>();
-
-            if (await _unitOfWork.SchoolContactRoles.AnyWithId(schoolContactRoleResource.Id))
-            {
-                result.Success = false;
-                result.Errors.Add($"A contact role with that ID already exists!");
-                return result;
-            }
-
-            var checkContact = await _unitOfWork.SchoolContacts.ForEditAsync(schoolContactRoleResource.SchoolContactId);
-
-            if (checkContact == null)
-            {
-                result.Success = false;
-                result.Errors.Add($"A contact with that ID could not be found!");
-                return result;
-            }
-
-            if (checkContact.IsDeleted)
-            {
-                await UndeleteContact(checkContact.Id);
-            }
-
-            var contactRole = new SchoolContactRole()
-            {
-                SchoolContactId = schoolContactRoleResource.SchoolContactId,
-                Role = schoolContactRoleResource.Role,
-                SchoolCode = schoolContactRoleResource.SchoolCode
-            };
-
-            _unitOfWork.Add(contactRole);
-
-            result.Success = true;
-            result.Entity = contactRole;
-
-            return result;
-        }
 
         public async Task<ServiceOperationResult<SchoolContactRole>> UpdateRole(SchoolContactRoleDto schoolContactRoleResource)
         {

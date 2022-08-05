@@ -10,9 +10,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifications
+namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifications.SchoolContactRoleAssignmentCreated
 {
-    public class AddMSTeamOperation : INotificationHandler<SchoolContactCreatedNotification>
+    public class AddMSTeamOperation : INotificationHandler<SchoolContactRoleAssignmentCreatedNotification>
     {
         private readonly IAppDbContext _context;
 
@@ -21,18 +21,19 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifica
             _context = context;
         }
 
-        public async Task Handle(SchoolContactCreatedNotification notification, CancellationToken cancellationToken)
+        public async Task Handle(SchoolContactRoleAssignmentCreatedNotification notification, CancellationToken cancellationToken)
         {
             // Validate entries
             var contact = await _context.SchoolContacts
-                .Select(entry => 
-                    new ContactWithAssignmentSpecifications 
-                    { 
-                        Id = entry.Id, 
+                .Where(contact => contact.Assignments.Any(assignment => assignment.Id == notification.AssignmentId))
+                .Select(entry =>
+                    new ContactWithAssignmentSpecifications
+                    {
+                        Id = entry.Id,
                         IsPrimary = entry.Assignments.Any(assignment => !assignment.IsDeleted && assignment.School.Students.Any(student => !student.IsDeleted && student.CurrentGrade <= Grade.Y06)),
                         IsSecondary = entry.Assignments.Any(assignment => !assignment.IsDeleted && assignment.School.Students.Any(student => !student.IsDeleted && student.CurrentGrade >= Grade.Y07))
                     })
-                .FirstOrDefaultAsync(contact => contact.Id == notification.Id, cancellationToken);
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (contact == null)
                 return;

@@ -33,14 +33,15 @@ namespace Constellation.Infrastructure.Features.Awards.Queries
 
             foreach (Grade grade in Enum.GetValues(typeof(Grade)))
             {
-                for (int j = 0; j < 4; j++)
+                for (int j = 0; j <= 3; j++)
                 {
                     var awardType = j switch
                     {
                         0 => "Astra Award",
                         1 => "Stellar Award",
                         2 => "Galaxy Medal",
-                        3 => "Aurora Universal Achiever"
+                        3 => "Aurora Universal Achiever",
+                        _ => ""
                     };
 
                     var entry = new AwardCountByTypeByGrade
@@ -57,14 +58,15 @@ namespace Constellation.Infrastructure.Features.Awards.Queries
 
             foreach (Grade grade in Enum.GetValues(typeof(Grade)))
             {
-                for (int j = 0; j < 4; j++)
+                for (int j = 0; j <= 3; j++)
                 {
                     var awardType = j switch
                     {
                         0 => "Astra Award",
                         1 => "Stellar Award",
                         2 => "Galaxy Medal",
-                        3 => "Aurora Universal Achiever"
+                        3 => "Aurora Universal Achiever",
+                        _ => ""
                     };
 
                     var entry = new AwardCountByTypeByGrade

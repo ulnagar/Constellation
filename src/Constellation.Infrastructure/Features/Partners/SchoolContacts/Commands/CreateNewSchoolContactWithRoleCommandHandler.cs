@@ -1,10 +1,6 @@
 ﻿using Constellation.Application.Features.Partners.SchoolContacts.Commands;
-using Constellation.Application.Features.Partners.SchoolContacts.Notifications;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,50 +19,20 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Commands
 
         public async Task<Unit> Handle(CreateNewSchoolContactWithRoleCommand request, CancellationToken cancellationToken)
         {
-            var contact = await _context.SchoolContacts
-                .FirstOrDefaultAsync(contact => contact.EmailAddress == request.EmailAddress, cancellationToken);
-
-            if (contact == null)
+            var contactId = await _mediator.Send(new CreateNewSchoolContactCommand
             {
-                contact = new SchoolContact
-                {
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    EmailAddress = request.EmailAddress,
-                    PhoneNumber = request.PhoneNumber,
-                    SelfRegistered = true,
-                    DateEntered = DateTime.Now
-                };
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                PhoneNumber = request.PhoneNumber,
+                EmailAddress = request.EmailAddress
+            }, cancellationToken);
 
-                _context.SchoolContacts.Add(contact);
-            } else
+            await _mediator.Send(new CreateNewAssignmentForSchoolContactCommand
             {
-                if (contact.IsDeleted)
-                {
-                    contact.IsDeleted = false;
-                    contact.DateDeleted = null;
-                }
-            }
-
-            var role = await _context.SchoolContactRoles
-                .FirstOrDefaultAsync(role => role.SchoolContact == contact && role.Role == request.Position && role.SchoolCode == request.SchoolCode, cancellationToken);
-
-            if (role == null || role.IsDeleted)
-            {
-                role = new SchoolContactRole
-                {
-                    SchoolCode = request.SchoolCode,
-                    SchoolContact = contact,
-                    Role = request.Position,
-                    DateEntered = DateTime.Now
-                };
-
-                _context.SchoolContactRoles.Add(role);
-            }
-
-            await _context.SaveChangesAsync(cancellationToken);
-
-            await _mediator.Publish(new SchoolContactCreatedNotification { Id = contact.Id }, cancellationToken);
+                ContactId = contactId,
+                SchoolCode = request.SchoolCode,
+                Position = request.Position
+            }, cancellationToken);
 
             return Unit.Value;
         }

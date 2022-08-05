@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Features.Partners.SchoolContacts.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
@@ -7,6 +8,7 @@ using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Portal.Models.Lessons;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
@@ -23,18 +25,18 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
         private readonly IAuthService _authService;
         private readonly ILessonService _lessonService;
         private readonly ISchoolContactService _schoolContactService;
-        private readonly IOperationService _operationsService;
+        private readonly IMediator _mediator;
 
         public LessonsController(IUnitOfWork unitOfWork, IAuthService authService,
             ILessonService lessonService, ISchoolContactService schoolContactService,
-            IOperationService operationsService)
+            IMediator mediator)
             : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;
             _lessonService = lessonService;
             _schoolContactService = schoolContactService;
-            _operationsService = operationsService;
+            _mediator = mediator;
         }
 
         public async Task<IActionResult> Index()
@@ -531,70 +533,17 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
             }
             else
             {
-                // New Coordinator (maybe)
-                // Check to see if another coordinator with same email is registered.
-                var contact = await _unitOfWork.SchoolContacts.FromEmailForExistCheck(vm.EmailAddress);
-
-                if (contact == null)
+                await _mediator.Send(new CreateNewSchoolContactWithRoleCommand
                 {
-                    var contactResource = new SchoolContactDto
-                    {
-                        FirstName = vm.FirstName.Trim(' '),
-                        LastName = vm.LastName.Trim(' '),
-                        PhoneNumber = vm.PhoneNumber,
-                        EmailAddress = vm.EmailAddress.Trim(' ')
-                    };
+                    FirstName = vm.FirstName,
+                    LastName = vm.LastName,
+                    PhoneNumber = vm.PhoneNumber,
+                    EmailAddress = vm.EmailAddress,
+                    SchoolCode = vm.SchoolCode,
+                    Position = SchoolContactRole.SciencePrac
+                });
 
-                    var contactResult = await _schoolContactService.CreateContact(contactResource);
-                    if (contactResult.Success)
-                    {
-                        await _unitOfWork.CompleteAsync();
-                        await _operationsService.CreateContactAddedMSTeamAccess(contactResult.Entity.Id);
-                        contact = contactResult.Entity;
-                    }
-                    else
-                    {
-                        await UpdateViewModel(vm);
-                        vm.SchoolList = new SelectList(schools, "Code", "Name", vm.SchoolCode);
-                        return View(vm);
-                    }
-                }
-
-                if (contact != null)
-                {
-                    if (contact.IsDeleted)
-                    {
-                        await _schoolContactService.UndeleteContact(contact.Id);
-
-                        await _unitOfWork.CompleteAsync();
-                    }
-
-                    var roleResource = new SchoolContactRoleDto
-                    {
-                        SchoolContactId = contact.Id,
-                        SchoolCode = vm.SchoolCode,
-                        Role = SchoolContactRole.SciencePrac
-                    };
-
-                    var roleResult = await _schoolContactService.CreateRole(roleResource);
-                    if (roleResult.Success)
-                    {
-                        await _authService.AuditSchoolContactUsers();
-
-                        await _unitOfWork.CompleteAsync();
-                        return RedirectToAction("AdminTeachers");
-                    }
-                    else
-                    {
-                        await UpdateViewModel(vm);
-                        vm.SchoolList = new SelectList(schools, "Code", "Name", vm.SchoolCode);
-                        return View(vm);
-                    }
-                }
-
-                await UpdateViewModel(vm);
-                vm.SchoolList = new SelectList(schools, "Code", "Name");
-                return View(vm);
+                return RedirectToAction("AdminTeachers");
             }
         }
 
