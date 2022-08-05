@@ -25,19 +25,19 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifica
         {
             // Validate entries
             var contact = await _context.SchoolContacts
-                .Include(context => context.Assignments)
-                .FirstOrDefaultAsync(contact => contact.Id == notification.Id);
+                .Select(entry => 
+                    new ContactWithAssignmentSpecifications 
+                    { 
+                        Id = entry.Id, 
+                        IsPrimary = entry.Assignments.Any(assignment => !assignment.IsDeleted && assignment.School.Students.Any(student => !student.IsDeleted && student.CurrentGrade <= Grade.Y06)),
+                        IsSecondary = entry.Assignments.Any(assignment => !assignment.IsDeleted && assignment.School.Students.Any(student => !student.IsDeleted && student.CurrentGrade >= Grade.Y07))
+                    })
+                .FirstOrDefaultAsync(contact => contact.Id == notification.Id, cancellationToken);
 
             if (contact == null)
                 return;
 
-            var secondary = contact.Assignments
-                .Any(a => a.School.Students.Any(s => s.CurrentGrade >= Core.Enums.Grade.Y07));
-
-            var primary = contact.Assignments
-                .Any(a => a.School.Students.Any(s => s.CurrentGrade <= Core.Enums.Grade.Y06));
-
-            if (secondary)
+            if (contact.IsSecondary)
             {
                 var operation = new ContactAddedMSTeamOperation()
                 {
@@ -51,7 +51,7 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifica
                 _context.Add(operation);
             }
 
-            if (primary)
+            if (contact.IsPrimary)
             {
                 var operation = new ContactAddedMSTeamOperation()
                 {
@@ -66,6 +66,13 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifica
             }
 
             await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        private class ContactWithAssignmentSpecifications
+        {
+            public int Id { get; set; }
+            public bool IsPrimary { get; set; }
+            public bool IsSecondary { get; set; }
         }
     }
 }

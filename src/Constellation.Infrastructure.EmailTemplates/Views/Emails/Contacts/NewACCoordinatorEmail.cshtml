@@ -1,0 +1,29 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Contacts
+@model NewACCoordinatorEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Welcome to Aurora College!</p>
+
+<p>As an Aurora College Coordinator, you will be helping to support students shared between @Model.PartnerSchool and Aurora College.</p>
+
+<p>You have been automatically added to some of our systems to help with your work:</p>
+    <ul>
+        <li>Our Partner Schools team, which includes a channel for Aurora College Coordinators from all our Partner Schools to chat and share tips.</li>
+        <li>Our Schools Portal site (available at <a href="https://acos-int.aurora.nsw.edu.au/Portal/School" target="_blank">https://acos-int.aurora.nsw.edu.au/Portal/School</a> from School sites only), which allows you to view the information Aurora College has on our shared students.</li>
+    </ul>
+
+<p>If you have any questions, please feel free to contact our staff below:
+    <ul>
+        <li>Virginia Cluff, Instructional Leader, <a href="mailto:virginia.cluff@det.nsw.edu.au">virginia.cluff@det.nsw.edu.au</a></li>
+        <li>Technology Support Team, 1300 610 733 or <a href="mailto:support@aurora.nsw.edu.au">support@aurora.nsw.edu.au</a></li>
+        <li>Office Administration Team, 1300 287 629 or <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a></li>
+    </ul>
+</p>
