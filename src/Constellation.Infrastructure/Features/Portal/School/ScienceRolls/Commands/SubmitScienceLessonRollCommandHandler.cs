@@ -1,10 +1,10 @@
-﻿using Constellation.Application.Features.Portal.School.ScienceRolls.Commands;
+﻿using Constellation.Application.Features.Lessons.Notifications;
+using Constellation.Application.Features.Portal.School.ScienceRolls.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,10 +14,12 @@ namespace Constellation.Infrastructure.Features.Portal.School.ScienceRolls.Comma
     public class SubmitScienceLessonRollCommandHandler : IRequestHandler<SubmitScienceLessonRollCommand>
     {
         private readonly IAppDbContext _context;
+        private readonly IMediator _mediator;
 
-        public SubmitScienceLessonRollCommandHandler(IAppDbContext context)
+        public SubmitScienceLessonRollCommandHandler(IAppDbContext context, IMediator mediator)
         {
             _context = context;
+            _mediator = mediator;
         }
 
         public async Task<Unit> Handle(SubmitScienceLessonRollCommand request, CancellationToken cancellationToken)
@@ -41,7 +43,15 @@ namespace Constellation.Infrastructure.Features.Portal.School.ScienceRolls.Comma
 
                 if (vmRecord.Key != new Guid())
                 {
+                    if (attendanceRecord.Present == vmRecord.Value)
+                        continue;
+
                     attendanceRecord.Present = vmRecord.Value;
+
+                    if (vmRecord.Value)
+                    {
+                        await _mediator.Publish(new StudentMarkedPresentInScienceLessonNotification { RollId = attendanceRecord.LessonRollId, StudentId = attendanceRecord.StudentId }, cancellationToken);
+                    }
                 }
             }
 

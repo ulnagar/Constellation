@@ -1,0 +1,16 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Lessons
+@model StudentMarkedPresentEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Dear @Model.StudentName,</p>
+<p>You have now completed the practical component of your @Model.Subject lesson, @Model.LessonTitle.</p>
+<p>Please ensure that any results are completed and submitted to the Stile platform: <a href="https://www.stileapp.com/">https://www.stileapp.com/</a>.</p>
+<p>If you have any questions, please feel free to ask your @Model.Subject teacher.</p>
