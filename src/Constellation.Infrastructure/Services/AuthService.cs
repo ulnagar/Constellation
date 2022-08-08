@@ -204,21 +204,72 @@ namespace Constellation.Infrastructure.Services
 
         public async Task RepairStaffUserAccounts()
         {
-            var staff = await _context.Staff.ToListAsync();
+            var staff = await _context.Staff.Where(staff => !staff.IsDeleted).ToListAsync();
 
-            var users = await _userManager.Users.Where(user => user.IsSchoolContact == false).ToListAsync();
+            var users = await _userManager.Users.ToListAsync();
+
+            foreach (var member in staff)
+            {
+                var user = users.FirstOrDefault(user => user.Email == member.EmailAddress);
+
+                if (user == null)
+                {
+                    // Create new user
+                    user = new AppUser
+                    {
+                        UserName = member.EmailAddress,
+                        Email = member.EmailAddress,
+                        FirstName = member.FirstName,
+                        LastName = member.LastName,
+                        IsSchoolContact = false,
+                        IsStaffMember = true,
+                        StaffId = member.StaffId
+                    };
+
+                    await _userManager.CreateAsync(user);
+
+                    await _userManager.AddToRoleAsync(user, AuthRoles.User);
+                    await _userManager.UpdateAsync(user);
+                } else
+                {
+                    user.IsStaffMember = true;
+                    user.StaffId = member.StaffId;
+
+                    var inRole = await _userManager.IsInRoleAsync(user, AuthRoles.User);
+
+                    if (!inRole)
+                        await _userManager.AddToRoleAsync(user, AuthRoles.User);
+                    await _userManager.UpdateAsync(user);
+                }
+            }
 
             foreach (var user in users)
             {
                 var member = staff.FirstOrDefault(staffMember => staffMember.EmailAddress == user.Email);
 
                 if (member == null)
-                    continue;
+                {
+                    user.IsStaffMember = false;
+                    user.StaffId = null;
 
-                user.IsStaffMember = true;
-                user.StaffId = member.StaffId;
+                    var inRole = await _userManager.IsInRoleAsync(user, AuthRoles.User);
 
-                await _userManager.UpdateAsync(user);
+                    if (inRole)
+                        await _userManager.RemoveFromRoleAsync(user, AuthRoles.User);
+                    await _userManager.UpdateAsync(user);
+                } else
+                {
+                    user.IsStaffMember = true;
+                    user.StaffId = member.StaffId;
+
+                    await _userManager.UpdateAsync(user);
+
+                    var inRole = await _userManager.IsInRoleAsync(user, AuthRoles.User);
+
+                    if (!inRole)
+                        await _userManager.AddToRoleAsync(user, AuthRoles.User);
+                    await _userManager.UpdateAsync(user);
+                }
             }
         }
 

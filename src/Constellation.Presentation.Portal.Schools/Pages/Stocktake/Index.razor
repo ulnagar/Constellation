@@ -8,9 +8,12 @@
 
 <h2>Stocktake Data Collection</h2>
 
-<div>
-    <a onclick="@(() => SubmitSighting(CurrentlySelectedStocktake.Id))" class="btn btn-primary">Sight Device</a>
-</div>
+@if (StocktakeEventId != Guid.Empty)
+{
+    <div>
+        <a onclick="@(() => SubmitSighting(CurrentlySelectedStocktake.Id))" class="btn btn-primary">Sight Device</a>
+    </div>
+}
 
 <hr />
 
@@ -93,16 +96,22 @@
 
             StocktakeEvents = await mediator.Send(new GetCurrentStocktakeEventsQuery());
 
-            if (StocktakeEventId == Guid.Empty)
+            if (StocktakeEvents.Any())
             {
-                CurrentlySelectedStocktake = StocktakeEvents.FirstOrDefault();
-                StocktakeEventId = CurrentlySelectedStocktake.Id;
+                if (StocktakeEventId == Guid.Empty)
+                {
+                    CurrentlySelectedStocktake = StocktakeEvents.FirstOrDefault();
+                    StocktakeEventId = CurrentlySelectedStocktake.Id;
+                } else
+                {
+                    CurrentlySelectedStocktake = StocktakeEvents.First(stocktake => stocktake.Id == StocktakeEventId);
+                }
+
+                await UpdateSightings(); 
             } else
             {
-                CurrentlySelectedStocktake = StocktakeEvents.First(stocktake => stocktake.Id == StocktakeEventId);
+                NavigationManager.NavigateTo("");
             }
-
-            await UpdateSightings();
         }
     }
 
