@@ -68,7 +68,7 @@
                                 <td>
                                     <span class="control-label text-only">
                                         @*<InputCheckbox @bind-Value="student.Present" />*@
-                                        <Toggle Value="student.Present" />
+                                        <Toggle @bind-Value="student.Present" @bind-Value:event="ValueChanged" />
                                     </span>
                                 </td>
                             </tr>

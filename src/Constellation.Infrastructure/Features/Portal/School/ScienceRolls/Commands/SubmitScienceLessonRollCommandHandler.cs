@@ -31,6 +31,9 @@ namespace Constellation.Infrastructure.Features.Portal.School.ScienceRolls.Comma
                 .Include(roll => roll.Attendance)
                 .FirstOrDefaultAsync(roll => roll.Id == request.RollId, cancellationToken);
 
+            if (schoolContact == null || roll == null)
+                return Unit.Value;
+
             roll.LessonDate = request.LessonDate;
             roll.SubmittedDate = DateTime.Today;
             roll.SchoolContactId = schoolContact.Id;

@@ -44,7 +44,7 @@ namespace Constellation.Infrastructure.Features.Lessons.Notifications.StudentMar
             // Send ACC email
             var viewModel = new StudentMarkedPresentEmailViewModel
             {
-                Title = $"Welcome to Aurora College!",
+                Title = $"Congratulations on finishing your Science Prac!",
                 SenderName = "Silvia Rudmann",
                 SenderTitle = "R/Head Teacher Science and Agriculture",
                 Preheader = "",
