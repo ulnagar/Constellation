@@ -455,7 +455,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
                 await _unitOfWork.CompleteAsync();
             }
 
-            return RedirectToAction("AdminCoordinators");
+            return RedirectToAction("AdminTeachers");
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.LessonsEditor)]
