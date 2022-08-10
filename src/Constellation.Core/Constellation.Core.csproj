@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Configurations>Debug;Release;Test</Configurations>
+	  <LangVersion>10.0</LangVersion>
   </PropertyGroup>
 
 </Project>

@@ -17,6 +17,19 @@ namespace Constellation.Infrastructure.Persistence
 {
     public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>, IAppDbContext
     {
+        public AppDbContext()
+        {
+
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer("Server=8912SCH000SA001.DETNSW.WIN;Database=CONSTELLATION_TEST;Persist Security Info=True;User ID=ACOS_appuser;Password=bKe)]dx(3Z6dDxJU;MultipleActiveResultSets=True");
+            }
+        }
+
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {

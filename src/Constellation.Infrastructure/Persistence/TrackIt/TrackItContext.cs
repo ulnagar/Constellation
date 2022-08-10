@@ -7,6 +7,19 @@ namespace Constellation.Infrastructure.Persistence.TrackIt
 {
     public partial class TrackItContext : DbContext
     {
+        public TrackItContext()
+        {
+
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer("Server=8912SCH000SA001.DETNSW.WIN;Database=TrackIt;Persist Security Info=True;User ID=TRACKIT_appuser;Password=7fMueFr?8&i4XbHg");
+            }
+        }
+
         public TrackItContext(DbContextOptions<TrackItContext> options)
             : base(options)
         {
