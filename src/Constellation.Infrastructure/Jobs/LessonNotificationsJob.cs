@@ -160,7 +160,7 @@ namespace Constellation.Infrastructure.Jobs
                     var notification = new LessonMissedNotificationEmail
                     {
                         SchoolName = school.Name,
-                        NotificationType = LessonMissedNotificationEmail.NotificationSequence.Second,
+                        NotificationType = LessonMissedNotificationEmail.NotificationSequence.First,
                         Lessons = firstWarning,
                         Recipients = spt.Concat(acc).Distinct().ToList()
                     };
@@ -181,7 +181,7 @@ namespace Constellation.Infrastructure.Jobs
                         SchoolName = school.Name,
                         NotificationType = LessonMissedNotificationEmail.NotificationSequence.Second,
                         Lessons = secondWarning,
-                        Recipients = spt.Concat(acc).Distinct().ToList()
+                        Recipients = spt.Concat(acc).Concat(new List<EmailBaseClass.Recipient> { school }).Distinct().ToList()
                     };
 
                     await _emailService.SendLessonMissedEmail(notification);
@@ -200,7 +200,7 @@ namespace Constellation.Infrastructure.Jobs
                         SchoolName = school.Name,
                         NotificationType = LessonMissedNotificationEmail.NotificationSequence.Third,
                         Lessons = thirdWarning,
-                        Recipients = spt.Concat(acc).Concat(new List<EmailBaseClass.Recipient> { school }).Distinct().ToList()
+                        Recipients = spt.Concat(acc).Concat(new List<EmailBaseClass.Recipient> { school }).Concat(principal).Distinct().ToList()
                     };
 
                     await _emailService.SendLessonMissedEmail(notification);

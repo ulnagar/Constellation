@@ -10,13 +10,13 @@
     ViewData["SenderTitle"] = Model.SenderTitle;
 }
 
-<p></p>Dear Colleagues,</p>
-<p></p>We are writing to you in regards to the Science Practical lessons at @Model.SchoolName. The following lessons have been flagged as not completed in the last fortnight block.</p>
+<p>>Dear Colleagues,</p>
+<p>We are writing to you in regards to the Science Practical lessons at @Model.SchoolName. The following lessons have been flagged as not completed in the last fortnight block.</p>
 <ul>
     @foreach (var entry in Model.Lessons)
     {
         <li>@entry.Name (Due by @entry.DueDate.ToShortDateString())</li>
     }
 </ul>
-<p>Could you please arrange a catch up session to complete this practical activity as soon as possible and then tick it off on the SPT website (at <a href="@Model.Link" target="_blank">@Model.Link</a>)</p>
-<p></p>Thank you for your work with our shared students.</p>
+<p>Could you please arrange a catch up session to complete this practical activity as soon as possible and then mark the lesson roll on the SPT website (at <a href="@Model.Link" target="_blank">@Model.Link</a>)</p>
+<p>Thank you for your work with our shared students.</p>
