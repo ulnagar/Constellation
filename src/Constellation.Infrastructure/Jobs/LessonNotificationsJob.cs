@@ -123,12 +123,14 @@ namespace Constellation.Infrastructure.Jobs
 
                 // Break these down into the outstanding time
                 // Eg 1. first email after due date (SPT & ACC)
-                // 2. second email a week after first (SPT, ACC, & SCHOOL)
-                // 3. third email a week after second (SPT, ACC, SCHOOL, & PRINCIPAL)
-                // 4. remaining emails sent to SPC/HT (SPC & HT)
+                // 2. second email a week after first (SPT, ACC) (rpt)
+                // 3. third email a week after second (SPT, ACC, & SCHOOL)
+                // 4. fourth email a week after third (SPT, ACC, SCHOOL, & PRINCIPAL)
+                // 5. remaining emails sent to SPC/HT (SPC & HT)
                 var firstWarning = schoolItem.Lessons.Where(lesson => lesson.OverdueSeverity == 1).ToList();
                 var secondWarning = schoolItem.Lessons.Where(lesson => lesson.OverdueSeverity == 2).ToList();
                 var thirdWarning = schoolItem.Lessons.Where(lesson => lesson.OverdueSeverity == 3).ToList();
+                var finalWarning = schoolItem.Lessons.Where(lesson => lesson.OverdueSeverity == 4).ToList();
                 var alert = schoolItem.Lessons.Where(lesson => lesson.OverdueSeverity >= 5).ToList();
 
                 _logger.Log(LogSeverity.Information, $"");
@@ -177,9 +179,9 @@ namespace Constellation.Infrastructure.Jobs
                     var notification = new LessonMissedNotificationEmail
                     {
                         SchoolName = school.Name,
-                        NotificationType = LessonMissedNotificationEmail.NotificationSequence.Third,
+                        NotificationType = LessonMissedNotificationEmail.NotificationSequence.Second,
                         Lessons = secondWarning,
-                        Recipients = spt.Concat(acc).Concat(new List<EmailBaseClass.Recipient> { school }).Distinct().ToList()
+                        Recipients = spt.Concat(acc).Distinct().ToList()
                     };
 
                     await _emailService.SendLessonMissedEmail(notification);
@@ -196,8 +198,27 @@ namespace Constellation.Infrastructure.Jobs
                     var notification = new LessonMissedNotificationEmail
                     {
                         SchoolName = school.Name,
-                        NotificationType = LessonMissedNotificationEmail.NotificationSequence.Final,
+                        NotificationType = LessonMissedNotificationEmail.NotificationSequence.Third,
                         Lessons = thirdWarning,
+                        Recipients = spt.Concat(acc).Concat(new List<EmailBaseClass.Recipient> { school }).Distinct().ToList()
+                    };
+
+                    await _emailService.SendLessonMissedEmail(notification);
+                }
+
+                if (finalWarning.Any())
+                {
+                    if (token.IsCancellationRequested)
+                        return;
+
+                    foreach (var lesson in finalWarning)
+                        _logger.Log(LogSeverity.Information, $" (4W) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
+
+                    var notification = new LessonMissedNotificationEmail
+                    {
+                        SchoolName = school.Name,
+                        NotificationType = LessonMissedNotificationEmail.NotificationSequence.Final,
+                        Lessons = finalWarning,
                         Recipients = spt.Concat(acc).Concat(new List<EmailBaseClass.Recipient> { school }).Concat(principal).Distinct().ToList()
                     };
 
