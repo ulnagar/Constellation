@@ -1,10 +1,11 @@
 namespace Constellation.Core.Refactor.Models;
 
+using Constellation.Core.Refactor.Common;
 using Constellation.Core.Refactor.ValueObjects;
 using System;
 using System.Collections.Generic;
 
-public class Student
+public class Student : BaseAuditableEntity
 {
     public string SRN { get; set; }
     public string FirstName { get; set; }

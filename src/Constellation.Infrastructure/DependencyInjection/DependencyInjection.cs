@@ -2,9 +2,13 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
+using Constellation.Application.Refactor.Common.Interfaces;
 using Constellation.Infrastructure.Persistence;
 using Constellation.Infrastructure.Persistence.Repositories;
 using Constellation.Infrastructure.Persistence.TrackIt;
+using Constellation.Infrastructure.Refactor.Persistence;
+using Constellation.Infrastructure.Refactor.Persistence.Interceptors;
+using Constellation.Infrastructure.Refactor.Services;
 using Constellation.Infrastructure.Templates.Services;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -34,6 +38,18 @@ namespace Constellation.Infrastructure.DependencyInjection
             {
                 options.UseSqlServer(configuration.GetConnectionString("TrackItConnection"));
             });
+
+            // Refactor Code changes below
+            services.AddScoped<AuditableEntitySaveChangesInterceptor>();
+
+            services.AddDbContext<RefactorDbContext>(options =>
+            {
+                options.UseSqlServer(configuration.GetConnectionString("RefactorConnection"));
+            });
+
+            services.AddTransient<IDateTime, DateTimeService>();
+            services.AddTransient<ICurrentUserService, CurrentUserService>();
+            // Refactor Code changes above
 
             services.AddSingleton(Log.Logger);
 

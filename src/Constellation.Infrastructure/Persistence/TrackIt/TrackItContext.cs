@@ -28,7 +28,7 @@ namespace Constellation.Infrastructure.Persistence.TrackIt
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<Department> Departments { get; set; }
         public virtual DbSet<Location> Locations { get; set; }
-        public virtual DbSet<Index> Indexes { get; set; }
+        public virtual DbSet<Models.Index> Indexes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -193,9 +193,9 @@ namespace Constellation.Infrastructure.Persistence.TrackIt
         }
     }
 
-    public class SmsysrecnumConfiguration : IEntityTypeConfiguration<Index>
+    public class SmsysrecnumConfiguration : IEntityTypeConfiguration<Models.Index>
     {
-        public void Configure(EntityTypeBuilder<Index> builder)
+        public void Configure(EntityTypeBuilder<Models.Index> builder)
         {
             builder.HasKey(e => e.Name);
             builder.ToTable("SMSYSRECNUM");

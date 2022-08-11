@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Refactor.ValueObjects;
 
 using Constellation.Core.Refactor.Common;
+using Constellation.Core.Refactor.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
