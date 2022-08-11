@@ -1,8 +1,9 @@
-﻿namespace Constellation.Core.NewModels;
+﻿namespace Constellation.Core.Refactor.Models;
 
+using Constellation.Core.Refactor.Common;
 using System.Collections.Generic;
 
-public class School
+public class School : BaseAuditableEntity
 {
     public string SchoolCode { get; set; }
     public string Name { get; set; }
@@ -18,4 +19,5 @@ public class School
     public string Website { get; set; }
 
     public IList<Student> Students { get; private set; } = new List<Student>();
+    public IList<StaffMember> StaffMembers { get; private set; } = new List<StaffMember>();
 }

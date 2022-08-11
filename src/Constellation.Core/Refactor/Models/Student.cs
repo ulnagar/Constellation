@@ -1,6 +1,6 @@
-namespace Constellation.Core.NewModels;
+namespace Constellation.Core.Refactor.Models;
 
-using Constellation.Core.NewEnums;
+using Constellation.Core.Refactor.ValueObjects;
 using System;
 using System.Collections.Generic;
 
@@ -23,4 +23,9 @@ public class Student
 
     public Guid PhotoId { get; set; }
     public virtual StudentPhoto Photo { get; set; }
+
+    public Guid FamilyId { get; set; }
+    public virtual Family Family { get; set; }
+
+    public IList<Enrolment> Enrolments { get; private set; } = new List<Enrolment>();
 }

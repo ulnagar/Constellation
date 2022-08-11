@@ -1,6 +1,6 @@
-﻿namespace Constellation.Core.NewModels;
+﻿namespace Constellation.Core.Refactor.Models;
 
-using Constellation.Core.Common;
+using Constellation.Core.Refactor.Common;
 using System.Collections.Generic;
 
 public class Grade : BaseAuditableEntity
