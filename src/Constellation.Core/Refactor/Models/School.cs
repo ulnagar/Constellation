@@ -20,4 +20,5 @@ public class School : BaseAuditableEntity
 
     public IList<Student> Students { get; private set; } = new List<Student>();
     public IList<StaffMember> StaffMembers { get; private set; } = new List<StaffMember>();
+    public IList<ContactRole> Contacts { get; private set; } = new List<ContactRole>();
 }

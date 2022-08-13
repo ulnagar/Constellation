@@ -9,5 +9,7 @@ public class GradeConfiguration : IEntityTypeConfiguration<Grade>
     public void Configure(EntityTypeBuilder<Grade> builder)
     {
         builder.HasMany(grade => grade.Students).WithMany(student => student.Cohorts);
+
+        builder.HasMany(grade => grade.Resources).WithOne(resource => resource.Grade).OnDelete(DeleteBehavior.NoAction);
     }
 }

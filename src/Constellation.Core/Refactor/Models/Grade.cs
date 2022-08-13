@@ -10,6 +10,7 @@ public class Grade : BaseAuditableEntity
     public string Description => $"{CohortYear} {Name}";
 
     public IList<Student> Students { get; private set; } = new List<Student>();
+    public IList<GradeResource> Resources { get; private set; } = new List<GradeResource>();
 
     // public IList<StaffMember> YearAdvisor { get; set; }
 }

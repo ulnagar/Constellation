@@ -26,13 +26,18 @@ public class RefactorDbContext : DbContext, IRefactorDbContext
     }
 
     public DbSet<AccessRequirement> AccessRequirements => Set<AccessRequirement>();
+    public DbSet<AdobeRoom> AdobeRooms => Set<AdobeRoom>();
+    public DbSet<CanvasCourse> CanvasCourse => Set<CanvasCourse>();
     public DbSet<Class> Classes => Set<Class>();
     public DbSet<SystemResource> SystemResources => Set<SystemResource>();
     public DbSet<ClassSession> ClassSessions => Set<ClassSession>();
+    public DbSet<Contact> Contacts => Set<Contact>();
+    public DbSet<ContactRole> ContactRoles => Set<ContactRole>();
     public DbSet<Enrolment> Enrolments => Set<Enrolment>();
     public DbSet<Faculty> Faculties => Set<Faculty>();
     public DbSet<Family> Families => Set<Family>();
     public DbSet<Grade> Grades => Set<Grade>();
+    public DbSet<MSTeam> MSTeams => Set<MSTeam>();
     public DbSet<Period> Periods => Set<Period>();
     public DbSet<Photo> Photos => Set<Photo>();
     public DbSet<School> Schools => Set<School>();
@@ -46,13 +51,18 @@ public class RefactorDbContext : DbContext, IRefactorDbContext
 
         // Temporary while there are mulitple configuration types in the assembly
         new AccessRequirementConfiguration().Configure(builder.Entity<AccessRequirement>());
+        new AdobeRoomConfiguration().Configure(builder.Entity<AdobeRoom>());
+        new CanvasCourseConfiguration().Configure(builder.Entity<CanvasCourse>());
         new ClassConfiguration().Configure(builder.Entity<Class>());
         new TutorialClassConfiguration().Configure(builder.Entity<TutorialClass>());
         new ClassSessionConfiguration().Configure(builder.Entity<ClassSession>());
+        new ContactConfiguration().Configure(builder.Entity<Contact>());
+        new ContactRoleConfiguration().Configure(builder.Entity<ContactRole>());
         new EnrolmentConfiguration().Configure(builder.Entity<Enrolment>());
         new FacultyConfiguration().Configure(builder.Entity<Faculty>());
         new FamilyConfiguration().Configure(builder.Entity<Family>());
         new GradeConfiguration().Configure(builder.Entity<Grade>());
+        new MSTeamConfiguration().Configure(builder.Entity<MSTeam>());
         new PeriodConfiguration().Configure(builder.Entity<Period>());
         new SchoolConfiguration().Configure(builder.Entity<School>());
         new StaffMemberConfiguration().Configure(builder.Entity<StaffMember>());

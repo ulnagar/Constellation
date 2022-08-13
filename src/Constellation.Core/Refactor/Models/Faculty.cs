@@ -15,4 +15,5 @@ public class Faculty : BaseAuditableEntity
     public virtual StaffMember HeadTeacher { get; set; }
 
     public IList<StaffMember> StaffMembers { get; private set; } = new List<StaffMember>();
+    public IList<FacultyResource> Resources { get; private set; } = new List<FacultyResource>();
 }

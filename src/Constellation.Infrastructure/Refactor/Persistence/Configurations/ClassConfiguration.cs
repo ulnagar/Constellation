@@ -19,6 +19,8 @@ public class ClassConfiguration : IEntityTypeConfiguration<Class>
 
         builder.HasMany(@class => @class.Sessions).WithOne(session => session.Class).OnDelete(DeleteBehavior.NoAction);
 
+        builder.HasMany(@class => @class.Resources).WithOne(resource => resource.Class).OnDelete(DeleteBehavior.NoAction);
+
         builder.Property(@class => @class.StartDate).HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder.Property(@class => @class.EndDate).HasConversion<DateOnlyConverter, DateOnlyComparer>();

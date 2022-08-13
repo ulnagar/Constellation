@@ -21,7 +21,7 @@ public class ClassResourceConfiguration : IEntityTypeConfiguration<ClassResource
 {
     public void Configure(EntityTypeBuilder<ClassResource> builder)
     {
-        builder.HasOne(resource => resource.Class).WithMany().OnDelete(DeleteBehavior.NoAction);
+        builder.HasOne(resource => resource.Class).WithMany(@class => @class.Resources).OnDelete(DeleteBehavior.NoAction);
     }
 }
 
@@ -29,7 +29,7 @@ public class FacultyResourceConfiguration : IEntityTypeConfiguration<FacultyReso
 {
     public void Configure(EntityTypeBuilder<FacultyResource> builder)
     {
-        builder.HasOne(resource => resource.Faculty).WithMany().OnDelete(DeleteBehavior.NoAction);
+        builder.HasOne(resource => resource.Faculty).WithMany(faculty => faculty.Resources).OnDelete(DeleteBehavior.NoAction);
     }
 }
 
@@ -37,6 +37,6 @@ public class GradeResourceConfiguration : IEntityTypeConfiguration<GradeResource
 {
     public void Configure(EntityTypeBuilder<GradeResource> builder)
     {
-        builder.HasOne(resource => resource.Grade).WithMany().OnDelete(DeleteBehavior.NoAction);
+        builder.HasOne(resource => resource.Grade).WithMany(grade => grade.Resources).OnDelete(DeleteBehavior.NoAction);
     }
 }

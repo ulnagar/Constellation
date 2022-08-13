@@ -13,5 +13,7 @@ public class FacultyConfiguration : IEntityTypeConfiguration<Faculty>
         builder.HasOne(faculty => faculty.HeadTeacher).WithOne().OnDelete(DeleteBehavior.NoAction);
 
         builder.HasMany(faculty => faculty.StaffMembers).WithMany(staff => staff.Faculties);
+
+        builder.HasMany(faculty => faculty.Resources).WithOne(resource => resource.Faculty);
     }
 }

@@ -11,5 +11,7 @@ public class SchoolConfiguration : IEntityTypeConfiguration<School>
         builder.HasMany(school => school.Students).WithOne(student => student.School).OnDelete(DeleteBehavior.NoAction);
 
         builder.HasMany(school => school.StaffMembers).WithOne(staff => staff.School).OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasMany(school => school.Contacts).WithOne(role => role.School).OnDelete(DeleteBehavior.NoAction);
     }
 }
