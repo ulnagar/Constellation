@@ -143,19 +143,19 @@ namespace Constellation.Infrastructure.Gateways
                     {
                         SchoolCode = splitString[0].Trim(),
                         Name = splitString[1].Trim('"').Trim(),
-                        Address = splitString[3].Trim(),
-                        Town = textInfo.ToTitleCase(splitString[4].Trim()),
+                        Address = splitString[6].Trim(),
+                        Town = textInfo.ToTitleCase(splitString[8].Trim()),
                         PostCode = splitString[5].Trim(),
                         Status = splitString[9].Trim(),
                         Electorate = splitString[17].Trim(),
-                        PrincipalNetwork = splitString[24].Trim(),
-                        Division = splitString[21].Trim(),
-                        PhoneNumber = Regex.Replace(splitString[43].Trim(), @"[^0-9]", ""),
-                        EmailAddress = splitString[46].Trim(),
-                        FaxNumber = Regex.Replace(splitString[47].Trim(), @"[^0-9]", ""),
-                        HeatSchool = splitString[50] == "Yes",
-                        PrincipalName = splitString[73].Trim(),
-                        PrincipalEmail = splitString[74].Trim()
+                        PrincipalNetwork = splitString[25].Trim(),
+                        Division = splitString[22].Trim(), // School Performance Directorate
+                        PhoneNumber = Regex.Replace(splitString[45].Trim(), @"[^0-9]", ""),
+                        EmailAddress = splitString[48].Trim(),
+                        FaxNumber = Regex.Replace(splitString[49].Trim(), @"[^0-9]", ""),
+                        HeatSchool = splitString[51] == "Yes",
+                        PrincipalName = splitString[76].Trim(),
+                        PrincipalEmail = splitString[77].Trim()
                     };
 
                     if (school.PhoneNumber.Length == 8)
