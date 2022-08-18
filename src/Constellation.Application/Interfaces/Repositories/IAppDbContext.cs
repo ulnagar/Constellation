@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.Models;
+using Constellation.Application.Models.EmailQueue;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Stocktake;
@@ -51,6 +52,7 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<StocktakeEvent> StocktakeEvents { get; set; }
         DbSet<StocktakeSighting> StocktakeSightings { get; set; }
         DbSet<StudentAward> StudentAward { get; set; }
+        DbSet<EmailQueueItem> EmailQueue { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         DatabaseFacade Database { get; }

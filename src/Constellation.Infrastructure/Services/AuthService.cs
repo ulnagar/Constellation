@@ -3,7 +3,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
-using Constellation.Infrastructure.Persistence;
+using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
