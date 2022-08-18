@@ -56,11 +56,15 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<ICanvasGatewayConfiguration, CanvasGatewayConfiguration>();
             services.AddScoped<ICanvasGateway, CanvasGateway>();
 
+            services.AddScoped<ICeseGateway, CeseGateway>();
+
             services.AddTransient<ILinkShortenerGatewayConfiguration, LinkShortenerGatewayConfiguration>();
             services.AddScoped<ILinkShortenerGateway, LinkShortenerGateway>();
 
             services.AddTransient<INetworkStatisticsGatewayConfiguration, NetworkStatisticsGatewayConfiguration>();
             services.AddScoped<INetworkStatisticsGateway, NetworkStatisticsGateway>();
+
+            services.AddScoped<ISchoolRegisterGateway, SchoolRegisterGateway>();
 
             services.AddTransient<ISentralGatewayConfiguration, SentralGatewayConfiguration>();
             services.AddScoped<ISentralGateway, SentralGateway>();
@@ -124,6 +128,38 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+        {
+            services.AddScoped<IAbsenceService, AbsenceService>();
+            services.AddScoped<IActiveDirectoryActionsService, ActiveDirectoryActionsService>();
+            services.AddScoped<IAdobeConnectRoomService, AdobeConnectRoomService>();
+            services.AddScoped<IAdobeConnectService, AdobeConnectService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<ICalendarService, CalendarService>();
+            services.AddScoped<ICasualService, CasualService>();
+            services.AddSingleton<IClassMonitorCacheService, ClassMonitorCacheService>();
+            services.AddScoped<ICourseOfferingService, CourseOfferingService>();
+            services.AddScoped<ICoverService, CoverService>();
+            services.AddScoped<IDeviceService, DeviceService>();
+            services.AddScoped<IEnrolmentService, EnrolmentService>();
+            services.AddScoped<IExcelService, ExcelService>();
+            services.AddScoped<IExportService, ExportService>();
+            services.AddScoped(typeof(IJobDispatcherService<>), typeof(JobDispatcherService<>));
+            services.AddScoped<ILessonService, LessonService>();
+            services.AddScoped(typeof(ILogHandler<>), typeof(LogHandler<>));
+            services.AddScoped<IOperationService, OperationService>();
+            services.AddScoped<IPDFService, PDFService>();
+            services.AddScoped<ISchoolContactService, SchoolContactService>();
+            services.AddScoped<ISchoolService, SchoolService>();
+            services.AddScoped<ISentralService, SentralService>();
+            services.AddScoped<ISessionService, SessionService>();
+            services.AddScoped<ISMSService, SMSService>();
+            services.AddScoped<IStaffService, StaffService>();
+            services.AddScoped<IStudentService, StudentService>();
+
+            return services;
+        }
+
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddConstallationContext(configuration);
@@ -132,11 +168,12 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddSingleton(Log.Logger);
 
-            services.AddMediatR(Assembly.GetExecutingAssembly());
-
             services.AddHangfireJobs()
                 .AddExternalServiceGateways()
-                .AddEmailTemplateEngine();
+                .AddEmailTemplateEngine()
+                .AddApplicationServices();
+
+            services.AddMediatR(Assembly.GetExecutingAssembly());
 
             //services.Scan(scan => scan
             //    .FromAssemblyOf<IApplicationService>()
