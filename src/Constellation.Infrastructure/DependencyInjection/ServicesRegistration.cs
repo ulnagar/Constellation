@@ -330,7 +330,10 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddConstallationContext(configuration);
 
-            services.AddIdentity<AppUser, AppRole>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddIdentity<AppUser, AppRole>()
+                .AddUserManager<UserManager<AppUser>>()
+                .AddRoleManager<RoleManager<AppRole>>()
+                .AddSignInManager<SignInManager<AppUser>>()
                 .AddEntityFrameworkStores<AppDbContext>();
 
             services.AddIdentityServer()
@@ -339,9 +342,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddAuthentication()
                 .AddIdentityServerJwt();
 
-            services.AddSingleton(Log.Logger);
+            //services.AddSingleton(Log.Logger);
 
-            services.AddMediatR(Assembly.GetExecutingAssembly());
+            //services.AddMediatR(Assembly.GetExecutingAssembly());
 
             services.AddApplication();
 
