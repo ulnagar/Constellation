@@ -354,7 +354,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             //services.AddSingleton(Log.Logger);
 
-            //services.AddMediatR(Assembly.GetExecutingAssembly());
+            services.AddMediatR(Assembly.GetExecutingAssembly());
 
             services.AddApplication();
 
