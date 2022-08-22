@@ -1,16 +1,15 @@
 ﻿@page "/fetchdata"
+@using Constellation.Application.DTOs
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @attribute [Authorize]
 @inject HttpClient Http
 
-<PageTitle>Weather forecast</PageTitle>
+<PageTitle>Students List</PageTitle>
 
-<h1>Weather forecast</h1>
+<h1>Students List</h1>
 
-<p>This component demonstrates fetching data from the server.</p>
-
-@if (forecasts == null)
+@if (Students == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -19,14 +18,18 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Summary</th>
+                <th>SRN</th>
+                <th>Name</th>
+                <th>Email</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
+            @foreach (var student in Students)
             {
                 <tr>
-                    <td>@forecast</td>
+                    <td>@student.StudentId</td>
+                    <td>@student.FirstName @student.LastName</td>
+                    <td>@student.PortalUsername@@det.nsw.edu.au</td>
                 </tr>
             }
         </tbody>
@@ -34,13 +37,13 @@ else
 }
 
 @code {
-    private string[]? forecasts;
+    private List<StudentDto> Students = new();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            forecasts = await Http.GetFromJsonAsync<string[]>("WeatherForecast");
+            Students = await Http.GetFromJsonAsync<List<StudentDto>>("Students");
         }
         catch (AccessTokenNotAvailableException exception)
         {

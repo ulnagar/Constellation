@@ -8,6 +8,7 @@ using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.GatewayConfigurations;
 using Constellation.Infrastructure.Gateways;
+using Constellation.Infrastructure.Identity.MagicLink;
 using Constellation.Infrastructure.Jobs;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
@@ -334,13 +335,22 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddUserManager<UserManager<AppUser>>()
                 .AddRoleManager<RoleManager<AppRole>>()
                 .AddSignInManager<SignInManager<AppUser>>()
-                .AddEntityFrameworkStores<AppDbContext>();
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddPasswordlessLoginProvider();
 
             services.AddIdentityServer()
                 .AddApiAuthorization<AppUser, AppDbContext>();
 
             services.AddAuthentication()
                 .AddIdentityServerJwt();
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.Name = "Constellation.Parents.Identity";
+                options.ExpireTimeSpan = TimeSpan.FromHours(1);
+                //options.LoginPath = new PathString("/Portal/School/Auth/Login");
+                //options.LogoutPath = new PathString("/Portal/School/Auth/LogOut");
+            });
 
             //services.AddSingleton(Log.Logger);
 
