@@ -1,0 +1,19 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Auth
+@model MagicLinkLoginEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>@Model.ToName</p>
+<br />
+<p>Someone has requested to log into the Aurora College Parent Portal using this email address.</p>
+<p>If you made this request, please click the button below to be logged in:</p>
+<a href="@Model.Link" target="_blank" class="button"><span style="display:block;padding:10px 20px;font-size: 14px; line-height: 16.8px;">Log In</span></a>
+
+<p>Please note the button will only be active for the next 15 minutes.</p>
