@@ -1,5 +1,7 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
+using Constellation.Application.Features.Partners.SchoolContacts.Commands;
+using Constellation.Application.Features.Partners.SchoolContacts.Notifications;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
@@ -8,6 +10,7 @@ using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -25,15 +28,18 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         private readonly IAuthService _authService;
         private readonly ISchoolContactService _schoolContactService;
         private readonly IOperationService _operationService;
+        private readonly IMediator _mediator;
 
         public SchoolContactsController(IUnitOfWork unitOfWork, IAuthService authService,
-            ISchoolContactService schoolContactService, IOperationService operationService)
+            ISchoolContactService schoolContactService, IOperationService operationService,
+            IMediator mediator)
             : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;
             _schoolContactService = schoolContactService;
             _operationService = operationService;
+            _mediator = mediator;
         }
 
         // GET: Partner/SchoolContact
@@ -139,8 +145,12 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> _AddAssignment(Contacts_AssignmentViewModel viewModel)
         {
-            await _schoolContactService.CreateRole(viewModel.ContactRole);
-            await _unitOfWork.CompleteAsync();
+            await _mediator.Send(new CreateNewAssignmentForSchoolContactCommand
+            {
+                ContactId = viewModel.ContactRole.SchoolContactId,
+                SchoolCode = viewModel.ContactRole.SchoolCode,
+                Position = viewModel.ContactRole.Role
+            });
 
             if (viewModel.ReturnUrl == null)
                 return Redirect(Request.GetTypedHeaders().Referer.ToString());
@@ -192,37 +202,26 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             if (viewModel.IsNew)
             {
-                var result = await _schoolContactService.CreateContact(viewModel.Contact);
-
-                if (!result.Success)
+                if (string.IsNullOrWhiteSpace(viewModel.ContactRole.SchoolCode))
                 {
-                    await UpdateViewModel(viewModel);
-                    foreach (var error in result.Errors)
-                        ModelState.AddModelError("", error);
-                    return View("Update", viewModel);
-                }
-
-                await _unitOfWork.CompleteAsync();
-
-                await _operationService.CreateContactAddedMSTeamAccess(result.Entity.Id);
-
-                var user = new UserTemplateDto
+                    await _mediator.Send(new CreateNewSchoolContactCommand
+                    {
+                        FirstName = viewModel.Contact.FirstName,
+                        LastName = viewModel.Contact.LastName,
+                        PhoneNumber = viewModel.Contact.PhoneNumber,
+                        EmailAddress = viewModel.Contact.EmailAddress
+                    });
+                } else
                 {
-                    FirstName = result.Entity.FirstName.Trim(' '),
-                    LastName = result.Entity.LastName.Trim(' '),
-                    Email = result.Entity.EmailAddress.Trim(' '),
-                    Username = result.Entity.EmailAddress.Trim(' '),
-                    IsSchoolContact = true,
-                    SchoolContactId = result.Entity.Id
-                };
-
-                await _authService.CreateUser(user);
-
-                if (!string.IsNullOrWhiteSpace(viewModel.ContactRole.SchoolCode) && !string.IsNullOrWhiteSpace(viewModel.ContactRole.Role))
-                {
-                    viewModel.ContactRole.SchoolContactId = result.Entity.Id;
-
-                    await _schoolContactService.CreateRole(viewModel.ContactRole);
+                    await _mediator.Send(new CreateNewSchoolContactWithRoleCommand
+                    {
+                        FirstName = viewModel.Contact.FirstName,
+                        LastName = viewModel.Contact.LastName,
+                        PhoneNumber = viewModel.Contact.PhoneNumber,
+                        EmailAddress = viewModel.Contact.EmailAddress,
+                        SchoolCode = viewModel.ContactRole.SchoolCode,
+                        Position = viewModel.ContactRole.Role
+                    });
                 }
             }
             else

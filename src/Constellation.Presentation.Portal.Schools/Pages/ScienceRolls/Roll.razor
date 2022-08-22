@@ -8,6 +8,11 @@
 <h2>Science Practical Roll</h2>
 
 <div class="row">
+    @if (Editable)
+    {
+        <a href="ScienceRolls/@RollId/Submit" class="btn btn-success">Edit</a>
+    }
+
     <a href="ScienceRolls" class="btn btn-danger btn-pull-right-solo">Go Back</a>
 </div>
 
@@ -80,6 +85,8 @@
     [Parameter]
     public Guid RollId { get; set; }
 
+    public bool Editable { get; set; }
+
     public ScienceLessonRollForDetails MarkedRoll { get; set; } = new();
 
     protected override async Task OnParametersSetAsync()
@@ -89,6 +96,11 @@
             CurrentlySelectedSchool = SelectedSchool;
 
             MarkedRoll = await mediator.Send(new GetScienceLessonRollForDisplayQuery { RollId = RollId });
+
+            if (MarkedRoll.LessonDate > DateTime.Today.AddDays(-14))
+            {
+                Editable = true;
+            }
         }
 
         if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool != null)

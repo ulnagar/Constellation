@@ -1,10 +1,11 @@
-﻿using Constellation.Application.DTOs;
-using Constellation.Application.DTOs.CSV;
+﻿using Constellation.Application.DTOs.CSV;
+using Constellation.Application.Features.Partners.SchoolContacts.Commands;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -12,7 +13,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Gateways
@@ -22,8 +22,9 @@ namespace Constellation.Infrastructure.Gateways
         private readonly HttpClient _client;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ISchoolContactService _schoolContactService;
+        private readonly IMediator _mediator;
 
-        public SchoolRegisterGateway(IUnitOfWork unitOfWork, ISchoolContactService schoolContactService)
+        public SchoolRegisterGateway(IUnitOfWork unitOfWork, ISchoolContactService schoolContactService, IMediator mediator)
         {
             var config = new HttpClientHandler
             {
@@ -37,6 +38,7 @@ namespace Constellation.Infrastructure.Gateways
             _client = new HttpClient(config);
             _unitOfWork = unitOfWork;
             _schoolContactService = schoolContactService;
+            _mediator = mediator;
         }
 
         public async Task GetSchoolPrincipals()
@@ -90,28 +92,16 @@ namespace Constellation.Infrastructure.Gateways
                 if (principal == null)
                 {
                     // Does the email address appear in the SchoolContact list?
-                    //var contact = await _unitOfWork.SchoolContacts.FromEmailForExistCheck(csvSchool.PrincipalEmail);
-                    var contact = dbContacts.FirstOrDefault(contact => contact.EmailAddress.ToLower() == csvSchool.PrincipalEmail.ToLower());
-                    if (contact == null)
+                    Console.WriteLine($" Adding new Principal: {csvSchool.PrincipalEmail}");
+                    Console.WriteLine($" Linking Principal {csvSchool.PrincipalFirstName} {csvSchool.PrincipalLastName} with {csvSchool.Name}");
+                    await _mediator.Send(new CreateNewSchoolContactWithRoleCommand
                     {
-                        Console.WriteLine($" Adding new Principal: {csvSchool.PrincipalEmail}");
-                        var contactResult = await _schoolContactService.CreateContact(new SchoolContactDto
-                        {
-                            FirstName = csvSchool.PrincipalFirstName,
-                            LastName = csvSchool.PrincipalLastName,
-                            EmailAddress = csvSchool.PrincipalEmail
-                        });
-
-                        contact = contactResult.Entity;
-                    }
-
-                    Console.WriteLine($" Linking Principal {contact.DisplayName} with {csvSchool.Name}");
-                    await _schoolContactService.CreateRole(new SchoolContactRoleDto
-                    {
-                        Role = SchoolContactRole.Principal,
+                        FirstName = csvSchool.PrincipalFirstName,
+                        LastName = csvSchool.PrincipalLastName,
+                        EmailAddress = csvSchool.PrincipalEmail,
                         SchoolCode = csvSchool.SchoolCode,
-                        SchoolContactId = contact.Id
-                    });
+                        Position = SchoolContactRole.Principal
+                    });                        
                 }
 
                 await _unitOfWork.CompleteAsync();

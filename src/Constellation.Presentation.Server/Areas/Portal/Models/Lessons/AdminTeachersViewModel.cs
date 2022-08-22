@@ -1,9 +1,10 @@
 ﻿using Constellation.Core.Models;
+using Constellation.Presentation.Server.BaseModels;
 using System.Collections.Generic;
 
 namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
 {
-    public class AdminTeachersViewModel
+    public class AdminTeachersViewModel : BaseViewModel
     {
         public AdminTeachersViewModel()
         {

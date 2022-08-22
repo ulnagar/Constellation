@@ -122,8 +122,8 @@ namespace Constellation.Infrastructure.Jobs
                 var school = new LessonMissedNotificationEmail.Recipient { Name = contacts.First().School.Name, Email = contacts.First().School.EmailAddress };
 
                 // Break these down into the outstanding time
-                // Eg 1. first email after due date (SPT)
-                // 2. second email a week after first (SPT & ACC)
+                // Eg 1. first email after due date (SPT & ACC)
+                // 2. second email a week after first (SPT, ACC) (rpt)
                 // 3. third email a week after second (SPT, ACC, & SCHOOL)
                 // 4. fourth email a week after third (SPT, ACC, SCHOOL, & PRINCIPAL)
                 // 5. remaining emails sent to SPC/HT (SPC & HT)
@@ -162,7 +162,7 @@ namespace Constellation.Infrastructure.Jobs
                         SchoolName = school.Name,
                         NotificationType = LessonMissedNotificationEmail.NotificationSequence.First,
                         Lessons = firstWarning,
-                        Recipients = spt
+                        Recipients = spt.Concat(acc).Distinct().ToList()
                     };
 
                     await _emailService.SendLessonMissedEmail(notification);
@@ -181,7 +181,7 @@ namespace Constellation.Infrastructure.Jobs
                         SchoolName = school.Name,
                         NotificationType = LessonMissedNotificationEmail.NotificationSequence.Second,
                         Lessons = secondWarning,
-                        Recipients = spt.Concat(acc).Distinct().ToList()
+                        Recipients = spt.Concat(acc).Concat(new List<EmailBaseClass.Recipient> { school }).Distinct().ToList()
                     };
 
                     await _emailService.SendLessonMissedEmail(notification);
@@ -200,7 +200,7 @@ namespace Constellation.Infrastructure.Jobs
                         SchoolName = school.Name,
                         NotificationType = LessonMissedNotificationEmail.NotificationSequence.Third,
                         Lessons = thirdWarning,
-                        Recipients = spt.Concat(acc).Concat(new List<EmailBaseClass.Recipient> { school }).Distinct().ToList()
+                        Recipients = spt.Concat(acc).Concat(new List<EmailBaseClass.Recipient> { school }).Concat(principal).Distinct().ToList()
                     };
 
                     await _emailService.SendLessonMissedEmail(notification);

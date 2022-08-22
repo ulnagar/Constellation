@@ -109,18 +109,18 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
 
                 _logger.LogInformation($"Starting Login Attempt by {Input.Email}");
 
-//#if DEBUG
-//                // Detected local login with claims bypass
-//                var claimList = new List<Claim>();
-//                claimList.Add(new Claim("Schools", "8371,8146"));
+#if DEBUG
+                // Detected local login with claims bypass
+                var claimList = new List<Claim>();
+                claimList.Add(new Claim("Schools", "8148"));
 
-//                var dbUserAccount = await _userManager.FindByEmailAsync(Input.Email);
+                var dbUserAccount = await _userManager.FindByEmailAsync(Input.Email);
 
-//                _logger.LogInformation($" - DEBUG code found. Bypass login check.");
-//                await _signInManager.SignInWithClaimsAsync(dbUserAccount, false, claimList);
+                _logger.LogInformation($" - DEBUG code found. Bypass login check.");
+                await _signInManager.SignInWithClaimsAsync(dbUserAccount, false, claimList);
 
-//                return LocalRedirect(returnUrl);
-//#else
+                return LocalRedirect(returnUrl);
+#else
 #pragma warning disable CA1416 // Validate platform compatibility
                 _logger.LogInformation(" - Attempting domain login by {user}", Input.Email);
                 var context = new PrincipalContext(ContextType.Domain, "DETNSW.WIN");
@@ -206,7 +206,7 @@ namespace Constellation.Presentation.Portal.Schools.Pages.Auth
 
                 return LocalRedirect(returnUrl);
 #pragma warning restore CA1416 // Validate platform compatibility
-//#endif
+#endif
             }
 
             ModelState.AddModelError(string.Empty, "Invalid login attempt."); 

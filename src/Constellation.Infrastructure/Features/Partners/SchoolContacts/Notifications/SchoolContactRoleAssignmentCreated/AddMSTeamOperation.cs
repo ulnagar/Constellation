@@ -10,9 +10,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifications
+namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifications.SchoolContactRoleAssignmentCreated
 {
-    public class AddMSTeamOperation : INotificationHandler<SchoolContactCreatedNotification>
+    public class AddMSTeamOperation : INotificationHandler<SchoolContactRoleAssignmentCreatedNotification>
     {
         private readonly IAppDbContext _context;
 
@@ -21,23 +21,24 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifica
             _context = context;
         }
 
-        public async Task Handle(SchoolContactCreatedNotification notification, CancellationToken cancellationToken)
+        public async Task Handle(SchoolContactRoleAssignmentCreatedNotification notification, CancellationToken cancellationToken)
         {
             // Validate entries
             var contact = await _context.SchoolContacts
-                .Include(context => context.Assignments)
-                .FirstOrDefaultAsync(contact => contact.Id == notification.Id);
+                .Where(contact => contact.Assignments.Any(assignment => assignment.Id == notification.AssignmentId))
+                .Select(entry =>
+                    new ContactWithAssignmentSpecifications
+                    {
+                        Id = entry.Id,
+                        IsPrimary = entry.Assignments.Any(assignment => !assignment.IsDeleted && assignment.School.Students.Any(student => !student.IsDeleted && student.CurrentGrade <= Grade.Y06)),
+                        IsSecondary = entry.Assignments.Any(assignment => !assignment.IsDeleted && assignment.School.Students.Any(student => !student.IsDeleted && student.CurrentGrade >= Grade.Y07))
+                    })
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (contact == null)
                 return;
 
-            var secondary = contact.Assignments
-                .Any(a => a.School.Students.Any(s => s.CurrentGrade >= Core.Enums.Grade.Y07));
-
-            var primary = contact.Assignments
-                .Any(a => a.School.Students.Any(s => s.CurrentGrade <= Core.Enums.Grade.Y06));
-
-            if (secondary)
+            if (contact.IsSecondary)
             {
                 var operation = new ContactAddedMSTeamOperation()
                 {
@@ -51,7 +52,7 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifica
                 _context.Add(operation);
             }
 
-            if (primary)
+            if (contact.IsPrimary)
             {
                 var operation = new ContactAddedMSTeamOperation()
                 {
@@ -66,6 +67,13 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifica
             }
 
             await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        private class ContactWithAssignmentSpecifications
+        {
+            public int Id { get; set; }
+            public bool IsPrimary { get; set; }
+            public bool IsSecondary { get; set; }
         }
     }
 }

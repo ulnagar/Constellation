@@ -15,6 +15,19 @@
             <ValidationSummary />
 
             <div class="form-group row">
+                <div class="col-md-8 alert alert-warning">
+                    Please note that this document:
+                    <ul>
+                        <li>constitutes a class roll under the Education Act 1990, </li>
+                        <li>must be an accurate record of what happened during the lesson, </li>
+                        <li>can be subpoenaed into court records, and</li>
+                        <li>is registered as being submitted by you, with your DoE email address attached.</li>
+                    </ul>
+                    You must ensure that all details you record here are correct and accurately reflect the delivery of the lesson.
+                </div>
+            </div>
+
+            <div class="form-group row">
                 <label class="col-md-2">Lesson Name</label>
                 <div class="col-md-6">@Roll.LessonName</div>
             </div>
@@ -39,27 +52,33 @@
             </div>
 
             <div class="row form-group">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <td class="col-md-4"><label>Name</label></td>
-                        <td><label>Present?</label></td>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var student in Roll.Attendance)
-                    {
+                <div class="col-md-8">
+                    <table class="table">
+                        <thead>
                         <tr>
-                            <td><span class="control-label text-only">@student.StudentName</span></td>
-                            <td>
-                                <span class="control-label text-only">
-                                    <InputCheckbox @bind-Value="student.Present" />
-                                </span>
-                            </td>
+                            <td class="col-md-4"><label>Name</label></td>
+                            <td><label>Present?</label></td>
                         </tr>
-                    }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        @foreach (var student in Roll.Attendance)
+                        {
+                            <tr>
+                                <td><span class="control-label text-only">@student.StudentName</span></td>
+                                <td>
+                                    <span class="control-label text-only">
+                                        @*<InputCheckbox @bind-Value="student.Present" />*@
+                                        <Toggle @bind-Value="student.Present" @bind-Value:event="ValueChanged" />
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-3 alert alert-warning ">
+                    Ticking a student in this list indicates the student was <strong>present</strong> for the lesson.
+                </div>
             </div>
 
             <div class="form-group row">
