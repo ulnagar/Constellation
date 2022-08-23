@@ -13,6 +13,9 @@ builder.Services.AddHttpClient("Constellation.Portal.Parents.ServerAPI", client 
 // Supply HttpClient instances that include access tokens when making requests to the server project
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("Constellation.Portal.Parents.ServerAPI"));
 
-builder.Services.AddApiAuthorization();
+builder.Services.AddApiAuthorization(options =>
+{
+    options.AuthenticationPaths.LogInPath = "Identity/Account/Login";
+});
 
 await builder.Build().RunAsync();

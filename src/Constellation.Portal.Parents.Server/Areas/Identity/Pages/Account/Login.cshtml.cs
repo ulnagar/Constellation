@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
+using Constellation.Application.DTOs.EmailRequests;
+using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -15,13 +17,15 @@ namespace Constellation.Portal.Parents.Server.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IEmailService _emailService;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<AppUser> signInManager, ILogger<LoginModel> logger, UserManager<AppUser> userManager)
+        public LoginModel(SignInManager<AppUser> signInManager, ILogger<LoginModel> logger, UserManager<AppUser> userManager, IEmailService emailService)
         {
             _signInManager = signInManager;
             _logger = logger;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         [BindProperty]
@@ -72,7 +76,7 @@ namespace Constellation.Portal.Parents.Server.Areas.Identity.Pages.Account
         }
 
         // Provide login experience using Magic Link (as per https://gist.github.com/ebicoglu/04cedc99d0365f4d20a6233cca69cf5b)
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync()
         {
             if (ModelState.IsValid)
             {
@@ -87,9 +91,19 @@ namespace Constellation.Portal.Parents.Server.Areas.Identity.Pages.Account
                 // Send user magic link
                 var token = await _userManager.GenerateUserTokenAsync(user, "PasswordlessLoginProvider", "passwordless-auth");
 
-                var url = Url.Page("Login", "Passwordless", new { token = token, userId = user.Id.ToString() }, Request.Scheme);
+                var url = Url.Page("Login", "Passwordless", new { token, userId = user.Id.ToString() }, Request.Scheme);
 
-                _logger.LogInformation(url);
+                var notification = new MagicLinkEmail
+                {
+                    Link = url,
+                    Name = user.DisplayName
+                };
+
+                notification.Recipients.Add(new EmailBaseClass.Recipient { Name = user.DisplayName, Email = user.Email });
+
+                await _emailService.SendMagicLinkLoginEmail(notification);
+
+                _logger.LogInformation("Login link is: {link}", url);
 
                 return Page();
             }

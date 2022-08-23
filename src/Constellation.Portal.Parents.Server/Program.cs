@@ -33,6 +33,7 @@ else
     app.UseHsts();
 }
 
+app.UsePathBase("/portal/parents");
 app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();
@@ -43,7 +44,6 @@ app.UseRouting();
 app.UseIdentityServer();
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.MapRazorPages();
 app.MapControllers();

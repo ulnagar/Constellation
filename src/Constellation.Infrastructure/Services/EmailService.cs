@@ -6,6 +6,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Templates.Views.Emails.Absences;
+using Constellation.Infrastructure.Templates.Views.Emails.Auth;
 using Constellation.Infrastructure.Templates.Views.Emails.Covers;
 using Constellation.Infrastructure.Templates.Views.Emails.Lessons;
 using Constellation.Infrastructure.Templates.Views.Emails.MissedWork;
@@ -882,6 +883,30 @@ namespace Constellation.Infrastructure.Services
             }
 
             await _emailSender.Send(toRecipients, null, viewModel.Title, body);
+        }
+
+        public async Task SendMagicLinkLoginEmail(MagicLinkEmail notification)
+        {
+            var settings = await _unitOfWork.Settings.Get();
+
+            var viewModel = new MagicLinkLoginEmailViewModel
+            {
+                Preheader = "This is an automated message. Please do not reply.",
+                SenderName = "",
+                SenderTitle = "",
+                Title = "[Aurora College] Portal Login Link",
+                ToName = notification.Name,
+                Link = notification.Link
+            };
+
+            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Auth/MagicLinkLoginEmail.cshtml", viewModel);
+
+            var toRecipients = new Dictionary<string, string>();
+            foreach (var entry in notification.Recipients)
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                    toRecipients.Add(entry.Name, entry.Email);
+
+            await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
         }
     }
 }

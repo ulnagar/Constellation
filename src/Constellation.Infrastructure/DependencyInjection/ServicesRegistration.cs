@@ -19,10 +19,12 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System;
+using System.Linq;
 using System.Reflection;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -88,7 +90,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddConstallationContext(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddConstellationContext(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<AppDbContext>(options =>
             {
@@ -163,7 +165,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddConstallationContext(configuration);
+            services.AddConstellationContext(configuration);
 
             services.AddTrackItContext(configuration);
 
@@ -329,14 +331,20 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddParentPortalInfrastructureComponents(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddConstallationContext(configuration);
+            services.AddConstellationContext(configuration)
+                .AddTrackItContext(configuration)
+                .AddEmailTemplateEngine();
 
-            services.AddIdentity<AppUser, AppRole>()
+            services.AddDefaultIdentity<AppUser>()
+                .AddRoles<AppRole>()
                 .AddUserManager<UserManager<AppUser>>()
                 .AddRoleManager<RoleManager<AppRole>>()
                 .AddSignInManager<SignInManager<AppUser>>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddPasswordlessLoginProvider();
+
+            // Due to IS5 stupidity, the subsite configuration must be lower case:
+            // https://stackoverflow.com/questions/62563174/identityserver4-authorization-error-not-matching-redirect-uri
 
             services.AddIdentityServer()
                 .AddApiAuthorization<AppUser, AppDbContext>();
@@ -348,13 +356,27 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 options.Cookie.Name = "Constellation.Parents.Identity";
                 options.ExpireTimeSpan = TimeSpan.FromHours(1);
-                //options.LoginPath = new PathString("/Portal/School/Auth/Login");
-                //options.LogoutPath = new PathString("/Portal/School/Auth/LogOut");
             });
 
-            //services.AddSingleton(Log.Logger);
+            services.AddSingleton(Log.Logger);
 
             services.AddMediatR(Assembly.GetExecutingAssembly());
+
+            services.Scan(scan => scan
+                .FromAssemblyOf<IApplicationService>()
+
+                .AddClasses(classes => classes.AssignableTo<IScopedService>())
+                .AsMatchingInterface()
+                .WithScopedLifetime()
+
+                .AddClasses(classes => classes.AssignableTo<ITransientService>())
+                .AsMatchingInterface()
+                .WithTransientLifetime()
+
+                .AddClasses(classes => classes.AssignableTo<ISingletonService>())
+                .AsMatchingInterface()
+                .WithSingletonLifetime()
+            );
 
             services.AddApplication();
 

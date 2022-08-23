@@ -49,5 +49,8 @@ namespace Constellation.Application.Interfaces.Services
         Task SendAdminAbsenceSentralAlert(string studentName);
         Task SendAdminLowCreditAlert(double credit);
         Task SendAdminClassworkNotificationContactAlert(Student student, Staff teacher, ClassworkNotification notification);
+
+        // Auth Emails
+        Task SendMagicLinkLoginEmail(MagicLinkEmail notification);
     }
 }
