@@ -10,7 +10,4 @@ public class ClassSession : BaseAuditableEntity
 
     public Guid PeriodId { get; set; }
     public virtual Period Period { get; set; }
-
-    public Guid StaffMemberId { get; set; }
-    public virtual StaffMember StaffMember { get; set; }
 }

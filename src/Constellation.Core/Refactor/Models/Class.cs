@@ -23,6 +23,7 @@ public class Class : BaseAuditableEntity
     public decimal FullTimeEquivalentValue { get; set; }
     public IList<Enrolment> Enrolments { get; private set; } = new List<Enrolment>();
     public IList<ClassSession> Sessions { get; private set; } = new List<ClassSession>();
+    public IList<ClassAssignment> Teachers { get; private set; } = new List<ClassAssignment>();
     public IList<ClassResource> Resources { get; private set; } = new List<ClassResource>();
 }
 

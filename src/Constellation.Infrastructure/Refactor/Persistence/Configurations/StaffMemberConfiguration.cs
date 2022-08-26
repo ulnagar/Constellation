@@ -16,6 +16,6 @@ public class StaffMemberConfiguration : IEntityTypeConfiguration<StaffMember>
 
         builder.HasOne(staff => staff.School).WithMany(school => school.StaffMembers).OnDelete(DeleteBehavior.NoAction);
 
-        builder.HasMany(staff => staff.Sessions).WithOne(session => session.StaffMember).OnDelete(DeleteBehavior.NoAction);
+        builder.HasMany(staff => staff.Assignments).WithOne(assignment => assignment.StaffMember).OnDelete(DeleteBehavior.NoAction);
     }
 }

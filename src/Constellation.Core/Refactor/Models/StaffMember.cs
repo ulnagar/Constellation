@@ -25,5 +25,5 @@ public class StaffMember : BaseAuditableEntity
     public Guid SchoolId { get; set; }
     public virtual School School { get; set; }
 
-    public IList<ClassSession> Sessions { get; private set; } = new List<ClassSession>();
+    public IList<ClassAssignment> Assignments { get; private set; } = new List<ClassAssignment>();
 }

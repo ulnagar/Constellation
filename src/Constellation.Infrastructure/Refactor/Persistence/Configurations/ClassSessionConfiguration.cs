@@ -11,7 +11,5 @@ public class ClassSessionConfiguration : IEntityTypeConfiguration<ClassSession>
         builder.HasOne(session => session.Class).WithMany(@class => @class.Sessions).OnDelete(DeleteBehavior.NoAction);
 
         builder.HasOne(session => session.Period).WithMany(period => period.Sessions).OnDelete(DeleteBehavior.NoAction);
-
-        builder.HasOne(session => session.StaffMember).WithMany(staff => staff.Sessions).OnDelete(DeleteBehavior.NoAction);
     }
 }
