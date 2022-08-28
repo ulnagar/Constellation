@@ -1,115 +1,147 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-#nullable disable
+﻿namespace Constellation.Portal.Parents.Server.Areas.Identity.Pages.Account;
 
 using Constellation.Application.DTOs.EmailRequests;
+using Constellation.Application.Features.Auth.Queries;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
 
-namespace Constellation.Portal.Parents.Server.Areas.Identity.Pages.Account
+public class LoginModel : PageModel
 {
-    public class LoginModel : PageModel
+    private readonly SignInManager<AppUser> _signInManager;
+    private readonly UserManager<AppUser> _userManager;
+    private readonly IEmailService _emailService;
+    private readonly IMediator _mediator;
+
+    internal enum LoginStatus
     {
-        private readonly SignInManager<AppUser> _signInManager;
-        private readonly UserManager<AppUser> _userManager;
-        private readonly IEmailService _emailService;
-        private readonly ILogger<LoginModel> _logger;
+        WaitingUserInput,
+        EmailSent,
+        InvalidUsername,
+        TokenInvalid
+    }
 
-        public LoginModel(SignInManager<AppUser> signInManager, ILogger<LoginModel> logger, UserManager<AppUser> userManager, IEmailService emailService)
+    public LoginModel(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager,
+        IEmailService emailService, IMediator mediator)
+    {
+        _signInManager = signInManager;
+        _userManager = userManager;
+        _emailService = emailService;
+        _mediator = mediator;
+    }
+
+    [BindProperty]
+    public InputModel Input { get; set; } = new();
+
+    public string ReturnUrl { get; set; } = String.Empty;
+
+    internal LoginStatus Status { get; set; } = LoginStatus.WaitingUserInput;
+
+    public class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = String.Empty;
+    }
+
+    /// <summary>
+    /// First page visit. Request email address from user.
+    /// </summary>
+    /// <param name="returnUrl"></param>
+    /// <returns></returns>
+    public async Task OnGetAsync(string? returnUrl = null)
+    {
+        // Clear the existing external cookie to ensure a clean login process
+        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+    }
+
+    // Provide login experience using Magic Link (as per https://gist.github.com/ebicoglu/04cedc99d0365f4d20a6233cca69cf5b)
+    /// <summary>
+    /// User has supplied an email address. Verify and send link.
+    /// </summary>
+    /// <returns></returns>
+    public async Task<IActionResult> OnPostAsync()
+    {
+        if (ModelState.IsValid)
         {
-            _signInManager = signInManager;
-            _logger = logger;
-            _userManager = userManager;
-            _emailService = emailService;
-        }
-
-        [BindProperty]
-        public InputModel Input { get; set; }
-
-        public string ReturnUrl { get; set; }
-
-        [TempData]
-        public string ErrorMessage { get; set; }
-
-        public class InputModel
-        {
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; }
-        }
-
-        public async Task OnGetAsync(string returnUrl = null)
-        {
-            if (!string.IsNullOrEmpty(ErrorMessage))
+            // Check email address is valid user
+            var user = await _userManager.FindByEmailAsync(Input.Email);
+            if (user == null)
             {
-                ModelState.AddModelError(string.Empty, ErrorMessage);
-            }
-
-            returnUrl ??= Url.Content("~/");
-
-            // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-
-            ReturnUrl = returnUrl;
-        }
-
-        public async Task<IActionResult> OnGetPasswordlessAsync(string token, string userId)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-
-            var isValid = await _userManager.VerifyUserTokenAsync(user, "PasswordlessLoginProvider", "passwordless-auth", token);
-            if (!isValid)
-            {
-                // Can't do it!
-            }
-
-            await _userManager.UpdateSecurityStampAsync(user);
-
-            await _signInManager.SignInAsync(user, false);
-
-            return LocalRedirect(Url.Content("~/"));
-        }
-
-        // Provide login experience using Magic Link (as per https://gist.github.com/ebicoglu/04cedc99d0365f4d20a6233cca69cf5b)
-        public async Task<IActionResult> OnPostAsync()
-        {
-            if (ModelState.IsValid)
-            {
-                // Check email address is valid user
-                var user = await _userManager.FindByEmailAsync(Input.Email);
-                if (user == null)
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return Page();
-                }
-
-                // Send user magic link
-                var token = await _userManager.GenerateUserTokenAsync(user, "PasswordlessLoginProvider", "passwordless-auth");
-
-                var url = Url.Page("Login", "Passwordless", new { token, userId = user.Id.ToString() }, Request.Scheme);
-
-                var notification = new MagicLinkEmail
-                {
-                    Link = url,
-                    Name = user.DisplayName
-                };
-
-                notification.Recipients.Add(new EmailBaseClass.Recipient { Name = user.DisplayName, Email = user.Email });
-
-                await _emailService.SendMagicLinkLoginEmail(notification);
-
-                _logger.LogInformation("Login link is: {link}", url);
-
+                Status = LoginStatus.InvalidUsername;
                 return Page();
             }
 
-            // If we got this far, something failed, redisplay form
+            // Confirm user is a parent
+            var isValid = await _mediator.Send(new IsUserAParentQuery { EmailAddress = Input.Email });
+            if (!isValid)
+            {
+                Status = LoginStatus.InvalidUsername;
+                return Page();
+            }
+
+            // Get token from provider
+            var token = await _userManager.GenerateUserTokenAsync(user, "PasswordlessLoginProvider", "passwordless-auth");
+
+            // Create login url with embedded token
+            var url = Url.Page("Login", "Passwordless", new { token, userId = user.Id.ToString() }, Request.Scheme);
+
+            // Email login url to user
+            var notification = new MagicLinkEmail
+            {
+                Link = url,
+                Name = user.DisplayName
+            };
+
+            notification.Recipients.Add(new EmailBaseClass.Recipient { Name = user.DisplayName, Email = user.Email });
+
+            await _emailService.SendMagicLinkLoginEmail(notification);
+
+            // Present user with confirmation that email has been sent
+            Status = LoginStatus.EmailSent;
+
             return Page();
         }
+
+        // There was a problem with the data returned. Show an error.
+        Status = LoginStatus.InvalidUsername;
+
+        return Page();
+    }
+
+    /// <summary>
+    /// A Passwordless Login token has been supplied. Process login.
+    /// </summary>
+    /// <param name="token"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<IActionResult> OnGetPasswordlessAsync(string token, string userId)
+    {
+        // Get user entry from database
+        var user = await _userManager.FindByIdAsync(userId);
+
+        // Verify login token in url
+        var isValid = await _userManager.VerifyUserTokenAsync(user, "PasswordlessLoginProvider", "passwordless-auth", token);
+        
+        if (!isValid)
+        {
+            Status = LoginStatus.TokenInvalid;
+
+            return Page();
+        }
+
+        // Log out all other sessions
+        await _userManager.UpdateSecurityStampAsync(user);
+
+        // Log user in
+        await _signInManager.SignInAsync(user, false);
+
+        // Redirect to home page
+        return LocalRedirect(Url.Content("~/"));
     }
 }
