@@ -24,6 +24,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Reflection;
 
@@ -351,6 +352,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddAuthentication()
                 .AddIdentityServerJwt();
+
+            services.AddTransient<IClaimsTransformation, DisplayNameClaimTransformation>();
 
             services.ConfigureApplicationCookie(options =>
             {
