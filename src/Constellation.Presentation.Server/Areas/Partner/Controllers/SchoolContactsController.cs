@@ -211,7 +211,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                     FirstName = result.Entity.FirstName.Trim(' '),
                     LastName = result.Entity.LastName.Trim(' '),
                     Email = result.Entity.EmailAddress.Trim(' '),
-                    Username = result.Entity.EmailAddress.Trim(' '),
+                    Username = $"{result.Entity.FirstName.Trim(' ')} {result.Entity.LastName.Trim(' ')}",
                     IsSchoolContact = true,
                     SchoolContactId = result.Entity.Id
                 };
@@ -244,7 +244,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                     FirstName = result.Entity.FirstName.Trim(' '),
                     LastName = result.Entity.LastName.Trim(' '),
                     Email = result.Entity.EmailAddress.Trim(' '),
-                    Username = result.Entity.EmailAddress.Trim(' '),
+                    Username = $"{result.Entity.FirstName.Trim(' ')} {result.Entity.LastName.Trim(' ')}",
                     IsSchoolContact = true,
                     SchoolContactId = result.Entity.Id
                 };
@@ -285,7 +285,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                     FirstName = role.SchoolContact.FirstName,
                     LastName = role.SchoolContact.LastName,
                     Email = role.SchoolContact.EmailAddress,
-                    Username = role.SchoolContact.EmailAddress,
+                    Username = $"{role.SchoolContact.FirstName} {role.SchoolContact.LastName}",
                     IsSchoolContact = false
                 };
 

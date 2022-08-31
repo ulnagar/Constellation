@@ -353,8 +353,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddAuthentication()
                 .AddIdentityServerJwt();
 
-            services.AddTransient<IClaimsTransformation, DisplayNameClaimTransformation>();
-
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.Name = "Constellation.Parents.Identity";
