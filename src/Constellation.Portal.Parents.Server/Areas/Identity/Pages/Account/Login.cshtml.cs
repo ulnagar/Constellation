@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 
 public class LoginModel : PageModel
 {
@@ -18,6 +17,7 @@ public class LoginModel : PageModel
     private readonly UserManager<AppUser> _userManager;
     private readonly IEmailService _emailService;
     private readonly IMediator _mediator;
+    private readonly ILogger<IAuthService> _logger;
 
     internal enum LoginStatus
     {
@@ -28,12 +28,13 @@ public class LoginModel : PageModel
     }
 
     public LoginModel(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager,
-        IEmailService emailService, IMediator mediator)
+        IEmailService emailService, IMediator mediator, ILogger<IAuthService> logger)
     {
         _signInManager = signInManager;
         _userManager = userManager;
         _emailService = emailService;
         _mediator = mediator;
+        _logger = logger;
     }
 
     [BindProperty]
@@ -70,10 +71,14 @@ public class LoginModel : PageModel
     {
         if (ModelState.IsValid)
         {
+            _logger.LogInformation($"Starting Login Attempt by {Input.Email}");
+
             // Check email address is valid user
             var user = await _userManager.FindByEmailAsync(Input.Email);
             if (user == null)
             {
+                _logger.LogWarning(" - No user found for email {user}", Input.Email);
+
                 Status = LoginStatus.InvalidUsername;
                 return Page();
             }
@@ -82,6 +87,8 @@ public class LoginModel : PageModel
             var isValid = await _mediator.Send(new IsUserAParentQuery { EmailAddress = Input.Email });
             if (!isValid)
             {
+                _logger.LogWarning(" - User {user} has not corresponding parent record", Input.Email);
+
                 Status = LoginStatus.InvalidUsername;
                 return Page();
             }
@@ -103,6 +110,8 @@ public class LoginModel : PageModel
 
             await _emailService.SendMagicLinkLoginEmail(notification);
 
+            _logger.LogInformation(" - Magic login link sent to user {user}", Input.Email);
+
             // Present user with confirmation that email has been sent
             Status = LoginStatus.EmailSent;
 
@@ -123,6 +132,8 @@ public class LoginModel : PageModel
     /// <returns></returns>
     public async Task<IActionResult> OnGetPasswordlessAsync(string token, string userId)
     {
+        _logger.LogInformation("Continuing Login Attempt by {user}", userId);
+
         // Get user entry from database
         var user = await _userManager.FindByIdAsync(userId);
 
@@ -131,6 +142,8 @@ public class LoginModel : PageModel
         
         if (!isValid)
         {
+            _logger.LogWarning(" - Token invalid for {user}", Input.Email);
+
             Status = LoginStatus.TokenInvalid;
 
             return Page();
@@ -141,6 +154,8 @@ public class LoginModel : PageModel
 
         // Log user in
         await _signInManager.SignInAsync(user, false);
+
+        _logger.LogInformation(" - Login succeeded for {user}", user.Email);
 
         // Redirect to home page
         return LocalRedirect(Url.Content("~/"));
