@@ -26,4 +26,14 @@ public class AttendanceController : BaseAPIController
 
         return await _mediator.Send(new GetAbsencesForFamilyQuery { ParentEmail = user.Email });
     }
+
+    [HttpGet]
+    public async Task<AbsenceDetailDto> GetDetails(Guid Id)
+    {
+        var user = await GetCurrentUser();
+
+        _logger.LogInformation("Requested to retrieve absence details for id {id} by parent {name}", Id, user.UserName);
+
+        return await _mediator.Send(new GetAbsenceDetailsForParentQuery { AbsenceId = Id });
+    }
 }

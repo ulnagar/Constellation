@@ -1,0 +1,47 @@
+﻿@page "/Attendance/Details/{id:Guid}"
+
+@using Constellation.Application.Features.Attendance.Queries;
+
+@inject HttpClient Http
+
+@attribute [Authorize]
+
+<div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none">
+    <a href="attendance" class="btn btn-primary"><i class="fas fa-send-back" />Go Back</a>
+</div>
+
+<div class="d-none d-lg-block d-xl-block d-xxl-block">
+    <a href="attendance" class="btn btn-primary"><i class="fas fa-send-back" />Go Back</a>
+</div>
+
+<h3>Absence Details</h3>
+
+Whole Absence for Gloria Jean
+
+Date
+
+Class
+
+Absence
+
+Explanation (Verified? By)
+
+Submit?
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    internal AbsenceDetailDto Absence { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            Absence = await Http.GetFromJsonAsync<AbsenceDetailDto>($"Attendance/Details/{Id}");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+}
