@@ -1,0 +1,156 @@
+﻿@page "/Attendance/"
+
+@using Constellation.Application.Features.Attendance.Queries
+
+@inject HttpClient Http
+
+@attribute [Authorize]
+
+<h2>Attendance Information</h2>
+
+Attendance Report Downloads
+
+<h3>Absences</h3>
+
+Absence Totals
+
+<div class="d-flex flex-column flex-lg-row justify-content-around mt-3 mb-3">
+    <div class="cursor-pointer border border-secondary rounded p-3 mb-3 h-100 text-center @(AbsencesType == AbsenceCategory.UnexplainedPartials ? "selected" : "unselected")" @onclick="() => ChangeAbsenceType(AbsenceCategory.UnexplainedPartials)">
+        <div>Unexplained Partial Absences</div>
+        <div>@UnexplainedPartialsCount</div>
+    </div>
+
+    <div class="cursor-pointer border border-secondary rounded p-3 mb-3 h-100 text-center @(AbsencesType == AbsenceCategory.UnverifiedPartials ? "selected" : "unselected")" @onclick="() => ChangeAbsenceType(AbsenceCategory.UnverifiedPartials)">
+        <div>Unverified Partial Absences</div>
+        <div>@UnverifiedPartialsCount</div>
+    </div>
+
+    <div class="cursor-pointer border border-secondary rounded p-3 mb-3 h-100 text-center @(AbsencesType == AbsenceCategory.UnexplainedWholes ? "selected" : "unselected")" @onclick="() => ChangeAbsenceType(AbsenceCategory.UnexplainedWholes)">
+        <div>Unexplained Whole Absences</div>
+        <div>@UnexplainedWholesCount</div>
+    </div>
+</div>
+
+<div class="m-3">
+    @if (AbsencesType == AbsenceCategory.UnexplainedPartials)
+    {
+        <h3>Unexplained Partial Absences</h3>
+        <span>
+            These absences are where a student was not present for a portion of a lesson. Students are sent an email requesting a reason for their absence, which is then forwarded to the Aurora College Coordinator at their school for verification.
+        </span>
+    }
+
+    @if (AbsencesType == AbsenceCategory.UnverifiedPartials)
+    {
+        <h3>Unverified Partial Absences</h3>
+        <span>
+            These absences are where a student was not present for a portion of a lesson. Students have provided an reason for their absence, which is then forwarded to the Aurora College Coordinator at their school for verification. The Aurora College Coordinator has not yet verified the explanation.
+        </span>
+    }
+
+    @if (AbsencesType == AbsenceCategory.UnexplainedWholes)
+    {
+        <h3>Unexplained Whole Absences</h3>
+        <span>
+            These absences are where a student was not present for an entire lesson. Parents are requested to provide an explanation for the absence. Please provide one here.
+        </span>
+    }
+</div>
+
+<div class="d-flex flex-column justify-content-around">
+    @foreach (var entry in FilteredAbsences.OrderBy(student => student.StudentName))
+    {
+        <div class="w-auto p-3 ms-3 me-3 mb-2 shadow position-relative">
+            <div class="row d-flex align-items-center"> @*Display as flex to enable vertical centering of the button in the second div*@
+                <div class="col-lg-8">
+                    <div class="h5">@entry.StudentName (@entry.StudentCurrentGrade)</div>
+                    <div><span class="me-2">@entry.Date.ToString("dd/MM")</span> <span class="me-2">@entry.OfferingName</span> @entry.AbsenceLength min (@entry.AbsenceTimeframe)</div>
+                    
+                    @*If this is a unverified partial absence, include the student explanation in the view*@
+                    @if (!string.IsNullOrWhiteSpace(entry.Reason))
+                    {
+                        <div class="mt-2">"@entry.Reason"</div>
+                    }
+                    
+                    @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
+                    <div class="d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none">
+                        <a href="attendance/details/@entry.Id" class="stretched-link"></a>
+                    </div>
+                </div>
+
+                @*If the display is large enough, include a button to show details of the absence*@
+                <div class="col-lg-4 d-none d-lg-block d-xl-block d-xxl-block">
+                    <a class="btn btn-success" href="attendance/details/@entry.Id">Perform action!</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private List<AbsenceDto> Absences = new();
+    private List<AbsenceDto> FilteredAbsences { get; set; } = new();
+    private AbsenceCategory AbsencesType { get; set; } = AbsenceCategory.UnexplainedWholes;
+
+    private int UnexplainedPartialsCount = 0;
+    private int UnverifiedPartialsCount = 0;
+    private int UnexplainedWholesCount = 0;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            Absences = await Http.GetFromJsonAsync<List<AbsenceDto>>($"Attendance");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+
+        UnexplainedPartialsCount = Absences.Count(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && string.IsNullOrWhiteSpace(absence.Reason));
+        UnverifiedPartialsCount = Absences.Count(absence =>  absence.AbsenceTimeframe != absence.PeriodTimeframe && !string.IsNullOrWhiteSpace(absence.Reason));
+        UnexplainedWholesCount = Absences.Count(absence => absence.AbsenceTimeframe == absence.PeriodTimeframe);
+
+        FilterAbsences();
+    }
+
+    public enum AbsenceCategory
+    {
+        UnexplainedPartials,
+        UnverifiedPartials,
+        UnexplainedWholes
+    }
+
+    private void FilterAbsences()
+    {
+        switch (AbsencesType)
+        {
+            case AbsenceCategory.UnexplainedPartials:
+                FilteredAbsences = Absences
+                    .Where(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && string.IsNullOrWhiteSpace(absence.Reason))
+                    .ToList();
+                break;
+            case AbsenceCategory.UnexplainedWholes:
+                FilteredAbsences = Absences
+                    .Where(absence => absence.AbsenceTimeframe == absence.PeriodTimeframe)
+                    .ToList();
+                break;
+            case AbsenceCategory.UnverifiedPartials:
+                FilteredAbsences = Absences
+                    .Where(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && !string.IsNullOrWhiteSpace(absence.Reason))
+                    .ToList();
+                break;
+        }
+
+        FilteredAbsences = FilteredAbsences.OrderBy(absence => absence.StudentCurrentGrade).ThenBy(absence => absence.StudentLastName).ThenBy(absence => absence.StudentFirstName).ToList();
+    }
+
+    private void ChangeAbsenceType(AbsenceCategory type)
+    {
+        AbsencesType = type;
+
+        FilterAbsences();
+    }
+}

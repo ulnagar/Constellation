@@ -361,7 +361,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddSingleton(Log.Logger);
 
-            services.AddMediatR(Assembly.GetExecutingAssembly());
+            services.AddMediatR(new[] { Assembly.GetExecutingAssembly(), typeof(IAppDbContext).Assembly });
 
             services.Scan(scan => scan
                 .FromAssemblyOf<IApplicationService>()

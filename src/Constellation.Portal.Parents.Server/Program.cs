@@ -1,13 +1,19 @@
+using Constellation.Infrastructure.DependencyInjection;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog();
+LoggingConfiguration.SetupLogging(builder.Configuration, Serilog.Events.LogEventLevel.Debug);
 
 // Add services to the container.
 builder.Services.AddParentPortalInfrastructureComponents(builder.Configuration);
 
-builder.Services.AddLogging(config =>
-{
-    config.AddDebug();
-    config.AddConsole();
-});
+//builder.Services.AddLogging(config =>
+//{
+//    config.AddDebug();
+//    config.AddConsole();
+//});
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddControllersWithViews();
