@@ -88,6 +88,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScoped<ITrackItSyncJob, TrackItSyncJob>();
 
+            services.AddScoped<ITrackItSyncJob, TrackItSyncJob>();
+
             return services;
         }
 
@@ -102,6 +104,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScoped<IAppDbContext, AppDbContext>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddApplicationServices();
 
             return services;
         }
@@ -333,7 +337,8 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddParentPortalInfrastructureComponents(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddConstellationContext(configuration)
-                .AddTrackItContext(configuration)
+                //.AddTrackItContext(configuration)
+                .AddExternalServiceGateways()
                 .AddEmailTemplateEngine();
 
             services.AddDefaultIdentity<AppUser>()
@@ -363,21 +368,23 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddMediatR(new[] { Assembly.GetExecutingAssembly(), typeof(IAppDbContext).Assembly });
 
-            services.Scan(scan => scan
-                .FromAssemblyOf<IApplicationService>()
+            services.AddConstellationContext(configuration);
 
-                .AddClasses(classes => classes.AssignableTo<IScopedService>())
-                .AsMatchingInterface()
-                .WithScopedLifetime()
+            //services.Scan(scan => scan
+            //    .FromAssemblyOf<IApplicationService>()
 
-                .AddClasses(classes => classes.AssignableTo<ITransientService>())
-                .AsMatchingInterface()
-                .WithTransientLifetime()
+            //    .AddClasses(classes => classes.AssignableTo<IScopedService>())
+            //    .AsMatchingInterface()
+            //    .WithScopedLifetime()
 
-                .AddClasses(classes => classes.AssignableTo<ISingletonService>())
-                .AsMatchingInterface()
-                .WithSingletonLifetime()
-            );
+            //    .AddClasses(classes => classes.AssignableTo<ITransientService>())
+            //    .AsMatchingInterface()
+            //    .WithTransientLifetime()
+
+            //    .AddClasses(classes => classes.AssignableTo<ISingletonService>())
+            //    .AsMatchingInterface()
+            //    .WithSingletonLifetime()
+            //);
 
             services.AddApplication();
 

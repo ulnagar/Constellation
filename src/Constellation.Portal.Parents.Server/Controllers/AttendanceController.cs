@@ -27,8 +27,8 @@ public class AttendanceController : BaseAPIController
         return await _mediator.Send(new GetAbsencesForFamilyQuery { ParentEmail = user.Email });
     }
 
-    [HttpGet]
-    public async Task<AbsenceDetailDto> GetDetails(Guid Id)
+    [HttpGet("Details/{id:guid}")]
+    public async Task<AbsenceDetailDto> GetDetails([FromRoute] Guid Id)
     {
         var user = await GetCurrentUser();
 
