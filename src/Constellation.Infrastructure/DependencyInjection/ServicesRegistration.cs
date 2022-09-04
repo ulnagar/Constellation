@@ -1,11 +1,12 @@
-﻿using Constellation.Application;
+﻿namespace Microsoft.Extensions.DependencyInjection;
+
+using Constellation.Application;
 using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
-using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.GatewayConfigurations;
 using Constellation.Infrastructure.Gateways;
 using Constellation.Infrastructure.Identity.MagicLink;
@@ -19,376 +20,300 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Reflection;
 
-namespace Microsoft.Extensions.DependencyInjection
+public static class ServicesRegistration
 {
-    public static class ServicesRegistration
+    public static IServiceCollection AddStaffPortalInfrastructureComponents(this IServiceCollection services, IConfiguration configuration)
     {
-        public static IServiceCollection AddHangfireJobs(this IServiceCollection services)
+        services.AddConstellationContext(configuration)
+            .AddTrackItContext(configuration);
+
+        services.AddStaffPortalAuthentication(configuration);
+
+        services.AddExternalServiceGateways()
+            .AddEmailTemplateEngine()
+            .AddHangfireJobs();
+
+        services.AddSingleton(Log.Logger);
+
+        services.AddMediatR(new[] { Assembly.GetExecutingAssembly(), typeof(IAppDbContext).Assembly });
+
+        services.AddApplication();
+
+        return services;
+    }
+
+    public static IServiceCollection AddSchoolPortalInfrastructureComponents(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddConstellationContext(configuration)
+            .AddExternalServiceGateways()
+            .AddEmailTemplateEngine();
+
+        services.AddSchoolPortalAuthentication();
+
+        services.AddSingleton(Log.Logger);
+
+        services.AddMediatR(new[] { Assembly.GetExecutingAssembly(), typeof(IAppDbContext).Assembly });
+
+        services.AddApplication();
+
+        return services;
+    }
+
+    public static IServiceCollection AddParentPortalInfrastructureComponents(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddConstellationContext(configuration)
+            .AddExternalServiceGateways()
+            .AddEmailTemplateEngine();
+
+        services.AddParentPortalAuthentication();
+
+        services.AddSingleton(Log.Logger);
+
+        services.AddMediatR(new[] { Assembly.GetExecutingAssembly(), typeof(IAppDbContext).Assembly });
+
+        services.AddConstellationContext(configuration);
+
+        services.AddApplication();
+
+        return services;
+    }
+
+    // Helper Methods
+
+    internal static IServiceCollection AddHangfireJobs(this IServiceCollection services)
+    {
+        services.AddScoped<IAbsenceClassworkNotificationJob, AbsenceClassworkNotificationJob>();
+        services.AddScoped<IAbsenceMonitorJob, AbsenceMonitorJob>();
+        services.AddScoped<IAbsenceProcessingJob, AbsenceProcessingJob>();
+        services.AddScoped<IAttendanceReportJob, AttendanceReportJob>();
+        services.AddScoped<IClassMonitorJob, ClassMonitorJob>();
+        services.AddScoped<ILessonNotificationsJob, LessonNotificationsJob>();
+        services.AddScoped<IPermissionUpdateJob, PermissionUpdateJob>();
+        services.AddScoped<IRollMarkingReportJob, RollMarkingReportJob>();
+        services.AddScoped<ISchoolRegisterJob, SchoolRegisterJob>();
+        services.AddScoped<ISentralAwardSyncJob, SentralAwardSyncJob>();
+        services.AddScoped<ISentralFamilyDetailsSyncJob, SentralFamilyDetailsSyncJob>();
+        services.AddScoped<ISentralPhotoSyncJob, SentralPhotoSyncJob>();
+        services.AddScoped<ISentralReportSyncJob, SentralReportSyncJob>();
+        services.AddScoped<IUserManagerJob, UserManagerJob>();
+
+        return services;
+    }
+
+    internal static IServiceCollection AddExternalServiceGateways(this IServiceCollection services)
+    {
+        services.AddTransient<IAdobeConnectGatewayConfiguration, AdobeConnectGatewayConfiguration>();
+        services.AddScoped<IAdobeConnectGateway, AdobeConnectGateway>();
+
+        services.AddTransient<ICanvasGatewayConfiguration, CanvasGatewayConfiguration>();
+        services.AddScoped<ICanvasGateway, CanvasGateway>();
+
+        services.AddScoped<ICeseGateway, CeseGateway>();
+
+        services.AddTransient<ILinkShortenerGatewayConfiguration, LinkShortenerGatewayConfiguration>();
+        services.AddScoped<ILinkShortenerGateway, LinkShortenerGateway>();
+
+        services.AddTransient<INetworkStatisticsGatewayConfiguration, NetworkStatisticsGatewayConfiguration>();
+        services.AddScoped<INetworkStatisticsGateway, NetworkStatisticsGateway>();
+
+        services.AddScoped<ISchoolRegisterGateway, SchoolRegisterGateway>();
+
+        services.AddTransient<ISentralGatewayConfiguration, SentralGatewayConfiguration>();
+        services.AddScoped<ISentralGateway, SentralGateway>();
+
+        services.AddTransient<ISMSGatewayConfiguration, SMSGatewayConfiguration>();
+        services.AddScoped<ISMSGateway, SMSGateway>();
+
+        return services;
+    }
+
+    internal static IServiceCollection AddTrackItContext(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddDbContext<TrackItContext>(options =>
         {
-            services.AddScoped<IAbsenceClassworkNotificationJob, AbsenceClassworkNotificationJob>();
-            services.AddScoped<IAbsenceMonitorJob, AbsenceMonitorJob>();
-            services.AddScoped<IAbsenceProcessingJob, AbsenceProcessingJob>();
-            services.AddScoped<IAttendanceReportJob, AttendanceReportJob>();
-            services.AddScoped<IClassMonitorJob, ClassMonitorJob>();
-            services.AddScoped<ILessonNotificationsJob, LessonNotificationsJob>();
-            services.AddScoped<IPermissionUpdateJob, PermissionUpdateJob>();
-            services.AddScoped<IRollMarkingReportJob, RollMarkingReportJob>();
-            services.AddScoped<ISchoolRegisterJob, SchoolRegisterJob>();
-            services.AddScoped<ISentralAwardSyncJob, SentralAwardSyncJob>();
-            services.AddScoped<ISentralFamilyDetailsSyncJob, SentralFamilyDetailsSyncJob>();
-            services.AddScoped<ISentralPhotoSyncJob, SentralPhotoSyncJob>();
-            services.AddScoped<ISentralReportSyncJob, SentralReportSyncJob>();
-            services.AddScoped<IUserManagerJob, UserManagerJob>();
+            options.UseSqlServer(configuration.GetConnectionString("TrackItConnection"));
+        });
 
-            return services;
-        }
+        services.AddScoped<ITrackItSyncJob, TrackItSyncJob>();
 
-        public static IServiceCollection AddExternalServiceGateways(this IServiceCollection services)
+        return services;
+    }
+
+    internal static IServiceCollection AddConstellationContext(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddDbContext<AppDbContext>(options =>
         {
-            services.AddTransient<IAdobeConnectGatewayConfiguration, AdobeConnectGatewayConfiguration>();
-            services.AddScoped<IAdobeConnectGateway, AdobeConnectGateway>();
+            options.UseSqlServer(
+                configuration.GetConnectionString("DefaultConnection"),
+                b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
+        });
 
-            services.AddTransient<ICanvasGatewayConfiguration, CanvasGatewayConfiguration>();
-            services.AddScoped<ICanvasGateway, CanvasGateway>();
+        services.AddScoped<IAppDbContext, AppDbContext>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            services.AddScoped<ICeseGateway, CeseGateway>();
+        services.AddApplicationServices();
 
-            services.AddTransient<ILinkShortenerGatewayConfiguration, LinkShortenerGatewayConfiguration>();
-            services.AddScoped<ILinkShortenerGateway, LinkShortenerGateway>();
+        return services;
+    }
 
-            services.AddTransient<INetworkStatisticsGatewayConfiguration, NetworkStatisticsGatewayConfiguration>();
-            services.AddScoped<INetworkStatisticsGateway, NetworkStatisticsGateway>();
+    // To be consolidated:
+    // 1. Move all email to a queue
+    // 2. Create an email queue worker to send emails
+    // 3. Register the worker, the razor enginge, and the gateway services as a single operation
+    // This would allow for separation of concerns and decoupling of the engine from presentation projects that don't require it
+    // Cannot be done as a BackgroundService without requiring the engine to be injected everywhere that queues work for the service.
+    // Seems to need to be a manual database queue that all front-ends can add to (possibly via Mediator?)
+    // Then a separate (possibly Hangfire) processor that simply pops work from the queue and processes it.
+    // Problem is that the database has to be generic enough to take all types of emails.
+    // Maybe I could use a serialized string for the data, and include a type call in the queue?
+    // e.g. EmailType = "StudentAbsenceNotification", Data = "{ to: [{emailname, email1}, {emailname, email2}]}" etc?
+    // But would need to figure out how to separately deal with attachments.
+    // Or, pull back and include the type and the reference, so the processor would compile the entire email itself
+    // e.g. EmailType = "StudentAbsenceNotification", Data = "{ studentId: 432109876, absenceId: xxxxx }"
+    internal static IServiceCollection AddEmailTemplateEngine(this IServiceCollection services)
+    {
+        services.AddTransient<IEmailGatewayConfiguration, EmailGatewayConfiguration>();
+        services.AddScoped<IEmailGateway, EmailGateway>();
 
-            services.AddScoped<ISchoolRegisterGateway, SchoolRegisterGateway>();
+        services.AddScoped<IEmailService, EmailService>();
 
-            services.AddTransient<ISentralGatewayConfiguration, SentralGatewayConfiguration>();
-            services.AddScoped<ISentralGateway, SentralGateway>();
+        services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
 
-            services.AddTransient<ISMSGatewayConfiguration, SMSGatewayConfiguration>();
-            services.AddScoped<ISMSGateway, SMSGateway>();
+        return services;
+    }
 
-            return services;
-        }
+    internal static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    {
+        services.AddScoped<IAbsenceService, AbsenceService>();
+        services.AddScoped<IActiveDirectoryActionsService, ActiveDirectoryActionsService>();
+        services.AddScoped<IAdobeConnectRoomService, AdobeConnectRoomService>();
+        services.AddScoped<IAdobeConnectService, AdobeConnectService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICalendarService, CalendarService>();
+        services.AddScoped<ICasualService, CasualService>();
+        services.AddSingleton<IClassMonitorCacheService, ClassMonitorCacheService>();
+        services.AddScoped<ICourseOfferingService, CourseOfferingService>();
+        services.AddScoped<ICoverService, CoverService>();
+        services.AddScoped<IDeviceService, DeviceService>();
+        services.AddScoped<IEnrolmentService, EnrolmentService>();
+        services.AddScoped<IExcelService, ExcelService>();
+        services.AddScoped<IExportService, ExportService>();
+        services.AddScoped(typeof(IJobDispatcherService<>), typeof(JobDispatcherService<>));
+        services.AddScoped<ILessonService, LessonService>();
+        services.AddScoped(typeof(ILogHandler<>), typeof(LogHandler<>));
+        services.AddScoped<IOperationService, OperationService>();
+        services.AddScoped<IPDFService, PDFService>();
+        services.AddScoped<ISchoolContactService, SchoolContactService>();
+        services.AddScoped<ISchoolService, SchoolService>();
+        services.AddScoped<ISentralService, SentralService>();
+        services.AddScoped<ISessionService, SessionService>();
+        services.AddScoped<ISMSService, SMSService>();
+        services.AddScoped<IStaffService, StaffService>();
+        services.AddScoped<IStudentService, StudentService>();
 
-        public static IServiceCollection AddTrackItContext(this IServiceCollection services, IConfiguration configuration)
+        return services;
+    }
+
+    internal static IServiceCollection AddStaffPortalAuthentication(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddIdentity<AppUser, AppRole>()
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+
+        services.Configure<IdentityOptions>(options =>
         {
-            services.AddDbContext<TrackItContext>(options =>
-            {
-                options.UseSqlServer(configuration.GetConnectionString("TrackItConnection"));
-            });
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequireUppercase = true;
+            options.Password.RequiredLength = 6;
+            options.Password.RequiredUniqueChars = 1;
+            options.User.RequireUniqueEmail = true;
+        });
 
-            services.AddScoped<ITrackItSyncJob, TrackItSyncJob>();
-
-            services.AddScoped<ITrackItSyncJob, TrackItSyncJob>();
-
-            return services;
-        }
-
-        public static IServiceCollection AddConstellationContext(this IServiceCollection services, IConfiguration configuration)
+        services.ConfigureApplicationCookie(options =>
         {
-            services.AddDbContext<AppDbContext>(options =>
-            {
-                options.UseSqlServer(
-                    configuration.GetConnectionString("DefaultConnection"),
-                    b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
-            });
+            options.Cookie.Name = "Constellation.Staff.Identity";
+            options.ExpireTimeSpan = TimeSpan.FromHours(7);
+            options.LoginPath = new PathString("/Admin/Login");
+            options.LogoutPath = new PathString("/Admin/Logout");
+        });
 
-            services.AddScoped<IAppDbContext, AppDbContext>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+        var clientId = configuration["Authentication:Microsoft:ClientId"];
+        var clientSecret = configuration["Authentication:Microsoft:ClientSecret"];
 
-            services.AddApplicationServices();
-
-            return services;
-        }
-
-        // To be consolidated:
-        // 1. Move all email to a queue
-        // 2. Create an email queue worker to send emails
-        // 3. Register the worker, the razor enginge, and the gateway services as a single operation
-        // This would allow for separation of concerns and decoupling of the engine from presentation projects that don't require it
-        // Cannot be done as a BackgroundService without requiring the engine to be injected everywhere that queues work for the service.
-        // Seems to need to be a manual database queue that all front-ends can add to (possibly via Mediator?)
-        // Then a separate (possibly Hangfire) processor that simply pops work from the queue and processes it.
-        // Problem is that the database has to be generic enough to take all types of emails.
-        // Maybe I could use a serialized string for the data, and include a type call in the queue?
-        // e.g. EmailType = "StudentAbsenceNotification", Data = "{ to: [{emailname, email1}, {emailname, email2}]}" etc?
-        // But would need to figure out how to separately deal with attachments.
-        // Or, pull back and include the type and the reference, so the processor would compile the entire email itself
-        // e.g. EmailType = "StudentAbsenceNotification", Data = "{ studentId: 432109876, absenceId: xxxxx }"
-        public static IServiceCollection AddEmailTemplateEngine(this IServiceCollection services)
+        if (!string.IsNullOrWhiteSpace(clientId) && !string.IsNullOrWhiteSpace(clientSecret))
         {
-            services.AddTransient<IEmailGatewayConfiguration, EmailGatewayConfiguration>();
-            services.AddScoped<IEmailGateway, EmailGateway>();
-
-            services.AddScoped<IEmailService, EmailService>();
-            
-            services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
-
-            return services;
-        }
-
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
-        {
-            services.AddScoped<IAbsenceService, AbsenceService>();
-            services.AddScoped<IActiveDirectoryActionsService, ActiveDirectoryActionsService>();
-            services.AddScoped<IAdobeConnectRoomService, AdobeConnectRoomService>();
-            services.AddScoped<IAdobeConnectService, AdobeConnectService>();
-            services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<ICalendarService, CalendarService>();
-            services.AddScoped<ICasualService, CasualService>();
-            services.AddSingleton<IClassMonitorCacheService, ClassMonitorCacheService>();
-            services.AddScoped<ICourseOfferingService, CourseOfferingService>();
-            services.AddScoped<ICoverService, CoverService>();
-            services.AddScoped<IDeviceService, DeviceService>();
-            services.AddScoped<IEnrolmentService, EnrolmentService>();
-            services.AddScoped<IExcelService, ExcelService>();
-            services.AddScoped<IExportService, ExportService>();
-            services.AddScoped(typeof(IJobDispatcherService<>), typeof(JobDispatcherService<>));
-            services.AddScoped<ILessonService, LessonService>();
-            services.AddScoped(typeof(ILogHandler<>), typeof(LogHandler<>));
-            services.AddScoped<IOperationService, OperationService>();
-            services.AddScoped<IPDFService, PDFService>();
-            services.AddScoped<ISchoolContactService, SchoolContactService>();
-            services.AddScoped<ISchoolService, SchoolService>();
-            services.AddScoped<ISentralService, SentralService>();
-            services.AddScoped<ISessionService, SessionService>();
-            services.AddScoped<ISMSService, SMSService>();
-            services.AddScoped<IStaffService, StaffService>();
-            services.AddScoped<IStudentService, StudentService>();
-
-            return services;
-        }
-
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddConstellationContext(configuration);
-
-            services.AddTrackItContext(configuration);
-
-            services.AddSingleton(Log.Logger);
-
-            services.AddHangfireJobs()
-                .AddExternalServiceGateways()
-                .AddEmailTemplateEngine()
-                .AddApplicationServices();
-
-            services.AddMediatR(Assembly.GetExecutingAssembly());
-
-            //services.Scan(scan => scan
-            //    .FromAssemblyOf<IApplicationService>()
-
-            //    .AddClasses(classes => classes.AssignableTo<IScopedService>())
-            //    .AsMatchingInterface()
-            //    .WithScopedLifetime()
-
-            //    .AddClasses(classes => classes.AssignableTo<ITransientService>())
-            //    .AsMatchingInterface()
-            //    .WithTransientLifetime()
-
-            //    .AddClasses(classes => classes.AssignableTo<ISingletonService>())
-            //    .AsMatchingInterface()
-            //    .WithSingletonLifetime()
-            //);
-
-            services.AddApplication();
-
-            return services;
-        }
-
-        public static IServiceCollection AddStandardAuthentication(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddIdentity<AppUser, AppRole>()
-                .AddUserManager<UserManager<AppUser>>()
-                .AddRoleManager<RoleManager<AppRole>>()
-                .AddSignInManager<SignInManager<AppUser>>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
-
-            services.Configure<IdentityOptions>(options =>
-            {
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 6;
-                options.Password.RequiredUniqueChars = 1;
-                options.User.RequireUniqueEmail = true;
-            });
-
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.Cookie.Name = "Constellation.Fallback.Identity";
-                options.ExpireTimeSpan = TimeSpan.FromHours(1);
-                options.LoginPath = new PathString("/Admin/Login");
-                options.LogoutPath = new PathString("/Admin/Logout");
-            });
-
-            return services;
-        }
-
-        public static IServiceCollection AddMainAppAuthentication(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddIdentity<AppUser, AppRole>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
-
-            services.Configure<IdentityOptions>(options =>
-            {
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 6;
-                options.Password.RequiredUniqueChars = 1;
-                options.User.RequireUniqueEmail = true;
-            });
-
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.Cookie.Name = "Constellation.Staff.Identity";
-                options.ExpireTimeSpan = TimeSpan.FromHours(7);
-                options.LoginPath = new PathString("/Admin/Login");
-                options.LogoutPath = new PathString("/Admin/Logout");
-            });
-
-            var clientId = configuration["Authentication:Microsoft:ClientId"];
-            var clientSecret = configuration["Authentication:Microsoft:ClientSecret"];
-
-            if (!string.IsNullOrWhiteSpace(clientId) && !string.IsNullOrWhiteSpace(clientSecret)) {
-                services.AddAuthentication()
-                    .AddMicrosoftAccount(options =>
-                    {
-                        options.ClientId = configuration["Authentication:Microsoft:ClientId"];
-                        options.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
-                    });
-            }
-
-            return services;
-        }
-
-        public static IServiceCollection AddParentPortalAuthentication(this IServiceCollection services)
-        {
-            services.AddIdentity<AppUser, AppRole>()
-                .AddUserManager<UserManager<AppUser>>()
-                .AddRoleManager<RoleManager<AppRole>>()
-                .AddSignInManager<SignInManager<AppUser>>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
-
-            services.Configure<IdentityOptions>(options =>
-            {
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 6;
-                options.Password.RequiredUniqueChars = 1;
-                options.User.RequireUniqueEmail = true;
-            });
-
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.Cookie.Name = "Constellation.Parents.Identity";
-                options.ExpireTimeSpan = TimeSpan.FromHours(1);
-                options.LoginPath = new PathString("/Portal/Parents/Identity/Login");
-                options.LogoutPath = new PathString("/Portal/Parents/Identity/Logout");
-            });
-
-            return services;
-        }
-
-        public static IServiceCollection AddSchoolPortalAuthentication(this IServiceCollection services)
-        {
-            services.AddIdentity<AppUser, AppRole>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
-
-            services.Configure<IdentityOptions>(options =>
-            {
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 6;
-                options.Password.RequiredUniqueChars = 1;
-                options.User.RequireUniqueEmail = true;
-            });
-
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.Cookie.Name = "Constellation.Schools.Identity";
-                options.ExpireTimeSpan = TimeSpan.FromHours(1);
-                options.LoginPath = new PathString("/Portal/School/Auth/Login");
-                options.LogoutPath = new PathString("/Portal/School/Auth/LogOut");
-            });
-
-            return services;
-        }
-
-        public static IServiceCollection AddParentPortalInfrastructureComponents(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddConstellationContext(configuration)
-                //.AddTrackItContext(configuration)
-                .AddExternalServiceGateways()
-                .AddEmailTemplateEngine();
-
-            services.AddDefaultIdentity<AppUser>()
-                .AddRoles<AppRole>()
-                .AddUserManager<UserManager<AppUser>>()
-                .AddRoleManager<RoleManager<AppRole>>()
-                .AddSignInManager<SignInManager<AppUser>>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddPasswordlessLoginProvider();
-
-            // Due to IS5 stupidity, the subsite configuration must be lower case:
-            // https://stackoverflow.com/questions/62563174/identityserver4-authorization-error-not-matching-redirect-uri
-
-            services.AddIdentityServer()
-                .AddApiAuthorization<AppUser, AppDbContext>();
-
             services.AddAuthentication()
-                .AddIdentityServerJwt();
-
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.Cookie.Name = "Constellation.Parents.Identity";
-                options.ExpireTimeSpan = TimeSpan.FromHours(1);
-            });
-
-            services.AddSingleton(Log.Logger);
-
-            services.AddMediatR(new[] { Assembly.GetExecutingAssembly(), typeof(IAppDbContext).Assembly });
-
-            services.AddConstellationContext(configuration);
-
-            //services.Scan(scan => scan
-            //    .FromAssemblyOf<IApplicationService>()
-
-            //    .AddClasses(classes => classes.AssignableTo<IScopedService>())
-            //    .AsMatchingInterface()
-            //    .WithScopedLifetime()
-
-            //    .AddClasses(classes => classes.AssignableTo<ITransientService>())
-            //    .AsMatchingInterface()
-            //    .WithTransientLifetime()
-
-            //    .AddClasses(classes => classes.AssignableTo<ISingletonService>())
-            //    .AsMatchingInterface()
-            //    .WithSingletonLifetime()
-            //);
-
-            services.AddApplication();
-
-            return services;
+                .AddMicrosoftAccount(options =>
+                {
+                    options.ClientId = configuration["Authentication:Microsoft:ClientId"];
+                    options.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
+                });
         }
+
+        return services;
+    }
+
+    internal static IServiceCollection AddSchoolPortalAuthentication(this IServiceCollection services)
+    {
+        services.AddIdentity<AppUser, AppRole>()
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+
+        services.Configure<IdentityOptions>(options =>
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequireUppercase = true;
+            options.Password.RequiredLength = 6;
+            options.Password.RequiredUniqueChars = 1;
+            options.User.RequireUniqueEmail = true;
+        });
+
+        services.ConfigureApplicationCookie(options =>
+        {
+            options.Cookie.Name = "Constellation.Schools.Identity";
+            options.ExpireTimeSpan = TimeSpan.FromHours(1);
+            options.LoginPath = new PathString("/Portal/School/Auth/Login");
+            options.LogoutPath = new PathString("/Portal/School/Auth/LogOut");
+        });
+
+        return services;
+    }
+
+    internal static IServiceCollection AddParentPortalAuthentication(this IServiceCollection services)
+    {
+        services.AddDefaultIdentity<AppUser>()
+            .AddRoles<AppRole>()
+            .AddUserManager<UserManager<AppUser>>()
+            .AddRoleManager<RoleManager<AppRole>>()
+            .AddSignInManager<SignInManager<AppUser>>()
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddPasswordlessLoginProvider();
+
+        // Due to IS5 stupidity, the subsite configuration must be lower case:
+        // https://stackoverflow.com/questions/62563174/identityserver4-authorization-error-not-matching-redirect-uri
+
+        services.AddIdentityServer()
+            .AddApiAuthorization<AppUser, AppDbContext>();
+
+        services.AddAuthentication()
+            .AddIdentityServerJwt();
+
+        services.ConfigureApplicationCookie(options =>
+        {
+            options.Cookie.Name = "Constellation.Parents.Identity";
+            options.ExpireTimeSpan = TimeSpan.FromHours(1);
+        });
+
+        return services;
     }
 }

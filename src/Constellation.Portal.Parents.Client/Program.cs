@@ -14,11 +14,9 @@ builder.Services.AddHttpClient("Constellation.Portal.Parents.ServerAPI", client 
 // Supply HttpClient instances that include access tokens when making requests to the server project
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("Constellation.Portal.Parents.ServerAPI"));
 
-//builder.Services.AddOptions();
-//builder.Services.AddAuthorizationCore();
-
 builder.Services.AddApiAuthorization();
 
+// Update culture to always run in en-AU location to ensure that dates are formatted correctly
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-AU");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-AU");
 

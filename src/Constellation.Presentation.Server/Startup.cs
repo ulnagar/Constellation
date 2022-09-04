@@ -1,5 +1,4 @@
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Presentation.Server.Infrastructure;
 using FluentValidation;
@@ -7,7 +6,6 @@ using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,8 +28,7 @@ namespace Constellation.Presentation.Server
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddInfrastructure(Configuration);
-            services.AddMainAppAuthentication(Configuration);
+            services.AddStaffPortalInfrastructureComponents(Configuration);
 
             services.AddHangfire((provider, configuration) => configuration
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
