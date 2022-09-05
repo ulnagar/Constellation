@@ -31,22 +31,57 @@ public class AbsenceDto : IMapFrom<Absence>
     public string PeriodTimeframe { get; set; }
     public int AbsenceLength { get; set; }
     public string AbsenceTimeframe { get; set; }
+    public string AbsenceReason { get; set; }
     public string OfferingName { get; set; }
-    public string Reason { get; set; }
+    public string Explanation { get; set; }
+    public AbsenceStatus Status => GetAbsenceStatus();
     public bool Explained { get; set; }
 
     public void Mapping(Profile profile)
     {
         profile.CreateMap<Absence, AbsenceDto>()
-            .ForMember(dest => dest.Reason, opt =>
+            .ForMember(dest => dest.Explanation, opt =>
             {
-                opt.PreCondition(src => src.Responses.Any(response => response.VerificationStatus == AbsenceResponse.Pending));
-                opt.MapFrom(src => src.Responses.First(response => response.VerificationStatus == AbsenceResponse.Pending).Explanation);
+                //opt.PreCondition(src => src.Responses.Any(response => response.VerificationStatus == AbsenceResponse.Pending));
+                //opt.MapFrom(src => src.Responses.First(response => response.VerificationStatus == AbsenceResponse.Pending).Explanation);
+                opt.MapFrom(src => (string.IsNullOrWhiteSpace(src.ExternalExplanation)) ? src.Responses.First().Explanation : src.ExternalExplanation);
             })
             .ForMember(dest => dest.Explained, opt =>
             {
-                opt.MapFrom(src => src.ExternallyExplained || src.Responses.Any(response => response.Type == AbsenceResponse.Parent || response.Type == AbsenceResponse.System || response.VerificationStatus == AbsenceResponse.Verified));
+                opt.MapFrom(src => src.ExternallyExplained || 
+                    src.Responses.Any(response => response.Type == AbsenceResponse.Parent) || 
+                    src.Responses.Any(response => response.Type == AbsenceResponse.System) ||
+                    src.Responses.Any(response => response.Type == AbsenceResponse.Coordinator) ||
+                    src.Responses.Any(response => response.Type == AbsenceResponse.Student && response.VerificationStatus == AbsenceResponse.Verified));
             });
+    }
+
+    public AbsenceStatus GetAbsenceStatus()
+    {
+        if (Type == Absence.Whole)
+        {
+            if (Explained)
+                return AbsenceStatus.ExplainedWhole;
+            else
+                return AbsenceStatus.UnexplainedWhole;
+        }
+
+        //if (Type == Absence.Partial)
+        if (Explained)
+            return AbsenceStatus.VerifiedPartial;
+        else if (!string.IsNullOrWhiteSpace(Explanation))
+            return AbsenceStatus.UnverifiedPartial;
+        else
+            return AbsenceStatus.UnexplainedPartial;
+    }
+
+    public enum AbsenceStatus
+    {
+        UnexplainedPartial = 1,
+        UnverifiedPartial = 2,
+        UnexplainedWhole = 3,
+        VerifiedPartial = 4,
+        ExplainedWhole = 5
     }
 }
 
