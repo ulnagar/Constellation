@@ -9,7 +9,6 @@ namespace Constellation.Application.Interfaces.Services
     {
         ServiceOperationResult<StudentWholeAbsence> CreateWholeAbsence(WholeAbsenceDto absenceResource);
         ServiceOperationResult<StudentPartialAbsence> CreatePartialAbsence(PartialAbsenceDto absenceResource);
-        Task CreateSingleParentExplanation(Guid absenceId, string explanation);
         Task CreateSingleStudentExplanation(Guid absenceId, string explanation);
         Task CreateSingleCoordinatorExplanation(Guid absenceId, string explanation, string userName);
         Task RecordCoordinatorVerificationOfPartialExplanation(Guid responseId, bool isVerified, string comment, string username);

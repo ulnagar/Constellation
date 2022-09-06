@@ -34,23 +34,32 @@ public class AbsenceDetailDto : IMapFrom<Absence>
     public string Reason { get; set; }
     public string Validation { get; set; }
     public string ValidatedBy { get; set; }
+    public bool Explained { get; set; }
 
     public void Mapping(Profile profile)
     {
         profile.CreateMap<Absence, AbsenceDetailDto>()
             .ForMember(dest => dest.Reason, opt =>
             {
-                opt.MapFrom(src => (src.ExternallyExplained) ? src.ExternalExplanation : src.Responses.First().Explanation);
+                opt.MapFrom(src => (string.IsNullOrWhiteSpace(src.ExternalExplanation)) ? src.Responses.First().Explanation : src.ExternalExplanation);
             })
             .ForMember(dest => dest.Validation, opt =>
             {
-                opt.PreCondition(src => src.Responses.Any(response => response.VerificationStatus == AbsenceResponse.Pending));
+                opt.PreCondition(src => src.Type == Absence.Partial);
                 opt.MapFrom(src => src.Responses.First(response => response.VerificationStatus == AbsenceResponse.Pending).VerificationStatus);
             })
             .ForMember(dest => dest.ValidatedBy, opt =>
             {
-                opt.PreCondition(src => src.Responses.Any(response => response.VerificationStatus == AbsenceResponse.Pending));
+                opt.PreCondition(src => src.Type == Absence.Partial);
                 opt.MapFrom(src => src.Responses.First(response => response.VerificationStatus == AbsenceResponse.Pending).Verifier);
+            })
+            .ForMember(dest => dest.Explained, opt =>
+            {
+                opt.MapFrom(src => src.ExternallyExplained ||
+                    src.Responses.Any(response => response.Type == AbsenceResponse.Parent) ||
+                    src.Responses.Any(response => response.Type == AbsenceResponse.System) ||
+                    src.Responses.Any(response => response.Type == AbsenceResponse.Coordinator) ||
+                    src.Responses.Any(response => response.Type == AbsenceResponse.Student && response.VerificationStatus == AbsenceResponse.Verified));
             });
     }
 }

@@ -1,6 +1,8 @@
+using Constellation.Application.Features.Attendance.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
@@ -14,11 +16,13 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAbsenceService _absenceService;
+        private readonly IMediator _mediator;
 
-        public ParentExplanationModel(IUnitOfWork unitOfWork, IAbsenceService absenceService)
+        public ParentExplanationModel(IUnitOfWork unitOfWork, IAbsenceService absenceService, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _absenceService = absenceService;
+            _mediator = mediator;
         }
 
         [BindProperty]
@@ -61,7 +65,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
             if (!ModelState.IsValid)
                 return Page();
 
-            await _absenceService.CreateSingleParentExplanation(Absence.AbsenceId, Absence.Reason);
+            await _mediator.Send(new ProvideParentWholeAbsenceExplanationCommand { AbsenceId = Absence.AbsenceId, Comment = Absence.Reason });
 
             return RedirectToPage("/Absences/Parents", new { area = "Portal", studentId = Absence.StudentId });
         }

@@ -1,8 +1,10 @@
 ﻿@page "/Attendance/Details/{id:guid}"
 
+@using Constellation.Application.Features.Attendance.Commands
 @using Constellation.Application.Features.Attendance.Queries;
 
 @inject HttpClient Http
+@inject NavigationManager navManager
 
 @attribute [Authorize]
 
@@ -16,31 +18,82 @@
 
 <h3>@Absence.Type absence for @Absence.StudentName</h3>
 
-<div>
-    Date: @Absence.Date.ToShortDateString()
+<div class="form-group">
+    <label>Date</label>
+    <span class="form-control">@Absence.Date.ToShortDateString()</span>
 </div>
 
-<div>
-    Class: @Absence.OfferingName
+<div class="form-group">
+    <label>Class</label>
+    <span class="form-control">@Absence.OfferingName</span>
 </div>
 
-<div>
-    Absence: @Absence.AbsenceTimeframe
+<div class="form-group">
+    <label>Absence</label>
+    <span class="form-control">@Absence.AbsenceTimeframe</span>
 </div>
 
-<div>
-    @if(string.IsNullOrWhiteSpace(Absence.Reason)){
-        //Form
-        <input type="text" placeholder="Absence Reason" />
-    } else {
-        <span>Reason: @Absence.Reason</span>
+@if (Absence.Type == Constellation.Core.Models.Absence.Whole)
+{
+    @if (Absence.Explained)
+    {
+        <div class="form-group">
+            <label>Explanation</label>
+            <span class="form-control">@Absence.Reason</span>
+        </div>
+    } else
+    {
+        <EditForm Model="Command" OnValidSubmit="SubmitResponse">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group">
+                <label for="Command.Comment">Explanation</label>
+                <InputTextArea @bind-Value="Command.Comment" rows="5" cols="100" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <button class="btn btn-success btn-lg" type="submit">Submit</button>
+            </div>
+        </EditForm>
     }
-</div>
+}
+
+@if (Absence.Type == Constellation.Core.Models.Absence.Partial)
+{
+    @if (Absence.Explained)
+    {
+        <div class="form-group">
+            <label>Explanation</label>
+            <span class="form-control">
+                @Absence.Reason<br />
+                @Absence.Validation by @Absence.ValidatedBy
+            </span>
+        </div>
+    } else if (Absence.Validation == Core.Models.AbsenceResponse.Pending)
+    {
+        <div class="form-group">
+            <label>Explanation</label>
+            <span class="form-control">
+                @Absence.Reason<br />
+                Pending verification by Aurora College Coordinator
+            </span>
+        </div>
+    } else
+    {
+        <div class="form-group">
+            <label>Explanation</label>
+            <span class="form-control">Pending explanation by @Absence.StudentName
+            </span>
+        </div>
+    }
+}
 
 @code {
     [Parameter] public Guid Id { get; set; }
 
     internal AbsenceDetailDto Absence { get; set; } = new();
+    public ProvideParentWholeAbsenceExplanationCommand Command { get; set; } = new();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -52,5 +105,14 @@
         {
             exception.Redirect();
         }
+    }
+
+    async Task SubmitResponse()
+    {
+        Command.AbsenceId = Id;
+
+        await Http.PostAsJsonAsync<ProvideParentWholeAbsenceExplanationCommand>($"Attendance/ParentExplanation", Command);
+
+        navManager.NavigateTo("Attendance");
     }
 }
