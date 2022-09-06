@@ -1,4 +1,4 @@
-﻿@page "/Attendance/Details/{id:guid}"
+﻿@page "/Attendance/Absences/Details/{id:guid}"
 
 @using Constellation.Application.Features.Attendance.Commands
 @using Constellation.Application.Features.Attendance.Queries;
@@ -9,14 +9,14 @@
 @attribute [Authorize]
 
 <div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mb-1">
-    <a href="attendance" class="btn btn-primary"><i class="fas fa-long-arrow-left" /> Go Back</a>
+    <a href="attendance/absences" class="btn btn-primary"><i class="fas fa-long-arrow-left" /> Go Back</a>
 </div>
 
 <div class="d-none d-lg-block d-xl-block d-xxl-block mb-1">
-    <a href="attendance" class="btn btn-primary"><i class="fas fa-long-arrow-left" /> Go Back</a>
+    <a href="attendance/absences" class="btn btn-primary"><i class="fas fa-long-arrow-left" /> Go Back</a>
 </div>
 
-<h3>@Absence.Type absence for @Absence.StudentName</h3>
+<h2>@Absence.Type absence for @Absence.StudentName</h2>
 
 <EditForm Model="Command" OnValidSubmit="SubmitResponse">
     <DataAnnotationsValidator />
@@ -166,6 +166,6 @@
 
         await Http.PostAsJsonAsync<ProvideParentWholeAbsenceExplanationCommand>($"Attendance/ParentExplanation", Command);
 
-        navManager.NavigateTo("Attendance");
+        navManager.NavigateTo("Attendance/Absences");
     }
 }
