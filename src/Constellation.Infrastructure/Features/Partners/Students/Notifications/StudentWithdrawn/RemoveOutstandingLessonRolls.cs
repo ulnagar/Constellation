@@ -39,7 +39,7 @@ namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.
 
                 _logger.Information("Removed student from lesson {lessonName}", lesson.Lesson.Name);
 
-                if (lesson.Attendance.Count <= 1)
+                if (lesson.Attendance.Count < 1)
                 {
                     _logger.Information("Removing empty roll for lesson {lesson} at school {school}", lesson.Lesson.Name, lesson.SchoolCode);
                     _context.Remove(lesson);
