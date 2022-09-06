@@ -80,6 +80,8 @@ namespace Constellation.Infrastructure.Services
             if (absence == null)
                 return;
 
+            var student = await _unitOfWork.Students.ForEditAsync(absence.StudentId);
+
             var response = new AbsenceResponse()
             {
                 Type = AbsenceResponse.Coordinator,
@@ -92,7 +94,8 @@ namespace Constellation.Infrastructure.Services
             await _unitOfWork.CompleteAsync();
 
             notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
-            notificationEmail.WholeAbsences.Add(absence);
+            notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response));
+            notificationEmail.StudentName = student.DisplayName;
 
             await _emailService.SendAbsenceReasonToSchoolAdmin(notificationEmail);
             response.Forwarded = true;
@@ -171,10 +174,14 @@ namespace Constellation.Infrastructure.Services
 
             await _unitOfWork.CompleteAsync();
 
+            var absence = await _unitOfWork.Absences.ForSendingNotificationAsync(response.AbsenceId.ToString());
+            var student = await _unitOfWork.Students.ForEditAsync(absence.StudentId);
+
             var notificationEmail = new EmailDtos.AbsenceResponseEmail();
 
             notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
-            notificationEmail.WholeAbsences.Add(response.Absence);
+            notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response));
+            notificationEmail.StudentName = student.DisplayName;
 
             await _emailService.SendAbsenceReasonToSchoolAdmin(notificationEmail);
             response.Forwarded = true;

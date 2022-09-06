@@ -405,36 +405,19 @@ namespace Constellation.Infrastructure.Services
                 SenderName = absenceSettings.AbsenceCoordinatorName,
                 SenderTitle = absenceSettings.AbsenceCoordinatorTitle,
                 Title = "Absence Explanation Received",
-                StudentName = notificationEmail.WholeAbsences.First().Student.DisplayName
-            };
+                StudentName = notificationEmail.StudentName
+            }; 
 
             foreach (var absence in notificationEmail.WholeAbsences)
             {
-                var reportedBy = "UNKNOWN SOURCE";
-                var response = absence.Responses.First();
-
-                if (response.Type == AbsenceResponse.Coordinator)
-                    reportedBy = $"Reported by {response.From} (ACC)";
-                else if (response.Type == AbsenceResponse.Parent)
-                    reportedBy = "Reported by Parent";
-                else if (response.Type == AbsenceResponse.Student)
-                {
-                    var status = (response.VerificationStatus == AbsenceResponse.Verified) ? "verified" : "rejected";
-
-                    reportedBy = $"Reported by Student and <strong>{status}</strong> by {response.Verifier} (ACC)";
-
-                    if (!string.IsNullOrWhiteSpace(response.VerificationComment))
-                        reportedBy += $"<br />with comment: {response.VerificationComment}";
-                }
-
                 viewModel.Absences.Add(new AbsenceExplanationToSchoolAdminEmailViewModel.AbsenceDto
                 {
-                    AbsenceDate = absence.Date,
-                    PeriodName = $"{absence.PeriodName} ({absence.PeriodTimeframe})",
-                    ClassName = absence.Offering.Name,
-                    Explanation = absence.Responses.First().Explanation,
-                    Source = reportedBy,
-                    Type = absence.Type,
+                    AbsenceDate = absence.AbsenceDate,
+                    PeriodName = absence.PeriodName,
+                    ClassName = absence.ClassName,
+                    Explanation = absence.Explanation,
+                    Source = absence.ReportedBy,
+                    Type = absence.AbsenceType,
                     AbsenceTime = absence.AbsenceTimeframe 
                 });
             }

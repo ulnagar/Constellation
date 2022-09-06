@@ -31,12 +31,16 @@ public class SendAbsenceExplanationToAdmin : INotificationHandler<AbsenceExplana
     {
         var absence = await _context.Absences
             .Include(absence => absence.Responses)
+            .Include(absence => absence.Offering)
             .FirstOrDefaultAsync(absence => absence.Responses.Any(response => response.Id == notification.AbsenceResponseId), cancellationToken);
 
         var response = absence.Responses.First(response => response.Id == notification.AbsenceResponseId);
 
         if (absence.Type != Absence.Whole && response.VerificationStatus != AbsenceResponse.Verified)
             return;
+
+        var student = await _context.Students
+            .FirstOrDefaultAsync(student => student.StudentId == absence.StudentId, cancellationToken);
 
         var teachers = await _context.Sessions
             .Where(session => !session.IsDeleted && session.OfferingId == absence.OfferingId)
@@ -48,7 +52,8 @@ public class SendAbsenceExplanationToAdmin : INotificationHandler<AbsenceExplana
 
         notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
         notificationEmail.Recipients.AddRange(teachers);
-        notificationEmail.WholeAbsences.Add(absence);
+        notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response));
+        notificationEmail.StudentName = student.DisplayName;
 
         await _emailService.SendAbsenceReasonToSchoolAdmin(notificationEmail);
 

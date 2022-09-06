@@ -30,6 +30,7 @@ public class AbsenceDetailDto : IMapFrom<Absence>
     public string PeriodTimeframe { get; set; }
     public int AbsenceLength { get; set; }
     public string AbsenceTimeframe { get; set; }
+    public string AbsenceReason { get; set; }
     public string OfferingName { get; set; }
     public string Reason { get; set; }
     public string Validation { get; set; }
@@ -46,12 +47,12 @@ public class AbsenceDetailDto : IMapFrom<Absence>
             .ForMember(dest => dest.Validation, opt =>
             {
                 opt.PreCondition(src => src.Type == Absence.Partial);
-                opt.MapFrom(src => src.Responses.First(response => response.VerificationStatus == AbsenceResponse.Pending).VerificationStatus);
+                opt.MapFrom(src => src.Responses.Max(response => response.VerificationStatus));
             })
             .ForMember(dest => dest.ValidatedBy, opt =>
             {
                 opt.PreCondition(src => src.Type == Absence.Partial);
-                opt.MapFrom(src => src.Responses.First(response => response.VerificationStatus == AbsenceResponse.Pending).Verifier);
+                opt.MapFrom(src => src.Responses.First(response => !string.IsNullOrWhiteSpace(response.Verifier)).Verifier);
             })
             .ForMember(dest => dest.Explained, opt =>
             {

@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="logs\**" />
+    <Content Remove="logs\**" />
+    <EmbeddedResource Remove="logs\**" />
+    <None Remove="logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="11.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.7" />
   </ItemGroup>
