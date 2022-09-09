@@ -101,7 +101,7 @@ namespace Constellation.Infrastructure.Gateways
             return null;
         }
 
-        private async Task<HtmlDocument> PostPageAsync(string uri, List<KeyValuePair<string,string>> payload)
+        private async Task<HtmlDocument> PostPageAsync(string uri, List<KeyValuePair<string, string>> payload)
         {
             for (int i = 1; i < 6; i++)
             {
@@ -564,6 +564,112 @@ namespace Constellation.Infrastructure.Gateways
             }
 
             return nonSchoolDays.OrderBy(a => a).ToList();
+        }
+
+        public async Task<List<ValidAttendenceReportDate>> GetValidAttendanceReportDatesFromCalendar(string year)
+        {
+            var validDates = new List<ValidAttendenceReportDate>();
+
+            var page = await GetPageAsync($"{_settings.Server}/admin/settings/school/calendar/{year}/term");
+
+            if (page == null)
+                return validDates;
+
+            var calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "TermCalendarTable").Value);
+
+            if (calendarTable != null)
+            {
+                var TermName = "";
+                var WeekName = "";
+
+                var rows = calendarTable.Descendants("tr").ToList();
+
+                for (int row = 0; row < rows.Count - 1; row++)
+                {
+                    var firstChildNode = rows[row].ChildNodes.Where(node => node.Name != "#text").First();
+                     
+                    if (firstChildNode.Name == "td" && firstChildNode.GetAttributeValue("colspan", 0) > 1)
+                    {
+                        // This is a header row with the term name
+                        var nodes = firstChildNode.Descendants("b");
+                        foreach (var node in nodes)
+                        {
+                            if (node.InnerText.Contains("Term"))
+                            {
+                                TermName = node.InnerText.Trim();
+                            }
+                        }
+                    }
+
+                    if (firstChildNode.Name == "th")
+                    {
+                        if (firstChildNode.InnerText.Trim() == "11")
+                        {
+                            // This is a calendar row starting with the week number
+                            WeekName = $"Week {firstChildNode.InnerText.Trim()}";
+
+                            var entry = new ValidAttendenceReportDate
+                            {
+                                Description = $"{TermName} {WeekName}"
+                            };
+
+                            var startDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[1].GetAttributeValue("onclick", "");
+                            if (!string.IsNullOrWhiteSpace(startDateAction))
+                            {
+                                var detectedDate = startDateAction.Split('\'')[1];
+                                var date = DateTime.Parse(detectedDate);
+
+                                entry.StartDate = date;
+                            }
+
+                            var endDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[5].GetAttributeValue("onclick", "");
+                            if (!string.IsNullOrWhiteSpace(endDateAction))
+                            {
+                                var detectedDate = endDateAction.Split('\'')[1];
+                                var date = DateTime.Parse(detectedDate);
+
+                                entry.EndDate = date;
+                            }
+
+                            validDates.Add(entry);
+                        }
+                        else
+                        {
+                            // This is a calendar row starting with the week number
+                            WeekName = $"Week {firstChildNode.InnerText.Trim()} - Week {rows[row + 1].ChildNodes.Where(node => node.Name != "#text").First().InnerText.Trim()}";
+
+                            var entry = new ValidAttendenceReportDate
+                            {
+                                Description = $"{TermName} {WeekName}"
+                            };
+
+                            var startDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[1].GetAttributeValue("onclick", "");
+                            if (!string.IsNullOrWhiteSpace(startDateAction))
+                            {
+                                var detectedDate = startDateAction.Split('\'')[1];
+                                var date = DateTime.Parse(detectedDate);
+
+                                entry.StartDate = date;
+                            }
+
+                            var endDateAction = rows[row + 1].ChildNodes.Where(node => node.Name != "#text").ToArray()[5].GetAttributeValue("onclick", "");
+                            if (!string.IsNullOrWhiteSpace(endDateAction))
+                            {
+                                var detectedDate = endDateAction.Split('\'')[1];
+                                var date = DateTime.Parse(detectedDate);
+
+                                entry.EndDate = date;
+                            }
+
+                            validDates.Add(entry);
+
+                            row++;
+                        }
+                    }
+                }
+            }
+
+            return validDates.OrderBy(date => date.StartDate).ToList();
         }
 
         public async Task<IDictionary<string, IDictionary<string, string>>> GetParentContactEntry(string sentralStudentId)

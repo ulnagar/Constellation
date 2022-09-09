@@ -1,7 +1,9 @@
 namespace Constellation.Portal.Parents.Server.Controllers;
 
+using Constellation.Application.DTOs;
 using Constellation.Application.Features.Attendance.Commands;
 using Constellation.Application.Features.Attendance.Queries;
+using Constellation.Infrastructure.Templates.Views.Documents.Attendance;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -50,4 +52,23 @@ public class AttendanceController : BaseAPIController
 
         return Ok();
     }
+
+    [HttpGet("Reports/Dates")]
+    public async Task<IList<ValidAttendenceReportDate>> GetReportDates()
+    {
+        return await _mediator.Send(new GetValidAttendenceReportDatesQuery());
+    }
+
+    [HttpPost("Reports/Download")]
+    public async Task<IActionResult> GetAttendanceReport([FromBody] AttendanceReportRequest request)
+    {
+        // Create file as stream
+        var stream = await _mediator.Send(new GetAttendanceReportForStudentQuery { StudentId = request.StudentId, StartDate = request.StartDate, EndDate = request.EndDate });
+
+        var filename = $"Attendance Report - {request.StartDate:yyyy-MM-dd}.pdf";
+
+        return File(stream, "application/pdf", filename);
+    }
+
+
 }
