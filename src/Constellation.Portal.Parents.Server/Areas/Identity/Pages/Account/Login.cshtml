@@ -34,7 +34,8 @@
                         </div>
 
                         <div>
-                            <input id="login-submit" type="button" class="w-100 btn btn-lg btn-primary" value="Send me my link" />
+                            @*<input id="login-submit" type="button" class="w-100 btn btn-lg btn-primary" value="Send me my link" />*@
+                            <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Send me my link</button>
                         </div>
                     </form>
             }
@@ -56,16 +57,13 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
-<script>
-    $(document).ready(function () {
-        $('#login-submit').on('click',
-            function (event) {
-                console.log('clicked!');
-                $('#login-submit').prop('disabled', true);
-                console.log('disabled!');
-                $('#account').submit();
-                console.log('submitted!');
+    <script>
+        $(document).ready(function() {
+            $('#account').on('submit',
+                function(event) {
+                    //console.log('submitted');
+                    $('#login-submit').prop('disabled', true);
+                });
         });
-    });
-</script>
+    </script>
 }

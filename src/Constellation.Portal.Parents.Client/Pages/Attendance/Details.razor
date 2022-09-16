@@ -8,148 +8,153 @@
 
 @attribute [Authorize]
 
-<div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mb-1">
-    <a href="attendance/absences" class="btn btn-primary"><i class="fas fa-long-arrow-left" /> Go Back</a>
-</div>
+<Loader IsLoading="ShowLoader">
+    <div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mb-1">
+        <a href="attendance/absences" class="btn btn-primary"><i class="fas fa-long-arrow-left" /> Go Back</a>
+    </div>
 
-<div class="d-none d-lg-block d-xl-block d-xxl-block mb-1">
-    <a href="attendance/absences" class="btn btn-primary"><i class="fas fa-long-arrow-left" /> Go Back</a>
-</div>
+    <div class="d-none d-lg-block d-xl-block d-xxl-block mb-1">
+        <a href="attendance/absences" class="btn btn-primary"><i class="fas fa-long-arrow-left" /> Go Back</a>
+    </div>
 
-<h2>@Absence.Type absence for @Absence.StudentName</h2>
+    <h2>@Absence.Type absence for @Absence.StudentName</h2>
 
-<EditForm Model="Command" OnValidSubmit="SubmitResponse">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+    <EditForm Model="Command" OnValidSubmit="SubmitResponse">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-    <div class="d-sm-flex flex-column flex-lg-row border-bottom mt-3">
-        <div class="mb-2 col-md-2">
-            <strong>Status</strong>
-        </div>
-        <div class="mb-2 col-md-10">
-            @if (Absence.Type == Constellation.Core.Models.Absence.Whole)
-            {
-                @if (Absence.Explained)
+        <div class="d-sm-flex flex-column flex-lg-row border-bottom mt-3">
+            <div class="mb-2 col-md-2">
+                <strong>Status</strong>
+            </div>
+            <div class="mb-2 col-md-10">
+                @if (Absence.Type == Constellation.Core.Models.Absence.Whole)
                 {
-                    <span><i class="fas fa-check" /> Explained Whole Absence</span>
-                } else
-                {
-                    <span><i class="fas fa-exclamation" /> Unexplained Whole Absence</span>
+                    @if (Absence.Explained)
+                    {
+                        <span><i class="fas fa-check" /> Explained Whole Absence</span>
+                    } else
+                    {
+                        <span><i class="fas fa-exclamation" /> Unexplained Whole Absence</span>
+                    }
                 }
-            }
 
-            @if (Absence.Type == Constellation.Core.Models.Absence.Partial)
-            {
-                @if (Absence.Explained && Absence.AbsenceReason != "Absent")
+                @if (Absence.Type == Constellation.Core.Models.Absence.Partial)
                 {
-                    <span><i class="fas fa-check" /> Explained Partial Absence via @Absence.AbsenceReason</span>
-                } else if (Absence.Validation == Constellation.Core.Models.AbsenceResponse.Verified)
-                {
-                    <span><i class="fas fa-check" /> @Absence.Validation Partial Absence</span>
-                } else if (Absence.Validation == Constellation.Core.Models.AbsenceResponse.Rejected)
-                {
-                    <span><i class="fas fa-exclamation" /> @Absence.Validation Partial Absence</span>
-                } else if (Absence.Validation == Constellation.Core.Models.AbsenceResponse.Pending)
-                {
-                    <span><i class="fas fa-question" /> @Absence.Validation Partial Absence</span>
-                } else
-                {
-                    <span><i class="fas fa-exclamation" /> Unexplained Partial Absence</span>
+                    @if (Absence.Explained && Absence.AbsenceReason != "Absent")
+                    {
+                        <span><i class="fas fa-check" /> Explained Partial Absence via @Absence.AbsenceReason</span>
+                    } else if (Absence.Validation == Constellation.Core.Models.AbsenceResponse.Verified)
+                    {
+                        <span><i class="fas fa-check" /> @Absence.Validation Partial Absence</span>
+                    } else if (Absence.Validation == Constellation.Core.Models.AbsenceResponse.Rejected)
+                    {
+                        <span><i class="fas fa-exclamation" /> @Absence.Validation Partial Absence</span>
+                    } else if (Absence.Validation == Constellation.Core.Models.AbsenceResponse.Pending)
+                    {
+                        <span><i class="fas fa-question" /> @Absence.Validation Partial Absence</span>
+                    } else
+                    {
+                        <span><i class="fas fa-exclamation" /> Unexplained Partial Absence</span>
+                    }
                 }
-            }
+            </div>
         </div>
-    </div>
 
-    <div class="d-sm-flex flex-column flex-lg-row border-bottom mt-1">
-        <div class="mb-2 col-md-2">
-            <strong>Date</strong>
+        <div class="d-sm-flex flex-column flex-lg-row border-bottom mt-1">
+            <div class="mb-2 col-md-2">
+                <strong>Date</strong>
+            </div>
+            <div class="mb-2 col-md-10">
+                <span>@Absence.Date.ToShortDateString()</span>
+            </div>
         </div>
-        <div class="mb-2 col-md-10">
-            <span>@Absence.Date.ToShortDateString()</span>
-        </div>
-    </div>
 
-    <div class="d-sm-flex flex-column flex-lg-row border-bottom mt-1">
-        <div class="mb-2 col-md-2">
-            <strong>Class</strong>
+        <div class="d-sm-flex flex-column flex-lg-row border-bottom mt-1">
+            <div class="mb-2 col-md-2">
+                <strong>Class</strong>
+            </div>
+            <div class="mb-2 col-md-10">
+                <span>@Absence.OfferingName</span>
+            </div>
         </div>
-        <div class="mb-2 col-md-10">
-            <span>@Absence.OfferingName</span>
-        </div>
-    </div>
 
-    <div class="d-sm-flex flex-column flex-lg-row border-bottom mt-1">
-        <div class="mb-2 col-md-2">
-            <strong>Absence</strong>
+        <div class="d-sm-flex flex-column flex-lg-row border-bottom mt-1">
+            <div class="mb-2 col-md-2">
+                <strong>Absence</strong>
+            </div>
+            <div class="mb-2 col-md-10">
+                <span>@Absence.AbsenceTimeframe</span>
+            </div>
         </div>
-        <div class="mb-2 col-md-10">
-            <span>@Absence.AbsenceTimeframe</span>
-        </div>
-    </div>
 
-    <div class="d-sm-flex flex-column flex-lg-row border-bottom mt-1">
-        <div class="mb-2 col-md-2">
-            <strong>Explanation</strong>
-        </div>
-        <div class="mb-2 col-md-10">
-            @if (Absence.Type == Constellation.Core.Models.Absence.Whole)
-            {
-                @if (Absence.Explained)
+        <div class="d-sm-flex flex-column flex-lg-row border-bottom mt-1">
+            <div class="mb-2 col-md-2">
+                <strong>Explanation</strong>
+            </div>
+            <div class="mb-2 col-md-10">
+                @if (Absence.Type == Constellation.Core.Models.Absence.Whole)
                 {
-                    <span>"@Absence.Reason"</span>
-                } else
-                {
-                    <InputTextArea @bind-Value="Command.Comment" rows="5" cols="100" class="form-control" />
+                    @if (Absence.Explained)
+                    {
+                        <span>"@Absence.Reason"</span>
+                    } else
+                    {
+                        <InputTextArea @bind-Value="Command.Comment" rows="5" cols="100" class="form-control" />
+                    }
                 }
-            }
 
-            @if (Absence.Type == Constellation.Core.Models.Absence.Partial)
-            {
-                @if (Absence.Explained && Absence.AbsenceReason != "Absent")
+                @if (Absence.Type == Constellation.Core.Models.Absence.Partial)
                 {
-                    <span>
-                        @Absence.AbsenceReason
-                    </span>                    
-                } else if (Absence.Explained)
-                {
-                    <span>
-                        "@Absence.Reason"<br />
-                        @Absence.Validation by @Absence.ValidatedBy
-                    </span>
-                } else if (Absence.Validation == Core.Models.AbsenceResponse.Pending)
-                {
-                    <span>
-                        "@Absence.Reason"<br />
-                        Pending verification by Aurora College Coordinator
-                    </span>
-                } else
-                {
-                    <span>Pending explanation by @Absence.StudentName</span>
+                    @if (Absence.Explained && Absence.AbsenceReason != "Absent")
+                    {
+                        <span>
+                            @Absence.AbsenceReason
+                        </span>                    
+                    } else if (Absence.Explained)
+                    {
+                        <span>
+                            "@Absence.Reason"<br />
+                            @Absence.Validation by @Absence.ValidatedBy
+                        </span>
+                    } else if (Absence.Validation == Core.Models.AbsenceResponse.Pending)
+                    {
+                        <span>
+                            "@Absence.Reason"<br />
+                            Pending verification by Aurora College Coordinator
+                        </span>
+                    } else
+                    {
+                        <span>Pending explanation by @Absence.StudentName</span>
+                    }
                 }
-            }
-        </div>
-    </div>
-
-    @if (Absence.Type == Constellation.Core.Models.Absence.Whole && !Absence.Explained)
-    {
-        <div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mt-1">
-            <button class="btn btn-success btn-lg" type="submit">Submit</button>
+            </div>
         </div>
 
-        <div class="d-none d-lg-block d-xl-block d-xxl-block mt-1">
-            <button class="btn btn-success btn-lg" type="submit">Submit</button>
-        </div>
-    }
-</EditForm>
+        @if (Absence.Type == Constellation.Core.Models.Absence.Whole && !Absence.Explained)
+        {
+            <div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mt-1">
+                <button class="btn btn-success btn-lg" type="submit">Submit</button>
+            </div>
 
+            <div class="d-none d-lg-block d-xl-block d-xxl-block mt-1">
+                <button class="btn btn-success btn-lg" type="submit">Submit</button>
+            </div>
+        }
+    </EditForm>
+</Loader>
 @code {
     [Parameter] public Guid Id { get; set; }
+
+    public bool ShowLoader { get; set; } = false;
 
     internal AbsenceDetailDto Absence { get; set; } = new();
     public ProvideParentWholeAbsenceExplanationCommand Command { get; set; } = new();
 
     protected override async Task OnParametersSetAsync()
     {
+        ShowLoader = true;
+
         try
         {
             Absence = await Http.GetFromJsonAsync<AbsenceDetailDto>($"Attendance/Details/{Id}");
@@ -158,6 +163,8 @@
         {
             exception.Redirect();
         }
+
+        ShowLoader = false;
     }
 
     async Task SubmitResponse()
