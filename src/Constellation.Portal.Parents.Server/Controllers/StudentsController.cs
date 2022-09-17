@@ -1,15 +1,11 @@
 namespace Constellation.Portal.Parents.Server.Controllers;
 
-using Constellation.Application.DTOs;
-using Constellation.Application.Features.Portal.School.Home.Queries;
+using Constellation.Application.Features.Partners.Students.Queries;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-[Authorize]
-[ApiController]
 [Route("[controller]")]
-public class StudentsController : ControllerBase
+public class StudentsController : BaseAPIController
 {
     private readonly ILogger<StudentsController> _logger;
     private readonly IMediator _mediator;
@@ -21,10 +17,10 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ICollection<StudentDto>> Get()
+    public async Task<ICollection<StudentOfParent>> Get()
     {
-        _logger.LogInformation("Started getting students!");
+        var user = await GetCurrentUser();
 
-        return await _mediator.Send(new GetStudentsFromSchoolQuery { SchoolCode = "8155" });
+        return await _mediator.Send(new GetStudentsOfParentQuery { ParentEmail = user.Email });
     }
 }

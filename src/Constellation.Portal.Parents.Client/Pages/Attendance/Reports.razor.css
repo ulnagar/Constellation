@@ -18,3 +18,12 @@
     margin-top: 1rem;
     margin-bottom: 1rem;
 }
+
+.disabled {
+    color: darkgray;
+}
+
+.custom-border {
+    border: 3px;
+    border-radius: 2px;
+}

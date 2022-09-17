@@ -610,7 +610,8 @@ namespace Constellation.Infrastructure.Gateways
 
                             var entry = new ValidAttendenceReportDate
                             {
-                                Description = $"{TermName} {WeekName}"
+                                Description = $"{TermName} {WeekName}",
+                                TermGroup = TermName
                             };
 
                             var startDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[1].GetAttributeValue("onclick", "");
@@ -640,7 +641,8 @@ namespace Constellation.Infrastructure.Gateways
 
                             var entry = new ValidAttendenceReportDate
                             {
-                                Description = $"{TermName} {WeekName}"
+                                Description = $"{TermName} {WeekName}",
+                                TermGroup = TermName
                             };
 
                             var startDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[1].GetAttributeValue("onclick", "");
