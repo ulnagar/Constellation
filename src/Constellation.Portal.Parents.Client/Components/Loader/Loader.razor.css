@@ -14,6 +14,7 @@
     justify-content: center;
     align-items: center;
     background: #a2a2a2;
+    z-index: 2;
 }
 
 .wave {
