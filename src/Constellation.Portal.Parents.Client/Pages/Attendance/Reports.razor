@@ -4,6 +4,7 @@
 @using Constellation.Application.Features.Partners.Students.Queries
 
 @inject HttpClient Http
+@inject IJSRuntime JS
 
 @attribute [Authorize]
 
@@ -13,8 +14,14 @@
     @if (SelectingStudent)
     {
         // Show list of students in boxes to allow them to select a different student
-
-
+        <ul class="list-group">
+            @foreach (var student in Students)
+            {
+                <button class="list-group-item list-group-item-action @(student == SelectedStudent ? "active" : "")" @onclick="() => SelectNewStudent(student)">
+                    @student.DisplayName (@student.CurrentGrade)
+                </button>
+            }
+        </ul>
     } 
     else
     {
@@ -28,7 +35,7 @@
                     {
                         <span class="fst-italic">Click or tap to change</span>
 
-                        <div class="d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none">
+                        <div class="d-block">
                             <a @onclick="EnableStudentSelection" href="javascript:void(0)" class="stretched-link"></a>
                         </div>
                     }
@@ -67,7 +74,7 @@
                                             {
                                                 <span class="fst-italic">Click or tap to download</span>
 
-                                                <div class="d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none">
+                                                <div class="d-block">
                                                     <a @onclick="() => DownloadReport(entry)" href="javascript:void(0)" class="stretched-link"></a>
                                                 </div>
                                             }
@@ -91,12 +98,16 @@
     public bool ShowLoader { get; set; } = false;
     public bool SelectingStudent { get; set; } = false;
 
+    public string BaseUrl = "";
+
     protected override async Task OnParametersSetAsync()
     {
         ShowLoader = true;
 
         try
         {
+            BaseUrl = Http.BaseAddress.AbsoluteUri;
+
             Students = await Http.GetFromJsonAsync<List<StudentOfParent>>($"Students");
             Students = Students.OrderBy(student => student.CurrentGrade).ToList();
 
@@ -123,6 +134,8 @@
     {
         try
         {
+            ShowLoader = true;
+
             var a = new AttendanceReportRequest { StudentId = SelectedStudent.StudentId, StartDate = reportDate.StartDate, EndDate = reportDate.EndDate };
 
             var response = await Http.PostAsJsonAsync($"Attendance/Reports/Download", a);
@@ -130,10 +143,20 @@
             // Need to push it to the browser as a file download, possibly using JS
             // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0
 
+            var fileStream = response.Content.ReadAsStream();
+            var fileName = $"Attendance Report - {SelectedStudent.DisplayName} - {reportDate.StartDate:yyyy-MM-dd}.pdf";
+
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
+        }
+        finally
+        {
+            ShowLoader = false;
         }
     }
 
@@ -145,5 +168,7 @@
     void SelectNewStudent(StudentOfParent student)
     {
         SelectedStudent = student;
+
+        SelectingStudent = false;
     }
 }

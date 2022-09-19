@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\DownloadReports.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.7" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.7" />
@@ -20,6 +24,10 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\css\fontawesome\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\js\DownloadReports.js" />
   </ItemGroup>
 
 </Project>
