@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\CollapseAccordion.js" />
     <Content Remove="wwwroot\js\DownloadReports.js" />
   </ItemGroup>
 
@@ -27,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\js\CollapseAccordion.js" />
     <None Include="wwwroot\js\DownloadReports.js" />
   </ItemGroup>
 

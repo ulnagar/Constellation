@@ -3,6 +3,7 @@
 @using Constellation.Application.Features.Attendance.Queries
 
 @inject HttpClient Http
+@inject IJSRuntime JS
 
 @attribute [Authorize]
 
@@ -81,34 +82,50 @@
     </div>
 
     <div class="d-flex flex-column justify-content-around">
-        @foreach (var entry in FilteredAbsences)
-        {
-            <div class="w-auto p-3 ms-3 me-3 mb-2 shadow position-relative">
-                <div class="row d-flex align-items-center"> @*Display as flex to enable vertical centering of the button in the second div*@
-                    <div class="col-lg-8">
-                        <div class="h5">@entry.StudentName (@entry.StudentCurrentGrade) - @entry.AbsenceReason</div>
-                        @*<div><span class="me-2">@entry.Status.ToString()</span> <span class="me-2">@entry.Id</span></div>*@
-                        <div><span class="me-2">@entry.Date.ToString("dd/MM")</span> <span class="me-2">@entry.OfferingName</span> @entry.AbsenceLength min (@entry.AbsenceTimeframe)</div>
+        <div class="accordion accordion-flush" id="accordion">
+            @foreach (var month in FilteredAbsences.GroupBy(absence => absence.Date.Month))
+            {
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="accordion-header-@month.Key">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-@month.Key" aria-expanded="false" aria-controls="accordion-item-@month.Key">
+                            @month.First().Date.ToString("MMMM")
+                        </button>
+                    </h2>
+                    <div id="accordion-item-@month.Key" class="accordion-collapse collapse" aria-labelledby="accordion-header-@month.Key" data-bs-parent="#accordion">
+                        <div class="accordion-body">
+                            @foreach (var entry in month)
+                            {
+                                <div class="w-auto p-3 mb-2 shadow position-relative">
+                                    <div class="row d-flex align-items-center"> @*Display as flex to enable vertical centering of the button in the second div*@
+                                        <div class="col-lg-8">
+                                            <div class="h5">@entry.StudentName (@entry.StudentCurrentGrade) - @entry.AbsenceReason</div>
+                                            @*<div><span class="me-2">@entry.Status.ToString()</span> <span class="me-2">@entry.Id</span></div>*@
+                                            <div><span class="me-2">@entry.Date.ToString("dd/MM")</span> <span class="me-2">@entry.OfferingName</span> @entry.AbsenceLength min (@entry.AbsenceTimeframe)</div>
                     
-                        @*If this is a unverified partial absence, include the student explanation in the view*@
-                        @if (!string.IsNullOrWhiteSpace(entry.Explanation))
-                        {
-                            <div class="mt-2">"@entry.Explanation"</div>
-                        }
+                                            @*If this is a unverified partial absence, include the student explanation in the view*@
+                                            @if (!string.IsNullOrWhiteSpace(entry.Explanation))
+                                            {
+                                                <div class="mt-2">"@entry.Explanation"</div>
+                                            }
                     
-                        @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
-                        <div class="d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none">
-                            <a href="attendance/absences/details/@entry.Id" class="stretched-link"></a>
+                                            @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
+                                            <div class="d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none">
+                                                <a href="attendance/absences/details/@entry.Id" class="stretched-link"></a>
+                                            </div>
+                                        </div>
+
+                                        @*If the display is large enough, include a button to show details of the absence*@
+                                        <div class="col-lg-4 d-none d-lg-block d-xl-block d-xxl-block">
+                                            <a class="btn btn-success" href="attendance/absences/details/@entry.Id">Perform action!</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     </div>
-
-                    @*If the display is large enough, include a button to show details of the absence*@
-                    <div class="col-lg-4 d-none d-lg-block d-xl-block d-xxl-block">
-                        <a class="btn btn-success" href="attendance/absences/details/@entry.Id">Perform action!</a>
-                    </div>
                 </div>
-            </div>
-        }
+            }
+        </div>
     </div>
 </Loader>
 
@@ -146,7 +163,7 @@
         UnverifiedPartialsCount = AbsencesList.Count(absence =>  absence.Status == AbsenceDto.AbsenceStatus.UnverifiedPartial);
         UnexplainedWholesCount = AbsencesList.Count(absence => absence.Status == AbsenceDto.AbsenceStatus.UnexplainedWhole);
 
-        FilterAbsences();
+        await FilterAbsences();
 
         ShowLoader = false;
     }
@@ -160,7 +177,7 @@
         VerifiedPartials
     }
 
-    private void FilterAbsences()
+    private async Task FilterAbsences()
     {
         switch (AbsencesType)
         {
@@ -210,12 +227,14 @@
                     .ToList();
                 break;
         }
+
+        await JS.InvokeVoidAsync("collapseAccordion");
     }
 
-    private void ChangeAbsenceType(AbsenceCategory type)
+    async Task ChangeAbsenceType(AbsenceCategory type)
     {
         AbsencesType = type;
 
-        FilterAbsences();
+        await FilterAbsences();
     }
 }
