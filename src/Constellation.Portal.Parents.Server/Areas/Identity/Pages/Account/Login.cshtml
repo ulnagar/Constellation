@@ -35,7 +35,7 @@
 
                         <div>
                             @*<input id="login-submit" type="button" class="w-100 btn btn-lg btn-primary" value="Send me my link" />*@
-                            <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Send me my link</button>
+                            <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary" disabled>Send me my link</button>
                         </div>
                     </form>
             }
@@ -47,7 +47,7 @@
 
             <div class="mt-3">
                 <form method="post" asp-page-handler="DebugBypass">
-                    <button type="submit" class="btn btn-lg btn-warning">Debug Bypass</button>
+                    <button type="submit" class="btn btn-lg btn-warning" disabled>Debug Bypass</button>
                 </form>
             </div>
         </section>
@@ -64,6 +64,10 @@
                     //console.log('submitted');
                     $('#login-submit').prop('disabled', true);
                 });
+        });
+
+        $(document).ready(function() {
+            $(':submit').prop('disabled', false);
         });
     </script>
 }
