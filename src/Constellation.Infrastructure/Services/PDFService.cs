@@ -74,7 +74,7 @@ namespace Constellation.Infrastructure.Services
                 converter.Header.DisplayOnFirstPage = true;
                 converter.Header.DisplayOnEvenPages = true;
                 converter.Header.DisplayOnOddPages = true;
-                converter.Header.Height = 100;
+                converter.Header.Height = 110;
                 var headerSection = new PdfHtmlSection(header, "");
                 headerSection.AutoFitHeight = HtmlToPdfPageFitMode.AutoFit;
                 converter.Header.Add(headerSection);
