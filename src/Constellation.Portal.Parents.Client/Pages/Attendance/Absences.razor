@@ -81,7 +81,7 @@
     </div>
 
     <div class="d-flex flex-column justify-content-around">
-        @foreach (var entry in FilteredAbsences.OrderBy(student => student.StudentName))
+        @foreach (var entry in FilteredAbsences)
         {
             <div class="w-auto p-3 ms-3 me-3 mb-2 shadow position-relative">
                 <div class="row d-flex align-items-center"> @*Display as flex to enable vertical centering of the button in the second div*@
@@ -167,31 +167,49 @@
             case AbsenceCategory.UnexplainedPartials:
                 FilteredAbsences = AbsencesList
                     .Where(absence => absence.Status == AbsenceDto.AbsenceStatus.UnexplainedPartial)
+                    .OrderBy(absence => absence.Date)
+                    .ThenBy(absence => absence.StudentCurrentGrade)
+                    .ThenBy(absence => absence.StudentLastName)
+                    .ThenBy(absence => absence.StudentFirstName)
                     .ToList();
                 break;
             case AbsenceCategory.UnexplainedWholes:
                 FilteredAbsences = AbsencesList
                     .Where(absence => absence.Status == AbsenceDto.AbsenceStatus.UnexplainedWhole)
+                    .OrderBy(absence => absence.Date)
+                    .ThenBy(absence => absence.StudentCurrentGrade)
+                    .ThenBy(absence => absence.StudentLastName)
+                    .ThenBy(absence => absence.StudentFirstName)
                     .ToList();
                 break;
             case AbsenceCategory.UnverifiedPartials:
                 FilteredAbsences = AbsencesList
                     .Where(absence => absence.Status == AbsenceDto.AbsenceStatus.UnverifiedPartial)
+                    .OrderBy(absence => absence.Date)
+                    .ThenBy(absence => absence.StudentCurrentGrade)
+                    .ThenBy(absence => absence.StudentLastName)
+                    .ThenBy(absence => absence.StudentFirstName)
                     .ToList();
                 break;
             case AbsenceCategory.ExplainedWholes:
                 FilteredAbsences = AbsencesList
                     .Where(absence => absence.Status == AbsenceDto.AbsenceStatus.ExplainedWhole)
+                    .OrderBy(absence => absence.Date)
+                    .ThenBy(absence => absence.StudentCurrentGrade)
+                    .ThenBy(absence => absence.StudentLastName)
+                    .ThenBy(absence => absence.StudentFirstName)
                     .ToList();
                 break;
             case AbsenceCategory.VerifiedPartials:
                 FilteredAbsences = AbsencesList
                     .Where(absence => absence.Status == AbsenceDto.AbsenceStatus.VerifiedPartial)
+                    .OrderBy(absence => absence.Date)
+                    .ThenBy(absence => absence.StudentCurrentGrade)
+                    .ThenBy(absence => absence.StudentLastName)
+                    .ThenBy(absence => absence.StudentFirstName)
                     .ToList();
                 break;
         }
-
-        FilteredAbsences = FilteredAbsences.OrderBy(absence => absence.StudentCurrentGrade).ThenBy(absence => absence.StudentLastName).ThenBy(absence => absence.StudentFirstName).ToList();
     }
 
     private void ChangeAbsenceType(AbsenceCategory type)
