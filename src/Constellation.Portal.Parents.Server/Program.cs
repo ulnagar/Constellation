@@ -34,7 +34,7 @@ else
     app.UseHsts();
 }
 
-app.UsePathBase("/portal/parents");
+app.UsePathBase("/parents");
 app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();
