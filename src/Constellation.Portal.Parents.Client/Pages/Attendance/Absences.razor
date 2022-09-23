@@ -108,15 +108,12 @@
                                                 <div class="mt-2">"@entry.Explanation"</div>
                                             }
                     
-                                            @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
-                                            <div class="d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none">
+                                            @*Turn the entire entry into a clickable element*@
+                                            <span class="fst-italic">Click or tap to change</span>
+
+                                            <div class="d-block">
                                                 <a href="attendance/absences/details/@entry.Id" class="stretched-link"></a>
                                             </div>
-                                        </div>
-
-                                        @*If the display is large enough, include a button to show details of the absence*@
-                                        <div class="col-lg-4 d-none d-lg-block d-xl-block d-xxl-block">
-                                            <a class="btn btn-success" href="attendance/absences/details/@entry.Id">Perform action!</a>
                                         </div>
                                     </div>
                                 </div>

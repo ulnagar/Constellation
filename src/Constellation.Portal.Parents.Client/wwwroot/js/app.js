@@ -1,10 +1,16 @@
 ﻿window.collapseAccordion = () => {
     console.log('Collapsing!');
-    //$('.accordion-collapse').collapse('hide');
-    var collapseElementList = [].slice.call(document.querySelectorAll('.collapse'));
-    var collapseList = collapseElementList.map(function (collapseEl) {
-        return new bootstrap.Collapse(collapseEl, { hide: false });
+    const collapseElements = document.querySelectorAll('.collapse');
+
+    collapseElements.forEach(element => {
+        element.classList.remove('show');
     });
+
+    const buttonElements = document.querySelectorAll('.accordion-button');
+
+    buttonElements.forEach(element => {
+        element.classList.add('collapsed');
+    })
 }
 
 window.downloadFileFromStream = async (fileName, contentStreamReference) => {
