@@ -61,6 +61,7 @@ body {
     height: 100px;
     background: linear-gradient(45deg, #009b77, #00617f);
     margin: 10px;
+    transform: scaleY(0.05);
     animation: wave 1s linear infinite;
     border-radius: 20px;
 }
@@ -103,15 +104,15 @@ body {
 
 @keyframes wave {
     0% {
-        transform: scale(0);
+        transform: scaleY(0.05);
     }
 
     50% {
-        transform: scale(1);
+        transform: scaleY(1);
     }
 
     100% {
-        transform: scale(0);
+        transform: scaleY(0.05);
     }
 }
 

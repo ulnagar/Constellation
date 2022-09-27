@@ -1,7 +1,180 @@
 ﻿@page "/Reports/"
 
-<h3>Download Reports</h3>
+@using Constellation.Application.Features.Documents.Queries
+@using Constellation.Application.Features.Partners.Students.Queries
+
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+@attribute [Authorize]
+
+<Loader IsLoading="@ShowLoader">
+    <h2>Reports</h2>
+
+    @if (SelectingStudent)
+    {
+        // Show list of students in boxes to allow them to select a different student
+        <h4>Select student to display:</h4>
+        <ul class="list-group">
+            @foreach (var student in Students)
+            {
+                <button class="list-group-item list-group-item-action @(student == SelectedStudent ? "active" : "")" @onclick="() => SelectNewStudent(student)">
+                    @student.DisplayName (@student.CurrentGrade)
+                </button>
+            }
+        </ul>
+    }
+    else
+    {
+        <div class="w-auto p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+            <span class="row d-flex align-items-center">
+                @*Display as flex to enable vertical centering of the button in the second div*@
+                <div class="col-lg">
+                    <div class="h4">Reports for @SelectedStudent.DisplayName</div>
+                    @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
+                    @if (Students.Count > 1)
+                    {
+                        <span class="fst-italic">Click or tap to change</span>
+
+                        <div class="d-block">
+                            <a @onclick="EnableStudentSelection" href="javascript:void(0)" class="stretched-link"></a>
+                        </div>
+                    }
+                </div>
+            </span>
+        </div>
+
+        <div class="d-flex flex-column justify-content-around">
+            <div class="accordion accordion-flush" id="accordion">
+
+                @foreach (var group in Reports.GroupBy(report => report.Year).OrderByDescending(group => group.Key))
+                {
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="accordion-header-@group.Key">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-@group.Key" aria-expanded="false" aria-controls="accordion-item-@group.Key">
+                                    @group.Key
+                            </button>
+                        </h2>
+                        <div id="accordion-item-@group.Key" class="accordion-collapse collapse" aria-labelledby="accordion-header-@group.Key" data-bs-parent="#accordion">
+                            <div class="accordion-body">
+                                @foreach (var entry in group.OrderBy(report => Convert.ToInt32(report.PublishId)))
+                                {
+                                    <div class="w-auto p-3 mb-2 shadow position-relative">
+                                        <div class="row d-flex align-items-center">
+                                            @*Display as flex to enable vertical centering of the button in the second div*@
+                                            <div class="col-lg-8">
+                                                <div class="h5">@entry.ReportingPeriod (@entry.PublishId)</div>
+                                                
+                                                @*Turn the entire entry into a clickable element*@
+                                                <span class="fst-italic">Click or tap to download</span>
+
+                                                <div class="d-block">
+                                                    <a @onclick="() => DownloadReport(entry)" href="javascript:void(0)" class="stretched-link"></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</Loader>
 
 @code {
+    public List<StudentOfParent> Students { get; set; } = new();
+    public StudentOfParent SelectedStudent { get; set; } = new();
+    public List<StudentReportForList> Reports { get; set; } = new();
 
+    public bool ShowLoader = false;
+    public bool SelectingStudent = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            Students = await Http.GetFromJsonAsync<List<StudentOfParent>>($"Students");
+            Students = Students.OrderBy(student => student.CurrentGrade).ToList();
+
+            if (Students.Count == 1)
+            {
+                SelectedStudent = Students.First();
+                await GetStudentReports();
+            }
+
+            if (Students.Count > 1)
+            {
+                SelectingStudent = true;
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+    async Task GetStudentReports()
+    {
+        try
+        {
+            Reports = await Http.GetFromJsonAsync<List<StudentReportForList>>($"Reports/Student/{SelectedStudent.StudentId}");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+    void EnableStudentSelection()
+    {
+        SelectingStudent = true;
+    }
+
+    async void SelectNewStudent(StudentOfParent student)
+    {
+        ShowLoader = true;
+
+        SelectedStudent = student;
+        SelectingStudent = false;
+
+        await GetStudentReports();
+
+        ShowLoader = false;
+
+        StateHasChanged();
+    }
+
+    async Task DownloadReport(StudentReportForList reportEntry)
+    {
+        try
+        {
+            ShowLoader = true;
+
+            var response = await Http.PostAsJsonAsync($"Reports/Download/{reportEntry.Id}", new { });
+            // This returns the file in the response variable.
+            // Need to push it to the browser as a file download, possibly using JS
+            // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0
+
+            if (response.IsSuccessStatusCode)
+            {
+                var fileStream = response.Content.ReadAsStream();
+                var fileName = $"Academic Report - {SelectedStudent.DisplayName} - {reportEntry.ReportingPeriod}.pdf";
+
+                using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+                await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        finally
+        {
+            ShowLoader = false;
+        }
+    }
 }
