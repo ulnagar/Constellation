@@ -3,7 +3,6 @@ namespace Constellation.Portal.Parents.Server.Controllers;
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Attendance.Commands;
 using Constellation.Application.Features.Attendance.Queries;
-using Constellation.Infrastructure.Templates.Views.Documents.Attendance;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
