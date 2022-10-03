@@ -1,12 +1,8 @@
 ﻿@page "/Contacts/"
-
 @using Constellation.Application.Features.Contacts.Queries
-@using Constellation.Application.Features.Emails.Queries
 @using Constellation.Application.Features.Partners.Students.Queries
-@using System.Security.Claims
 
 @inject HttpClient Http
-@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @attribute [Authorize]
 
@@ -25,54 +21,7 @@
                 </button>
             }
         </ul>
-    }
-    else if (SendingMessage)
-    {
-        <div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mb-1">
-            <a href="javascript:void(0)" @onclick="CancelSendMessage" class="btn btn-primary"><i class="fas fa-long-arrow-left" /> Go Back</a>
-        </div>
-
-        <div class="d-none d-lg-block d-xl-block d-xxl-block mb-1">
-            <a href="javascript:void(0)" @onclick="CancelSendMessage" class="btn btn-primary"><i class="fas fa-long-arrow-left" /> Go Back</a>
-        </div>
-
-        <h4>Send Message</h4>
-
-        <EditForm Model="Message" OnValidSubmit="@SendMessage">
-            <div class="mb-3">
-                <label class="form-label">To</label>
-                <input type="text" readonly value="@Message.ToName (@Message.ToAddress)" class="form-control" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">From</label>
-                <input type="text" readonly value="@Message.FromName (@Message.FromAddress)" class="form-control" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Subject</label>
-                <InputText @bind-Value="Message.Subject" class="form-control" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Body</label>
-                <InputTextArea @bind-Value="Message.Body" class="form-control" />
-            </div>
-
-            <div class="mb-3 form-check form-switch">
-                <InputCheckbox @bind-Value="Message.SendMeACopy" class="form-check-input" />
-                <label class="form-check-label">Send me a copy?</label>
-            </div>
-
-            <div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mt-1">
-                <button class="btn btn-success btn-lg" type="submit">Submit</button>
-            </div>
-
-            <div class="d-none d-lg-block d-xl-block d-xxl-block mt-1">
-                <button class="btn btn-success btn-lg" type="submit">Submit</button>
-            </div>
-        </EditForm>
-    }
+    } 
     else
     {
         <div class="w-auto p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
@@ -100,9 +49,9 @@
 
                 @foreach (var entry in group.OrderBy(contact => contact.Detail))
                 {
-                    <div class="p-2 ms-1 me-1 mb-2 border border-2 rounded-3">
+                    <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
                         <span class="row d-flex align-items-center">
-                            <div class="col-10 position-relative">
+                            <div class="col">
                                 <div class="h5">@entry.DisplayName</div>
                                 <span class="fst-italic">@entry.Detail</span>
                                 <span class="d-block"><a href="mailto:@entry.EmailAddress" class="stretched-link">@entry.EmailAddress</a></span>
@@ -110,10 +59,6 @@
                                 {
                                     <span class="d-block">@entry.PhoneNumber</span>
                                 }
-                            </div>
-                            <div class="fa-icon-sizing position-relative">
-                                <i class="fad fa-paper-plane fa-3x app-theme"></i>
-                                <a href="javascript:void(0)" @onclick="() => EnableSendingMessage(entry)" class="stretched-link"></a>
                             </div>
                         </span>
                     </div>
@@ -128,11 +73,8 @@
     public StudentOfParent SelectedStudent { get; set; } = new();
     public List<StudentSupportContact> Contacts { get; set; } = new();
 
-    public MessageFromParentForSchoolQuery Message { get; set; } = new();
-
     public bool ShowLoader = false;
     public bool SelectingStudent = false;
-    public bool SendingMessage = false;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -187,32 +129,5 @@
         ShowLoader = false;
 
         StateHasChanged();
-    }
-
-    async Task EnableSendingMessage(StudentSupportContact contact)
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        SendingMessage = true;
-        Message = new();
-        Message.ToAddress = contact.EmailAddress;
-        Message.ToName = contact.DisplayName;
-        Message.FromAddress = user.FindFirst(c => c.Type == "email")?.Value;
-        Message.FromName = user.Identity.Name;
-    }
-
-    void CancelSendMessage(){
-        SendingMessage = false;
-    }
-
-    async Task SendMessage()
-    {
-        ShowLoader = true;
-
-        await Http.PostAsJsonAsync<MessageFromParentForSchoolQuery>("Contacts/Send", Message);
-
-        SendingMessage = false;
-        ShowLoader = false;
     }
 }

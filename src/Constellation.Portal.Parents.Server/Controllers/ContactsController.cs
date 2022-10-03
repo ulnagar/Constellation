@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Portal.Parents.Server.Controllers;
 
 using Constellation.Application.Features.Contacts.Queries;
-using Constellation.Application.Features.Emails.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,11 +24,5 @@ public class ContactsController : BaseAPIController
 		//_logger.LogInformation("Requested to retrieve contacts for student {studentId} by user {user}", studentId, user.UserName);
 
 		return await _mediator.Send(new GetStudentSupportContactsQuery { StudentId = studentId });
-	}
-
-	[HttpPost("Send")]
-	public async Task SendMessage([FromBody] MessageFromParentForSchoolQuery message)
-	{
-		await _mediator.Send(message);
 	}
 }
