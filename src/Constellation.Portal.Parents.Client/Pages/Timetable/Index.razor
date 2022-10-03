@@ -1,7 +1,304 @@
 ﻿@page "/Timetable/"
+@using Constellation.Application.DTOs
+@using Constellation.Application.Extensions
+@using Constellation.Application.Features.Partners.Students.Queries
+@using System.ComponentModel
+@using System.ComponentModel.DataAnnotations
 
-<h3>View Timetables</h3>
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+@attribute [Authorize]
+
+<Loader IsLoading="ShowLoader">
+    <h2>Timetables</h2>
+
+    @if (SelectingStudent)
+    {
+        // Show list of students in boxes to allow them to select a different student
+        <h4>Select student to display:</h4>
+        <ul class="list-group">
+            @foreach (var student in Students)
+            {
+                <button class="list-group-item list-group-item-action @(student == SelectedStudent ? "active" : "")" @onclick="() => SelectNewStudent(student)">
+                    @student.DisplayName (@student.CurrentGrade)
+                </button>
+            }
+        </ul>
+    }
+    else
+    {
+        <div class="w-auto p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+            <span class="row d-flex align-items-center">
+                @*Display as flex to enable vertical centering of the button in the second div*@
+                <div class="col-lg">
+                    <div class="h4">Timetable for @SelectedStudent.DisplayName</div>
+                    @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
+                    @if (Students.Count > 1)
+                    {
+                        <span class="fst-italic">Click or tap to change</span>
+
+                        <div class="d-block">
+                            <a @onclick="EnableStudentSelection" href="javascript:void(0)" class="stretched-link"></a>
+                        </div>
+                    }
+                </div>
+            </span>
+        </div>
+
+        // Download Link
+        <div class="d-grid gap-2 d-block mb-2">
+            <button class="btn btn-primary" @onclick="DownloadReport"><i class="fas fa-file-download" /> Download Full Timetable</button>
+        </div>
+
+        // Show Today shortcut
+
+        
+        <div class="w-auto d-flex">
+            <div class="w-50 p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+                <span class="row d-flex flex-column align-items-center">
+                    @if (SelectingWeek)
+                    {
+                        @foreach (var entry in Weeks)
+                        {
+                            <div class="col w-auto position-relative p-2">
+                                <div class="h4">@entry.Value</div>
+                                <div class="d-block">
+                                    <a @onclick="() => SelectNewWeek(entry)" href="javascript:void(0)" class="stretched-link"></a>
+                                </div>
+                            </div>
+                        }
+                    } 
+                    else
+                    {
+                        <div class="col">
+                            <div class="h4">Week: @SelectedWeek.Value</div>
+                            <span class="fst-italic">Click or tap to change</span>
+
+                            <div class="d-block">
+                                <a @onclick="EnableSelectingWeek" href="javascript:void(0)" class="stretched-link"></a>
+                            </div>
+                        </div>
+                    }
+                </span>
+            </div>
+
+            <div class="w-50 p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+                <span class="row d-flex flex-column align-items-center">
+                    @if (SelectingDay)
+                    {
+                        @foreach (Day day in Enum.GetValues(typeof(Day)))
+                        {
+                            <div class="col w-auto position-relative p-2">
+                                <div class="h4">@day</div>
+                                <div class="d-block">
+                                    <a @onclick="() => SelectNewDay(day)" href="javascript:void(0)" class="stretched-link"></a>
+                                </div>
+                            </div>
+                        }
+                    } 
+                    else
+                    {
+                        <div class="col">
+                            <div class="h4">Day: @SelectedDay.ToString()</div>
+                            <span class="fst-italic">Click or tap to change</span>
+
+                            <div class="d-block">
+                                <a @onclick="EnableSelectingDay" href="javascript:void(0)" class="stretched-link"></a>
+                            </div>
+                        </div>
+                    }
+                </span>
+            </div>
+        </div>
+
+        var currentday = ((SelectedWeek.Key - 1) * 5) + (int)SelectedDay;
+        var entries = StudentTimetableData.Timetables.Where(entry => entry.Day == currentday).OrderBy(entry => entry.StartTime).ToList();
+
+        <div class="w-auto position-relative mt-3">
+            @foreach (var period in entries)
+            {
+                var style = "";
+
+                if (string.IsNullOrWhiteSpace(period.ClassName))
+                {
+                    style += " period-inactive";
+                }
+                else
+                {
+                    style += " period-active";
+                }
+
+                if (period.Type == "Break")
+                {
+                    style += " period-break";
+                }
+
+                <div class="p-2 ms-1 me-1 border border-2 rounded-3 @style">
+                    <span class="h5">@period.Name (@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime())</span>
+                    <span class="d-block">&nbsp; @period.ClassName</span>
+                    <span class="d-block">&nbsp; @period.ClassTeacher</span>
+                </div>
+            }
+        </div>
+    }
+</Loader>
 
 @code {
+    public List<StudentOfParent> Students { get; set; } = new();
+    public StudentOfParent SelectedStudent { get; set; } = new();
+    public StudentTimetableDataDto StudentTimetableData { get; set; } = new();
+    public Dictionary<int, string> Weeks { get; set; } = new();
+    public KeyValuePair<int, string> SelectedWeek { get; set; } 
+    public Day SelectedDay { get; set; }
 
+    private bool ShowLoader = false;
+    private bool SelectingStudent = false;
+    private bool SelectingWeek = false;
+    private bool SelectingDay = false;
+
+    protected override async Task OnParametersSetAsync()
+    {        
+        try
+        {
+            Students = await Http.GetFromJsonAsync<List<StudentOfParent>>($"Students");
+            Students = Students.OrderBy(student => student.CurrentGrade).ToList();
+
+            if (Students.Count == 1)
+            {
+                SelectedStudent = Students.First();
+                await GetStudentTimetable();
+            }
+
+            if (Students.Count > 1)
+            {
+                SelectingStudent = true;
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+
+    }
+
+    async Task GetStudentTimetable()
+    {
+        StudentTimetableData = await Http.GetFromJsonAsync<StudentTimetableDataDto>($"timetables/{SelectedStudent.StudentId}");
+
+        var dayList = StudentTimetableData.Timetables.Select(data => data.Day).Distinct().ToList();
+        var weekList = dayList.Max();
+        var numWeeks = weekList / 5;
+
+        Weeks = new();
+
+        foreach (var entry in Enumerable.Range(1, numWeeks)) 
+        {
+            switch (entry)
+            {
+                case 1:
+                    Weeks.Add(1, "Week A");
+                    break;
+                case 2:
+                    Weeks.Add(2, "Week B");
+                    break;
+                case 3:
+                    Weeks.Add(3, "Week C");
+                    break;
+                case 4:
+                    Weeks.Add(4, "Week D");
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        SelectedWeek = Weeks.First();
+        SelectedDay = Day.Monday;
+    }
+
+    void EnableStudentSelection()
+    {
+        SelectingStudent = true;
+    }
+
+    async void SelectNewStudent(StudentOfParent student)
+    {
+        ShowLoader = true;
+
+        SelectedStudent = student;
+        SelectingStudent = false;
+
+        await GetStudentTimetable();
+
+        ShowLoader = false;
+
+        StateHasChanged();
+    }
+
+    void EnableSelectingWeek()
+    {
+        SelectingWeek = true;
+    }
+
+    void SelectNewWeek(KeyValuePair<int, string> week)
+    {
+        SelectedWeek = week;
+
+        SelectingWeek = false;
+    }
+
+    void EnableSelectingDay()
+    {
+        SelectingDay = true;
+    }
+
+    void SelectNewDay(Day day)
+    {
+        Console.WriteLine(day);
+
+        SelectedDay = day;
+
+        SelectingDay = false;
+    }
+
+    async Task DownloadReport()
+    {
+        try
+        {
+            ShowLoader = true;
+
+            var response = await Http.PostAsJsonAsync($"Timetables/Download/{SelectedStudent.StudentId}", new { });
+            // This returns the file in the response variable.
+            // Need to push it to the browser as a file download, possibly using JS
+            // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0
+
+            if (response.IsSuccessStatusCode)
+            {
+                var fileStream = response.Content.ReadAsStream();
+                var fileName = $"{SelectedStudent.DisplayName} - Timetable.pdf";
+
+                using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+                await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        finally
+        {
+            ShowLoader = false;
+        }
+    }
+
+    public enum Day 
+    {
+        Monday = 1,
+        Tuesday = 2,
+        Wednesday = 3,
+        Thursday = 4,
+        Friday = 5
+    }
 }
