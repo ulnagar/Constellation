@@ -46,8 +46,11 @@
             }
 
             <div class="mt-3">
-                <form method="post" asp-page-handler="DebugBypass">
-                    <button type="submit" class="btn btn-lg btn-warning" disabled>Debug Bypass</button>
+                <form method="post" asp-page-handler="DebugBypassSingle">
+                    <button type="submit" class="btn btn-lg btn-warning" disabled>Debug Login Single Student</button>
+                </form>
+                <form method="post" asp-page-handler="DebugBypassMultiple">
+                    <button type="submit" class="btn btn-lg btn-warning" disabled>Debug Login Mulitple Students</button>
                 </form>
             </div>
         </section>

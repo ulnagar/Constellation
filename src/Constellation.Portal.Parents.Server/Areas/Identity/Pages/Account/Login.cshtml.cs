@@ -161,11 +161,24 @@ public class LoginModel : PageModel
         return LocalRedirect(Url.Content("~/"));
     }
 
-    public async Task<IActionResult> OnPostDebugBypassAsync()
+    public async Task<IActionResult> OnPostDebugBypassSingleAsync()
     {
         _logger.LogInformation($"Starting Login Attempt using Debug Process");
 
-        var user = await _userManager.FindByEmailAsync("benjamin.hillsley@det.nsw.edu.au");
+        var user = await _userManager.FindByEmailAsync("singletrackedmind@gmail.com");
+
+        await _userManager.UpdateSecurityStampAsync(user);
+
+        await _signInManager.SignInAsync(user, false);
+
+        return LocalRedirect(Url.Content("~/"));
+    }
+
+    public async Task<IActionResult> OnPostDebugBypassMulitpleAsync()
+    {
+        _logger.LogInformation($"Starting Login Attempt using Debug Process");
+
+        var user = await _userManager.FindByEmailAsync("fitzcarraldo1958@gmail.com");
 
         await _userManager.UpdateSecurityStampAsync(user);
 

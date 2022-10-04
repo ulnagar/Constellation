@@ -77,8 +77,6 @@ public static class ServicesRegistration
 
         services.AddMediatR(new[] { Assembly.GetExecutingAssembly(), typeof(IAppDbContext).Assembly });
 
-        services.AddConstellationContext(configuration);
-
         services.AddApplication();
 
         return services;
