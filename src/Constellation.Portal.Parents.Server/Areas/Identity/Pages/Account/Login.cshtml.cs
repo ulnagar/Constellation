@@ -165,7 +165,7 @@ public class LoginModel : PageModel
     {
         _logger.LogInformation($"Starting Login Attempt using Debug Process");
 
-        var user = await _userManager.FindByEmailAsync("singletrackedmind@gmail.com");
+        var user = await _userManager.FindByEmailAsync("hreselectrical@gmail.com");
 
         await _userManager.UpdateSecurityStampAsync(user);
 
@@ -174,7 +174,7 @@ public class LoginModel : PageModel
         return LocalRedirect(Url.Content("~/"));
     }
 
-    public async Task<IActionResult> OnPostDebugBypassMulitpleAsync()
+    public async Task<IActionResult> OnPostDebugBypassMultipleAsync()
     {
         _logger.LogInformation($"Starting Login Attempt using Debug Process");
 

@@ -35,7 +35,7 @@ public class RegisterParentContactAsUserCommandHandler : IRequestHandler<Registe
 
         user = new AppUser
         {
-            UserName = $"{request.FirstName} {request.LastName}",
+            UserName = request.EmailAddress,
             Email = request.EmailAddress,
             FirstName = request.FirstName,
             LastName = request.LastName

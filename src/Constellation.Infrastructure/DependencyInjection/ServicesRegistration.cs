@@ -10,6 +10,7 @@ using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.GatewayConfigurations;
 using Constellation.Infrastructure.Gateways;
 using Constellation.Infrastructure.Identity.MagicLink;
+using Constellation.Infrastructure.Identity.ProfileService;
 using Constellation.Infrastructure.Jobs;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
@@ -301,7 +302,8 @@ public static class ServicesRegistration
         // https://stackoverflow.com/questions/62563174/identityserver4-authorization-error-not-matching-redirect-uri
 
         services.AddIdentityServer()
-            .AddApiAuthorization<AppUser, AppDbContext>();
+            .AddApiAuthorization<AppUser, AppDbContext>()
+            .AddProfileService<ParentPortalProfileService>();
 
         services.AddAuthentication()
             .AddIdentityServerJwt();
