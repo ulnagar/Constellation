@@ -8,11 +8,11 @@ using Microsoft.AspNetCore.Identity;
 using System.Linq;
 using System.Threading.Tasks;
 
-public class ParentPortalProfileService : IProfileService
+public class CustomProfileService : IProfileService
 {
     private readonly UserManager<AppUser> _userManager;
 
-    public ParentPortalProfileService(UserManager<AppUser> userManager)
+    public CustomProfileService(UserManager<AppUser> userManager)
     {
         _userManager = userManager;
     }

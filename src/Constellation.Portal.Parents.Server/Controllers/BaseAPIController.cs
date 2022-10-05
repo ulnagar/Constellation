@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-//[Authorize]
+[Authorize]
 [ApiController]
 public class BaseAPIController : ControllerBase
 {

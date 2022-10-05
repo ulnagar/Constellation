@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.Features.Auth.Queries;
+using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
@@ -24,17 +25,19 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
         private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<IAuthService> _logger;
         private readonly IMediator _mediator;
+        private readonly IActiveDirectoryGateway _gateway;
         private readonly SignInManager<AppUser> _signInManager;
         
         public LoginModel(SignInManager<AppUser> signInManager, IUnitOfWork unitOfWork,
             UserManager<AppUser> userManager, ILogger<IAuthService> logger,
-            IMediator mediator)
+            IMediator mediator, IActiveDirectoryGateway gateway)
             : base()
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _logger = logger;
             _mediator = mediator;
+            _gateway = gateway;
             _signInManager = signInManager;
         }
 
@@ -130,10 +133,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                 {
                     _logger.LogInformation(" - Attempting domain login by {Email}", Input.Email);
 
-#pragma warning disable CA1416 // Validate platform compatibility
-                    var context = new PrincipalContext(ContextType.Domain, "DETNSW.WIN");
-                    var success = context.ValidateCredentials(Input.Email, Input.Password);
-#pragma warning restore CA1416 // Validate platform compatibility
+                    var success = await _gateway.VerifyUserCredentialsAgainstActiveDirectory(Input.Email, Input.Password);
 
                     if (!success)
                     {

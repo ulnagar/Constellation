@@ -107,6 +107,8 @@ public static class ServicesRegistration
 
     internal static IServiceCollection AddExternalServiceGateways(this IServiceCollection services)
     {
+        services.AddTransient<IActiveDirectoryGateway, ActiveDirectoryGateway>();
+
         services.AddTransient<IAdobeConnectGatewayConfiguration, AdobeConnectGatewayConfiguration>();
         services.AddScoped<IAdobeConnectGateway, AdobeConnectGateway>();
 
@@ -190,7 +192,6 @@ public static class ServicesRegistration
     internal static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<IAbsenceService, AbsenceService>();
-        services.AddScoped<IActiveDirectoryActionsService, ActiveDirectoryActionsService>();
         services.AddScoped<IAdobeConnectRoomService, AdobeConnectRoomService>();
         services.AddScoped<IAdobeConnectService, AdobeConnectService>();
         services.AddScoped<IAuthService, AuthService>();
@@ -262,27 +263,27 @@ public static class ServicesRegistration
 
     internal static IServiceCollection AddSchoolPortalAuthentication(this IServiceCollection services)
     {
-        services.AddIdentity<AppUser, AppRole>()
-            .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders();
+        services.AddDefaultIdentity<AppUser>()
+            .AddRoles<AppRole>()
+            .AddUserManager<UserManager<AppUser>>()
+            .AddRoleManager<RoleManager<AppRole>>()
+            .AddSignInManager<SignInManager<AppUser>>()
+            .AddEntityFrameworkStores<AppDbContext>();
 
-        services.Configure<IdentityOptions>(options =>
-        {
-            options.Password.RequireDigit = true;
-            options.Password.RequireLowercase = true;
-            options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequireUppercase = true;
-            options.Password.RequiredLength = 6;
-            options.Password.RequiredUniqueChars = 1;
-            options.User.RequireUniqueEmail = true;
-        });
+        // Due to IS5 stupidity, the subsite configuration must be lower case:
+        // https://stackoverflow.com/questions/62563174/identityserver4-authorization-error-not-matching-redirect-uri
+
+        services.AddIdentityServer()
+            .AddApiAuthorization<AppUser, AppDbContext>()
+            .AddProfileService<CustomProfileService>();
+
+        services.AddAuthentication()
+            .AddIdentityServerJwt();
 
         services.ConfigureApplicationCookie(options =>
         {
             options.Cookie.Name = "Constellation.Schools.Identity";
             options.ExpireTimeSpan = TimeSpan.FromHours(1);
-            options.LoginPath = new PathString("/Portal/School/Auth/Login");
-            options.LogoutPath = new PathString("/Portal/School/Auth/LogOut");
         });
 
         return services;
@@ -303,7 +304,7 @@ public static class ServicesRegistration
 
         services.AddIdentityServer()
             .AddApiAuthorization<AppUser, AppDbContext>()
-            .AddProfileService<ParentPortalProfileService>();
+            .AddProfileService<CustomProfileService>();
 
         services.AddAuthentication()
             .AddIdentityServerJwt();
