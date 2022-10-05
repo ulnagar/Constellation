@@ -11,6 +11,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,6 +52,8 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
 
             family.MotherMobile = family.MotherMobile.Replace(" ", "");
             family.FatherMobile = family.FatherMobile.Replace(" ", "");
+
+            var replacedEmails = new List<string>();
 
             // Check family exists in database
             var entry = await _context.StudentFamilies
@@ -146,6 +149,8 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
                 {
                     _logger.LogInformation("{id}: {family} ({code}): Updated Parent 1 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.EmailAddress, family.FatherEmail);
 
+                    replacedEmails.Add(entry.Parent1.EmailAddress);
+
                     entry.Parent1.EmailAddress = family.FatherEmail;
                 }
 
@@ -185,6 +190,8 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
                 if (entry.Parent2.EmailAddress != family.MotherEmail && !string.IsNullOrWhiteSpace(family.MotherEmail))
                 {
                     _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.EmailAddress, family.MotherEmail);
+
+                    replacedEmails.Add(entry.Parent2.EmailAddress);
 
                     entry.Parent2.EmailAddress = family.MotherEmail;
                 }
@@ -265,7 +272,6 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
 
             await _context.SaveChangesAsync(token);
 
-
             // Create app users for each parents
             if (!string.IsNullOrWhiteSpace(entry.Parent1.EmailAddress) && !string.IsNullOrWhiteSpace(entry.Parent1.FirstName))
             {
@@ -275,6 +281,13 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
             if (!string.IsNullOrWhiteSpace(entry.Parent2.EmailAddress) && !string.IsNullOrWhiteSpace(entry.Parent2.FirstName))
             {
                 await _mediator.Send(new RegisterParentContactAsUserCommand { FirstName = entry.Parent2.FirstName, LastName = entry.Parent2.LastName, EmailAddress = entry.Parent2.EmailAddress });
+            }
+
+            // Remove app users for old and replaced email addresses
+            foreach (var email in replacedEmails)
+            {
+                if (email != entry.Parent1.EmailAddress && email != entry.Parent2.EmailAddress)
+                    await _mediator.Send(new RemoveOldParentEmailAddressFromUserCommand { Email = email });
             }
         }
     }
