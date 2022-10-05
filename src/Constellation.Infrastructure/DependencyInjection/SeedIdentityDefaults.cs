@@ -47,7 +47,7 @@ namespace Constellation.Infrastructure.DependencyInjection
                 var adminUser = new AppUser
                 {
                     Email = "auroracollegeitsupport@det.nsw.edu.au",
-                    UserName = "auroracollegeitsupport@det.nsw.edu.au",
+                    UserName = "Aurora College Admin",
                     FirstName = "Admin",
                     LastName = "User",
                 };
@@ -70,7 +70,7 @@ namespace Constellation.Infrastructure.DependencyInjection
                 var guestUser = new AppUser
                 {
                     Email = "noemail@here.com",
-                    UserName = "noemail@here.com",
+                    UserName = "Guest Account",
                     FirstName = "Guest",
                     LastName = "User",
                 };

@@ -1,0 +1,77 @@
+﻿@page
+@model LoginModel
+
+<h1>@ViewData["Title"]</h1>
+<div class="row">
+    <div class="col-offset-3 col-md-9">
+        <section>
+            <h2>Login with a magic link</h2>
+            <hr />
+            <div class="mb-4">
+                A magic link is a direct login link sent to your email account. Enter your registered email address below, and we will send you a link that is valid for 10 minutes only.
+            </div>
+            <div class="text-danger h4 mb-4">Please make sure you use the email address that you have registered with the Aurora College office!</div>
+
+            @if (Model.Status == LoginModel.LoginStatus.InvalidUsername)
+            {
+                <span class="text-danger h4">Please check your email address and try again!</span>
+            }
+
+            @if (Model.Status == LoginModel.LoginStatus.TokenInvalid)
+            {
+                <span class="text-danger h4">Looks like your login link has expired. Please enter your email address below to be sent a new link!</span>
+            }
+
+            @if (Model.Status == LoginModel.LoginStatus.WaitingUserInput || 
+                Model.Status == LoginModel.LoginStatus.InvalidUsername ||
+                Model.Status == LoginModel.LoginStatus.TokenInvalid) {
+                    <form id="account" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" />
+                            <label asp-for="Input.Email" class="form-label"></label>
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+
+                        <div>
+                            @*<input id="login-submit" type="button" class="w-100 btn btn-lg btn-primary" value="Send me my link" />*@
+                            <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary" disabled>Send me my link</button>
+                        </div>
+                    </form>
+            }
+
+            @if (Model.Status == LoginModel.LoginStatus.EmailSent){
+                <span class="h4">Your login link is on it's way to your email!</span>
+                <span>Please check your email for the link to login to the Aurora College Parents Portal. Remember that it is only valid for the next 10 minutes.</span>
+            }
+
+            <div class="mt-3">
+                <form method="post" asp-page-handler="DebugBypassSingle">
+                    <button type="submit" class="btn btn-lg btn-warning" disabled>Debug Login Single Student</button>
+                </form>
+                <form method="post" asp-page-handler="DebugBypassMultiple">
+                    <button type="submit" class="btn btn-lg btn-warning" disabled>Debug Login Mulitple Students</button>
+                </form>
+            </div>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function() {
+            $('#account').on('submit',
+                function(event) {
+                    //console.log('submitted');
+                    $('#login-submit').prop('disabled', true);
+                });
+        });
+
+        $(document).ready(function() {
+            $(':submit').prop('disabled', false);
+        });
+    </script>
+}

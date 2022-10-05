@@ -1,8 +1,10 @@
-﻿using Constellation.Application.Interfaces.Jobs;
+﻿using Constellation.Application.Features.API.Operations.Commands;
+using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -16,19 +18,19 @@ namespace Constellation.Infrastructure.Jobs
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAdobeConnectService _adobeConnectService;
         private readonly IOperationService _operationsService;
-        private readonly ICanvasService _canvasService;
+        private readonly IMediator _mediator;
         private readonly ILogger<IPermissionUpdateJob> _logger;
 
         private Guid JobId { get; set; }
 
         public PermissionUpdateJob(IUnitOfWork unitOfWork, IAdobeConnectService adobeConnectService,
-            IOperationService operationsService, ICanvasService canvasService,
+            IOperationService operationsService, IMediator mediator,
             ILogger<IPermissionUpdateJob> logger)
         {
             _unitOfWork = unitOfWork;
             _adobeConnectService = adobeConnectService;
             _operationsService = operationsService;
-            _canvasService = canvasService;
+            _mediator = mediator;
             _logger = logger;
         }
 
@@ -115,7 +117,7 @@ namespace Constellation.Infrastructure.Jobs
 
         private async Task ProcessOperation(CanvasOperation operation)
         {
-            var result = await _canvasService.ProcessOperation(operation);
+            var result = await _mediator.Send(new ProcessCanvasOperationCommand { Operation = operation });
             foreach (var line in result.Errors)
                 _logger.LogInformation("{id}: {operation}: {line}", JobId, operation, line);
         }

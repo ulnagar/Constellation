@@ -29,14 +29,51 @@ namespace Constellation.Application.DTOs
         public class AbsenceResponseEmail
         {
             public List<string> Recipients { get; set; }
-            public ICollection<Absence> WholeAbsences { get; set; }
+            public List<AbsenceDto> WholeAbsences { get; private set; } = new();
             public ICollection<Absence> PartialAbsences { get; set; }
+            public string StudentName { get; set; }
 
             public AbsenceResponseEmail()
             {
                 Recipients = new List<string>();
-                WholeAbsences = new List<Absence>();
                 PartialAbsences = new List<Absence>();
+            }
+
+            public class AbsenceDto
+            {
+                public string ReportedBy { get; set; }
+                public DateTime AbsenceDate { get; set; }
+                public string PeriodName { get; set; }
+                public string ClassName { get; set; }
+                public string Explanation { get; set; }
+                public string AbsenceType { get; set; }
+                public string AbsenceTimeframe { get; set; }
+
+                public AbsenceDto(Absence absence, AbsenceResponse response)
+                {
+                    ReportedBy = "UNKNOWN SOURCE";
+
+                    if (response.Type == AbsenceResponse.Coordinator)
+                        ReportedBy = $"Reported by {response.From} (ACC)";
+                    else if (response.Type == AbsenceResponse.Parent)
+                        ReportedBy = "Reported by Parent";
+                    else if (response.Type == AbsenceResponse.Student)
+                    {
+                        var status = (response.VerificationStatus == AbsenceResponse.Verified) ? "verified" : "rejected";
+
+                        ReportedBy = $"Reported by Student and <strong>{status}</strong> by {response.Verifier} (ACC)";
+
+                        if (!string.IsNullOrWhiteSpace(response.VerificationComment))
+                            ReportedBy += $"<br />with comment: {response.VerificationComment}";
+                    }
+
+                    AbsenceDate = absence.Date;
+                    PeriodName = $"{absence.PeriodName} ({absence.PeriodTimeframe})";
+                    ClassName = absence.Offering.Name;
+                    Explanation = response.Explanation;
+                    AbsenceType = absence.Type;
+                    AbsenceTimeframe = absence.AbsenceTimeframe;
+                }
             }
         }
 

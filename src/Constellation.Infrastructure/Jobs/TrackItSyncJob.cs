@@ -2,8 +2,8 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
-using Constellation.Infrastructure.Persistence.TrackIt;
-using Constellation.Infrastructure.Persistence.TrackIt.Models;
+using Constellation.Infrastructure.Persistence.TrackItContext;
+using Constellation.Infrastructure.Persistence.TrackItContext.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;

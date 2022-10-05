@@ -31,7 +31,8 @@ namespace Constellation.Infrastructure.GatewayConfigurations
                 { "AbsenceTable", "//*[@id='layout-2col-content']/div/div[3]/div[2]/table/tbody" },
                 { "StudentTable", "//*[@id='layout-2col-content']/div/div[1]/div/div[2]/table/tbody" },
                 { "PartialAbsenceTable", "//*[@id='student-absences-list']/table/tbody" },
-                { "CalendarTable", "//*[@id='layout-2col-content']/div/div/div[2]/div/table[1]" }
+                { "CalendarTable", "//*[@id='layout-2col-content']/div/div/div[2]/div/table[1]" },
+                { "TermCalendarTable", "//*[@id='layout-2col-content']/div/div/div[2]/div/div/table" }
             };
         }
 

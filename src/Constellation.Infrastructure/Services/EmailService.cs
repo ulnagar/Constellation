@@ -6,6 +6,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Templates.Views.Emails.Absences;
+using Constellation.Infrastructure.Templates.Views.Emails.Auth;
 using Constellation.Infrastructure.Templates.Views.Emails.Covers;
 using Constellation.Infrastructure.Templates.Views.Emails.Lessons;
 using Constellation.Infrastructure.Templates.Views.Emails.MissedWork;
@@ -404,36 +405,19 @@ namespace Constellation.Infrastructure.Services
                 SenderName = absenceSettings.AbsenceCoordinatorName,
                 SenderTitle = absenceSettings.AbsenceCoordinatorTitle,
                 Title = "Absence Explanation Received",
-                StudentName = notificationEmail.WholeAbsences.First().Student.DisplayName
-            };
+                StudentName = notificationEmail.StudentName
+            }; 
 
             foreach (var absence in notificationEmail.WholeAbsences)
             {
-                var reportedBy = "UNKNOWN SOURCE";
-                var response = absence.Responses.First();
-
-                if (response.Type == AbsenceResponse.Coordinator)
-                    reportedBy = $"Reported by {response.From} (ACC)";
-                else if (response.Type == AbsenceResponse.Parent)
-                    reportedBy = "Reported by Parent";
-                else if (response.Type == AbsenceResponse.Student)
-                {
-                    var status = (response.VerificationStatus == AbsenceResponse.Verified) ? "verified" : "rejected";
-
-                    reportedBy = $"Reported by Student and <strong>{status}</strong> by {response.Verifier} (ACC)";
-
-                    if (!string.IsNullOrWhiteSpace(response.VerificationComment))
-                        reportedBy += $"<br />with comment: {response.VerificationComment}";
-                }
-
                 viewModel.Absences.Add(new AbsenceExplanationToSchoolAdminEmailViewModel.AbsenceDto
                 {
-                    AbsenceDate = absence.Date,
-                    PeriodName = $"{absence.PeriodName} ({absence.PeriodTimeframe})",
-                    ClassName = absence.Offering.Name,
-                    Explanation = absence.Responses.First().Explanation,
-                    Source = reportedBy,
-                    Type = absence.Type,
+                    AbsenceDate = absence.AbsenceDate,
+                    PeriodName = absence.PeriodName,
+                    ClassName = absence.ClassName,
+                    Explanation = absence.Explanation,
+                    Source = absence.ReportedBy,
+                    Type = absence.AbsenceType,
                     AbsenceTime = absence.AbsenceTimeframe 
                 });
             }
@@ -882,6 +866,30 @@ namespace Constellation.Infrastructure.Services
             }
 
             await _emailSender.Send(toRecipients, null, viewModel.Title, body);
+        }
+
+        public async Task SendMagicLinkLoginEmail(MagicLinkEmail notification)
+        {
+            var settings = await _unitOfWork.Settings.Get();
+
+            var viewModel = new MagicLinkLoginEmailViewModel
+            {
+                Preheader = "This is an automated message. Please do not reply.",
+                SenderName = "",
+                SenderTitle = "",
+                Title = "[Aurora College] Portal Login Link",
+                ToName = notification.Name,
+                Link = notification.Link
+            };
+
+            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Auth/MagicLinkLoginEmail.cshtml", viewModel);
+
+            var toRecipients = new Dictionary<string, string>();
+            foreach (var entry in notification.Recipients)
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                    toRecipients.Add(entry.Name, entry.Email);
+
+            await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
         }
     }
 }

@@ -3,6 +3,8 @@
 @model AttendanceReportViewModel
 @{
     Layout = null;
+
+    var dateData = Model.DateData.OrderBy(d => d.Date).ToList();
 }
 
 <!DOCTYPE html>
@@ -111,208 +113,128 @@
     </style>
 </head>
 <body>
-    <div class="row">
-        <div class="heading-row">Legend:</div>
-        <div class="legend">
-            <div class="legend-box">
-                <img src="@Model.GreenLightIcon" height="50px" width="50px" />
-                All Absences Explained
-            </div>
-            <div class="legend-box">
-                <img src="@Model.YellowLightIcon" height="50px" width="50px" />
-                Some Absences Explained
-            </div>
-            <div class="legend-box">
-                <img src="@Model.RedLightIcon" height="50px" width="50px" />
-                No Absences Explained
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="offset-1 col-10">
-            <h2>Week A</h2>
-        </div>
-
-        @foreach (var entry in Model.DateData.OrderBy(d => d.Date).Take(7))
+    @for (int i = 0; i < dateData.Count; i++)
+    {
+        var weekIndex = (i * 7);
+        if (weekIndex >= dateData.Count)
         {
-            if (entry.Date.DayOfWeek == DayOfWeek.Sunday || entry.Date.DayOfWeek == DayOfWeek.Saturday)
+            continue;
+        }
+        var week = dateData[weekIndex];
+        var weekName = (week.DayNumber == 1) ? "Week A" : "Week B";
+
+        if (i > 0)
+        {
+            <div style="page-break-after: always; border: none;"></div>
+        }
+
+        <div class="row">
+            <div class="heading-row">Legend:</div>
+            <div class="legend">
+                <div class="legend-box">
+                    <img src="@Model.GreenLightIcon" height="50px" width="50px" />
+                    All Absences Explained
+                </div>
+                <div class="legend-box">
+                    <img src="@Model.YellowLightIcon" height="50px" width="50px" />
+                    Some Absences Explained
+                </div>
+                <div class="legend-box">
+                    <img src="@Model.RedLightIcon" height="50px" width="50px" />
+                    No Absences Explained
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="offset-1 col-10">
+                <h2>@weekName</h2>
+            </div>
+
+            @for (int k = 0; k < 7; k++)
             {
-                continue;
-            }
-
-            <div class="offset-1 col-10" style="page-break-inside: avoid">
-                @if (!Model.ExcludedDates.Contains(entry.Date))
+                var index = (i * 7) + k;
+                if (index >= dateData.Count)
                 {
-                    <h4>@entry.Date.ToLongDateString()</h4>
+                    continue;
+                }
 
-                    if (!entry.SessionsByOffering.Any())
+                var entry = dateData[index];
+
+                if (entry.Date.DayOfWeek == DayOfWeek.Sunday || entry.Date.DayOfWeek == DayOfWeek.Saturday)
+                {
+                    continue;
+                }
+
+                <div class="offset-1 col-10" style="page-break-inside: avoid">
+                    @if (!Model.ExcludedDates.Contains(entry.Date))
                     {
-                        <span>No classes scheduled this day</span>
+                        <h4>@entry.Date.ToLongDateString()</h4>
+
+                        if (!entry.SessionsByOffering.Any())
+                        {
+                            <span>No classes scheduled this day</span>
+                        }
+                        else
+                        {
+                            <table class="mt-3 table-roll">
+                                @foreach (var group in entry.SessionsByOffering)
+                                {
+                                    <tr>
+                                        <th>
+                                            @group.PeriodName<br />
+                                            @group.PeriodTimeframe<br />
+                                            @group.OfferingName<br />
+                                            <span style="white-space: nowrap">@group.CourseName</span>
+                                        </th>
+                                        <td>
+                                            @{
+                                                var periodAbsences = Model.Absences.Where(a => a.Date.Date == entry.Date && a.OfferingId == group.OfferingId);
+
+                                                if (periodAbsences.Any())
+                                                {
+                                                    foreach (var absence in periodAbsences.OrderBy(a => a.StartTime))
+                                                    {
+                                                        <strong>@absence.Type (@absence.AbsenceTimeframe) - @absence.AbsenceReason</strong>
+
+                                                        @Html.Raw(absence.ExplanationString)
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <strong>Student was marked present for the entire lesson</strong>
+                                                }
+                                            }
+                                        </td>
+                                        <td>
+                                            @{
+                                                if (periodAbsences.All(a => a.Explained))
+                                                {
+                                                    <img src="@Model.GreenLightIcon" height="50px" width="50px" />
+                                                }
+                                                else if (periodAbsences.All(a => !a.Explained))
+                                                {
+                                                    <img src="@Model.RedLightIcon" height="50px" width="50px" />
+                                                }
+                                                else
+                                                {
+                                                    <img src="@Model.YellowLightIcon" height="50px" width="50px" />
+                                                }
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        }
                     }
                     else
                     {
-                        <table class="mt-3 table-roll">
-                            @foreach (var group in entry.SessionsByOffering)
-                            {
-                                <tr>
-                                    <th>
-                                        @group.PeriodName<br />
-                                        @group.PeriodTimeframe<br />
-                                        @group.OfferingName<br />
-                                        <span style="white-space: nowrap">@group.CourseName</span>
-                                    </th>
-                                    <td>
-                                        @{
-                                            var periodAbsences = Model.Absences.Where(a => a.Date.Date == entry.Date && a.OfferingId == group.OfferingId);
-
-                                            if (periodAbsences.Any())
-                                            {
-                                                foreach (var absence in periodAbsences.OrderBy(a => a.StartTime))
-                                                {
-                                                    <strong>@absence.Type (@absence.AbsenceTimeframe) - @absence.AbsenceReason</strong>
-
-                                                    @Html.Raw(absence.ExplanationString)
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <strong>Student was marked present for the entire lesson</strong>
-                                            }
-                                        }
-                                    </td>
-                                    <td>
-                                        @{
-                                            if (periodAbsences.All(a => a.Explained))
-                                            {
-                                                <img src="@Model.GreenLightIcon" height="50px" width="50px" />
-                                            }
-                                            else if (periodAbsences.All(a => !a.Explained))
-                                            {
-                                                <img src="@Model.RedLightIcon" height="50px" width="50px" />
-                                            }
-                                            else
-                                            {
-                                                <img src="@Model.YellowLightIcon" height="50px" width="50px" />
-                                            }
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        </table>
+                        <h4>@entry.Date.ToLongDateString()</h4>
+                        <span>Non Teaching Day</span>
                     }
-                }
-                else
-                {
-                    <h4>@entry.Date.ToLongDateString()</h4>
-                    <span>Non Teaching Day</span>
-                }
-            </div>
-        }
-    </div>
-    
-    <div style="page-break-after: always; border: none;"></div>
-
-    <div class="row">
-        <div class="heading-row">Legend:</div>
-        <div class="legend">
-            <div class="legend-box">
-                <img src="@Model.GreenLightIcon" height="50px" width="50px" />
-                All Absences Explained
-            </div>
-            <div class="legend-box">
-                <img src="@Model.YellowLightIcon" height="50px" width="50px" />
-                Some Absences Explained
-            </div>
-            <div class="legend-box">
-                <img src="@Model.RedLightIcon" height="50px" width="50px" />
-                No Absences Explained
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="offset-1 col-10">
-            <h2>Week B</h2>
-        </div>
-
-        @foreach (var entry in Model.DateData.OrderBy(d => d.Date).Skip(7))
-        {
-            if (entry.Date.DayOfWeek == DayOfWeek.Sunday || entry.Date.DayOfWeek == DayOfWeek.Saturday)
-            {
-                continue;
+                </div>
             }
-
-            <div class="offset-1 col-10" style="page-break-inside: avoid">
-                @if (!Model.ExcludedDates.Contains(entry.Date))
-                {
-                    <h4>@entry.Date.ToLongDateString()</h4>
-
-                    if (!entry.SessionsByOffering.Any())
-                    {
-                        <span>No classes scheduled this day</span>
-                    }
-                    else
-                    {
-                        <table class="mt-3 table-roll">
-                            @foreach (var group in entry.SessionsByOffering)
-                            {
-                                <tr>
-                                    <th>
-                                        @group.PeriodName<br />
-                                        @group.PeriodTimeframe<br />
-                                        @group.OfferingName<br />
-                                        <span style="white-space: nowrap">@group.CourseName</span>
-                                    </th>
-                                    <td>
-                                        @{
-                                            var periodAbsences = Model.Absences.Where(a => a.Date.Date == entry.Date && a.OfferingId == group.OfferingId);
-
-                                            if (periodAbsences.Any())
-                                            {
-                                                foreach (var absence in periodAbsences.OrderBy(a => a.StartTime))
-                                                {
-                                                    <strong>@absence.Type (@absence.AbsenceTimeframe) - @absence.AbsenceReason</strong>
-
-                                                    @Html.Raw(absence.ExplanationString)
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <strong>Student was marked present for the entire lesson</strong>
-                                            }
-                                        }
-                                    </td>
-                                    <td>
-                                        @{
-                                            if (periodAbsences.All(a => a.Explained))
-                                            {
-                                                <img src="@Model.GreenLightIcon" height="50px" width="50px" />
-                                            }
-                                            else if (periodAbsences.All(a => !a.Explained))
-                                            {
-                                                <img src="@Model.RedLightIcon" height="50px" width="50px" />
-                                            }
-                                            else
-                                            {
-                                                <img src="@Model.YellowLightIcon" height="50px" width="50px" />
-                                            }
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        </table>
-                    }
-                }
-                else
-                {
-                    <h4>@entry.Date.ToLongDateString()</h4>
-                    <span>Non Teaching Day</span>
-                }
-            </div>
-        }
-
-    </div>
-
+        </div>
+    }
 </body>
 </html>

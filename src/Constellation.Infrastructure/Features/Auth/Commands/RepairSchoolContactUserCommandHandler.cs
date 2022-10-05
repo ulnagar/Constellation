@@ -45,7 +45,7 @@ namespace Constellation.Infrastructure.Features.Auth.Commands
                 // Create a new user
                 var newUser = new AppUser
                 {
-                    UserName = contact.EmailAddress,
+                    UserName = $"{contact.FirstName} {contact.LastName}",
                     Email = contact.EmailAddress,
                     FirstName = contact.FirstName,
                     LastName = contact.LastName,

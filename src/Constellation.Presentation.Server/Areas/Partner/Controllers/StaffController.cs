@@ -150,7 +150,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                         FirstName = result.Entity.FirstName,
                         LastName = result.Entity.LastName,
                         Email = result.Entity.EmailAddress,
-                        Username = result.Entity.EmailAddress,
+                        Username = $"{result.Entity.FirstName} {result.Entity.LastName}",
                         IsStaffMember = true,
                         StaffId = result.Entity.StaffId
                     };
@@ -176,8 +176,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                     FirstName = result.Entity.FirstName,
                     LastName = result.Entity.LastName,
                     Email = result.Entity.EmailAddress,
-                    Username = result.Entity.EmailAddress,
-                    IsStaffMember = true,
+                    Username = $"{result.Entity.FirstName} {result.Entity.LastName}",
                     StaffId = result.Entity.StaffId
                 };
 
@@ -258,7 +257,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 FirstName = staffMember.FirstName,
                 LastName = staffMember.LastName,
                 Email = staffMember.EmailAddress,
-                Username = staffMember.EmailAddress,
+                Username = $"{staffMember.FirstName} {staffMember.LastName}",
                 IsStaffMember = false
             };
 
@@ -301,7 +300,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 FirstName = staffMember.FirstName,
                 LastName = staffMember.LastName,
                 Email = staffMember.EmailAddress,
-                Username = staffMember.EmailAddress,
+                Username = $"{staffMember.FirstName} {staffMember.LastName}",
                 IsStaffMember = false
             };
 

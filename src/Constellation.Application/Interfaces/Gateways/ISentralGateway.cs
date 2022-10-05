@@ -14,6 +14,7 @@ namespace Constellation.Application.Interfaces.Gateways
         Task<string> GetSentralStudentIdFromSRN(string srn, string grade);
         Task<IDictionary<string, IDictionary<string, string>>> GetParentContactEntry(string sentralStudentId);
         Task<List<DateTime>> GetExcludedDatesFromCalendar(string year);
+        Task<List<ValidAttendenceReportDate>> GetValidAttendanceReportDatesFromCalendar(string year);
         Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateTime date);
         Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(ILogger logger);
         Task<byte[]> GetSentralStudentPhoto(string studentId);

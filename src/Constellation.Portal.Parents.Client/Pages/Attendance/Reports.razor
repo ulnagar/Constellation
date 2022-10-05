@@ -1,0 +1,182 @@
+﻿@page "/Attendance/Reports/"
+
+@using Constellation.Application.DTOs
+@using Constellation.Application.Features.Partners.Students.Queries
+
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+@attribute [Authorize]
+
+<Loader IsLoading="ShowLoader">
+    <h2>Attendance Reports</h2>
+
+    <div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mb-1">
+        <a href="attendance" class="btn btn-primary"><i class="fas fa-long-arrow-left" /> Go Back</a>
+    </div>
+
+    <div class="d-none d-lg-block d-xl-block d-xxl-block mb-1">
+        <a href="attendance" class="btn btn-primary"><i class="fas fa-long-arrow-left" /> Go Back</a>
+    </div>
+
+    @if (SelectingStudent)
+    {
+        // Show list of students in boxes to allow them to select a different student
+        <ul class="list-group">
+            @foreach (var student in Students)
+            {
+                <button class="list-group-item list-group-item-action @(student == SelectedStudent ? "active" : "")" @onclick="() => SelectNewStudent(student)">
+                    @student.DisplayName (@student.CurrentGrade)
+                </button>
+            }
+        </ul>
+    } 
+    else
+    {
+        <div class="w-auto p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+            <span class="row d-flex align-items-center">
+                @*Display as flex to enable vertical centering of the button in the second div*@
+                <div class="col-lg">
+                    <div class="h4">Report for @SelectedStudent.DisplayName</div>
+                    @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
+                    @if (Students.Count > 1)
+                    {
+                        <span class="fst-italic">Click or tap to change</span>
+
+                        <div class="d-block">
+                            <a @onclick="EnableStudentSelection" href="javascript:void(0)" class="stretched-link"></a>
+                        </div>
+                    }
+                </div>
+            </span>
+        </div>
+    
+        <div class="accordion accordion-flush" id="accordion">
+            @foreach (var term in ValidDates.OrderBy(entry => entry.StartDate).GroupBy(entry => entry.TermGroup).ToList())
+            {
+                var termId = term.First().TermGroup.Replace(' ', '-');
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="accordion-header-@termId">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-@termId" aria-expanded="false" aria-controls="accordion-item-@termId">
+                            @term.First().TermGroup
+                        </button>
+                    </h2>
+                    <div id="accordion-item-@termId" class="accordion-collapse collapse" aria-labelledby="accordion-header-@termId" data-bs-parent="#accordion">
+                        <div class="accordion-body">
+                            @foreach (var entry in term)
+                            {
+                                var disabled = entry.EndDate.Date > DateTime.Today;
+
+                                <div class="w-auto p-3 ms-3 me-3 mb-2 shadow position-relative @(disabled ? "disabled" : "")">
+                                    <div class="row d-flex align-items-center">
+                                        @*Display as flex to enable vertical centering of the button in the second div*@
+                                        <div class="col-lg-8">
+                                            <div class="h5">@entry.Description</div>
+                                            <div class="mb-1">
+                                                <span>@entry.StartDate.ToShortDateString() - @entry.EndDate.ToShortDateString()</span>
+                                            </div>
+
+                                            @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
+                                            @if (!disabled)
+                                            {
+                                                <span class="fst-italic">Click or tap to download</span>
+
+                                                <div class="d-block">
+                                                    <a @onclick="() => DownloadReport(entry)" href="javascript:void(0)" class="stretched-link"></a>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</Loader>
+
+@code {
+    public List<ValidAttendenceReportDate> ValidDates { get; set; } = new();
+    public List<StudentOfParent> Students { get; set; } = new();
+    public StudentOfParent SelectedStudent { get; set; } = new();
+
+    public bool ShowLoader { get; set; } = false;
+    public bool SelectingStudent { get; set; } = false;
+
+    public string BaseUrl = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        ShowLoader = true;
+
+        try
+        {
+            BaseUrl = Http.BaseAddress.AbsoluteUri;
+
+            Students = await Http.GetFromJsonAsync<List<StudentOfParent>>($"Students");
+            Students = Students.OrderBy(student => student.CurrentGrade).ToList();
+
+            if (Students.Count > 0)
+            {
+                SelectedStudent = Students.First();
+            }
+            else
+            {
+                // Throw error?
+            }
+
+            ValidDates = await Http.GetFromJsonAsync<List<ValidAttendenceReportDate>>($"Attendance/Reports/Dates");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+
+        ShowLoader = false;
+    }
+
+    async Task DownloadReport(ValidAttendenceReportDate reportDate)
+    {
+        try
+        {
+            ShowLoader = true;
+
+            var a = new AttendanceReportRequest { StudentId = SelectedStudent.StudentId, StartDate = reportDate.StartDate, EndDate = reportDate.EndDate };
+
+            var response = await Http.PostAsJsonAsync($"Attendance/Reports/Download", a);
+            // This returns the file in the response variable.
+            // Need to push it to the browser as a file download, possibly using JS
+            // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0
+
+            var fileStream = response.Content.ReadAsStream();
+            var fileName = $"Attendance Report - {SelectedStudent.DisplayName} - {reportDate.StartDate:yyyy-MM-dd}.pdf";
+
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        finally
+        {
+            ShowLoader = false;
+        }
+    }
+
+    void EnableStudentSelection()
+    {
+        SelectingStudent = true;
+    }
+
+    void SelectNewStudent(StudentOfParent student)
+    {
+        SelectedStudent = student;
+
+        SelectingStudent = false;
+    }
+}

@@ -1,0 +1,133 @@
+﻿@page "/Contacts/"
+@using Constellation.Application.Features.Contacts.Queries
+@using Constellation.Application.Features.Partners.Students.Queries
+
+@inject HttpClient Http
+
+@attribute [Authorize]
+
+<Loader IsLoading="@ShowLoader">
+    <h2>Contacts</h2>
+
+    @if (SelectingStudent)
+    {
+        // Show list of students in boxes to allow them to select a different student
+        <h4>Select student to display:</h4>
+        <ul class="list-group">
+            @foreach (var student in Students)
+            {
+                <button class="list-group-item list-group-item-action @(student == SelectedStudent ? "active" : "")" @onclick="() => SelectNewStudent(student)">
+                    @student.DisplayName (@student.CurrentGrade)
+                </button>
+            }
+        </ul>
+    } 
+    else
+    {
+        <div class="w-auto p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+            <span class="row d-flex align-items-center">
+                @*Display as flex to enable vertical centering of the button in the second div*@
+                <div class="col-lg">
+                    <div class="h4">Contacts for @SelectedStudent.DisplayName</div>
+                    @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
+                    @if (Students.Count > 1)
+                    {
+                        <span class="fst-italic">Click or tap to change</span>
+
+                        <div class="d-block">
+                            <a @onclick="EnableStudentSelection" href="javascript:void(0)" class="stretched-link"></a>
+                        </div>
+                    }
+                </div>
+            </span>
+        </div>
+
+        @foreach(var group in Contacts.OrderBy(contact => contact.Category).GroupBy(contact => contact.Category))
+        {
+            <div class="row mt-3">
+                <h4>@group.Key</h4>
+
+                @foreach (var entry in group.OrderBy(contact => contact.Detail))
+                {
+                    <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+                        <span class="row d-flex align-items-center">
+                            <div class="col">
+                                <div class="h5">@entry.DisplayName</div>
+                                <span class="fst-italic">@entry.Detail</span>
+                                <span class="d-block"><a href="mailto:@entry.EmailAddress" class="stretched-link">@entry.EmailAddress</a></span>
+                                @if (!string.IsNullOrWhiteSpace(entry.PhoneNumber))
+                                {
+                                    <span class="d-block">@entry.PhoneNumber</span>
+                                }
+                            </div>
+                        </span>
+                    </div>
+                }
+            </div>
+        }
+    }
+</Loader>
+
+@code {
+    public List<StudentOfParent> Students { get; set; } = new();
+    public StudentOfParent SelectedStudent { get; set; } = new();
+    public List<StudentSupportContact> Contacts { get; set; } = new();
+
+    public bool ShowLoader = false;
+    public bool SelectingStudent = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            Students = await Http.GetFromJsonAsync<List<StudentOfParent>>($"Students");
+            Students = Students.OrderBy(student => student.CurrentGrade).ToList();
+
+            if (Students.Count == 1)
+            {
+                SelectedStudent = Students.First();
+                await GetStudentContacts();
+            }
+
+            if (Students.Count > 1)
+            {
+                SelectingStudent = true;
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+    async Task GetStudentContacts()
+    {
+        try
+        {
+            Contacts = await Http.GetFromJsonAsync<List<StudentSupportContact>>($"Contacts/All/{SelectedStudent.StudentId}");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+    void EnableStudentSelection()
+    {
+        SelectingStudent = true;
+    }
+
+    async void SelectNewStudent(StudentOfParent student)
+    {
+        ShowLoader = true;
+
+        SelectedStudent = student;
+        SelectingStudent = false;
+
+        await GetStudentContacts();
+
+        ShowLoader = false;
+
+        StateHasChanged();
+    }
+}

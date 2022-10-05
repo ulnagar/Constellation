@@ -1,0 +1,26 @@
+﻿@if (IsLoading)
+{
+    <div class="loader">
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+} 
+else
+{
+    @ChildContent
+}
+
+@code {
+    @namespace Constellation.Portal.Parents.Client.Components
+
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+}

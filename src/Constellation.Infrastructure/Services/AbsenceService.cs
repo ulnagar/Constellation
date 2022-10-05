@@ -71,43 +71,6 @@ namespace Constellation.Infrastructure.Services
             return result;
         }
 
-        public async Task CreateSingleParentExplanation(Guid absenceId, string explanation)
-        {
-            var absence = await _unitOfWork.Absences.ForExplanationFromParent(absenceId);
-
-            var notificationEmail = new EmailDtos.AbsenceResponseEmail();
-
-            if (absence == null)
-                return; 
-
-            var response = new AbsenceResponse()
-            {
-                Type = AbsenceResponse.Parent,
-                From = AbsenceResponse.Parent,
-                ReceivedAt = DateTime.Now,
-                Explanation = explanation
-            };
-
-            absence.Responses.Add(response);
-            await _unitOfWork.CompleteAsync();
-
-            var teachers = absence.Offering
-                .Sessions
-                .Where(session => !session.IsDeleted)
-                .Select(session => session.Teacher.EmailAddress)
-                .Distinct()
-                .ToList();
-
-            notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
-            notificationEmail.Recipients.AddRange(teachers);
-            notificationEmail.WholeAbsences.Add(absence);
-
-            await _emailService.SendAbsenceReasonToSchoolAdmin(notificationEmail);
-            response.Forwarded = true;
-
-            await _unitOfWork.CompleteAsync();
-        }
-
         public async Task CreateSingleCoordinatorExplanation(Guid absenceId, string explanation, string userName)
         {
             var absence = await _unitOfWork.Absences.ForExplanationFromParent(absenceId);
@@ -116,6 +79,8 @@ namespace Constellation.Infrastructure.Services
 
             if (absence == null)
                 return;
+
+            var student = await _unitOfWork.Students.ForEditAsync(absence.StudentId);
 
             var response = new AbsenceResponse()
             {
@@ -129,7 +94,8 @@ namespace Constellation.Infrastructure.Services
             await _unitOfWork.CompleteAsync();
 
             notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
-            notificationEmail.WholeAbsences.Add(absence);
+            notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response));
+            notificationEmail.StudentName = student.DisplayName;
 
             await _emailService.SendAbsenceReasonToSchoolAdmin(notificationEmail);
             response.Forwarded = true;
@@ -208,10 +174,14 @@ namespace Constellation.Infrastructure.Services
 
             await _unitOfWork.CompleteAsync();
 
+            var absence = await _unitOfWork.Absences.ForSendingNotificationAsync(response.AbsenceId.ToString());
+            var student = await _unitOfWork.Students.ForEditAsync(absence.StudentId);
+
             var notificationEmail = new EmailDtos.AbsenceResponseEmail();
 
             notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
-            notificationEmail.WholeAbsences.Add(response.Absence);
+            notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response));
+            notificationEmail.StudentName = student.DisplayName;
 
             await _emailService.SendAbsenceReasonToSchoolAdmin(notificationEmail);
             response.Forwarded = true;
