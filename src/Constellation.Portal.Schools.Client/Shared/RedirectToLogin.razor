@@ -3,6 +3,12 @@
 @code {
     protected override void OnInitialized()
     {
-        Navigation.NavigateTo($"authentication/login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}");
+        var uri = Navigation.Uri;
+
+        if (uri.EndsWith("/schools"))
+            uri += "/";
+
+        //Navigation.NavigateTo($"authentication/login?returnUrl={Uri.EscapeDataString(uri)}");
+        Navigation.NavigateTo($"authentication/login");
     }
 }

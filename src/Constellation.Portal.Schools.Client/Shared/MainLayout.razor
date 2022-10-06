@@ -1,4 +1,10 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
+
+@inject SchoolState state
+
+@using Constellation.Application.DTOs
+@using Constellation.Portal.Schools.Client.StateManagement
 
 <div class="page">
     <div class="sidebar">
@@ -6,12 +12,42 @@
     </div>
 
     <main>
-        <div class="top-row px-4 auth">
-            <LoginDisplay />
+        <div class="top-row px-4 auth flex-column flex-sm-row d-none d-sm-none d-md-none d-lg-flex d-xl-flex d-xxl-flex">
+            <div class="col-sm-8 col-12 order-last order-sm-first d-flex align-items-center">
+                <SchoolSelector />
+            </div>
+            <div class="col-sm-4 col-12 order-first order-sm-last d-flex align-items-center ms-3">
+                <LoginDisplay />
+            </div>
         </div>
 
+        <div class="top-row px-4 auth flex-row d-flex d-sm-flex d-md-flex d-lg-none d-xl-none d-xxl-none">
+            <div class="col-12 order-sm-last d-flex align-items-center">
+                <LoginDisplay />
+            </div>
+        </div>
+        <div class="top-row px-4 auth flex-row d-flex d-sm-flex d-md-flex d-lg-none d-xl-none d-xxl-none">
+            <div class="col-12 order-sm-first d-flex align-items-center">
+                <SchoolSelector />
+            </div>
+        </div>
+            
         <article class="content px-4">
+            @state.SelectedSchool?.Name <br />
             @Body
         </article>
     </main>
 </div>
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        state.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        state.OnChange -= StateHasChanged;
+    }
+}

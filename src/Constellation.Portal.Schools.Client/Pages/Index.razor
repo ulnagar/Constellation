@@ -1,6 +1,14 @@
 ﻿@page "/"
+@implements IDisposable
+@inject SchoolState state
+
+@using Constellation.Application.DTOs
+@using Constellation.Portal.Schools.Client.StateManagement
+
 
 <h1>Welcome to the Aurora College Parents Portal</h1>
+
+<h2>@state.SelectedSchool?.Name</h2>
 
 <p>This portal can be used to access information from Aurora College about your child.</p>
 
@@ -19,3 +27,16 @@
         <dd>Send a message to your childs class teachers or to the school administration</dd>
     </dl>
 </p>
+
+@code{
+    protected override void OnInitialized()
+    {
+        state.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        state.OnChange -= StateHasChanged;
+    }
+
+}
