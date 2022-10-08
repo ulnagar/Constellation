@@ -137,12 +137,14 @@ public class LoginModel : PageModel
         // Get user entry from database
         var user = await _userManager.FindByIdAsync(userId);
 
+        _logger.LogInformation("Found user {user} with Id {id}", user.Email, userId);
+
         // Verify login token in url
         var isValid = await _userManager.VerifyUserTokenAsync(user, "PasswordlessLoginProvider", "passwordless-auth", token);
         
         if (!isValid)
         {
-            _logger.LogWarning(" - Token invalid for {user}", Input.Email);
+            _logger.LogWarning(" - Token invalid for {user}", user.Email);
 
             Status = LoginStatus.TokenInvalid;
 

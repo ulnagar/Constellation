@@ -301,7 +301,13 @@ public static class ServicesRegistration
         // Due to IS5 stupidity, the subsite configuration must be lower case:
         // https://stackoverflow.com/questions/62563174/identityserver4-authorization-error-not-matching-redirect-uri
 
-        services.AddIdentityServer()
+        services.AddIdentityServer(opts =>
+        {
+            opts.KeyManagement.KeyPath = "Keys";
+            opts.KeyManagement.RotationInterval = TimeSpan.FromDays(30);
+            opts.KeyManagement.PropagationTime = TimeSpan.FromDays(2);
+            opts.KeyManagement.RetentionDuration = TimeSpan.FromDays(7);
+        })
             .AddApiAuthorization<AppUser, AppDbContext>()
             .AddProfileService<ParentPortalProfileService>();
 
