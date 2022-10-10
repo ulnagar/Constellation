@@ -24,8 +24,6 @@ namespace Constellation.Core.Models
         public ICollection<MSTeamOperation> MSTeamOperations { get; set; }
 
         public ICollection<ClassworkNotification> ClassworkNotifications { get; set; }
-        public bool IsCurrent => (StartDate <= DateTime.Today && EndDate >= DateTime.Today);
-        public bool IsFuture => (StartDate > DateTime.Today);
                
         public void Delete()
         {

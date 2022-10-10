@@ -13,6 +13,5 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<ICollection<CanvasOperation>> All();
         Task<ICollection<CanvasOperation>> AllWithFilter(Expression<Func<CanvasOperation, bool>> predicate);
         Task<ICollection<CanvasOperation>> AllToProcess();
-        Task<ICollection<CanvasOperation>> AllOverdue();
     }
 }

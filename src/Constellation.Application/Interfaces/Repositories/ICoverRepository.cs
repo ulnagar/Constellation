@@ -1,4 +1,5 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Application.Interfaces.Providers;
+using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -13,7 +14,7 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<string> CoverTypeForCancellationAsync(int id);
         Task<ICollection<ClassCover>> ForOperationCancellation();
         Task<ClassCover> GetForExistCheck(int id);
-        Task<ICollection<ClassCover>> OutstandingForCasual(int casualId);
+        Task<ICollection<ClassCover>> OutstandingForCasual(int casualId, IDateTimeProvider dateTimeProvider);
         Task<ClassCover> ForUpdate(int id);
     }
 }

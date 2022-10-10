@@ -1,4 +1,5 @@
 using Constellation.Application.Extensions;
+using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
@@ -68,12 +69,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToList();
         }
 
-        public ICollection<TeacherClassCover> AllUpcoming()
+        public ICollection<TeacherClassCover> AllUpcoming(IDateTimeProvider dateTimeProvider)
         {
             return Collection()
                 .Where(c => c.IsDeleted == false)
                 .ToList()
-                .Where(c => c.IsCurrent() || c.IsFuture())
+                .Where(c => c.IsCurrent(dateTimeProvider) || c.IsFuture(dateTimeProvider))
                 .ToList();
         }
 
