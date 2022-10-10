@@ -98,7 +98,7 @@ namespace Constellation.Infrastructure.Services
             if (casual == null)
                 return;
 
-            var outstandingCovers = await _unitOfWork.Covers.OutstandingForCasual(casualId);
+            var outstandingCovers = await _unitOfWork.Covers.OutstandingForCasual(casualId, _dateTimeProvider);
 
             // Remove all current casual covers
             foreach (var cover in outstandingCovers)
