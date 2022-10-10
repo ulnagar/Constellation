@@ -1,4 +1,5 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Application.Interfaces.Providers;
+using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -13,7 +14,7 @@ namespace Constellation.Application.Interfaces.Repositories
         T GetForExistCheck(int id);
         ICollection<T> All();
         ICollection<T> AllWithFilter(Expression<Func<T, bool>> predicate);
-        ICollection<T> AllUpcoming();
+        ICollection<T> AllUpcoming(IDateTimeProvider dateTimeProvider);
         ICollection<T> AllOutdated();
         Task<T> ForEditAsync(int id);
         Task<ICollection<T>> ForClassworkNotifications(DateTime absenceDate, int offeringId);

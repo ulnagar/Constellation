@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Features.ShortTerm.Covers.Commands;
+using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
@@ -22,13 +23,15 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICoverService _coverService;
         private readonly IMediator _mediator;
+        private readonly IDateTimeProvider _dateTimeProvider;
 
-        public CoversController(IUnitOfWork unitOfWork, ICoverService coverService, IMediator mediator)
+        public CoversController(IUnitOfWork unitOfWork, ICoverService coverService, IMediator mediator, IDateTimeProvider dateTimeProvider)
             : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _coverService = coverService;
             _mediator = mediator;
+            _dateTimeProvider = dateTimeProvider;
         }
 
         public IActionResult Index()
@@ -41,7 +44,7 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
             var covers = await _unitOfWork.Covers.ForListAsync(cover => true);
 
             var viewModel = await CreateViewModel<Covers_ViewModel>();
-            viewModel.Covers = covers.Select(Covers_ViewModel.CoverDto.ConvertFromCover).ToList();
+            viewModel.Covers = covers.Select(cover => Covers_ViewModel.CoverDto.ConvertFromCover(cover, _dateTimeProvider)).ToList();
 
             return View("Index", viewModel);
         }
@@ -51,7 +54,7 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
             var covers = await _unitOfWork.Covers.ForListAsync(cover => cover.EndDate >= DateTime.Today && !cover.IsDeleted);
 
             var viewModel = await CreateViewModel<Covers_ViewModel>();
-            viewModel.Covers = covers.Select(Covers_ViewModel.CoverDto.ConvertFromCover).ToList();
+            viewModel.Covers = covers.Select(cover => Covers_ViewModel.CoverDto.ConvertFromCover(cover, _dateTimeProvider)).ToList();
 
             return View("Index", viewModel);
         }
