@@ -1,4 +1,5 @@
 ﻿using Constellation.Core.Models;
+using FluentAssertions;
 
 namespace Constellation.Core.Tests.Unit.Models;
 
