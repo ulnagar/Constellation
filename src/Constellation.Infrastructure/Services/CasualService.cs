@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
@@ -13,11 +14,13 @@ namespace Constellation.Infrastructure.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICoverService _coverService;
+        private readonly IDateTimeProvider _dateTimeProvider;
 
-        public CasualService(IUnitOfWork unitOfWork, ICoverService coverService)
+        public CasualService(IUnitOfWork unitOfWork, ICoverService coverService, IDateTimeProvider dateTimeProvider)
         {
             _unitOfWork = unitOfWork;
             _coverService = coverService;
+            _dateTimeProvider = dateTimeProvider;
         }
 
         public async Task<ServiceOperationResult<Casual>> CreateCasual(CasualDto casualResource)
@@ -95,7 +98,7 @@ namespace Constellation.Infrastructure.Services
             if (casual == null)
                 return;
 
-            var outstandingCovers = await _unitOfWork.Covers.OutstandingForCasual(casualId);
+            var outstandingCovers = await _unitOfWork.Covers.OutstandingForCasual(casualId, _dateTimeProvider);
 
             // Remove all current casual covers
             foreach (var cover in outstandingCovers)
