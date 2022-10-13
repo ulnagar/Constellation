@@ -52,7 +52,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D85E00EC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Core.Tests.Unit", "tests\Constellation.Core.Tests.Unit\Constellation.Core.Tests.Unit.csproj", "{A1728944-B15B-4729-8E35-6D3622BDF209}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Constellation.Application.Tests.Unit", "tests\Constellation.Application.Tests.Unit\Constellation.Application.Tests.Unit.csproj", "{E3F6AA6A-7629-48C0-ADD2-CF765079182D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Application.Tests.Unit", "tests\Constellation.Application.Tests.Unit\Constellation.Application.Tests.Unit.csproj", "{E3F6AA6A-7629-48C0-ADD2-CF765079182D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{24FFFA65-845F-43F2-A297-F912CA728EAB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "snippets", "snippets", "{B38737FC-70CC-445E-AC36-D0E131ABE461}"
+	ProjectSection(SolutionItems) = preProject
+		docs\tools\snippets\TestingSetup.snippet = docs\tools\snippets\TestingSetup.snippet
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Infrastructure.HangfireServer", "src\Constellation.Infrastructure.HangfireServer\Constellation.Infrastructure.HangfireServer.csproj", "{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}"
 EndProject
@@ -145,6 +152,8 @@ Global
 		{A59F7765-A0F9-4571-AA3F-C17C105DACD5} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
 		{A1728944-B15B-4729-8E35-6D3622BDF209} = {D85E00EC-36FB-426E-8473-43960C18FAB4}
 		{E3F6AA6A-7629-48C0-ADD2-CF765079182D} = {D85E00EC-36FB-426E-8473-43960C18FAB4}
+		{24FFFA65-845F-43F2-A297-F912CA728EAB} = {8E4ACA9A-B3CB-4538-96EE-FC153E53AA1F}
+		{B38737FC-70CC-445E-AC36-D0E131ABE461} = {24FFFA65-845F-43F2-A297-F912CA728EAB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {266E1BC1-EC70-416D-8B6F-E86CB0C2066C}

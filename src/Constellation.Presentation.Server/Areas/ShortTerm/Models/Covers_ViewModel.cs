@@ -32,7 +32,7 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Models
             public bool IsCurrent { get; set; }
             public bool IsFuture { get; set; }
 
-            public static CoverDto ConvertFromCover<T>(T cover, IDateTimeProvider dateTimeProvider) where T : ClassCover
+            public static CoverDto ConvertFromCover<T>(T cover) where T : ClassCover
             {
                 var viewModel = new CoverDto
                 {
@@ -40,8 +40,8 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Models
                     OfferingId = cover.OfferingId,
                     EndDate = cover.EndDate,
                     StartDate = cover.StartDate,
-                    IsCurrent = cover.IsCurrent(dateTimeProvider),
-                    IsFuture = cover.IsFuture(dateTimeProvider),
+                    IsCurrent = cover.IsCurrent(),
+                    IsFuture = cover.IsFuture(),
                     IsDeleted = cover.IsDeleted,
                     OfferingName = cover.Offering.Name
                 };

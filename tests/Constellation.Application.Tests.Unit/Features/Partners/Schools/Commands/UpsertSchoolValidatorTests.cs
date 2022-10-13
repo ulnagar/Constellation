@@ -1,5 +1,4 @@
 ﻿using Constellation.Application.Features.Partners.Schools.Commands;
-using FluentAssertions;
 
 namespace Constellation.Application.Tests.Unit.Features.Partners.Schools.Commands;
 
@@ -13,7 +12,7 @@ public class UpsertSchoolValidatorTests
     }
 
     [Fact]
-    public void UpsertSchoolValidator_ShouldFailToValidate_WhenNumberIsLessThanTenDigitsInLength()
+    public void MustBeValidPhoneNumber_ShouldFailToValidate_WhenNumberIsLessThanTenDigitsInLength()
     {
         // Arrange
         var model = new UpsertSchool();
@@ -31,7 +30,7 @@ public class UpsertSchoolValidatorTests
     }
 
     [Fact]
-    public void UpsertSchoolValidator_ShouldFailToValidate_WhenNumberStartsWithUnknownPrefix()
+    public void MustBeValidPhoneNumber_ShouldFailToValidate_WhenNumberStartsWithUnknownPrefix()
     {
         // Arrange
         var model = new UpsertSchool();
@@ -49,7 +48,7 @@ public class UpsertSchoolValidatorTests
     }
 
     [Fact]
-    public void UpsertSchoolValidator_ShouldValidate_WhenNumberIsValidPhoneNumber()
+    public void MustBeValidPhoneNumber_ShouldValidate_WhenNumberIsValidPhoneNumber()
     {
         // Arrange
         var model = new UpsertSchool();
@@ -65,7 +64,7 @@ public class UpsertSchoolValidatorTests
     }
 
     [Fact]
-    public void UpsertSchoolValidator_ShouldFailToValidate_WhenSchoolCodeIsEmpty()
+    public void SchoolCode_ShouldFailToValidate_WhenSchoolCodeIsEmpty()
     {
         // Arrange
         var model = new UpsertSchool();
@@ -83,7 +82,7 @@ public class UpsertSchoolValidatorTests
     }
 
     [Fact]
-    public void UpsertSchoolValidator_ShouldFailToValidate_WhenEmailIsNotValid()
+    public void EmailAddress_ShouldFailToValidate_WhenEmailIsNotValid()
     {
         // Arrange
         var model = new UpsertSchool();

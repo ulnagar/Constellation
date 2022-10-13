@@ -72,10 +72,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .SingleOrDefaultAsync(cover => cover.Id == id);
         }
 
-        public async Task<ICollection<ClassCover>> OutstandingForCasual(int casualId, IDateTimeProvider dateTimeProvider)
+        public async Task<ICollection<ClassCover>> OutstandingForCasual(int casualId)
         {
             return await _context.Covers
-                .Where(cover => !cover.IsDeleted && (cover.IsCurrent(dateTimeProvider) || cover.IsFuture(dateTimeProvider)) && ((CasualClassCover)cover).CasualId == casualId)
+                .Where(cover => !cover.IsDeleted && (cover.IsCurrent() || cover.IsFuture()) && ((CasualClassCover)cover).CasualId == casualId)
                 .ToListAsync();
         }
 

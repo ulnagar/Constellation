@@ -14,7 +14,7 @@ namespace Constellation.Application.Interfaces.Repositories
         T GetForExistCheck(int id);
         ICollection<T> All();
         ICollection<T> AllWithFilter(Expression<Func<T, bool>> predicate);
-        ICollection<T> AllUpcoming(IDateTimeProvider dateTimeProvider);
+        ICollection<T> AllUpcoming();
         ICollection<T> AllOutdated();
         Task<T> ForEditAsync(int id);
         Task<ICollection<T>> ForClassworkNotifications(DateTime absenceDate, int offeringId);
