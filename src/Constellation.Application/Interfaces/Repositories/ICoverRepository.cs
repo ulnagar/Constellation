@@ -14,7 +14,7 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<string> CoverTypeForCancellationAsync(int id);
         Task<ICollection<ClassCover>> ForOperationCancellation();
         Task<ClassCover> GetForExistCheck(int id);
-        Task<ICollection<ClassCover>> OutstandingForCasual(int casualId, IDateTimeProvider dateTimeProvider);
+        Task<ICollection<ClassCover>> OutstandingForCasual(int casualId);
         Task<ClassCover> ForUpdate(int id);
     }
 }
