@@ -1,27 +1,27 @@
 ﻿namespace Constellation.Application.Extensions;
 
-using Constellation.Application.Interfaces.Providers;
 using Constellation.Core.Models;
+using System;
 
 public static class ClassCoverExtensions
 {
-    public static bool IsCurrent(this ClassCover cover, IDateTimeProvider dateTimeProvider)
+    public static bool IsCurrent(this ClassCover cover)
     {
         if (cover.IsDeleted == true)
             return false;
 
-        if (cover.EndDate <= dateTimeProvider.Today)
+        if (cover.EndDate <= DateTime.Today)
             return false;
 
-        if (cover.StartDate >= dateTimeProvider.Today)
+        if (cover.StartDate >= DateTime.Today)
             return false;
 
         return true;
     }
 
-    public static bool IsFuture(this ClassCover cover, IDateTimeProvider dateTimeProvider)
+    public static bool IsFuture(this ClassCover cover)
     {
-        if (cover.StartDate.Date > dateTimeProvider.Today && !cover.IsDeleted)
+        if (cover.StartDate.Date > DateTime.Today && !cover.IsDeleted)
             return true;
 
         return false;
