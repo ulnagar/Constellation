@@ -69,12 +69,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToList();
         }
 
-        public ICollection<TeacherClassCover> AllUpcoming(IDateTimeProvider dateTimeProvider)
+        public ICollection<TeacherClassCover> AllUpcoming()
         {
             return Collection()
                 .Where(c => c.IsDeleted == false)
                 .ToList()
-                .Where(c => c.IsCurrent(dateTimeProvider) || c.IsFuture(dateTimeProvider))
+                .Where(c => c.IsCurrent() || c.IsFuture())
                 .ToList();
         }
 

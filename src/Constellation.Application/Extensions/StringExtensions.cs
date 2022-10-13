@@ -13,18 +13,16 @@ namespace Constellation.Application.Extensions
             return oString.Split(delimiter).ToList().RemoveNulls().ToList();
         }
 
-        public static string Collapse(this ICollection<string> oList, char delimiter)
+        public static string Collapse(this IList<string> oList, char delimiter)
         {
             var oString = "";
 
-            var list = oList.ToList();
-
-            for (int i = 0; i < list.Count; i++)
+            for (int i = 0; i < oList.Count; i++)
             {
-                if (i == list.Count - 1)
-                    oString += list[i];
+                if (i == oList.Count - 1)
+                    oString += oList[i];
                 else
-                    oString += list[i] + delimiter;
+                    oString += oList[i] + delimiter;
             }
             
             return oString;
