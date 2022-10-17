@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Constellation.Infrastructure.Persistence.TrackItContext.EntityConfigurations
 {
-    public class SmsysrecnumConfiguration : IEntityTypeConfiguration<Index>
+    public class SmsysrecnumConfiguration : IEntityTypeConfiguration<Models.Index>
     {
-        public void Configure(EntityTypeBuilder<Index> builder)
+        public void Configure(EntityTypeBuilder<Models.Index> builder)
         {
             builder.HasKey(e => e.Name);
             builder.ToTable("SMSYSRECNUM");

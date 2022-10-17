@@ -4,16 +4,10 @@ using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Infrastructure.DependencyInjection;
 using HtmlAgilityPack;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace Constellation.Infrastructure.Gateways
@@ -934,7 +928,7 @@ namespace Constellation.Infrastructure.Gateways
                 if (familyLinkItem.Value == null)
                 {
                     // Family was not found. Why?
-                    logger.LogWarning("Student {studentId} is not found in any active family", studentId);
+                    logger.Warning("Student {studentId} is not found in any active family", studentId);
 
                     continue;
                 }
@@ -944,7 +938,7 @@ namespace Constellation.Infrastructure.Gateways
                 if (dataItem == null)
                 {
                     // This student is not part of a family?
-                    logger.LogWarning("Student {studentId} is not found in any active family", studentId);
+                    logger.Warning("Student {studentId} is not found in any active family", studentId);
 
                     continue;
                 }

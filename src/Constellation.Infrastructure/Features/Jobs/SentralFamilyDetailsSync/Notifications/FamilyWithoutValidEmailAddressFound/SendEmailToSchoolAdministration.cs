@@ -2,13 +2,7 @@
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Features.Jobs.SentralFamilyDetailsSync.Notifications.FamilyWithoutValidEmailAddressFound
 {
