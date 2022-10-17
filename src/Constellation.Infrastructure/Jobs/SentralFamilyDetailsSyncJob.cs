@@ -9,7 +9,6 @@ using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,28 +18,28 @@ using System.Threading.Tasks;
 public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScopedService, IHangfireJob
 {
     private readonly IAppDbContext _context;
-    private readonly ILogger<ISentralFamilyDetailsSyncJob> _logger;
+    private readonly ILogger _logger;
     private readonly ISentralGateway _gateway;
     private readonly IMediator _mediator;
 
-    public SentralFamilyDetailsSyncJob(IAppDbContext context, ILogger<ISentralFamilyDetailsSyncJob> logger, 
+    public SentralFamilyDetailsSyncJob(IAppDbContext context, ILogger logger, 
         ISentralGateway gateway, IMediator mediator)
     {
         _context = context;
-        _logger = logger;
+        _logger = logger.ForContext<ISentralFamilyDetailsSyncJob>();
         _gateway = gateway;
         _mediator = mediator;
     }
 
     public async Task StartJob(Guid jobId, CancellationToken token)
     {
-        _logger.LogInformation("{id}: Starting Sentral Family Details Scan.", jobId);
+        _logger.Information("{id}: Starting Sentral Family Details Scan.", jobId);
 
         // Get the CSV file from Sentral
         // Convert to temporary objects
         var families = await _gateway.GetFamilyDetailsReport(_logger);
 
-        _logger.LogInformation("{id}: Found {count} families", jobId, families.Count);
+        _logger.Information("{id}: Found {count} families", jobId, families.Count);
 
         // Check objects against database
         foreach (var family in families)
@@ -48,7 +47,7 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
             if (token.IsCancellationRequested)
                 return;
 
-            _logger.LogInformation("{id}: Checking family: {name} ({code})", jobId, family.AddressName, family.FamilyId);
+            _logger.Information("{id}: Checking family: {name} ({code})", jobId, family.AddressName, family.FamilyId);
 
             family.MotherMobile = family.MotherMobile.Replace(" ", "");
             family.FatherMobile = family.FatherMobile.Replace(" ", "");
@@ -62,7 +61,7 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
 
             if (entry == null)
             {
-                _logger.LogInformation("{id}: No existing entry for {name} ({code}). Creating new family.", jobId, family.AddressName, family.FamilyId);
+                _logger.Information("{id}: No existing entry for {name} ({code}). Creating new family.", jobId, family.AddressName, family.FamilyId);
                 // New Family... Add to database
                 entry = new StudentFamily
                 {
@@ -104,7 +103,7 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
                     var student = await _context.Students.FirstOrDefaultAsync(student => student.StudentId == studentId, token);
                     if (student != null)
                     {
-                        _logger.LogInformation("{id}: Adding student {name} to family {family} ({code})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
+                        _logger.Information("{id}: Adding student {name} to family {family} ({code})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
 
                         entry.Students.Add(student);
                     }
@@ -114,40 +113,40 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
 
             } else
             {
-                _logger.LogInformation("{id}: Found existing entry for {family} ({code}). Updating details.", jobId, family.AddressName, family.FamilyId);
+                _logger.Information("{id}: Found existing entry for {family} ({code}). Updating details.", jobId, family.AddressName, family.FamilyId);
 
                 // Existing family... Check details
                 if (entry.Parent1.Title != family.FatherTitle)
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Parent 1 Title from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.Title, family.FatherTitle);
+                    _logger.Information("{id}: {family} ({code}): Updated Parent 1 Title from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.Title, family.FatherTitle);
                     
                     entry.Parent1.Title = family.FatherTitle;
                 }
 
                 if (entry.Parent1.FirstName != family.FatherFirstName)
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Parent 1 First Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.FirstName, family.FatherFirstName);
+                    _logger.Information("{id}: {family} ({code}): Updated Parent 1 First Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.FirstName, family.FatherFirstName);
 
                     entry.Parent1.FirstName = family.FatherFirstName;
                 }
 
                 if (entry.Parent1.LastName != family.FatherLastName)
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Parent 1 Last Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.LastName, family.FatherLastName);
+                    _logger.Information("{id}: {family} ({code}): Updated Parent 1 Last Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.LastName, family.FatherLastName);
                     
                     entry.Parent1.LastName = family.FatherLastName;
                 }
 
                 if (entry.Parent1.MobileNumber != family.FatherMobile)
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Parent 1 Mobile from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.MobileNumber, family.FatherMobile);
+                    _logger.Information("{id}: {family} ({code}): Updated Parent 1 Mobile from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.MobileNumber, family.FatherMobile);
                     
                     entry.Parent1.MobileNumber = family.FatherMobile;
                 }
 
                 if (entry.Parent1.EmailAddress != family.FatherEmail && !string.IsNullOrWhiteSpace(family.FatherEmail))
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Parent 1 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.EmailAddress, family.FatherEmail);
+                    _logger.Information("{id}: {family} ({code}): Updated Parent 1 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent1.EmailAddress, family.FatherEmail);
 
                     replacedEmails.Add(entry.Parent1.EmailAddress);
 
@@ -161,35 +160,35 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
 
                 if (entry.Parent2.Title != family.MotherTitle)
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 Title from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.Title, family.MotherTitle);
+                    _logger.Information("{id}: {family} ({code}): Updated Parent 2 Title from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.Title, family.MotherTitle);
 
                     entry.Parent2.Title = family.MotherTitle;
                 }
 
                 if (entry.Parent2.FirstName != family.MotherFirstName)
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 First Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.FirstName, family.MotherFirstName);
+                    _logger.Information("{id}: {family} ({code}): Updated Parent 2 First Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.FirstName, family.MotherFirstName);
 
                     entry.Parent2.FirstName = family.MotherFirstName;
                 }
 
                 if (entry.Parent2.LastName != family.MotherLastName)
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 Last Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.LastName, family.MotherLastName);
+                    _logger.Information("{id}: {family} ({code}): Updated Parent 2 Last Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.LastName, family.MotherLastName);
 
                     entry.Parent2.LastName = family.MotherLastName;
                 }
 
                 if (entry.Parent2.MobileNumber != family.MotherMobile)
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 Mobile from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.MobileNumber, family.MotherMobile);
+                    _logger.Information("{id}: {family} ({code}): Updated Parent 2 Mobile from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.MobileNumber, family.MotherMobile);
 
                     entry.Parent2.MobileNumber = family.MotherMobile;
                 }
 
                 if (entry.Parent2.EmailAddress != family.MotherEmail && !string.IsNullOrWhiteSpace(family.MotherEmail))
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Parent 2 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.EmailAddress, family.MotherEmail);
+                    _logger.Information("{id}: {family} ({code}): Updated Parent 2 Email from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Parent2.EmailAddress, family.MotherEmail);
 
                     replacedEmails.Add(entry.Parent2.EmailAddress);
 
@@ -203,35 +202,35 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
 
                 if (entry.Address.Title != family.AddressName)
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Address Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Title, family.AddressName);
+                    _logger.Information("{id}: {family} ({code}): Updated Address Name from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Title, family.AddressName);
 
                     entry.Address.Title = family.AddressName;
                 }
 
                 if (entry.Address.Line1 != family.AddressLine1)
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Address Line 1 from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Line1, family.AddressLine1);
+                    _logger.Information("{id}: {family} ({code}): Updated Address Line 1 from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Line1, family.AddressLine1);
 
                     entry.Address.Line1 = family.AddressLine1;
                 }
 
                 if (entry.Address.Line2 != family.AddressLine2)
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Address Line 2 from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Line2, family.AddressLine2);
+                    _logger.Information("{id}: {family} ({code}): Updated Address Line 2 from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Line2, family.AddressLine2);
 
                     entry.Address.Line2 = family.AddressLine2;
                 }
 
                 if (entry.Address.Town != family.AddressTown)
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Address Town from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Town, family.AddressTown);
+                    _logger.Information("{id}: {family} ({code}): Updated Address Town from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.Town, family.AddressTown);
 
                     entry.Address.Town = family.AddressTown;
                 }
 
                 if (entry.Address.PostCode != family.AddressPostCode)
                 {
-                    _logger.LogInformation("{id}: {family} ({code}): Updated Address PostCode from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.PostCode, family.AddressPostCode);
+                    _logger.Information("{id}: {family} ({code}): Updated Address PostCode from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.Address.PostCode, family.AddressPostCode);
 
                     entry.Address.PostCode = family.AddressPostCode;
                 }
@@ -250,7 +249,7 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
                         var student = await _context.Students.FirstOrDefaultAsync(student => student.StudentId == studentId, token);
                         if (student != null)
                         {
-                            _logger.LogInformation("{id}: Adding student {name} to family {family} ({code})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
+                            _logger.Information("{id}: Adding student {name} to family {family} ({code})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
 
                             entry.Students.Add(student);
                         }
@@ -262,7 +261,7 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
                 {
                     if (!family.StudentIds.Contains(student.StudentId))
                     {
-                        _logger.LogInformation("{id}: Removing student {name} to family {family} ({code})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
+                        _logger.Information("{id}: Removing student {name} to family {family} ({code})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
 
                         // Student should not be linked
                         entry.Students.Remove(student);

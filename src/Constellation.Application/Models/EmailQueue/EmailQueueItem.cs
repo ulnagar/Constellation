@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text.Json;
 
 namespace Constellation.Application.Models.EmailQueue;
 
@@ -132,5 +134,31 @@ public class EmailQueueItem
 
     public Guid Id { get; set; }
     public string ReferenceId { get; set; }
-    public string ReferenceType { get; set; }
+    public string ReferenceType { get; internal set; }
+    internal string JsonData { get; private set; }
+    public DateTime ScheduledFor { get; set; }
+    public List<EmailQueueSendLog> SendAttempts { get; set; } = new();
+    public bool IsSent { get; set; }
+    public bool IsCancelled { get; set; }
+
+    public void StoreData<T>(T entity) where T : class
+    {
+        ReferenceType = entity.GetType().ToString();
+        JsonData = JsonSerializer.Serialize(entity);
+    }
+
+    public T GetData<T>() where T : class
+    {
+        return JsonSerializer.Deserialize<T>(JsonData);
+    }
+
+    public class EmailQueueSendLog
+    {
+        public Guid Id { get; set; }
+        public Guid EmailId { get; set; }
+        public virtual EmailQueueItem Email { get; set; }
+        public DateTime AttemptedAt { get; set; }
+        public bool Success { get; set; }
+        public List<string> Errors { get; set; }
+    }
 }

@@ -14,7 +14,7 @@ namespace Constellation.Infrastructure.Persistence.TrackItContext
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<Department> Departments { get; set; }
         public virtual DbSet<Location> Locations { get; set; }
-        public virtual DbSet<Index> Indexes { get; set; }
+        public virtual DbSet<Models.Index> Indexes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
