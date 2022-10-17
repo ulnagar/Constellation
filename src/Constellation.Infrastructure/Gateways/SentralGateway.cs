@@ -15,6 +15,7 @@ using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
+using System.Security.Authentication;
 
 namespace Constellation.Infrastructure.Gateways
 {
@@ -30,7 +31,9 @@ namespace Constellation.Infrastructure.Gateways
 
             var config = new HttpClientHandler
             {
-                CookieContainer = new CookieContainer()
+                CookieContainer = new CookieContainer(),
+                SslProtocols = SslProtocols.Tls13 | SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls,
+                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
             };
 
             var proxy = WebRequest.DefaultWebProxy;
@@ -44,24 +47,28 @@ namespace Constellation.Infrastructure.Gateways
         {
             var uri = $"{_settings.Server}/check_login";
 
-            var request = new HttpRequestMessage();
-            request.Headers.CacheControl = new CacheControlHeaderValue
-            {
-                NoCache = true
-            };
-
             var formData = new List<KeyValuePair<string, string>>
             {
                 new KeyValuePair<string, string>("sentral-username", _settings.Username),
                 new KeyValuePair<string, string>("sentral-password", _settings.Password)
             };
-            var formDataEncoded = new FormUrlEncodedContent(formData);
 
             for (int i = 1; i < 6; i++)
             {
                 try
                 {
-                    var response = await _client.PostAsync(uri, formDataEncoded);
+                    var request = new HttpRequestMessage(HttpMethod.Post, uri)
+                    {
+                        Content = new FormUrlEncodedContent(formData)
+                    };
+
+                    request.Headers.CacheControl = new CacheControlHeaderValue
+                    {
+                        NoCache = true
+                    };
+
+                    var response = await _client.SendAsync(request);
+
                     response.EnsureSuccessStatusCode();
 
                     return;
