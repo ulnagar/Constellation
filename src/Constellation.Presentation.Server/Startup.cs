@@ -44,7 +44,7 @@ namespace Constellation.Presentation.Server
                 }));
             GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
 
-            //services.AddHangfireServer();
+            services.AddHangfireServer();
 
             services.AddValidatorsFromAssemblyContaining<IAppDbContext>();
 

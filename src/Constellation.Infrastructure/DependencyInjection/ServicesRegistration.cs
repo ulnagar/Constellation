@@ -1,7 +1,6 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection;
 
 using Constellation.Application;
-using Constellation.Application.Common.Behaviours;
 using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
@@ -36,23 +35,6 @@ public static class ServicesRegistration
             .AddTrackItContext(configuration);
 
         services.AddStaffPortalAuthentication(configuration);
-
-        services.AddExternalServiceGateways()
-            .AddEmailTemplateEngine()
-            .AddHangfireJobs();
-
-        services.AddSingleton(Log.Logger);
-
-        services.AddMediatR(new[] { Assembly.GetExecutingAssembly(), typeof(IAppDbContext).Assembly });
-
-        services.AddApplication();
-
-        return services;
-    }
-    public static IServiceCollection AddHangfireServerInfrastructureComponents(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddConstellationContext(configuration)
-            .AddTrackItContext(configuration);
 
         services.AddExternalServiceGateways()
             .AddEmailTemplateEngine()
@@ -119,8 +101,6 @@ public static class ServicesRegistration
         services.AddScoped<ISentralPhotoSyncJob, SentralPhotoSyncJob>();
         services.AddScoped<ISentralReportSyncJob, SentralReportSyncJob>();
         services.AddScoped<IUserManagerJob, UserManagerJob>();
-
-        services.AddScoped(typeof(IJobDispatcherService<>), typeof(JobDispatcherService<>));
 
         return services;
     }
