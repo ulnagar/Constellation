@@ -1,0 +1,50 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "",
+    "Hangfire": "",
+    "TrackItConnection": ""
+  },
+  "EPPlus": {
+    "ExcelPackage": {
+      "LicenseContext": "NonCommercial"
+    }
+  },
+  "AppSettings": {
+    "AdobeConnectGateway": {
+      "Username": "",
+      "Password": "",
+      "ServerUrl": ""
+    },
+    "EmailGateway": {
+      "Server": "",
+      "Port": 25,
+      "Username": "",
+      "Password": ""
+    },
+    "SentralGateway": {
+      "ServerUrl": "",
+      "Username": "",
+      "Password": ""
+    },
+    "CanvasGateway": {
+      "ServerUrl": "",
+      "Key": ""
+    },
+    "SMSGateway": {
+      "Key": "",
+      "Secret": ""
+    },
+    "LinkShortenerGateway": {
+      "ServerUrl": "",
+      "Key": ""
+    },
+    "NetworkStatisticsGateway": {
+      "ServerUrl": "",
+      "Key": ""
+    },
+    "LoggingServer": {
+      "ServerUrl": "",
+      "ApiKey": ""
+    }
+  }
+}
