@@ -50,6 +50,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Portal.Parent
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Portal.Parents.Server", "src\Constellation.Portal.Parents.Server\Constellation.Portal.Parents.Server.csproj", "{3CEAD0F6-D237-465B-9434-097B1DBF23EF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Constellation.Infrastructure.HangfireServer", "src\Constellation.Infrastructure.HangfireServer\Constellation.Infrastructure.HangfireServer.csproj", "{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -88,6 +90,10 @@ Global
 		{3CEAD0F6-D237-465B-9434-097B1DBF23EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CEAD0F6-D237-465B-9434-097B1DBF23EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CEAD0F6-D237-465B-9434-097B1DBF23EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,6 +109,7 @@ Global
 		{8BCE7325-73BC-488E-A932-4FC31AACC4E9} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
 		{B4F8EA5B-D8EA-4C7E-828F-86097DEAF8D9} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
 		{3CEAD0F6-D237-465B-9434-097B1DBF23EF} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
+		{9FCA56C1-8A67-44F9-9BA6-98975D256E2B} = {F42D170F-99FA-4279-BD76-0B88D71AA3A4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {266E1BC1-EC70-416D-8B6F-E86CB0C2066C}
