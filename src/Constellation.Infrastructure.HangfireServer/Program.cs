@@ -1,17 +1,9 @@
 ﻿using Constellation.Infrastructure.HangfireServer;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 
-// Setup and import appsettings.json
-var builder = new ConfigurationBuilder()
-    .AddJsonFile($"appsettings.json", true, true);
+var builder = WebApplication.CreateBuilder();
 
-var config = builder.Build();
+builder.Services.RegisterServices(builder.Configuration);
 
-using IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((_, services) => services.RegisterServices(config))
-    .Build();
+var app = builder.Build();
 
-host.Start();
-
-Console.ReadKey();
+app.Run();

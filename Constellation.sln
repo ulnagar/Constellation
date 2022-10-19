@@ -50,7 +50,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Portal.Parent
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Portal.Parents.Server", "src\Constellation.Portal.Parents.Server\Constellation.Portal.Parents.Server.csproj", "{3CEAD0F6-D237-465B-9434-097B1DBF23EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Constellation.Infrastructure.HangfireServer", "src\Constellation.Infrastructure.HangfireServer\Constellation.Infrastructure.HangfireServer.csproj", "{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Infrastructure.HangfireServer", "src\Constellation.Infrastructure.HangfireServer\Constellation.Infrastructure.HangfireServer.csproj", "{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

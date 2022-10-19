@@ -37,9 +37,9 @@ public static class DependencyInjection
 
         services.AddControllersWithViews();
 
-        var diagnosticSource = new DiagnosticListener("Constellation.Infrastructure.HangfireServer");
-        services.AddSingleton<DiagnosticSource>(diagnosticSource);
-        services.AddSingleton<DiagnosticListener>(diagnosticSource);
+        //var diagnosticSource = new DiagnosticListener("Constellation.Infrastructure.HangfireServer");
+        //services.AddSingleton<DiagnosticSource>(diagnosticSource);
+        //services.AddSingleton<DiagnosticListener>(diagnosticSource);
 
         return services;
     }

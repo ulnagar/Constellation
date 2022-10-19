@@ -367,3 +367,4 @@ FodyWeavers.xsd
 /src/Constellation.Presentation.Server/appsettings.production.json
 appsettings.*.json
 ~appsettings.*.json
+/src/Constellation.Infrastructure.HangfireServer/docker-compose.yml
