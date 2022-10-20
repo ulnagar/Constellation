@@ -2,10 +2,6 @@
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Hangfire;
 using Hangfire.SqlServer;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Diagnostics;
 
 namespace Constellation.Infrastructure.HangfireServer;
 public static class DependencyInjection
@@ -36,10 +32,6 @@ public static class DependencyInjection
             });
 
         services.AddControllersWithViews();
-
-        //var diagnosticSource = new DiagnosticListener("Constellation.Infrastructure.HangfireServer");
-        //services.AddSingleton<DiagnosticSource>(diagnosticSource);
-        //services.AddSingleton<DiagnosticListener>(diagnosticSource);
 
         return services;
     }
