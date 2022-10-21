@@ -22,11 +22,13 @@ namespace Constellation.Infrastructure.Gateways
     {
         private readonly HttpClient _client;
         private readonly ISentralGatewayConfiguration _settings;
+        private readonly Serilog.ILogger _logger;
         private HtmlDocument StudentListPage;
 
-        public SentralGateway(ISentralGatewayConfiguration settings)
+        public SentralGateway(ISentralGatewayConfiguration settings, Serilog.ILogger logger)
         {
             _settings = settings;
+            _logger = logger.ForContext<ISentralGateway>();
 
             var config = new HttpClientHandler
             {
@@ -66,8 +68,12 @@ namespace Constellation.Infrastructure.Gateways
 
                     return;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    _logger.Warning($"Failed to login to Sentral Server with error: {ex.Message}");
+                    if (ex.InnerException != null)
+                        _logger.Warning($"Inner Exception: {ex.InnerException.Message}");
+
                     // Wait and retry
                     await Task.Delay(5000);
                 }
@@ -91,8 +97,12 @@ namespace Constellation.Infrastructure.Gateways
 
                     return page;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    _logger.Warning($"Failed to retrieve information from Sentral Server with error: {ex.Message}");
+                    if (ex.InnerException != null)
+                        _logger.Warning($"Inner Exception: {ex.InnerException.Message}");
+
                     // Wait and retry
                     await Task.Delay(5000);
                 }
@@ -123,8 +133,12 @@ namespace Constellation.Infrastructure.Gateways
 
                     return page;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    _logger.Warning($"Failed to retrieve information from Sentral Server with error: {ex.Message}");
+                    if (ex.InnerException != null)
+                        _logger.Warning($"Inner Exception: {ex.InnerException.Message}");
+
                     // Wait and retry
                     await Task.Delay(5000);
                 }
@@ -812,7 +826,7 @@ namespace Constellation.Infrastructure.Gateways
             return list;
         }
 
-        public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(ILogger logger)
+        public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(Microsoft.Extensions.Logging.ILogger logger)
         {
             var data = new List<FamilyDetailsDto>();
 
