@@ -28,3 +28,6 @@ services:
       - AppSettings__NetworkStatisticsGateway__Key=
       - AppSettings__LoggingServer__ServerUrl=
       - AppSettings__LoggingServer__ApiKey=
+      - http_proxy=
+      - https_proxy=
+      - ftp_proxy=
