@@ -34,7 +34,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("ClassworkNotificationsId");
 
-                    b.ToTable("AbsenceClassworkNotification");
+                    b.ToTable("AbsenceClassworkNotification", (string)null);
                 });
 
             modelBuilder.Entity("ClassCoverClassworkNotification", b =>
@@ -49,7 +49,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("CoversId");
 
-                    b.ToTable("ClassCoverClassworkNotification");
+                    b.ToTable("ClassCoverClassworkNotification", (string)null);
                 });
 
             modelBuilder.Entity("ClassworkNotificationStaff", b =>
@@ -64,7 +64,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("TeachersStaffId");
 
-                    b.ToTable("ClassworkNotificationStaff");
+                    b.ToTable("ClassworkNotificationStaff", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Application.Models.AppSettings", b =>
@@ -95,7 +95,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("AppSettings");
+                    b.ToTable("AppSettings", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Application.Models.EmailQueue.EmailQueueItem", b =>
@@ -112,7 +112,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("EmailQueue");
+                    b.ToTable("EmailQueue", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Application.Models.Identity.AppAccessToken", b =>
@@ -131,7 +131,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("AccessToken");
 
-                    b.ToTable("AspNetAccessTokens");
+                    b.ToTable("AspNetAccessTokens", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Application.Models.Identity.AppRole", b =>
@@ -267,7 +267,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsUnique()
                         .HasFilter("[JobName] IS NOT NULL");
 
-                    b.ToTable("JobActivations");
+                    b.ToTable("JobActivations", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Absence", b =>
@@ -330,7 +330,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Absences");
+                    b.ToTable("Absences", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.AbsenceNotification", b =>
@@ -370,7 +370,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("AbsenceId");
 
-                    b.ToTable("AbsenceNotification");
+                    b.ToTable("AbsenceNotification", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.AbsenceResponse", b =>
@@ -413,7 +413,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("AbsenceId");
 
-                    b.ToTable("AbsenceResponse");
+                    b.ToTable("AbsenceResponse", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.AdobeConnectOperation", b =>
@@ -458,7 +458,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("ScoId");
 
-                    b.ToTable("AdobeConnectOperations");
+                    b.ToTable("AdobeConnectOperations", (string)null);
 
                     b.HasDiscriminator<string>("UserType").HasValue("AdobeConnectOperation");
                 });
@@ -485,7 +485,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("ScoId");
 
-                    b.ToTable("Rooms");
+                    b.ToTable("Rooms", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.CanvasAssignment", b =>
@@ -519,7 +519,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("CanvasAssignments");
+                    b.ToTable("CanvasAssignments", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.CanvasAssignmentSubmission", b =>
@@ -546,7 +546,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("CanvasAssignmentsSubmissions");
+                    b.ToTable("CanvasAssignmentsSubmissions", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.CanvasOperation", b =>
@@ -578,7 +578,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("CanvasOperations");
+                    b.ToTable("CanvasOperations", (string)null);
 
                     b.HasDiscriminator<string>("OperationType").HasValue("CanvasOperation");
                 });
@@ -619,7 +619,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("SchoolCode");
 
-                    b.ToTable("Casuals");
+                    b.ToTable("Casuals", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.ClassCover", b =>
@@ -650,7 +650,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("OfferingId");
 
-                    b.ToTable("Covers");
+                    b.ToTable("Covers", (string)null);
 
                     b.HasDiscriminator<string>("UserType").HasValue("ClassCover");
                 });
@@ -685,7 +685,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StaffId");
 
-                    b.ToTable("ClassworkNotifications");
+                    b.ToTable("ClassworkNotifications", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Course", b =>
@@ -716,7 +716,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("HeadTeacherId");
 
-                    b.ToTable("Courses");
+                    b.ToTable("Courses", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.CourseOffering", b =>
@@ -743,7 +743,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("Offerings");
+                    b.ToTable("Offerings", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Device", b =>
@@ -774,7 +774,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("SerialNumber");
 
-                    b.ToTable("Devices");
+                    b.ToTable("Devices", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.DeviceAllocation", b =>
@@ -806,7 +806,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("DeviceAllocations");
+                    b.ToTable("DeviceAllocations", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.DeviceNotes", b =>
@@ -830,7 +830,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("SerialNumber");
 
-                    b.ToTable("DeviceNotes");
+                    b.ToTable("DeviceNotes", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Enrolment", b =>
@@ -862,7 +862,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Enrolments");
+                    b.ToTable("Enrolments", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Lesson", b =>
@@ -882,7 +882,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("Lessons");
+                    b.ToTable("Lessons", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.LessonRoll", b =>
@@ -920,7 +920,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("SchoolContactId");
 
-                    b.ToTable("LessonRolls");
+                    b.ToTable("LessonRolls", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.LessonRoll+LessonRollStudentAttendance", b =>
@@ -944,7 +944,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("LessonRollStudentAttendance");
+                    b.ToTable("LessonRollStudentAttendance", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.MSTeamOperation", b =>
@@ -976,7 +976,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("MSTeamOperations");
+                    b.ToTable("MSTeamOperations", (string)null);
 
                     b.HasDiscriminator<string>("UserType").HasValue("MSTeamOperation");
                 });
@@ -1005,7 +1005,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("OfferingId");
 
-                    b.ToTable("OfferingResources");
+                    b.ToTable("OfferingResources", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.OfferingSession", b =>
@@ -1047,7 +1047,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StaffId");
 
-                    b.ToTable("Sessions");
+                    b.ToTable("Sessions", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.PartialAbsenceNotification", b =>
@@ -1207,7 +1207,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Code");
 
-                    b.ToTable("Schools");
+                    b.ToTable("Schools", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.SchoolContact", b =>
@@ -1296,7 +1296,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Name", "Type");
 
-                    b.ToTable("Setting");
+                    b.ToTable("Setting", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Staff", b =>
@@ -1358,7 +1358,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("StocktakeEvents");
+                    b.ToTable("StocktakeEvents", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Stocktake.StocktakeSighting", b =>
@@ -1422,7 +1422,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StocktakeEventId");
 
-                    b.ToTable("StocktakeSightings");
+                    b.ToTable("StocktakeSightings", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.StoredFile", b =>
@@ -1453,7 +1453,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("StoredFiles");
+                    b.ToTable("StoredFiles", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Student", b =>
@@ -1516,7 +1516,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("SchoolCode");
 
-                    b.ToTable("Students");
+                    b.ToTable("Students", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.StudentAward", b =>
@@ -1541,7 +1541,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("StudentAward");
+                    b.ToTable("StudentAward", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.StudentFamily", b =>
@@ -1551,7 +1551,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("StudentFamilies");
+                    b.ToTable("StudentFamilies", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.StudentPartialAbsence", b =>
@@ -1621,7 +1621,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("StudentReports");
+                    b.ToTable("StudentReports", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.StudentWholeAbsence", b =>
@@ -1677,7 +1677,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("Teams");
+                    b.ToTable("Teams", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.TimetablePeriod", b =>
@@ -1717,7 +1717,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("Periods");
+                    b.ToTable("Periods", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.WholeAbsenceNotification", b =>
@@ -1805,7 +1805,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("OfferingsId");
 
-                    b.ToTable("CourseOfferingLesson");
+                    b.ToTable("CourseOfferingLesson", (string)null);
                 });
 
             modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.DeviceFlowCodes", b =>
@@ -1891,7 +1891,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("Use");
 
-                    b.ToTable("Keys");
+                    b.ToTable("Keys", (string)null);
                 });
 
             modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.PersistedGrant", b =>
@@ -2347,7 +2347,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Constellation.Application.Models.AppSettings", b =>
                 {
-                    b.OwnsOne("Constellation.Application.Models.AppSettings+AbsencesModule", "Absences", b1 =>
+                    b.OwnsOne("Constellation.Application.Models.AppSettings.Absences#Constellation.Application.Models.AppSettings+AbsencesModule", "Absences", b1 =>
                         {
                             b1.Property<int>("AppSettingsId")
                                 .HasColumnType("int");
@@ -2381,7 +2381,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                             b1.HasKey("AppSettingsId");
 
-                            b1.ToTable("AppSettings");
+                            b1.ToTable("AppSettings", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("AppSettingsId");
@@ -2764,7 +2764,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Constellation.Core.Models.StudentFamily", b =>
                 {
-                    b.OwnsOne("Constellation.Core.Models.StudentFamily+MailingAddress", "Address", b1 =>
+                    b.OwnsOne("Constellation.Core.Models.StudentFamily.Address#Constellation.Core.Models.StudentFamily+MailingAddress", "Address", b1 =>
                         {
                             b1.Property<string>("StudentFamilyId")
                                 .HasColumnType("nvarchar(450)");
@@ -2786,13 +2786,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                             b1.HasKey("StudentFamilyId");
 
-                            b1.ToTable("StudentFamilies");
+                            b1.ToTable("StudentFamilies", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("StudentFamilyId");
                         });
 
-                    b.OwnsOne("Constellation.Core.Models.StudentFamily+Parent", "Parent1", b1 =>
+                    b.OwnsOne("Constellation.Core.Models.StudentFamily.Parent1#Constellation.Core.Models.StudentFamily+Parent", "Parent1", b1 =>
                         {
                             b1.Property<string>("StudentFamilyId")
                                 .HasColumnType("nvarchar(450)");
@@ -2814,13 +2814,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                             b1.HasKey("StudentFamilyId");
 
-                            b1.ToTable("StudentFamilies");
+                            b1.ToTable("StudentFamilies", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("StudentFamilyId");
                         });
 
-                    b.OwnsOne("Constellation.Core.Models.StudentFamily+Parent", "Parent2", b1 =>
+                    b.OwnsOne("Constellation.Core.Models.StudentFamily.Parent2#Constellation.Core.Models.StudentFamily+Parent", "Parent2", b1 =>
                         {
                             b1.Property<string>("StudentFamilyId")
                                 .HasColumnType("nvarchar(450)");
@@ -2842,7 +2842,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                             b1.HasKey("StudentFamilyId");
 
-                            b1.ToTable("StudentFamilies");
+                            b1.ToTable("StudentFamilies", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("StudentFamilyId");
