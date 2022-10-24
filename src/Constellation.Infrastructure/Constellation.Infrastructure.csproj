@@ -12,7 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Constellation.Application\Constellation.Application.csproj" />
     <ProjectReference Include="..\Constellation.Core\Constellation.Core.csproj" />
-    <ProjectReference Include="..\Constellation.Infrastructure.EmailTemplates\Constellation.Infrastructure.Templates.csproj" />
+    <ProjectReference Include="..\Constellation.Infrastructure.Templates\Constellation.Infrastructure.Templates.csproj" />
   </ItemGroup>
 
   <ItemGroup>
