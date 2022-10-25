@@ -16,10 +16,10 @@ namespace Constellation.Infrastructure.Gateways
     {
         private readonly HttpClient _client;
         private readonly ISentralGatewayConfiguration _settings;
-        private readonly Serilog.ILogger _logger;
+        private readonly ILogger _logger;
         private HtmlDocument StudentListPage;
 
-        public SentralGateway(ISentralGatewayConfiguration settings, Serilog.ILogger logger)
+        public SentralGateway(ISentralGatewayConfiguration settings, ILogger logger)
         {
             _settings = settings;
             _logger = logger.ForContext<ISentralGateway>();
@@ -820,7 +820,7 @@ namespace Constellation.Infrastructure.Gateways
             return list;
         }
 
-        public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(Microsoft.Extensions.Logging.ILogger logger)
+        public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(ILogger logger)
         {
             var data = new List<FamilyDetailsDto>();
 
