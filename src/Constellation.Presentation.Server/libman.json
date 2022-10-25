@@ -52,6 +52,26 @@
     {
       "library": "jquery-validation-unobtrusive@3.2.11",
       "destination": "wwwroot/lib/jquery-validation-unobtrusive/"
+    },
+    {
+      "library": "datatables.net-dt@1.11.3",
+      "destination": "wwwroot/lib/datatables.net-dt/"
     }
+  ,
+{
+  "provider": "cdnjs",
+  "library": "moment.js@2.8.4",
+  "destination": "wwwroot/lib/moment.js/"
+}
+,
+{
+  "provider": "cdnjs",
+  "library": "datatables-plugins@1.11.3",
+  "destination": "wwwroot/lib/datatables-plugins/",
+  "files": [
+    "sorting/datetime-moment.js",
+    "sorting/datetime-moment.min.js"
   ]
+}
+]
 }
