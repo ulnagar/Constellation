@@ -370,3 +370,4 @@ appsettings.*.json
 ~appsettings.*.json
 /src/Constellation.Infrastructure.HangfireServer/docker-compose.yml
 /src/Constellation.Presentation.Server/wwwroot/lib/*
+/src/Constellation.Presentation.Portal.Schools/wwwroot/lib/*
