@@ -16,7 +16,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{8E4ACA9A-B3CB-4538-96EE-FC153E53AA1F}"
 	ProjectSection(SolutionItems) = preProject
 		docs\MigrationStatus.txt = docs\MigrationStatus.txt
-		Tasks.txt = Tasks.txt
+		docs\Tasks.txt = docs\Tasks.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sql", "sql", "{AAD6B84B-76A4-43EE-A99D-885E6A7612FA}"
