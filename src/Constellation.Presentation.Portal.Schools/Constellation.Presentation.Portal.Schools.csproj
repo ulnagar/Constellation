@@ -7,17 +7,17 @@
 
   <ItemGroup>
     <Compile Remove="logs\**" />
+    <Compile Remove="wwwroot\js\**" />
     <Content Remove="logs\**" />
+    <Content Remove="wwwroot\js\**" />
     <EmbeddedResource Remove="logs\**" />
+    <EmbeddedResource Remove="wwwroot\js\**" />
     <None Remove="logs\**" />
+    <None Remove="wwwroot\js\**" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Constellation.Infrastructure\Constellation.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\js\" />
   </ItemGroup>
 
   <ItemGroup>
