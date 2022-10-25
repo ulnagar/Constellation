@@ -372,3 +372,4 @@ appsettings.*.json
 /src/Constellation.Presentation.Server/wwwroot/lib/*
 /src/Constellation.Presentation.Portal.Schools/wwwroot/lib/*
 /src/Constellation.Portal.Parents.Server/wwwroot/lib/*
+/src/Constellation.Portal.Parents.Client/wwwroot/lib/*
