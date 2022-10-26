@@ -108,6 +108,8 @@ public static class ServicesRegistration
     internal static IServiceCollection AddHangfireJobs(this IServiceCollection services)
     {
         services.AddScoped<IAbsenceClassworkNotificationJob, AbsenceClassworkNotificationJob>();
+        services.AddScoped<IAbsenceClassworkNotificationJobDataHandler, AbsenceClassworkNotificationJobDataHandler>();
+
         services.AddScoped<IAbsenceMonitorJob, AbsenceMonitorJob>();
         services.AddScoped<IAbsenceProcessingJob, AbsenceProcessingJob>();
         services.AddScoped<IAttendanceReportJob, AttendanceReportJob>();

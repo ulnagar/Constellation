@@ -35,35 +35,32 @@ public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob,
             var absenceDate = group.Key.Date;
             var offeringId = group.Key.OfferingId;
 
-            // Make sure to filter out cancelled sessions and deleted teachers
-            var teachers = group.First().Offering.Sessions.Where(session => !session.IsDeleted).Select(session => session.Teacher).Where(teacher => !teacher.IsDeleted).Distinct().ToList();
-            var offering = group.First().Offering;
-
-            List<ClassCover> covers = await _handler.GetCovers(absenceDate, offeringId, token);
-
-            // If there are covers, send the email to the Head Teacher instead
-            if (covers.Count > 0)
-                teachers = new List<Staff> { offering.Course.HeadTeacher };
-
-            // create notification object in database
-            var notification = new ClassworkNotification
-            {
-                AbsenceDate = absenceDate,
-                Absences = group.ToList(),
-                Covers = covers,
-                Offering = offering,
-                OfferingId = offeringId,
-                Teachers = teachers
-            };
-
-            if (token.IsCancellationRequested)
-                return;
-
             // Check if the db already has an entry for this?
             var check = await _handler.GetClassworkNotification(absenceDate, offeringId, token);
 
             if (check == null)
             {
+                // Make sure to filter out cancelled sessions and deleted teachers
+                var teachers = group.First().Offering.Sessions.Where(session => !session.IsDeleted).Select(session => session.Teacher).Where(teacher => !teacher.IsDeleted).Distinct().ToList();
+                var offering = group.First().Offering;
+
+                List<ClassCover> covers = await _handler.GetCovers(absenceDate, offeringId, token);
+
+                // If there are covers, send the email to the Head Teacher instead
+                if (covers.Count > 0)
+                    teachers = new List<Staff> { offering.Course.HeadTeacher };
+
+                // create notification object in database
+                var notification = new ClassworkNotification
+                {
+                    AbsenceDate = absenceDate,
+                    Absences = group.ToList(),
+                    Covers = covers,
+                    Offering = offering,
+                    OfferingId = offeringId,
+                    Teachers = teachers
+                };
+
                 await ProcessNewNotification(jobId, notification, token);
             }
             else
@@ -73,20 +70,19 @@ public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob,
                 // entry accordingly. Then, if the teacher has already responded, send the student/parent email
                 // with the details of work required.
 
-                await ProcessExistingNotification(jobId, notification, check, token);
+                _logger.Information("{id}: Found existing entry for {Offering} @ {AbsenceDate}", jobId, check.Offering.Name, check.AbsenceDate.ToShortDateString());
+
+                foreach (var absence in group)
+                    await CheckAbsenceInExistingNotification(jobId, absence, check, token);
             }
         }
     }
 
-    private async Task ProcessExistingNotification(Guid jobId, ClassworkNotification newNotification, ClassworkNotification dbNotification, CancellationToken token)
+    private async Task CheckAbsenceInExistingNotification(Guid jobId, Models.AbsenceDto absence, ClassworkNotification dbNotification, CancellationToken token)
     {
-        _logger.Information("{id}: Found existing entry for {Offering} @ {AbsenceDate}", jobId, newNotification.Offering.Name, newNotification.AbsenceDate.ToShortDateString());
-
-        var newAbsences = newNotification.Absences.Except(dbNotification.Absences).ToList();
-
-        foreach (var absence in newAbsences)
+        if (!dbNotification.Absences.Any(dbAbsence => dbAbsence.Id == absence.Id))
         {
-            _logger.Information("{id}: Adding {Student} to the existing entry for {Offering} @ {AbsenceDate}", jobId, absence.Student.DisplayName, newNotification.Offering.Name, newNotification.AbsenceDate.ToShortDateString());
+            _logger.Information("{id}: Adding {Student} to the existing entry for {Offering} @ {AbsenceDate}", jobId, absence.Student.DisplayName, dbNotification.Offering.Name, dbNotification.AbsenceDate.ToShortDateString());
 
             // Add absence to the dbNotification (?)
             await _handler.SaveAbsenceToNotification(dbNotification.Id, absence, token);
@@ -112,7 +108,7 @@ public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob,
         }
     }
 
-    internal async Task ProcessNewNotification(Guid jobId, ClassworkNotification notification, CancellationToken token)
+    private async Task ProcessNewNotification(Guid jobId, ClassworkNotification notification, CancellationToken token)
     {
         await _handler.SaveClassworkNotification(notification, token);
 
@@ -135,6 +131,4 @@ public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob,
 
         await _handler.SaveEmail(entry, token);
     }
-
-
 }

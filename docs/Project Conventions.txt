@@ -1,0 +1,4 @@
+Project conventions used:
+
+ - Mediatr Commands should be RECORDS
+ - DTOs should be returned from all DbContext actions
