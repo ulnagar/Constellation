@@ -2,6 +2,7 @@
 using Constellation.Application.Models.EmailQueue;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
+using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Models.Stocktake;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -53,6 +54,10 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<StocktakeSighting> StocktakeSightings { get; set; }
         DbSet<StudentAward> StudentAward { get; set; }
         DbSet<EmailQueueItem> EmailQueue { get; set; }
+        //DbSet<TrainingModule> Modules { get; set; }
+        //DbSet<TrainingCompletion> CompletionRecords { get; set; }
+
+        IMandatoryTrainingSets MandatoryTraining { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         DatabaseFacade Database { get; }
