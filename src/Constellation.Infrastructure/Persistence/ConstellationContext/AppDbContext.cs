@@ -3,8 +3,10 @@ using Constellation.Application.Models;
 using Constellation.Application.Models.EmailQueue;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
+using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Models.Stocktake;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ContextExtensions;
+using Constellation.Infrastructure.Persistence.ConstellationContext.ContextSets;
 using Duende.IdentityServer.EntityFramework.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -23,6 +25,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public AppDbContext(DbContextOptions<AppDbContext> options, IOptions<OperationalStoreOptions> operationalStoreOptions)
             : base(options, operationalStoreOptions)
         {
+            MandatoryTraining = new MandatoryTrainingSets(this);
         }
 
         public DbSet<AppSettings> AppSettings { get; set; }
@@ -65,6 +68,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public DbSet<StocktakeSighting> StocktakeSightings { get; set; }
         public DbSet<StudentAward> StudentAward { get; set; }
         public DbSet<EmailQueueItem> EmailQueue { get; set; }
+        
+        public IMandatoryTrainingSets MandatoryTraining { get; private set; }
+        public DbSet<TrainingModule> MandatoryTraining_Modules { get; set; }
+        public DbSet<TrainingCompletion> MandatoryTraining_CompletionRecords { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {

@@ -6,6 +6,7 @@ namespace Constellation.Core.Models
     {
         public const string CanvasAssignmentSubmission = "Canvas Assignment Submission";
         public const string StudentReport = "Student Report";
+        public const string TrainingCertificate = "Training Certificate";
 
         public int Id { get; set; }
         public string Name { get; set; }
