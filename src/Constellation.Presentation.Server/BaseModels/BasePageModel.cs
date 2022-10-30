@@ -1,9 +1,8 @@
-﻿using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Models.Identity;
+﻿using Constellation.Application.Features.Home.Queries;
+using Constellation.Application.Interfaces.Repositories;
+using MediatR;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.BaseModels
@@ -31,6 +30,12 @@ namespace Constellation.Presentation.Server.BaseModels
                     Classes.Add(entry.Name, entry.Id);
                 }
             }
+        }
+
+        public async Task GetClasses(IMediator mediator)
+        {
+            var username = User.Identity.Name;
+            Classes = await mediator.Send(new GetUsersClassesQuery { Username = username });
         }
     }
 }

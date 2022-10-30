@@ -12,9 +12,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
 
             builder.Property(completion => completion.Id).ValueGeneratedOnAdd();
 
-            builder.HasOne(completion => completion.Staff).WithMany().OnDelete(DeleteBehavior.NoAction);
+            builder.HasOne(completion => completion.Staff)
+                .WithMany(staff => staff.TrainingCompletionRecords)
+                .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(completion => completion.Module).WithMany(module => module.Completions).OnDelete(DeleteBehavior.NoAction);
+            builder.HasOne(completion => completion.Module)
+                .WithMany(module => module.Completions)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

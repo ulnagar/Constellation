@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20221027052150_AddMandatoryTrainingModulesAndCompletions")]
-    partial class AddMandatoryTrainingModulesAndCompletions
+    [Migration("20221029043357_IncludeAuditingPropertiesInTrainingClasses")]
+    partial class IncludeAuditingPropertiesInTrainingClasses
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -958,9 +958,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<DateTime>("CompletedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("ModuleId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("StaffId")
                         .HasColumnType("nvarchar(450)");
 
@@ -968,8 +965,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ModuleId");
 
                     b.HasIndex("StaffId");
 
@@ -984,7 +979,25 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Expiry")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -2668,16 +2681,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Constellation.Core.Models.MandatoryTraining.TrainingCompletion", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.MandatoryTraining.TrainingModule", "Module")
-                        .WithMany()
-                        .HasForeignKey("ModuleId");
-
                     b.HasOne("Constellation.Core.Models.Staff", "Staff")
-                        .WithMany()
+                        .WithMany("TrainingCompletionRecords")
                         .HasForeignKey("StaffId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Constellation.Core.Models.MandatoryTraining.TrainingModule", null)
+                    b.HasOne("Constellation.Core.Models.MandatoryTraining.TrainingModule", "Module")
                         .WithMany("Completions")
                         .HasForeignKey("TrainingModuleId")
                         .OnDelete(DeleteBehavior.ClientCascade)
@@ -3326,6 +3335,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("MSTeamOperations");
 
                     b.Navigation("ResponsibleCourses");
+
+                    b.Navigation("TrainingCompletionRecords");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Stocktake.StocktakeEvent", b =>

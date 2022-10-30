@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application;
 
 using Constellation.Application.Common.Behaviours;
+using Constellation.Application.Interfaces.Providers;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,8 @@ public static class DependencyInjection
     {
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+        services.AddScoped<IDateTimeProvider, DateTimeProvider>();
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(BusinessValidationBehaviour<,>));
         //services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));

@@ -1,4 +1,5 @@
 ﻿using Constellation.Core.Enums;
+using Constellation.Core.Models.MandatoryTraining;
 using System;
 using System.Collections.Generic;
 
@@ -40,5 +41,6 @@ namespace Constellation.Core.Models
         public ICollection<TeacherMSTeamOperation> MSTeamOperations { get; set; }
         public ICollection<Course> ResponsibleCourses { get; set; }
         public ICollection<ClassworkNotification> ClassworkNotifications { get; set; }
+        public List<TrainingCompletion> TrainingCompletionRecords { get; set; } = new();
     }
 }

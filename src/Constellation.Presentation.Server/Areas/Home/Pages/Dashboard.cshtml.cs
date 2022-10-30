@@ -45,15 +45,14 @@ namespace Constellation.Presentation.Server.Areas.Home.Pages
         {
             var username = User.Identity.Name;
             var IsStaff = User.IsInRole(AuthRoles.User);
+            IsAdmin = User.IsInRole(AuthRoles.Admin);
 
-            if (!IsStaff)
+            if (!IsStaff && !IsAdmin)
             {
                 return RedirectToPage("Index", new { area = "" });
             }
 
             var teacher = await _unitOfWork.Staff.FromEmailForExistCheck(username);
-            IsAdmin = User.IsInRole(AuthRoles.Admin);
-
 
             if (teacher == null) return Page();
 

@@ -1,0 +1,48 @@
+﻿@page
+@using Constellation.Application.Models.Identity
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.IndexModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin) || User.IsInRole(AuthRoles.MandatoryTrainingEditor));
+}
+
+<h2>Mandatory Training Modules</h2>
+
+@if (authorised)
+{
+    <div>
+        <a asp-page="Upsert" class="btn btn-warning">Create New</a>
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    </div>
+}
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Frequency</th>
+            <th>Link</th>
+            <th></th>
+        </tr>
+    </thead>
+    @foreach (var item in Model.Modules)
+    {
+        <tr>
+            <td>@item.IsActive</td>
+            <td>@item.Name</td>
+            <td>@item.Expiry</td>
+            <td>
+                <a href="@item.Url" target="_blank" class="btn btn-sm btn-success">Launch</a>
+            </td>
+            <td>
+                @if (authorised)
+                {
+                    @:Link to details view
+                }
+            </td>
+        </tr>
+    }
+</table>

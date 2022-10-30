@@ -30,17 +30,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StaffId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     CompletedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TrainingModuleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ModuleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    TrainingModuleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MandatoryTraining_CompletionRecords", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_MandatoryTraining_CompletionRecords_MandatoryTraining_Modules_ModuleId",
-                        column: x => x.ModuleId,
-                        principalTable: "MandatoryTraining_Modules",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_MandatoryTraining_CompletionRecords_MandatoryTraining_Modules_TrainingModuleId",
                         column: x => x.TrainingModuleId,
@@ -52,11 +46,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         principalTable: "Staff",
                         principalColumn: "StaffId");
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MandatoryTraining_CompletionRecords_ModuleId",
-                table: "MandatoryTraining_CompletionRecords",
-                column: "ModuleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MandatoryTraining_CompletionRecords_StaffId",
