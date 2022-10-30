@@ -14,6 +14,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
 
             builder.HasOne(s => s.School)
                 .WithMany(s => s.Staff);
+
+            builder.HasMany(staff => staff.TrainingCompletionRecords)
+                .WithOne(completion => completion.Staff)
+                .HasPrincipalKey(completion => completion.StaffId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

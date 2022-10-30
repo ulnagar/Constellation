@@ -1,4 +1,6 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Extensions;
+using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Infrastructure.DependencyInjection;
 using OfficeOpenXml;
@@ -7,6 +9,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Services
@@ -181,6 +184,44 @@ namespace Constellation.Infrastructure.Services
             resultStream.Position = 0;
 
             return resultStream;
+        }
+
+        public async Task<MemoryStream> CreateTrainingModuleReportFile(ModuleDetailsDto data)
+        {
+            var completion = typeof(CompletionRecordDto);
+
+            var excel = new ExcelPackage();
+            var workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
+
+            var nameDetail = workSheet.Cells[1, 1].RichText.Add(data.Name);
+            nameDetail.Bold = true;
+            nameDetail.Size = 16;
+
+            workSheet.Cells[2, 1].Value = new Uri(data.Url);
+
+            workSheet.Cells[4, 1].LoadFromCollection(data.Completions, opt =>
+            {
+                opt.PrintHeaders = true;
+                opt.TableStyle = OfficeOpenXml.Table.TableStyles.Light1;
+                opt.HeaderParsingType = OfficeOpenXml.LoadFunctions.Params.HeaderParsingTypes.CamelCaseToSpace;
+                opt.Members = new MemberInfo[]
+                {
+                    completion.GetProperty("StaffId"),
+                    completion.GetProperty("StaffFirstName"),
+                    completion.GetProperty("StaffLastName"),
+                    completion.GetProperty("StaffFaculty"),
+                    completion.GetProperty("CompletedDate")
+                };
+            });
+
+            workSheet.Cells[4, 5, workSheet.Dimension.Rows, 5].Style.Numberformat.Format = "dd/MM/yyyy";
+            workSheet.Cells[4, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
+
+            var memoryStream = new MemoryStream();
+            await excel.SaveAsAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            return memoryStream;
         }
 
         private class StudentRecord

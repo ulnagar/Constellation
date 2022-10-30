@@ -10,9 +10,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
         {
             builder.HasKey(module => module.Id);
 
-            builder.Property(module => module.Id).ValueGeneratedOnAdd();
+            builder.Property(module => module.Id)
+                .ValueGeneratedOnAdd();
 
-            builder.HasMany(module => module.Completions).WithOne().HasForeignKey(completion => completion.TrainingModuleId).OnDelete(DeleteBehavior.ClientCascade);
+            builder.HasMany(module => module.Completions)
+                .WithOne(completion => completion.Module)
+                .HasForeignKey(completion => completion.TrainingModuleId)
+                .OnDelete(DeleteBehavior.ClientCascade);
         }
     }
 }

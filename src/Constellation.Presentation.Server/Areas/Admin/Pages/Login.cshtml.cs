@@ -115,13 +115,18 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                     _logger.LogInformation(" - Found user {user} for email {email}", user.Id, Input.Email);
                 }
 
-                // Temporarily turned off as Schools Portal is not working
-                var isStaffMember = await _mediator.Send(new IsUserASchoolStaffMemberQuery { EmailAddress = Input.Email });
-
-                if (!isStaffMember)
+                // If user is admin, bypass Staff Member check
+                if (await _userManager.IsInRoleAsync(user, AuthRoles.Admin))
                 {
-                    _logger.LogInformation(" - User is not a staff member - redirecting to Schools Portal");
-                    return RedirectToPage("PortalRedirect");
+                    // Bypass check
+                } else {
+                    var isStaffMember = await _mediator.Send(new IsUserASchoolStaffMemberQuery { EmailAddress = Input.Email });
+
+                    if (!isStaffMember)
+                    {
+                        _logger.LogInformation(" - User is not a staff member - redirecting to Schools Portal");
+                        return RedirectToPage("PortalRedirect");
+                    }
                 }
 
                 var result = new LoginResult();
