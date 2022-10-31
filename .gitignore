@@ -361,6 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
 /src/Constellation.Presentation.Server/appsettings.development.json
 /src/Constellation.Presentation.Server/emails
 /src/Constellation.Presentation.Server/~appsettings.development.json
@@ -368,3 +369,9 @@ FodyWeavers.xsd
 appsettings.*.json
 ~appsettings.*.json
 /src/Constellation.Infrastructure.HangfireServer/docker-compose.yml
+
+### Client Side Libraries in Front End Projects
+/src/Constellation.Presentation.Server/wwwroot/lib/*
+/src/Constellation.Presentation.Portal.Schools/wwwroot/lib/*
+/src/Constellation.Portal.Parents.Server/wwwroot/lib/*
+/src/Constellation.Portal.Parents.Client/wwwroot/lib/*
