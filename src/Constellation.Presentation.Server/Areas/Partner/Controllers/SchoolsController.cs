@@ -269,6 +269,21 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet("/Partner/Schools/Map/AHP")]
+        public async Task<IActionResult> ViewAHPMap()
+        {
+            var vm = await CreateViewModel<School_MapViewModel>();
+
+            var schoolCodes = await _unitOfWork.Schools
+                .AHPSchoolCodes();
+
+            vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes.ToList());
+            vm.PageHeading = "AHP Partner Schools";
+
+            return View("Map", vm);
+        }
+
+        [AllowAnonymous]
         [HttpGet("/Partner/Schools/Map/Stage45")]
         public async Task<IActionResult> ViewStage45Map()
         {

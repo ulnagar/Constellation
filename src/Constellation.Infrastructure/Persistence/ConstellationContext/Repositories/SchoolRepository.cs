@@ -2,7 +2,6 @@
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
-using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -133,6 +132,17 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             return await _context.Schools
                 .OrderBy(school => school.Name)
                 .Where(predicate)
+                .ToListAsync();
+        }
+
+        public async Task<ICollection<string>> AHPSchoolCodes()
+        {
+            return await _context.Courses
+                .Where(course => course.Name == "AHPG STEM")
+                .SelectMany(course => course.Offerings)
+                .SelectMany(offering => offering.Enrolments)
+                .Select(enrolment => enrolment.Student)
+                .Select(student => student.SchoolCode)
                 .ToListAsync();
         }
 
