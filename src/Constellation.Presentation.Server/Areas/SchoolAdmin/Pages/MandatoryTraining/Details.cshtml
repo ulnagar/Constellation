@@ -18,9 +18,7 @@
 {
         <div>
             <a asp-page="Upsert" asp-route-id="@Model.Module.Id" class="btn btn-warning">Edit</a>
-            <form asp-page-handler="DownloadReport">
-                <input type="submit" value="Download Report" class="btn btn-info" />
-            </form>
+            <a asp-page-handler="DownloadReport" class="btn btn-info">Download Report</a>
             <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
         </div>
 }
@@ -34,33 +32,35 @@ else
 <hr />
 
 <div>
-    <div class="row">
-        <label asp-for="Module.Id" class="col-md-2"></label>
-        <div class="col-md-9">
-            <span class="form-control">@Model.Module.Id</span>
-        </div>
-    </div>
+    <dl class="row">
+        <dt class="col-md-2">
+            <label asp-for="Module.Id"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Module.Id</span>
+        </dd>
 
-    <div class="row">
-        <label asp-for="Module.Name" class="col-md-2">Module</label>
-        <div class="col-md-9">
-            <span class="form-control">@Model.Module.Name</span>
-        </div>
-    </div>
+        <dt class="col-md-2">
+            <label asp-for="Module.Name">Module</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Module.Name</span>
+        </dd>
 
-    <div class="row">
-        <label asp-for="Module.Expiry" class="col-md-2">Expiry Frequency</label>
-        <div class="col-md-9">
-            <span class="form-control">@Model.Module.Expiry</span>
-        </div>
-    </div>
+        <dt class="col-md-2">
+            <label asp-for="Module.Expiry">Expiry Frequency</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Module.Expiry</span>
+        </dd>
 
-    <div class="row">
-        <label asp-for="Module.Url" class="col-md-2">Link</label>
-        <div class="col-md-9">
-            <span class="form-control"><a href="@Model.Module.Url" target="_blank">@Model.Module.Url</a></span>
-        </div>
-    </div>
+        <dt class="col-md-2">
+            <label asp-for="Module.Url">Link</label>
+        </dt>
+        <dd class="col-md-10">
+            <span><a href="@Model.Module.Url" target="_blank">@Model.Module.Url</a></span>
+        </dd>
+    </dl>
 </div>
 
 <hr />
