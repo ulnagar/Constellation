@@ -40,7 +40,7 @@
             <td>
                 @if (authorised)
                 {
-                    @:Link to details view
+                    <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
                 }
             </td>
         </tr>

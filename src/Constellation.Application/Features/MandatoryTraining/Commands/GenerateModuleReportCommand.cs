@@ -44,7 +44,7 @@ public class GenerateModuleReportCommandHandler : IRequestHandler<GenerateModule
         var reportDto = new ModuleReportDto
         {
             FileData = fileData.ToArray(),
-            FileName = $"Mandatory Training Report - {data.Name}",
+            FileName = $"Mandatory Training Report - {data.Name}.xlsx",
             FileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         };
 

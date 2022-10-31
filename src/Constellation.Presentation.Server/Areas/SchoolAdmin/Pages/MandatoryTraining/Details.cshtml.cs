@@ -35,7 +35,7 @@ public class DetailsModel : BasePageModel
         //TODO: Check if return value is null, redirect and display error
     }
 
-    public async Task<IActionResult> OnPostDownloadReport()
+    public async Task<IActionResult> OnGetDownloadReport()
     {
         var report = await _mediator.Send(new GenerateModuleReportCommand { Id = Id });
 

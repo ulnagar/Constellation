@@ -54,6 +54,10 @@
       "destination": "wwwroot/lib/jquery-validation-unobtrusive/"
     },
     {
+      "library": "datatables.net@1.11.3",
+      "destination": "wwwroot/lib/datatables.net/"
+    },
+    {
       "library": "datatables.net-dt@1.11.3",
       "destination": "wwwroot/lib/datatables.net-dt/"
     },
