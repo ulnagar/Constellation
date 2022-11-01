@@ -1,6 +1,7 @@
 using Constellation.Application.Features.MandatoryTraining.Commands;
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Features.MandatoryTraining.Queries;
+using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -15,10 +16,12 @@ namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTra
 public class DetailsModel : BasePageModel
 {
     private readonly IMediator _mediator;
+    private readonly IDateTimeProvider _dateTimeProvider;
 
-    public DetailsModel(IMediator mediator)
+    public DetailsModel(IMediator mediator, IDateTimeProvider dateTimeProvider)
     {
         _mediator = mediator;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -40,5 +43,31 @@ public class DetailsModel : BasePageModel
         var report = await _mediator.Send(new GenerateModuleReportCommand { Id = Id });
 
         return File(report.FileData, report.FileType, report.FileName);
+    }
+
+    public async Task<IActionResult> OnGetRetireModule()
+    {
+        var command = new RetireTrainingModuleCommand
+        {
+            Id = Id,
+            DeletedBy = Request.HttpContext.User.Identity?.Name,
+            DeletedAt = _dateTimeProvider.Now
+        };
+
+        await _mediator.Send(command);
+
+        return RedirectToPage("Details");
+    }
+
+    public async Task<IActionResult> OnGetReinstateModule()
+    {
+        var command = new ReinstateTrainingModuleCommand
+        {
+            Id = Id
+        };
+
+        await _mediator.Send(command);
+
+        return RedirectToPage("Details");
     }
 }

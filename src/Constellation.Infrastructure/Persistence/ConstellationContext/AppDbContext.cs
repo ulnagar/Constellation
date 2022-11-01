@@ -95,6 +95,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
             return base.Remove(entity);
         }
 
+        public override EntityEntry Attach(object entity)
+        {
+            return base.Attach(entity);
+        }
+
         public void ClearTrackerDb()
         {
             var changedEntriesCopy = base.ChangeTracker.Entries()

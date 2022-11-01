@@ -60,6 +60,7 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         DatabaseFacade Database { get; }
         EntityEntry Add(object entity);
+        EntityEntry Attach(object entity);
         EntityEntry Remove(object entity);
 
         void ClearTrackerDb();
