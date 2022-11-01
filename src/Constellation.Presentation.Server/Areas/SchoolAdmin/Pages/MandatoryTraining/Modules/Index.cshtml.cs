@@ -7,7 +7,7 @@ using MediatR;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
 
 [Roles(AuthRoles.Admin, AuthRoles.User, AuthRoles.MandatoryTrainingEditor)]
 public class IndexModel : BasePageModel

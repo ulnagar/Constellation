@@ -1,0 +1,64 @@
+﻿@page
+@using Constellation.Application.Models.Identity
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion.DetailsModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin) || User.IsInRole(AuthRoles.MandatoryTrainingEditor));
+}
+
+<h2>Training Completion Record Details</h2>
+
+@if (authorised)
+{
+    <div>
+        <a asp-page="Upsert" asp-route-id="@Model.Record.Id" class="btn btn-warning">Edit</a>
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    </div>
+}
+else
+{
+    <div class="row">
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+    </div>
+}
+
+<hr />
+
+<div>
+    <dl class="row">
+        <dt class="col-md-2">
+            <label asp-for="Record.Id"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Record.Id</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Record.StaffId">Staff Member</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Record.StaffFirstName @Model.Record.StaffLastName</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Record.ModuleId">Module</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Record.ModuleName</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Record.ModuleExpiry">Expiry</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Record.ModuleExpiry</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Record.CompletedDate">Completed Date</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Record.CompletedDate.ToString("dd/MM/yyyy")</span>
+        </dd>
+    </dl>
+</div>

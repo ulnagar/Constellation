@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 
-namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
 
 [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.MandatoryTrainingEditor)]
 public class DetailsModel : BasePageModel
@@ -34,7 +34,7 @@ public class DetailsModel : BasePageModel
         await GetClasses(_mediator);
 
         Module = await _mediator.Send(new GetModuleDetailsQuery { Id = Id });
-        
+
         //TODO: Check if return value is null, redirect and display error
     }
 
