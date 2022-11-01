@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Constellation.Application.Common.Mapping;
+using Constellation.Application.Helpers;
 using Constellation.Core.Models.MandatoryTraining;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ public class ModuleDetailsDto : IMapFrom<TrainingModule>
     public void Mapping(Profile profile)
     {
         profile.CreateMap<TrainingModule, ModuleDetailsDto>()
+            .ForMember(dest => dest.Expiry, opt => opt.MapFrom(src => src.Expiry.GetDisplayName()))
             .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.DeletedBy)));
     }
 }

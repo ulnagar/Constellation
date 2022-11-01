@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -11,7 +12,7 @@ public record UpdateTrainingModuleCommand : IRequest
 {
     public Guid Id { get; init; }
     public string Name { get; init; }
-    public string Expiry { get; init; }
+    public TrainingModuleExpiryFrequency Expiry { get; init; }
     public string Url { get; init; }
     public string ModifiedBy { get; init; }
     public DateTime ModifiedAt { get; init; }

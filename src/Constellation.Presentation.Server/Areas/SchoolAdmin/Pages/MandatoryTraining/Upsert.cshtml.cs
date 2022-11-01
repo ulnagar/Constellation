@@ -2,6 +2,7 @@ using Constellation.Application.Features.MandatoryTraining.Commands;
 using Constellation.Application.Features.MandatoryTraining.Queries;
 using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Models.Identity;
+using Constellation.Core.Enums;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
@@ -28,7 +29,7 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     public string Name { get; set; }
     [BindProperty]
-    public string Expiry { get; set; }
+    public TrainingModuleExpiryFrequency Expiry { get; set; }
     [BindProperty]
     public string ModelUrl { get; set; }
 
