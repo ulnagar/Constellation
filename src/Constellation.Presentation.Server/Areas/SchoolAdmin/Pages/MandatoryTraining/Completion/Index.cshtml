@@ -3,6 +3,7 @@
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion.IndexModel
 
 @{
+    var userStaffId = (User.HasClaim(claim => claim.Type == "StaffId") ? User.Claims.First(claim => claim.Type == "StaffId").Value : "");
     var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin) || User.IsInRole(AuthRoles.MandatoryTrainingEditor));
 }
 
@@ -36,7 +37,7 @@
             <td>@item.ModuleName</td>
             <td>@item.CompletedDate.ToString("dd/MM/yyyy")</td>
             <td>
-                @if (authorised)
+                @if (authorised || userStaffId == item.StaffId)
                 {
                     <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
                 }

@@ -2,7 +2,11 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Test.Pages
@@ -20,9 +24,13 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages
             _authService = authService;
         }
 
+        public List<Claim> Claims { get; set; }
+
         public async Task OnGetAsync()
         {
             await GetClasses(_unitOfWork);
+
+            Claims = User.Claims.ToList();
         }
 
         public async Task<IActionResult> OnPostAsync()

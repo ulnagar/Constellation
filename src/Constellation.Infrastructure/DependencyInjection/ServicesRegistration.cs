@@ -10,6 +10,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.GatewayConfigurations;
 using Constellation.Infrastructure.Gateways;
+using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
 using Constellation.Infrastructure.Identity.MagicLink;
 using Constellation.Infrastructure.Identity.ProfileService;
 using Constellation.Infrastructure.Jobs;
@@ -243,7 +244,10 @@ public static class ServicesRegistration
     {
         services.AddIdentity<AppUser, AppRole>()
             .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddClaimsPrincipalFactory<StaffUserIdClaimsFactory>();
+
+        services.AddTransient<IUserClaimsPrincipalFactory<AppUser>, StaffUserIdClaimsFactory>();
 
         services.Configure<IdentityOptions>(options =>
         {

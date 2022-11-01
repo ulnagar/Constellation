@@ -2,11 +2,14 @@ namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTra
 
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Features.MandatoryTraining.Queries;
+using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+[Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.MandatoryTrainingEditor)]
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
