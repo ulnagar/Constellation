@@ -1,6 +1,6 @@
 ﻿@page "{Id:Guid}"
 @using Constellation.Application.Models.Identity
-@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.DetailsModel
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules.DetailsModel
 
 @{
     var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin) || User.IsInRole(AuthRoles.MandatoryTrainingEditor));
@@ -109,7 +109,7 @@ else
                                 <td>@item.StaffFaculty</td>
                                 <td>@item.CompletedDate.ToString("dd/MM/yyyy")</td>
                                 <td>
-                                    Link to Completion Details
+                                    <a asp-page="/MandatoryTraining/Completion/Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
                                 </td>
                             </tr>
                         }

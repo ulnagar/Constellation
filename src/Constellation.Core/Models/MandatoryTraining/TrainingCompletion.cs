@@ -1,8 +1,9 @@
-﻿using System;
+﻿namespace Constellation.Core.Models.MandatoryTraining;
 
-namespace Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Common;
+using System;
 
-public class TrainingCompletion
+public class TrainingCompletion : AuditableEntity
 {
     public Guid Id { get; set; }
     public string StaffId { get; set; }

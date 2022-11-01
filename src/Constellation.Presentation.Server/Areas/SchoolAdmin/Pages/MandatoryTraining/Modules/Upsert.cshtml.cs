@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 
-namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
 
 [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.MandatoryTrainingEditor)]
 public class UpsertModel : BasePageModel
@@ -42,7 +42,7 @@ public class UpsertModel : BasePageModel
             // Get existing entry from database and populate fields
 
             var entity = await _mediator.Send(new GetTrainingModuleEditContextQuery { Id = Id.Value });
-            
+
             //TODO: Check that the return value is not null
             // If it is, redirect and show error message?
 
@@ -69,7 +69,8 @@ public class UpsertModel : BasePageModel
             };
 
             await _mediator.Send(command);
-        } else
+        }
+        else
         {
             // Create new entry
 
