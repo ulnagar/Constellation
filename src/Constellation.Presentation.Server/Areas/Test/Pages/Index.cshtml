@@ -4,3 +4,10 @@
 <form method="post">
     <button type="submit">Submit</button>
 </form>
+
+<dl>
+    @foreach (var claim in Model.Claims){
+        <dt>@claim.Type</dt>
+        <dd>@claim.Value</dd>
+    }
+</dl>
