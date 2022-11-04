@@ -1,6 +1,6 @@
 ﻿using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.Areas.Admin.Models;
 using Constellation.Presentation.Server.Areas.Admin.Models.AdobeConnect;
 using Constellation.Presentation.Server.BaseModels;

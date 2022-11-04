@@ -1,4 +1,4 @@
-﻿using Constellation.Application.Models.Identity;
+﻿using Constellation.Application.Models.Auth;
 using Hangfire.Dashboard;
 
 namespace Constellation.Presentation.Server.Infrastructure

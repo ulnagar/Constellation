@@ -7,12 +7,12 @@ using Constellation.Application.Interfaces.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class GetListOfCompletionRecordsQuery : IRequest<List<CompletionRecordDto>>
-{
-}
+public record GetListOfCompletionRecordsQuery(
+    string StaffId) : IRequest<List<CompletionRecordDto>> { }
 
 public class GetListOfCompletionRecordsQueryHandler : IRequestHandler<GetListOfCompletionRecordsQuery, List<CompletionRecordDto>>
 {
@@ -27,10 +27,16 @@ public class GetListOfCompletionRecordsQueryHandler : IRequestHandler<GetListOfC
 
     public async Task<List<CompletionRecordDto>> Handle(GetListOfCompletionRecordsQuery request, CancellationToken cancellationToken)
     {
-        var records = await _context.MandatoryTraining.CompletionRecords
-            .ProjectTo<CompletionRecordDto>(_mapper.ConfigurationProvider)
-            .ToListAsync(cancellationToken);
+        var records = _context.MandatoryTraining.CompletionRecords
+            .AsNoTracking();
 
-        return records;
+        // If a StaffId was specified, then filter the query
+        if (!string.IsNullOrWhiteSpace(request.StaffId))
+        {
+            records = records.Where(record => record.StaffId == request.StaffId);
+        }
+
+        return await records.ProjectTo<CompletionRecordDto>(_mapper.ConfigurationProvider)
+            .ToListAsync(cancellationToken);
     }
 }

@@ -1,4 +1,5 @@
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;

@@ -1,10 +1,10 @@
-﻿namespace Constellation.Application.Models.Identity
+﻿namespace Constellation.Application.Models.Auth
 {
     public static class AuthRoles
     {
         public const string Admin = "Administrator";
         public const string Editor = "Editor";
-        public const string User = "User";
+        public const string StaffMember = "User";
         public const string CoverEditor = "Covers Editor";
         public const string EquipmentEditor = "Equipment Editor";
         public const string LessonsEditor = "Lessons Editor";

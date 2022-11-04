@@ -1,5 +1,5 @@
 ﻿using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -44,7 +44,7 @@ namespace Constellation.Presentation.Server.Areas.Home.Pages
         public async Task<IActionResult> OnGet()
         {
             var username = User.Identity.Name;
-            var IsStaff = User.IsInRole(AuthRoles.User);
+            var IsStaff = User.IsInRole(AuthRoles.StaffMember);
             IsAdmin = User.IsInRole(AuthRoles.Admin);
 
             if (!IsStaff && !IsAdmin)

@@ -1,19 +1,17 @@
 ﻿@page
-@using Constellation.Application.Models.Identity
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion.IndexModel
+@inject IAuthorizationService AuthorizationService
 
 @{
-    var userStaffId = (User.HasClaim(claim => claim.Type == "StaffId") ? User.Claims.First(claim => claim.Type == "StaffId").Value : "");
-    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin) || User.IsInRole(AuthRoles.MandatoryTrainingEditor));
+    var isEditorTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
 }
 
 <h2>Mandatory Training Completion Records</h2>
 
-@if (authorised)
+@if (isEditorTest.Succeeded)
 {
     <div>
         <a asp-page="Upsert" class="btn btn-warning">Create New</a>
-        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
     </div>
 }
 
@@ -37,9 +35,13 @@
             <td>@item.ModuleName</td>
             <td>@item.CompletedDate.ToString("dd/MM/yyyy")</td>
             <td>
-                @if (authorised || userStaffId == item.StaffId)
-                {
-                    <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
+                @{
+                    var canViewDetailsTest = await AuthorizationService.AuthorizeAsync(User, item.Id, AuthPolicies.CanViewTrainingCompletionRecord);
+
+                    if (canViewDetailsTest.Succeeded)
+                    {
+                        <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
+                    }
                 }
             </td>
         </tr>

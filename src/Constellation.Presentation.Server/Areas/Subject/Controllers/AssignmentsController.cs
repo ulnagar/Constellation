@@ -3,7 +3,7 @@ using Constellation.Application.Features.Subject.Assignments.Queries;
 using Constellation.Application.Features.Subject.Courses.Models;
 using Constellation.Application.Features.Subject.Courses.Queries;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.Areas.Subject.Models.Assignments;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 {
     [Area("Subject")]
-    [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.User)]
+    [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class AssignmentsController : BaseController
     {
         private readonly IMediator _mediator;

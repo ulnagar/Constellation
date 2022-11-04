@@ -5,9 +5,17 @@
     <button type="submit">Submit</button>
 </form>
 
+<h2>Claims</h2>
 <dl>
     @foreach (var claim in Model.Claims){
         <dt>@claim.Type</dt>
         <dd>@claim.Value</dd>
     }
 </dl>
+
+<h2>Roles</h2>
+<ul>
+    @foreach (var role in Model.Roles){
+        <li>@role</li>
+    }
+</ul>

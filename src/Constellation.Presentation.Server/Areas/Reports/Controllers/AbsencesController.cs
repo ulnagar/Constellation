@@ -3,7 +3,7 @@ using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.Templates.Views.Documents.Attendance;
 using Constellation.Presentation.Server.Areas.Reports.Models;
@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 namespace Constellation.Presentation.Server.Areas.Reports.Controllers
 {
     [Area("Reports")]
-    [Roles(AuthRoles.Admin, AuthRoles.AbsencesEditor, AuthRoles.Editor, AuthRoles.User)]
+    [Roles(AuthRoles.Admin, AuthRoles.AbsencesEditor, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class AbsencesController : BaseController
     {
         private readonly IUnitOfWork _unitOfWork;

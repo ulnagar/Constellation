@@ -1,7 +1,7 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.Areas.ShortTerm.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
 {
     [Area("ShortTerm")]
-    [Roles(AuthRoles.Admin, AuthRoles.CoverEditor, AuthRoles.Editor, AuthRoles.User)]
+    [Roles(AuthRoles.Admin, AuthRoles.CoverEditor, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class CasualsController : BaseController
     {
         private readonly IUnitOfWork _unitOfWork;

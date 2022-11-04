@@ -1,15 +1,15 @@
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
+
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Features.MandatoryTraining.Queries;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
-
-[Roles(AuthRoles.Admin, AuthRoles.User, AuthRoles.MandatoryTrainingEditor)]
+[Authorize(Policy = AuthPolicies.CanViewTrainingModuleContent)]
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;

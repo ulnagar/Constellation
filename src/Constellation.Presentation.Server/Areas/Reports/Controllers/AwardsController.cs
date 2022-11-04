@@ -2,7 +2,7 @@
 using Constellation.Application.Features.Awards.Queries;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Presentation.Server.Areas.Reports.Models.Awards;
 using Constellation.Presentation.Server.BaseModels;
@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Constellation.Presentation.Server.Areas.Reports.Controllers
 {
     [Area("Reports")]
-    [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.User)]
+    [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class AwardsController : BaseController
     {
         private readonly IMediator _mediator;

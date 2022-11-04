@@ -1,18 +1,18 @@
 ﻿@page
-@using Constellation.Application.Models.Identity
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules.IndexModel
+@inject IAuthorizationService AuthorizationService
 
 @{
-    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin) || User.IsInRole(AuthRoles.MandatoryTrainingEditor));
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+    var canViewDetailsTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanViewTrainingModuleContentDetails);
 }
 
 <h2>Mandatory Training Modules</h2>
 
-@if (authorised)
+@if (canEditTest.Succeeded)
 {
     <div>
         <a asp-page="Upsert" class="btn btn-warning">Create New</a>
-        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
     </div>
 }
 
@@ -38,7 +38,7 @@
                 <a href="@item.Url" target="_blank" class="btn btn-sm btn-success">Launch</a>
             </td>
             <td>
-                @if (authorised)
+                @if (canViewDetailsTest.Succeeded)
                 {
                     <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
                 }
