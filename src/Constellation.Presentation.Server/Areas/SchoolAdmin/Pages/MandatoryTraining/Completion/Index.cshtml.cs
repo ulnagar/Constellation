@@ -2,14 +2,14 @@ namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTra
 
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Features.MandatoryTraining.Queries;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-[Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.MandatoryTrainingEditor)]
+[Authorize(Policy = AuthPolicies.CanViewTrainingModuleContent)]
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
@@ -25,6 +25,14 @@ public class IndexModel : BasePageModel
     {
         await GetClasses(_mediator);
 
-        CompletionRecords = await _mediator.Send(new GetListOfCompletionRecordsQuery());
+        // If user does not have details view permissions, only show their own records
+        if (User.HasClaim(claim => claim.Type == AuthClaimType.Permission && claim.Value == AuthPermissions.MandatoryTrainingDetailsView))
+        {
+            CompletionRecords = await _mediator.Send(new GetListOfCompletionRecordsQuery(""));
+        } else
+        {
+            var staffId = User.FindFirst(AuthClaimType.StaffEmployeeId).Value;
+            CompletionRecords = await _mediator.Send(new GetListOfCompletionRecordsQuery(staffId));
+        }
     }
 }

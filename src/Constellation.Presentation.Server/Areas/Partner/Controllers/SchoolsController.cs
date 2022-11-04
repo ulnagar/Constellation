@@ -2,7 +2,7 @@
 using Constellation.Application.Features.API.Schools.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 {
     [Area("Partner")]
-    [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.User)]
+    [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class SchoolsController : BaseController
     {
         private readonly IUnitOfWork _unitOfWork;

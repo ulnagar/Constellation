@@ -1,6 +1,7 @@
 ﻿using Constellation.Application.Features.Auth.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
@@ -52,7 +53,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
         {
             [Required]
             [EmailAddress]
-            [RegularExpression(@"^~*\w+([-+.']\w+)*@det.nsw.edu.au$", ErrorMessage = "Invalid Email.")]
+            [RegularExpression(@"^(?:~+.*$)|\w+(?:[-+.']\w+)*@det.nsw.edu.au$", ErrorMessage = "Invalid Email.")]
             public string Email { get; set; }
 
             [Required]
@@ -120,7 +121,8 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                 {
                     // Bypass check
                 } else {
-                    var isStaffMember = await _mediator.Send(new IsUserASchoolStaffMemberQuery { EmailAddress = Input.Email });
+                    //var isStaffMember = await _mediator.Send(new IsUserASchoolStaffMemberQuery { EmailAddress = Input.Email });
+                    var isStaffMember = user.IsStaffMember;
 
                     if (!isStaffMember)
                     {

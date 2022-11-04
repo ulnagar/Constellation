@@ -4,7 +4,7 @@ using Constellation.Application.Features.Partners.SchoolContacts.Commands;
 using Constellation.Application.Features.Partners.SchoolContacts.Notifications;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Partner.Models;
@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 {
     [Area("Partner")]
-    [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.User)]
+    [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class SchoolContactsController : BaseController
     {
         private readonly IUnitOfWork _unitOfWork;

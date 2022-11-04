@@ -6,6 +6,16 @@ PRESENTATION.SERVER
 	Test report export for Training Modules
 	- Add to nav menu
 
+	Implement generic permissions as per https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-6.0#use-a-handler-for-multiple-requirements
+	Permission Structure:
+	 SchoolContact = Portal.School.User
+	 Parent = Portal.Parent.User
+
+	Interface for teachers to create a new completion record
+	Upload of certificates with completion records
+	Display certificates in completion record detail view
+	Bulk download report and certificates from module view for permitted users only
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~

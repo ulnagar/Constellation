@@ -1,7 +1,7 @@
 ﻿using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.Areas.Reports.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace ACOS.Web.Areas.Reports.Controllers
 {
     [Area("Reports")]
-    [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.User)]
+    [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class StudentsController : BaseController
     {
         private readonly IUnitOfWork _unitOfWork;

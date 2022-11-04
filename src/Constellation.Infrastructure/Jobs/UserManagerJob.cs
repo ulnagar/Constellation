@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
@@ -38,7 +39,7 @@ namespace Constellation.Infrastructure.Jobs
                 if (token.IsCancellationRequested)
                     return;
 
-                await CreateUser(member.EmailAddress, member.FirstName, member.LastName, AuthRoles.User);
+                await CreateUser(member.EmailAddress, member.FirstName, member.LastName, AuthRoles.StaffMember);
             }
 
             var contacts = await _unitOfWork.SchoolContacts.AllWithActiveRoleAsync();

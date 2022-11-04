@@ -4,6 +4,7 @@ using Constellation.Application.Features.ShortTerm.Covers.Notifications;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.Templates.Views.Documents.Covers;

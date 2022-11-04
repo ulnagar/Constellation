@@ -2,7 +2,7 @@ using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
 {
-    [Roles(AuthRoles.Admin, AuthRoles.User)]
+    [Roles(AuthRoles.Admin, AuthRoles.StaffMember)]
     public class TeacherUpdateModel : BasePageModel
     {
         private readonly IUnitOfWork _unitOfWork;

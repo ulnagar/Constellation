@@ -7,9 +7,12 @@ using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
+using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.GatewayConfigurations;
 using Constellation.Infrastructure.Gateways;
+using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
 using Constellation.Infrastructure.Identity.MagicLink;
 using Constellation.Infrastructure.Identity.ProfileService;
@@ -21,6 +24,7 @@ using Constellation.Infrastructure.Services;
 using Constellation.Infrastructure.Templates.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -243,11 +247,11 @@ public static class ServicesRegistration
     internal static IServiceCollection AddStaffPortalAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddIdentity<AppUser, AppRole>()
+            .AddClaimsPrincipalFactory<StaffUserIdClaimsFactory>()
             .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders()
-            .AddClaimsPrincipalFactory<StaffUserIdClaimsFactory>();
+            .AddDefaultTokenProviders();
 
-        services.AddTransient<IUserClaimsPrincipalFactory<AppUser>, StaffUserIdClaimsFactory>();
+        services.AddTransient<UserClaimsPrincipalFactory<AppUser, AppRole>, StaffUserIdClaimsFactory>();
 
         services.Configure<IdentityOptions>(options =>
         {
@@ -267,6 +271,12 @@ public static class ServicesRegistration
             options.LoginPath = new PathString("/Admin/Login");
             options.LogoutPath = new PathString("/Admin/Logout");
         });
+
+        services.AddAuthorization(opt => opt.AddApplicationPolicies());
+
+        services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByRoute>();
+        services.AddScoped<IAuthorizationHandler, HasRequiredMandatoryTrainingModulePermissions>();
+        services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByResource>();
 
         var clientId = configuration["Authentication:Microsoft:ClientId"];
         var clientSecret = configuration["Authentication:Microsoft:ClientSecret"];

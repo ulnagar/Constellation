@@ -3,6 +3,7 @@
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
@@ -76,7 +77,7 @@ public class AuthService : IAuthService, IScopedService
 
             if (user.IsStaffMember)
             {
-                await AddUserToRole(userDetails, AuthRoles.User);
+                await AddUserToRole(userDetails, AuthRoles.StaffMember);
             }
 
             return result;
@@ -120,14 +121,14 @@ public class AuthService : IAuthService, IScopedService
                 // Remove user from Staff Members
                 user.IsStaffMember = newUser.IsStaffMember.Value;
                 user.StaffId = "";
-                await RemoveUserFromRole(newUser, AuthRoles.User);
+                await RemoveUserFromRole(newUser, AuthRoles.StaffMember);
             }
             else if (!user.IsStaffMember && newUser.IsStaffMember.Value)
             {
                 // Add user to Users role
                 user.IsStaffMember = newUser.IsStaffMember.Value;
                 user.StaffId = newUser.StaffId;
-                await AddUserToRole(newUser, AuthRoles.User);
+                await AddUserToRole(newUser, AuthRoles.StaffMember);
             }
         }
 
@@ -220,17 +221,17 @@ public class AuthService : IAuthService, IScopedService
 
                 await _userManager.CreateAsync(user);
 
-                await _userManager.AddToRoleAsync(user, AuthRoles.User);
+                await _userManager.AddToRoleAsync(user, AuthRoles.StaffMember);
                 await _userManager.UpdateAsync(user);
             } else
             {
                 user.IsStaffMember = true;
                 user.StaffId = member.StaffId;
 
-                var inRole = await _userManager.IsInRoleAsync(user, AuthRoles.User);
+                var inRole = await _userManager.IsInRoleAsync(user, AuthRoles.StaffMember);
 
                 if (!inRole)
-                    await _userManager.AddToRoleAsync(user, AuthRoles.User);
+                    await _userManager.AddToRoleAsync(user, AuthRoles.StaffMember);
                 await _userManager.UpdateAsync(user);
             }
         }
@@ -244,10 +245,10 @@ public class AuthService : IAuthService, IScopedService
                 user.IsStaffMember = false;
                 user.StaffId = null;
 
-                var inRole = await _userManager.IsInRoleAsync(user, AuthRoles.User);
+                var inRole = await _userManager.IsInRoleAsync(user, AuthRoles.StaffMember);
 
                 if (inRole)
-                    await _userManager.RemoveFromRoleAsync(user, AuthRoles.User);
+                    await _userManager.RemoveFromRoleAsync(user, AuthRoles.StaffMember);
                 await _userManager.UpdateAsync(user);
             } else
             {
@@ -256,10 +257,10 @@ public class AuthService : IAuthService, IScopedService
 
                 await _userManager.UpdateAsync(user);
 
-                var inRole = await _userManager.IsInRoleAsync(user, AuthRoles.User);
+                var inRole = await _userManager.IsInRoleAsync(user, AuthRoles.StaffMember);
 
                 if (!inRole)
-                    await _userManager.AddToRoleAsync(user, AuthRoles.User);
+                    await _userManager.AddToRoleAsync(user, AuthRoles.StaffMember);
                 await _userManager.UpdateAsync(user);
             }
         }

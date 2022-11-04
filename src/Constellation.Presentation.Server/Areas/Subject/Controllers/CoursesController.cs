@@ -1,7 +1,7 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Presentation.Server.Areas.Subject.Models;
 using Constellation.Presentation.Server.BaseModels;
@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 {
     [Area("Subject")]
-    [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.User)]
+    [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class CoursesController : BaseController
     {
         private readonly IUnitOfWork _unitOfWork;

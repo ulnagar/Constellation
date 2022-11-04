@@ -3,7 +3,7 @@ using Constellation.Application.Features.Equipment.Stocktake.Queries;
 using Constellation.Application.Features.Portal.School.Home.Queries;
 using Constellation.Application.Features.Portal.School.Stocktake.Commands;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Stocktake;
 using Constellation.Presentation.Server.Areas.Equipment.Models.Stocktake;
@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
 {
     [Area("Equipment")]
-    [Roles(AuthRoles.Admin, AuthRoles.EquipmentEditor, AuthRoles.Editor, AuthRoles.User)]
+    [Roles(AuthRoles.Admin, AuthRoles.EquipmentEditor, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class StocktakeController : BaseController
     {
         private readonly IMediator _mediator;

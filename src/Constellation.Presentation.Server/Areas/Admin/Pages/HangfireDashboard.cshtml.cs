@@ -1,5 +1,5 @@
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
 using Hangfire;
 using Hangfire.Common;

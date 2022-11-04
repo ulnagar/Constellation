@@ -1,18 +1,18 @@
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
+
 using Constellation.Application.Features.MandatoryTraining.Commands;
 using Constellation.Application.Features.MandatoryTraining.Queries;
 using Constellation.Application.Interfaces.Providers;
-using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 
-namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
-
-[Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.MandatoryTrainingEditor)]
+[Authorize(Policy = AuthPolicies.CanEditTrainingModuleContent)]
 public class UpsertModel : BasePageModel
 {
     private readonly IMediator _mediator;

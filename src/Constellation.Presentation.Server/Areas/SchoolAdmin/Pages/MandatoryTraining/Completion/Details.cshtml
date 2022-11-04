@@ -1,25 +1,23 @@
-﻿@page
-@using Constellation.Application.Models.Identity
+﻿@page "{id:Guid}"
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion.DetailsModel
-
-@{
-    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin) || User.IsInRole(AuthRoles.MandatoryTrainingEditor));
-}
+@inject IAuthorizationService AuthorizationService
 
 <h2>Training Completion Record Details</h2>
 
-@if (authorised)
-{
-    <div>
-        <a asp-page="Upsert" asp-route-id="@Model.Record.Id" class="btn btn-warning">Edit</a>
-        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
-    </div>
-}
-else
-{
-    <div class="row">
-        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
-    </div>
+@{
+    var authorised = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+
+    if (authorised.Succeeded)
+    {
+        <div>
+            <a asp-page="Upsert" asp-route-id="@Model.Record.Id" class="btn btn-warning">Edit</a>
+            <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+        </div>
+    } else {
+        <div>
+            <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+        </div>
+    }
 }
 
 <hr />
