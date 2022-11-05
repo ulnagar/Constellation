@@ -1,9 +1,12 @@
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Presentation.Server.Infrastructure;
 using FluentValidation;
 using Hangfire;
 using Hangfire.SqlServer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,6 +48,30 @@ else
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+    var logger = loggerFactory.CreateLogger("app");
+    try
+    {
+        var userManager = services.GetRequiredService<UserManager<AppUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+        await IdentityDefaults.SeedRoles(roleManager);
+        await IdentityDefaults.SeedUsers(userManager);
+
+        var env = services.GetRequiredService<IWebHostEnvironment>();
+        if (env.IsDevelopment())
+        {
+            await IdentityDefaults.SeedTestUsers(userManager);
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "Failed to seed users and roles.");
+    }
 }
 
 app.UseSerilogRequestLogging();

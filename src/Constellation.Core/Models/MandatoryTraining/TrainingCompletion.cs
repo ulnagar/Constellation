@@ -11,4 +11,6 @@ public class TrainingCompletion : AuditableEntity
     public DateTime CompletedDate { get; set; }
     public Guid TrainingModuleId { get; set; }
     public virtual TrainingModule Module { get; set; }
+    public int? StoredFileId { get; set; }
+    public virtual StoredFile StoredFile { get; set; }
 }

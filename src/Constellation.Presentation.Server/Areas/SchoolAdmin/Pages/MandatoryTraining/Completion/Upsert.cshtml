@@ -14,7 +14,7 @@
 
 <hr />
 
-<form asp-page-handler="Update">
+<form asp-page-handler="Update" enctype="multipart/form-data">
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         @Html.HiddenFor(model => model.Id)
@@ -47,6 +47,19 @@
             </div>
         </div>
 
+        <div class="form-group row">
+            <label asp-for="FormFile" class="col-md-2">Certificate</label>
+            <div class="col-md-5">
+                <div class="custom-file">
+                    <input asp-for="FormFile" type="file" class="custom-file-input" />
+                    <label class="custom-file-label" asp-for="FormFile">Choose file</label>
+                </div>
+                <span asp-validation-for="FormFile" class="text-danger">
+                    Only accepts PDF files. Max file size is 10Mb.
+                </span>
+            </div>
+        </div>
+
         <div class="form-group">
             <div class="col-md-3">
                 <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
@@ -57,4 +70,11 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(".custom-file-input").on("change", function () {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+    </script>
 }
