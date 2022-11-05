@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
 
+using Constellation.Application.DTOs;
 using Constellation.Application.Features.Common.Queries;
 using Constellation.Application.Features.MandatoryTraining.Commands;
 using Constellation.Application.Features.MandatoryTraining.Queries;
@@ -15,6 +16,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 [Authorize(Policy = AuthPolicies.CanEditTrainingModuleContent)]
+[RequestSizeLimit(10485760)]
 public class UpsertModel : BasePageModel
 {
     private readonly IMediator _mediator;
@@ -34,6 +36,10 @@ public class UpsertModel : BasePageModel
     public DateTime CompletedDate { get; set; } = DateTime.Today;
     [BindProperty]
     public Guid TrainingModuleId { get; set; }
+
+    [FileExtensions(Extensions = ".pdf")]
+    [BindProperty]
+    public IFormFile FormFile { get; set; }
 
     public Dictionary<string, string> StaffOptions { get; set; } = new();
     public Dictionary<Guid, string> ModuleOptions { get; set; } = new();
@@ -60,8 +66,44 @@ public class UpsertModel : BasePageModel
         ModuleOptions = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
     }
 
+
+    private async Task<FileDto> GetUploadedFile()
+    {
+        if (FormFile is not null)
+        {
+            var file = new FileDto
+            {
+                FileName = FormFile.FileName,
+                FileType = FormFile.ContentType
+            };
+
+            try
+            {
+                await using var target = new MemoryStream();
+                await FormFile.CopyToAsync(target);
+                file.FileData = target.ToArray();
+            }
+            catch (Exception ex)
+            {
+                // Error uploading file
+            }
+
+            return file;
+        }
+
+        return null;
+    }
+
     public async Task<IActionResult> OnPostUpdate()
     {
+        if (!ModelState.IsValid)
+        {
+            StaffOptions = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+            ModuleOptions = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
+
+            return Page();
+        }
+
         if (Id.HasValue)
         {
             // Update existing entry
@@ -74,6 +116,7 @@ public class UpsertModel : BasePageModel
                 CompletedDate = CompletedDate,
                 ModifiedBy = Request.HttpContext.User.Identity?.Name,
                 ModifiedAt = _dateTimeProvider.Now,
+                File = await GetUploadedFile()
             };
 
             await _mediator.Send(command);
@@ -89,6 +132,7 @@ public class UpsertModel : BasePageModel
                 CompletedDate = CompletedDate,
                 CreatedBy = Request.HttpContext.User.Identity?.Name,
                 CreatedAt = _dateTimeProvider.Now,
+                File = await GetUploadedFile()
             };
 
             await _mediator.Send(command);

@@ -1,6 +1,9 @@
 ﻿namespace Constellation.Application.Features.MandatoryTraining.Commands;
 
+using Constellation.Application.DTOs;
+using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Models;
 using Constellation.Core.Models.MandatoryTraining;
 using MediatR;
 using System;
@@ -14,20 +17,23 @@ public record CreateTrainingCompletionCommand : IRequest
     public DateTime CompletedDate { get; set; }
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
+    public FileDto File { get; set; }
 }
 
 public class CreateTrainingCompletionCommandHandler : IRequestHandler<CreateTrainingCompletionCommand>
 {
 	private readonly IAppDbContext _context;
+    private readonly IDateTimeProvider _dateTimeProvider;
 
-	public CreateTrainingCompletionCommandHandler(IAppDbContext context)
+    public CreateTrainingCompletionCommandHandler(IAppDbContext context, IDateTimeProvider dateTimeProvider)
 	{
 		_context = context;
-	}
+        _dateTimeProvider = dateTimeProvider;
+    }
 
 	public async Task<Unit> Handle(CreateTrainingCompletionCommand request, CancellationToken cancellationToken)
 	{
-        var entity = new TrainingCompletion
+        var recordEntity = new TrainingCompletion
         {
             StaffId = request.StaffId,
             TrainingModuleId = request.TrainingModuleId,
@@ -36,7 +42,23 @@ public class CreateTrainingCompletionCommandHandler : IRequestHandler<CreateTrai
             CreatedAt = request.CreatedAt
         };
 
-        _context.Add(entity);
+        _context.Add(recordEntity);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        if (request.File is null)
+            return Unit.Value;
+
+        var fileEntity = new StoredFile
+        {
+            Name = request.File.FileName,
+            FileType = request.File.FileType,
+            FileData = request.File.FileData,
+            CreatedAt = _dateTimeProvider.Now,
+            LinkType = StoredFile.TrainingCertificate,
+            LinkId = recordEntity.Id.ToString()
+        };
+
+        recordEntity.StoredFile = fileEntity;
         await _context.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
