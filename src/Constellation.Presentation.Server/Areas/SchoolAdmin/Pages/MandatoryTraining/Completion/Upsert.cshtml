@@ -22,17 +22,25 @@
         <div class="form-group row">
             <label asp-for="StaffId" class="col-md-2">Staff Member</label>
             <div class="col-md-5">
-                <select asp-for="StaffId" asp-items="@(new SelectList(Model.StaffOptions, "Key", "Value"))" class="form-control">
-                    <option selected="selected" value=""> -- Please Select -- </option>
-                </select>
-                <span asp-validation-for="StaffId" class="text-danger"></span>
+                @if (Model.CanEditRecords)
+                {
+                    <select asp-for="StaffId" asp-items="@(new SelectList(Model.StaffOptions, "Key", "Value"))" class="form-control combo custom-select">
+                        <option selected="selected" value=""> -- Please Select -- </option>
+                    </select>
+                    <span asp-validation-for="StaffId" class="text-danger"></span>
+                } 
+                else 
+                {
+                    <input type="hidden" asp-for="StaffId" />
+                    <input type="text" class="form-control" readonly="readonly" value="@Model.SoloStaffMember.Value" />
+                }
             </div>
         </div>
 
         <div class="form-group row">
             <label asp-for="TrainingModuleId" class="col-md-2">Training Module</label>
             <div class="col-md-8">
-                <select asp-for="TrainingModuleId" asp-items="@(new SelectList(Model.ModuleOptions, "Key", "Value"))" class="form-control">
+                <select asp-for="TrainingModuleId" asp-items="@(new SelectList(Model.ModuleOptions, "Key", "Value"))" class="form-control combo custom-select">
                     <option selected="selected" value=""> -- Please Select -- </option>
                 </select>
                 <span asp-validation-for="TrainingModuleId" class="text-danger"></span>
@@ -49,14 +57,15 @@
 
         <div class="form-group row">
             <label asp-for="FormFile" class="col-md-2">Certificate</label>
-            <div class="col-md-5">
+            <div class="col-md-8">
                 <div class="custom-file">
                     <input asp-for="FormFile" type="file" class="custom-file-input" />
                     <label class="custom-file-label" asp-for="FormFile">Choose file</label>
                 </div>
-                <span asp-validation-for="FormFile" class="text-danger">
+                <div class="font-italic">
                     Only accepts PDF files. Max file size is 10Mb.
-                </span>
+                </div>
+                <span asp-validation-for="FormFile" class="text-danger"></span>
             </div>
         </div>
 
