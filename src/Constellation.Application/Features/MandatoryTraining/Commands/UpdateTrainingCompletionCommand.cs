@@ -71,8 +71,9 @@ public class UpdateTrainingCompletionCommandHandler : IRequestHandler<UpdateTrai
             };
 
             entity.StoredFile = fileEntity;
-            await _context.SaveChangesAsync(cancellationToken);
         }
+
+        await _context.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
     }

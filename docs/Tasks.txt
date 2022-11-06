@@ -3,6 +3,9 @@ CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 PRESENTATION.SERVER
+	Display certificates in completion record detail view
+	 - Displays sometimes? Check multiple files
+
 	Test report export for Training Modules
 	- Add to nav menu
 
@@ -11,7 +14,6 @@ PRESENTATION.SERVER
 	 SchoolContact = Portal.School.User
 	 Parent = Portal.Parent.User
 
-	Display certificates in completion record detail view
 	Bulk download report and certificates from module view for permitted users only
 
 ~~~~~~~~~~~~~~~~~~~~~~~~

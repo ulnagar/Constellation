@@ -60,3 +60,10 @@
         </dd>
     </dl>
 </div>
+
+@if (Model.UploadedCertificate is not null && Model.UploadedCertificate.FileData is not null)
+{
+    <div class="embed-responsive embed-responsive-4by3">
+        <embed src="data:application/pdf;base64,@Model.UploadedCertificate.FileData" class="embed-responsive-item" />
+    </div>
+}

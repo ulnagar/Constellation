@@ -3,9 +3,11 @@ namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTra
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Common.Queries;
 using Constellation.Application.Features.MandatoryTraining.Commands;
+using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Features.MandatoryTraining.Queries;
 using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Validation;
 using MediatR;
@@ -55,19 +57,16 @@ public class UpsertModel : BasePageModel
     public KeyValuePair<string, string> SoloStaffMember { get; set; } = new();
 
     public bool CanEditRecords { get; set; }
+    public CompletionRecordCertificateDto UploadedCertificate { get; set; } = new();
 
     public async Task<IActionResult> OnGet()
     {
         await GetClasses(_mediator);
 
         // Is this user a staff member created a record for themselves?
-        var canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
-        CanEditRecords = canEditTest.Succeeded;
+        await SetUpForm();
 
         var staffIdClaim = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-        StaffOptions = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
-        ModuleOptions = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
 
         if (Id.HasValue)
         {
@@ -82,6 +81,8 @@ public class UpsertModel : BasePageModel
             CompletedDate = entity.CompletedDate;
             TrainingModuleId = entity.TrainingModuleId;
 
+            UploadedCertificate = await _mediator.Send(new GetUploadedTrainingCertificateMetadataQuery { LinkType = StoredFile.TrainingCertificate, LinkId = Id.Value.ToString() });
+
             if (!CanEditRecords && StaffId != staffIdClaim)
             {
                 // User is not the staff member listed on the record and does not have permission to edit records
@@ -90,8 +91,6 @@ public class UpsertModel : BasePageModel
         }
         else if (!CanEditRecords)
         {
-            SoloStaffMember = StaffOptions.FirstOrDefault(member => member.Key == staffIdClaim);
-
             if (SoloStaffMember.Key == null)
             {
                 // This staff member is not on the list of staff. Something has gone wrong here.
@@ -104,6 +103,24 @@ public class UpsertModel : BasePageModel
 
         
         return Page();
+    }
+
+    private async Task SetUpForm()
+    {
+        var canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+        CanEditRecords = canEditTest.Succeeded;
+
+        var staffIdClaim = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
+        StaffOptions = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        ModuleOptions = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
+
+        if (!CanEditRecords)
+        {
+            SoloStaffMember = StaffOptions.FirstOrDefault(member => member.Key == staffIdClaim);
+
+            StaffId = staffIdClaim;
+        }
     }
 
 
@@ -141,22 +158,16 @@ public class UpsertModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            StaffOptions = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
-            ModuleOptions = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
+            await SetUpForm();
 
             if (!CanEditRecords)
             {
-                var staffIdClaim = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-                SoloStaffMember = StaffOptions.FirstOrDefault(member => member.Key == staffIdClaim);
-
                 if (SoloStaffMember.Key == null)
                 {
                     // This staff member is not on the list of staff. Something has gone wrong here.
 
                     return RedirectToPage("Index");
                 }
-
-                StaffId = staffIdClaim;
             }
 
             return Page();

@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTra
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Features.MandatoryTraining.Queries;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -23,12 +24,15 @@ public class DetailsModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }
     public CompletionRecordDto Record { get; set; }
+    public CompletionRecordCertificateDetailsDto UploadedCertificate { get; set; } = new();
 
     public async Task OnGet()
     {
         await GetClasses(_mediator);
 
         Record = await _mediator.Send(new GetCompletionRecordDetailsQuery { Id = Id });
+
+        UploadedCertificate = await _mediator.Send(new GetUploadedTrainingCertificateFileByIdQuery { LinkType = StoredFile.TrainingCertificate, LinkId = Record.Id.ToString() });
 
         //TODO: Check if return value is null, redirect and display error
     }
