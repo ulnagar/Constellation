@@ -3,14 +3,6 @@ CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 PRESENTATION.SERVER
-    Upsert Completion page
-	 - file field needs the label shortened to the length of the field
-	 - file field validation errors do not display
-	 - pre-populate current user when user is not an editor
-	 - modify file name to be username-date-module for easy identification on download
-	 - enable select2 input on Staff Member and Training Module fields
-
-
 	Test report export for Training Modules
 	- Add to nav menu
 
@@ -19,7 +11,6 @@ PRESENTATION.SERVER
 	 SchoolContact = Portal.School.User
 	 Parent = Portal.Parent.User
 
-	Interface for teachers to create a new completion record
 	Display certificates in completion record detail view
 	Bulk download report and certificates from module view for permitted users only
 

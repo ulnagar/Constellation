@@ -7,4 +7,5 @@ public class AuthPolicies
     public const string CanViewTrainingModuleContent = "CanViewTrainingModuleContent";
     public const string CanViewTrainingModuleContentDetails = "CanViewTrainingModuleContentDetails";
     public const string CanRunTrainingModuleReports = "CanRunTrainingModuleReports";
+    public const string IsStaffMember = "IsStaffMember";
 }

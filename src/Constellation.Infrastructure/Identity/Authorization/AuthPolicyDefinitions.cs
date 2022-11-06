@@ -22,6 +22,9 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanRunTrainingModuleReports, policy =>
             policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.MandatoryTrainingReportsRun));
 
+        options.AddPolicy(AuthPolicies.IsStaffMember, policy =>
+            policy.RequireClaim(AuthClaimType.StaffEmployeeId));
+
         return options;
     }
 }
