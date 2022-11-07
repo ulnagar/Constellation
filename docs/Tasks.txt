@@ -3,8 +3,10 @@ CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 PRESENTATION.SERVER
-	Display certificates in completion record detail view
-	 - Displays sometimes? Check multiple files
+	Completion Records view has status lights for when the training is due to be repeated, 
+	however it does not take into account whether there is a subsequent record for that 
+	staff member for that particular module. Need to be able to detect when an overriding 
+	entry has appeared and hide the status of the superceded lines.
 
 	Test report export for Training Modules
 	- Add to nav menu
@@ -15,6 +17,7 @@ PRESENTATION.SERVER
 	 Parent = Portal.Parent.User
 
 	Bulk download report and certificates from module view for permitted users only
+	Report should be most recent completion of each module only, and should include staff members who have not completed the module as well.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS

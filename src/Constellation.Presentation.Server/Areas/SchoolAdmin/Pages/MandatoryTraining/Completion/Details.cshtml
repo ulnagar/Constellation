@@ -1,4 +1,5 @@
 ﻿@page "{id:Guid}"
+@using Constellation.Application.Helpers
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion.DetailsModel
 @inject IAuthorizationService AuthorizationService
 
@@ -49,7 +50,7 @@
             <label asp-for="Record.ModuleExpiry">Expiry</label>
         </dt>
         <dd class="col-md-10">
-            <span>@Model.Record.ModuleExpiry</span>
+            <span>@Model.Record.ModuleExpiry.GetDisplayName()</span>
         </dd>
 
         <dt class="col-md-2">
@@ -63,7 +64,11 @@
 
 @if (Model.UploadedCertificate is not null && Model.UploadedCertificate.FileData is not null)
 {
+    <h3>Certificate</h3>
+    <div class="mb-3">
+        <a asp-page-handler="DownloadCertificate" class="btn btn-secondary">Download Certificate</a>
+    </div>
     <div class="embed-responsive embed-responsive-4by3">
-        <embed src="data:application/pdf;base64,@Model.UploadedCertificate.FileData" class="embed-responsive-item" />
+        <embed src="data:application/pdf;base64,@Model.UploadedCertificate.FileDataBase64" class="embed-responsive-item" />
     </div>
 }

@@ -36,4 +36,12 @@ public class DetailsModel : BasePageModel
 
         //TODO: Check if return value is null, redirect and display error
     }
+
+    public async Task<IActionResult> OnGetDownloadCertificate()
+    {
+        await GetClasses(_mediator);
+        UploadedCertificate = await _mediator.Send(new GetUploadedTrainingCertificateFileByIdQuery { LinkType = StoredFile.TrainingCertificate, LinkId = Id.ToString() });
+
+        return File(UploadedCertificate.FileData, UploadedCertificate.FileType, UploadedCertificate.Name);
+    }
 }
