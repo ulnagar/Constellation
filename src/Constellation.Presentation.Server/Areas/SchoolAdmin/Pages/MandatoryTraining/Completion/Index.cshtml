@@ -27,7 +27,26 @@
     @foreach (var item in Model.CompletionRecords)
     {
         <tr>
-            <td></td>
+            <td>
+                @{
+                    if (item.ExpiryCountdown > 31)
+                    {
+                        <img src="/images/GreenLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                    }
+                    else if (item.ExpiryCountdown > 15)
+                    {
+                        <img src="/images/YellowLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                    }
+                    else if (item.ExpiryCountdown > 1)
+                    {
+                        <img src="/images/RedLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                    }
+                    else
+                    {
+                        <img src="/images/RedLight.png" class="status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
+                    }
+                }
+            </td>
             <td>@item.StaffFirstName @item.StaffLastName</td>
             <td>@item.ModuleName</td>
             <td>@item.CompletedDate.ToString("dd/MM/yyyy")</td>
@@ -37,7 +56,7 @@
 
                     if (canViewDetailsTest.Succeeded)
                     {
-                        <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
+                            <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
                     }
                 }
             </td>
