@@ -2,6 +2,12 @@
 COPY bin/Release/net6.0/publish/ App/
 WORKDIR /App
 
+# Set the proxy details for the build environment
+ENV HTTP_PROXY="http://10.136.44.14:3128"
+ENV HTTPS_PROXY="http://10.136.44.14:3128"
+ENV FTP_PROXY="http://10.136.44.14:3128"
+ENV NO_PROXY="127.0.0.1,localhost,10.136.44.*,*.det.nsw.edu.au"
+
 # Reduce the required security level for external connections to allow 
 # connection to Sentral server
 RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1/g' /etc/ssl/openssl.cnf
