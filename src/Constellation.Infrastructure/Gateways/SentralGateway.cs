@@ -25,8 +25,6 @@ namespace Constellation.Infrastructure.Gateways
         private readonly Serilog.ILogger _logger;
         private HtmlDocument StudentListPage;
 
-        private readonly CultureInfo DateFormatProvider = new CultureInfo("en-AU");
-
         public SentralGateway(ISentralGatewayConfiguration settings, Serilog.ILogger logger)
         {
             _settings = settings;
@@ -346,6 +344,7 @@ namespace Constellation.Infrastructure.Gateways
                 {
                     var dateCell = row.ChildNodes.FindFirst("td");
                     var stringDate = dateCell.InnerText.Trim();
+                    DateTime date;
 
                     if (stringDate == "No period absences have been recorded for this student.")
                         return absences;
@@ -357,11 +356,13 @@ namespace Constellation.Infrastructure.Gateways
                             continue;
                         }
 
-                        stringDate = previousDate.ToString("dd-MM-yyyy");
+                        //stringDate = previousDate.ToString("dd-MM-yyyy");
+                        date = previousDate;
+                    } else
+                    {
+                        date = DateTime.Parse(stringDate).Date;
+                        previousDate = date;
                     }
-
-                    var date = DateTime.ParseExact(stringDate, "dd-MM-yyyy", DateFormatProvider).Date;
-                    previousDate = date;
 
                     var periodAbsence = new SentralPeriodAbsenceDto
                     {
@@ -479,7 +480,7 @@ namespace Constellation.Infrastructure.Gateways
                         continue;
 
                     var stringDate = rowData.Substring(0, rowData.IndexOf('_'));
-                    var rowDate = DateTime.Parse(stringDate, DateFormatProvider);
+                    var rowDate = DateTime.Parse(stringDate);
                     absence.Date = rowDate;
 
                     var cellNumber = 0;
@@ -499,10 +500,10 @@ namespace Constellation.Infrastructure.Gateways
 
                                 if (absence.Timeframe.Contains('-'))
                                 {
-                                    var startDateTime = DateTime.ParseExact(absence.Timeframe.Split(' ')[0], "h:mmtt", DateFormatProvider);
+                                    var startDateTime = DateTime.ParseExact(absence.Timeframe.Split(' ')[0], "h:mmtt", CultureInfo.InvariantCulture);
                                     absence.StartTime = startDateTime.TimeOfDay;
 
-                                    var endDateTime = DateTime.ParseExact(absence.Timeframe.Split(' ')[2], "h:mmtt", DateFormatProvider);
+                                    var endDateTime = DateTime.ParseExact(absence.Timeframe.Split(' ')[2], "h:mmtt", CultureInfo.InvariantCulture);
                                     absence.EndTime = endDateTime.TimeOfDay;
                                 }
                                 else
@@ -570,7 +571,7 @@ namespace Constellation.Infrastructure.Gateways
                             if (!string.IsNullOrWhiteSpace(action))
                             {
                                 var detectedDate = action.Split('\'')[1];
-                                var date = DateTime.Parse(detectedDate, DateFormatProvider);
+                                var date = DateTime.Parse(detectedDate);
 
                                 nonSchoolDays.Add(date);
                             }
@@ -634,7 +635,7 @@ namespace Constellation.Infrastructure.Gateways
                             if (!string.IsNullOrWhiteSpace(startDateAction))
                             {
                                 var detectedDate = startDateAction.Split('\'')[1];
-                                var date = DateTime.Parse(detectedDate, DateFormatProvider);
+                                var date = DateTime.Parse(detectedDate);
 
                                 entry.StartDate = date;
                             }
@@ -643,7 +644,7 @@ namespace Constellation.Infrastructure.Gateways
                             if (!string.IsNullOrWhiteSpace(endDateAction))
                             {
                                 var detectedDate = endDateAction.Split('\'')[1];
-                                var date = DateTime.Parse(detectedDate, DateFormatProvider);
+                                var date = DateTime.Parse(detectedDate);
 
                                 entry.EndDate = date;
                             }
@@ -665,7 +666,7 @@ namespace Constellation.Infrastructure.Gateways
                             if (!string.IsNullOrWhiteSpace(startDateAction))
                             {
                                 var detectedDate = startDateAction.Split('\'')[1];
-                                var date = DateTime.Parse(detectedDate, DateFormatProvider);
+                                var date = DateTime.Parse(detectedDate);
 
                                 entry.StartDate = date;
                             }
@@ -674,7 +675,7 @@ namespace Constellation.Infrastructure.Gateways
                             if (!string.IsNullOrWhiteSpace(endDateAction))
                             {
                                 var detectedDate = endDateAction.Split('\'')[1];
-                                var date = DateTime.Parse(detectedDate, DateFormatProvider);
+                                var date = DateTime.Parse(detectedDate);
 
                                 entry.EndDate = date;
                             }
@@ -798,7 +799,7 @@ namespace Constellation.Infrastructure.Gateways
                     continue;
                 list.Add(new RollMarkReportDto
                 {
-                    Date = DateTime.Parse(splitString[0].TrimStart('"').TrimEnd('"'), DateFormatProvider),
+                    Date = DateTime.Parse(splitString[0].TrimStart('"').TrimEnd('"')),
                     Period = splitString[1].TrimStart('"').TrimEnd('"'),
                     ClassName = splitString[2].TrimStart('"').TrimEnd('"'),
                     Teacher = splitString[3].TrimStart('"').TrimEnd('"'),
@@ -815,7 +816,7 @@ namespace Constellation.Infrastructure.Gateways
                     continue;
                 list.Add(new RollMarkReportDto
                 {
-                    Date = DateTime.Parse(splitString[0].TrimStart('"').TrimEnd('"'), DateFormatProvider),
+                    Date = DateTime.Parse(splitString[0].TrimStart('"').TrimEnd('"')),
                     Period = splitString[1].TrimStart('"').TrimEnd('"'),
                     ClassName = splitString[2].TrimStart('"').TrimEnd('"'),
                     Teacher = splitString[3].TrimStart('"').TrimEnd('"'),
