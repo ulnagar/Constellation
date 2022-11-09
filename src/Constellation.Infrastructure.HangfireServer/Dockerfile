@@ -7,6 +7,14 @@ WORKDIR /App
 RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1/g' /etc/ssl/openssl.cnf
 RUN sed -i 's/CipherString = DEFAULT@SECLEVEL=2/CipherString = DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
 
+# Set the locale
+## From http://jaredmarkell.com/docker-and-locales/
+RUN apt-get clean && apt-get update && apt-get install -y locales
+RUN locale-gen en_AU.UTF-8
+ENV LANG en_AU.UTF-8
+ENV LANGUAGE en_AU:en
+ENV LC_ALL en_AU.UTF-8
+
 # Update Timezone settings to correct date format issues
 ENV TZ=Australia/Sydney
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
