@@ -5,14 +5,10 @@ using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.Areas.Reports.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace ACOS.Web.Areas.Reports.Controllers
+namespace Constellation.Presentation.Server.Areas.Reports.Controllers
 {
     [Area("Reports")]
     [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
@@ -102,7 +98,7 @@ namespace ACOS.Web.Areas.Reports.Controllers
 
             var sessions = student.Enrolments.Where(e => !e.IsDeleted)
                 .SelectMany(e => e.Offering.Sessions.Where(s => s.Period.Day == selectedDay));
-            
+
             var dayPeriods = _unitOfWork.Periods.AllFromDay(selectedDay);
 
             viewModel.Periods = dayPeriods;
@@ -144,7 +140,7 @@ namespace ACOS.Web.Areas.Reports.Controllers
                         LogoutTime = user.LogoutTime
                     };
 
-                    entry.Highlighted = (string.Equals(entry.Login, (student.PortalUsername + "@detnsw"), StringComparison.CurrentCultureIgnoreCase));
+                    entry.Highlighted = string.Equals(entry.Login, student.PortalUsername + "@detnsw", StringComparison.CurrentCultureIgnoreCase);
 
                     viewModel.Users.Add(entry);
                 }
