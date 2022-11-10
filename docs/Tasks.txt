@@ -6,6 +6,7 @@ PRESENTATION.SERVER
 	Upsert Completion:
 		Prevent adding entry that is beyond today (i.e. do not create entry in the future)
 		Order the dropdowns for staff and module
+		Enable edit mode for staff to only upload certificate
 
 	Details Module:
 		Add link to create new completion

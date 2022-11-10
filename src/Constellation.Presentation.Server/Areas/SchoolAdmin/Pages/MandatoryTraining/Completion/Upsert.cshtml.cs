@@ -34,6 +34,16 @@ public class UpsertModel : BasePageModel
         _authorizationService = authorizationService;
     }
 
+    // Allow mode switching for:
+    // "FULL" - Editor access with no forced fields
+    // "SOLOSTAFF" - Insert access with forced staff field
+    // "SOLOMODULE" - Insert access with pre-populated module field
+    [BindProperty(SupportsGet = true)]
+    public ModeOptions Mode { get; set; }
+
+    [BindProperty(SupportsGet = true)]
+    public Guid? ModuleId { get; set; }
+
     [BindProperty(SupportsGet = true)]
     public Guid? Id { get; set; }
 
@@ -46,6 +56,7 @@ public class UpsertModel : BasePageModel
 
     [BindProperty]
     [Required(ErrorMessage = "You must select a training module")]
+    // Must be nullable to have the default value be null, and therefore trigger required validation rule
     public Guid? TrainingModuleId { get; set; }
 
     [AllowExtensions(FileExtensions: "pdf", ErrorMessage = "You can only upload PDF files")]
@@ -55,6 +66,7 @@ public class UpsertModel : BasePageModel
     public Dictionary<string, string> StaffOptions { get; set; } = new();
     public Dictionary<Guid, string> ModuleOptions { get; set; } = new();
     public KeyValuePair<string, string> SoloStaffMember { get; set; } = new();
+    public KeyValuePair<Guid, string> SoloModule { get; set; } = new();
 
     public bool CanEditRecords { get; set; }
     public CompletionRecordCertificateDto UploadedCertificate { get; set; } = new();
@@ -63,7 +75,20 @@ public class UpsertModel : BasePageModel
     {
         await GetClasses(_mediator);
 
-        // Is this user a staff member created a record for themselves?
+        var canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+        CanEditRecords = canEditTest.Succeeded;
+
+        // Does the current user have permissons for the selected mode?
+        if (Mode == ModeOptions.FULL && !CanEditRecords)
+        {
+            // Editor mode selected without edit access
+            return RedirectToPage("Index");
+        } else if (Mode == ModeOptions.SOLOMODULE && !CanEditRecords)
+        {
+            // Editor insert mode selected without edit access
+            return RedirectToPage("/MandatoryTraining/Modules/Details", new { Id = ModuleId.Value });
+        }
+
         await SetUpForm();
 
         var staffIdClaim = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
@@ -107,22 +132,22 @@ public class UpsertModel : BasePageModel
 
     private async Task SetUpForm()
     {
-        var canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
-        CanEditRecords = canEditTest.Succeeded;
-
-        var staffIdClaim = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
         StaffOptions = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
         ModuleOptions = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
 
-        if (!CanEditRecords)
+        if (Mode == ModeOptions.SOLOSTAFF)
         {
+            var staffIdClaim = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
             SoloStaffMember = StaffOptions.FirstOrDefault(member => member.Key == staffIdClaim);
-
             StaffId = staffIdClaim;
         }
-    }
 
+        if (Mode == ModeOptions.SOLOMODULE)
+        {
+            SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == ModuleId.Value);
+            TrainingModuleId = SoloModule.Key;
+        }
+    }
 
     private async Task<FileDto> GetUploadedFile()
     {
@@ -159,16 +184,6 @@ public class UpsertModel : BasePageModel
         if (!ModelState.IsValid)
         {
             await SetUpForm();
-
-            if (!CanEditRecords)
-            {
-                if (SoloStaffMember.Key == null)
-                {
-                    // This staff member is not on the list of staff. Something has gone wrong here.
-
-                    return RedirectToPage("Index");
-                }
-            }
 
             return Page();
         }
@@ -207,6 +222,18 @@ public class UpsertModel : BasePageModel
             await _mediator.Send(command);
         }
 
+        if (Mode == ModeOptions.SOLOMODULE)
+        {
+            return RedirectToPage("/MandatoryTraining/Modules/Details", new { Id = ModuleId.Value });
+        }
+
         return RedirectToPage("Index");
+    }
+
+    public enum ModeOptions
+    {
+        FULL,
+        SOLOSTAFF,
+        SOLOMODULE
     }
 }

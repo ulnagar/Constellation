@@ -1,6 +1,7 @@
 ﻿@page "{id:Guid}"
 @using Constellation.Application.Helpers
-@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion.DetailsModel
+@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion
+@model DetailsModel
 @inject IAuthorizationService AuthorizationService
 
 <h2>Training Completion Record Details</h2>
@@ -11,7 +12,7 @@
     if (authorised.Succeeded)
     {
         <div>
-            <a asp-page="Upsert" asp-route-id="@Model.Record.Id" class="btn btn-warning">Edit</a>
+            <a asp-page="Upsert" asp-route-id="@Model.Record.Id" asp-route-mode="@UpsertModel.ModeOptions.FULL" class="btn btn-warning">Edit</a>
             <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
         </div>
     } else {

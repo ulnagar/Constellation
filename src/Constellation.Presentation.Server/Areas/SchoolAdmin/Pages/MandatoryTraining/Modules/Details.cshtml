@@ -2,6 +2,7 @@
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules.DetailsModel
 @inject IAuthorizationService AuthorizationService
 @using Constellation.Application.Features.MandatoryTraining.Models
+@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
 
 @{
     var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
@@ -75,6 +76,15 @@
 
 <hr />
 
+<h3>Completion Records</h3>
+
+@if (canEditTest.Succeeded)
+{
+    <div class="mb-3">
+        <a asp-page="/MandatoryTraining/Completion/Upsert" class="btn btn-info" asp-route-ModuleId="@Model.Module.Id" asp-route-Mode="@UpsertModel.ModeOptions.SOLOMODULE">Create New</a>
+    </div>
+}
+
 <div>
     <ul class="nav nav-pills" data-tabs="tabs" role="tablist">
         <li class="nav-item mr-1">
@@ -95,7 +105,7 @@
 
     <div class="tab-content">
         <div id="expiring" class="tab-pane active" role="tabpanel">
-            <h3>Records Expiring Soon</h3>
+            <h4>Records Expiring Soon</h4>
 
             <table class="table-striped table-hover data-table">
                 <thead>
@@ -146,7 +156,7 @@
         @foreach (var year in completionsGroupedByYear) 
         {
             <div id="Y-@year.Key" class="tab-pane" role="tabpanel">
-                <h3>Records from @year.Key</h3>
+                <h4>Records from @year.Key</h4>
 
                 <table class="table-striped table-hover data-table">
                     <thead>
