@@ -1,5 +1,6 @@
 ﻿@page
-@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion.IndexModel
+@model IndexModel
+@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion
 @inject IAuthorizationService AuthorizationService
 
 @{
@@ -9,6 +10,26 @@
 <h2>Mandatory Training Completion Records</h2>
 
 <div>
+    @{
+        var all_style = "btn-outline-secondary";
+        var recent_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case IndexModel.FilterDto.All:
+                all_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Recent:
+                recent_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Recent" class="btn @recent_style">Recent</a>
+    </div>
+
     <a asp-page="Upsert" class="btn btn-warning">Create New</a>
 </div>
 
@@ -29,21 +50,24 @@
         <tr>
             <td>
                 @{
-                    if (item.ExpiryCountdown > 31)
+                    if (item.Status == Constellation.Application.Features.MandatoryTraining.Models.CompletionRecordDto.ExpiryStatus.Active)
                     {
-                        <img src="/images/GreenLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
-                    }
-                    else if (item.ExpiryCountdown > 15)
-                    {
-                        <img src="/images/YellowLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
-                    }
-                    else if (item.ExpiryCountdown > 1)
-                    {
-                        <img src="/images/RedLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
-                    }
-                    else
-                    {
-                        <img src="/images/RedLight.png" class="status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
+                        if (item.ExpiryCountdown > 31)
+                        {
+                            <img src="/images/GreenLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                        }
+                        else if (item.ExpiryCountdown > 15)
+                        {
+                            <img src="/images/YellowLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                        }
+                        else if (item.ExpiryCountdown > 1)
+                        {
+                            <img src="/images/RedLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                        }
+                        else
+                        {
+                            <img src="/images/RedLight.png" class="status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
+                        }
                     }
                 }
             </td>
