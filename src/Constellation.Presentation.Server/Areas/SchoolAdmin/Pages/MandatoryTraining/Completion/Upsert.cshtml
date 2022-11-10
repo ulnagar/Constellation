@@ -24,17 +24,17 @@
         <div class="form-group row">
             <label asp-for="StaffId" class="col-md-2">Staff Member</label>
             <div class="col-md-5">
-                @if (Model.Mode != UpsertModel.ModeOptions.SOLOSTAFF)
+                @if (Model.Mode == UpsertModel.ModeOptions.SOLOSTAFF || Model.Mode == UpsertModel.ModeOptions.CERTUPLOAD)
+                {
+                    <input type="hidden" asp-for="StaffId" />
+                    <input type="text" class="form-control" readonly="readonly" value="@Model.SoloStaffMember.Value" />
+                } 
+                else
                 {
                     <select asp-for="StaffId" asp-items="@(new SelectList(Model.StaffOptions, "Key", "Value"))" class="form-control combo custom-select">
                         <option selected="selected" value=""> -- Please Select -- </option>
                     </select>
                     <span asp-validation-for="StaffId" class="text-danger"></span>
-                } 
-                else 
-                {
-                    <input type="hidden" asp-for="StaffId" />
-                    <input type="text" class="form-control" readonly="readonly" value="@Model.SoloStaffMember.Value" />
                 }
             </div>
         </div>
@@ -42,17 +42,16 @@
         <div class="form-group row">
             <label asp-for="TrainingModuleId" class="col-md-2">Training Module</label>
             <div class="col-md-8">
-                @if (Model.Mode != UpsertModel.ModeOptions.SOLOMODULE)
+                @if (Model.Mode == UpsertModel.ModeOptions.SOLOMODULE || Model.Mode == UpsertModel.ModeOptions.CERTUPLOAD)
+                {
+                    <input type="hidden" asp-for="TrainingModuleId" />
+                    <input type="text" class="form-control" readonly="readonly" value="@Model.SoloModule.Value" />
+                } else
                 {
                     <select asp-for="TrainingModuleId" asp-items="@(new SelectList(Model.ModuleOptions, "Key", "Value"))" class="form-control combo custom-select">
                         <option selected="selected" value=""> -- Please Select -- </option>
                     </select>
                     <span asp-validation-for="TrainingModuleId" class="text-danger"></span>
-                }
-                else
-                {
-                    <input type="hidden" asp-for="TrainingModuleId" />
-                    <input type="text" class="form-control" readonly="readonly" value="@Model.SoloModule.Value" />
                 }
             </div>
         </div>
@@ -60,8 +59,15 @@
         <div class="form-group row">
             <label asp-for="CompletedDate" class="col-md-2">Date Completed</label>
             <div class="col-md-3">
-                <input asp-for="CompletedDate" class="form-control" />
-                <span asp-validation-for="CompletedDate" class="text-danger"></span>
+                @if (Model.Mode == UpsertModel.ModeOptions.CERTUPLOAD)
+                {
+                    <input asp-for="CompletedDate" class="form-control" readonly="readonly" />
+                } 
+                else
+                {
+                    <input asp-for="CompletedDate" class="form-control" />
+                    <span asp-validation-for="CompletedDate" class="text-danger"></span>
+                }
             </div>
         </div>
 
