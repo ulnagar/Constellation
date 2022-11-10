@@ -78,6 +78,8 @@ public class UpsertModel : BasePageModel
         var canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
         CanEditRecords = canEditTest.Succeeded;
 
+        var staffIdClaim = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         // Does the current user have permissons for the selected mode?
         if (Mode == ModeOptions.FULL && !CanEditRecords)
         {
@@ -88,10 +90,6 @@ public class UpsertModel : BasePageModel
             // Editor insert mode selected without edit access
             return RedirectToPage("/MandatoryTraining/Modules/Details", new { Id = ModuleId.Value });
         }
-
-        await SetUpForm();
-
-        var staffIdClaim = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         if (Id.HasValue)
         {
@@ -108,25 +106,23 @@ public class UpsertModel : BasePageModel
 
             UploadedCertificate = await _mediator.Send(new GetUploadedTrainingCertificateMetadataQuery { LinkType = StoredFile.TrainingCertificate, LinkId = Id.Value.ToString() });
 
+
             if (!CanEditRecords && StaffId != staffIdClaim)
             {
                 // User is not the staff member listed on the record and does not have permission to edit records
                 return RedirectToPage("Index");
             }
         }
-        else if (!CanEditRecords)
+
+        await SetUpForm();
+
+        if (!Id.HasValue && !CanEditRecords && SoloStaffMember.Key == null)
         {
-            if (SoloStaffMember.Key == null)
-            {
-                // This staff member is not on the list of staff. Something has gone wrong here.
+            // This staff member is not on the list of staff. Something has gone wrong here.
 
-                return RedirectToPage("Index");
-            }
-
-            StaffId = staffIdClaim;
+            return RedirectToPage("Index");
         }
 
-        
         return Page();
     }
 
@@ -135,6 +131,7 @@ public class UpsertModel : BasePageModel
         StaffOptions = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
         ModuleOptions = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
 
+        // Insert only mode allowing staff to create new records for themselves only
         if (Mode == ModeOptions.SOLOSTAFF)
         {
             var staffIdClaim = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
@@ -142,10 +139,18 @@ public class UpsertModel : BasePageModel
             StaffId = staffIdClaim;
         }
 
+        // Insert only mode allowing editors to pre-select the module
         if (Mode == ModeOptions.SOLOMODULE)
         {
             SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == ModuleId.Value);
             TrainingModuleId = SoloModule.Key;
+        }
+
+        // Edit only mode allowing staff to upload certificate for existing records
+        if (Mode == ModeOptions.CERTUPLOAD)
+        {
+            SoloStaffMember = StaffOptions.FirstOrDefault(member => member.Key == StaffId);
+            SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == TrainingModuleId.Value);
         }
     }
 
@@ -234,6 +239,7 @@ public class UpsertModel : BasePageModel
     {
         FULL,
         SOLOSTAFF,
-        SOLOMODULE
+        SOLOMODULE,
+        CERTUPLOAD
     }
 }

@@ -16,8 +16,9 @@
             <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
         </div>
     } else {
-        <div class="row">
-            <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+        <div>
+            <a asp-page="Upsert" asp-route-id="@Model.Record.Id" asp-route-mode="@UpsertModel.ModeOptions.CERTUPLOAD" class="btn btn-warning">Upload Certificate</a>
+            <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
         </div>
     }
 }
