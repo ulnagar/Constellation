@@ -38,6 +38,17 @@ public class DetailsModel : BasePageModel
 
         Module = await _mediator.Send(new GetModuleDetailsQuery { Id = Id });
 
+        foreach (var record in Module.Completions)
+        {
+            record.ExpiryCountdown = record.CalculateExpiry();
+            record.Status = CompletionRecordDto.ExpiryStatus.Active;
+
+            if (Module.Completions.Any(s => s.ModuleId == record.ModuleId && s.StaffId == record.StaffId && s.CompletedDate > record.CompletedDate))
+            {
+                record.Status = CompletionRecordDto.ExpiryStatus.Superceded;
+            }
+        }
+
         //TODO: Check if return value is null, redirect and display error
     }
 
