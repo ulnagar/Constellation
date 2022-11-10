@@ -7,6 +7,7 @@ using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -210,12 +211,27 @@ namespace Constellation.Infrastructure.Services
                     completion.GetProperty("StaffFirstName"),
                     completion.GetProperty("StaffLastName"),
                     completion.GetProperty("StaffFaculty"),
+                    completion.GetProperty("ExpiryCountdown"),
                     completion.GetProperty("CompletedDate")
                 };
             });
 
-            workSheet.Cells[4, 5, workSheet.Dimension.Rows, 5].Style.Numberformat.Format = "dd/MM/yyyy";
+            workSheet.Cells[4, 6, workSheet.Dimension.Rows, 6].Style.Numberformat.Format = "dd/MM/yyyy";
             workSheet.Cells[4, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
+
+            // Highlight overdue entries
+            var dataRange = new ExcelAddress(5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
+
+            var formatOverdue = workSheet.ConditionalFormatting.AddExpression(dataRange);
+            formatOverdue.Formula = "=$E5 < 1";
+            formatOverdue.Style.Fill.BackgroundColor.Color = Color.Red;
+            formatOverdue.Style.Font.Color.Color = Color.White;
+            formatOverdue.StopIfTrue = true;
+
+            var formatSoonExpire = workSheet.ConditionalFormatting.AddExpression(dataRange);
+            formatSoonExpire.Formula = "=$E5 < 14";
+            formatSoonExpire.Style.Fill.BackgroundColor.Color = Color.Yellow;
+            formatSoonExpire.StopIfTrue = true;
 
             var memoryStream = new MemoryStream();
             await excel.SaveAsAsync(memoryStream);

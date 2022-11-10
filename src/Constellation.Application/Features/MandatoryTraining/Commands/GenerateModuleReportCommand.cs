@@ -6,7 +6,9 @@ using Constellation.Application.Interfaces.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 using System.Net.Mime;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,6 +38,19 @@ public class GenerateModuleReportCommandHandler : IRequestHandler<GenerateModule
         var data = await _context.MandatoryTraining.Modules
             .ProjectTo<ModuleDetailsDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(module => module.Id == request.Id, cancellationToken);
+
+        foreach (var record in data.Completions)
+        {
+            record.ExpiryCountdown = record.CalculateExpiry();
+            record.Status = CompletionRecordDto.ExpiryStatus.Active;
+
+            if (data.Completions.Any(s => s.ModuleId == record.ModuleId && s.StaffId == record.StaffId && s.CompletedDate > record.CompletedDate))
+            {
+                record.Status = CompletionRecordDto.ExpiryStatus.Superceded;
+            }
+        }
+
+        data.Completions = data.Completions.Where(record => record.Status != CompletionRecordDto.ExpiryStatus.Superceded).OrderBy(record => record.StaffLastName).ToList();
 
         // Generate CSV/XLSX file
         var fileData = await _excelService.CreateTrainingModuleReportFile(data);

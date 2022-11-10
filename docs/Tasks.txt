@@ -3,6 +3,18 @@ CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 PRESENTATION.SERVER
+	Upsert Completion:
+		Prevent adding entry that is beyond today (i.e. do not create entry in the future)
+		Order the dropdowns for staff and module
+
+	Details Module:
+		Add link to create new completion
+		Update report to include date of export and frozen pane from row 4
+		Update report to include entry for all current staff
+			and include column that indicates whether they are current or remove non-current staff?
+
+	Update all buttons in tables to hide unless hovered
+
 	Test report export for Training Modules
 
 	Implement generic permissions as per https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-6.0#use-a-handler-for-multiple-requirements
@@ -12,6 +24,8 @@ PRESENTATION.SERVER
 
 	Bulk download report and certificates from module view for permitted users only
 	Report should be most recent completion of each module only, and should include staff members who have not completed the module as well.
+
+	Create a db migration to convert all StaffIds to EmpoyeeId values using https://stackoverflow.com/a/31919849
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
