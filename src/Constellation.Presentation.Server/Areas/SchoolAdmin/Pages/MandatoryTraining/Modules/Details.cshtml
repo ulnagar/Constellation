@@ -72,49 +72,61 @@
 <hr />
 
 <div>
-    <ul class="nav nav-pills" data-tabs="tabs">
-        @foreach (var year in completionsGroupedByYear)
-        {
-            <li class="nav-item">
-                <a class="nav-link active" href="#@year.Key" data-toggle="tab">
-                    @year.Key
-                </a>
-            </li>
+    <ul class="nav nav-pills" data-tabs="tabs" role="tablist">
+        @{
+            firstIteration = true;
+
+            foreach (var year in completionsGroupedByYear)
+            {
+                <li class="nav-item mr-1">
+                    <a class="nav-link @(firstIteration ? "active" : "")" href="#Y-@year.Key" data-toggle="pill">
+                        @year.Key
+                    </a>
+                </li>
+
+                firstIteration = false;
+            }
         }
     </ul>
 
     <div class="tab-content">
-        @foreach (var year in completionsGroupedByYear) 
-        {
-            <div id="@year.Key" class="tab-pane @(firstIteration ? "active" : "")">
-                <h3>Records from @year.Key</h3>
+        @{
+            firstIteration = true;
 
-                <table class="table-striped table-hover data-table">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Name</th>
-                            <th>Faculty</th>
-                            <th>Completed Date</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in year.OrderBy(record => record.StaffLastName))
-                        {
+            foreach (var year in completionsGroupedByYear) 
+            {
+                <div id="Y-@year.Key" class="tab-pane @(firstIteration ? "active" : "")" role="tabpanel">
+                    <h3>Records from @year.Key</h3>
+
+                    <table class="table-striped table-hover data-table">
+                        <thead>
                             <tr>
-                                <td></td>
-                                <td>@item.StaffFirstName @item.StaffLastName</td>
-                                <td>@item.StaffFaculty</td>
-                                <td>@item.CompletedDate.ToString("dd/MM/yyyy")</td>
-                                <td>
-                                    <a asp-page="/MandatoryTraining/Completion/Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
-                                </td>
+                                <th></th>
+                                <th>Name</th>
+                                <th>Faculty</th>
+                                <th>Completed Date</th>
+                                <th></th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in year.OrderBy(record => record.StaffLastName))
+                            {
+                                <tr>
+                                    <td></td>
+                                    <td>@item.StaffFirstName @item.StaffLastName</td>
+                                    <td>@item.StaffFaculty</td>
+                                    <td>@item.CompletedDate.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <a asp-page="/MandatoryTraining/Completion/Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                firstIteration = false;
+            }
         }
     </div>
 </div>
