@@ -12,22 +12,22 @@
 <div>
     @{
         var all_style = "btn-outline-secondary";
-        var recent_style = all_style;
+        var current_style = all_style;
 
         switch (Model.Filter)
         {
             case IndexModel.FilterDto.All:
                 all_style = "btn-primary";
                 break;
-            case IndexModel.FilterDto.Recent:
-                recent_style = "btn-primary";
+            case IndexModel.FilterDto.Current:
+                current_style = "btn-primary";
                 break;
         }
     }
 
     <div class="btn-group">
         <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
-        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Recent" class="btn @recent_style">Recent</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Current" class="btn @current_style">Current</a>
     </div>
 
     <a asp-page="Upsert" class="btn btn-warning">Create New</a>

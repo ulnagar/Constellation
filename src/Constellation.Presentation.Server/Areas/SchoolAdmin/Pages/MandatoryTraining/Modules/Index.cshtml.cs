@@ -6,6 +6,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -20,11 +21,30 @@ public class IndexModel : BasePageModel
     }
 
     public List<ModuleSummaryDto> Modules { get; set; } = new();
+    [BindProperty(SupportsGet = true)]
+    public FilterDto Filter { get; set; }
 
     public async Task OnGet()
     {
         await GetClasses(_mediator);
 
         Modules = await _mediator.Send(new GetListOfModuleSummaryQuery());
+
+        Modules = Filter switch
+        {
+            FilterDto.All => Modules,
+            FilterDto.Active => Modules.Where(module => module.IsActive).ToList(),
+            FilterDto.Inactive => Modules.Where(module => !module.IsActive).ToList(),
+            _ => Modules
+        };
+
+        Modules = Modules.OrderBy(module => module.Name).ToList();
+    }
+
+    public enum FilterDto
+    {
+        All,
+        Active,
+        Inactive
     }
 }

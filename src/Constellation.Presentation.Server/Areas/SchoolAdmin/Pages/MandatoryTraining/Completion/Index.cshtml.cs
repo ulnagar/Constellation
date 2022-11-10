@@ -52,15 +52,17 @@ public class IndexModel : BasePageModel
 
         CompletionRecords = Filter switch
         {
-            FilterDto.Recent => CompletionRecords.Where(record => record.Status == CompletionRecordDto.ExpiryStatus.Active).ToList(),
+            FilterDto.Current => CompletionRecords.Where(record => record.Status == CompletionRecordDto.ExpiryStatus.Active).ToList(),
             FilterDto.All => CompletionRecords,
             _ => CompletionRecords
         };
+
+        CompletionRecords = CompletionRecords.OrderByDescending(record => record.CompletedDate).ThenBy(record => record.StaffLastName).ToList();
     }
 
     public enum FilterDto
     {
         All,
-        Recent
+        Current
     }
 }
