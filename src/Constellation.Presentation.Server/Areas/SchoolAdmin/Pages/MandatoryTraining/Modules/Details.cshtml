@@ -1,6 +1,7 @@
 ﻿@page "{Id:Guid}"
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules.DetailsModel
 @inject IAuthorizationService AuthorizationService
+@using Constellation.Application.Features.MandatoryTraining.Models
 
 @{
     var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
@@ -10,7 +11,10 @@
         .GroupBy(record => record.CompletedDate.Year)
         .OrderByDescending(group => group.Key);
 
-    var firstIteration = true;
+    var completionsExpiringSoon = Model.Module.Completions
+        .Where(record =>
+            record.ExpiryCountdown < 30 &&
+            record.Status == CompletionRecordDto.ExpiryStatus.Active);
 }
 
 <h2>Training Module Details</h2>
@@ -73,82 +77,125 @@
 
 <div>
     <ul class="nav nav-pills" data-tabs="tabs" role="tablist">
-        @{
-            firstIteration = true;
+        <li class="nav-item mr-1">
+            <a class="nav-link active" href="#expiring" data-toggle="pill">
+                Expiring Soon <span class="badge badge-light">@completionsExpiringSoon.Count()</span>
+            </a>
+        </li>
 
-            foreach (var year in completionsGroupedByYear)
-            {
-                <li class="nav-item mr-1">
-                    <a class="nav-link @(firstIteration ? "active" : "")" href="#Y-@year.Key" data-toggle="pill">
-                        @year.Key
-                    </a>
-                </li>
-
-                firstIteration = false;
-            }
+        @foreach (var year in completionsGroupedByYear)
+        {
+            <li class="nav-item mr-1">
+                <a class="nav-link" href="#Y-@year.Key" data-toggle="pill">
+                    @year.Key
+                </a>
+            </li>
         }
     </ul>
 
     <div class="tab-content">
-        @{
-            firstIteration = true;
+        <div id="expiring" class="tab-pane active" role="tabpanel">
+            <h3>Records Expiring Soon</h3>
 
-            foreach (var year in completionsGroupedByYear) 
-            {
-                <div id="Y-@year.Key" class="tab-pane @(firstIteration ? "active" : "")" role="tabpanel">
-                    <h3>Records from @year.Key</h3>
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Faculty</th>
+                        <th>Completed Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in completionsExpiringSoon)
+                    {
+                        <tr>
+                            <td>
+                                @{
+                                    if (item.ExpiryCountdown > 31)
+                                    {
+                                        <img src="/images/GreenLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                    }
+                                    else if (item.ExpiryCountdown > 15)
+                                    {
+                                        <img src="/images/YellowLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                    }
+                                    else if (item.ExpiryCountdown > 1)
+                                    {
+                                        <img src="/images/RedLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                    }
+                                    else
+                                    {
+                                        <img src="/images/RedLight.png" class="status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
+                                    }
+                                }
+                            </td>
+                            <td>@item.StaffFirstName @item.StaffLastName</td>
+                            <td>@item.StaffFaculty</td>
+                            <td>@item.CompletedDate.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <a asp-page="/MandatoryTraining/Completion/Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
-                    <table class="table-striped table-hover data-table">
-                        <thead>
+        @foreach (var year in completionsGroupedByYear) 
+        {
+            <div id="Y-@year.Key" class="tab-pane" role="tabpanel">
+                <h3>Records from @year.Key</h3>
+
+                <table class="table-striped table-hover data-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th>Faculty</th>
+                            <th>Completed Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in year)
+                        {
                             <tr>
-                                <th></th>
-                                <th>Name</th>
-                                <th>Faculty</th>
-                                <th>Completed Date</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in year.OrderBy(record => record.StaffLastName))
-                            {
-                                <tr>
-                                    <td>
-                                        @{
-                                            if (item.Status == Constellation.Application.Features.MandatoryTraining.Models.CompletionRecordDto.ExpiryStatus.Active)
+                                <td>
+                                    @{
+                                        if (item.Status == CompletionRecordDto.ExpiryStatus.Active)
+                                        {
+                                            if (item.ExpiryCountdown > 31)
                                             {
-                                                if (item.ExpiryCountdown > 31)
-                                                {
-                                                    <img src="/images/GreenLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
-                                                }
-                                                else if (item.ExpiryCountdown > 15)
-                                                {
-                                                    <img src="/images/YellowLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
-                                                }
-                                                else if (item.ExpiryCountdown > 1)
-                                                {
-                                                    <img src="/images/RedLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
-                                                }
-                                                else
-                                                {
-                                                    <img src="/images/RedLight.png" class="status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
-                                                }
+                                                <img src="/images/GreenLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                            }
+                                            else if (item.ExpiryCountdown > 15)
+                                            {
+                                                <img src="/images/YellowLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                            }
+                                            else if (item.ExpiryCountdown > 1)
+                                            {
+                                                <img src="/images/RedLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                            }
+                                            else
+                                            {
+                                                <img src="/images/RedLight.png" class="status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
                                             }
                                         }
-                                    </td>
-                                    <td>@item.StaffFirstName @item.StaffLastName</td>
-                                    <td>@item.StaffFaculty</td>
-                                    <td>@item.CompletedDate.ToString("dd/MM/yyyy")</td>
-                                    <td>
-                                        <a asp-page="/MandatoryTraining/Completion/Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-
-                firstIteration = false;
-            }
+                                    }
+                                </td>
+                                <td>@item.StaffFirstName @item.StaffLastName</td>
+                                <td>@item.StaffFaculty</td>
+                                <td>@item.CompletedDate.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <a asp-page="/MandatoryTraining/Completion/Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         }
     </div>
 </div>
