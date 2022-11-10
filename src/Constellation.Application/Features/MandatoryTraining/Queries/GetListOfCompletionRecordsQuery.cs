@@ -11,8 +11,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-public record GetListOfCompletionRecordsQuery(
-    string StaffId) : IRequest<List<CompletionRecordDto>> { }
+public record GetListOfCompletionRecordsQuery : IRequest<List<CompletionRecordDto>> 
+{ 
+    public string StaffId { get; init; }
+}
 
 public class GetListOfCompletionRecordsQueryHandler : IRequestHandler<GetListOfCompletionRecordsQuery, List<CompletionRecordDto>>
 {

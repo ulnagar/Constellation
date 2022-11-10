@@ -3,13 +3,7 @@ CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 PRESENTATION.SERVER
-	Completion Records view has status lights for when the training is due to be repeated, 
-	however it does not take into account whether there is a subsequent record for that 
-	staff member for that particular module. Need to be able to detect when an overriding 
-	entry has appeared and hide the status of the superceded lines.
-
 	Test report export for Training Modules
-	- Add to nav menu
 
 	Implement generic permissions as per https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-6.0#use-a-handler-for-multiple-requirements
 	Permission Structure:
