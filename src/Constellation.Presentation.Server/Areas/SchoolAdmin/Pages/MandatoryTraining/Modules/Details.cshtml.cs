@@ -49,6 +49,11 @@ public class DetailsModel : BasePageModel
             }
         }
 
+        Module.Completions = Module.Completions
+            .OrderByDescending(record => record.CompletedDate)
+            .ThenBy(record => record.StaffLastName)
+            .ToList();
+
         //TODO: Check if return value is null, redirect and display error
     }
 
