@@ -70,12 +70,12 @@
             <td>@item.Name</td>
             <td>@item.Expiry</td>
             <td>
-                <a href="@item.Url" target="_blank" class="btn btn-sm btn-success">Launch</a>
+                <a href="@item.Url" target="_blank" class="btn btn-sm btn-success btn-show-hover">Launch</a>
             </td>
             <td>
                 @if (canViewDetailsTest.Succeeded)
                 {
-                    <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
+                    <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
                 }
             </td>
         </tr>

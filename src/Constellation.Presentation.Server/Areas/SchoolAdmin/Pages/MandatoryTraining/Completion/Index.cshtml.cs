@@ -54,6 +54,7 @@ public class IndexModel : BasePageModel
         {
             FilterDto.Current => CompletionRecords.Where(record => record.Status == CompletionRecordDto.ExpiryStatus.Active).ToList(),
             FilterDto.All => CompletionRecords,
+            FilterDto.Expiring => CompletionRecords.Where(record => record.Status == CompletionRecordDto.ExpiryStatus.Active && record.ExpiryCountdown < 31).ToList(),
             _ => CompletionRecords
         };
 
@@ -63,6 +64,7 @@ public class IndexModel : BasePageModel
     public enum FilterDto
     {
         All,
-        Current
+        Current,
+        Expiring
     }
 }

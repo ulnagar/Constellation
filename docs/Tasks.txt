@@ -3,9 +3,6 @@ CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 PRESENTATION.SERVER
-	Completion Records Index:
-		Add Expiring Soon filter
-
 	Update all buttons in tables to hide unless hovered
 
 	Test report export for Training Modules
