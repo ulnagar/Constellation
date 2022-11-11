@@ -197,10 +197,11 @@ namespace Constellation.Infrastructure.Services
             var nameDetail = workSheet.Cells[1, 1].RichText.Add(data.Name);
             nameDetail.Bold = true;
             nameDetail.Size = 16;
+            
+            workSheet.Cells[2, 1].Value = $"Exported at {DateTime.Now:F}";
+            workSheet.Cells[3, 1].Value = $"Link to module: {new Uri(data.Url)}";
 
-            workSheet.Cells[2, 1].Value = new Uri(data.Url);
-
-            workSheet.Cells[4, 1].LoadFromCollection(data.Completions, opt =>
+            workSheet.Cells[5, 1].LoadFromCollection(data.Completions, opt =>
             {
                 opt.PrintHeaders = true;
                 opt.TableStyle = OfficeOpenXml.Table.TableStyles.Light1;
@@ -216,11 +217,11 @@ namespace Constellation.Infrastructure.Services
                 };
             });
 
-            workSheet.Cells[4, 6, workSheet.Dimension.Rows, 6].Style.Numberformat.Format = "dd/MM/yyyy";
-            workSheet.Cells[4, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
+            workSheet.Cells[5, 6, workSheet.Dimension.Rows, 6].Style.Numberformat.Format = "dd/MM/yyyy";
+            workSheet.Cells[5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
             // Highlight overdue entries
-            var dataRange = new ExcelAddress(5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
+            var dataRange = new ExcelAddress(6, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
 
             var formatOverdue = workSheet.ConditionalFormatting.AddExpression(dataRange);
             formatOverdue.Formula = "=$E5 < 1";
@@ -232,6 +233,9 @@ namespace Constellation.Infrastructure.Services
             formatSoonExpire.Formula = "=$E5 < 14";
             formatSoonExpire.Style.Fill.BackgroundColor.Color = Color.Yellow;
             formatSoonExpire.StopIfTrue = true;
+
+            // Freeze top rows
+            workSheet.View.FreezePanes(6, 1);
 
             var memoryStream = new MemoryStream();
             await excel.SaveAsAsync(memoryStream);
