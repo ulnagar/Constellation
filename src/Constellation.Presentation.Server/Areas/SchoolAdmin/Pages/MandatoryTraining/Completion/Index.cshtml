@@ -13,6 +13,7 @@
     @{
         var all_style = "btn-outline-secondary";
         var current_style = all_style;
+        var expiring_style = all_style;
 
         switch (Model.Filter)
         {
@@ -22,12 +23,16 @@
             case IndexModel.FilterDto.Current:
                 current_style = "btn-primary";
                 break;
+            case IndexModel.FilterDto.Expiring:
+                expiring_style = "btn-primary";
+                break;
         }
     }
 
     <div class="btn-group">
         <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
         <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Current" class="btn @current_style">Current</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Expiring" class="btn @expiring_style">Expiring Soon</a>
     </div>
 
     @if (isEditorTest.Succeeded)
@@ -91,7 +96,7 @@
 
                     if (canViewDetailsTest.Succeeded)
                     {
-                            <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">More Details...</a>
+                            <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
                     }
                 }
             </td>
