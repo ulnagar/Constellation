@@ -3,10 +3,7 @@ CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 PRESENTATION.SERVER
-	Module Details Module:
-		Update report to include date of export and frozen pane from row 4
-		Update report to include entry for all current staff
-			and include column that indicates whether they are current or remove non-current staff?
+	Add status icon legend popup to web pages, and include color legend in export
 
 	Completion Records Index:
 		Add Expiring Soon filter

@@ -3,7 +3,9 @@ using Constellation.Application.Extensions;
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Infrastructure.DependencyInjection;
+using LinqKit;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -217,20 +219,27 @@ namespace Constellation.Infrastructure.Services
                 };
             });
 
+            workSheet.Cells[6, 6, workSheet.Dimension.Rows, 6].ForEach(range => UpdateDefaultDateDataForRange(range));
             workSheet.Cells[5, 6, workSheet.Dimension.Rows, 6].Style.Numberformat.Format = "dd/MM/yyyy";
             workSheet.Cells[5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
             // Highlight overdue entries
             var dataRange = new ExcelAddress(6, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
 
+            var formatNeverCompleted = workSheet.ConditionalFormatting.AddExpression(dataRange);
+            formatNeverCompleted.Formula = "=$E6 = \"\"";
+            formatNeverCompleted.Style.Fill.BackgroundColor.Color = Color.Gray;
+            formatNeverCompleted.Style.Font.Color.Color = Color.White;
+            formatNeverCompleted.StopIfTrue = true;
+
             var formatOverdue = workSheet.ConditionalFormatting.AddExpression(dataRange);
-            formatOverdue.Formula = "=$E5 < 1";
+            formatOverdue.Formula = "=$E6 < 1";
             formatOverdue.Style.Fill.BackgroundColor.Color = Color.Red;
             formatOverdue.Style.Font.Color.Color = Color.White;
             formatOverdue.StopIfTrue = true;
 
             var formatSoonExpire = workSheet.ConditionalFormatting.AddExpression(dataRange);
-            formatSoonExpire.Formula = "=$E5 < 14";
+            formatSoonExpire.Formula = "=$E6 < 14";
             formatSoonExpire.Style.Fill.BackgroundColor.Color = Color.Yellow;
             formatSoonExpire.StopIfTrue = true;
 
@@ -242,6 +251,18 @@ namespace Constellation.Infrastructure.Services
             memoryStream.Position = 0;
 
             return memoryStream;
+        }
+
+        private void UpdateDefaultDateDataForRange(ExcelRangeBase range)
+        {
+            for (int r = 0; r < range.Rows; r++)
+            {
+                if (range.GetCellValue<DateTime>(r, 0) == DateTime.MinValue)
+                {
+                    range.SetCellValue(r, -1, string.Empty);
+                    range.SetCellValue(r, 0, string.Empty);
+                }
+            }
         }
 
         private class StudentRecord

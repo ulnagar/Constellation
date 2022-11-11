@@ -50,7 +50,32 @@ public class GenerateModuleReportCommandHandler : IRequestHandler<GenerateModule
             }
         }
 
+        // Remove superceded completion records
         data.Completions = data.Completions.Where(record => record.Status != CompletionRecordDto.ExpiryStatus.Superceded).OrderBy(record => record.StaffLastName).ToList();
+
+        var currentStaff = await _context.Staff
+            .AsNoTracking()
+            .Where(staff => !staff.IsDeleted)
+            .ToListAsync(cancellationToken);
+
+        foreach (var staff in currentStaff)
+        {
+            if (data.Completions.Any(record => record.StaffId == staff.StaffId))
+                continue;
+
+            var record = new CompletionRecordDto
+            {
+                StaffId = staff.StaffId,
+                StaffFirstName = staff.FirstName,
+                StaffLastName = staff.LastName,
+                StaffFaculty = staff.Faculty.ToString(),
+                CompletedDate = DateTime.MinValue
+            };
+
+            data.Completions.Add(record);
+        }
+
+        data.Completions = data.Completions.OrderBy(record => record.StaffLastName).ToList();
 
         // Generate CSV/XLSX file
         var fileData = await _excelService.CreateTrainingModuleReportFile(data);
