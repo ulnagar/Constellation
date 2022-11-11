@@ -97,4 +97,6 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions()
 app.MapRazorPages();
 app.MapControllers();
 
+app.MapControllerRoute(name: "areas", pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
 app.Run();
