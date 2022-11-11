@@ -38,7 +38,11 @@
     {
         <a asp-page="Upsert" class="btn btn-warning" asp-route-Mode="@UpsertModel.ModeOptions.SOLOSTAFF">Create New</a>
     }
+
+    <button class="btn btn-secondary" data-toggle="modal" data-target="#legend">View Legend</button>
 </div>
+
+<partial name="_StatusIconModalPartial" />
 
 <hr />
 
@@ -61,19 +65,19 @@
                     {
                         if (item.ExpiryCountdown > 31)
                         {
-                            <img src="/images/GreenLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                            <img src="/images/GreenLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
                         }
                         else if (item.ExpiryCountdown > 15)
                         {
-                            <img src="/images/YellowLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                            <img src="/images/YellowLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
                         }
                         else if (item.ExpiryCountdown > 1)
                         {
-                            <img src="/images/RedLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                            <img src="/images/RedLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
                         }
                         else
                         {
-                            <img src="/images/RedLight.png" class="status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
+                            <img src="/images/RedLight.png" class="training status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
                         }
                     }
                 }
