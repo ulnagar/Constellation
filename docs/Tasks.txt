@@ -3,16 +3,14 @@ CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 PRESENTATION.SERVER
-	Upsert Completion:
-		Prevent adding entry that is beyond today (i.e. do not create entry in the future)
-		Order the dropdowns for staff and module
-		Enable edit mode for staff to only upload certificate
-
 	Details Module:
 		Add link to create new completion
 		Update report to include date of export and frozen pane from row 4
 		Update report to include entry for all current staff
 			and include column that indicates whether they are current or remove non-current staff?
+
+	Completion Records Index:
+		Add Expiring Soon filter
 
 	Update all buttons in tables to hide unless hovered
 
