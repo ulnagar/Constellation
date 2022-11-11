@@ -254,3 +254,19 @@ tr.group:hover {
 tr.cancelled-True {
     text-decoration: line-through;
 }
+
+/* Mandatory Training Status Icons */
+img.training.status-icon {
+    width: 35px;
+    height: 35px;
+}
+
+img.training.status-icon.blink {
+    animation: blink-animation 1s steps(5, start) infinite;
+}
+
+@keyframes blink-animation {
+    to {
+        visibility: hidden;
+    }
+}

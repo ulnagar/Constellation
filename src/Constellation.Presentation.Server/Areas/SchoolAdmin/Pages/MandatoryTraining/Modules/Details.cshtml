@@ -78,12 +78,15 @@
 
 <h3>Completion Records</h3>
 
-@if (canEditTest.Succeeded)
-{
-    <div class="mb-3">
+<div class="mb-3">
+    @if (canEditTest.Succeeded)
+    {
         <a asp-page="/MandatoryTraining/Completion/Upsert" class="btn btn-info" asp-route-ModuleId="@Model.Module.Id" asp-route-Mode="@UpsertModel.ModeOptions.SOLOMODULE">Create New</a>
-    </div>
-}
+    }
+    <button class="btn btn-secondary" data-toggle="modal" data-target="#legend">View Legend</button>
+</div>
+
+<partial name="_StatusIconModalPartial" />
 
 <div>
     <ul class="nav nav-pills" data-tabs="tabs" role="tablist">
@@ -125,19 +128,19 @@
                                 @{
                                     if (item.ExpiryCountdown > 31)
                                     {
-                                        <img src="/images/GreenLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                        <img src="/images/GreenLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
                                     }
                                     else if (item.ExpiryCountdown > 15)
                                     {
-                                        <img src="/images/YellowLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                        <img src="/images/YellowLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
                                     }
                                     else if (item.ExpiryCountdown > 1)
                                     {
-                                        <img src="/images/RedLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                        <img src="/images/RedLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
                                     }
                                     else
                                     {
-                                        <img src="/images/RedLight.png" class="status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
+                                        <img src="/images/RedLight.png" class="training status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
                                     }
                                 }
                             </td>
@@ -178,19 +181,19 @@
                                         {
                                             if (item.ExpiryCountdown > 31)
                                             {
-                                                <img src="/images/GreenLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                                <img src="/images/GreenLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
                                             }
                                             else if (item.ExpiryCountdown > 15)
                                             {
-                                                <img src="/images/YellowLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                                <img src="/images/YellowLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
                                             }
                                             else if (item.ExpiryCountdown > 1)
                                             {
-                                                <img src="/images/RedLight.png" class="status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                                <img src="/images/RedLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
                                             }
                                             else
                                             {
-                                                <img src="/images/RedLight.png" class="status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
+                                                <img src="/images/RedLight.png" class="training status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
                                             }
                                         }
                                     }
