@@ -52,6 +52,7 @@ public class UpsertModel : BasePageModel
     public string StaffId { get; set; }
 
     [BindProperty, DataType(DataType.Date)]
+    [NotFutureDate]
     public DateTime CompletedDate { get; set; } = DateTime.Today;
 
     [BindProperty]

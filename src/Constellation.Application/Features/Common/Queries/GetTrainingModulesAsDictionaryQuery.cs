@@ -26,6 +26,7 @@ public class GetTrainingModulesAsDictionaryQueryHandler : IRequestHandler<GetTra
 	{
 		return await _context.MandatoryTraining.Modules
 			.Where(module => string.IsNullOrWhiteSpace(module.DeletedBy))
+			.OrderBy(module => module.Name)
 			.ToDictionaryAsync(module => module.Id, module => module.Name, cancellationToken);
 	}
 }
