@@ -3,18 +3,13 @@ CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 PRESENTATION.SERVER
-	Update all buttons in tables to hide unless hovered
-
-	Test report export for Training Modules
-
 	Implement generic permissions as per https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-6.0#use-a-handler-for-multiple-requirements
 	Permission Structure:
 	 SchoolContact = Portal.School.User
 	 Parent = Portal.Parent.User
 
 	Bulk download report and certificates from module view for permitted users only
-	Report should be most recent completion of each module only, and should include staff members who have not completed the module as well.
-
+	
 	Create a db migration to convert all StaffIds to EmpoyeeId values using https://stackoverflow.com/a/31919849
 
 ~~~~~~~~~~~~~~~~~~~~~~~~

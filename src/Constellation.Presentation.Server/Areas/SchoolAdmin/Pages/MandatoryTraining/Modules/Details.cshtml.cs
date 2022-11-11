@@ -10,6 +10,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Net.Mime;
 using System.Threading.Tasks;
 
 [Authorize(Policy = AuthPolicies.CanViewTrainingModuleContentDetails)]
@@ -66,6 +67,19 @@ public class DetailsModel : BasePageModel
             return Page();
 
         var report = await _mediator.Send(new GenerateModuleReportCommand { Id = Id });
+
+        return File(report.FileData, report.FileType, report.FileName);
+    }
+
+    public async Task<IActionResult> OnGetDownloadReportWithCertificates()
+    {
+        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
+
+        //TODO: Show error explaining why this did not work!
+        if (!isAuthorised.Succeeded)
+            return Page();
+
+        var report = await _mediator.Send(new GenerateModuleReportWithCertificatesCommand { Id = Id });
 
         return File(report.FileData, report.FileType, report.FileName);
     }

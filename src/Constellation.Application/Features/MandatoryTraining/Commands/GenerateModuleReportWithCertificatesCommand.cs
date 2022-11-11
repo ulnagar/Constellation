@@ -1,37 +1,45 @@
-﻿using AutoMapper;
+﻿namespace Constellation.Application.Features.MandatoryTraining.Commands;
+
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Application.Features.MandatoryTraining.Commands;
-
-public record GenerateModuleReportCommand : IRequest<ModuleReportDto>
+public record GenerateModuleReportWithCertificatesCommand : IRequest<ModuleReportDto>
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 }
 
-public class GenerateModuleReportCommandHandler : IRequestHandler<GenerateModuleReportCommand, ModuleReportDto>
+public class GenerateModuleReportWithCertificatesCommandHandler : IRequestHandler<GenerateModuleReportWithCertificatesCommand, ModuleReportDto>
 {
     private readonly IAppDbContext _context;
     private readonly IMapper _mapper;
     private readonly IExcelService _excelService;
 
-    public GenerateModuleReportCommandHandler(IAppDbContext context, IMapper mapper, IExcelService excelService)
+    public GenerateModuleReportWithCertificatesCommandHandler(IAppDbContext context, IMapper mapper,
+        IExcelService excelService)
     {
         _context = context;
         _mapper = mapper;
         _excelService = excelService;
     }
 
-    public async Task<ModuleReportDto> Handle(GenerateModuleReportCommand request, CancellationToken cancellationToken)
+    public async Task<ModuleReportDto> Handle(GenerateModuleReportWithCertificatesCommand request, CancellationToken cancellationToken)
     {
+        var fileList = new Dictionary<string, byte[]>();
+
         // Get info from database
         var data = await _context.MandatoryTraining.Modules
             .ProjectTo<ModuleDetailsDto>(_mapper.ConfigurationProvider)
@@ -78,15 +86,37 @@ public class GenerateModuleReportCommandHandler : IRequestHandler<GenerateModule
         // Generate CSV/XLSX file
         var fileData = await _excelService.CreateTrainingModuleReportFile(data);
 
-        // Wrap data in return object
-        var reportDto = new ModuleReportDto
+        fileList.Add($"Mandatory Training Report - {data.Name}.xlsx", fileData.ToArray());
+
+        var certificates = await _context.StoredFiles
+            .AsNoTracking()
+            .Where(storedFile => storedFile.LinkType == StoredFile.TrainingCertificate && data.Completions.Select(record => record.Id.ToString()).ToList().Contains(storedFile.LinkId))
+            .ToListAsync(cancellationToken);
+
+        foreach (var certificate in certificates)
         {
-            FileData = fileData.ToArray(),
-            FileName = $"Mandatory Training Report - {data.Name}.xlsx",
-            FileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            fileList.Add(certificate.Name, certificate.FileData);
+        }
+
+        // Create ZIP file
+        using var memoryStream = new MemoryStream();
+        using (var zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Create))
+        {
+            foreach (var file in fileList)
+            {
+                var zipArchiveEntry = zipArchive.CreateEntry(file.Key);
+                using var streamWriter = new StreamWriter(zipArchiveEntry.Open());
+                streamWriter.BaseStream.Write(file.Value, 0, file.Value.Length);
+            }
+        }
+
+        var zipFile = new ModuleReportDto
+        {
+            FileData = memoryStream.ToArray(),
+            FileName = $"Mandatory Training Export - {data.Name}.zip",
+            FileType = MediaTypeNames.Application.Zip
         };
 
-        // Return for download
-        return reportDto;
+        return zipFile;
     }
 }
