@@ -243,6 +243,24 @@ namespace Constellation.Infrastructure.Services
             formatSoonExpire.Style.Fill.BackgroundColor.Color = Color.Yellow;
             formatSoonExpire.StopIfTrue = true;
 
+            // Add format legend
+            workSheet.Cells[2, 8].Value = "Colour Legend";
+            workSheet.Cells[2, 8].Style.Font.Bold = true;
+            workSheet.Cells[3, 8].Value = "Expired";
+            workSheet.Cells[3, 8].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+            workSheet.Cells[3, 8].Style.Fill.BackgroundColor.SetColor(Color.Red);
+            workSheet.Cells[3, 8].Style.Font.Color.SetColor(Color.White);
+            workSheet.Cells[4, 8].Value = "Expiring Soon";
+            workSheet.Cells[4, 8].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+            workSheet.Cells[4, 8].Style.Fill.BackgroundColor.SetColor(Color.Yellow);
+            workSheet.Cells[5, 8].Value = "Never Completed";
+            workSheet.Cells[5, 8].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+            workSheet.Cells[5, 8].Style.Fill.BackgroundColor.SetColor(Color.Gray);
+            workSheet.Cells[5, 8].Style.Font.Color.SetColor(Color.White);
+            workSheet.Cells[2, 8, 5, 8].AutoFitColumns();
+            workSheet.Cells[2, 8, 5, 8].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thick);
+
+
             // Freeze top rows
             workSheet.View.FreezePanes(6, 1);
 

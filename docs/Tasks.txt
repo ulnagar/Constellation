@@ -3,8 +3,6 @@ CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 PRESENTATION.SERVER
-	Add status icon legend popup to web pages, and include color legend in export
-
 	Completion Records Index:
 		Add Expiring Soon filter
 
