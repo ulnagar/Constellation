@@ -1,0 +1,21 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.MandatoryTraining
+@model TrainingExpiringSoonAlertViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>The following Mandatory Training modules are due to expire within the next 14 days. Please arrange to complete the courses again soon.</p>
+<dl>
+    @foreach (var course in Model.Courses)
+    {
+        <dt>@course.Key</dt>
+        <dd>Due by : @course.Value</dd>
+    }
+</dl>
+<p>If you have already completed these courses, please ensure you have registered your results with Constellation.</p>
