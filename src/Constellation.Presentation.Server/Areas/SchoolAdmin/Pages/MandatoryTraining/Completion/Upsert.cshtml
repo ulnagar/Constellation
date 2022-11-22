@@ -72,6 +72,21 @@
         </div>
 
         <div class="form-group row">
+            <label asp-for="NotRequired" class="col-md-2">Not Required</label>
+            <div class="col-md-3">
+                @if (Model.Mode == UpsertModel.ModeOptions.CERTUPLOAD)
+                {
+                    <input asp-for="NotRequired" class="form-control" readonly="readonly" />
+                }
+                else
+                {
+                    <input asp-for="NotRequired" class="form-control" />
+                    <span asp-validation-for="NotRequired" class="text-danger"></span>
+                }
+            </div>
+        </div>
+
+        <div class="form-group row">
             <label asp-for="FormFile" class="col-md-2">Certificate</label>
             <div class="col-md-8">
                 <div class="custom-file">

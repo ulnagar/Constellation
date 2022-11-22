@@ -5,18 +5,13 @@ CURRENT TASK
 PRESENTATION.SERVER
 	Created notifications for both warning and alert email categories
 		Created job that will call the notifications
-			Need to build the "not-required" feature (below) so that they are excluded from the email list
-	
+
+	Create dashboard overview for individual staff members
+
 	Implement generic permissions as per https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-6.0#use-a-handler-for-multiple-requirements
 	Permission Structure:
 	 SchoolContact = Portal.School.User
 	 Parent = Portal.Parent.User
-
-	Allow staff/coordinator to mark a module as not required (via a submitted completion that has a special marking)
-	 Include these on the reports with a special format
-	 Do not generate emails for these
-	 Allow coordinator to delete this completion if the requirements change
-
 
 	Lessons Admin Teacher Delete - Passes ID of the School Contact, not the ROLE. Acts to delete ROLE with the wrong ID.
 	Normalise all email addresses to remove spaces at entry.

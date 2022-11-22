@@ -89,7 +89,18 @@
             </td>
             <td>@item.StaffFirstName @item.StaffLastName</td>
             <td>@item.ModuleName</td>
-            <td>@item.CompletedDate.ToString("dd/MM/yyyy")</td>
+            <td>
+                @{
+                    if (item.NotRequired)
+                    {
+                        @:N/A
+                    }
+                    else
+                    {
+                        @item.CompletedDate.ToString("dd/MM/yyyy")
+                    }
+                }
+            </td>
             <td>
                 @{
                     var canViewDetailsTest = await AuthorizationService.AuthorizeAsync(User, item.Id, AuthPolicies.CanViewTrainingCompletionRecord);

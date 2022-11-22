@@ -16,12 +16,10 @@ using System.Threading.Tasks;
 public class UpsertModel : BasePageModel
 {
     private readonly IMediator _mediator;
-    private readonly IDateTimeProvider _dateTimeProvider;
 
-    public UpsertModel(IMediator mediator, IDateTimeProvider dateTimeProvider)
+    public UpsertModel(IMediator mediator)
     {
         _mediator = mediator;
-        _dateTimeProvider = dateTimeProvider;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -32,6 +30,8 @@ public class UpsertModel : BasePageModel
     public TrainingModuleExpiryFrequency Expiry { get; set; }
     [BindProperty]
     public string ModelUrl { get; set; }
+    [BindProperty]
+    public bool CanMarkNotRequired { get; set; }
 
     public async Task OnGet()
     {
@@ -49,6 +49,7 @@ public class UpsertModel : BasePageModel
             Name = entity.Name;
             Expiry = entity.Expiry;
             ModelUrl = entity.Url;
+            CanMarkNotRequired = entity.CanMarkNotRequired;
         }
     }
 
@@ -58,13 +59,12 @@ public class UpsertModel : BasePageModel
         {
             // Update existing entry
 
-            var command = new UpdateTrainingModuleCommand
-            {
-                Id = Id.Value,
-                Name = Name,
-                Expiry = Expiry,
-                Url = ModelUrl
-            };
+            var command = new UpdateTrainingModuleCommand(
+                Id.Value,
+                Name,
+                Expiry,
+                ModelUrl,
+                CanMarkNotRequired);
 
             await _mediator.Send(command);
         }
@@ -72,12 +72,11 @@ public class UpsertModel : BasePageModel
         {
             // Create new entry
 
-            var command = new CreateTrainingModuleCommand
-            {
-                Name = Name,
-                Expiry = Expiry,
-                Url = ModelUrl
-            };
+            var command = new CreateTrainingModuleCommand(
+                Name,
+                Expiry,
+                ModelUrl,
+                CanMarkNotRequired);
 
             await _mediator.Send(command);
         }

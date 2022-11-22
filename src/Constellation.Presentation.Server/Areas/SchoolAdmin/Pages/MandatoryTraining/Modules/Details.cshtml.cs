@@ -44,7 +44,13 @@ public class DetailsModel : BasePageModel
             record.ExpiryCountdown = record.CalculateExpiry();
             record.Status = CompletionRecordDto.ExpiryStatus.Active;
 
-            if (Module.Completions.Any(s => s.ModuleId == record.ModuleId && s.StaffId == record.StaffId && s.CompletedDate > record.CompletedDate))
+            if (Module.Completions.Any(other =>
+                other.Id != record.Id &&
+                other.ModuleId == record.ModuleId && // true
+                other.StaffId == record.StaffId && // true
+                ((other.NotRequired && other.CreatedAt > record.CompletedDate) || // false
+                (!other.NotRequired && !record.NotRequired && other.CompletedDate > record.CompletedDate) || // false
+                (record.NotRequired && record.CreatedAt < other.CompletedDate))))
             {
                 record.Status = CompletionRecordDto.ExpiryStatus.Superceded;
             }

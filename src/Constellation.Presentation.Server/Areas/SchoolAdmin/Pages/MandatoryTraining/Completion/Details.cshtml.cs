@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
 
+using Constellation.Application.Features.MandatoryTraining.Commands;
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Features.MandatoryTraining.Queries;
 using Constellation.Application.Models.Auth;
@@ -15,10 +16,12 @@ using System.Threading.Tasks;
 public class DetailsModel : BasePageModel
 {
     private readonly IMediator _mediator;
+    private readonly IAuthorizationService _authorizationService;
 
-    public DetailsModel(IMediator mediator)
+    public DetailsModel(IMediator mediator, IAuthorizationService authorizationService)
     {
         _mediator = mediator;
+        _authorizationService = authorizationService;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -43,5 +46,17 @@ public class DetailsModel : BasePageModel
         UploadedCertificate = await _mediator.Send(new GetUploadedTrainingCertificateFileByIdQuery { LinkType = StoredFile.TrainingCertificate, LinkId = Id.ToString() });
 
         return File(UploadedCertificate.FileData, UploadedCertificate.FileType, UploadedCertificate.Name);
+    }
+
+    public async Task<IActionResult> OnPostDeleteRecord()
+    {
+        var canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+        
+        if (canEditTest.Succeeded)
+        {
+            await _mediator.Send(new MarkTrainingCompletionRecordDeletedCommand(Id));
+        }
+
+        return RedirectToPage("Index");
     }
 }

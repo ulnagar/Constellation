@@ -203,7 +203,7 @@ namespace Constellation.Infrastructure.Services
             workSheet.Cells[2, 1].Value = $"Exported at {DateTime.Now:F}";
             workSheet.Cells[3, 1].Value = $"Link to module: {new Uri(data.Url)}";
 
-            workSheet.Cells[5, 1].LoadFromCollection(data.Completions, opt =>
+            workSheet.Cells[7, 1].LoadFromCollection(data.Completions, opt =>
             {
                 opt.PrintHeaders = true;
                 opt.TableStyle = OfficeOpenXml.Table.TableStyles.Light1;
@@ -214,55 +214,65 @@ namespace Constellation.Infrastructure.Services
                     completion.GetProperty("StaffFirstName"),
                     completion.GetProperty("StaffLastName"),
                     completion.GetProperty("StaffFaculty"),
+                    completion.GetProperty("NotRequired"),
                     completion.GetProperty("ExpiryCountdown"),
                     completion.GetProperty("CompletedDate")
                 };
             });
 
-            workSheet.Cells[6, 6, workSheet.Dimension.Rows, 6].ForEach(range => UpdateDefaultDateDataForRange(range));
-            workSheet.Cells[5, 6, workSheet.Dimension.Rows, 6].Style.Numberformat.Format = "dd/MM/yyyy";
-            workSheet.Cells[5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
+            workSheet.Cells[8, 7, workSheet.Dimension.Rows, 7].ForEach(range => UpdateDefaultDateDataForRange(range));
+            //workSheet.Cells[8, 5, workSheet.Dimension.Rows, 5].ForEach(range => UpdateDefaultBooleanForRange(range));
+            workSheet.Cells[7, 7, workSheet.Dimension.Rows, 7].Style.Numberformat.Format = "dd/MM/yyyy";
 
             // Highlight overdue entries
-            var dataRange = new ExcelAddress(6, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
+            var dataRange = new ExcelAddress(8, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
+
+            var formatNotRequired = workSheet.ConditionalFormatting.AddExpression(dataRange);
+            formatNotRequired.Formula = "=$E8 = TRUE";
+            formatNotRequired.Style.Font.Color.Color = Color.DarkOliveGreen;
+            formatNotRequired.Style.Font.Italic = true;
+            formatNotRequired.StopIfTrue = true;
 
             var formatNeverCompleted = workSheet.ConditionalFormatting.AddExpression(dataRange);
-            formatNeverCompleted.Formula = "=$E6 = \"\"";
+            formatNeverCompleted.Formula = "=$F8 = \"\"";
             formatNeverCompleted.Style.Fill.BackgroundColor.Color = Color.Gray;
             formatNeverCompleted.Style.Font.Color.Color = Color.White;
             formatNeverCompleted.StopIfTrue = true;
 
             var formatOverdue = workSheet.ConditionalFormatting.AddExpression(dataRange);
-            formatOverdue.Formula = "=$E6 < 1";
+            formatOverdue.Formula = "=$F8 < 1";
             formatOverdue.Style.Fill.BackgroundColor.Color = Color.Red;
             formatOverdue.Style.Font.Color.Color = Color.White;
             formatOverdue.StopIfTrue = true;
 
             var formatSoonExpire = workSheet.ConditionalFormatting.AddExpression(dataRange);
-            formatSoonExpire.Formula = "=$E6 < 14";
+            formatSoonExpire.Formula = "=$F8 < 14";
             formatSoonExpire.Style.Fill.BackgroundColor.Color = Color.Yellow;
             formatSoonExpire.StopIfTrue = true;
 
             // Add format legend
-            workSheet.Cells[2, 8].Value = "Colour Legend";
-            workSheet.Cells[2, 8].Style.Font.Bold = true;
-            workSheet.Cells[3, 8].Value = "Expired";
-            workSheet.Cells[3, 8].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-            workSheet.Cells[3, 8].Style.Fill.BackgroundColor.SetColor(Color.Red);
-            workSheet.Cells[3, 8].Style.Font.Color.SetColor(Color.White);
-            workSheet.Cells[4, 8].Value = "Expiring Soon";
-            workSheet.Cells[4, 8].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-            workSheet.Cells[4, 8].Style.Fill.BackgroundColor.SetColor(Color.Yellow);
-            workSheet.Cells[5, 8].Value = "Never Completed";
-            workSheet.Cells[5, 8].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-            workSheet.Cells[5, 8].Style.Fill.BackgroundColor.SetColor(Color.Gray);
-            workSheet.Cells[5, 8].Style.Font.Color.SetColor(Color.White);
-            workSheet.Cells[2, 8, 5, 8].AutoFitColumns();
-            workSheet.Cells[2, 8, 5, 8].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thick);
-
+            workSheet.Cells[5, 2].Value = "Colour Legend";
+            workSheet.Cells[5, 2].Style.Font.Bold = true;
+            workSheet.Cells[5, 3].Value = "Expired";
+            workSheet.Cells[5, 3].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+            workSheet.Cells[5, 3].Style.Fill.BackgroundColor.SetColor(Color.Red);
+            workSheet.Cells[5, 3].Style.Font.Color.SetColor(Color.White);
+            workSheet.Cells[5, 4].Value = "Expiring Soon";
+            workSheet.Cells[5, 4].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+            workSheet.Cells[5, 4].Style.Fill.BackgroundColor.SetColor(Color.Yellow);
+            workSheet.Cells[5, 5].Value = "Never Completed";
+            workSheet.Cells[5, 5].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+            workSheet.Cells[5, 5].Style.Fill.BackgroundColor.SetColor(Color.Gray);
+            workSheet.Cells[5, 5].Style.Font.Color.SetColor(Color.White);
+            workSheet.Cells[5, 6].Value = "Not Required";
+            workSheet.Cells[5, 6].Style.Font.Color.SetColor(Color.DarkOliveGreen);
+            workSheet.Cells[5, 6].Style.Font.Italic = true;
+            workSheet.Cells[5, 2, 5, 6].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thick);
+            workSheet.Cells[5, 3, 5, 6].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
 
             // Freeze top rows
-            workSheet.View.FreezePanes(6, 1);
+            workSheet.View.FreezePanes(8, 1);
+            workSheet.Cells[5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
             var memoryStream = new MemoryStream();
             await excel.SaveAsAsync(memoryStream);
@@ -279,6 +289,21 @@ namespace Constellation.Infrastructure.Services
                 {
                     range.SetCellValue(r, -1, string.Empty);
                     range.SetCellValue(r, 0, string.Empty);
+                }
+            }
+        }
+
+        private void UpdateDefaultBooleanForRange(ExcelRangeBase range)
+        {
+            for (int r = 0; r < range.Rows; r++)
+            {
+                if (range.GetCellValue<bool>(r, 0) == false)
+                {
+                    range.SetCellValue(r, 0, "false");
+                }
+                else
+                {
+                    range.SetCellValue(r, 0, "true");
                 }
             }
         }

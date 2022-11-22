@@ -23,14 +23,11 @@ using System.Threading.Tasks;
 public class UpsertModel : BasePageModel
 {
     private readonly IMediator _mediator;
-    private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IAuthorizationService _authorizationService;
 
-    public UpsertModel(IMediator mediator, IDateTimeProvider dateTimeProvider,
-        IAuthorizationService authorizationService)
+    public UpsertModel(IMediator mediator, IAuthorizationService authorizationService)
     {
         _mediator = mediator;
-        _dateTimeProvider = dateTimeProvider;
         _authorizationService = authorizationService;
     }
 
@@ -54,6 +51,9 @@ public class UpsertModel : BasePageModel
     [BindProperty, DataType(DataType.Date)]
     [NotFutureDate]
     public DateTime CompletedDate { get; set; } = DateTime.Today;
+
+    [BindProperty]
+    public bool NotRequired { get; set; }
 
     [BindProperty]
     [Required(ErrorMessage = "You must select a training module")]
@@ -104,6 +104,7 @@ public class UpsertModel : BasePageModel
             StaffId = entity.StaffId;
             CompletedDate = entity.CompletedDate;
             TrainingModuleId = entity.TrainingModuleId;
+            NotRequired = entity.NotRequired;
 
             UploadedCertificate = await _mediator.Send(new GetUploadedTrainingCertificateMetadataQuery { LinkType = StoredFile.TrainingCertificate, LinkId = Id.Value.ToString() });
 
@@ -187,6 +188,17 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdate()
     {
+        // Check if the Module allows not required if the not required has been selected.
+        if (TrainingModuleId is not null && NotRequired)
+        {
+            var canSetNotRequired = await _mediator.Send(new DoesModuleAllowNotRequiredResponseQuery(TrainingModuleId.Value));
+
+            if (!canSetNotRequired)
+            {
+                ModelState.AddModelError("NotRequired", "This Training Module does not allow Not Required responses.");
+            }
+        }
+
         if (!ModelState.IsValid)
         {
             await SetUpForm();
@@ -198,28 +210,26 @@ public class UpsertModel : BasePageModel
         {
             // Update existing entry
 
-            var command = new UpdateTrainingCompletionCommand
-            {
-                Id = Id.Value,
-                StaffId = StaffId,
-                TrainingModuleId = TrainingModuleId.Value,
-                CompletedDate = CompletedDate,
-                File = await GetUploadedFile()
-            };
-
+            var command = new UpdateTrainingCompletionCommand(
+                Id.Value,
+                StaffId,
+                TrainingModuleId.Value,
+                CompletedDate,
+                NotRequired,
+                await GetUploadedFile());
+            
             await _mediator.Send(command);
         }
         else
         {
             // Create new entry
 
-            var command = new CreateTrainingCompletionCommand
-            {
-                StaffId = StaffId,
-                TrainingModuleId = TrainingModuleId.Value,
-                CompletedDate = CompletedDate,
-                File = await GetUploadedFile()
-            };
+            var command = new CreateTrainingCompletionCommand(
+                StaffId,
+                TrainingModuleId.Value,
+                CompletedDate,
+                NotRequired,
+                await GetUploadedFile());
 
             await _mediator.Send(command);
         }

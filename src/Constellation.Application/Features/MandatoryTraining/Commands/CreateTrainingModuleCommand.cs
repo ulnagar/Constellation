@@ -7,12 +7,13 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-public record CreateTrainingModuleCommand : IRequest
-{
-    public string Name { get; init; }
-    public TrainingModuleExpiryFrequency Expiry { get; init; }
-    public string Url { get; init; }
-}
+public record CreateTrainingModuleCommand(
+    string Name,
+    TrainingModuleExpiryFrequency Expiry,
+    string Url,
+    bool CanMarkNotRequired
+    ) : IRequest
+{ }
 
 public class CreateTrainingModuleCommandHandler : IRequestHandler<CreateTrainingModuleCommand>
 {
@@ -29,7 +30,8 @@ public class CreateTrainingModuleCommandHandler : IRequestHandler<CreateTraining
         {
             Name = request.Name,
             Expiry = request.Expiry,
-            Url = request.Url
+            Url = request.Url,
+            CanMarkNotRequired = request.CanMarkNotRequired,
         };
 
         _context.Add(entity);

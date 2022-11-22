@@ -12,5 +12,6 @@ public class TrainingModule : AuditableEntity
     public TrainingModuleExpiryFrequency Expiry { get; set; }
     public string Url { get; set; }
     public List<TrainingCompletion> Completions { get; set; } = new();
+    public bool CanMarkNotRequired { get; set; }
 
 }
