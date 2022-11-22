@@ -77,9 +77,9 @@ namespace Constellation.Infrastructure.Gateways
             var messageId = Guid.NewGuid();
             _logger.LogInformation("{id}: Sending SMS {sms}", messageId, JsonConvert.SerializeObject(payload));
 
-#if DEBUG
-            return new SMSMessageCollectionDto();
-#else
+//#if DEBUG
+//            return new SMSMessageCollectionDto();
+//#else
             try
             {
                 HttpResponseMessage response = await RequestAsync("sms", payload);
@@ -108,7 +108,7 @@ namespace Constellation.Infrastructure.Gateways
 
                 return ConvertToDto(data);
             }
-#endif
+//#endif
         }
 
         /// <summary>
@@ -138,7 +138,10 @@ namespace Constellation.Infrastructure.Gateways
                     }
                     else
                     {
-                        response = await _client.PostAsJsonAsync(_uri.ToString(), (SMSMessageToSend)payload);
+                        var jsonPayload = JsonConvert.SerializeObject(payload);
+                        var content = new StringContent(jsonPayload.ToString(), Encoding.UTF8, "application/json");
+
+                        response = await _client.PostAsync(_uri.ToString(), content);
                     }
 
                     return response;

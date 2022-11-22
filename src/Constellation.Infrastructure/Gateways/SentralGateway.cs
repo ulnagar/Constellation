@@ -344,6 +344,7 @@ namespace Constellation.Infrastructure.Gateways
                 {
                     var dateCell = row.ChildNodes.FindFirst("td");
                     var stringDate = dateCell.InnerText.Trim();
+                    DateTime date;
 
                     if (stringDate == "No period absences have been recorded for this student.")
                         return absences;
@@ -355,11 +356,13 @@ namespace Constellation.Infrastructure.Gateways
                             continue;
                         }
 
-                        stringDate = previousDate.ToString("dd-MM-yyyy");
+                        //stringDate = previousDate.ToString("dd-MM-yyyy");
+                        date = previousDate;
+                    } else
+                    {
+                        date = DateTime.Parse(stringDate).Date;
+                        previousDate = date;
                     }
-
-                    var date = DateTime.Parse(stringDate).Date;
-                    previousDate = date;
 
                     var periodAbsence = new SentralPeriodAbsenceDto
                     {

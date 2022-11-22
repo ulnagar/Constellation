@@ -258,6 +258,7 @@ namespace Constellation.Infrastructure.Gateways
         private async Task PushToServer(MimeMessage message)
         {
             using var client = new MailKit.Net.Smtp.SmtpClient();
+            client.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
             await client.ConnectAsync(_configuration.Server, _configuration.Port, SecureSocketOptions.StartTlsWhenAvailable);
             if (!string.IsNullOrWhiteSpace(_configuration.Username))
