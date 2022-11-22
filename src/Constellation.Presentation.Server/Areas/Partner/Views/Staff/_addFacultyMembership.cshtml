@@ -1,0 +1,45 @@
+﻿@using Constellation.Core.Enums;
+@model Staff_FacultyAssignmentViewModel
+
+<div class="modal fade" id="addMembership">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="_AddFacultyMembership" asp-controller="Staff" asp-area="Partner" method="post">
+                <div class="modal-header">
+                    <h3 class="modal-title">Add new contact</h3>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        @Html.HiddenFor(model => model.StaffId)
+                        <div class="row">
+                            <div class="form-group col-md-10 offset-1">
+                                <span class="control-label">Staff member </span>
+                                <input asp-for="StaffName" class="form-control" readonly="readonly" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-10 offset-1">
+                                <span class="control-label">is in faculty </span>
+                                <select asp-for="FacultyId" asp-items="@Model.Faculties" class="form-control combo custom-select">
+                                    <option> -- Please Select -- </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-10 offset-1">
+                                <span class="control-label">with role </span>
+                                <select asp-for="Role" asp-items="@Html.GetEnumSelectList<FacultyMembershipRole>()" class="form-control combo custom-select">
+                                    <option> -- Please Select -- </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -54,6 +54,7 @@ namespace Constellation.Core.Models
 
     public class GroupMSTeamOperation : OfferingMSTeamOperation
     {
+        public Guid FacultyId { get; set; }
         public Faculty Faculty { get; set; }
     }
 

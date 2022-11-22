@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
+using Constellation.Application.Features.Faculties.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
@@ -9,6 +10,7 @@ using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.Areas.Subject.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -30,10 +32,11 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         private readonly IOperationService _operationsService;
         private readonly IStudentService _studentService;
         private readonly IAppDbContext _context;
+        private readonly IMediator _mediator;
 
         public ClassesController(IUnitOfWork unitOfWork, ICourseOfferingService offeringService,
             IAdobeConnectService adobeConnectService, IOperationService operationsService,
-            IStudentService studentService, IAppDbContext context)
+            IStudentService studentService, IAppDbContext context, IMediator mediator)
             : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -42,6 +45,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             _operationsService = operationsService;
             _studentService = studentService;
             _context = context;
+            _mediator = mediator;
         }
 
         // GET: Subject/Classes
@@ -56,6 +60,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 
             var viewModel = await CreateViewModel<Classes_ViewModel>();
             viewModel.Offerings = offerings.Select(Classes_ViewModel.OfferingDto.ConvertFromOffering).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
@@ -66,6 +71,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 
             var viewModel = await CreateViewModel<Classes_ViewModel>();
             viewModel.Offerings = offerings.Select(Classes_ViewModel.OfferingDto.ConvertFromOffering).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
@@ -76,6 +82,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 
             var viewModel = await CreateViewModel<Classes_ViewModel>();
             viewModel.Offerings = offerings.Select(Classes_ViewModel.OfferingDto.ConvertFromOffering).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
@@ -86,6 +93,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 
             var viewModel = await CreateViewModel<Classes_ViewModel>();
             viewModel.Offerings = offerings.Select(Classes_ViewModel.OfferingDto.ConvertFromOffering).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
@@ -96,16 +104,18 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 
             var viewModel = await CreateViewModel<Classes_ViewModel>();
             viewModel.Offerings = offerings.Select(Classes_ViewModel.OfferingDto.ConvertFromOffering).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
 
-        public async Task<IActionResult> FromFaculty(Faculty id)
+        public async Task<IActionResult> FromFaculty(Guid facultyId)
         {
-            var offerings = await _unitOfWork.CourseOfferings.ForListAsync(offering => offering.Course.Faculty.HasFlag(id) && offering.EndDate >= DateTime.Now);
+            var offerings = await _unitOfWork.CourseOfferings.ForListAsync(offering => offering.Course.FacultyId == facultyId && offering.EndDate >= DateTime.Now);
 
             var viewModel = await CreateViewModel<Classes_ViewModel>();
             viewModel.Offerings = offerings.Select(Classes_ViewModel.OfferingDto.ConvertFromOffering).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }

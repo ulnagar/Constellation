@@ -15,6 +15,8 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
 
         public ICollection<OfferingDto> Offerings { get; set; }
 
+        public IDictionary<Guid, string> FacultyList { get; set; } = new Dictionary<Guid, string>();
+
         public class OfferingDto
         {
             public int Id { get; set; }

@@ -270,3 +270,8 @@ img.training.status-icon.blink {
         visibility: hidden;
     }
 }
+
+/* Page-Menu to allow right align back button */
+.page-menu {
+    overflow: auto;
+}

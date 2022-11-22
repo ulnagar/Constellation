@@ -1,4 +1,5 @@
-﻿using Constellation.Core.Enums;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Application.DTOs
@@ -20,7 +21,5 @@ namespace Constellation.Application.DTOs
 
         [Required]
         public string SchoolCode { get; set; }
-        [Required]
-        public virtual Faculty Faculty { get; set; }
     }
 }

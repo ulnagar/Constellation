@@ -24,19 +24,21 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         private IQueryable<Course> Collection()
         {
             return _context.Courses
-                .Include(c => c.Offerings)
+                .Include(course => course.Offerings)
                     .ThenInclude(offering => offering.Enrolments)
                         .ThenInclude(enrolment => enrolment.Student)
-                .Include(c => c.Offerings)
+                .Include(course => course.Offerings)
                     .ThenInclude(offering => offering.Sessions)
                         .ThenInclude(session => session.Room)
-                .Include(c => c.Offerings)
+                .Include(course => course.Offerings)
                     .ThenInclude(offering => offering.Sessions)
                         .ThenInclude(session => session.Period)
-                .Include(c => c.Offerings)
+                .Include(course => course.Offerings)
                     .ThenInclude(offering => offering.Sessions)
                         .ThenInclude(session => session.Teacher)
-                .Include(c => c.HeadTeacher);
+                .Include(course => course.Faculty)
+                    .ThenInclude(faculty => faculty.Members.Where(member => member.Role == FacultyMembershipRole.Manager))
+                        .ThenInclude(member => member.Staff);
         }
 
         public Course WithDetails(int id)
@@ -64,12 +66,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToList();
         }
 
-        public ICollection<Course> AllFromFaculty(Faculty faculty)
+        public ICollection<Course> AllFromFaculty(Guid facultyId)
         {
-            Enum.TryParse(faculty.ToString(), out faculty);
-
             return Collection()
-                .Where(c => c.Faculty == faculty)
+                .Where(c => c.FacultyId == facultyId)
                 .ToList();
         }
 
@@ -94,25 +94,25 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToList();
         }
 
-        public async Task<IDictionary<int, string>> AllForLessonsPortal()
-        {
-            var courses = await _context.Courses
-                .Include(course => course.Offerings)
-                    .ThenInclude(offering => offering.Sessions)
-                .Where(course => course.Faculty == Faculty.Science)
-                .OrderBy(course => course.Name)
-                .ToListAsync();
+        //public async Task<IDictionary<int, string>> AllForLessonsPortal()
+        //{
+        //    var courses = await _context.Courses
+        //        .Include(course => course.Offerings)
+        //            .ThenInclude(offering => offering.Sessions)
+        //        .Where(course => course.Faculty == Faculty.Science)
+        //        .OrderBy(course => course.Name)
+        //        .ToListAsync();
 
-            var currentCourses = courses.Where(course => course.Offerings.Any(offering => offering.IsCurrent())).ToList();
+        //    var currentCourses = courses.Where(course => course.Offerings.Any(offering => offering.IsCurrent())).ToList();
 
-            var dict = new Dictionary<int, string>();
-            foreach (var course in currentCourses)
-            {
-                dict.Add(course.Id, $"{course.Grade} {course.Name}");
-            }
+        //    var dict = new Dictionary<int, string>();
+        //    foreach (var course in currentCourses)
+        //    {
+        //        dict.Add(course.Id, $"{course.Grade} {course.Name}");
+        //    }
 
-            return dict;
-        }
+        //    return dict;
+        //}
 
         public async Task<Course> WithOfferingsForLessonsPortal(int courseId)
         {
@@ -125,6 +125,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         {
             return await _context.Courses
                 .Include(course => course.Offerings)
+                .Include(course => course.Faculty)
                 .Where(predicate)
                 .ToListAsync();
         }
@@ -132,7 +133,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         public async Task<Course> ForDetailDisplayAsync(int id)
         {
             return await _context.Courses
-                .Include(course => course.HeadTeacher)
+                .Include(course => course.Faculty)
+                    .ThenInclude(faculty => faculty.Members.Where(member => member.Role == FacultyMembershipRole.Manager && !member.IsDeleted))
+                        .ThenInclude(member => member.Staff)
                 .Include(course => course.Offerings)
                 .ThenInclude(offering => offering.Sessions)
                 .ThenInclude(session => session.Teacher)

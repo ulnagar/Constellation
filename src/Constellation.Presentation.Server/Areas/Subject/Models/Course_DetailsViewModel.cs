@@ -1,9 +1,6 @@
 ﻿using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Constellation.Presentation.Server.Areas.Subject.Models
 {
@@ -17,8 +14,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
             public int Id { get; set; }
             public string Name { get; set; }
             public Grade Grade { get; set; }
-            public Faculty Faculty { get; set; }
-            public string HeadTeacherName { get; set; }
+            public string Faculty { get; set; }
             public decimal FTEValue { get; set; }
             public decimal FTECalculation { get; set; }
 
@@ -29,8 +25,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
                     Id = course.Id,
                     Name = course.Name,
                     Grade = course.Grade,
-                    Faculty = course.Faculty,
-                    HeadTeacherName = course.HeadTeacher.DisplayName,
+                    Faculty = course.Faculty.Name,
                     FTEValue = course.FullTimeEquivalentValue
                 };
 

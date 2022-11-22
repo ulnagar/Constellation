@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Features.Faculties.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
@@ -6,11 +7,9 @@ using Constellation.Core.Enums;
 using Constellation.Presentation.Server.Areas.Subject.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 {
@@ -20,12 +19,15 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICourseOfferingService _offeringService;
+        private readonly IMediator _mediator;
 
-        public CoursesController(IUnitOfWork unitOfWork, ICourseOfferingService offeringService)
+        public CoursesController(IUnitOfWork unitOfWork, ICourseOfferingService offeringService,
+            IMediator mediator)
             : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _offeringService = offeringService;
+            _mediator = mediator;
         }
 
         public IActionResult Index()
@@ -39,6 +41,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 
             var viewModel = await CreateViewModel<Course_ViewModel>();
             viewModel.Courses = courses.Select(Course_ViewModel.CourseDto.ConvertFromCourse).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
@@ -49,6 +52,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 
             var viewModel = await CreateViewModel<Course_ViewModel>();
             viewModel.Courses = courses.Select(Course_ViewModel.CourseDto.ConvertFromCourse).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
@@ -59,6 +63,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 
             var viewModel = await CreateViewModel<Course_ViewModel>();
             viewModel.Courses = courses.Select(Course_ViewModel.CourseDto.ConvertFromCourse).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
@@ -69,16 +74,18 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 
             var viewModel = await CreateViewModel<Course_ViewModel>();
             viewModel.Courses = courses.Select(Course_ViewModel.CourseDto.ConvertFromCourse).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
 
-        public async Task<IActionResult> ForFaculty(Faculty id)
+        public async Task<IActionResult> ForFaculty(Guid facultyId)
         {
-            var courses = await _unitOfWork.Courses.ForListAsync(course => course.Faculty.HasFlag(id));
+            var courses = await _unitOfWork.Courses.ForListAsync(course => course.FacultyId == facultyId);
 
             var viewModel = await CreateViewModel<Course_ViewModel>();
             viewModel.Courses = courses.Select(Course_ViewModel.CourseDto.ConvertFromCourse).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
@@ -126,11 +133,14 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
                 Id = course.Id,
                 Name = course.Name,
                 Grade = course.Grade,
+                FacultyId = course.FacultyId,
                 Faculty = course.Faculty,
-                HeadTeacherId = course.HeadTeacherId,
                 FullTimeEquivalentValue = course.FullTimeEquivalentValue
             };
 
+            var faculties = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
+
+            viewModel.FacultyList = new SelectList(faculties, "Key", "Value");
             viewModel.StaffList = new SelectList(await _unitOfWork.Staff.ForSelectionAsync(), "StaffId", "DisplayName");
             viewModel.IsNew = false;
 

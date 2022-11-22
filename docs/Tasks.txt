@@ -6,7 +6,7 @@ PRESENTATION.SERVER
 	Created notifications for both warning and alert email categories
 		Created job that will call the notifications
 			Need to build the "not-required" feature (below) so that they are excluded from the email list
-			Need to build the Faculy object feature (Future Plans) so that determining the Head Teacher is easy
+			Need to secure the faculty pages
 	
 	Implement generic permissions as per https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-6.0#use-a-handler-for-multiple-requirements
 	Permission Structure:
@@ -25,11 +25,18 @@ PRESENTATION.SERVER
 	Normalise all email addresses to remove spaces at entry.
 	Update parent emails to point to new portal.
 	Figure out what is directly accessing Sentral from the parent portal, and if it is necessary.
+	Periodic Team sync to ensure that all classes have registered Teams in the application
+	Include error checking for non-existing details in email senders (SendCoverNotificationEmail/Casual)
+	INFRASTRUCTURE\FEATURES\SHORTTERM\COVERS\NOTIFICATIONS\CASUALCOVERCREATED\SENDCOVERNOTIFICATIONEMAIL - LINE 72:
+		Change the `team.Name.Contains(cover.EndDate.Year.ToString())` to `team.Name.Contains(offering.EndDate.Year.ToString())`
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+ADOBE CONNECT:
+	Remove direct link for Adobe Connect Room to Session, allowing a class to be created without a Connect Room.
 
 OPERATIONS:
 	Return more meaningful errors to log for troubleshooting

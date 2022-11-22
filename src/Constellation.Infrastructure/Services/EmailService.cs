@@ -406,7 +406,7 @@ namespace Constellation.Infrastructure.Services
                 SenderTitle = absenceSettings.AbsenceCoordinatorTitle,
                 Title = "Absence Explanation Received",
                 StudentName = notificationEmail.StudentName
-            }; 
+            };
 
             foreach (var absence in notificationEmail.WholeAbsences)
             {
@@ -418,7 +418,7 @@ namespace Constellation.Infrastructure.Services
                     Explanation = absence.Explanation,
                     Source = absence.ReportedBy,
                     Type = absence.AbsenceType,
-                    AbsenceTime = absence.AbsenceTimeframe 
+                    AbsenceTime = absence.AbsenceTimeframe
                 });
             }
 
@@ -809,7 +809,7 @@ namespace Constellation.Infrastructure.Services
             };
 
             var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MissedWork/ParentMissedWorkNotificationEmail.cshtml", viewModel);
-            
+
             var toRecipients = new Dictionary<string, string>();
             foreach (var entry in parentEmails)
                 if (!toRecipients.Any(recipient => recipient.Value == entry))
@@ -818,7 +818,7 @@ namespace Constellation.Infrastructure.Services
             await _emailSender.Send(toRecipients, notification.CompletedBy.EmailAddress, viewModel.Title, body);
         }
 
-        public async Task SendDailyRollMarkingReport(List<RollMarkReportDto> orderedEntries, bool sendToAbsenceCoordinator, bool sendToFacultyHeadTeacher)
+        public async Task SendDailyRollMarkingReport(List<RollMarkingEmailDto> entries, DateOnly reportDate, Dictionary<string, string> recipients)
         {
             var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
@@ -827,45 +827,13 @@ namespace Constellation.Infrastructure.Services
                 Preheader = "",
                 SenderName = absenceSettings.AbsenceCoordinatorName,
                 SenderTitle = absenceSettings.AbsenceCoordinatorTitle,
-                Title = $"[Aurora College] Roll Marking Report - {orderedEntries.First().Date.ToShortDateString()}",
-                UnsubmittedRolls = orderedEntries.Select(entry => entry.Description).ToList()
+                Title = $"[Aurora College] Roll Marking Report - {reportDate.ToLongDateString()}",
+                RollEntries = entries
             };
 
             var body = await _razorService.RenderViewToStringAsync("/Views/Emails/RollMarking/DailyReportEmail.cshtml", viewModel);
 
-            var toRecipients = new Dictionary<string, string>();
-            if (sendToAbsenceCoordinator)
-            {
-                // Send the Absence Coordinator
-                if (!toRecipients.Any(recipient => recipient.Value == absenceSettings.ForwardingEmailAbsenceCoordinator))
-                    toRecipients.Add(absenceSettings.AbsenceCoordinatorName, absenceSettings.ForwardingEmailAbsenceCoordinator);
-
-                if (!toRecipients.Any(recipient => recipient.Value == "scott.new@det.nsw.edu.au"))
-                    toRecipients.Add("Scott New", "scott.new@det.nsw.edu.au");
-            }
-            
-            if (sendToFacultyHeadTeacher)
-            {
-                var headTeacherName = orderedEntries.Select(entry => entry.HeadTeacher).Distinct().First();
-                var headTeacherEmail = orderedEntries.Select(entry => entry.HeadTeacherEmail).Distinct().First();
-
-                if (string.IsNullOrWhiteSpace(headTeacherEmail))
-                {
-                    return;
-                }
-
-                if (!toRecipients.Any(recipient => recipient.Value == headTeacherEmail))
-                    toRecipients.Add(headTeacherName, headTeacherEmail);
-            }
-
-            if (!sendToFacultyHeadTeacher && !sendToAbsenceCoordinator)
-            {
-                // Send to the Classroom Teacher
-                if (!toRecipients.Any(recipient => recipient.Value == orderedEntries.First().EmailSentTo))
-                    toRecipients.Add(orderedEntries.First().EmailSentTo, orderedEntries.First().EmailSentTo);
-            }
-
-            await _emailSender.Send(toRecipients, null, viewModel.Title, body);
+            await _emailSender.Send(recipients, null, viewModel.Title, body);
         }
 
         public async Task SendMagicLinkLoginEmail(MagicLinkEmail notification)

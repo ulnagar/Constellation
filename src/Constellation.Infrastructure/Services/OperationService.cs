@@ -424,18 +424,8 @@ namespace Constellation.Infrastructure.Services
                 TeamName = MicrosoftTeam.Students,
                 Action = MSTeamOperationAction.Add,
                 DateScheduled = DateTime.Now,
+                PermissionLevel = MSTeamOperationPermissionLevel.Member
             };
-
-            if (staffMember.Faculty.HasFlag(Faculty.Administration) ||
-                staffMember.Faculty.HasFlag(Faculty.Executive) ||
-                staffMember.Faculty.HasFlag(Faculty.Support))
-            {
-                studentTeamOperation.PermissionLevel = MSTeamOperationPermissionLevel.Owner;
-            }
-            else
-            {
-                studentTeamOperation.PermissionLevel = MSTeamOperationPermissionLevel.Member;
-            }
 
             _unitOfWork.Add(studentTeamOperation);
 
@@ -653,154 +643,154 @@ namespace Constellation.Infrastructure.Services
             operation.IsDeleted = true;
         }
 
-        public async Task AddStaffToAdobeGroupBasedOnFaculty(string staffId, Faculty staffFaculty)
-        {
-            if (staffFaculty.HasFlag(Faculty.Administration))
-            {
-                await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Administration, DateTime.Now);
-            }
+        //public async Task AddStaffToAdobeGroupBasedOnFaculty(string staffId, Faculty staffFaculty)
+        //{
+        //    if (staffFaculty.HasFlag(Faculty.Administration))
+        //    {
+        //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Administration, DateTime.Now);
+        //    }
 
-            if (staffFaculty.HasFlag(Faculty.Executive))
-            {
-                await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Executive, DateTime.Now);
-            }
+        //    if (staffFaculty.HasFlag(Faculty.Executive))
+        //    {
+        //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Executive, DateTime.Now);
+        //    }
 
-            if (staffFaculty.HasFlag(Faculty.English))
-            {
-                await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.English, DateTime.Now);
-            }
+        //    if (staffFaculty.HasFlag(Faculty.English))
+        //    {
+        //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.English, DateTime.Now);
+        //    }
 
-            if (staffFaculty.HasFlag(Faculty.Mathematics))
-            {
-                await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Mathematics, DateTime.Now);
-            }
+        //    if (staffFaculty.HasFlag(Faculty.Mathematics))
+        //    {
+        //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Mathematics, DateTime.Now);
+        //    }
 
-            if (staffFaculty.HasFlag(Faculty.Science))
-            {
-                await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Science, DateTime.Now);
-            }
+        //    if (staffFaculty.HasFlag(Faculty.Science))
+        //    {
+        //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Science, DateTime.Now);
+        //    }
 
-            if (staffFaculty.HasFlag(Faculty.Stage3))
-            {
-                await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Stage3, DateTime.Now);
-            }
+        //    if (staffFaculty.HasFlag(Faculty.Stage3))
+        //    {
+        //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Stage3, DateTime.Now);
+        //    }
 
-            if (staffFaculty.HasFlag(Faculty.Support))
-            {
-                await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Support, DateTime.Now);
-            }
-        }
+        //    if (staffFaculty.HasFlag(Faculty.Support))
+        //    {
+        //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Support, DateTime.Now);
+        //    }
+        //}
 
-        public async Task AuditStaffAdobeGroupMembershipBasedOnFaculty(string staffId, Faculty originalFaculty, Faculty staffFaculty)
-        {
-            if (!originalFaculty.HasFlag(Faculty.Administration) && staffFaculty.HasFlag(Faculty.Administration))
-            {
-                await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Administration, DateTime.Now);
-            }
+        //public async Task AuditStaffAdobeGroupMembershipBasedOnFaculty(string staffId, Faculty originalFaculty, Faculty staffFaculty)
+        //{
+        //    if (!originalFaculty.HasFlag(Faculty.Administration) && staffFaculty.HasFlag(Faculty.Administration))
+        //    {
+        //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Administration, DateTime.Now);
+        //    }
 
-            if (!staffFaculty.HasFlag(Faculty.Administration) && originalFaculty.HasFlag(Faculty.Administration))
-            {
-                await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Administration, DateTime.Now);
-            }
+        //    if (!staffFaculty.HasFlag(Faculty.Administration) && originalFaculty.HasFlag(Faculty.Administration))
+        //    {
+        //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Administration, DateTime.Now);
+        //    }
 
-            if (!originalFaculty.HasFlag(Faculty.Executive) && staffFaculty.HasFlag(Faculty.Executive))
-            {
-               await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Executive, DateTime.Now);
-            }
+        //    if (!originalFaculty.HasFlag(Faculty.Executive) && staffFaculty.HasFlag(Faculty.Executive))
+        //    {
+        //       await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Executive, DateTime.Now);
+        //    }
 
-            if (!staffFaculty.HasFlag(Faculty.Executive) && originalFaculty.HasFlag(Faculty.Executive))
-            {
-                await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Executive, DateTime.Now);
-            }
+        //    if (!staffFaculty.HasFlag(Faculty.Executive) && originalFaculty.HasFlag(Faculty.Executive))
+        //    {
+        //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Executive, DateTime.Now);
+        //    }
 
-            if (!originalFaculty.HasFlag(Faculty.English) && staffFaculty.HasFlag(Faculty.English))
-            {
-                await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.English, DateTime.Now);
-            }
+        //    if (!originalFaculty.HasFlag(Faculty.English) && staffFaculty.HasFlag(Faculty.English))
+        //    {
+        //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.English, DateTime.Now);
+        //    }
 
-            if (!staffFaculty.HasFlag(Faculty.English) && originalFaculty.HasFlag(Faculty.English))
-            {
-                await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.English, DateTime.Now);
-            }
+        //    if (!staffFaculty.HasFlag(Faculty.English) && originalFaculty.HasFlag(Faculty.English))
+        //    {
+        //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.English, DateTime.Now);
+        //    }
 
-            if (!originalFaculty.HasFlag(Faculty.Mathematics) && staffFaculty.HasFlag(Faculty.Mathematics))
-            {
-                await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Mathematics, DateTime.Now);
-            }
+        //    if (!originalFaculty.HasFlag(Faculty.Mathematics) && staffFaculty.HasFlag(Faculty.Mathematics))
+        //    {
+        //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Mathematics, DateTime.Now);
+        //    }
 
-            if (!staffFaculty.HasFlag(Faculty.Mathematics) && originalFaculty.HasFlag(Faculty.Mathematics))
-            {
-                await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Mathematics, DateTime.Now);
-            }
+        //    if (!staffFaculty.HasFlag(Faculty.Mathematics) && originalFaculty.HasFlag(Faculty.Mathematics))
+        //    {
+        //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Mathematics, DateTime.Now);
+        //    }
 
-            if (!originalFaculty.HasFlag(Faculty.Science) && staffFaculty.HasFlag(Faculty.Science))
-            {
-                await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Science, DateTime.Now);
-            }
+        //    if (!originalFaculty.HasFlag(Faculty.Science) && staffFaculty.HasFlag(Faculty.Science))
+        //    {
+        //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Science, DateTime.Now);
+        //    }
 
-            if (!staffFaculty.HasFlag(Faculty.Science) && originalFaculty.HasFlag(Faculty.Science))
-            {
-                await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Science, DateTime.Now);
-            }
+        //    if (!staffFaculty.HasFlag(Faculty.Science) && originalFaculty.HasFlag(Faculty.Science))
+        //    {
+        //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Science, DateTime.Now);
+        //    }
 
-            if (!originalFaculty.HasFlag(Faculty.Stage3) && staffFaculty.HasFlag(Faculty.Stage3))
-            {
-                await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Stage3, DateTime.Now);
-            }
+        //    if (!originalFaculty.HasFlag(Faculty.Stage3) && staffFaculty.HasFlag(Faculty.Stage3))
+        //    {
+        //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Stage3, DateTime.Now);
+        //    }
 
-            if (!staffFaculty.HasFlag(Faculty.Stage3) && originalFaculty.HasFlag(Faculty.Stage3))
-            {
-                await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Stage3, DateTime.Now);
-            }
+        //    if (!staffFaculty.HasFlag(Faculty.Stage3) && originalFaculty.HasFlag(Faculty.Stage3))
+        //    {
+        //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Stage3, DateTime.Now);
+        //    }
 
-            if (!originalFaculty.HasFlag(Faculty.Support) && staffFaculty.HasFlag(Faculty.Support))
-            {
-                await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Support, DateTime.Now);
-            }
+        //    if (!originalFaculty.HasFlag(Faculty.Support) && staffFaculty.HasFlag(Faculty.Support))
+        //    {
+        //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Support, DateTime.Now);
+        //    }
 
-            if (!staffFaculty.HasFlag(Faculty.Support) && originalFaculty.HasFlag(Faculty.Support))
-            {
-                await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Support, DateTime.Now);
-            }
-        }
+        //    if (!staffFaculty.HasFlag(Faculty.Support) && originalFaculty.HasFlag(Faculty.Support))
+        //    {
+        //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Support, DateTime.Now);
+        //    }
+        //}
 
-        public async Task RemoveStaffAdobeGroupMembershipBasedOnFaculty(string staffId, Faculty staffFaculty)
-        {
-            if (staffFaculty.HasFlag(Faculty.Administration))
-            {
-                await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Administration, DateTime.Now);
-            }
+        //public async Task RemoveStaffAdobeGroupMembershipBasedOnFaculty(string staffId, Faculty staffFaculty)
+        //{
+        //    if (staffFaculty.HasFlag(Faculty.Administration))
+        //    {
+        //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Administration, DateTime.Now);
+        //    }
 
-            if (staffFaculty.HasFlag(Faculty.Executive))
-            {
-                await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Executive, DateTime.Now);
-            }
+        //    if (staffFaculty.HasFlag(Faculty.Executive))
+        //    {
+        //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Executive, DateTime.Now);
+        //    }
 
-            if (staffFaculty.HasFlag(Faculty.English))
-            {
-                await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.English, DateTime.Now);
-            }
+        //    if (staffFaculty.HasFlag(Faculty.English))
+        //    {
+        //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.English, DateTime.Now);
+        //    }
 
-            if (staffFaculty.HasFlag(Faculty.Mathematics))
-            {
-                await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Mathematics, DateTime.Now);
-            }
+        //    if (staffFaculty.HasFlag(Faculty.Mathematics))
+        //    {
+        //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Mathematics, DateTime.Now);
+        //    }
 
-            if (staffFaculty.HasFlag(Faculty.Science))
-            {
-                await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Science, DateTime.Now);
-            }
+        //    if (staffFaculty.HasFlag(Faculty.Science))
+        //    {
+        //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Science, DateTime.Now);
+        //    }
 
-            if (staffFaculty.HasFlag(Faculty.Stage3))
-            {
-                await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Stage3, DateTime.Now);
-            }
+        //    if (staffFaculty.HasFlag(Faculty.Stage3))
+        //    {
+        //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Stage3, DateTime.Now);
+        //    }
 
-            if (staffFaculty.HasFlag(Faculty.Support))
-            {
-                await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Support, DateTime.Now);
-            }
-        }
+        //    if (staffFaculty.HasFlag(Faculty.Support))
+        //    {
+        //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Support, DateTime.Now);
+        //    }
+        //}
 
         public Task CreateCanvasUserFromStudent(Student student)
         {

@@ -36,10 +36,9 @@
         <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">For Faculty <span class="caret"></span></button>
         <div class="dropdown-menu">
             @{
-                var faculties = Enum.GetValues(typeof(Faculty));
-                foreach (var faculty in faculties)
+                foreach (var faculty in Model.FacultyList.OrderBy(list => list.Value))
                 {
-                    <a asp-action="ForFaculty" asp-controller="Courses" asp-area="Subject" asp-route-id="@faculty.ToString()" class="dropdown-item">@faculty.ToString()</a>
+                    <a asp-action="ForFaculty" asp-controller="Courses" asp-area="Subject" asp-route-facultyId="@faculty.Key" class="dropdown-item">@faculty.Value</a>
                 }
             }
         </div>

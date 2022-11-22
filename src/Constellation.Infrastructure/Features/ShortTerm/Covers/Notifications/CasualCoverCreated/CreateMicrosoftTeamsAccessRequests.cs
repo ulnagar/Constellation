@@ -89,7 +89,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
-            if (!offering.Sessions.Any(session => session.StaffId == "735422017" && !session.IsDeleted) && !offering.Course.Faculty.HasFlag(Faculty.Mathematics)) //Karen Bellamy
+            if (!offering.Sessions.Any(session => session.StaffId == "735422017" && !session.IsDeleted)) //Karen Bellamy
             {
                 var karenAddOperation = new TeacherMSTeamOperation
                 {

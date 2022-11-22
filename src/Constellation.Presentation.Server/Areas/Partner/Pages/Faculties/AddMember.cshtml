@@ -1,0 +1,55 @@
+﻿@page
+@using Constellation.Core.Enums;
+@model AddMemberModel
+
+<h2>Add Member to Faculty</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-page-handler="AddMember" method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.MemberDefinition.FacultyId)
+
+        <div class="form-group row">
+            <label asp-for="MemberDefinition.StaffId" class="col-md-2">Staff Member</label>
+            <div class="col-md-5">
+                <select asp-for="MemberDefinition.StaffId" asp-items="@(new SelectList(Model.StaffList, "Key", "Value"))" class="form-control combo custom-select">
+                    <option selected="selected" value=""> -- Please Select -- </option>
+                </select>
+                <span asp-validation-for="MemberDefinition.StaffId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="MemberDefinition.FacultyName" class="col-md-2">Faculty</label>
+            <div class="col-md-8">
+                <input type="text" class="form-control" readonly="readonly" value="@Model.MemberDefinition.FacultyName" />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="MemberDefinition.Role" class="col-md-2"></label>
+            <div class="col-md-3">
+                <select asp-for="MemberDefinition.Role" asp-items="@Html.GetEnumSelectList<FacultyMembershipRole>()" class="form-control">
+                    <option selected="selected" value=""> -- Please Select -- </option>
+                </select>
+                <span asp-validation-for="MemberDefinition.Role" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

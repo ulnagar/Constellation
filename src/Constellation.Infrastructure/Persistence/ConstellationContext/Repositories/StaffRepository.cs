@@ -33,7 +33,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Include(s => s.CourseSessions)
                     .ThenInclude(session => session.Period)
                 .Include(s => s.CourseSessions)
-                    .ThenInclude(session => session.Room);
+                    .ThenInclude(session => session.Room)
+                .Include(staff => staff.Faculties)
+                    .ThenInclude(member => member.Faculty);
         }
 
         public Staff WithDetails(string id)
@@ -76,6 +78,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         public async Task<ICollection<Staff>> AllActiveAsync()
         {
             return await _context.Staff
+                .Include(staff => staff.Faculties)
+                .ThenInclude(member => member.Faculty)
                 .Where(s => !s.IsDeleted)
                 .OrderBy(s => s.LastName)
                 .ToListAsync();
@@ -113,11 +117,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToList();
         }
 
-        public ICollection<Staff> AllFromFaculty(Faculty faculty)
+        public ICollection<Staff> AllFromFaculty(Guid facultyId)
         {
-            return Collection()
-                .Where(s => s.Faculty.HasFlag(faculty) && !s.IsDeleted)
-                .OrderBy(s => s.LastName)
+            return _context.Staff
+                .Where(staff => staff.Faculties.Any(member => member.FacultyId == facultyId && !member.IsDeleted))
+                .OrderBy(staff => staff.LastName)
                 .ToList();
         }
 
@@ -172,6 +176,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         {
             return await _context.Staff
                 .Include(staff => staff.School)
+                .Include(staff => staff.Faculties)
+                .ThenInclude(member => member.Faculty)
                 .OrderBy(staff => staff.LastName)
                 .Where(predicate)
                 .ToListAsync();
@@ -180,6 +186,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         public async Task<Staff> ForDetailDisplayAsync(string id)
         {
             return await _context.Staff
+                .Include(staff => staff.Faculties)
+                .ThenInclude(member => member.Faculty)
                 .Include(staff => staff.School)
                 .ThenInclude(school => school.StaffAssignments)
                 .ThenInclude(role => role.SchoolContact)

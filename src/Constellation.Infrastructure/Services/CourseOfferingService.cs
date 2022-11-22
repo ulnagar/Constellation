@@ -29,7 +29,6 @@ namespace Constellation.Infrastructure.Services
                     Name = courseResource.Name,
                     Grade = courseResource.Grade,
                     Faculty = courseResource.Faculty,
-                    HeadTeacher = courseResource.HeadTeacher,
                     FullTimeEquivalentValue = courseResource.FullTimeEquivalentValue
                 };
 
@@ -63,13 +62,10 @@ namespace Constellation.Infrastructure.Services
                 if (courseResource.Grade != 0)
                     course.Grade = courseResource.Grade;
 
-                if (courseResource.Faculty != 0)
-                    course.Faculty = courseResource.Faculty;
+                course.FacultyId = courseResource.FacultyId;
 
                 if (courseResource.FullTimeEquivalentValue != 0)
                     course.FullTimeEquivalentValue = courseResource.FullTimeEquivalentValue;
-
-                course.HeadTeacherId = courseResource.HeadTeacherId;
 
                 result.Success = true;
                 result.Entity = course;

@@ -12,9 +12,18 @@
 
 <p>Sentral reports that the following rolls have not yet been submitted.</p>
 <ul>
-    @foreach (var entry in Model.UnsubmittedRolls)
+    @foreach (var entry in Model.RollEntries)
     {
-        <li>@entry</li>
+        <li>
+            @entry.RollInformation
+            @if (entry.Notes.Any())
+            {
+                foreach (var note in entry.Notes)
+                {
+                    <br />@note
+                }
+            }
+        </li>
     }
 </ul>
 <p>Please ensure that these rolls have been submitted prior to 11am tomorrow.</p>

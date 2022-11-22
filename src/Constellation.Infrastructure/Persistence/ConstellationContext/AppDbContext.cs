@@ -1,7 +1,10 @@
-﻿using Constellation.Application.Interfaces.Repositories;
+﻿using Constellation.Application.Interfaces.Providers;
+using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models;
 using Constellation.Application.Models.EmailQueue;
 using Constellation.Application.Models.Identity;
+using Constellation.Core.Common;
 using Constellation.Core.Models;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Models.Stocktake;
@@ -22,10 +25,21 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
 {
     public class AppDbContext : KeyApiAuthorizationDbContext<AppUser, AppRole, Guid>, IAppDbContext
     {
+        private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly ICurrentUserService _currentUserService;
+
         public AppDbContext(DbContextOptions<AppDbContext> options, IOptions<OperationalStoreOptions> operationalStoreOptions)
             : base(options, operationalStoreOptions)
         {
             MandatoryTraining = new MandatoryTrainingSets(this);
+        }
+
+        public AppDbContext(DbContextOptions<AppDbContext> options, IOptions<OperationalStoreOptions> operationalStoreOptions,
+            IDateTimeProvider dateTimeProvider, ICurrentUserService currentUserService)
+            : base (options, operationalStoreOptions)
+        {
+            _dateTimeProvider = dateTimeProvider;
+            _currentUserService = currentUserService;
         }
 
         public DbSet<AppSettings> AppSettings { get; set; }
@@ -68,13 +82,33 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public DbSet<StocktakeSighting> StocktakeSightings { get; set; }
         public DbSet<StudentAward> StudentAward { get; set; }
         public DbSet<EmailQueueItem> EmailQueue { get; set; }
-        
+        public DbSet<Faculty> Faculties { get; set; }
         public IMandatoryTrainingSets MandatoryTraining { get; private set; }
         public DbSet<TrainingModule> MandatoryTraining_Modules { get; set; }
         public DbSet<TrainingCompletion> MandatoryTraining_CompletionRecords { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
+            foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                        entry.Entity.CreatedBy = _currentUserService.UserName;
+                        entry.Entity.CreatedAt = _dateTimeProvider.Now;
+                        break;
+                    case EntityState.Modified:
+                        if (entry.Entity.IsDeleted)
+                        {
+                            entry.Entity.DeletedBy = _currentUserService.UserName;
+                            entry.Entity.DeletedAt = _dateTimeProvider.Now;
+                        }
+                        entry.Entity.ModifiedBy = _currentUserService.UserName;
+                        entry.Entity.ModifiedAt = _dateTimeProvider.Now;
+                        break;
+                }
+            }
+            
             return base.SaveChangesAsync(cancellationToken);
         }
 

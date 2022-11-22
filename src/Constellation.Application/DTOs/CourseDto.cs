@@ -1,6 +1,7 @@
 ﻿using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Application.DTOs
@@ -13,10 +14,8 @@ namespace Constellation.Application.DTOs
         [Required]
         public Grade Grade { get; set; }
         [Required]
-        public Faculty Faculty { get; set; }
-        public Staff HeadTeacher { get; set; }
-        [Display(Name=DisplayNameDefaults.HeadTeacherId)]
-        public string HeadTeacherId { get; set; }
+        public Guid FacultyId { get; set; }
+        public virtual Faculty Faculty { get; set; }
         [Display(Name=DisplayNameDefaults.FTEValue)]
         public decimal FullTimeEquivalentValue { get; set; }
     }

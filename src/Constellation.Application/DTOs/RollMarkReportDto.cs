@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System;
+using System.Collections.Generic;
 
 namespace Constellation.Application.DTOs
 {
@@ -12,16 +14,15 @@ namespace Constellation.Application.DTOs
         public string Year { get; set; }
         public string Room { get; set; }
         public bool Submitted { get; set; }
-
-        // Collated from Database
-        public int OfferingId { get; set; }
-        public bool Covered { get; set; }
-        public string CoveredBy { get; set; }
-        public string CoverType { get; set; }
-        public string HeadTeacher { get; set; }
-        public string HeadTeacherEmail { get; set; }
-        public string EmailSentTo { get; set; }
-        public string Description { get; set; }
-        public string Faculty { get; set; }
     }
+
+    public class RollMarkingEmailDto 
+    {
+        public string RollInformation { get; set; }
+        public Dictionary<string, string> Teachers { get; set; } = new();
+        public Dictionary<string, string> HeadTeachers { get; set; } = new();
+        public string Faculty { get; set; }
+        public List<string> Notes { get; set; } = new();
+    }
+
 }

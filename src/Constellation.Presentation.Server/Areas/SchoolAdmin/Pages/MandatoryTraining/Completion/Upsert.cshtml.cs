@@ -204,8 +204,6 @@ public class UpsertModel : BasePageModel
                 StaffId = StaffId,
                 TrainingModuleId = TrainingModuleId.Value,
                 CompletedDate = CompletedDate,
-                ModifiedBy = Request.HttpContext.User.Identity?.Name,
-                ModifiedAt = _dateTimeProvider.Now,
                 File = await GetUploadedFile()
             };
 
@@ -220,8 +218,6 @@ public class UpsertModel : BasePageModel
                 StaffId = StaffId,
                 TrainingModuleId = TrainingModuleId.Value,
                 CompletedDate = CompletedDate,
-                CreatedBy = Request.HttpContext.User.Identity?.Name,
-                CreatedAt = _dateTimeProvider.Now,
                 File = await GetUploadedFile()
             };
 

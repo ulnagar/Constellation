@@ -18,6 +18,6 @@ public class ModuleSummaryDto : IMapFrom<TrainingModule>
     {
         profile.CreateMap<TrainingModule, ModuleSummaryDto>()
             .ForMember(dest => dest.Expiry, opt => opt.MapFrom(src => src.Expiry.GetDisplayName()))
-            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.DeletedBy)));
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => !src.IsDeleted));
     }
 }

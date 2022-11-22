@@ -1,4 +1,5 @@
-﻿using Constellation.Core.Enums;
+﻿using Constellation.Application.Features.Faculties.Models;
+using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
 using System;
@@ -15,6 +16,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
         }
 
         public ICollection<CourseDto> Courses { get; set; }
+        public IDictionary<Guid, string> FacultyList { get; set; } = new Dictionary<Guid, string>();
 
         public class CourseDto
         {

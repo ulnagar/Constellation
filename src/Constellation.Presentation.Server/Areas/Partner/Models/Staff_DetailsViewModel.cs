@@ -1,36 +1,24 @@
-﻿using Constellation.Application.Extensions;
-using Constellation.Core.Enums;
+﻿using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Models
 {
     public class Staff_DetailsViewModel : BaseViewModel
     {
-        public Staff_DetailsViewModel()
-        {
-            Offerings = new List<OfferingDto>();
-            Sessions = new List<SessionDto>();
-            SchoolStaff = new List<ContactDto>();
-        }
-
         public StaffDto Staff { get; set; }
 
-        public ICollection<OfferingDto> Offerings { get; set; }
-        public ICollection<SessionDto> Sessions { get; set; }
-        public ICollection<ContactDto> SchoolStaff { get; set; }
+        public List<OfferingDto> Offerings { get; set; } = new();
+        public List<SessionDto> Sessions { get; set; } = new();
+        public List<ContactDto> SchoolStaff { get; set; } = new();
+        public List<FacultyDto> Faculties { get; set; } = new();
+
+        public Staff_FacultyAssignmentViewModel FacultyAssignmentDto { get; set; } = new();
 
         public class StaffDto
         {
-            public StaffDto()
-            {
-                Faculty = new List<string>();
-            }
-
             [Display(Name=DisplayNameDefaults.StaffId)]
             public string StaffId { get; set; }
             [Display(Name=DisplayNameDefaults.IsDeleted)]
@@ -46,7 +34,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
             public string SchoolName { get; set; }
             [Display(Name = DisplayNameDefaults.AdobeConnectId)]
             public string AdobeConnectId { get; set; }
-            public ICollection<string> Faculty { get; set; }
 
             public static StaffDto ConvertFromStaff(Staff staff)
             {
@@ -59,8 +46,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
                     DateEntered = staff.DateEntered,
                     EmailAddress = staff.EmailAddress,
                     SchoolName = staff.School.Name,
-                    AdobeConnectId = staff.AdobeConnectPrincipalId,
-                    Faculty = staff.Faculty.AsList()
+                    AdobeConnectId = staff.AdobeConnectPrincipalId
                 };
 
                 return viewModel;
@@ -131,6 +117,25 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
                     EmailAddress = role.SchoolContact.EmailAddress,
                     PhoneNumber = string.IsNullOrWhiteSpace(role.SchoolContact.PhoneNumber) ? role.School.PhoneNumber : role.SchoolContact.PhoneNumber,
                     Role = role.Role
+                };
+
+                return viewModel;
+            }
+        }
+
+        public class FacultyDto
+        {
+            public Guid Id { get; set; }
+            public string Name { get; set; }
+            public FacultyMembershipRole Role { get; set; }
+
+            public static FacultyDto ConvertFromFacultyMembership(FacultyMembership membership)
+            {
+                var viewModel = new FacultyDto
+                {
+                    Id = membership.Id,
+                    Name = membership.Faculty.Name,
+                    Role = membership.Role
                 };
 
                 return viewModel;

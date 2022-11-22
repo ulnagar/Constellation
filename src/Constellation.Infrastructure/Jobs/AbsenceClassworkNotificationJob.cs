@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs.EmailRequests;
+using Constellation.Application.Features.Faculties.Queries;
 using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
@@ -62,7 +63,9 @@ namespace Constellation.Infrastructure.Jobs
                     covers.Add(cover);
 
                 if (covers.Count > 0)
-                    teachers = new List<Staff> { offering.Course.HeadTeacher };
+                {
+                    teachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = offering.Course.FacultyId });
+                }
 
                 // create notification object in database
                 var notification = new ClassworkNotification

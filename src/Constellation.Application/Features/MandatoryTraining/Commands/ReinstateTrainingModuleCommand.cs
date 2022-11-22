@@ -26,6 +26,7 @@ public class ReinstateTrainingModuleCommandHandler : IRequestHandler<ReinstateTr
         var entity = await _context.MandatoryTraining.Modules
             .FirstOrDefaultAsync(module => module.Id == request.Id, cancellationToken);
 
+		entity.IsDeleted = false;
         entity.DeletedBy = null;
 		entity.DeletedAt = new DateTime();
 

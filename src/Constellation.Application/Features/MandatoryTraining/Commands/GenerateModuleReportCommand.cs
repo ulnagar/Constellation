@@ -66,7 +66,7 @@ public class GenerateModuleReportCommandHandler : IRequestHandler<GenerateModule
                 StaffId = staff.StaffId,
                 StaffFirstName = staff.FirstName,
                 StaffLastName = staff.LastName,
-                StaffFaculty = staff.Faculty.ToString(),
+                StaffFaculty = String.Join(",", staff.Faculties.Where(member => !member.IsDeleted).Select(member => member.Faculty.Name)),
                 CompletedDate = DateTime.MinValue
             };
 

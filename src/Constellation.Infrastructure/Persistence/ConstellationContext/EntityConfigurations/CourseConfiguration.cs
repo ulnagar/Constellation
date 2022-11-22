@@ -13,13 +13,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
             builder.HasMany(c => c.Offerings)
                 .WithOne(o => o.Course);
 
-            builder.HasOne(c => c.HeadTeacher)
-                .WithMany(s => s.ResponsibleCourses)
-                .HasForeignKey(c => c.HeadTeacherId)
-                .OnDelete(DeleteBehavior.NoAction);
-
             builder.Property(c => c.FullTimeEquivalentValue)
                 .HasPrecision(4, 3);
+
+            builder.HasOne(course => course.Faculty)
+                .WithMany()
+                .HasForeignKey(course => course.FacultyId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

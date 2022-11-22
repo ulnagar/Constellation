@@ -13,11 +13,11 @@ namespace Constellation.Application.Interfaces.Repositories
         Course WithFilter(Expression<Func<Course, bool>> predicate);
         ICollection<Course> All();
         ICollection<Course> AllWithFilter(Expression<Func<Course, bool>> predicate);
-        ICollection<Course> AllFromFaculty(Faculty faculty);
+        ICollection<Course> AllFromFaculty(Guid facultyId);
         ICollection<Course> AllFromGrade(Grade grade);
         ICollection<Course> AllWithActiveOfferings();
         ICollection<Course> AllWithoutActiveOfferings();
-        Task<IDictionary<int, string>> AllForLessonsPortal();
+        //Task<IDictionary<int, string>> AllForLessonsPortal();
         Task<Course> WithOfferingsForLessonsPortal(int courseId);
         Task<ICollection<Course>> ForListAsync(Expression<Func<Course, bool>> predicate);
         Task<Course> ForDetailDisplayAsync(int id);
