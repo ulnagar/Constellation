@@ -91,7 +91,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             return await _context.Covers
                 .Include(cover => cover.Offering)
                 .ThenInclude(offering => offering.Course)
-                .ThenInclude(course => course.HeadTeacher)
+                .ThenInclude(course => course.Faculty)
+                .ThenInclude(faculty => faculty.Members)
+                .ThenInclude(member => member.Staff)
                 .Include(cover => cover.Offering)
                 .ThenInclude(offering => offering.Sessions)
                 .ThenInclude(session => session.Teacher)

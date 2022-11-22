@@ -145,7 +145,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
 
             public string Id { get; set; }
             public string Name { get; set; }
-            public Faculty Faculty { get; set; }
+            public List<string> Faculty { get; set; } = new();
             public ICollection<string> Courses { get; set; }
 
             public static StaffDto ConvertFromStaff(Staff staff)
@@ -154,7 +154,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
                 {
                     Id = staff.StaffId,
                     Name = staff.DisplayName,
-                    Faculty = staff.Faculty,
+                    Faculty = staff.Faculties.Where(member => !member.IsDeleted).Select(member => member.Faculty.Name).ToList(),
                     Courses = staff.CourseSessions.Where(session => !session.IsDeleted).Select(session => session.Offering.Name).Distinct().ToList()
                 };
 

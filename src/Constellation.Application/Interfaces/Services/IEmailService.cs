@@ -1,6 +1,7 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Core.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -32,8 +33,7 @@ namespace Constellation.Application.Interfaces.Services
 
 
         // RollMarking Emails
-        Task SendDailyRollMarkingReport(List<RollMarkReportDto> orderedEntries, bool sendToAbsenceCoordinator, bool sendToFacultyHeadTeacher);
-
+        Task SendDailyRollMarkingReport(List<RollMarkingEmailDto> entries, DateOnly reportDate, Dictionary<string, string> recipients);
 
 
         // Cover Emails

@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
+using Constellation.Application.Features.Faculties.Queries;
 using Constellation.Application.Features.ShortTerm.Covers.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -255,7 +256,8 @@ namespace Constellation.Infrastructure.Services
                 await _operationService.RemoveTeacherMSTeamAccess("1030937", cover.OfferingId, cover.EndDate.AddDays(1), null);
             }
 
-            if (!offering.Sessions.Any(session => session.StaffId == "735422017" && !session.IsDeleted) && !offering.Course.Faculty.HasFlag(Faculty.Mathematics)) //Karen Bellamy
+            // TODO: Update this with the access right concept.
+            if (!offering.Sessions.Any(session => session.StaffId == "735422017" && !session.IsDeleted)) //Karen Bellamy will be removed from all Mathematics faculty teams as they are covered!
             {
                 await _operationService.CreateTeacherMSTeamOwnerAccess("735422017", cover.OfferingId, cover.StartDate.AddDays(-1), null);
                 await _operationService.RemoveTeacherMSTeamAccess("735422017", cover.OfferingId, cover.EndDate.AddDays(1), null);
@@ -446,11 +448,7 @@ namespace Constellation.Infrastructure.Services
                     await _operationService.RemoveTeacherAdobeConnectAccess(cover.StaffId, room, cover.EndDate.AddDays(1), cover.Id);
                 }
 
-                if ((checkTeacher.Faculty & Faculty.Executive) == checkTeacher.Faculty)
-                {
-                    // Teacher is an Executive Faculty Member. Do not remove!
-                }
-                else if (offering.Sessions.Select(s => s.StaffId).Contains(checkTeacher.StaffId))
+                if (offering.Sessions.Select(s => s.StaffId).Contains(checkTeacher.StaffId))
                 {
                     // Teacher is a regular teacher of the class. Do not remove!
                 }
@@ -617,12 +615,22 @@ namespace Constellation.Infrastructure.Services
         private async Task<EmailDtos.CoverEmail> CreateBulkCoverEmail(CoverDto coverResource, List<CoverClassSchedule> coverSchedule, Casual casual, List<CasualClassCover> coverList)
         {
             var secondaryRecipients = new Dictionary<string, string>();
-            var headTeachers = coverList.Select(cover => cover.Offering.Course.HeadTeacher).Distinct().ToList();
-            headTeachers.ForEach(teacher => secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress));
+
+            var faculties = coverList.Select(cover => cover.Offering.Course.FacultyId).Distinct().ToList();
+
+            foreach (var faculty in faculties)
+            {
+                var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = faculty });
+                foreach (var teacher in headTeachers)
+                {
+                    if (!secondaryRecipients.ContainsKey(teacher.DisplayName))
+                        secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
+                }
+            }
 
             var roleUsers = await _unitOfWork.Identities.UsersInRole(AuthRoles.CoverRecipient);
             foreach (var user in roleUsers)
-                if (!secondaryRecipients.Any(recipient => recipient.Value == user.Email))
+                if (!secondaryRecipients.ContainsValue(user.Email))
                     secondaryRecipients.Add(user.DisplayName, user.Email);
 
             var classroomTeachers = new Dictionary<string, string>();
@@ -683,8 +691,17 @@ namespace Constellation.Infrastructure.Services
         private async Task<EmailDtos.CoverEmail> CreateBulkCoverEmail(CoverDto coverResource, List<CoverClassSchedule> coverSchedule, Staff staff, List<TeacherClassCover> coverList)
         {
             var secondaryRecipients = new Dictionary<string, string>();
-            var headTeachers = coverList.Select(cover => cover.Offering.Course.HeadTeacher).Distinct().ToList();
-            headTeachers.ForEach(teacher => secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress));
+            var faculties = coverList.Select(cover => cover.Offering.Course.FacultyId).Distinct().ToList();
+
+            foreach (var faculty in faculties)
+            {
+                var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = faculty });
+                foreach (var teacher in headTeachers)
+                {
+                    if (!secondaryRecipients.ContainsKey(teacher.DisplayName))
+                        secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
+                }
+            }
 
             var roleUsers = await _unitOfWork.Identities.UsersInRole(AuthRoles.CoverRecipient);
             foreach (var user in roleUsers)
@@ -727,13 +744,20 @@ namespace Constellation.Infrastructure.Services
                 EndDate = cover.EndDate
             };
 
-            var secondaryRecipients = new[] { new { cover.Offering.Course.HeadTeacher.DisplayName, cover.Offering.Course.HeadTeacher.EmailAddress } }.ToList();
+            var secondaryRecipients = new Dictionary<string, string>();
+            var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = cover.Offering.Course.FacultyId });
+            foreach (var teacher in headTeachers)
+            {
+                if (!secondaryRecipients.ContainsKey(teacher.DisplayName))
+                    secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
+            }
+
             var roleUsers = await _unitOfWork.Identities.UsersInRole(AuthRoles.CoverRecipient);
             foreach (var user in roleUsers)
             {
-                if (!secondaryRecipients.Any(recipient => recipient.EmailAddress == user.Email))
+                if (!secondaryRecipients.ContainsValue(user.Email))
                 {
-                    secondaryRecipients.Add(new { user.DisplayName, EmailAddress = user.Email });
+                    secondaryRecipients.Add(user.DisplayName, user.Email);
                 }
             }
 
@@ -774,13 +798,20 @@ namespace Constellation.Infrastructure.Services
                 EndDate = cover.EndDate
             };
 
-            var secondaryRecipients = new[] { new { cover.Offering.Course.HeadTeacher.DisplayName, cover.Offering.Course.HeadTeacher.EmailAddress } }.ToList();
+            var secondaryRecipients = new Dictionary<string, string>();
+            var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = cover.Offering.Course.FacultyId });
+            foreach (var teacher in headTeachers)
+            {
+                if (!secondaryRecipients.ContainsKey(teacher.DisplayName))
+                    secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
+            }
+
             var roleUsers = await _unitOfWork.Identities.UsersInRole(AuthRoles.CoverRecipient);
             foreach (var user in roleUsers)
             {
-                if (!secondaryRecipients.Any(recipient => recipient.EmailAddress == user.Email))
+                if (!secondaryRecipients.ContainsValue(user.Email))
                 {
-                    secondaryRecipients.Add(new { user.DisplayName, EmailAddress = user.Email });
+                    secondaryRecipients.Add(user.DisplayName, user.Email);
                 }
             }
 
@@ -809,20 +840,24 @@ namespace Constellation.Infrastructure.Services
                 EndDate = cover.EndDate
             };
 
-            var secondaryRecipients = new[] { new { cover.Offering.Course.HeadTeacher.DisplayName, cover.Offering.Course.HeadTeacher.EmailAddress } }.ToList();
+            var secondaryRecipients = new Dictionary<string, string>();
+            var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = cover.Offering.Course.FacultyId });
+            foreach (var teacher in headTeachers)
+            {
+                if (!secondaryRecipients.ContainsKey(teacher.DisplayName))
+                    secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
+            }
+
             var roleUsers = await _unitOfWork.Identities.UsersInRole(AuthRoles.CoverRecipient);
             foreach (var user in roleUsers)
             {
-                if (!secondaryRecipients.Any(recipient => recipient.EmailAddress == user.Email))
+                if (!secondaryRecipients.ContainsValue(user.Email))
                 {
-                    secondaryRecipients.Add(new { user.DisplayName, EmailAddress = user.Email });
+                    secondaryRecipients.Add(user.DisplayName, user.Email);
                 }
             }
 
-            foreach (var user in secondaryRecipients)
-            {
-                resource.SecondaryRecipients.Add(user.DisplayName, user.EmailAddress);
-            }
+            resource.SecondaryRecipients = secondaryRecipients;
 
             //resource.ClassroomTeachers = (IDictionary<string, string>)cover.Offering.Sessions.Select(session => session.Teacher).Distinct().Select(teacher => new { teacher.DisplayName, teacher.EmailAddress }),
             var teachers = cover.Offering.Sessions.Select(session => session.Teacher).Distinct().ToList();
@@ -850,13 +885,20 @@ namespace Constellation.Infrastructure.Services
                 EndDate = cover.EndDate
             };
 
-            var secondaryRecipients = new[] { new { cover.Offering.Course.HeadTeacher.DisplayName, cover.Offering.Course.HeadTeacher.EmailAddress } }.ToList();
+            var secondaryRecipients = new Dictionary<string, string>();
+            var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = cover.Offering.Course.FacultyId });
+            foreach (var teacher in headTeachers)
+            {
+                if (!secondaryRecipients.ContainsKey(teacher.DisplayName))
+                    secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
+            }
+
             var roleUsers = await _unitOfWork.Identities.UsersInRole(AuthRoles.CoverRecipient);
             foreach (var user in roleUsers)
             {
-                if (!secondaryRecipients.Any(recipient => recipient.EmailAddress == user.Email))
+                if (!secondaryRecipients.ContainsValue(user.Email))
                 {
-                    secondaryRecipients.Add(new { user.DisplayName, EmailAddress = user.Email });
+                    secondaryRecipients.Add(user.DisplayName, user.Email);
                 }
             }
 

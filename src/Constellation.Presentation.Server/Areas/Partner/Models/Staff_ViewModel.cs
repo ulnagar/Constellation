@@ -8,18 +8,16 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
     public class Staff_ViewModel : BaseViewModel
     {
         public ICollection<StaffDto> Staff { get; set; }
+        public IDictionary<Guid, string> FacultyList { get; set; } = new Dictionary<Guid, string>();
+
 
         public class StaffDto
         {
-            public StaffDto()
-            {
-                Faculty = new List<string>();
-            }
-
             public string Id { get; set; }
             public string Name { get; set; }
-            public ICollection<string> Faculty { get; set; }
+            public List<Faculty> Faculties { get; set; } = new();
             public string SchoolName { get; set; }
+
 
             public static StaffDto ConvertFromStaff(Staff staff)
             {
@@ -27,7 +25,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
                 {
                     Id = staff.StaffId,
                     Name = staff.DisplayName,
-                    Faculty = staff.Faculty.AsList(),
+                    Faculties = staff.Faculties.Where(member => !member.IsDeleted).Select(member => member.Faculty).ToList(),
                     SchoolName = staff.School.Name
                 };
 

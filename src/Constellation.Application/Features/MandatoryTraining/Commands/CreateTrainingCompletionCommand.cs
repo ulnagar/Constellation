@@ -15,8 +15,6 @@ public record CreateTrainingCompletionCommand : IRequest
     public string StaffId { get; set; }
     public Guid TrainingModuleId { get; set; }
     public DateTime CompletedDate { get; set; }
-    public string CreatedBy { get; set; }
-    public DateTime CreatedAt { get; set; }
     public FileDto File { get; set; }
 }
 
@@ -37,9 +35,7 @@ public class CreateTrainingCompletionCommandHandler : IRequestHandler<CreateTrai
         {
             StaffId = request.StaffId,
             TrainingModuleId = request.TrainingModuleId,
-            CompletedDate = request.CompletedDate,
-            CreatedBy = request.CreatedBy,
-            CreatedAt = request.CreatedAt
+            CompletedDate = request.CompletedDate
         };
 
         _context.Add(recordEntity);

@@ -1,20 +1,17 @@
-﻿using Constellation.Application.Interfaces.Repositories;
+﻿namespace Constellation.Application.Features.MandatoryTraining.Commands;
+
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.MandatoryTraining;
 using MediatR;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
-
-namespace Constellation.Application.Features.MandatoryTraining.Commands;
 
 public record CreateTrainingModuleCommand : IRequest
 {
     public string Name { get; init; }
     public TrainingModuleExpiryFrequency Expiry { get; init; }
     public string Url { get; init; }
-    public string CreatedBy { get; init; }
-    public DateTime CreatedAt { get; init; }
 }
 
 public class CreateTrainingModuleCommandHandler : IRequestHandler<CreateTrainingModuleCommand>
@@ -32,9 +29,7 @@ public class CreateTrainingModuleCommandHandler : IRequestHandler<CreateTraining
         {
             Name = request.Name,
             Expiry = request.Expiry,
-            Url = request.Url,
-            CreatedBy = request.CreatedBy,
-            CreatedAt = request.CreatedAt
+            Url = request.Url
         };
 
         _context.Add(entity);

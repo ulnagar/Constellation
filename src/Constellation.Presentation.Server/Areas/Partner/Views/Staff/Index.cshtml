@@ -23,10 +23,9 @@
         <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">From Faculty <span class="caret"></span></button>
         <div class="dropdown-menu">
             @{
-                var faculties = Enum.GetValues(typeof(Faculty));
-                foreach (var faculty in faculties)
+                foreach (var faculty in Model.FacultyList.OrderBy(faculty => faculty.Value))
                 {
-                    <a asp-action="FromFaculty" asp-controller="Staff" asp-area="Partner" asp-route-id="@faculty.ToString()" class="dropdown-item">@faculty.ToString()</a>
+                    <a asp-action="FromFaculty" asp-controller="Staff" asp-area="Partner" asp-route-facultyId="@faculty.Key" class="dropdown-item">@faculty.Value</a>
                 }
             }
         </div>
@@ -58,7 +57,12 @@
             <tr>
                 <td>@Html.DisplayFor(model => item.Id)</td>
                 <td>@Html.DisplayFor(model => item.Name)</td>
-                <td>@Html.DisplayFor(model => item.Faculty, "StringList")</td>
+                <td>
+                    @foreach (var entry in item.Faculties)
+                    {
+                        @Html.DisplayFor(model => entry, "Faculty")
+                    }
+                </td>
                 <td>@Html.DisplayFor(model => item.SchoolName)</td>
                 <td>
                     <a asp-action="Details" asp-controller="Staff" asp-area="Partner" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>

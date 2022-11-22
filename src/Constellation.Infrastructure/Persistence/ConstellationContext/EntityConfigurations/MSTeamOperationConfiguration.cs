@@ -62,4 +62,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }
+
+    public class GroupMSTeamOperationConfiguration : IEntityTypeConfiguration<GroupMSTeamOperation>
+    {
+        public void Configure(EntityTypeBuilder<GroupMSTeamOperation> builder)
+        {
+            builder.HasOne(operation => operation.Faculty)
+                .WithMany()
+                .HasForeignKey(operation => operation.FacultyId)
+                .OnDelete(DeleteBehavior.NoAction);
+        }
+    }
 }

@@ -54,6 +54,7 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<StocktakeSighting> StocktakeSightings { get; set; }
         DbSet<StudentAward> StudentAward { get; set; }
         DbSet<EmailQueueItem> EmailQueue { get; set; }
+        DbSet<Faculty> Faculties { get; set; }
 
         IMandatoryTrainingSets MandatoryTraining { get; }
 

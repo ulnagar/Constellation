@@ -1,16 +1,15 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Features.Faculties.Queries;
+using Constellation.Application.Features.StaffMembers.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Enums;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 {
@@ -22,15 +21,18 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         private readonly IAuthService _authService;
         private readonly IStaffService _staffService;
         private readonly IOperationService _operationsService;
+        private readonly IMediator _mediator;
 
         public StaffController(IUnitOfWork unitOfWork, IAuthService authService,
-            IStaffService staffService, IOperationService operationsService)
+            IStaffService staffService, IOperationService operationsService, 
+            IMediator mediator)
             : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;
             _staffService = staffService;
             _operationsService = operationsService;
+            _mediator = mediator;
         }
 
         public IActionResult Index()
@@ -44,6 +46,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             var viewModel = await CreateViewModel<Staff_ViewModel>();
             viewModel.Staff = staff.Select(Staff_ViewModel.StaffDto.ConvertFromStaff).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
@@ -54,6 +57,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             var viewModel = await CreateViewModel<Staff_ViewModel>();
             viewModel.Staff = staff.Select(Staff_ViewModel.StaffDto.ConvertFromStaff).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
@@ -64,6 +68,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             var viewModel = await CreateViewModel<Staff_ViewModel>();
             viewModel.Staff = staff.Select(Staff_ViewModel.StaffDto.ConvertFromStaff).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
@@ -74,18 +79,18 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             var viewModel = await CreateViewModel<Staff_ViewModel>();
             viewModel.Staff = staff.Select(Staff_ViewModel.StaffDto.ConvertFromStaff).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
 
-        public async Task<IActionResult> FromFaculty(string id)
+        public async Task<IActionResult> FromFaculty(Guid facultyId)
         {
-            _ = Enum.TryParse(id, out Faculty faculty);
-
-            var staff = await _unitOfWork.Staff.ForListAsync(staff => staff.Faculty.HasFlag(faculty) && !staff.IsDeleted);
+            var staff = await _unitOfWork.Staff.ForListAsync(staff => staff.Faculties.Any(member => member.FacultyId == facultyId && !member.IsDeleted) && !staff.IsDeleted);
 
             var viewModel = await CreateViewModel<Staff_ViewModel>();
             viewModel.Staff = staff.Select(Staff_ViewModel.StaffDto.ConvertFromStaff).ToList();
+            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
 
             return View("Index", viewModel);
         }
@@ -102,13 +107,12 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             var schools = await _unitOfWork.Schools.ForSelectionAsync();
 
             var viewModel = await CreateViewModel<Staff_UpdateViewModel>();
-            viewModel.Staff = new Staff_UpdateViewModel.LocalStaffDto
+            viewModel.Staff = new StaffDto
             {
                 StaffId = staff.StaffId,
                 FirstName = staff.FirstName,
                 LastName = staff.LastName,
                 PortalUsername = staff.PortalUsername,
-                Faculty = staff.Faculty,
                 SchoolCode = staff.SchoolCode,
                 AdobeConnectPrincipalId = staff.AdobeConnectPrincipalId
             };
@@ -139,8 +143,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 {
                     await _unitOfWork.CompleteAsync();
 
-                    await _operationsService.AddStaffToAdobeGroupBasedOnFaculty(result.Entity.StaffId, result.Entity.Faculty);
-
                     await _operationsService.CreateTeacherEmployedMSTeamAccess(result.Entity.StaffId);
 
                     await _operationsService.CreateCanvasUserFromStaff(result.Entity);
@@ -161,15 +163,8 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             else
             {
                 var staff = await _unitOfWork.Staff.ForEditAsync(viewModel.Staff.StaffId);
-                var originalFaculty = staff.Faculty;
 
                 var result = await _staffService.UpdateStaffMember(viewModel.Staff.StaffId, viewModel.Staff);
-
-                if (staff.Faculty != result.Entity.Faculty)
-                {
-                    // Create operations for group addition/removal.
-                    await _operationsService.AuditStaffAdobeGroupMembershipBasedOnFaculty(staff.StaffId, originalFaculty, staff.Faculty);
-                }
 
                 var newUser = new UserTemplateDto
                 {
@@ -221,6 +216,17 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             viewModel.Offerings = staff.CourseSessions.Where(session => !session.IsDeleted && session.Offering.EndDate >= DateTime.Now).Select(session => session.Offering).Distinct().Select(Staff_DetailsViewModel.OfferingDto.ConvertFromOffering).ToList();
             viewModel.Sessions = staff.CourseSessions.Where(session => !session.IsDeleted && session.Offering.EndDate >= DateTime.Now).Select(Staff_DetailsViewModel.SessionDto.ConvertFromSession).ToList();
             viewModel.SchoolStaff = staff.School.StaffAssignments.Where(role => !role.IsDeleted).Select(Staff_DetailsViewModel.ContactDto.ConvertFromRoleAssignment).ToList();
+            viewModel.Faculties = staff.Faculties.Where(membership => !membership.IsDeleted).Select(Staff_DetailsViewModel.FacultyDto.ConvertFromFacultyMembership).ToList();
+
+            var facultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
+
+            // ViewModel properties for add faculty membership modal
+            viewModel.FacultyAssignmentDto = new Staff_FacultyAssignmentViewModel
+            {
+                StaffId = id,
+                StaffName = staff.DisplayName,
+                Faculties = new SelectList(facultyList, "Key", "Value")
+            };
 
             return View(viewModel);
         }
@@ -263,7 +269,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             await _authService.UpdateUser(staffMember.EmailAddress, newUser);
 
-            await _operationsService.RemoveStaffAdobeGroupMembershipBasedOnFaculty(staffMember.StaffId, staffMember.Faculty);
+            //await _operationsService.RemoveStaffAdobeGroupMembershipBasedOnFaculty(staffMember.StaffId, staffMember.Faculty);
 
             await _unitOfWork.CompleteAsync();
 
@@ -306,11 +312,30 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             await _authService.UpdateUser(staffMember.EmailAddress, newUser);
 
-            await _operationsService.AddStaffToAdobeGroupBasedOnFaculty(staffMember.StaffId, staffMember.Faculty);
+            //await _operationsService.AddStaffToAdobeGroupBasedOnFaculty(staffMember.StaffId, staffMember.Faculty);
 
             await _unitOfWork.CompleteAsync();
 
             return RedirectToAction("Details", new { id });
+        }
+
+        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
+        public async Task<IActionResult> DeleteFacultyRole(Guid id)
+        {
+            await _mediator.Send(new RemoveFacultyMembershipFromStaffMemberCommand { MembershipId = id });
+
+            return RedirectToAction("Index");
+        }
+
+        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
+        public async Task<IActionResult> _AddFacultyMembership(Staff_FacultyAssignmentViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+                return RedirectToAction("Details", new { id = viewModel.StaffId });
+
+            await _mediator.Send(new CreateFacultyMembershipForStaffMemberCommand { StaffId = viewModel.StaffId, FacultyId = viewModel.FacultyId, Role = viewModel.Role });
+
+            return RedirectToAction("Details", new { id = viewModel.StaffId });
         }
     }
 }

@@ -21,7 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Features\Faculties\Commands\" />
     <Folder Include="Features\Portal\School\Timetables\Models\" />
+    <Folder Include="Features\StaffMembers\Queries\" />
   </ItemGroup>
 
 </Project>

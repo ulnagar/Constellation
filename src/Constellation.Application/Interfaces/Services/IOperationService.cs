@@ -41,9 +41,9 @@ namespace Constellation.Application.Interfaces.Services
         Task CreateContactAddedMSTeamAccess(int contactId);
         Task RemoveContactAddedMSTeamAccess(int contactId);
 
-        Task AddStaffToAdobeGroupBasedOnFaculty(string staffId, Faculty staffFaculty);
-        Task AuditStaffAdobeGroupMembershipBasedOnFaculty(string staffId, Faculty originalFaculty, Faculty staffFaculty);
-        Task RemoveStaffAdobeGroupMembershipBasedOnFaculty(string staffId, Faculty staffFaculty);
+        //Task AddStaffToAdobeGroupBasedOnFaculty(string staffId, Faculty staffFaculty);
+        //Task AuditStaffAdobeGroupMembershipBasedOnFaculty(string staffId, Faculty originalFaculty, Faculty staffFaculty);
+        //Task RemoveStaffAdobeGroupMembershipBasedOnFaculty(string staffId, Faculty staffFaculty);
 
         Task MarkAdobeConnectOperationCompleteAsync(int id);
 

@@ -17,8 +17,6 @@ public record UpdateTrainingCompletionCommand : IRequest
     public string StaffId { get; set; }
     public Guid TrainingModuleId { get; set; }
     public DateTime CompletedDate { get; set; }
-    public string ModifiedBy { get; set; }
-    public DateTime ModifiedAt { get; set; }
     public FileDto File { get; set; }
 }
 
@@ -41,8 +39,6 @@ public class UpdateTrainingCompletionCommandHandler : IRequestHandler<UpdateTrai
         entity.StaffId = request.StaffId;
         entity.TrainingModuleId = request.TrainingModuleId;
         entity.CompletedDate = request.CompletedDate;
-        entity.ModifiedBy = request.ModifiedBy;
-        entity.ModifiedAt = request.ModifiedAt;
 
         await _context.SaveChangesAsync(cancellationToken);
 

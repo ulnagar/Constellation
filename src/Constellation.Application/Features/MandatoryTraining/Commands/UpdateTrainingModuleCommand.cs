@@ -14,8 +14,6 @@ public record UpdateTrainingModuleCommand : IRequest
     public string Name { get; init; }
     public TrainingModuleExpiryFrequency Expiry { get; init; }
     public string Url { get; init; }
-    public string ModifiedBy { get; init; }
-    public DateTime ModifiedAt { get; init; }
 }
 
 public class UpdateTrainingModuleCommandHandler : IRequestHandler<UpdateTrainingModuleCommand>
@@ -35,8 +33,6 @@ public class UpdateTrainingModuleCommandHandler : IRequestHandler<UpdateTraining
         entity.Name = request.Name;
         entity.Expiry = request.Expiry;
         entity.Url = request.Url;
-        entity.ModifiedBy = request.ModifiedBy;
-        entity.ModifiedAt = request.ModifiedAt;
 
         await _context.SaveChangesAsync(cancellationToken);
 

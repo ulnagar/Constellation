@@ -25,6 +25,12 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.IsStaffMember, policy =>
             policy.RequireClaim(AuthClaimType.StaffEmployeeId));
 
+        options.AddPolicy(AuthPolicies.CanEditFaculties, policy =>
+            policy.RequireRole(AuthRoles.Editor, AuthRoles.Admin));
+
+        options.AddPolicy(AuthPolicies.CanViewFacultyDetails, policy =>
+            policy.RequireRole(AuthRoles.StaffMember, AuthRoles.Editor, AuthRoles.Admin));
+
         return options;
     }
 }

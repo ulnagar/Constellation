@@ -63,9 +63,7 @@ public class UpsertModel : BasePageModel
                 Id = Id.Value,
                 Name = Name,
                 Expiry = Expiry,
-                Url = ModelUrl,
-                ModifiedBy = Request.HttpContext.User.Identity?.Name,
-                ModifiedAt = _dateTimeProvider.Now,
+                Url = ModelUrl
             };
 
             await _mediator.Send(command);
@@ -78,9 +76,7 @@ public class UpsertModel : BasePageModel
             {
                 Name = Name,
                 Expiry = Expiry,
-                Url = ModelUrl,
-                CreatedBy = Request.HttpContext.User.Identity?.Name,
-                CreatedAt = _dateTimeProvider.Now,
+                Url = ModelUrl
             };
 
             await _mediator.Send(command);

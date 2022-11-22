@@ -20,7 +20,7 @@ namespace Constellation.Application.Interfaces.Repositories
         ICollection<Staff> AllInactive();
         ICollection<Staff> AllFromSchool(string code);
         ICollection<Staff> AllActiveFromSchool(string code);
-        ICollection<Staff> AllFromFaculty(Faculty faculty);
+        ICollection<Staff> AllFromFaculty(Guid facultyId);
         ICollection<Staff> AllWithoutAdobeConnectInfo();
         ICollection<Staff> AllWithActiveClasses();
         Task<Staff> FromEmailForExistCheck(string email);

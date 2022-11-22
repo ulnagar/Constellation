@@ -207,12 +207,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         {
             return await _context.Absences
                 .Include(absence => absence.Student)
-                .Include(absence => absence.Student.School)
+                    .ThenInclude(student => student.School)
                 .Include(absence => absence.Offering)
-                .Include(absence => absence.Offering.Course)
-                .Include(absence => absence.Offering.Course.HeadTeacher)
-                .Include(absence => absence.Offering.Sessions)
-                .ThenInclude(session => session.Teacher)
+                    .ThenInclude(offering => offering.Course)
+                        .ThenInclude(course => course.Faculty)
+                            .ThenInclude(faculty => faculty.Members)
+                                .ThenInclude(member => member.Staff)
+                .Include(absence => absence.Offering)
+                    .ThenInclude(offering => offering.Sessions)
+                        .ThenInclude(session => session.Teacher)
                 .Where(absence =>
                     absence.DateScanned == scanDate &&
                     absence.Type == Absence.Whole &&

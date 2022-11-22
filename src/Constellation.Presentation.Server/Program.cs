@@ -1,7 +1,9 @@
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Presentation.Server.Infrastructure;
+using Constellation.Presentation.Server.Services;
 using FluentValidation;
 using Hangfire;
 using Hangfire.SqlServer;
@@ -16,6 +18,10 @@ LoggingConfiguration.SetupLogging(builder.Configuration, Serilog.Events.LogEvent
 
 // Add services to the container.
 builder.Services.AddStaffPortalInfrastructureComponents(builder.Configuration);
+
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+//builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 builder.Services.AddHangfire((provider, configuration) => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)

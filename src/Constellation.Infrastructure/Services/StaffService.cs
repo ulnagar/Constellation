@@ -44,8 +44,7 @@ namespace Constellation.Infrastructure.Services
                 LastName = staffResource.LastName,
                 PortalUsername = staffResource.PortalUsername,
                 AdobeConnectPrincipalId = staffResource.AdobeConnectPrincipalId,
-                SchoolCode = staffResource.SchoolCode,
-                Faculty = staffResource.Faculty
+                SchoolCode = staffResource.SchoolCode
             };
 
             _unitOfWork.Add(staff);
@@ -126,9 +125,6 @@ namespace Constellation.Infrastructure.Services
 
             if (!string.IsNullOrWhiteSpace(staffResource.SchoolCode))
                 staff.SchoolCode = staffResource.SchoolCode;
-
-            if (staffResource.Faculty != 0)
-                staff.Faculty = staffResource.Faculty;
 
             result.Success = true;
             result.Entity = staff;

@@ -297,12 +297,13 @@ namespace Constellation.Infrastructure.Jobs
                 _logger.LogInformation("{id}: Staff: Name {student} - Email {emailAddress}: LastName updated to {newName}", JobId, staff.DisplayName, staff.EmailAddress, staff.LastName);
             }
 
-            var faculty = staff.Faculty.ToString();
-            if (faculty.Contains(','))
-                faculty = faculty[..faculty.IndexOf(",")];
-            var department = _tiContext.Departments.ToList().FirstOrDefault(c => c.Name.Contains(faculty));
-            customer.Dept = department?.Sequence;
-
+            var faculty = staff.Faculties.FirstOrDefault(member => !member.IsDeleted);
+            if (faculty is not null) 
+            {
+                var department = _tiContext.Departments.ToList().FirstOrDefault(c => c.Name.Contains(faculty.Faculty.Name));
+                customer.Dept = department?.Sequence;
+            }
+            
             var location = _tiContext.Locations.FirstOrDefault(c => c.Note == staff.SchoolCode);
             customer.Location = location?.Sequence;
 
@@ -348,11 +349,12 @@ namespace Constellation.Infrastructure.Jobs
 
             _logger.LogInformation("{id}: Staff: Name {staff} - Email {emailAddress}: Created new record", JobId, staff.DisplayName, staff.EmailAddress);
 
-            var faculty = staff.Faculty.ToString();
-            if (faculty.Contains(','))
-                faculty = faculty[..faculty.IndexOf(",")];
-            var department = _tiContext.Departments.ToList().FirstOrDefault(c => c.Name.Contains(faculty));
-            customer.Dept = department?.Sequence;
+            var faculty = staff.Faculties.FirstOrDefault(member => !member.IsDeleted);
+            if (faculty is not null)
+            {
+                var department = _tiContext.Departments.ToList().FirstOrDefault(c => c.Name.Contains(faculty.Faculty.Name));
+                customer.Dept = department?.Sequence;
+            }
 
             var location = _tiContext.Locations.ToList().FirstOrDefault(c => c.Note == staff.SchoolCode);
             customer.Location = location?.Sequence;

@@ -1,7 +1,6 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
-using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -24,7 +23,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         {
             return _context.Offerings
                 .Include(o => o.Course)
-                    .ThenInclude(course => course.HeadTeacher)
+                    .ThenInclude(course => course.Faculty)
+                        .ThenInclude(faculty => faculty.Members.Where(member => member.Role == FacultyMembershipRole.Manager))
+                            .ThenInclude(member => member.Staff)
                 .Include(o => o.Sessions)
                     .ThenInclude(session => session.Room)
                 .Include(o => o.Sessions)
@@ -268,7 +269,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Include(offering => offering.Sessions)
                 .ThenInclude(session => session.Period)
                 .Include(offering => offering.Course)
-                .ThenInclude(course => course.HeadTeacher)
+                .ThenInclude(course => course.Faculty)
+                .ThenInclude(faculty => faculty.Members.Where(member => member.Role == FacultyMembershipRole.Manager))
+                .ThenInclude(member => member.Staff)
                 .SingleOrDefaultAsync(offering => offering.Id == id);
         }
 
@@ -315,7 +318,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         {
             return await _context.Offerings
                 .Include(offering => offering.Course)
-                .Include(offering => offering.Course.HeadTeacher)
+                    .ThenInclude(course => course.Faculty)
+                        .ThenInclude(faculty => faculty.Members.Where(member => member.Role == FacultyMembershipRole.Manager))
+                            .ThenInclude(member => member.Staff)
                 .SingleOrDefaultAsync(offering => offering.Name == name && offering.EndDate.Year == year);
         }
     }

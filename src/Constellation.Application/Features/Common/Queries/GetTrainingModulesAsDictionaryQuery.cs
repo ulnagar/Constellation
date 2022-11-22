@@ -25,7 +25,7 @@ public class GetTrainingModulesAsDictionaryQueryHandler : IRequestHandler<GetTra
 	public async Task<Dictionary<Guid, string>> Handle(GetTrainingModulesAsDictionaryQuery request, CancellationToken cancellationToken)
 	{
 		return await _context.MandatoryTraining.Modules
-			.Where(module => string.IsNullOrWhiteSpace(module.DeletedBy))
+			.Where(module => !module.IsDeleted)
 			.OrderBy(module => module.Name)
 			.ToDictionaryAsync(module => module.Id, module => module.Name, cancellationToken);
 	}

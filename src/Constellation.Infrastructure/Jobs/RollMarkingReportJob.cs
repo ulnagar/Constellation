@@ -1,9 +1,14 @@
-﻿using Constellation.Application.Interfaces.Gateways;
+﻿namespace Constellation.Infrastructure.Jobs;
+
+using Constellation.Application.DTOs;
+using Constellation.Application.Features.Faculties.Queries;
+using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -11,162 +16,178 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Infrastructure.Jobs
+public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHangfireJob
 {
-    public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHangfireJob
-    {
-        private readonly ISentralGateway _sentralService;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IEmailService _emailService;
-        private readonly ILogger<IRollMarkingReportJob> _logger;
+    private readonly ISentralGateway _sentralService;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IEmailService _emailService;
+    private readonly ILogger<IRollMarkingReportJob> _logger;
+    private readonly IMediator _mediator;
 
-        public RollMarkingReportJob(ISentralGateway sentralService, IUnitOfWork unitOfWork, 
-            IEmailService emailService, ILogger<IRollMarkingReportJob> logger)
+    public RollMarkingReportJob(ISentralGateway sentralService, IUnitOfWork unitOfWork, 
+        IEmailService emailService, ILogger<IRollMarkingReportJob> logger, IMediator mediator)
+    {
+        _sentralService = sentralService;
+        _unitOfWork = unitOfWork;
+        _emailService = emailService;
+        _logger = logger;
+        _mediator = mediator;
+    }
+
+    public async Task StartJob(Guid jobId, CancellationToken token)
+    {
+        var date = DateTime.Today;
+
+        if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
+            return;
+
+        _logger.LogInformation("{id}: Checking Date: {date}", jobId, date.ToShortDateString());
+        var entries = await _sentralService.GetRollMarkingReportAsync(date);
+
+        var unsubmitted = entries.Where(entry => !entry.Submitted).ToList();
+
+        if (!unsubmitted.Any())
         {
-            _sentralService = sentralService;
-            _unitOfWork = unitOfWork;
-            _emailService = emailService;
-            _logger = logger;
+            var infoString = $"{date.ToShortDateString()} - No Unsubmitted Rolls found!";
+
+            _logger.LogInformation("{id}: {infoString}", jobId, infoString);
+
+            return;
         }
 
-        public async Task StartJob(Guid jobId, CancellationToken token)
-        {
-            var date = DateTime.Today;
+        var emailList = new List<RollMarkingEmailDto>();
 
-            if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
+        foreach (var entry in unsubmitted)
+        {
+            if (token.IsCancellationRequested)
                 return;
 
-            _logger.LogInformation("{id}: Checking Date: {date}", jobId, date.ToShortDateString());
-            var entries = await _sentralService.GetRollMarkingReportAsync(date);
+            var emailDto = new RollMarkingEmailDto();
 
-            var unsubmitted = entries.Where(entry => !entry.Submitted).ToList();
+            var offeringName = entry.ClassName.StartsWith("5") || entry.ClassName.StartsWith("6") ? entry.ClassName.PadLeft(7, '0') : entry.ClassName.PadLeft(6, '0');
+            entry.ClassName = offeringName;
 
-            if (unsubmitted.Any())
+            var offering = await _unitOfWork.CourseOfferings.GetFromYearAndName(date.Year, offeringName);
+            var teacher = await _unitOfWork.Staff.GetFromName(entry.Teacher);
+            var covers = new List<ClassCover>();
+            var infoString = string.Empty;
+            var Covered = false;
+            var CoveredBy = string.Empty;
+            var CoverType = string.Empty;
+
+            if (offering is null && teacher is null)
             {
-                foreach (var entry in unsubmitted.OrderBy(item => item.ClassName).ThenBy(item => item.Period))
-                {
-                    if (token.IsCancellationRequested)
-                        return;
-
-                    var offeringName = entry.ClassName.StartsWith("5") || entry.ClassName.StartsWith("6") ? entry.ClassName.PadLeft(7, '0') : entry.ClassName.PadLeft(6, '0');
-                    entry.ClassName = offeringName;
-
-                    var offering = await _unitOfWork.CourseOfferings.GetFromYearAndName(date.Year, offeringName);
-                    var covers = new List<ClassCover>();
-
-                    if (offering != null)
-                    {
-                        var casualCovers = await _unitOfWork.CasualClassCovers.ForClassworkNotifications(date, offering.Id);
-                        var teacherCovers = await _unitOfWork.TeacherClassCovers.ForClassworkNotifications(date, offering.Id);
-
-                        foreach (var cover in casualCovers)
-                            covers.Add(cover);
-                        foreach (var cover in teacherCovers)
-                            covers.Add(cover);
-
-                        entry.HeadTeacher = offering.Course.HeadTeacher.DisplayName;
-                        entry.HeadTeacherEmail = offering.Course.HeadTeacher.EmailAddress;
-                        entry.Faculty = offering.Course.Faculty.ToString();
-                    }
-
-                    if (covers.Any())
-                    {
-                        entry.Covered = true;
-                        entry.HeadTeacher = offering.Course.HeadTeacher.DisplayName;
-                        entry.EmailSentTo = offering.Course.HeadTeacher.EmailAddress;
-                        
-                        foreach (var cover in covers)
-                        {
-                            if (cover.GetType().Name == nameof(CasualClassCover))
-                            {
-                                entry.Covered = true;
-                                entry.CoveredBy = ((CasualClassCover)cover).Casual.DisplayName;
-                                entry.CoverType = "Casual";
-                            }
-
-                            if (cover.GetType().Name == nameof(TeacherClassCover))
-                            {
-                                entry.Covered = true;
-                                entry.CoveredBy = ((TeacherClassCover)cover).Staff.DisplayName;
-                                entry.CoverType = "Teacher";
-                            }
-
-                            var infoString = $"{entry.Date.ToShortDateString()} - Unsubmitted Roll for {entry.ClassName} ({entry.Teacher}) in Period {entry.Period} covered by {entry.CoveredBy} ({entry.CoverType})";
-
-                            _logger.LogInformation("{id}: {infoString}", jobId, infoString);
-                            entry.Description = infoString;
-                        }
-                    }
-                    else
-                    {
-                        if (!string.IsNullOrWhiteSpace(entry.Teacher))
-                        {
-                            var teacher = await _unitOfWork.Staff.GetFromName(entry.Teacher);
-                            if (teacher != null)
-                                entry.EmailSentTo = teacher.EmailAddress;
-                            else if (offering != null)
-                                entry.EmailSentTo = offering.Course.HeadTeacher.EmailAddress;
-                            else
-                                entry.EmailSentTo = "auroracoll-h.school@det.nsw.edu.au";
-                        }
-                        else if (offering != null)
-                            entry.EmailSentTo = offering.Course.HeadTeacher.EmailAddress;
-                        else
-                            entry.EmailSentTo = "auroracoll-h.school@det.nsw.edu.au";
-
-                        var infoString = $"{entry.Date.ToShortDateString()} - Unsubmitted Roll for {entry.ClassName}";
-                        if (!string.IsNullOrWhiteSpace(entry.Teacher))
-                            infoString += $" by {entry.Teacher}";
-                        infoString += $" in Period {entry.Period}";
-
-                        _logger.LogInformation("{id}: {infoString}", jobId, infoString);
-                        entry.Description = infoString;
-                    }
-                }
-
-                var groupedByRecipient = unsubmitted.GroupBy(item => item.EmailSentTo);
-
-                foreach (var group in groupedByRecipient)
-                {
-                    if (token.IsCancellationRequested)
-                        return;
-
-                    // Email the relevant person (as outlined in the EmailSentTo field
-                    var orderedEntries = group.OrderBy(item => item.Date).ThenBy(item => item.ClassName).ThenBy(item => item.Period).ToList();
-
-                    await _emailService.SendDailyRollMarkingReport(orderedEntries, false, false);
-                }
-
-                var groupedByFaculty = unsubmitted.GroupBy(item => item.Faculty);
-
-                foreach (var group in groupedByFaculty)
-                {
-                    if (token.IsCancellationRequested)
-                        return;
-
-                    // Email the relevant person (as outlined in the EmailSentTo field
-                    var orderedEntries = group.OrderBy(item => item.Date).ThenBy(item => item.ClassName).ThenBy(item => item.Period).ToList();
-
-                    if (group == null)
-                        continue;
-
-                    await _emailService.SendDailyRollMarkingReport(orderedEntries, false, true);
-                }
-            }
-            else
-            {
-                var infoString = $"{date.ToShortDateString()} - No Unsubmitted Rolls found!";
-
-                _logger.LogInformation("{id}: {infoString}", jobId, infoString);
+                // Add note that Constellation does not understand this entry and send only to Scott.
+                emailDto.Notes.Add($"Could not identify the class or the teacher from Constellation records.");
+                emailDto.Notes.Add($"No email sent to classroom teacher or head teacher.");
             }
 
-            if (unsubmitted.Any())
+            if (teacher is not null)
             {
-                if (token.IsCancellationRequested)
-                    return;
-
-                await _emailService.SendDailyRollMarkingReport(unsubmitted, true, false);
+                emailDto.Teachers.Add(teacher.EmailAddress, teacher.DisplayName);
             }
+
+            if (offering is not null)
+            {
+                var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = offering.Course.FacultyId });
+                emailDto.HeadTeachers = headTeachers.ToDictionary(member => member.EmailAddress, member => member.DisplayName);
+
+                var casualCovers = await _unitOfWork.CasualClassCovers.ForClassworkNotifications(date, offering.Id);
+                var teacherCovers = await _unitOfWork.TeacherClassCovers.ForClassworkNotifications(date, offering.Id);
+
+                foreach (var cover in casualCovers)
+                    covers.Add(cover);
+                foreach (var cover in teacherCovers)
+                    covers.Add(cover);
+            }
+
+            if (covers.Any())
+            {
+                foreach (var cover in covers.OrderBy(cover => cover.Id))
+                {
+                    if (cover.GetType().Name == nameof(CasualClassCover))
+                    {
+                        Covered = true;
+                        CoveredBy = ((CasualClassCover)cover).Casual.DisplayName;
+                        CoverType = "Casual";
+                    }
+
+                    if (cover.GetType().Name == nameof(TeacherClassCover))
+                    {
+                        Covered = true;
+                        CoveredBy = ((TeacherClassCover)cover).Staff.DisplayName;
+                        CoverType = "Teacher";
+                    }
+                }
+            }
+
+            infoString = $"{entry.Date.ToShortDateString()} - Unsubmitted Roll for {entry.ClassName}";
+            if (!string.IsNullOrWhiteSpace(entry.Teacher))
+                infoString += $" by {entry.Teacher}";
+            infoString += $" in Period {entry.Period}";
+            if (Covered)
+            {
+                infoString += $"covered by {CoveredBy} ({CoverType})";
+            }
+
+            _logger.LogInformation("{id}: {infoString}", jobId, infoString);
+            emailDto.RollInformation = infoString;
+            emailList.Add(emailDto);
         }
+
+        var recipients = new Dictionary<string, string>(); 
+
+        // Send emails to teachers
+        // get flattened list of teachers
+        var teachers = emailList.SelectMany(list => list.Teachers).Distinct().ToList();
+
+        foreach (var teacher in teachers)
+        {
+            recipients = new();
+
+            var emails = emailList.Where(item => item.Teachers.ContainsKey(teacher.Key)).ToList();
+
+            if (token.IsCancellationRequested)
+                return;
+
+            recipients.Add(teacher.Value, teacher.Key);
+
+            // Email the relevant person (as outlined in the EmailSentTo field
+            await _emailService.SendDailyRollMarkingReport(emails, DateOnly.FromDateTime(date), recipients);
+        }
+
+        // Send emails to head teachers
+        recipients = new();
+        teachers = emailList.SelectMany(list => list.HeadTeachers).Distinct().ToList();
+
+        foreach (var teacher in teachers)
+        {
+            recipients = new();
+
+            var emails = emailList.Where(item => item.HeadTeachers.ContainsKey(teacher.Key)).ToList();
+
+            if (token.IsCancellationRequested)
+                return;
+
+            recipients.Add(teacher.Value, teacher.Key);
+
+            // Email the relevant person (as outlined in the EmailSentTo field
+            await _emailService.SendDailyRollMarkingReport(emails, DateOnly.FromDateTime(date), recipients);
+        }
+
+        // Send emails to absence administrator
+        if (token.IsCancellationRequested)
+            return;
+        
+        var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
+
+        recipients = new();
+        if (!recipients.Any(recipient => recipient.Value == absenceSettings.ForwardingEmailAbsenceCoordinator))
+            recipients.Add(absenceSettings.AbsenceCoordinatorName, absenceSettings.ForwardingEmailAbsenceCoordinator);
+
+        if (!recipients.Any(recipient => recipient.Value == "scott.new@det.nsw.edu.au"))
+            recipients.Add("Scott New", "scott.new@det.nsw.edu.au");
+
+        await _emailService.SendDailyRollMarkingReport(emailList, DateOnly.FromDateTime(date), recipients);
     }
 }

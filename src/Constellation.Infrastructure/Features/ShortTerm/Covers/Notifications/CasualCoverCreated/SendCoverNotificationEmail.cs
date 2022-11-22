@@ -6,6 +6,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
+using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.Templates.Views.Documents.Covers;
 using Constellation.Infrastructure.Templates.Views.Emails.Covers;
@@ -61,10 +62,11 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
                 .Distinct()
                 .ToListAsync(cancellationToken);
 
-            var headTeacher = await _context.Courses
-                .Where(course => course.Offerings.Any(offering => offering.Id == cover.OfferingId))
-                .Select(course => course.HeadTeacher)
-                .Distinct()
+            var headTeachers = await _context.Faculties
+                .Where(faculty => faculty.Id == offering.Course.FacultyId)
+                .SelectMany(faculty => faculty.Members)
+                .Where(member => member.Role == FacultyMembershipRole.Manager && !member.IsDeleted)
+                .Select(member => member.Staff)
                 .ToListAsync(cancellationToken);
 
             var additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
@@ -83,7 +85,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
                     secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
             }
 
-            foreach (var teacher in headTeacher)
+            foreach (var teacher in headTeachers)
             {
                 if (!primaryRecipients.Any(recipient => recipient.Value == teacher.EmailAddress) && !secondaryRecipients.Any(recipient => recipient.Value == teacher.EmailAddress))
                     secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);

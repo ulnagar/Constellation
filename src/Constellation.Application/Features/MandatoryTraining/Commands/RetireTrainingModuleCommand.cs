@@ -29,8 +29,7 @@ public class RetireTrainingModuleCommandHandler : IRequestHandler<RetireTraining
         var entity = await _context.MandatoryTraining.Modules
             .FirstOrDefaultAsync(module => module.Id == request.Id, cancellationToken);
 
-        entity.DeletedBy = request.DeletedBy;
-		entity.DeletedAt = request.DeletedAt;
+		entity.IsDeleted = true;
 
 		await _context.SaveChangesAsync(cancellationToken);
 

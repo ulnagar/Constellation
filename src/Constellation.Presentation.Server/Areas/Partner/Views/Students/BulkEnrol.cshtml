@@ -1,6 +1,10 @@
 ﻿@using Constellation.Core.Enums
 @model Student_BulkEnrolViewModel
 
+@{
+    var groupedOfferings = Model.OfferingList.GroupBy(offering => offering.Course.FacultyId);
+}
+
 <h2>Enrol in Multiple Classes</h2>
 
 <div class="row">
@@ -15,41 +19,17 @@
         @Html.HiddenFor(model => model.StudentId)
         
         <div class="form-group row">
-            <div class="col-md-2 offset-2">
-                @{
-                    var englishOfferings = Model.OfferingList.Where(e => (e.Course.Faculty & Faculty.English) == e.Course.Faculty).OrderBy(e => e.EndDate).ThenBy(e => e.Name);
-                    foreach (var offering in englishOfferings)
+            @foreach (var group in groupedOfferings)
+            {
+                <div class="col-md-3">
+                    @foreach (var offering in group.OrderBy(e => e.EndDate).ThenBy(e => e.Name))
                     {
                         <div>
                             <input type="checkbox" name="SelectedClasses" value="@offering.Id"/>@offering.Name (@offering.EndDate.Year)
                         </div>
                     }
-                }
-            </div>
-
-            <div class="col-md-2">
-                @{
-                    var mathematicsOfferings = Model.OfferingList.Where(e => (e.Course.Faculty & Faculty.Mathematics) == e.Course.Faculty).OrderBy(e => e.EndDate).ThenBy(e => e.Name);
-                    foreach (var offering in mathematicsOfferings)
-                    {
-                        <div>
-                            <input type="checkbox" name="SelectedClasses" value="@offering.Id" />@offering.Name (@offering.EndDate.Year)
-                        </div>
-                    }
-                }
-            </div>
-
-            <div class="col-md-2">
-                @{
-                    var scienceOfferings = Model.OfferingList.Where(e => (e.Course.Faculty & Faculty.Science) == e.Course.Faculty).OrderBy(e => e.EndDate).ThenBy(e => e.Name);
-                    foreach (var offering in scienceOfferings)
-                    {
-                        <div>
-                            <input type="checkbox" name="SelectedClasses" value="@offering.Id" />@offering.Name (@offering.EndDate.Year)
-                        </div>
-                    }
-                }
-            </div>
+                </div>
+            }
         </div>
 
         <div class="form-group">
