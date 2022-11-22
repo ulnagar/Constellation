@@ -6,14 +6,11 @@ PRESENTATION.SERVER
 	Created notifications for both warning and alert email categories
 		Created job that will call the notifications
 			Need to build the "not-required" feature (below) so that they are excluded from the email list
-			Need to secure the faculty pages
 	
 	Implement generic permissions as per https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-6.0#use-a-handler-for-multiple-requirements
 	Permission Structure:
 	 SchoolContact = Portal.School.User
 	 Parent = Portal.Parent.User
-
-	** Create a db migration to convert all StaffIds to EmpoyeeId values using https://stackoverflow.com/a/31919849
 
 	Allow staff/coordinator to mark a module as not required (via a submitted completion that has a special marking)
 	 Include these on the reports with a special format
@@ -55,9 +52,6 @@ TRACKITSYNC JOB:
 	Convert to individual MEDIATR actions, to allow for calling immediately when relevant records change
 
 GRADES:
-	Migrate from ENUM to object
-
-FACULTY:
 	Migrate from ENUM to object
 
 ACTIONS:
