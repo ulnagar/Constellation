@@ -1,24 +1,24 @@
-﻿using Constellation.Application.DTOs;
+﻿namespace Constellation.Application.Features.MandatoryTraining.Commands;
+
+using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Application.Features.MandatoryTraining.Commands;
-
-public record UpdateTrainingCompletionCommand : IRequest
-{
-    public Guid Id { get; set; }
-    public string StaffId { get; set; }
-    public Guid TrainingModuleId { get; set; }
-    public DateTime CompletedDate { get; set; }
-    public FileDto File { get; set; }
-}
+public record UpdateTrainingCompletionCommand(
+    Guid Id,
+    string StaffId,
+    Guid TrainingModuleId,
+    DateTime CompletedDate,
+    bool NotRequired,
+    FileDto File
+    ) : IRequest
+{ }
 
 public class UpdateTrainingCompletionCommandHandler : IRequestHandler<UpdateTrainingCompletionCommand>
 {
@@ -38,7 +38,11 @@ public class UpdateTrainingCompletionCommandHandler : IRequestHandler<UpdateTrai
 
         entity.StaffId = request.StaffId;
         entity.TrainingModuleId = request.TrainingModuleId;
-        entity.CompletedDate = request.CompletedDate;
+
+        if (request.NotRequired)
+            entity.MarkNotRequired();
+        else
+            entity.SetCompletedDate(request.CompletedDate);
 
         await _context.SaveChangesAsync(cancellationToken);
 

@@ -11,4 +11,5 @@ public class ModuleEditContextDto : IMapFrom<TrainingModule>
     public string Name { get; set; }
     public TrainingModuleExpiryFrequency Expiry { get; set; }
     public string Url { get; set; }
+    public bool CanMarkNotRequired { get; set; }
 }

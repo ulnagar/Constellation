@@ -16,14 +16,16 @@ public class CompletionRecordDto : IMapFrom<TrainingCompletion>
     public string StaffLastName { get; set; }
     public string StaffFaculty { get; set; }
     public DateTime CompletedDate { get; set; }
+    public bool NotRequired { get; set; }
     public int ExpiryCountdown { get; set; }
     public ExpiryStatus Status { get; set; } = ExpiryStatus.Unknown;
+    public DateTime CreatedAt { get; set; }
 
     public int CalculateExpiry()
     {
         var expirationDate = CompletedDate.AddYears((int)ModuleExpiry);
 
-        if (expirationDate == CompletedDate)
+        if (expirationDate == CompletedDate || NotRequired)
             return 999999;
 
         return (int)expirationDate.Subtract(DateTime.Today).TotalDays;

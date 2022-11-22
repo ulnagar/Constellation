@@ -10,4 +10,5 @@ public class CompletionRecordEditContextDto : IMapFrom<TrainingCompletion>
     public string StaffId { get; set; }
     public DateTime CompletedDate { get; set; }
     public Guid TrainingModuleId { get; set; }
+    public bool NotRequired { get; set; }
 }

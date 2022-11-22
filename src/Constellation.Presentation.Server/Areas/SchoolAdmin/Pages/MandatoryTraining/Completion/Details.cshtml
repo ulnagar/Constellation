@@ -11,10 +11,15 @@
 
     if (authorised.Succeeded)
     {
-        <div>
-            <a asp-page="Upsert" asp-route-id="@Model.Record.Id" asp-route-mode="@UpsertModel.ModeOptions.FULL" class="btn btn-warning">Edit</a>
-            <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
-        </div>
+        <form asp-page-handler="DeleteRecord" asp-route-id="@Model.Id" method="post">
+            <div class="page-menu">
+                <a asp-page="Upsert" asp-route-id="@Model.Record.Id" asp-route-mode="@UpsertModel.ModeOptions.FULL" class="btn btn-warning">Edit</a>
+            
+                <button type="submit" class="btn btn-danger">Delete Entry</button>
+
+                <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+            </div>
+        </form>
     } else {
         <div>
             <a asp-page="Upsert" asp-route-id="@Model.Record.Id" asp-route-mode="@UpsertModel.ModeOptions.CERTUPLOAD" class="btn btn-warning">Upload Certificate</a>

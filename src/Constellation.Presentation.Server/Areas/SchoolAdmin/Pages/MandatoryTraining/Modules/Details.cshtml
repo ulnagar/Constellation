@@ -9,7 +9,7 @@
     var canRunReportsTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
 
     var completionsGroupedByYear = Model.Module.Completions
-        .GroupBy(record => record.CompletedDate.Year)
+        .GroupBy(record => (record.NotRequired) ? record.CreatedAt.Year : record.CompletedDate.Year)
         .OrderByDescending(group => group.Key);
 
     var completionsExpiringSoon = Model.Module.Completions
@@ -154,7 +154,18 @@
                             </td>
                             <td>@item.StaffFirstName @item.StaffLastName</td>
                             <td>@item.StaffFaculty</td>
-                            <td>@item.CompletedDate.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @{
+                                    if (item.NotRequired)
+                                    {
+                                        @:N/A
+                                    }
+                                    else
+                                    {
+                                        @item.CompletedDate.ToString("dd/MM/yyyy")
+                                    }
+                                }
+                            </td>
                             <td>
                                 <a asp-page="/MandatoryTraining/Completion/Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
                             </td>
@@ -208,7 +219,18 @@
                                 </td>
                                 <td>@item.StaffFirstName @item.StaffLastName</td>
                                 <td>@item.StaffFaculty</td>
-                                <td>@item.CompletedDate.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    @{
+                                        if (item.NotRequired)
+                                        {
+                                            @:N/A
+                                        }
+                                        else
+                                        {
+                                            @item.CompletedDate.ToString("dd/MM/yyyy")
+                                        }
+                                    }
+                                </td>
                                 <td>
                                     <a asp-page="/MandatoryTraining/Completion/Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
                                 </td>

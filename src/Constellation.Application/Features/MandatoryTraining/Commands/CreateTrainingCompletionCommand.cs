@@ -6,17 +6,20 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.MandatoryTraining;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-public record CreateTrainingCompletionCommand : IRequest
-{
-    public string StaffId { get; set; }
-    public Guid TrainingModuleId { get; set; }
-    public DateTime CompletedDate { get; set; }
-    public FileDto File { get; set; }
-}
+public record CreateTrainingCompletionCommand(
+    string StaffId,
+    Guid TrainingModuleId,
+    DateTime CompletedDate,
+    bool NotRequired,
+    FileDto File
+    ) : IRequest
+{ }
 
 public class CreateTrainingCompletionCommandHandler : IRequestHandler<CreateTrainingCompletionCommand>
 {
@@ -31,12 +34,30 @@ public class CreateTrainingCompletionCommandHandler : IRequestHandler<CreateTrai
 
 	public async Task<Unit> Handle(CreateTrainingCompletionCommand request, CancellationToken cancellationToken)
 	{
+        // Check that another record does not already exist for this user, module, and date.
+        var existingRecord = await _context.MandatoryTraining.CompletionRecords
+            .AnyAsync(record =>
+                record.StaffId == request.StaffId &&
+                record.TrainingModuleId == request.TrainingModuleId &&
+                (record.CompletedDate == request.CompletedDate) || (record.NotRequired && request.NotRequired));
+
+        if (existingRecord)
+            return Unit.Value;
+        
+        var module = await _context.MandatoryTraining.Modules
+            .FirstOrDefaultAsync(module => module.Id == request.TrainingModuleId, cancellationToken: cancellationToken);
+
         var recordEntity = new TrainingCompletion
         {
             StaffId = request.StaffId,
-            TrainingModuleId = request.TrainingModuleId,
-            CompletedDate = request.CompletedDate
+            Module = module,
+            TrainingModuleId = request.TrainingModuleId
         };
+
+        if (request.NotRequired)
+            recordEntity.MarkNotRequired();
+        else
+            recordEntity.SetCompletedDate(request.CompletedDate);
 
         _context.Add(recordEntity);
         await _context.SaveChangesAsync(cancellationToken);

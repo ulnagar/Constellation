@@ -40,6 +40,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         {
             _dateTimeProvider = dateTimeProvider;
             _currentUserService = currentUserService;
+            MandatoryTraining = new MandatoryTrainingSets(this);
         }
 
         public DbSet<AppSettings> AppSettings { get; set; }

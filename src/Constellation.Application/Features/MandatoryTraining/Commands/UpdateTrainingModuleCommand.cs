@@ -8,13 +8,14 @@ using System.Threading.Tasks;
 
 namespace Constellation.Application.Features.MandatoryTraining.Commands;
 
-public record UpdateTrainingModuleCommand : IRequest
-{
-    public Guid Id { get; init; }
-    public string Name { get; init; }
-    public TrainingModuleExpiryFrequency Expiry { get; init; }
-    public string Url { get; init; }
-}
+public record UpdateTrainingModuleCommand(
+    Guid Id,
+    string Name,
+    TrainingModuleExpiryFrequency Expiry,
+    string Url,
+    bool CanMarkNotRequired
+    ) : IRequest
+{ }
 
 public class UpdateTrainingModuleCommandHandler : IRequestHandler<UpdateTrainingModuleCommand>
 {
@@ -33,6 +34,7 @@ public class UpdateTrainingModuleCommandHandler : IRequestHandler<UpdateTraining
         entity.Name = request.Name;
         entity.Expiry = request.Expiry;
         entity.Url = request.Url;
+        entity.CanMarkNotRequired = request.CanMarkNotRequired;
 
         await _context.SaveChangesAsync(cancellationToken);
 

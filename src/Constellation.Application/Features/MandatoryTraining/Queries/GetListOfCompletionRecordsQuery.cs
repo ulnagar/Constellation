@@ -30,6 +30,7 @@ public class GetListOfCompletionRecordsQueryHandler : IRequestHandler<GetListOfC
     public async Task<List<CompletionRecordDto>> Handle(GetListOfCompletionRecordsQuery request, CancellationToken cancellationToken)
     {
         var records = _context.MandatoryTraining.CompletionRecords
+            .Where(record => !record.IsDeleted)
             .AsNoTracking();
 
         // If a StaffId was specified, then filter the query
