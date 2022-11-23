@@ -100,7 +100,8 @@ public class CompletionRecordExtendedDetailsDto
     {
         if (ModuleId == Guid.Empty || RecordId == Guid.Empty)
         {
-            // This is not a fully formed object
+            DueDate = DateTime.Today;
+            TimeToExpiry = -1000;
             return;
         }
 

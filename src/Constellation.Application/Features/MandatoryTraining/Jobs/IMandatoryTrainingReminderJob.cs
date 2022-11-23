@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Features.MandatoryTraining.Jobs;
 
 using Constellation.Application.Features.MandatoryTraining.Models;
+using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -115,40 +116,27 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
         {
             await SendEmail(teacher.ToList());
         }
-
-        // Group by head teacher
-        // - Send emails to each head teacher
-        var flattenedHeadTeachers = latestRecords.SelectMany(record => record.StaffHeadTeachers).ToList();
-        foreach (var teacher in flattenedHeadTeachers)
-        {
-            var entries = latestRecords.Where(record => record.StaffHeadTeachers.Any(entry => entry.FacultyHeadTeacherEmail == teacher.FacultyHeadTeacherEmail)).ToList();
-
-
-        }
-
-        // Send overall report to Marnie.
-
     }
 
     public async Task SendEmail(List<CompletionRecordExtendedDetailsDto> entries)
     {
         var warning = entries
             .Where(record => record.TimeToExpiry <= 30 && record.TimeToExpiry > 14)
-            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency})", Date = record.DueDate.ToShortDateString() })
+            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", Date = record.DueDate.ToShortDateString() })
             .ToDictionary(record => record.Name, record => record.Date);
 
         var alert = entries
             .Where(record => record.TimeToExpiry <= 14 && record.TimeToExpiry > 0)
-            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency})", Date = record.DueDate.ToShortDateString() })
+            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", Date = record.DueDate.ToShortDateString() })
             .ToDictionary(record => record.Name, record => record.Date);
 
         var expired = entries.Where(record => record.TimeToExpiry <= 0)
-            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency})", Date = record.DueDate.ToShortDateString() })
+            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", Date = record.DueDate.ToShortDateString() })
             .ToDictionary(record => record.Name, record => record.Date);
 
         var warningRecipients = new Dictionary<string, string> { { entries.First().StaffName, entries.First().StaffEmail } };
 
-        var alertRecipients = warningRecipients;
+        var alertRecipients = new Dictionary<string, string>(warningRecipients);
         var headTeachers = entries.SelectMany(entry => entry.StaffHeadTeachers).Distinct(new CompletionRecordExtendedDetailsDto.FacultyContactDto.Comparer()).ToList();
         foreach (var teacher in headTeachers)
         {
@@ -156,7 +144,7 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
                 alertRecipients.Add(teacher.FacultyHeadTeacherName, teacher.FacultyHeadTeacherEmail);
         }
 
-        var expiredRecipients = alertRecipients;
+        var expiredRecipients = new Dictionary<string, string>(alertRecipients);
         expiredRecipients.Add("Marnie Etheridge", "marnie.etheridge@det.nsw.edu.au");
 
         if (warning.Count > 0)
