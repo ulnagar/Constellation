@@ -1,3 +1,4 @@
+using Constellation.Application.Features.MandatoryTraining.Jobs;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -10,10 +11,10 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
-        private readonly ITrackItSyncJob _reportJob;
+        private readonly IMandatoryTrainingReminderJob _reportJob;
 
         public IndexModel(IUnitOfWork unitOfWork, IAuthService authService,
-            ITrackItSyncJob reportJob)
+            IMandatoryTrainingReminderJob reportJob)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;

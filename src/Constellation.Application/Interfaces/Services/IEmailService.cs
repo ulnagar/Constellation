@@ -41,8 +41,6 @@ namespace Constellation.Application.Interfaces.Services
         Task SendNewCoverEmail(EmailDtos.CoverEmail resource);
         Task SendUpdatedCoverEmail(EmailDtos.CoverEmail resource);
 
-
-
         // Service Emails
         Task SendServiceLogEmail(ServiceLogEmail notification);
         Task SendAdminAbsenceContactAlert(string studentName);
@@ -52,5 +50,10 @@ namespace Constellation.Application.Interfaces.Services
 
         // Auth Emails
         Task SendMagicLinkLoginEmail(MagicLinkEmail notification);
+
+        // Training Module Emails
+        Task SendTrainingExpiryWarningEmail(Dictionary<string, string> courses, Dictionary<string, string> recipients);
+        Task SendTrainingExpiryAlertEmail(Dictionary<string, string> courses, Dictionary<string, string> recipients);
+        Task SendTrainingExpiredEmail(Dictionary<string, string> courses, Dictionary<string, string> recipients);
     }
 }

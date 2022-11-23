@@ -2,6 +2,7 @@
 
 using Constellation.Application;
 using Constellation.Application.Common.Behaviours;
+using Constellation.Application.Features.MandatoryTraining.Jobs;
 using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
@@ -124,6 +125,7 @@ public static class ServicesRegistration
         services.AddScoped<ISentralPhotoSyncJob, SentralPhotoSyncJob>();
         services.AddScoped<ISentralReportSyncJob, SentralReportSyncJob>();
         services.AddScoped<IUserManagerJob, UserManagerJob>();
+        services.AddScoped<IMandatoryTrainingReminderJob, MandatoryTrainingReminderJob>();
 
         services.AddScoped(typeof(IJobDispatcherService<>), typeof(JobDispatcherService<>));
 
