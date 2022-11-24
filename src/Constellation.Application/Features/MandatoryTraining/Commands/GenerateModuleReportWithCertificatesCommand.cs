@@ -89,6 +89,16 @@ public class GenerateModuleReportWithCertificatesCommandHandler : IRequestHandle
             data.Completions.Add(record);
         }
 
+        // Remove completion records for staff who are no longer active
+        var recordStaff = data.Completions.Select(record => record.StaffId).Distinct().ToList();
+        foreach (var staffId in recordStaff)
+        {
+            if (currentStaff.All(member => member.StaffId != staffId))
+            {
+                data.Completions.RemoveAll(record => record.StaffId == staffId);
+            }
+        }
+
         data.Completions = data.Completions.OrderBy(record => record.StaffLastName).ToList();
 
         // Generate CSV/XLSX file

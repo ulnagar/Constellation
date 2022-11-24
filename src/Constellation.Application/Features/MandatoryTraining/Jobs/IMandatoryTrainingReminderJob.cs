@@ -107,6 +107,16 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
             }
         }
 
+        // Remove entries for staff who are no longer active
+        var recordStaff = detailedRecords.Select(record => record.StaffId).Distinct().ToList();
+        foreach (var staffId in recordStaff)
+        {
+            if (staff.All(member => member.StaffId != staffId))
+            {
+                detailedRecords.RemoveAll(record => record.StaffId == staffId);
+            }
+        }
+
         // - Remove all entries that are not due for expiry within 30 days, or have not already expired
         var latestRecords = detailedRecords.Where(record => record.IsLatest && record.TimeToExpiry <= 30).ToList();
 
