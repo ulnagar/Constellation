@@ -14,7 +14,6 @@ PRESENTATION.SERVER
 	 SchoolContact = Portal.School.User
 	 Parent = Portal.Parent.User
 
-	Lessons Admin Teacher Delete - Passes ID of the School Contact, not the ROLE. Acts to delete ROLE with the wrong ID.
 	Normalise all email addresses to remove spaces at entry.
 	Update parent emails to point to new portal.
 	Figure out what is directly accessing Sentral from the parent portal, and if it is necessary.

@@ -37,7 +37,7 @@
                     <a asp-action="AdminTeacherAudit" asp-controller="Lessons" asp-area="Portal" asp-route-id="@item.Id" class="btn btn-sm btn-warning btn-show-hover">Audit Access</a>
                 </td>
                 <td>
-                    <a asp-action="AdminDeleteTeacher" asp-controller="Lessons" asp-area="Portal" asp-route-id="@item.Id" class="btn btn-sm btn-warning btn-show-hover">Delete</a>
+                    <a asp-action="AdminDeleteTeacher" asp-controller="Lessons" asp-area="Portal" asp-route-id="@item.RoleId" class="btn btn-sm btn-warning btn-show-hover">Delete</a>
                 </td>
             </tr>
         }
