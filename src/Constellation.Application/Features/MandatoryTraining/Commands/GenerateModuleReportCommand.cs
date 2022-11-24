@@ -58,6 +58,8 @@ public class GenerateModuleReportCommandHandler : IRequestHandler<GenerateModule
         data.Completions = data.Completions.Where(record => record.Status != CompletionRecordDto.ExpiryStatus.Superceded).OrderBy(record => record.StaffLastName).ToList();
 
         var currentStaff = await _context.Staff
+            .Include(staff => staff.Faculties)
+            .ThenInclude(member => member.Faculty)
             .AsNoTracking()
             .Where(staff => !staff.IsDeleted)
             .ToListAsync(cancellationToken);
