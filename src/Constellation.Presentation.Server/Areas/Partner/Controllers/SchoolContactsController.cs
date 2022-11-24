@@ -1,7 +1,5 @@
 ﻿using Constellation.Application.DTOs;
-using Constellation.Application.Extensions;
 using Constellation.Application.Features.Partners.SchoolContacts.Commands;
-using Constellation.Application.Features.Partners.SchoolContacts.Notifications;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
@@ -11,12 +9,8 @@ using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 {
@@ -177,10 +171,10 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             viewModel.Contact = new SchoolContactDto
             {
                 Id = id,
-                FirstName = contact.FirstName,
-                LastName = contact.LastName,
-                EmailAddress = contact.EmailAddress,
-                PhoneNumber = contact.PhoneNumber,
+                FirstName = contact.FirstName.Trim(' '),
+                LastName = contact.LastName.Trim(' '),
+                EmailAddress = contact.EmailAddress.Trim(' '),
+                PhoneNumber = contact.PhoneNumber.Trim(' '),
                 SelfRegistered = contact.SelfRegistered
             };
 
@@ -206,19 +200,19 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 {
                     await _mediator.Send(new CreateNewSchoolContactCommand
                     {
-                        FirstName = viewModel.Contact.FirstName,
-                        LastName = viewModel.Contact.LastName,
-                        PhoneNumber = viewModel.Contact.PhoneNumber,
-                        EmailAddress = viewModel.Contact.EmailAddress
+                        FirstName = viewModel.Contact.FirstName.Trim(' '),
+                        LastName = viewModel.Contact.LastName.Trim(' '),
+                        PhoneNumber = viewModel.Contact.PhoneNumber.Trim(' '),
+                        EmailAddress = viewModel.Contact.EmailAddress.Trim(' ')
                     });
                 } else
                 {
                     await _mediator.Send(new CreateNewSchoolContactWithRoleCommand
                     {
-                        FirstName = viewModel.Contact.FirstName,
-                        LastName = viewModel.Contact.LastName,
-                        PhoneNumber = viewModel.Contact.PhoneNumber,
-                        EmailAddress = viewModel.Contact.EmailAddress,
+                        FirstName = viewModel.Contact.FirstName.Trim(' '),
+                        LastName = viewModel.Contact.LastName.Trim(' '),
+                        PhoneNumber = viewModel.Contact.PhoneNumber.Trim(' '),
+                        EmailAddress = viewModel.Contact.EmailAddress.Trim(' '),
                         SchoolCode = viewModel.ContactRole.SchoolCode,
                         Position = viewModel.ContactRole.Role
                     });
