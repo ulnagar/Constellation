@@ -38,12 +38,19 @@ namespace Constellation.Infrastructure.Jobs
 
                 var photo = await _gateway.GetSentralStudentPhoto(student.StudentId);
 
-                if (student.Photo == null || !student.Photo.SequenceEqual(photo))
+                try
                 {
-                    _logger.LogInformation("{id}: Found new photo for {student} ({grade})", jobId, student.DisplayName, student.CurrentGrade.AsName());
+                    if (student.Photo == null || !student.Photo.SequenceEqual(photo))
+                    {
+                        _logger.LogInformation("{id}: Found new photo for {student} ({grade})", jobId, student.DisplayName, student.CurrentGrade.AsName());
 
-                    student.Photo = photo;
-                    await _context.SaveChangesAsync(token);
+                        student.Photo = photo;
+                        await _context.SaveChangesAsync(token);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("{id}: Failed to check student photo for {student} ({grade}) due to error {error}", jobId, student.DisplayName, student.CurrentGrade.AsName(), ex.Message);
                 }
             }
         }

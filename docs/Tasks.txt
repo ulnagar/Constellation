@@ -14,8 +14,8 @@ PRESENTATION.SERVER
 	 SchoolContact = Portal.School.User
 	 Parent = Portal.Parent.User
 
-	Update parent emails to point to new portal.
-	Figure out what is directly accessing Sentral from the parent portal, and if it is necessary.
+	Photo sync job is failing on Nathaniel Atkinson (likely because he does not have a current photo to compare the online one to)
+	** Parent Portal only access Sentral directly inside APPLICATION\FEATURES\ATTENDANCE\QUERIES\GETVALIDATTENDANCEREPORTDATESQUERY
 	Periodic Team sync to ensure that all classes have registered Teams in the application
 	Include error checking for non-existing details in email senders (SendCoverNotificationEmail/Casual)
 	INFRASTRUCTURE\FEATURES\SHORTTERM\COVERS\NOTIFICATIONS\CASUALCOVERCREATED\SENDCOVERNOTIFICATIONEMAIL - LINE 72:
