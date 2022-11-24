@@ -9,17 +9,15 @@ PRESENTATION.SERVER
 
 	Create dashboard overview for individual staff members
 
+	Create fast-import for old data at launch
+
 	Implement generic permissions as per https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-6.0#use-a-handler-for-multiple-requirements
 	Permission Structure:
 	 SchoolContact = Portal.School.User
 	 Parent = Portal.Parent.User
 
-	Photo sync job is failing on Nathaniel Atkinson (likely because he does not have a current photo to compare the online one to)
 	** Parent Portal only access Sentral directly inside APPLICATION\FEATURES\ATTENDANCE\QUERIES\GETVALIDATTENDANCEREPORTDATESQUERY
 	Periodic Team sync to ensure that all classes have registered Teams in the application
-	Include error checking for non-existing details in email senders (SendCoverNotificationEmail/Casual)
-	INFRASTRUCTURE\FEATURES\SHORTTERM\COVERS\NOTIFICATIONS\CASUALCOVERCREATED\SENDCOVERNOTIFICATIONEMAIL - LINE 72:
-		Change the `team.Name.Contains(cover.EndDate.Year.ToString())` to `team.Name.Contains(offering.EndDate.Year.ToString())`
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
