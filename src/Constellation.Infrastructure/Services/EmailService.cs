@@ -121,7 +121,6 @@ public class EmailService : IEmailService, IScopedService
             SenderTitle = absenceSettings.AbsenceCoordinatorTitle,
             Title = $"[Aurora College] Absentee Notice - Compulsory School Attendance",
             StudentFirstName = absences.First().Student.FirstName,
-            Link = $"https://acos.aurora.nsw.edu.au/Portal/Absences/Parents/{absences.First().StudentId}",
             Absences = absences.Select(ParentAbsenceNotificationEmailViewModel.AbsenceEntry.ConvertFromAbsence).ToList()
         };
 
@@ -162,7 +161,6 @@ public class EmailService : IEmailService, IScopedService
             SenderTitle = absenceSettings.AbsenceCoordinatorTitle,
             Title = $"[Aurora College] Absentee Notice - Compulsory School Attendance",
             StudentFirstName = absences.First().Student.FirstName,
-            Link = $"https://acos.aurora.nsw.edu.au/Portal/Absences/Parents/{absences.First().StudentId}",
             Absences = absences.Select(ParentAbsenceDigestEmailViewModel.AbsenceEntry.ConvertFromAbsence).ToList()
         };
 
