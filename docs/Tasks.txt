@@ -3,12 +3,9 @@ CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 PRESENTATION.SERVER
-	Created notifications for both warning and alert email categories
-		Created job that will call the notifications
+	Include Partner School Principal in expired email for shared staff
 
-	Faculties are not showing in Training Reports
-
-	Ensure that non-current staff are not included in the reports and emails for training
+	Create report for training by staff member
 
 	Create dashboard overview for individual staff members
 
