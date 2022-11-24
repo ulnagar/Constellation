@@ -13,11 +13,10 @@ using Constellation.Infrastructure.Templates.Views.Emails.Covers;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
+using Serilog;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,10 +30,11 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
         private readonly IPDFService _pdfService;
         private readonly IEmailGateway _emailGateway;
         private readonly ICalendarService _calendarService;
+        private readonly ILogger _logger;
 
         public SendCoverNotificationEmail(IAppDbContext context, UserManager<AppUser> userManager,
             IRazorViewToStringRenderer razorService, IPDFService pdfService, IEmailGateway emailGateway,
-            ICalendarService calendarService)
+            ICalendarService calendarService, ILogger logger)
         {
             _context = context;
             _userManager = userManager;
@@ -42,6 +42,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
             _pdfService = pdfService;
             _emailGateway = emailGateway;
             _calendarService = calendarService;
+            _logger = logger.ForContext<SendCoverNotificationEmail>();
         }
 
         public async Task Handle(CasualCoverCreatedNotification notification, CancellationToken cancellationToken)
@@ -50,7 +51,11 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
             var cover = await _context.Covers
                 .FirstOrDefaultAsync(cover => cover.Id == notification.CoverId, cancellationToken) as CasualClassCover;
 
+            if (cover is null)
+                return;
+
             var offering = await _context.Offerings
+                .Include(offering => offering.Course)
                 .FirstOrDefaultAsync(offering => offering.Id == cover.OfferingId, cancellationToken);
 
             var casual = await _context.Casuals
@@ -72,7 +77,17 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
             var additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
 
             var teamLink = await _context.Teams
-                .FirstOrDefaultAsync(team => team.Name.Contains(offering.Name) && team.Name.Contains(cover.EndDate.Year.ToString()), cancellationToken);
+                .FirstOrDefaultAsync(team => team.Name.Contains(offering.Name) && team.Name.Contains(offering.EndDate.Year.ToString()), cancellationToken);
+
+            if (teamLink == null)
+            {
+                _logger.Warning("Could not find team for {class} while attempting to send email for cover {id}", offering.Name, cover.Id);
+                teamLink = new Team
+                {
+                    Link = "https://teams.microsoft.com",
+                    Name = $"AC - {offering.EndDate.Year} - {offering.Name}"
+                };
+            }
 
             var primaryRecipients = new Dictionary<string, string>(); // Casual, Classroom Teacher
             var secondaryRecipients = new Dictionary<string, string>(); // Head Teacher, Additional Recipients
@@ -204,7 +219,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
                 // Create and add ICS files
                 var uid = $"{cover.Id}-{cover.Offering.Id}-{cover.StartDate:yyyyMMdd}";
                 var summary = $"Aurora College Cover - {cover.Offering.Name}";
-                var location = $"{teamLink.Name} ({teamLink.Link}";
+                var location = $"{teamLink.Name} ({teamLink.Link})";
                 var description = body;
 
                 // What cycle day does the cover fall on?
