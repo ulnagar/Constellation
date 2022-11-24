@@ -14,7 +14,6 @@ PRESENTATION.SERVER
 	 SchoolContact = Portal.School.User
 	 Parent = Portal.Parent.User
 
-	Normalise all email addresses to remove spaces at entry.
 	Update parent emails to point to new portal.
 	Figure out what is directly accessing Sentral from the parent portal, and if it is necessary.
 	Periodic Team sync to ensure that all classes have registered Teams in the application
