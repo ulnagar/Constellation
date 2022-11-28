@@ -114,7 +114,8 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 LastName = staff.LastName,
                 PortalUsername = staff.PortalUsername,
                 SchoolCode = staff.SchoolCode,
-                AdobeConnectPrincipalId = staff.AdobeConnectPrincipalId
+                AdobeConnectPrincipalId = staff.AdobeConnectPrincipalId,
+                IsShared = staff.IsShared,
             };
             viewModel.IsNew = false;
             viewModel.SchoolList = new SelectList(schools, "Code", "Name", staff.SchoolCode);

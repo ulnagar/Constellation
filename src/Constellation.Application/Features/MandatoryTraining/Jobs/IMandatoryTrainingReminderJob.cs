@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using static Constellation.Application.DTOs.EmailRequests.ClassworkNotificationTeacherEmail;
 
 public interface IMandatoryTrainingReminderJob : IHangfireJob
 {
@@ -45,6 +46,9 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
             .Include(staff => staff.Faculties)
             .ThenInclude(member => member.Faculty)
             .ThenInclude(faculty => faculty.Members)
+            .Include(staff => staff.School)
+            .ThenInclude(school => school.StaffAssignments)
+            .ThenInclude(role => role.SchoolContact)
             .Where(staff => !staff.IsDeleted)
             //.AsNoTracking()
             .ToListAsync(token);
@@ -155,7 +159,14 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
         }
 
         var expiredRecipients = new Dictionary<string, string>(alertRecipients);
-        expiredRecipients.Add("Marnie Etheridge", "marnie.etheridge@det.nsw.edu.au");
+        if (expiredRecipients.All(entry => entry.Key != "Marnie Etheridge"))
+            expiredRecipients.Add("Marnie Etheridge", "marnie.etheridge@det.nsw.edu.au");
+
+        foreach (var principal in entries.First().PrincipalContacts)
+        {
+            if (expiredRecipients.All(entry => entry.Key != principal.FacultyHeadTeacherName))
+                expiredRecipients.Add(principal.FacultyHeadTeacherName, principal.FacultyHeadTeacherEmail);
+        }
 
         if (warning.Count > 0)
             await _emailService.SendTrainingExpiryWarningEmail(warning, warningRecipients);

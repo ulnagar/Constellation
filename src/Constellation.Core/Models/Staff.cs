@@ -19,6 +19,7 @@ public class Staff
     public virtual School School { get; set; }
     public string DisplayName => FirstName + " " + LastName;
     public string EmailAddress => PortalUsername + "@det.nsw.edu.au";
+    public bool IsShared { get; set; }
     public List<OfferingSession> CourseSessions { get; set; } = new();
     public List<TeacherClassCover> ClassCovers { get; set; } = new();
     public List<TeacherAdobeConnectOperation> AdobeConnectOperations { get; set; } = new();
