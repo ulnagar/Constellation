@@ -3,6 +3,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
+using Duende.IdentityServer.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,7 +45,8 @@ namespace Constellation.Infrastructure.Services
                 LastName = staffResource.LastName,
                 PortalUsername = staffResource.PortalUsername,
                 AdobeConnectPrincipalId = staffResource.AdobeConnectPrincipalId,
-                SchoolCode = staffResource.SchoolCode
+                SchoolCode = staffResource.SchoolCode,
+                IsShared = staffResource.IsShared
             };
 
             _unitOfWork.Add(staff);
@@ -125,6 +127,8 @@ namespace Constellation.Infrastructure.Services
 
             if (!string.IsNullOrWhiteSpace(staffResource.SchoolCode))
                 staff.SchoolCode = staffResource.SchoolCode;
+
+            staff.IsShared = staffResource.IsShared;
 
             result.Success = true;
             result.Entity = staff;

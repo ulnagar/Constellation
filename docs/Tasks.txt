@@ -3,8 +3,6 @@ CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 PRESENTATION.SERVER
-	Include Partner School Principal in expired email for shared staff
-
 	Create report for training by staff member
 
 	Create dashboard overview for individual staff members

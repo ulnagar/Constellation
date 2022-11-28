@@ -11,10 +11,10 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
-        private readonly ISentralPhotoSyncJob _reportJob;
+        private readonly IMandatoryTrainingReminderJob _reportJob;
 
         public IndexModel(IUnitOfWork unitOfWork, IAuthService authService,
-            ISentralPhotoSyncJob reportJob)
+            IMandatoryTrainingReminderJob reportJob)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;

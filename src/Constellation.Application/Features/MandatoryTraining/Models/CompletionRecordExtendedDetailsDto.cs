@@ -19,6 +19,7 @@ public class CompletionRecordExtendedDetailsDto
     public string StaffName { get; set; }
     public string StaffEmail { get; set; }
     public List<FacultyContactDto> StaffHeadTeachers { get; set; } = new();
+    public List<FacultyContactDto> PrincipalContacts { get; set; } = new(); 
 
     public Guid RecordId { get; set; }
     public bool RecordNotRequired { get; set; }
@@ -86,6 +87,30 @@ public class CompletionRecordExtendedDetailsDto
                     FacultyHeadTeacherEmail = member.Staff.EmailAddress
                 });
             }
+        }
+
+        if (staff.IsShared)
+        {
+            var principals = staff.School.StaffAssignments.Where(role => role.Role == SchoolContactRole.Principal && !role.IsDeleted).ToList();
+
+            foreach (var principal in principals)
+            {
+                PrincipalContacts.Add(new FacultyContactDto
+                {
+                    FacultyName = staff.School.Name,
+                    FacultyHeadTeacherName = principal.SchoolContact.DisplayName,
+                    FacultyHeadTeacherEmail = principal.SchoolContact.EmailAddress
+                });
+            }
+        }
+        else
+        {
+            PrincipalContacts.Add(new FacultyContactDto
+            {
+                FacultyName = "Aurora College",
+                FacultyHeadTeacherName = "Chris Robertson",
+                FacultyHeadTeacherEmail = "christopher.robertson@det.nsw.edu.au"
+            });
         }
     }
 
