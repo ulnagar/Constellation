@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Features.MandatoryTraining.Models;
 
-public class ModuleReportDto
+public class ReportDto
 {
     public byte[] FileData { get; set; }
     public string FileName { get; set; }

@@ -17,12 +17,12 @@ using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
 
-public record GenerateModuleReportWithCertificatesCommand : IRequest<ModuleReportDto>
+public record GenerateModuleReportWithCertificatesCommand : IRequest<ReportDto>
 {
     public Guid Id { get; init; }
 }
 
-public class GenerateModuleReportWithCertificatesCommandHandler : IRequestHandler<GenerateModuleReportWithCertificatesCommand, ModuleReportDto>
+public class GenerateModuleReportWithCertificatesCommandHandler : IRequestHandler<GenerateModuleReportWithCertificatesCommand, ReportDto>
 {
     private readonly IAppDbContext _context;
     private readonly IMapper _mapper;
@@ -36,7 +36,7 @@ public class GenerateModuleReportWithCertificatesCommandHandler : IRequestHandle
         _excelService = excelService;
     }
 
-    public async Task<ModuleReportDto> Handle(GenerateModuleReportWithCertificatesCommand request, CancellationToken cancellationToken)
+    public async Task<ReportDto> Handle(GenerateModuleReportWithCertificatesCommand request, CancellationToken cancellationToken)
     {
         var fileList = new Dictionary<string, byte[]>();
 
@@ -128,7 +128,7 @@ public class GenerateModuleReportWithCertificatesCommandHandler : IRequestHandle
             }
         }
 
-        var zipFile = new ModuleReportDto
+        var zipFile = new ReportDto
         {
             FileData = memoryStream.ToArray(),
             FileName = $"Mandatory Training Export - {data.Name}.zip",

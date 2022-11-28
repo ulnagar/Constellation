@@ -18,7 +18,7 @@ public class CompletionRecordDto : IMapFrom<TrainingCompletion>
     public string StaffFirstName { get; set; }
     public string StaffLastName { get; set; }
     public string StaffFaculty { get; set; }
-    public DateTime CompletedDate { get; set; }
+    public DateTime? CompletedDate { get; set; }
     public bool NotRequired { get; set; }
     public int ExpiryCountdown { get; set; }
     public ExpiryStatus Status { get; set; } = ExpiryStatus.Unknown;
@@ -32,9 +32,12 @@ public class CompletionRecordDto : IMapFrom<TrainingCompletion>
 
     public int CalculateExpiry()
     {
-        var expirationDate = CompletedDate.AddYears((int)ModuleExpiry);
+        if (!CompletedDate.HasValue)
+            return -9999;
 
-        if (expirationDate == CompletedDate || NotRequired)
+        var expirationDate = CompletedDate.Value.AddYears((int)ModuleExpiry);
+
+        if (expirationDate == CompletedDate.Value || NotRequired)
             return 999999;
 
         return (int)expirationDate.Subtract(DateTime.Today).TotalDays;

@@ -136,16 +136,16 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
     {
         var warning = entries
             .Where(record => record.TimeToExpiry <= 30 && record.TimeToExpiry > 14)
-            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", Date = record.DueDate.ToShortDateString() })
+            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", Date = record.DueDate.Value.ToShortDateString() })
             .ToDictionary(record => record.Name, record => record.Date);
 
         var alert = entries
             .Where(record => record.TimeToExpiry <= 14 && record.TimeToExpiry > 0)
-            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", Date = record.DueDate.ToShortDateString() })
+            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", Date = record.DueDate.Value.ToShortDateString() })
             .ToDictionary(record => record.Name, record => record.Date);
 
         var expired = entries.Where(record => record.TimeToExpiry <= 0)
-            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", Date = record.DueDate.ToShortDateString() })
+            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", Date = record.DueDate.Value.ToShortDateString() })
             .ToDictionary(record => record.Name, record => record.Date);
 
         var warningRecipients = new Dictionary<string, string> { { entries.First().StaffName, entries.First().StaffEmail } };
