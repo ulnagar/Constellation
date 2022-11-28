@@ -64,7 +64,16 @@
             <label asp-for="Record.CompletedDate">Completed Date</label>
         </dt>
         <dd class="col-md-10">
-            <span>@Model.Record.CompletedDate.ToString("dd/MM/yyyy")</span>
+            @{
+                if (Model.Record.NotRequired)
+                {
+                    <span>Not Required</span>
+                }
+                else if (Model.Record.CompletedDate.HasValue)
+                {
+                    <span>@Model.Record.CompletedDate.Value.ToString("dd/MM/yyyy")</span>
+                }
+            }
         </dd>
     </dl>
 </div>

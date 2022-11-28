@@ -12,5 +12,6 @@ namespace Constellation.Application.Interfaces.Services
         Task<MemoryStream> CreateAbsencesFile(ICollection<AbsenceExportDto> exportAbsences, string title);
         Task<MemoryStream> CreateAwardsCalculationFile(MemoryStream stream);
         Task<MemoryStream> CreateTrainingModuleReportFile(ModuleDetailsDto data);
+        Task<MemoryStream> CreateTrainingModuleStaffReportFile(StaffCompletionListDto data);
     }
 }

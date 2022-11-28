@@ -4,6 +4,7 @@ CURRENT TASK
 
 PRESENTATION.SERVER
 	Create report for training by staff member
+		Moved CompletedDate in the DTO to nullable. Now shows the expired tag for Not Required options in the Module Details and Completion Index views.
 
 	Create dashboard overview for individual staff members
 

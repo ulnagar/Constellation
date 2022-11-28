@@ -23,11 +23,11 @@ public class CompletionRecordExtendedDetailsDto
 
     public Guid RecordId { get; set; }
     public bool RecordNotRequired { get; set; }
-    public DateTime RecordEffectiveDate { get; set; }
+    public DateTime? RecordEffectiveDate { get; set; }
 
     public bool IsLatest { get; set; }
     public int TimeToExpiry { get; set; }
-    public DateTime DueDate { get; set; }
+    public DateTime? DueDate { get; set; }
 
     public class FacultyContactDto
     {
@@ -126,23 +126,24 @@ public class CompletionRecordExtendedDetailsDto
         if (ModuleId == Guid.Empty || RecordId == Guid.Empty)
         {
             DueDate = DateTime.Today;
-            TimeToExpiry = -1000;
+            TimeToExpiry = -9999;
             return;
         }
 
-        if (RecordNotRequired || (ModuleFrequency == TrainingModuleExpiryFrequency.OnceOff && RecordEffectiveDate != DateTime.MinValue))
+        if (RecordNotRequired || (ModuleFrequency == TrainingModuleExpiryFrequency.OnceOff && RecordEffectiveDate.HasValue))
         {
+            DueDate = null;
             TimeToExpiry = 9999;
         }
-        else if (RecordEffectiveDate == DateTime.MinValue)
+        else if (!RecordEffectiveDate.HasValue)
         {
             DueDate = DateTime.Today;
-            TimeToExpiry = -1000;
+            TimeToExpiry = -9999;
         }
         else
         {
-            DueDate = RecordEffectiveDate.AddYears((int)ModuleFrequency);
-            TimeToExpiry = (int)DueDate.Subtract(DateTime.Now).TotalDays;
+            DueDate = RecordEffectiveDate.Value.AddYears((int)ModuleFrequency);
+            TimeToExpiry = (int)DueDate.Value.Subtract(DateTime.Now).TotalDays;
         }
     }
 }

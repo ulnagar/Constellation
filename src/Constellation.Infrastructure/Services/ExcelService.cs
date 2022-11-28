@@ -220,8 +220,6 @@ namespace Constellation.Infrastructure.Services
                 };
             });
 
-            workSheet.Cells[8, 7, workSheet.Dimension.Rows, 7].ForEach(range => UpdateDefaultDateDataForRange(range));
-            //workSheet.Cells[8, 5, workSheet.Dimension.Rows, 5].ForEach(range => UpdateDefaultBooleanForRange(range));
             workSheet.Cells[7, 7, workSheet.Dimension.Rows, 7].Style.Numberformat.Format = "dd/MM/yyyy";
 
             // Highlight overdue entries
@@ -234,7 +232,7 @@ namespace Constellation.Infrastructure.Services
             formatNotRequired.StopIfTrue = true;
 
             var formatNeverCompleted = workSheet.ConditionalFormatting.AddExpression(dataRange);
-            formatNeverCompleted.Formula = "=$F8 = \"\"";
+            formatNeverCompleted.Formula = "=$F8 = -9999";
             formatNeverCompleted.Style.Fill.BackgroundColor.Color = Color.Gray;
             formatNeverCompleted.Style.Font.Color.Color = Color.White;
             formatNeverCompleted.StopIfTrue = true;
@@ -281,31 +279,104 @@ namespace Constellation.Infrastructure.Services
             return memoryStream;
         }
 
-        private void UpdateDefaultDateDataForRange(ExcelRangeBase range)
+        public async Task<MemoryStream> CreateTrainingModuleStaffReportFile(StaffCompletionListDto data)
         {
-            for (int r = 0; r < range.Rows; r++)
-            {
-                if (range.GetCellValue<DateTime>(r, 0) == DateTime.MinValue)
-                {
-                    range.SetCellValue(r, -1, string.Empty);
-                    range.SetCellValue(r, 0, string.Empty);
-                }
-            }
-        }
+            var completion = typeof(CompletionRecordExtendedDetailsDto);
 
-        private void UpdateDefaultBooleanForRange(ExcelRangeBase range)
-        {
-            for (int r = 0; r < range.Rows; r++)
+            var excel = new ExcelPackage();
+            var workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
+
+            var nameDetail = workSheet.Cells[1, 1].RichText.Add(data.Name);
+            nameDetail.Bold = true;
+            nameDetail.Size = 16;
+
+            var facultyText = "Faculties: ";
+            for (int i = 0; i < data.Faculties.Count; i++)
             {
-                if (range.GetCellValue<bool>(r, 0) == false)
+                if (i != 0)
                 {
-                    range.SetCellValue(r, 0, "false");
+                    facultyText += ", ";
                 }
-                else
-                {
-                    range.SetCellValue(r, 0, "true");
-                }
+
+                facultyText += data.Faculties[i];
             }
+            workSheet.Cells[2, 1].Value = facultyText;
+
+            workSheet.Cells[3, 1].Value = $"Exported at {DateTime.Now:F}";
+
+            workSheet.Cells[7, 1].LoadFromCollection(data.Modules, opt =>
+            {
+                opt.PrintHeaders = true;
+                opt.TableStyle = OfficeOpenXml.Table.TableStyles.Light1;
+                opt.HeaderParsingType = OfficeOpenXml.LoadFunctions.Params.HeaderParsingTypes.CamelCaseToSpace;
+                opt.Members = new MemberInfo[]
+                {
+                    completion.GetProperty("ModuleName"),
+                    completion.GetProperty("ModuleFrequency"),
+                    completion.GetProperty("RecordNotRequired"),
+                    completion.GetProperty("TimeToExpiry"),
+                    completion.GetProperty("RecordEffectiveDate"),
+                    completion.GetProperty("DueDate")
+                };
+            });
+
+            workSheet.Cells[7, 5, workSheet.Dimension.Rows, 6].Style.Numberformat.Format = "dd/MM/yyyy";
+
+            // Highlight overdue entries
+            var dataRange = new ExcelAddress(8, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
+
+            var formatNotRequired = workSheet.ConditionalFormatting.AddExpression(dataRange);
+            formatNotRequired.Formula = "=$C8 = TRUE";
+            formatNotRequired.Style.Font.Color.Color = Color.DarkOliveGreen;
+            formatNotRequired.Style.Font.Italic = true;
+            formatNotRequired.StopIfTrue = true;
+
+            var formatNeverCompleted = workSheet.ConditionalFormatting.AddExpression(dataRange);
+            formatNeverCompleted.Formula = "=$D8 = -9999";
+            formatNeverCompleted.Style.Fill.BackgroundColor.Color = Color.Gray;
+            formatNeverCompleted.Style.Font.Color.Color = Color.White;
+            formatNeverCompleted.StopIfTrue = true;
+
+            var formatOverdue = workSheet.ConditionalFormatting.AddExpression(dataRange);
+            formatOverdue.Formula = "=$D8 < 1";
+            formatOverdue.Style.Fill.BackgroundColor.Color = Color.Red;
+            formatOverdue.Style.Font.Color.Color = Color.White;
+            formatOverdue.StopIfTrue = true;
+
+            var formatSoonExpire = workSheet.ConditionalFormatting.AddExpression(dataRange);
+            formatSoonExpire.Formula = "=$D8 < 14";
+            formatSoonExpire.Style.Fill.BackgroundColor.Color = Color.Yellow;
+            formatSoonExpire.StopIfTrue = true;
+
+            // Add format legend
+            workSheet.Cells[5, 2].Value = "Colour Legend";
+            workSheet.Cells[5, 2].Style.Font.Bold = true;
+            workSheet.Cells[5, 3].Value = "Expired";
+            workSheet.Cells[5, 3].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+            workSheet.Cells[5, 3].Style.Fill.BackgroundColor.SetColor(Color.Red);
+            workSheet.Cells[5, 3].Style.Font.Color.SetColor(Color.White);
+            workSheet.Cells[5, 4].Value = "Expiring Soon";
+            workSheet.Cells[5, 4].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+            workSheet.Cells[5, 4].Style.Fill.BackgroundColor.SetColor(Color.Yellow);
+            workSheet.Cells[5, 5].Value = "Never Completed";
+            workSheet.Cells[5, 5].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+            workSheet.Cells[5, 5].Style.Fill.BackgroundColor.SetColor(Color.Gray);
+            workSheet.Cells[5, 5].Style.Font.Color.SetColor(Color.White);
+            workSheet.Cells[5, 6].Value = "Not Required";
+            workSheet.Cells[5, 6].Style.Font.Color.SetColor(Color.DarkOliveGreen);
+            workSheet.Cells[5, 6].Style.Font.Italic = true;
+            workSheet.Cells[5, 2, 5, 6].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thick);
+            workSheet.Cells[5, 3, 5, 6].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+
+            // Freeze top rows
+            workSheet.View.FreezePanes(8, 1);
+            workSheet.Cells[5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
+
+            var memoryStream = new MemoryStream();
+            await excel.SaveAsAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            return memoryStream;
         }
 
         private class StudentRecord

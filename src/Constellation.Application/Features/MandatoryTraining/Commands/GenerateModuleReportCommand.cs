@@ -12,12 +12,12 @@ using System.Threading.Tasks;
 
 namespace Constellation.Application.Features.MandatoryTraining.Commands;
 
-public record GenerateModuleReportCommand : IRequest<ModuleReportDto>
+public record GenerateModuleReportCommand : IRequest<ReportDto>
 {
     public Guid Id { get; set; }
 }
 
-public class GenerateModuleReportCommandHandler : IRequestHandler<GenerateModuleReportCommand, ModuleReportDto>
+public class GenerateModuleReportCommandHandler : IRequestHandler<GenerateModuleReportCommand, ReportDto>
 {
     private readonly IAppDbContext _context;
     private readonly IMapper _mapper;
@@ -30,7 +30,7 @@ public class GenerateModuleReportCommandHandler : IRequestHandler<GenerateModule
         _excelService = excelService;
     }
 
-    public async Task<ModuleReportDto> Handle(GenerateModuleReportCommand request, CancellationToken cancellationToken)
+    public async Task<ReportDto> Handle(GenerateModuleReportCommand request, CancellationToken cancellationToken)
     {
         // Get info from database
         var data = await _context.MandatoryTraining.Modules
@@ -75,7 +75,8 @@ public class GenerateModuleReportCommandHandler : IRequestHandler<GenerateModule
                 StaffFirstName = staff.FirstName,
                 StaffLastName = staff.LastName,
                 StaffFaculty = String.Join(",", staff.Faculties.Where(member => !member.IsDeleted).Select(member => member.Faculty.Name)),
-                CompletedDate = DateTime.MinValue
+                CompletedDate = null,
+                ExpiryCountdown = -9999
             };
 
             data.Completions.Add(record);
@@ -97,7 +98,7 @@ public class GenerateModuleReportCommandHandler : IRequestHandler<GenerateModule
         var fileData = await _excelService.CreateTrainingModuleReportFile(data);
 
         // Wrap data in return object
-        var reportDto = new ModuleReportDto
+        var reportDto = new ReportDto
         {
             FileData = fileData.ToArray(),
             FileName = $"Mandatory Training Report - {data.Name}.xlsx",

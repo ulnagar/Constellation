@@ -48,9 +48,9 @@ public class DetailsModel : BasePageModel
                 other.Id != record.Id &&
                 other.ModuleId == record.ModuleId && // true
                 other.StaffId == record.StaffId && // true
-                ((other.NotRequired && other.CreatedAt > record.CompletedDate) || // false
-                (!other.NotRequired && !record.NotRequired && other.CompletedDate > record.CompletedDate) || // false
-                (record.NotRequired && record.CreatedAt < other.CompletedDate))))
+                ((other.NotRequired && other.CreatedAt > record.CompletedDate.Value) || // false
+                (!other.NotRequired && !record.NotRequired && other.CompletedDate.Value > record.CompletedDate.Value) || // false
+                (record.NotRequired && record.CreatedAt < other.CompletedDate.Value))))
             {
                 record.Status = CompletionRecordDto.ExpiryStatus.Superceded;
             }
