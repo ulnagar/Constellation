@@ -2,6 +2,8 @@
 using Constellation.Application.Extensions;
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Enums;
+using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Infrastructure.DependencyInjection;
 using LinqKit;
 using OfficeOpenXml;
@@ -377,6 +379,60 @@ namespace Constellation.Infrastructure.Services
             memoryStream.Position = 0;
 
             return memoryStream;
+        }
+
+        public List<TrainingModule> ImportMandatoryTrainingDataFromFile(MemoryStream excelFile)
+        {
+            var excel = new ExcelPackage(excelFile);
+            var workSheet = excel.Workbook.Worksheets[0];
+
+            var numModules = workSheet.Dimension.Rows;
+
+            var modules = new List<TrainingModule>();
+
+            for (int row = 2; row <= numModules; row++)
+            {
+                var entry = new TrainingModule
+                {
+                    Name = workSheet.Cells[row, 1].GetCellValue<string>(),
+                    Expiry = (TrainingModuleExpiryFrequency)workSheet.Cells[row, 2].GetCellValue<int>(),
+                    Url = workSheet.Cells[row, 3].GetCellValue<string>(),
+                    CanMarkNotRequired = workSheet.Cells[row, 4].GetCellValue<bool>()
+                };
+
+                modules.Add(entry);
+            }
+
+            var numStaff = workSheet.Dimension.Columns;
+
+            for (int column = 5; column <= numStaff; column++)
+            {
+                for (int row = 2; row <= numModules; row++)
+                {
+                    var completed = workSheet.Cells[row, column].GetCellValue<string>();
+                    if (string.IsNullOrWhiteSpace(completed))
+                        continue;
+
+                    var dateCompleted = DateTime.Parse(completed);
+
+                    var moduleName = workSheet.Cells[row, 1].GetCellValue<string>();
+                    var module = modules.FirstOrDefault(entry => entry.Name == moduleName);
+                    if (module is null)
+                        continue;
+
+                    var entry = new TrainingCompletion
+                    {
+                        Module = module,
+                        StaffId = workSheet.Cells[1, column].GetCellValue<string>()
+                    };
+
+                    entry.SetCompletedDate(dateCompleted);
+
+                    module.Completions.Add(entry);
+                }
+            }
+
+            return modules;
         }
 
         private class StudentRecord

@@ -1,44 +1,85 @@
-using Constellation.Application.Features.MandatoryTraining.Commands;
-using Constellation.Application.Features.MandatoryTraining.Jobs;
-using Constellation.Application.Interfaces.Jobs;
+namespace Constellation.Presentation.Server.Areas.Test.Pages;
+
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Presentation.Server.BaseModels;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace Constellation.Presentation.Server.Areas.Test.Pages
+public class IndexModel : BasePageModel
 {
-    public class IndexModel : BasePageModel
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IExcelService _excelService;
+    private readonly IAppDbContext _context;
+
+    public IndexModel(IUnitOfWork unitOfWork, IExcelService excelService, IAppDbContext context)
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IAuthService _authService;
-        private readonly IMandatoryTrainingReminderJob _reportJob;
-        private readonly IMediator _mediator;
+        _unitOfWork = unitOfWork;
+        _excelService = excelService;
+        _context = context;
+    }
 
-        public IndexModel(IUnitOfWork unitOfWork, IAuthService authService,
-            IMandatoryTrainingReminderJob reportJob, IMediator mediator)
+    [BindProperty]
+    public IFormFile UploadFile { get; set; }
+
+    public async Task OnGetAsync()
+    {
+        await GetClasses(_unitOfWork);
+    }
+
+    public async Task<IActionResult> OnPostAsync()
+    {
+        if (UploadFile is not null)
         {
-            _unitOfWork = unitOfWork;
-            _authService = authService;
-            _reportJob = reportJob;
-            _mediator = mediator;
+            var modules = new List<TrainingModule>();
+
+            try
+            {
+                await using var target = new MemoryStream();
+                await UploadFile.CopyToAsync(target);
+
+                modules = _excelService.ImportMandatoryTrainingDataFromFile(target);
+            }
+            catch (Exception ex)
+            {
+                // Error uploading file
+                throw ex;
+            }
+
+            if (modules is null || modules.Count == 0)
+                return Page();
+
+            foreach (var module in modules)
+            {
+                // check if it exists in the db
+                var existing = await _context.MandatoryTraining.Modules
+                    .Include(entry => entry.Completions)
+                    .Where(entry => entry.Name == module.Name)
+                    .FirstOrDefaultAsync();
+
+                if (existing is not null)
+                {
+                    foreach (var record in module.Completions)
+                    {
+                        if (existing.Completions.Any(entry => entry.StaffId == record.StaffId && entry.CompletedDate == record.CompletedDate))
+                            continue;
+
+                        record.TrainingModuleId = existing.Id;
+                        record.Module = existing;
+
+                        _context.Add(record);
+                    }
+
+                    continue;
+                }
+
+                _context.Add(module);
+            }
+
+            await _context.SaveChangesAsync(default);
         }
 
-        public async Task OnGetAsync()
-        {
-            await GetClasses(_unitOfWork);
-        }
-
-        public async Task<IActionResult> OnPostAsync()
-        {
-            //await _authService.RepairStaffUserAccounts();
-
-            //await _reportJob.StartJob(new Guid(), default);
-
-            var stream = await _mediator.Send(new GenerateStaffReportCommand("615171335"));
-
-            return File(stream.FileData, stream.FileType, stream.FileName);
-        }
+        return Page();
     }
 }
