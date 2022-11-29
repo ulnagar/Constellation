@@ -3,7 +3,6 @@
 using AutoMapper;
 using Constellation.Application.Common.Mapping;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Constellation.Core.Models.MandatoryTraining;
 using System;
 using System.Linq;
@@ -32,6 +31,9 @@ public class CompletionRecordDto : IMapFrom<TrainingCompletion>
 
     public int CalculateExpiry()
     {
+        if (!CompletedDate.HasValue && NotRequired)
+            return 999999;
+
         if (!CompletedDate.HasValue)
             return -9999;
 

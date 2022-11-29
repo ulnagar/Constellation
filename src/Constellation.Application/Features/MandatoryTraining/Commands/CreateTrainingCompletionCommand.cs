@@ -39,7 +39,7 @@ public class CreateTrainingCompletionCommandHandler : IRequestHandler<CreateTrai
             .AnyAsync(record =>
                 record.StaffId == request.StaffId &&
                 record.TrainingModuleId == request.TrainingModuleId &&
-                (record.CompletedDate == request.CompletedDate) || (record.NotRequired && request.NotRequired));
+                ((record.CompletedDate == request.CompletedDate) || (record.NotRequired && request.NotRequired)));
 
         if (existingRecord)
             return Unit.Value;
