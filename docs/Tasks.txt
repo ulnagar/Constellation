@@ -6,6 +6,8 @@ PRESENTATION.SERVER
 	Create report for training by staff member
 		Moved CompletedDate in the DTO to nullable. Now shows the expired tag for Not Required options in the Module Details and Completion Index views.
 
+	Faculty Memberships should be marked deleted when staff member is marked as resigned.
+
 	Create dashboard overview for individual staff members
 
 	Create fast-import for old data at launch

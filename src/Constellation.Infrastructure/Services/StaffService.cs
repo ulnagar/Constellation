@@ -3,7 +3,6 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
-using Duende.IdentityServer.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -91,6 +90,12 @@ namespace Constellation.Infrastructure.Services
 
             staff.IsDeleted = true;
             staff.DateDeleted = DateTime.Now;
+
+            foreach (var faculty in staff.Faculties)
+            {
+                if (!faculty.IsDeleted)
+                    faculty.IsDeleted = true;
+            }
         }
 
         public async Task<ServiceOperationResult<Staff>> UpdateStaffMember(string staffId, StaffDto staffResource)
