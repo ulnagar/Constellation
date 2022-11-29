@@ -223,6 +223,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         public async Task<Staff> ForDeletion(string id)
         {
             return await _context.Staff
+                .Include(staff => staff.Faculties)
                 .Include(staff => staff.CourseSessions)
                 .Include(staff => staff.AdobeConnectGroupOperations)
                 .SingleOrDefaultAsync(staff => staff.StaffId == id);
