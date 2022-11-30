@@ -5,8 +5,6 @@ CURRENT TASK
 PRESENTATION.SERVER
 	Create dashboard overview for individual staff members
 
-	Create fast-import for old data at launch
-
 	Implement generic permissions as per https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-6.0#use-a-handler-for-multiple-requirements
 	Permission Structure:
 	 SchoolContact = Portal.School.User

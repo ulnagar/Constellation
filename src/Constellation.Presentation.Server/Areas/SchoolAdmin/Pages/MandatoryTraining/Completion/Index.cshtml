@@ -38,6 +38,7 @@
     @if (isEditorTest.Succeeded)
     {
         <a asp-page="Upsert" class="btn btn-warning" asp-route-Mode="@UpsertModel.ModeOptions.FULL">Create New</a>
+        <a asp-page="Upload" class="btn btn-warning">Bulk Upload</a>
     } 
     else
     {
