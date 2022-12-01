@@ -1,6 +1,8 @@
-﻿using Constellation.Application.Interfaces.Repositories;
+﻿using Constellation.Application.Features.MandatoryTraining.Queries;
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -14,11 +16,13 @@ namespace Constellation.Presentation.Server.Areas.Home.Pages
     public class DashboardModel : BasePageModel
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMediator _mediator;
 
-        public DashboardModel(IUnitOfWork unitOfWork)
+        public DashboardModel(IUnitOfWork unitOfWork, IMediator mediator)
             : base()
         {
             _unitOfWork = unitOfWork;
+            _mediator = mediator;
             ClassworkNotifications = new List<ClassworkNotificationDto>();
         }
 
@@ -27,6 +31,9 @@ namespace Constellation.Presentation.Server.Areas.Home.Pages
         public ICollection<ClassworkNotificationDto> ClassworkNotifications { get; set; }
 
         public bool IsAdmin { get; set; }
+
+        public int ExpiringTraining { get; set; }
+        public string StaffId { get; set; }
 
         public class ClassworkNotificationDto
         {
@@ -55,6 +62,9 @@ namespace Constellation.Presentation.Server.Areas.Home.Pages
             var teacher = await _unitOfWork.Staff.FromEmailForExistCheck(username);
 
             if (teacher == null) return Page();
+
+            ExpiringTraining = await _mediator.Send(new GetCountOfExpiringCertificatesForStaffMemberQuery(teacher.StaffId));
+            StaffId = teacher.StaffId;
 
             UserName = teacher.DisplayName;
 

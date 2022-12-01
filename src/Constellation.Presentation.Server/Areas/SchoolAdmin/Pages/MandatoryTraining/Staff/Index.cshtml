@@ -1,0 +1,76 @@
+﻿@page "{StaffId}"
+@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Staff.IndexModel
+
+<h2>Mandatory Training Completion Records</h2>
+
+<div>
+    <a asp-page="/MandatoryTraining/Completion/Upsert" class="btn btn-warning" asp-route-Mode="@UpsertModel.ModeOptions.SOLOSTAFF">Create New</a>
+    
+    <button class="btn btn-secondary" data-toggle="modal" data-target="#legend">View Legend</button>
+</div>
+
+<partial name="_StatusIconModalPartial" />
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Module</th>
+            <th>Date Completed</th>
+            <th></th>
+        </tr>
+    </thead>
+    @foreach (var item in Model.CompletionList.Modules)
+    {
+        <tr>
+            <td>
+                @{
+                    if (item.TimeToExpiry > 31)
+                    {
+                        <img src="/images/GreenLight.png" class="training status-icon" title="@item.TimeToExpiry Days Remaining" />
+                    }
+                    else if (item.TimeToExpiry > 15)
+                    {
+                        <img src="/images/YellowLight.png" class="training status-icon" title="@item.TimeToExpiry Days Remaining" />
+                    }
+                    else if (item.TimeToExpiry > 1)
+                    {
+                        <img src="/images/RedLight.png" class="training status-icon" title="@item.TimeToExpiry Days Remaining" />
+                    }
+                    else
+                    {
+                        <img src="/images/RedLight.png" class="training status-icon blink" title="@item.TimeToExpiry Days Remaining" />
+                    }
+                }
+            </td>
+            <td>@item.ModuleName</td>
+            <td>
+                @{
+                    if (item.RecordNotRequired || !item.RecordEffectiveDate.HasValue)
+                    {
+                        @:N/A
+                    }
+                    else
+                    {
+                        @item.RecordEffectiveDate.Value.ToString("dd/MM/yyyy")
+                    }
+                }
+            </td>
+            <td>
+                @{
+                    <a asp-page="/Completion/Details" asp-route-id="@item.RecordId" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                }
+            </td>
+        </tr>
+    }
+</table>
+
+
+
+
+
+@{
+}
