@@ -38,6 +38,8 @@
         <a asp-page="HangfireDashboard" asp-area="Admin" class="btn btn-success btn-block">Job Activation</a>
     }
 
+    <a class="btn btn-success btn-block" asp-page="/MandatoryTraining/Staff/Index" asp-route-staffId="@Model.StaffId" asp-area="SchoolAdmin">Mandatory Training <span class="badge badge-light">@Model.ExpiringTraining</span><span class="sr-only">training certificates expiring soon</span></a>
+
     @*<a class="btn btn-warning btn-block" asp-area="Equipment" asp-controller="Stocktake" asp-action="StaffDashboard" asp-route-id="256d068a-d8cc-4220-ec2b-08da5fb7be30">Stocktake</a>*@
 
     @foreach (var entry in @Model.Classes.OrderBy(entry => entry.Key))
