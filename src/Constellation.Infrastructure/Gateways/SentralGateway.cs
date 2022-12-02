@@ -823,7 +823,7 @@ namespace Constellation.Infrastructure.Gateways
             return list;
         }
 
-        public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(Microsoft.Extensions.Logging.ILogger logger)
+        public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(ILogger logger)
         {
             var data = new List<FamilyDetailsDto>();
 

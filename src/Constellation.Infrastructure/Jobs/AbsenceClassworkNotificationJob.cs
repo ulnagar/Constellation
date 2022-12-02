@@ -2,6 +2,7 @@
 namespace Constellation.Infrastructure.Jobs;
 
 using Constellation.Application.DTOs.EmailRequests;
+using Constellation.Application.Features.Faculties.Queries;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.EmailQueue;
@@ -13,12 +14,14 @@ using Microsoft.EntityFrameworkCore;
 public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob, IScopedService
 {
     private readonly ILogger _logger;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAppDbContext _context;
+    private readonly IMediator _mediator;
 
-    public AbsenceClassworkNotificationJob(IUnitOfWork unitOfWork, ILogger logger)
+    public AbsenceClassworkNotificationJob(IAppDbContext context, ILogger logger, IMediator mediator)
     {
         _logger = logger.ForContext<IAbsenceMonitorJob>();
-        _unitOfWork = unitOfWork;
+        _context = context;
+        _mediator = mediator;
     }
 
     public async Task StartJob(Guid jobId, DateTime scanDate, CancellationToken token)
@@ -45,7 +48,9 @@ public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob,
 
             // If there are covers, send the email to the Head Teacher instead
             if (covers.Count > 0)
-                teachers = new List<Staff> { offering.Course.HeadTeacher };
+            {
+                teachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = offering.Course.FacultyId });
+            }
 
             // create notification object in database
             var notification = new ClassworkNotification
@@ -197,7 +202,9 @@ public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob,
                 .Include(absence => absence.Student)
                 .Include(absence => absence.Offering)
                 .ThenInclude(offering => offering.Course)
-                .ThenInclude(course => course.HeadTeacher)
+                .ThenInclude(course => course.Faculty)
+                .ThenInclude(faculty => faculty.Members)
+                .ThenInclude(member => member.Staff)
                 .Include(absence => absence.Offering.Sessions.Where(session => !session.IsDeleted))
                 .ThenInclude(session => session.Teacher)
                 .Where(absence =>
