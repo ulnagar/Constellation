@@ -16,7 +16,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{8E4ACA9A-B3CB-4538-96EE-FC153E53AA1F}"
 	ProjectSection(SolutionItems) = preProject
 		docs\MigrationStatus.txt = docs\MigrationStatus.txt
-		docs\Tasks.txt = docs\Tasks.txt
+		Tasks.txt = Tasks.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sql", "sql", "{AAD6B84B-76A4-43EE-A99D-885E6A7612FA}"
@@ -81,8 +81,8 @@ Global
 		{B100AA07-F366-4BC0-97F4-EF126928B8F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B100AA07-F366-4BC0-97F4-EF126928B8F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B100AA07-F366-4BC0-97F4-EF126928B8F7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B100AA07-F366-4BC0-97F4-EF126928B8F7}.Test|Any CPU.ActiveCfg = Test|Any CPU
-		{B100AA07-F366-4BC0-97F4-EF126928B8F7}.Test|Any CPU.Build.0 = Test|Any CPU
+		{B100AA07-F366-4BC0-97F4-EF126928B8F7}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{B100AA07-F366-4BC0-97F4-EF126928B8F7}.Test|Any CPU.Build.0 = Release|Any CPU
 		{8BCE7325-73BC-488E-A932-4FC31AACC4E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8BCE7325-73BC-488E-A932-4FC31AACC4E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BCE7325-73BC-488E-A932-4FC31AACC4E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -105,14 +105,14 @@ Global
 		{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}.Test|Any CPU.ActiveCfg = Release|Any CPU
-		{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}.Test|Any CPU.Build.0 = Release|Any CPU
+		{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FCA56C1-8A67-44F9-9BA6-98975D256E2B}.Test|Any CPU.Build.0 = Debug|Any CPU
 		{A59F7765-A0F9-4571-AA3F-C17C105DACD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A59F7765-A0F9-4571-AA3F-C17C105DACD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A59F7765-A0F9-4571-AA3F-C17C105DACD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A59F7765-A0F9-4571-AA3F-C17C105DACD5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A59F7765-A0F9-4571-AA3F-C17C105DACD5}.Test|Any CPU.ActiveCfg = Test|Any CPU
-		{A59F7765-A0F9-4571-AA3F-C17C105DACD5}.Test|Any CPU.Build.0 = Test|Any CPU
+		{A59F7765-A0F9-4571-AA3F-C17C105DACD5}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{A59F7765-A0F9-4571-AA3F-C17C105DACD5}.Test|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
