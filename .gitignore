@@ -375,3 +375,13 @@ appsettings.*.json
 /src/Constellation.Presentation.Portal.Schools/wwwroot/lib/*
 /src/Constellation.Portal.Parents.Server/wwwroot/lib/*
 /src/Constellation.Portal.Parents.Client/wwwroot/lib/*
+/src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/css
+/src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/js
+/src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/less
+/src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/metadata
+/src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/scss
+/src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/sprites
+/src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/svgs
+/src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/webfonts
+/src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/attribution.js
+/src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/LICENSE.txt

@@ -19,4 +19,19 @@
     <ProjectReference Include="..\Constellation.Application\Constellation.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="libman.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\private\" />
+  </ItemGroup>
+
+
+	<PropertyGroup>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+	</PropertyGroup>
+
 </Project>
