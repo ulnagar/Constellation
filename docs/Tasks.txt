@@ -2,18 +2,22 @@
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-PRESENTATION.SERVER
+
+~~~~~~~~~~~~~~~~~~~~~~~~
+FUTURE PLANS
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+APP PERMISSIONS:
 	Implement generic permissions as per https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-6.0#use-a-handler-for-multiple-requirements
 	Permission Structure:
 	 SchoolContact = Portal.School.User
 	 Parent = Portal.Parent.User
 
-	** Parent Portal only access Sentral directly inside APPLICATION\FEATURES\ATTENDANCE\QUERIES\GETVALIDATTENDANCEREPORTDATESQUERY
+TEAMS:
 	Periodic Team sync to ensure that all classes have registered Teams in the application
 
-~~~~~~~~~~~~~~~~~~~~~~~~
-FUTURE PLANS
-~~~~~~~~~~~~~~~~~~~~~~~~
+SENTRAL:
+	** Parent Portal only access Sentral directly inside APPLICATION\FEATURES\ATTENDANCE\QUERIES\GETVALIDATTENDANCEREPORTDATESQUERY
 
 ADOBE CONNECT:
 	Remove direct link for Adobe Connect Room to Session, allowing a class to be created without a Connect Room.
