@@ -6,10 +6,6 @@ using Hangfire.Common;
 using Hangfire.Storage;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 
 namespace Constellation.Presentation.Server.Areas.Admin.Pages
 {
@@ -40,7 +36,8 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                 { nameof(IAttendanceReportJob), "0 12 29 2 1" },
                 { nameof(ISentralPhotoSyncJob), "15 9 * * 1-6" },
                 { nameof(ISentralReportSyncJob), "* 18 * * 1-6" },
-                { nameof(ISentralAwardSyncJob), "15 8 * * 1-6" }
+                { nameof(ISentralAwardSyncJob), "15 8 * * 1-6" },
+                { nameof(IMandatoryTrainingReminderJob), "0 12 * * 1" }
             };
         }
 

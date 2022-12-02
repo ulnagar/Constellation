@@ -1,16 +1,12 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection;
 
 using Constellation.Application;
-using Constellation.Application.Common.Behaviours;
-using Constellation.Application.Features.MandatoryTraining.Jobs;
 using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
-using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.GatewayConfigurations;
 using Constellation.Infrastructure.Gateways;
 using Constellation.Infrastructure.Identity.Authorization;

@@ -1,22 +1,16 @@
-﻿namespace Constellation.Application.Features.MandatoryTraining.Jobs;
+﻿namespace Constellation.Infrastructure.Jobs;
 
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static Constellation.Application.DTOs.EmailRequests.ClassworkNotificationTeacherEmail;
-
-public interface IMandatoryTrainingReminderJob : IHangfireJob
-{
-}
 
 public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
 {
@@ -98,7 +92,7 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
         // - Remove all superceded entries
         foreach (var record in detailedRecords)
         {
-            var duplicates = detailedRecords.Where(entry => 
+            var duplicates = detailedRecords.Where(entry =>
                     entry.ModuleId == record.ModuleId &&
                     entry.StaffId == record.StaffId &&
                     entry.RecordId != record.RecordId)

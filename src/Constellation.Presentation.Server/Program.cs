@@ -69,7 +69,7 @@ using (var scope = app.Services.CreateScope())
         var env = services.GetRequiredService<IWebHostEnvironment>();
         if (env.IsDevelopment())
         {
-            await IdentityDefaults.SeedTestUsers(userManager);
+            //await IdentityDefaults.SeedTestUsers(userManager);
         }
     }
     catch (Exception ex)
