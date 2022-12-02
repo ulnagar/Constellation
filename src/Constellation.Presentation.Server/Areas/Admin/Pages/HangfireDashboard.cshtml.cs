@@ -1,3 +1,4 @@
+using Constellation.Application.Features.MandatoryTraining.Jobs;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
