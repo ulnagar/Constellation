@@ -8,7 +8,6 @@ using FluentValidation;
 using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Hosting;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,7 +19,6 @@ LoggingConfiguration.SetupLogging(builder.Configuration, Serilog.Events.LogEvent
 builder.Services.AddStaffPortalInfrastructureComponents(builder.Configuration);
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-//builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 builder.Services.AddHangfire((provider, configuration) => configuration
