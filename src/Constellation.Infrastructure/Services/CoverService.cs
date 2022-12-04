@@ -257,10 +257,10 @@ namespace Constellation.Infrastructure.Services
             }
 
             // TODO: Update this with the access right concept.
-            if (!offering.Sessions.Any(session => session.StaffId == "735422017" && !session.IsDeleted)) //Karen Bellamy will be removed from all Mathematics faculty teams as they are covered!
+            if (!offering.Sessions.Any(session => (session.StaffId == "1112830" || session.Offering.Course.Faculty.Name == "Mathematics") && !session.IsDeleted)) //Karen Bellamy will be removed from all Mathematics faculty teams as they are covered!
             {
-                await _operationService.CreateTeacherMSTeamOwnerAccess("735422017", cover.OfferingId, cover.StartDate.AddDays(-1), null);
-                await _operationService.RemoveTeacherMSTeamAccess("735422017", cover.OfferingId, cover.EndDate.AddDays(1), null);
+                await _operationService.CreateTeacherMSTeamOwnerAccess("1112830", cover.OfferingId, cover.StartDate.AddDays(-1), null);
+                await _operationService.RemoveTeacherMSTeamAccess("1112830", cover.OfferingId, cover.EndDate.AddDays(1), null);
             }
 
             result.Success = true;

@@ -89,12 +89,12 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.S
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
-            if (!offering.Sessions.Any(session => session.StaffId == "735422017" && !session.IsDeleted)) //Karen Bellamy
+            if (!offering.Sessions.Any(session => session.StaffId == "1112830" && !session.IsDeleted)) //Karen Bellamy
             {
                 var karenAddOperation = new TeacherMSTeamOperation
                 {
                     OfferingId = offering.Id,
-                    StaffId = "735422017",
+                    StaffId = "1112830",
                     Action = MSTeamOperationAction.Add,
                     PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                     DateScheduled = cover.StartDate.AddDays(-1),
@@ -104,7 +104,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.S
                 var karenRemoveOperation = new TeacherMSTeamOperation
                 {
                     OfferingId = offering.Id,
-                    StaffId = "735422017",
+                    StaffId = "1112830",
                     Action = MSTeamOperationAction.Remove,
                     PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                     DateScheduled = cover.EndDate.AddDays(1),
