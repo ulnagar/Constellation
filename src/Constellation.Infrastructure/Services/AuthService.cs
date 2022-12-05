@@ -286,7 +286,7 @@ public class AuthService : IAuthService, IScopedService
 
             var user = new AppUser
             {
-                UserName = $"{contact.FirstName} {contact.LastName}",
+                UserName = contact.EmailAddress,
                 Email = contact.EmailAddress,
                 FirstName = contact.FirstName,
                 LastName = contact.LastName,
