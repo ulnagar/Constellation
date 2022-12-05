@@ -1,12 +1,10 @@
-﻿using Constellation.Application.Interfaces.Repositories;
+﻿using Constellation.Application.Features.Home.Commands;
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Home.Pages
 {
@@ -14,11 +12,13 @@ namespace Constellation.Presentation.Server.Areas.Home.Pages
     public class DashboardModel : BasePageModel
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMediator _mediator;
 
-        public DashboardModel(IUnitOfWork unitOfWork)
+        public DashboardModel(IUnitOfWork unitOfWork, IMediator mediator)
             : base()
         {
             _unitOfWork = unitOfWork;
+            _mediator = mediator;
             ClassworkNotifications = new List<ClassworkNotificationDto>();
         }
 
@@ -27,6 +27,8 @@ namespace Constellation.Presentation.Server.Areas.Home.Pages
         public ICollection<ClassworkNotificationDto> ClassworkNotifications { get; set; }
 
         public bool IsAdmin { get; set; }
+
+        public string Message { get; set; }
 
         public class ClassworkNotificationDto
         {
@@ -43,6 +45,8 @@ namespace Constellation.Presentation.Server.Areas.Home.Pages
 
         public async Task<IActionResult> OnGet()
         {
+            Message = await _mediator.Send(new GeneratePepTalkCommand());
+
             var username = User.Identity.Name;
             var IsStaff = User.IsInRole(AuthRoles.StaffMember);
             IsAdmin = User.IsInRole(AuthRoles.Admin);
@@ -54,7 +58,11 @@ namespace Constellation.Presentation.Server.Areas.Home.Pages
 
             var teacher = await _unitOfWork.Staff.FromEmailForExistCheck(username);
 
-            if (teacher == null) return Page();
+            if (teacher == null)
+            {
+                UserName = username;
+                return Page();
+            }
 
             UserName = teacher.DisplayName;
 
