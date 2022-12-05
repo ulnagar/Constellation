@@ -254,7 +254,7 @@
                     <tr>
                         <td>@Html.DisplayFor(model => item.Id)</td>
                         <td>@Html.DisplayFor(model => item.Name)</td>
-                        <td>@Html.DisplayFor(model => item.Faculty, "Faculty")</td>
+                        <td>@Html.DisplayFor(model => item.Faculty, "StringList")</td>
                         <td>@Html.DisplayFor(model => item.Courses, "StringList")</td>
                         <td>
                             @Html.ActionLink("More Info...", "Details", "Staff", new { id = item.Id }, new { @class = "btn btn-sm btn-info btn-show-hover" })

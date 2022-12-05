@@ -161,6 +161,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Include(school => school.Staff)
                 .ThenInclude(staff => staff.CourseSessions)
                 .ThenInclude(session => session.Offering)
+                .Include(school => school.Staff)
+                .ThenInclude(staff => staff.Faculties)
+                .ThenInclude(member => member.Faculty)
                 .Include(school => school.StaffAssignments)
                 .ThenInclude(assignment => assignment.SchoolContact)
                 .SingleOrDefaultAsync(school => school.Code == id);
