@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Application.Interfaces.Jobs
+namespace Constellation.Application.Interfaces.Jobs.AbsenceClassworkNotificationJob
 {
     public interface IAbsenceClassworkNotificationJob
     {

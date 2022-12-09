@@ -1,4 +1,6 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Application.Extensions;
+using Constellation.Application.Interfaces.Providers;
+using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
 using System;
 using System.Collections.Generic;
@@ -38,8 +40,8 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Models
                     OfferingId = cover.OfferingId,
                     EndDate = cover.EndDate,
                     StartDate = cover.StartDate,
-                    IsCurrent = cover.IsCurrent,
-                    IsFuture = cover.IsFuture,
+                    IsCurrent = cover.IsCurrent(),
+                    IsFuture = cover.IsFuture(),
                     IsDeleted = cover.IsDeleted,
                     OfferingName = cover.Offering.Name
                 };

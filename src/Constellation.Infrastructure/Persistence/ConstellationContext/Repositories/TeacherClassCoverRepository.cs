@@ -1,4 +1,5 @@
 using Constellation.Application.Extensions;
+using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.Persistence.ConstellationContext;

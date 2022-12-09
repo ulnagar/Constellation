@@ -2,18 +2,13 @@
 using Constellation.Application.Features.Jobs.AbsenceMonitor.Models;
 using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
 using Constellation.Application.Interfaces.Jobs;
+using Constellation.Application.Interfaces.Jobs.AbsenceClassworkNotificationJob;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
-using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {

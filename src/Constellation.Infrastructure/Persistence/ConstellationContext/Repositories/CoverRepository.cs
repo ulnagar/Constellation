@@ -1,4 +1,6 @@
-﻿using Constellation.Application.Interfaces.Repositories;
+﻿using Constellation.Application.Extensions;
+using Constellation.Application.Interfaces.Providers;
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
@@ -73,7 +75,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         public async Task<ICollection<ClassCover>> OutstandingForCasual(int casualId)
         {
             return await _context.Covers
-                .Where(cover => !cover.IsDeleted && (cover.IsCurrent || cover.IsFuture) && ((CasualClassCover)cover).CasualId == casualId)
+                .Where(cover => !cover.IsDeleted && (cover.IsCurrent() || cover.IsFuture()) && ((CasualClassCover)cover).CasualId == casualId)
                 .ToListAsync();
         }
 

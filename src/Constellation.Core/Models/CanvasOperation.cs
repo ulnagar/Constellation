@@ -22,8 +22,6 @@ namespace Constellation.Core.Models
         public DateTime ScheduledFor { get; set; }
         public bool IsCompleted { get; set; }
         public bool IsDeleted { get; set; }
-
-        public bool Overdue => !IsCompleted && !IsDeleted && ScheduledFor < DateTime.Now;
     }
 
     public class CreateUserCanvasOperation : CanvasOperation

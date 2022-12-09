@@ -1,4 +1,5 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Application.Interfaces.Providers;
+using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;

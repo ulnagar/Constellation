@@ -17,9 +17,16 @@ namespace Constellation.Application.Extensions
         {
             var oString = "";
 
-            foreach (var oItem in oList)
-                oString += $"{oItem}{delimiter}";
+            var list = oList.ToList();
 
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (i == list.Count - 1)
+                    oString += list[i];
+                else
+                    oString += list[i] + delimiter;
+            }
+            
             return oString;
         }
 

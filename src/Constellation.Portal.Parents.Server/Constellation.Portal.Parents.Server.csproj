@@ -46,6 +46,10 @@
     <ProjectReference Include="..\Constellation.Portal.Parents.Client\Constellation.Portal.Parents.Client.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\lib\server\" />
+  </ItemGroup>
+
 	<PropertyGroup>
 		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 	</PropertyGroup>

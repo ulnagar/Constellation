@@ -4,16 +4,10 @@ using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Infrastructure.DependencyInjection;
 using HtmlAgilityPack;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace Constellation.Infrastructure.Gateways
@@ -22,10 +16,10 @@ namespace Constellation.Infrastructure.Gateways
     {
         private readonly HttpClient _client;
         private readonly ISentralGatewayConfiguration _settings;
-        private readonly Serilog.ILogger _logger;
+        private readonly ILogger _logger;
         private HtmlDocument StudentListPage;
 
-        public SentralGateway(ISentralGatewayConfiguration settings, Serilog.ILogger logger)
+        public SentralGateway(ISentralGatewayConfiguration settings, ILogger logger)
         {
             _settings = settings;
             _logger = logger.ForContext<ISentralGateway>();
@@ -829,7 +823,7 @@ namespace Constellation.Infrastructure.Gateways
             return list;
         }
 
-        public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(Microsoft.Extensions.Logging.ILogger logger)
+        public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(ILogger logger)
         {
             var data = new List<FamilyDetailsDto>();
 
@@ -937,7 +931,7 @@ namespace Constellation.Infrastructure.Gateways
                 if (familyLinkItem.Value == null)
                 {
                     // Family was not found. Why?
-                    logger.LogWarning("Student {studentId} is not found in any active family", studentId);
+                    logger.Warning("Student {studentId} is not found in any active family", studentId);
 
                     continue;
                 }
@@ -947,7 +941,7 @@ namespace Constellation.Infrastructure.Gateways
                 if (dataItem == null)
                 {
                     // This student is not part of a family?
-                    logger.LogWarning("Student {studentId} is not found in any active family", studentId);
+                    logger.Warning("Student {studentId} is not found in any active family", studentId);
 
                     continue;
                 }

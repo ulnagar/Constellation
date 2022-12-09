@@ -5,6 +5,7 @@
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 	<BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+	<AssemblyName>Constellation.Portal.Parents.Client</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
