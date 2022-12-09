@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.GroupTutorials;
 
-using Constellation.Core.Common;
+using Constellation.Core.Primitives;
 using System;
 
 public sealed class TutorialEnrolment : AuditableEntity
