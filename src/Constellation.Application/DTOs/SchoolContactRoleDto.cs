@@ -6,9 +6,9 @@ namespace Constellation.Application.DTOs
     {
         public int Id { get; set; }
         public int SchoolContactId { get; set; }
-        public string SchoolContactName { get; set; }
-        public string Role { get; set; }
-        public string SchoolCode { get; set; }
-        public string SchoolName { get; set; }
+        public string SchoolContactName { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string SchoolCode { get; set; } = string.Empty;
+        public string SchoolName { get; set; } = string.Empty;
     }
 }

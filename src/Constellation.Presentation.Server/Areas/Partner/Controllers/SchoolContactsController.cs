@@ -194,25 +194,32 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 return View("Update", viewModel);
             }
 
+            viewModel.Contact.FirstName = (string.IsNullOrWhiteSpace(viewModel.Contact.FirstName) ? string.Empty : viewModel.Contact.FirstName.Trim());
+            viewModel.Contact.LastName = (string.IsNullOrWhiteSpace(viewModel.Contact.LastName) ? string.Empty : viewModel.Contact.LastName.Trim());
+            viewModel.Contact.PhoneNumber = (string.IsNullOrWhiteSpace(viewModel.Contact.PhoneNumber) ? string.Empty : viewModel.Contact.PhoneNumber.Trim());
+            viewModel.Contact.EmailAddress = (string.IsNullOrWhiteSpace(viewModel.Contact.EmailAddress) ? string.Empty : viewModel.Contact.EmailAddress.Trim());
+
+            viewModel.ContactRole.Role = (string.IsNullOrWhiteSpace(viewModel.ContactRole.Role) ? string.Empty : viewModel.ContactRole.Role.Trim());
+
             if (viewModel.IsNew)
             {
                 if (string.IsNullOrWhiteSpace(viewModel.ContactRole.SchoolCode))
                 {
                     await _mediator.Send(new CreateNewSchoolContactCommand
                     {
-                        FirstName = viewModel.Contact.FirstName.Trim(' '),
-                        LastName = viewModel.Contact.LastName.Trim(' '),
-                        PhoneNumber = viewModel.Contact.PhoneNumber.Trim(' '),
-                        EmailAddress = viewModel.Contact.EmailAddress.Trim(' ')
+                        FirstName = viewModel.Contact.FirstName,
+                        LastName = viewModel.Contact.LastName,
+                        PhoneNumber = viewModel.Contact.PhoneNumber,
+                        EmailAddress = viewModel.Contact.EmailAddress
                     });
                 } else
                 {
                     await _mediator.Send(new CreateNewSchoolContactWithRoleCommand
                     {
-                        FirstName = viewModel.Contact.FirstName.Trim(' '),
-                        LastName = viewModel.Contact.LastName.Trim(' '),
-                        PhoneNumber = viewModel.Contact.PhoneNumber.Trim(' '),
-                        EmailAddress = viewModel.Contact.EmailAddress.Trim(' '),
+                        FirstName = viewModel.Contact.FirstName,
+                        LastName = viewModel.Contact.LastName,
+                        PhoneNumber = viewModel.Contact.PhoneNumber,
+                        EmailAddress = viewModel.Contact.EmailAddress,
                         SchoolCode = viewModel.ContactRole.SchoolCode,
                         Position = viewModel.ContactRole.Role
                     });
@@ -234,10 +241,10 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
                 var newUser = new UserTemplateDto
                 {
-                    FirstName = result.Entity.FirstName.Trim(' '),
-                    LastName = result.Entity.LastName.Trim(' '),
-                    Email = result.Entity.EmailAddress.Trim(' '),
-                    Username = result.Entity.EmailAddress.Trim(' '),
+                    FirstName = result.Entity.FirstName,
+                    LastName = result.Entity.LastName,
+                    Email = result.Entity.EmailAddress,
+                    Username = result.Entity.EmailAddress,
                     IsSchoolContact = true,
                     SchoolContactId = result.Entity.Id
                 };
