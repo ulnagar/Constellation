@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.MandatoryTraining;
 
-using Constellation.Core.Common;
+using Constellation.Core.Primitives;
 using System;
 
 public class TrainingCompletion : AuditableEntity

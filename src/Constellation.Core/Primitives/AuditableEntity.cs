@@ -1,8 +1,8 @@
-﻿namespace Constellation.Core.Common;
+﻿namespace Constellation.Core.Primitives;
 
 using System;
 
-public abstract class AuditableEntity
+public abstract class AuditableEntity : Entity
 {
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }

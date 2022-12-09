@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.MandatoryTraining;
 
-using Constellation.Core.Common;
 using Constellation.Core.Enums;
+using Constellation.Core.Primitives;
 using System;
 using System.Collections.Generic;
 
