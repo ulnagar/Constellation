@@ -1,9 +1,11 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
 
+using Constellation.Application.Features.MandatoryTraining.Commands;
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Features.MandatoryTraining.Queries;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Server.Pages.Shared.Components.StaffTrainingReport;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +16,12 @@ using System.Threading.Tasks;
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
+    private readonly IAuthorizationService _authorizationService;
 
-    public IndexModel(IMediator mediator)
+    public IndexModel(IMediator mediator, IAuthorizationService authorizationService)
     {
         _mediator = mediator;
+        _authorizationService = authorizationService;
     }
 
     public List<CompletionRecordDto> CompletionRecords { get; set; } = new();
@@ -25,7 +29,10 @@ public class IndexModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public FilterDto Filter { get; set; }
 
-    public async Task OnGet()
+    [BindProperty]
+    public StaffTrainingReportSelection Report { get; set; } 
+
+    public async Task<IActionResult> OnGet()
     {
         await GetClasses(_mediator);
 
@@ -36,7 +43,7 @@ public class IndexModel : BasePageModel
         } else
         {
             var staffId = User.FindFirst(AuthClaimType.StaffEmployeeId).Value;
-            CompletionRecords = await _mediator.Send(new GetListOfCompletionRecordsQuery { StaffId = staffId });
+            return RedirectToPage("/MandatoryTraining/Staff/Index", new { StaffId = staffId });
         }
 
         foreach (var record in CompletionRecords)
@@ -59,6 +66,35 @@ public class IndexModel : BasePageModel
         };
 
         CompletionRecords = CompletionRecords.OrderByDescending(record => record.CompletedDate).ThenBy(record => record.StaffLastName).ToList();
+
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostStaffReport()
+    {
+        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
+
+        //TODO: Show error explaining why this did not work!
+        if (!isAuthorised.Succeeded)
+            return Page();
+
+        if (string.IsNullOrWhiteSpace(Report.StaffId))
+        {
+            return Page();
+        }
+
+        ReportDto report;
+
+        if (Report.IncludeCertificates)
+        {
+            report = await _mediator.Send(new GenerateStaffReportWithCertificatesCommand(Report.StaffId));
+        } 
+        else
+        {
+            report = await _mediator.Send(new GenerateStaffReportCommand(Report.StaffId));
+        }
+
+        return File(report.FileData, report.FileType, report.FileName);
     }
 
     public enum FilterDto

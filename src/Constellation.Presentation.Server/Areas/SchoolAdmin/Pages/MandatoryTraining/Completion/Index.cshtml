@@ -5,6 +5,7 @@
 
 @{
     var isEditorTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+    var canRunReportsTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
 }
 
 <h2>Mandatory Training Completion Records</h2>
@@ -35,10 +36,22 @@
         <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Expiring" class="btn @expiring_style">Expiring Soon</a>
     </div>
 
+    @if (canRunReportsTest.Succeeded)
+    {
+        <button class="btn btn-warning" data-toggle="modal" data-target="#staffReport">Staff Report</button>
+    }
+
     @if (isEditorTest.Succeeded)
     {
-        <a asp-page="Upsert" class="btn btn-warning" asp-route-Mode="@UpsertModel.ModeOptions.FULL">Create New</a>
-        <a asp-page="Upload" class="btn btn-warning">Bulk Upload</a>
+        <div class="btn-group">
+            <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">
+                Create
+            </button>
+            <div class="dropdown-menu">
+                <a asp-page="Upsert" class="dropdown-item" asp-route-Mode="@UpsertModel.ModeOptions.FULL">Create New</a>
+                <a asp-page="Upload" class="dropdown-item">Bulk Upload</a>
+            </div>
+        </div>
     } 
     else
     {
@@ -115,3 +128,15 @@
         </tr>
     }
 </table>
+
+<vc:staff-training-report></vc:staff-training-report>
+
+@section scripts {
+    <script>
+        $('#staffReportSubmitButton').click(function (e) {
+            e.preventDefault();
+            $('#staffReport').modal('hide');
+            $('#staffReportForm').submit();
+        });
+    </script>
+}

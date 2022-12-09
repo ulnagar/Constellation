@@ -13,10 +13,6 @@ APP PERMISSIONS:
 	 SchoolContact = Portal.School.User
 	 Parent = Portal.Parent.User
 
-MANDATORY TRAINING:
-	No link to staff report
-	Staff dashboard actions return to the wrong location
-
 TEAMS:
 	Periodic Team sync to ensure that all classes have registered Teams in the application
 
