@@ -30,8 +30,8 @@ namespace Constellation.Core.Models
         public double Longitude { get; set; }
         public double Latitude { get; set; }
         public string Website { get; set; }
-        public bool HasStudents => (Students.Any());
-        public bool HasStaff => (Staff.Any());
+        public bool HasStudents => (Students.Any(students => !students.IsDeleted));
+        public bool HasStaff => (Staff.Any(staff => !staff.IsDeleted));
         public  ICollection<SchoolContactRole> StaffAssignments { get; set; }
         public virtual ICollection<Student> Students { get; set; }
         public virtual ICollection<Staff> Staff { get; set; }

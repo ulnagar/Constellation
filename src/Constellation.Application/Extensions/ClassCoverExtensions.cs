@@ -10,10 +10,10 @@ public static class ClassCoverExtensions
         if (cover.IsDeleted == true)
             return false;
 
-        if (cover.EndDate <= DateTime.Today)
+        if (cover.EndDate < DateTime.Today)
             return false;
 
-        if (cover.StartDate >= DateTime.Today)
+        if (cover.StartDate > DateTime.Today)
             return false;
 
         return true;

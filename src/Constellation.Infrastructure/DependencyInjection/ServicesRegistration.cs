@@ -15,7 +15,6 @@ using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
 using Constellation.Infrastructure.Identity.MagicLink;
 using Constellation.Infrastructure.Identity.ProfileService;
 using Constellation.Infrastructure.Jobs;
-using Constellation.Infrastructure.Jobs.AbsenceClassworkNotificationJob;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 using Constellation.Infrastructure.Persistence.TrackItContext;
@@ -110,8 +109,6 @@ public static class ServicesRegistration
     internal static IServiceCollection AddHangfireJobs(this IServiceCollection services)
     {
         services.AddScoped<IAbsenceClassworkNotificationJob, AbsenceClassworkNotificationJob>();
-        services.AddScoped<IAbsenceClassworkNotificationJobDataHandler, AbsenceClassworkNotificationJobDataHandler>();
-
         services.AddScoped<IAbsenceMonitorJob, AbsenceMonitorJob>();
         services.AddScoped<IAbsenceProcessingJob, AbsenceProcessingJob>();
         services.AddScoped<IAttendanceReportJob, AttendanceReportJob>();

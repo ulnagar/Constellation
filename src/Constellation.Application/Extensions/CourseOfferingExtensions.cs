@@ -11,7 +11,7 @@ namespace Constellation.Application.Extensions
             if (offering.Sessions.All(s => s.IsDeleted))
                 return false;
 
-            if (offering.StartDate <= DateTime.Now && offering.EndDate >= DateTime.Now)
+            if (offering.StartDate <= DateTime.Today && offering.EndDate >= DateTime.Today)
                 return true;
 
             return false;

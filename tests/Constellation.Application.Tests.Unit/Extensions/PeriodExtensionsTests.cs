@@ -58,23 +58,6 @@ public class PeriodExtensionsTests
     }
 
     [Fact]
-    public void GetPeriodDescriptor_ShouldReturnFullNumberPrefixedWithS_WhenPeriodIsInPrimaryGridAndNumberIsTwoDigits()
-    {
-        // Arrange
-        var sut = new TimetablePeriod
-        {
-            Timetable = "PRIMARY",
-            Name = "12"
-        };
-
-        // Act
-        var result = sut.GetPeriodDescriptor();
-
-        // Assert
-        result.Should().Be("S12");
-    }
-
-    [Fact]
     public void GetPeriodDescriptor_ShouldReturnStringWithoutPrefix_WhenPeriodIsNotInPrimaryGrid()
     {
         // Arrange
@@ -108,20 +91,22 @@ public class PeriodExtensionsTests
         result.Should().Be("2");
     }
 
-    [Fact]
-    public void GetPeriodDescriptor_ShouldReturnFullNumber_WhenPeriodNumberIsTwoDigits()
+    [Theory]
+    [InlineData("Lunch", "L")]
+    [InlineData("Recess", "R")]
+    public void GetPeriodDescriptor_ShouldReturnFirstLetter_WhenPeriodIsLunchOrRecess(string period, string expected)
     {
         // Arrange
         var sut = new TimetablePeriod
         {
             Timetable = "SECONDARY",
-            Name = "12"
+            Name = period
         };
 
         // Act
         var result = sut.GetPeriodDescriptor();
 
         // Assert
-        result.Should().Be("12");
+        result.Should().Be(expected);
     }
 }
