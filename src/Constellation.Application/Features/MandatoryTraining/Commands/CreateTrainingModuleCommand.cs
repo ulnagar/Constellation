@@ -4,6 +4,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.MandatoryTraining;
 using MediatR;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,7 +27,7 @@ public class CreateTrainingModuleCommandHandler : IRequestHandler<CreateTraining
 
     public async Task<Unit> Handle(CreateTrainingModuleCommand request, CancellationToken cancellationToken)
     {
-        var entity = new TrainingModule
+        var entity = new TrainingModule(Guid.NewGuid())
         {
             Name = request.Name,
             Expiry = request.Expiry,

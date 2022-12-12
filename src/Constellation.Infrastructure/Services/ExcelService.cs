@@ -392,7 +392,7 @@ namespace Constellation.Infrastructure.Services
 
             for (int row = 2; row <= numModules; row++)
             {
-                var entry = new TrainingModule
+                var entry = new TrainingModule(Guid.NewGuid())
                 {
                     Name = workSheet.Cells[row, 1].GetCellValue<string>(),
                     Expiry = (TrainingModuleExpiryFrequency)workSheet.Cells[row, 2].GetCellValue<int>(),
@@ -420,7 +420,7 @@ namespace Constellation.Infrastructure.Services
                     if (module is null)
                         continue;
 
-                    var entry = new TrainingCompletion
+                    var entry = new TrainingCompletion(Guid.NewGuid())
                     {
                         Module = module,
                         StaffId = workSheet.Cells[1, column].GetCellValue<string>()

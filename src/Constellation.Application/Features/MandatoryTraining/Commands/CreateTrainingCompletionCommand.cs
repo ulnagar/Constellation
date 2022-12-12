@@ -47,7 +47,7 @@ public class CreateTrainingCompletionCommandHandler : IRequestHandler<CreateTrai
         var module = await _context.MandatoryTraining.Modules
             .FirstOrDefaultAsync(module => module.Id == request.TrainingModuleId, cancellationToken: cancellationToken);
 
-        var recordEntity = new TrainingCompletion
+        var recordEntity = new TrainingCompletion(Guid.NewGuid())
         {
             StaffId = request.StaffId,
             Module = module,
