@@ -18,10 +18,8 @@ public sealed class TutorialRoll : Entity, IAuditableEntity
     }
 
     public Guid TutorialId { get; set; }
-    public GroupTutorial Tutorial { get; set; }
     public DateTime SessionDate { get; set; }
     public string StaffId { get; set; }
-    public Staff Staff { get; set; }
     public IReadOnlyCollection<TutorialRollStudent> Students => _students;
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -35,7 +33,7 @@ public sealed class TutorialRoll : Entity, IAuditableEntity
     {
         if (_students.All(student => student.StudentId != studentId))
         {
-            var student = new TutorialRollStudent(Guid.NewGuid())
+            var student = new TutorialRollStudent
             {
                 StudentId = studentId
             };

@@ -3,19 +3,19 @@
 using Constellation.Core.Primitives;
 using System;
 
-public sealed class TutorialEnrolment : Entity, IAuditableEntity
+public sealed class TutorialTeacher : Entity, IAuditableEntity
 {
-    private TutorialEnrolment() { }
+    private TutorialTeacher() { }
 
-    public TutorialEnrolment(Guid id, Student student, DateTime? effectiveTo)
+    public TutorialTeacher(Guid id, Staff staff, DateTime? effectiveTo)
         : base(id)
     {
-        StudentId = student.StudentId;
+        StaffId = staff.StaffId;
         EffectiveFrom = DateTime.Today;
         EffectiveTo = effectiveTo;
     }
 
-    public string StudentId { get; set; }
+    public string StaffId { get; set; }
     public Guid TutorialId { get; set; }
     public DateTime EffectiveFrom { get; set; }
     public DateTime? EffectiveTo { get; set; }

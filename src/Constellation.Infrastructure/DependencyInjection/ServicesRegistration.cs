@@ -16,6 +16,7 @@ using Constellation.Infrastructure.Identity.MagicLink;
 using Constellation.Infrastructure.Identity.ProfileService;
 using Constellation.Infrastructure.Jobs;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
+using Constellation.Infrastructure.Persistence.ConstellationContext.Interceptors;
 using Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 using Constellation.Infrastructure.Persistence.TrackItContext;
 using Constellation.Infrastructure.Services;
@@ -170,11 +171,17 @@ public static class ServicesRegistration
 
     internal static IServiceCollection AddConstellationContext(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<AppDbContext>(options =>
+        services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
+        services.AddScoped<UpdateAuditableEntitiesInterceptor>();
+
+        services.AddDbContext<AppDbContext>(
+            (sp, options) =>
         {
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
+
+            options.AddInterceptors(sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>());
         });
 
         services.AddScoped<IAppDbContext, AppDbContext>();

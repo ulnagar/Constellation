@@ -15,6 +15,9 @@ CURRENT TASK
 			- student attendance as a group over time
 			- individual student attendance
 
+		- Add DomainEvents to the GroupTutorial methods
+		- Add DomainEventHandler and OutboxProcessorJob
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~

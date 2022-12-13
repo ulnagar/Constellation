@@ -53,7 +53,7 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<StocktakeEvent> StocktakeEvents { get; set; }
         DbSet<StocktakeSighting> StocktakeSightings { get; set; }
         DbSet<StudentAward> StudentAward { get; set; }
-        DbSet<EmailQueueItem> EmailQueue { get; set; }
+        //DbSet<EmailQueueItem> EmailQueue { get; set; }
         DbSet<Faculty> Faculties { get; set; }
 
         IMandatoryTrainingSets MandatoryTraining { get; }

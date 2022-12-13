@@ -3,17 +3,10 @@
 using Constellation.Core.Primitives;
 using System;
 
-public sealed class TutorialRollStudent : Entity, IAuditableEntity
+public sealed class TutorialRollStudent : IAuditableEntity
 {
-    public TutorialRollStudent(Guid Id)
-        : base(Id)
-    {
-    }
-
     public string StudentId { get; set; }
-    public Student Student { get; set; }
     public Guid TutorialRollId { get; set; }
-    public TutorialRoll TutorialRoll { get; set; }
     public bool Present { get; set; }
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
