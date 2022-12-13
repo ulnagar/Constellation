@@ -17,6 +17,7 @@ CURRENT TASK
 
 		- Add DomainEvents to the GroupTutorial methods
 		- Add DomainEventHandler and OutboxProcessorJob
+		- Add job to scan for expired teacher and student group tutorial links (EffectiveTo) and raise appropriate events
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS

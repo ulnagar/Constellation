@@ -44,8 +44,8 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
     public Result<TutorialTeacher> AddTeacher(Staff teacher, DateTime? effectiveTo = null)
     {
         bool hasEndedOrBeenDeleted =
-            EndDate > DateTime.Today ||
-            IsDeleted == false;
+            EndDate < DateTime.Today ||
+            IsDeleted;
 
         if (hasEndedOrBeenDeleted)
         {
@@ -70,7 +70,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
 
     public Result RemoveTeacher(Staff teacher, DateTime? takesEffectOn = null)
     {
-        if (_teachers.Where(enrol => enrol.StaffId == teacher.StaffId).Any(enrol => !enrol.IsDeleted))
+        if (_teachers.Where(enrol => enrol.StaffId == teacher.StaffId).All(enrol => enrol.IsDeleted))
         {
             return Result.Success();
         }
@@ -86,6 +86,8 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
             else
             {
                 tutorialTeacher.IsDeleted = true;
+
+                RaiseDomainEvent(new TeacherRemovedFromGroupTutorialDomainEvent(Guid.NewGuid(), Id, tutorialTeacher.Id));
             }
         }
 
@@ -102,6 +104,8 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
         var enrolment = new TutorialEnrolment(Guid.NewGuid(), student, effectiveTo);
 
         _enrolments.Add(enrolment);
+
+        RaiseDomainEvent(new StudentAddedToGroupTutorialDomainEvent(Guid.NewGuid(), Id, enrolment.Id));
 
         return enrolment;
     }
@@ -123,6 +127,8 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
             } else
             {
                 enrolment.IsDeleted = true;
+
+                RaiseDomainEvent(new StudentRemovedFromGroupTutorialDomainEvent(Guid.NewGuid(), Id, enrolment.Id));
             }
         }
 
