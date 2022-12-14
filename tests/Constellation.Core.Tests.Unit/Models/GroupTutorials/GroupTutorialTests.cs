@@ -26,7 +26,7 @@ public class GroupTutorialTests
         var result = sut.AddTeacher(teacher);
 
         // Assert
-        result.IsFailure.Should().Be(true);
+        result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be(DomainErrors.GroupTutorials.TutorialHasExpired.Code);
     }
 
@@ -51,7 +51,7 @@ public class GroupTutorialTests
         var result = sut.AddTeacher(teacher);
 
         // Assert
-        result.IsFailure.Should().Be(true);
+        result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be(DomainErrors.GroupTutorials.TutorialHasExpired.Code);
     }
 
@@ -78,8 +78,8 @@ public class GroupTutorialTests
         var result = sut.AddTeacher(teacher);
 
         // Assert
-        result.IsSuccess.Should().Be(true);
-        result.Value.Should().NotBe(null);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
         result.Value.Id.Should().Be(existingRecord);
     }
 
@@ -108,13 +108,43 @@ public class GroupTutorialTests
         var result = sut.AddTeacher(teacher);
 
         // Assert
-        result.IsSuccess.Should().Be(true);
-        result.Value.Should().NotBe(null);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
         result.Value.Id.Should().NotBe(existingRecord);
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("2022-12-01")]
+    public void AddTeacher_ShouldRaiseDomainEvent_WhenTeacherSucessfullyAdded(string effectiveToDate)
+    {
+        // Arrange
+        DateTime? effectiveTo = string.IsNullOrWhiteSpace(effectiveToDate) ? null : DateTime.Parse(effectiveToDate);
+
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var teacher = new Staff
+        {
+            StaffId = "123456789"
+        };
+
+        // Act
+        var result = sut.AddTeacher(teacher, effectiveTo);
+        var events = sut.GetDomainEvents();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        events.Should().HaveCount(1);
+        events.First().Should().BeOfType<TeacherAddedToGroupTutorialDomainEvent>();
+    }
+
     [Fact]
-    public void AddTeacher_ShouldRaiseDomainEvent_WhenTeacherSucessfullyAdded()
+    public void RemoveTeacher_ShouldReturnSuccess_WhenTeacherIsNotAdded()
     {
         // Arrange
         var sut = new GroupTutorial(
@@ -129,13 +159,209 @@ public class GroupTutorialTests
         };
 
         // Act
-        var result = sut.AddTeacher(teacher);
+        var result = sut.RemoveTeacher(teacher);
+        var teachers = sut.Teachers.ToList();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        teachers.Any(member => member.StaffId == teacher.StaffId).Should().BeFalse();
+    }
+
+    [Fact]
+    public void RemoveTeacher_ShouldNotRaiseDomainEvent_WhenTeacherIsNotAdded()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var teacher = new Staff
+        {
+            StaffId = "123456789"
+        };
+
+        // Act
+        var result = sut.RemoveTeacher(teacher);
         var events = sut.GetDomainEvents();
 
         // Assert
-        result.IsSuccess.Should().Be(true);
-        result.Value.Should().NotBe(null);
-        events.Should().HaveCount(1);
-        events.First().Should().BeOfType<TeacherAddedToGroupTutorialDomainEvent>();
+        result.IsSuccess.Should().BeTrue();
+        events.Should().HaveCount(0);
     }
+
+    [Fact]
+    public void RemoveTeacher_ShouldReturnSuccess_WhenTeacherHasAlreadyBeenRemoved()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var teacher = new Staff
+        {
+            StaffId = "123456789"
+        };
+
+        var initialResult = sut.AddTeacher(teacher);
+        sut.RemoveTeacher(teacher);
+
+        // Act
+        var result = sut.RemoveTeacher(teacher);
+        var teachers = sut.Teachers.ToList();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        teachers.Any(member => member.StaffId == teacher.StaffId && !member.IsDeleted).Should().BeFalse();
+    }
+
+    [Fact]
+    public void RemoveTeacher_ShouldNotRaiseDomainEvent_WhenTeacherHasAlreadyBeenRemoved()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var teacher = new Staff
+        {
+            StaffId = "123456789"
+        };
+
+        var initialResult = sut.AddTeacher(teacher);
+        sut.RemoveTeacher(teacher);
+        sut.ClearDomainEvents();
+
+        // Act
+        var result = sut.RemoveTeacher(teacher);
+        var teachers = sut.Teachers.ToList();
+        var events = sut.GetDomainEvents();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        events.Should().HaveCount(0);
+        teachers.Any(member => member.StaffId == teacher.StaffId && !member.IsDeleted).Should().BeFalse();
+    }
+
+    [Fact]
+    public void RemoveTeacher_ShouldReturnSuccess_WhenTeacherIsRemoved()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var teacher = new Staff
+        {
+            StaffId = "123456789"
+        };
+
+        var initialResult = sut.AddTeacher(teacher);
+
+        // Act
+        var result = sut.RemoveTeacher(teacher);
+        var teachers = sut.Teachers.ToList();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        teachers.Any(member => member.StaffId == teacher.StaffId && !member.IsDeleted).Should().BeFalse();
+    }
+
+    [Fact]
+    public void RemoveTeacher_ShouldRaiseDomainEvent_WhenTeacherIsRemoved()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var teacher = new Staff
+        {
+            StaffId = "123456789"
+        };
+
+        sut.AddTeacher(teacher);
+        sut.ClearDomainEvents();
+
+        // Act
+        var result = sut.RemoveTeacher(teacher);
+        var events = sut.GetDomainEvents();
+        
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        events.Should().HaveCount(1);
+        events.First().Should().BeOfType<TeacherRemovedFromGroupTutorialDomainEvent>();
+    }
+
+    [Fact]
+    public void RemoveTeacher_ShouldNotRaiseDomainEvent_WhenTakesEffectOnIsSpecified()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var teacher = new Staff
+        {
+            StaffId = "123456789"
+        };
+
+        var takesEffectOn = DateTime.Today.AddDays(5);
+
+        sut.AddTeacher(teacher);
+        sut.ClearDomainEvents();
+
+        // Act
+        var result = sut.RemoveTeacher(teacher, takesEffectOn);
+        var events = sut.GetDomainEvents();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        events.Should().HaveCount(0);
+    }
+
+    [Fact]
+    public void RemoveTeacher_ShouldTakeEffectToday_WhenTakesEffectOnIsInThePast()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var teacher = new Staff
+        {
+            StaffId = "123456789"
+        };
+
+        var takesEffectOn = DateTime.Today.AddDays(-5);
+
+        sut.AddTeacher(teacher);
+        sut.ClearDomainEvents();
+
+        // Act
+        var result = sut.RemoveTeacher(teacher, takesEffectOn);
+        var events = sut.GetDomainEvents();
+        var teacherEntry = sut.Teachers.First(member => member.StaffId == teacher.StaffId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        events.Should().HaveCount(1);
+        events.First().Should().BeOfType<TeacherRemovedFromGroupTutorialDomainEvent>();
+        teacherEntry.EffectiveTo.Should().BeNull();
+    }
+
+
 }

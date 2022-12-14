@@ -79,7 +79,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
 
         foreach (var tutorialTeacher in tutorialTeachers)
         {
-            if (takesEffectOn.HasValue)
+            if (takesEffectOn.HasValue && takesEffectOn.Value > DateTime.Today)
             {
                 tutorialTeacher.EffectiveTo = takesEffectOn.Value;
             }
