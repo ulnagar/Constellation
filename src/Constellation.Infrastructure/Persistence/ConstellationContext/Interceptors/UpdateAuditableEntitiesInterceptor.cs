@@ -1,4 +1,5 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Interceptors;
+﻿#nullable enable
+namespace Constellation.Infrastructure.Persistence.ConstellationContext.Interceptors;
 
 using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Services;

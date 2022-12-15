@@ -1,14 +1,11 @@
-﻿using System;
+﻿namespace Constellation.Core.Models;
 
-namespace Constellation.Core.Models
+public class StudentReport
 {
-    public class StudentReport
-    {
-        public Guid Id { get; set; }
-        public string StudentId { get; set; }
-        public Student Student { get; set; }
-        public string PublishId { get; set; }
-        public string Year { get; set; }
-        public string ReportingPeriod { get; set; }
-    }
+    public Guid Id { get; set; }
+    public string StudentId { get; set; } = string.Empty;
+    public virtual Student? Student { get; set; }
+    public string PublishId { get; set; } = string.Empty;
+    public string Year { get; set; } = string.Empty;
+    public string ReportingPeriod { get; set; } = string.Empty;
 }

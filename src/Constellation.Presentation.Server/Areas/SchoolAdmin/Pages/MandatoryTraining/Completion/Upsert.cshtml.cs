@@ -175,7 +175,7 @@ public class UpsertModel : BasePageModel
                 await FormFile.CopyToAsync(target);
                 file.FileData = target.ToArray();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Error uploading file
             }

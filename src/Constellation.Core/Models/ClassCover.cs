@@ -1,57 +1,53 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace Constellation.Core.Models;
 
-namespace Constellation.Core.Models
+public abstract class ClassCover
 {
-    public abstract class ClassCover
+    public ClassCover()
     {
-        public ClassCover()
-        {
-            IsDeleted = false;
+        IsDeleted = false;
 
-            AdobeConnectOperations = new List<AdobeConnectOperation>();
-            MSTeamOperations = new List<MSTeamOperation>();
-            ClassworkNotifications = new List<ClassworkNotification>();
-        }
-
-        public int Id { get; set; }
-        public CourseOffering Offering { get; set; }
-        public int OfferingId { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public bool IsDeleted { get; set; }
-        public ICollection<AdobeConnectOperation> AdobeConnectOperations { get; set; }
-        public ICollection<MSTeamOperation> MSTeamOperations { get; set; }
-
-        public ICollection<ClassworkNotification> ClassworkNotifications { get; set; }
-               
-        public void Delete()
-        {
-            IsDeleted = true;
-        }
+        AdobeConnectOperations = new List<AdobeConnectOperation>();
+        MSTeamOperations = new List<MSTeamOperation>();
+        ClassworkNotifications = new List<ClassworkNotification>();
     }
 
-    public class CasualClassCover : ClassCover
+    public int Id { get; set; }
+    public virtual CourseOffering? Offering { get; set; }
+    public int OfferingId { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public bool IsDeleted { get; set; }
+    public ICollection<AdobeConnectOperation> AdobeConnectOperations { get; set; }
+    public ICollection<MSTeamOperation> MSTeamOperations { get; set; }
+
+    public ICollection<ClassworkNotification> ClassworkNotifications { get; set; }
+           
+    public void Delete()
     {
-        public CasualClassCover() { }
+        IsDeleted = true;
+    }
+}
 
-        public CasualClassCover(int offeringId, int casualId, DateTime startDate, DateTime endDate)
-        {
-            CasualId = casualId;
-            OfferingId = offeringId;
-            StartDate = startDate;
-            EndDate = endDate;
-        }
+public class CasualClassCover : ClassCover
+{
+    public CasualClassCover() { }
 
-        public Casual Casual { get; set; }
-        public int CasualId { get; set; }
+    public CasualClassCover(int offeringId, int casualId, DateTime startDate, DateTime endDate)
+    {
+        CasualId = casualId;
+        OfferingId = offeringId;
+        StartDate = startDate;
+        EndDate = endDate;
     }
 
-    public class TeacherClassCover : ClassCover
-    {
-        public TeacherClassCover() { }
+    public virtual Casual? Casual { get; set; }
+    public int CasualId { get; set; }
+}
 
-        public Staff Staff { get; set; }
-        public string StaffId { get; set; }
-    }
+public class TeacherClassCover : ClassCover
+{
+    public TeacherClassCover() { }
+
+    public virtual Staff? Staff { get; set; }
+    public string StaffId { get; set; } = string.Empty;
 }

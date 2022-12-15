@@ -4,9 +4,6 @@ using Constellation.Core.DomainEvents;
 using Constellation.Core.Errors;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
 {
@@ -33,13 +30,13 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
     public IReadOnlyCollection<TutorialEnrolment> Enrolments => _enrolments;
     public IReadOnlyCollection<TutorialRoll> Rolls => _rolls;
 
-    public string CreatedBy { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; }
-    public DateTime ModifiedAt { get; set; }
+    public string ModifiedBy { get; set; } = string.Empty;
+    public DateTime? ModifiedAt { get; set; }
     public bool IsDeleted { get; set; }
-    public string DeletedBy { get; set; }
-    public DateTime DeletedAt { get; set; }
+    public string DeletedBy { get; set; } = string.Empty;
+    public DateTime? DeletedAt { get; set; }
 
     public Result<TutorialTeacher> AddTeacher(Staff teacher, DateTime? effectiveTo = null)
     {

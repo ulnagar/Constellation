@@ -1,4 +1,5 @@
-﻿namespace Constellation.Application.Common.Behaviours;
+﻿#nullable enable
+namespace Constellation.Application.Common.Behaviours;
 
 using Constellation.Core.Shared;
 using FluentValidation;
@@ -56,7 +57,7 @@ public class RequestValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
         object validationResult = typeof(ValidationResult<>)
             .GetGenericTypeDefinition()
             .MakeGenericType(typeof(TResult).GenericTypeArguments[0])
-            .GetMethod(nameof(ValidationResult.WithErrors))
+            .GetMethod(nameof(ValidationResult.WithErrors))!
             .Invoke(null, new object?[] { errors })!;
 
         return (TResult)validationResult;

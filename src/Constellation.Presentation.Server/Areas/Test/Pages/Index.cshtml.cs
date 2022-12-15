@@ -20,6 +20,7 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
+        await Task.Delay(1);
         return Page();
     }
 }

@@ -97,12 +97,12 @@ namespace Constellation.Infrastructure.Services
 
             if (!await _unitOfWork.CourseOfferings.AnyWithId(offeringResource.Id))
             {
-                var offering = new CourseOffering
+                var offering = new CourseOffering(
+                    offeringResource.CourseId, 
+                    offeringResource.StartDate, 
+                    offeringResource.EndDate)
                 {
-                    Name = offeringResource.Name,
-                    CourseId = offeringResource.CourseId,
-                    StartDate = offeringResource.StartDate,
-                    EndDate = offeringResource.EndDate
+                    Name = offeringResource.Name
                 };
 
                 _unitOfWork.Add(offering);

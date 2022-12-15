@@ -1,4 +1,5 @@
-﻿using Constellation.Application.Models.EmailQueue;
+﻿#nullable enable
+using Constellation.Application.Models.EmailQueue;
 using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;

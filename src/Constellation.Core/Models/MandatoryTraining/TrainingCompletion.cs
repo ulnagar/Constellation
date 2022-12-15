@@ -10,26 +10,26 @@ public class TrainingCompletion : Entity, IAuditableEntity
     {
     }
 
-    public string StaffId { get; set; }
-    public virtual Staff Staff { get; set; }
+    public string StaffId { get; set; } = string.Empty;
+    public virtual Staff? Staff { get; set; }
     public DateTime? CompletedDate { get; private set; }
     public bool NotRequired { get; private set; }
     public Guid TrainingModuleId { get; set; }
-    public virtual TrainingModule Module { get; set; }
+    public virtual TrainingModule? Module { get; set; }
     public int? StoredFileId { get; set; }
-    public virtual StoredFile StoredFile { get; set; }
-    public string CreatedBy { get; set; }
+    public virtual StoredFile? StoredFile { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; }
-    public DateTime ModifiedAt { get; set; }
+    public string ModifiedBy { get; set; } = string.Empty;
+    public DateTime? ModifiedAt { get; set; }
     public bool IsDeleted { get; set; }
-    public string DeletedBy { get; set; }
-    public DateTime DeletedAt { get; set; }
+    public string DeletedBy { get; set; } = string.Empty;
+    public DateTime? DeletedAt { get; set; }
 
     public void MarkNotRequired()
     {
         // Check that this is valid on the Module
-        var canMarkNotRequired = Module.CanMarkNotRequired;
+        var canMarkNotRequired = Module!.CanMarkNotRequired;
 
         if (canMarkNotRequired)
         {

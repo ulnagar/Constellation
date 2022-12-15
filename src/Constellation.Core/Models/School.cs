@@ -1,39 +1,35 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿namespace Constellation.Core.Models;
 
-namespace Constellation.Core.Models
+public class School
 {
-    public class School
+    public School()
     {
-        public School()
-        {
-            StaffAssignments = new List<SchoolContactRole>();
-            Students = new List<Student>();
-            Staff = new List<Staff>();
-        }
-
-        public string Code { get; set; }
-        public string Name { get; set; }
-        public string Address { get; set; }
-        public string Town { get; set; }
-        public string State { get; set; }
-        public string PostCode { get; set; }
-        public string PhoneNumber { get; set; }
-        public string FaxNumber { get; set; }
-        public string EmailAddress { get; set; }
-        public string Division { get; set; }
-        public bool HeatSchool { get; set; }
-        public string Electorate { get; set; }
-        public string PrincipalNetwork { get; set; }
-        public string TimetableApplication { get; set; }
-        public string RollCallGroup { get; set; }
-        public double Longitude { get; set; }
-        public double Latitude { get; set; }
-        public string Website { get; set; }
-        public bool HasStudents => (Students.Any(students => !students.IsDeleted));
-        public bool HasStaff => (Staff.Any(staff => !staff.IsDeleted));
-        public  ICollection<SchoolContactRole> StaffAssignments { get; set; }
-        public virtual ICollection<Student> Students { get; set; }
-        public virtual ICollection<Staff> Staff { get; set; }
+        StaffAssignments = new List<SchoolContactRole>();
+        Students = new List<Student>();
+        Staff = new List<Staff>();
     }
+
+    public string Code { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    public string Town { get; set; } = string.Empty;
+    public string State { get; set; } = string.Empty;
+    public string PostCode { get; set; } = string.Empty;
+    public string PhoneNumber { get; set; } = string.Empty;
+    public string FaxNumber { get; set; } = string.Empty;
+    public string EmailAddress { get; set; } = string.Empty;
+    public string Division { get; set; } = string.Empty;
+    public bool HeatSchool { get; set; }
+    public string Electorate { get; set; } = string.Empty;
+    public string PrincipalNetwork { get; set; } = string.Empty;
+    public string TimetableApplication { get; set; } = string.Empty;
+    public string RollCallGroup { get; set; } = string.Empty;
+    public double Longitude { get; set; }
+    public double Latitude { get; set; }
+    public string Website { get; set; } = string.Empty;
+    public bool HasStudents => (Students.Any(students => !students.IsDeleted));
+    public bool HasStaff => (Staff.Any(staff => !staff.IsDeleted));
+    public virtual ICollection<SchoolContactRole> StaffAssignments { get; set; }
+    public virtual ICollection<Student> Students { get; set; }
+    public virtual ICollection<Staff> Staff { get; set; }
 }

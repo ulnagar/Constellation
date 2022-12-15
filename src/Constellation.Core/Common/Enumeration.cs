@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Constellation.Core.Common;
+﻿namespace Constellation.Core.Common;
 
 using System;
 using System.Collections.Generic;
@@ -36,7 +35,7 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>
             .SingleOrDefault(e => e.Name == name);
     }
 
-    public bool Equals(IntEnumeration<TEnum> other)
+    public bool Equals(IntEnumeration<TEnum>? other)
     {
         if (other is null)
             return false;
@@ -45,7 +44,7 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>
             Value == other.Value;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is IntEnumeration<TEnum> other &&
             Equals(other);
@@ -109,7 +108,7 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
             .SingleOrDefault(e => e.Name == name);
     }
 
-    public bool Equals(StringEnumeration<TEnum> other)
+    public bool Equals(StringEnumeration<TEnum>? other)
     {
         if (other is null)
             return false;
@@ -118,7 +117,7 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
             Value == other.Value;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is StringEnumeration<TEnum> other &&
             Equals(other);

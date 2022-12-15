@@ -39,7 +39,7 @@ public class UploadModel : BasePageModel
 
                 await _mediator.Send(new ProcessTrainingImportFileCommand(target));   
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Error uploading file
                 throw;

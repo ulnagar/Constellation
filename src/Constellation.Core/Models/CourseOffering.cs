@@ -1,43 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace Constellation.Core.Models;
 
-namespace Constellation.Core.Models
+public class CourseOffering
 {
-    public class CourseOffering
+    public CourseOffering() { }
+
+    public CourseOffering(int courseId, DateTime startDate, DateTime endDate)
     {
-        public CourseOffering()
-        {
-            Enrolments = new List<Enrolment>();
-            Sessions = new List<OfferingSession>();
-            ClassCovers = new List<ClassCover>();
-            Resources = new List<OfferingResource>();
-            Absences = new List<Absence>();
-        }
-
-        public CourseOffering(int courseId, DateTime startDate, DateTime endDate)
-        {
-            Enrolments = new List<Enrolment>();
-            Sessions = new List<OfferingSession>();
-            ClassCovers = new List<ClassCover>();
-            Resources = new List<OfferingResource>();
-            Absences = new List<Absence>();
-
-            CourseId = courseId;
-            StartDate = startDate;
-            EndDate = endDate;
-        }
-
-        public int Id { get;  set; }
-        public string Name { get;  set; }
-        public int CourseId { get;  set; }
-        public Course Course { get;  set; }
-        public DateTime StartDate { get;  set; }
-        public DateTime EndDate { get;  set; }
-        public ICollection<Enrolment> Enrolments { get;  set; }
-        public ICollection<OfferingSession> Sessions { get;  set; }
-        public ICollection<ClassCover> ClassCovers { get;  set; }
-        public ICollection<OfferingResource> Resources { get;  set; }
-        public ICollection<Lesson> Lessons { get; set; }
-        public ICollection<Absence> Absences { get; set; }
+        CourseId = courseId;
+        StartDate = startDate;
+        EndDate = endDate;
     }
+
+    public int Id { get;  set; }
+    public string Name { get;  set; } = string.Empty;
+    public int CourseId { get;  set; }
+    public virtual Course? Course { get;  set; }
+    public DateTime StartDate { get;  set; }
+    public DateTime EndDate { get;  set; }
+    public List<Enrolment> Enrolments { get; set; } = new();
+    public List<OfferingSession> Sessions { get; set; } = new();
+    public List<ClassCover> ClassCovers { get; set; } = new();
+    public List<OfferingResource> Resources { get; set; } = new();
+    public List<Lesson> Lessons { get; set; } = new();
+    public List<Absence> Absences { get; set; } = new();
 }

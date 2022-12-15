@@ -1,9 +1,6 @@
 ﻿namespace Constellation.Core.Models.GroupTutorials;
 
 using Constellation.Core.Primitives;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 public sealed class TutorialRoll : Entity, IAuditableEntity
 {
@@ -19,15 +16,15 @@ public sealed class TutorialRoll : Entity, IAuditableEntity
 
     public Guid TutorialId { get; set; }
     public DateTime SessionDate { get; set; }
-    public string StaffId { get; set; }
+    public string StaffId { get; set; } = string.Empty;
     public IReadOnlyCollection<TutorialRollStudent> Students => _students;
-    public string CreatedBy { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; }
-    public DateTime ModifiedAt { get; set; }
+    public string ModifiedBy { get; set; } = string.Empty;
+    public DateTime? ModifiedAt { get; set; }
     public bool IsDeleted { get; set; }
-    public string DeletedBy { get; set; }
-    public DateTime DeletedAt { get; set; }
+    public string DeletedBy { get; set; } = string.Empty;
+    public DateTime? DeletedAt { get; set; }
 
     public void AddStudent(string studentId)
     {

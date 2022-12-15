@@ -46,6 +46,10 @@ namespace Constellation.Infrastructure.Gateways
 
             _logger.LogInformation("{id}: Using object : {object}", requestId, JsonConvert.SerializeObject(linkInfo));
 #if DEBUG
+            _client.Timeout = TimeSpan.FromSeconds(1);
+            Console.WriteLine(_settings.ApiEndpoint);
+            await Task.Delay(1);
+
             return url;
 #else
             var response = await _client.PostAsJsonAsync($"{_settings.ApiEndpoint}?key={_settings.ApiKey}", linkInfo);
@@ -74,8 +78,10 @@ namespace Constellation.Infrastructure.Gateways
 
         private class DynamicLink
         {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "External API Requirements")]
             public DynamicLinkInfo dynamicLinkInfo { get; set; }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "External API Requirements")]
             public DynamicLinkSuffix suffix { get; set; }
 
             public DynamicLink()
@@ -87,7 +93,9 @@ namespace Constellation.Infrastructure.Gateways
 
         private class DynamicLinkInfo
         {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "External API Requirements")]
             public string domainUriPrefix { get; set; }
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "External API Requirements")]
             public string link { get; set; }
         }
 
@@ -95,7 +103,8 @@ namespace Constellation.Infrastructure.Gateways
         {
             public const string Short = "SHORT";
             public const string Long = "UNGUESSABLE";
-
+            
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "External API Requirements")]
             public string option { get; set; }
         }
     }
