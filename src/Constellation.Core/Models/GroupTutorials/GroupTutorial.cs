@@ -96,23 +96,34 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
 
     public Result<TutorialEnrolment> EnrolStudent(Student student, DateTime? effectiveTo = null)
     {
+        bool hasEndedOrBeenDeleted =
+            EndDate < DateTime.Today ||
+            IsDeleted;
+
+        if (hasEndedOrBeenDeleted)
+        {
+            return Result.Failure<TutorialEnrolment>(DomainErrors.GroupTutorials.TutorialHasExpired);
+        }
+
         if (_enrolments.Any(enrol => enrol.StudentId == student.StudentId && !enrol.IsDeleted))
         {
-            return Result.Failure<TutorialEnrolment>(DomainErrors.GroupTutorials.StudentAlreadyEnrolled);
+            var existingEntry = _enrolments.FirstOrDefault(enrol => enrol.StudentId == student.StudentId && !enrol.IsDeleted);
+
+            return existingEntry;
         }
 
         var enrolment = new TutorialEnrolment(Guid.NewGuid(), student, effectiveTo);
 
-        _enrolments.Add(enrolment);
-
         RaiseDomainEvent(new StudentAddedToGroupTutorialDomainEvent(Guid.NewGuid(), Id, enrolment.Id));
+
+        _enrolments.Add(enrolment);
 
         return enrolment;
     }
 
     public Result UnenrolStudent(Student student, DateTime? takesEffectOn = null)
     {
-        if (_enrolments.Where(enrol => enrol.StudentId == student.StudentId).Any(enrol => !enrol.IsDeleted))
+        if (_enrolments.Where(enrol => enrol.StudentId == student.StudentId).All(enrol => enrol.IsDeleted))
         {
             return Result.Success();
         }
@@ -121,10 +132,11 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
 
         foreach (var enrolment in enrolments)
         {
-            if (takesEffectOn.HasValue)
+            if (takesEffectOn.HasValue && takesEffectOn.Value > DateTime.Today)
             {
                 enrolment.EffectiveTo = takesEffectOn.Value;
-            } else
+            } 
+            else
             {
                 enrolment.IsDeleted = true;
 

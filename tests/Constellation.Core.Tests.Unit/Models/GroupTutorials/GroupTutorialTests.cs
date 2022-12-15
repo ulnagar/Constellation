@@ -12,8 +12,8 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = new GroupTutorial(
-            Guid.NewGuid(), 
-            "Stage 4 Mathematics", 
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
             DateTime.Today.AddMonths(-1),
             DateTime.Today.AddDays(-1));
 
@@ -295,7 +295,7 @@ public class GroupTutorialTests
         // Act
         var result = sut.RemoveTeacher(teacher);
         var events = sut.GetDomainEvents();
-        
+
         // Assert
         result.IsSuccess.Should().BeTrue();
         events.Should().HaveCount(1);
@@ -363,5 +363,359 @@ public class GroupTutorialTests
         teacherEntry.EffectiveTo.Should().BeNull();
     }
 
+    [Fact]
+    public void EnrolStudent_ShouldReturnFailure_WhenTutorialHasExpired()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddDays(-1));
 
+        var student = new Student
+        {
+            StudentId = "123456789"
+        };
+
+        // Act
+        var result = sut.EnrolStudent(student);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be(DomainErrors.GroupTutorials.TutorialHasExpired.Code);
+    }
+
+    [Fact]
+    public void EnrolStudent_ShouldReturnFailure_WhenTutorialHasBeenDeleted()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        sut.IsDeleted = true;
+
+        var student = new Student
+        {
+            StudentId = "123456789"
+        };
+
+        // Act
+        var result = sut.EnrolStudent(student);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be(DomainErrors.GroupTutorials.TutorialHasExpired.Code);
+    }
+
+    [Fact]
+    public void EnrolStudent_ShouldReturnSuccessWithSameId_WhenStudentIsAlreadyEnrolled()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var student = new Student
+        {
+            StudentId = "123456789"
+        };
+
+        var initialResult = sut.EnrolStudent(student);
+
+        Guid existingRecord = initialResult.IsSuccess ? initialResult.Value.Id : Guid.NewGuid();
+
+        // Act
+        var result = sut.EnrolStudent(student);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value.Id.Should().Be(existingRecord);
+    }
+
+    [Fact]
+    public void EnrolStudent_ShouldReturnSuccessWithNewId_WhenStudentWasPreviouslyEnrolled()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var student = new Student
+        {
+            StudentId = "123456789"
+        };
+
+        var initialResult = sut.EnrolStudent(student);
+
+        Guid existingRecord = initialResult.IsSuccess ? initialResult.Value.Id : Guid.NewGuid();
+
+        sut.UnenrolStudent(student);
+
+        // Act
+        var result = sut.EnrolStudent(student);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value.Id.Should().NotBe(existingRecord);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("2022-12-01")]
+    public void EnrolStudent_ShouldRaiseDomainEvent_WhenStudentSucessfullyEnrolled(string effectiveToDate)
+    {
+        // Arrange
+        DateTime? effectiveTo = string.IsNullOrWhiteSpace(effectiveToDate) ? null : DateTime.Parse(effectiveToDate);
+
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var student = new Student
+        {
+            StudentId = "123456789"
+        };
+
+        // Act
+        var result = sut.EnrolStudent(student, effectiveTo);
+        var events = sut.GetDomainEvents();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        events.Should().HaveCount(1);
+        events.First().Should().BeOfType<StudentAddedToGroupTutorialDomainEvent>();
+    }
+
+    [Fact]
+    public void UnenrolStudent_ShouldReturnSuccess_WhenStudentIsNotEnrolled()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var student = new Student
+        {
+            StudentId = "123456789"
+        };
+
+        // Act
+        var result = sut.UnenrolStudent(student);
+        var enrolments = sut.Enrolments.ToList();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        enrolments.Any(member => member.StudentId == student.StudentId).Should().BeFalse();
+    }
+
+    [Fact]
+    public void UnenrolStudent_ShouldNotRaiseDomainEvent_WhenStudentIsNotEnrolled()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var student = new Student
+        {
+            StudentId = "123456789"
+        };
+
+        // Act
+        var result = sut.UnenrolStudent(student);
+        var events = sut.GetDomainEvents();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        events.Should().HaveCount(0);
+    }
+
+    [Fact]
+    public void UnenrolStudent_ShouldReturnSuccess_WhenStudentHasAlreadyBeenUnenrolled()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var student = new Student
+        {
+            StudentId = "123456789"
+        };
+
+        var initialResult = sut.EnrolStudent(student);
+        sut.UnenrolStudent(student);
+
+        // Act
+        var result = sut.UnenrolStudent(student);
+        var enrolments = sut.Enrolments.ToList();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        enrolments.Any(member => member.StudentId == student.StudentId && !member.IsDeleted).Should().BeFalse();
+    }
+
+    [Fact]
+    public void UnenrolStudent_ShouldNotRaiseDomainEvent_WhenStudentHasAlreadyBeenUnenrolled()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var student = new Student
+        {
+            StudentId = "123456789"
+        };
+
+        var initialResult = sut.EnrolStudent(student);
+        sut.UnenrolStudent(student);
+        sut.ClearDomainEvents();
+
+        // Act
+        var result = sut.UnenrolStudent(student);
+        var enrolments = sut.Enrolments.ToList();
+        var events = sut.GetDomainEvents();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        events.Should().HaveCount(0);
+        enrolments.Any(member => member.StudentId == student.StudentId && !member.IsDeleted).Should().BeFalse();
+    }
+
+    [Fact]
+    public void UnenrolStudent_ShouldReturnSuccess_WhenStudentIsUnenrolled()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var student = new Student
+        {
+            StudentId = "123456789"
+        };
+
+        var initialResult = sut.EnrolStudent(student);
+
+        // Act
+        var result = sut.UnenrolStudent(student);
+        var enrolments = sut.Enrolments.ToList();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        enrolments.Any(member => member.StudentId == student.StudentId && !member.IsDeleted).Should().BeFalse();
+    }
+
+    [Fact]
+    public void UnenrolStudent_ShouldRaiseDomainEvent_WhenStudentIsUnenrolled()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var student = new Student
+        {
+            StudentId = "123456789"
+        };
+
+        sut.EnrolStudent(student);
+        sut.ClearDomainEvents();
+
+        // Act
+        var result = sut.UnenrolStudent(student);
+        var events = sut.GetDomainEvents();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        events.Should().HaveCount(1);
+        events.First().Should().BeOfType<StudentRemovedFromGroupTutorialDomainEvent>();
+    }
+
+    [Fact]
+    public void UnenrolStudent_ShouldNotRaiseDomainEvent_WhenTakesEffectOnIsSpecified()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var student = new Student
+        {
+            StudentId = "123456789"
+        };
+
+        var takesEffectOn = DateTime.Today.AddDays(5);
+
+        sut.EnrolStudent(student);
+        sut.ClearDomainEvents();
+
+        // Act
+        var result = sut.UnenrolStudent(student, takesEffectOn);
+        var events = sut.GetDomainEvents();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        events.Should().HaveCount(0);
+    }
+
+    [Fact]
+    public void UnenrolStudent_ShouldTakeEffectToday_WhenTakesEffectOnIsInThePast()
+    {
+        // Arrange
+        var sut = new GroupTutorial(
+            Guid.NewGuid(),
+            "Stage 4 Mathematics",
+            DateTime.Today.AddMonths(-1),
+            DateTime.Today.AddMonths(1));
+
+        var student = new Student
+        {
+            StudentId = "123456789"
+        };
+
+        var takesEffectOn = DateTime.Today.AddDays(-5);
+
+        sut.EnrolStudent(student);
+        sut.ClearDomainEvents();
+
+        // Act
+        var result = sut.UnenrolStudent(student, takesEffectOn);
+        var events = sut.GetDomainEvents();
+        var studentEntry = sut.Enrolments.First(member => member.StudentId == student.StudentId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        events.Should().HaveCount(1);
+        events.First().Should().BeOfType<StudentRemovedFromGroupTutorialDomainEvent>();
+        studentEntry.EffectiveTo.Should().BeNull();
+    }
 }
