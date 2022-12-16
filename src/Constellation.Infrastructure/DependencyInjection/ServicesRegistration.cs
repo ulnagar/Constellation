@@ -10,6 +10,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.GatewayConfigurations;
 using Constellation.Infrastructure.Gateways;
+using Constellation.Infrastructure.Idempotence;
 using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
 using Constellation.Infrastructure.Identity.MagicLink;
@@ -27,7 +28,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
+using Scrutor;
 using Serilog;
 using System;
 using System.Reflection;
@@ -47,9 +50,20 @@ public static class ServicesRegistration
 
         services.AddSingleton(Log.Logger);
 
-        services.AddMediatR(new[] { Assembly.GetExecutingAssembly(), typeof(IAppDbContext).Assembly });
+        // Import Mediatr handlers from Application and Infrastructure projects
+        services.AddMediatR(new[] { Constellation.Application.AssemblyReference.Assembly, Constellation.Infrastructure.AssemblyReference.Assembly});
 
         services.AddApplication();
+
+        // Add any other missing services as their interfaces
+        services.Scan(selector =>
+            selector.FromAssemblies(
+                Constellation.Application.AssemblyReference.Assembly,
+                Constellation.Infrastructure.AssemblyReference.Assembly)
+            .AddClasses(false)
+            .UsingRegistrationStrategy(RegistrationStrategy.Skip)
+            .AsMatchingInterface()
+            .WithScopedLifetime());
 
         return services;
     }
@@ -100,6 +114,8 @@ public static class ServicesRegistration
 
         services.AddMediatR(new[] { Assembly.GetExecutingAssembly(), typeof(IAppDbContext).Assembly });
 
+        services.Decorate(typeof(INotificationHandler<>), typeof(IdempotentDomainEventHandler<>));
+
         services.AddApplication();
 
         return services;
@@ -124,6 +140,7 @@ public static class ServicesRegistration
         services.AddScoped<ISentralReportSyncJob, SentralReportSyncJob>();
         services.AddScoped<IUserManagerJob, UserManagerJob>();
         services.AddScoped<IMandatoryTrainingReminderJob, MandatoryTrainingReminderJob>();
+        services.AddScoped<ProcessOutboxMessagesJob>();
 
         services.AddScoped(typeof(IJobDispatcherService<>), typeof(JobDispatcherService<>));
 
@@ -181,10 +198,14 @@ public static class ServicesRegistration
                 configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
 
-            options.AddInterceptors(sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>());
+            options.AddInterceptors(new List<IInterceptor> {
+                sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>(),
+                sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
+            });
         });
 
         services.AddScoped<IAppDbContext, AppDbContext>();
+        services.AddScoped<AppDbContext>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddApplicationServices();

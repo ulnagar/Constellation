@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -28,5 +29,9 @@ internal sealed class TutorialRollConfiguration : IEntityTypeConfiguration<Tutor
 
         builder
             .HasMany(e => e.Students);
+
+        builder
+            .Property(e => e.SessionDate)
+            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }

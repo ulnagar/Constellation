@@ -17,8 +17,8 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
     public GroupTutorial(
         Guid id,
         string name,
-        DateTime startDate,
-        DateTime endDate)
+        DateOnly startDate,
+        DateOnly endDate)
         : base(id)
     {
         Name = name;
@@ -27,10 +27,12 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
     }
 
     public string Name { get; private set; }
-    public DateTime StartDate { get; private set; }
-    public DateTime EndDate { get; private set; }
+    public DateOnly StartDate { get; private set; }
+    public DateOnly EndDate { get; private set; }
     public IReadOnlyCollection<TutorialTeacher> Teachers => _teachers;
     public IReadOnlyCollection<TutorialEnrolment> Enrolments => _enrolments;
+    public IReadOnlyCollection<TutorialEnrolment> CurrentEnrolments =>
+        GetActiveEnrolmentsForDate(DateOnly.FromDateTime(DateTime.Today));
     public IReadOnlyCollection<TutorialRoll> Rolls => _rolls;
 
     public string CreatedBy { get; set; }
@@ -41,10 +43,18 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
     public string DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
 
-    public Result<TutorialTeacher> AddTeacher(Staff teacher, DateTime? effectiveTo = null)
+    public List<TutorialEnrolment> GetActiveEnrolmentsForDate(DateOnly date) =>
+        _enrolments
+            .Where(member =>
+                !member.IsDeleted &&
+                member.EffectiveFrom <= date &&
+                (!member.EffectiveTo.HasValue || member.EffectiveTo.Value >= date))
+            .ToList();
+
+    public Result<TutorialTeacher> AddTeacher(Staff teacher, DateOnly? effectiveTo = null)
     {
         bool hasEndedOrBeenDeleted =
-            EndDate < DateTime.Today ||
+            EndDate < DateOnly.FromDateTime(DateTime.Today) ||
             IsDeleted;
 
         if (hasEndedOrBeenDeleted)
@@ -68,7 +78,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
         return entry;
     }
 
-    public Result RemoveTeacher(Staff teacher, DateTime? takesEffectOn = null)
+    public Result RemoveTeacher(Staff teacher, DateOnly? takesEffectOn = null)
     {
         if (_teachers.Where(enrol => enrol.StaffId == teacher.StaffId).All(enrol => enrol.IsDeleted))
         {
@@ -79,7 +89,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
 
         foreach (var tutorialTeacher in tutorialTeachers)
         {
-            if (takesEffectOn.HasValue && takesEffectOn.Value > DateTime.Today)
+            if (takesEffectOn.HasValue && takesEffectOn.Value > DateOnly.FromDateTime(DateTime.Today))
             {
                 tutorialTeacher.EffectiveTo = takesEffectOn.Value;
             }
@@ -94,10 +104,10 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
         return Result.Success();
     }
 
-    public Result<TutorialEnrolment> EnrolStudent(Student student, DateTime? effectiveTo = null)
+    public Result<TutorialEnrolment> EnrolStudent(Student student, DateOnly? effectiveTo = null)
     {
         bool hasEndedOrBeenDeleted =
-            EndDate < DateTime.Today ||
+            EndDate < DateOnly.FromDateTime(DateTime.Today) ||
             IsDeleted;
 
         if (hasEndedOrBeenDeleted)
@@ -121,7 +131,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
         return enrolment;
     }
 
-    public Result UnenrolStudent(Student student, DateTime? takesEffectOn = null)
+    public Result UnenrolStudent(Student student, DateOnly? takesEffectOn = null)
     {
         if (_enrolments.Where(enrol => enrol.StudentId == student.StudentId).All(enrol => enrol.IsDeleted))
         {
@@ -132,7 +142,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
 
         foreach (var enrolment in enrolments)
         {
-            if (takesEffectOn.HasValue && takesEffectOn.Value > DateTime.Today)
+            if (takesEffectOn.HasValue && takesEffectOn.Value > DateOnly.FromDateTime(DateTime.Today))
             {
                 enrolment.EffectiveTo = takesEffectOn.Value;
             } 
@@ -147,24 +157,23 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
         return Result.Success();
     }
 
-    public Result<TutorialRoll> CreateRoll(DateTime rollDate)
+    public Result<TutorialRoll> CreateRoll(DateOnly rollDate)
     {
-        if (_rolls.Any(roll => roll.SessionDate == rollDate))
+        if (Rolls.Any(roll => roll.SessionDate == rollDate))
         {
             return Result.Failure<TutorialRoll>(DomainErrors.GroupTutorials.RollAlreadyExistsForDate(rollDate));
         }
 
-        var roll = new TutorialRoll(Guid.NewGuid(), rollDate);
+        var roll = new TutorialRoll(Guid.NewGuid(), this, rollDate);
 
-        var students = _enrolments
-            .Where(enrol => !enrol.IsDeleted || enrol.EffectiveTo < rollDate)
-            .Select(enrol => enrol.StudentId)
-            .ToList();
+        var students = GetActiveEnrolmentsForDate(rollDate).Select(member => member.StudentId);
 
-        foreach (var student in students)
+        foreach (var studentId in students)
         {
-            roll.AddStudent(student);
+            roll.AddStudent(studentId);
         }
+
+        _rolls.Add(roll);
 
         return roll;
     }

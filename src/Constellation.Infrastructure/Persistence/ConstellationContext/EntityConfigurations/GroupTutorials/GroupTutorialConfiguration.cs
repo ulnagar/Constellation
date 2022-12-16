@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.GroupTutorials;
 
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -30,5 +31,16 @@ internal sealed class GroupTutorialConfiguration : IEntityTypeConfiguration<Grou
             .WithOne()
             .HasForeignKey(e => e.TutorialId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .Property(t => t.StartDate)
+            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+
+        builder
+            .Property(t => t.EndDate)
+            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+
+        builder
+            .Ignore(t => t.CurrentEnrolments);
     }
 }

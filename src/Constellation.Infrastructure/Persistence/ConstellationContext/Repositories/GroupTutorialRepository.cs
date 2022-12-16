@@ -29,7 +29,4 @@ internal sealed class GroupTutorialRepository : IGroupTutorialRepository
 
     public void Insert(GroupTutorial tutorial) =>
         _dbContext.Set<GroupTutorial>().Add(tutorial);
-
-    public void Remove(GroupTutorial tutorial) =>
-        _dbContext.Set<GroupTutorial>().Remove(tutorial);
 }

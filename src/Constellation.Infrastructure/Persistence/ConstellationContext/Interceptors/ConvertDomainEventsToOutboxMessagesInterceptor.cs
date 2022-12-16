@@ -35,7 +35,7 @@ public sealed class ConvertDomainEventsToOutboxMessagesInterceptor
             .Select(domainEvent => new OutboxMessage
             {
                 Id = Guid.NewGuid(),
-                OccurredOnUtc = DateTime.UtcNow,
+                OccurredOn = DateTime.Now,
                 Type = domainEvent.GetType().Name,
                 Content = JsonConvert.SerializeObject(
                     domainEvent,

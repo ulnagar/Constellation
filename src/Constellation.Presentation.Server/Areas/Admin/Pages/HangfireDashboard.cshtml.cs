@@ -37,7 +37,8 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
                 { nameof(ISentralPhotoSyncJob), "15 9 * * 1-6" },
                 { nameof(ISentralReportSyncJob), "* 18 * * 1-6" },
                 { nameof(ISentralAwardSyncJob), "15 8 * * 1-6" },
-                { nameof(IMandatoryTrainingReminderJob), "0 12 * * 1" }
+                { nameof(IMandatoryTrainingReminderJob), "0 12 * * 1" },
+                { nameof(IProcessOutboxMessagesJob), "* 6-18 * * 1-5" }
             };
         }
 

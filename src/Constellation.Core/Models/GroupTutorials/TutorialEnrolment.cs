@@ -7,18 +7,18 @@ public sealed class TutorialEnrolment : Entity, IAuditableEntity
 {
     private TutorialEnrolment() { }
 
-    public TutorialEnrolment(Guid id, Student student, DateTime? effectiveTo)
+    public TutorialEnrolment(Guid id, Student student, DateOnly? effectiveTo)
         : base(id)
     {
         StudentId = student.StudentId;
-        EffectiveFrom = DateTime.Today;
+        EffectiveFrom = DateOnly.FromDateTime(DateTime.Today);
         EffectiveTo = effectiveTo;
     }
 
     public string StudentId { get; set; }
     public Guid TutorialId { get; set; }
-    public DateTime EffectiveFrom { get; set; }
-    public DateTime? EffectiveTo { get; set; }
+    public DateOnly EffectiveFrom { get; set; }
+    public DateOnly? EffectiveTo { get; set; }
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public string ModifiedBy { get; set; }

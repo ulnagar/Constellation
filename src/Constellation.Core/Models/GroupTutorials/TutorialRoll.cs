@@ -9,16 +9,20 @@ public sealed class TutorialRoll : Entity, IAuditableEntity
 {
     private readonly List<TutorialRollStudent> _students = new();
 
+    private TutorialRoll() { }
+
     public TutorialRoll(
         Guid Id,
-        DateTime sessionDate)
+        GroupTutorial tutorial,
+        DateOnly sessionDate)
         : base(Id)
     {
+        TutorialId = tutorial.Id;
         SessionDate = sessionDate;
     }
 
     public Guid TutorialId { get; set; }
-    public DateTime SessionDate { get; set; }
+    public DateOnly SessionDate { get; set; }
     public string StaffId { get; set; }
     public IReadOnlyCollection<TutorialRollStudent> Students => _students;
     public string CreatedBy { get; set; }

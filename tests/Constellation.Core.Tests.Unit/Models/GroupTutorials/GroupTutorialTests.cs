@@ -14,8 +14,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddDays(-1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddDays(-1)));
 
         var teacher = new Staff
         {
@@ -37,8 +37,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         sut.IsDeleted = true;
 
@@ -62,8 +62,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var teacher = new Staff
         {
@@ -90,8 +90,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var teacher = new Staff
         {
@@ -119,13 +119,13 @@ public class GroupTutorialTests
     public void AddTeacher_ShouldRaiseDomainEvent_WhenTeacherSucessfullyAdded(string effectiveToDate)
     {
         // Arrange
-        DateTime? effectiveTo = string.IsNullOrWhiteSpace(effectiveToDate) ? null : DateTime.Parse(effectiveToDate);
+        DateOnly? effectiveTo = string.IsNullOrWhiteSpace(effectiveToDate) ? null : DateOnly.Parse(effectiveToDate);
 
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var teacher = new Staff
         {
@@ -150,8 +150,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var teacher = new Staff
         {
@@ -174,8 +174,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var teacher = new Staff
         {
@@ -198,8 +198,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var teacher = new Staff
         {
@@ -225,8 +225,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var teacher = new Staff
         {
@@ -255,8 +255,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var teacher = new Staff
         {
@@ -281,8 +281,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var teacher = new Staff
         {
@@ -309,15 +309,15 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var teacher = new Staff
         {
             StaffId = "123456789"
         };
 
-        var takesEffectOn = DateTime.Today.AddDays(5);
+        var takesEffectOn = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
 
         sut.AddTeacher(teacher);
         sut.ClearDomainEvents();
@@ -338,15 +338,15 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var teacher = new Staff
         {
             StaffId = "123456789"
         };
 
-        var takesEffectOn = DateTime.Today.AddDays(-5);
+        var takesEffectOn = DateOnly.FromDateTime(DateTime.Today.AddDays(-5));
 
         sut.AddTeacher(teacher);
         sut.ClearDomainEvents();
@@ -370,8 +370,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddDays(-1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddDays(-1)));
 
         var student = new Student
         {
@@ -393,8 +393,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         sut.IsDeleted = true;
 
@@ -418,8 +418,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var student = new Student
         {
@@ -446,8 +446,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var student = new Student
         {
@@ -475,13 +475,13 @@ public class GroupTutorialTests
     public void EnrolStudent_ShouldRaiseDomainEvent_WhenStudentSucessfullyEnrolled(string effectiveToDate)
     {
         // Arrange
-        DateTime? effectiveTo = string.IsNullOrWhiteSpace(effectiveToDate) ? null : DateTime.Parse(effectiveToDate);
+        DateOnly? effectiveTo = string.IsNullOrWhiteSpace(effectiveToDate) ? null : DateOnly.Parse(effectiveToDate);
 
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var student = new Student
         {
@@ -506,8 +506,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var student = new Student
         {
@@ -530,8 +530,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var student = new Student
         {
@@ -554,8 +554,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var student = new Student
         {
@@ -581,8 +581,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var student = new Student
         {
@@ -611,8 +611,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var student = new Student
         {
@@ -637,8 +637,8 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var student = new Student
         {
@@ -665,15 +665,15 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var student = new Student
         {
             StudentId = "123456789"
         };
 
-        var takesEffectOn = DateTime.Today.AddDays(5);
+        var takesEffectOn = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
 
         sut.EnrolStudent(student);
         sut.ClearDomainEvents();
@@ -694,15 +694,15 @@ public class GroupTutorialTests
         var sut = new GroupTutorial(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
-            DateTime.Today.AddMonths(-1),
-            DateTime.Today.AddMonths(1));
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
         var student = new Student
         {
             StudentId = "123456789"
         };
 
-        var takesEffectOn = DateTime.Today.AddDays(-5);
+        var takesEffectOn = DateOnly.FromDateTime(DateTime.Today.AddDays(-5));
 
         sut.EnrolStudent(student);
         sut.ClearDomainEvents();
