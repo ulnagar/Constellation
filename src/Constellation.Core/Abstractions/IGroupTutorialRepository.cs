@@ -8,5 +8,6 @@ namespace Constellation.Core.Abstractions;
 public interface IGroupTutorialRepository
 {
     Task<GroupTutorial> GetWholeAggregate(Guid id, CancellationToken cancellationToken = default);
+    Task<GroupTutorial> GetById(Guid id, CancellationToken cancellationToken = default);
     void Insert(GroupTutorial tutorial);
 }

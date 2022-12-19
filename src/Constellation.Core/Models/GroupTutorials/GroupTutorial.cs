@@ -14,7 +14,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
     private readonly List<TutorialEnrolment> _enrolments = new();
     private readonly List<TutorialRoll> _rolls = new();
 
-    public GroupTutorial(
+    private GroupTutorial(
         Guid id,
         string name,
         DateOnly startDate,
@@ -42,6 +42,15 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
     public bool IsDeleted { get; set; }
     public string DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
+
+    public static GroupTutorial Create(Guid id, string name, DateOnly startDate, DateOnly endDate)
+    {
+        var tutorial = new GroupTutorial(id, name, startDate, endDate);
+
+        tutorial.RaiseDomainEvent(new GroupTutorialCreatedDomainEvent(Guid.NewGuid(), tutorial.Id));
+
+        return tutorial;
+    }
 
     public List<TutorialEnrolment> GetActiveEnrolmentsForDate(DateOnly date) =>
         _enrolments

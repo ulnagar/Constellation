@@ -1,4 +1,5 @@
 ﻿using Constellation.Core.Enums;
+using Constellation.Core.Models.GroupTutorials;
 using System;
 
 namespace Constellation.Core.Models
@@ -79,5 +80,11 @@ namespace Constellation.Core.Models
     {
         public int ContactId { get; set; }
         public SchoolContact Contact { get; set; }
+    }
+
+    public class GroupTutorialCreatedMSTeamOperation : EventMSTeamOperation
+    {
+        public Guid TutorialId { get; set; }
+        public GroupTutorial GroupTutorial { get; set; }
     }
 }

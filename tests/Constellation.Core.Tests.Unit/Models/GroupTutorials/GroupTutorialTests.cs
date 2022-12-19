@@ -11,7 +11,7 @@ public class GroupTutorialTests
     public void AddTeacher_ShouldReturnFailure_WhenTutorialHasExpired()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -34,7 +34,7 @@ public class GroupTutorialTests
     public void AddTeacher_ShouldReturnFailure_WhenTutorialHasBeenDeleted()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -59,7 +59,7 @@ public class GroupTutorialTests
     public void AddTeacher_ShouldReturnSuccessWithSameId_WhenTeacherIsAlreadyAdded()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -87,7 +87,7 @@ public class GroupTutorialTests
     public void AddTeacher_ShouldReturnSuccessWithNewId_WhenTeacherWasPreviouslyRemoved()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -121,7 +121,7 @@ public class GroupTutorialTests
         // Arrange
         DateOnly? effectiveTo = string.IsNullOrWhiteSpace(effectiveToDate) ? null : DateOnly.Parse(effectiveToDate);
 
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -131,6 +131,8 @@ public class GroupTutorialTests
         {
             StaffId = "123456789"
         };
+
+        sut.ClearDomainEvents();
 
         // Act
         var result = sut.AddTeacher(teacher, effectiveTo);
@@ -147,7 +149,7 @@ public class GroupTutorialTests
     public void RemoveTeacher_ShouldReturnSuccess_WhenTeacherIsNotAdded()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -171,7 +173,7 @@ public class GroupTutorialTests
     public void RemoveTeacher_ShouldNotRaiseDomainEvent_WhenTeacherIsNotAdded()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -181,6 +183,8 @@ public class GroupTutorialTests
         {
             StaffId = "123456789"
         };
+
+        sut.ClearDomainEvents();
 
         // Act
         var result = sut.RemoveTeacher(teacher);
@@ -195,7 +199,7 @@ public class GroupTutorialTests
     public void RemoveTeacher_ShouldReturnSuccess_WhenTeacherHasAlreadyBeenRemoved()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -222,7 +226,7 @@ public class GroupTutorialTests
     public void RemoveTeacher_ShouldNotRaiseDomainEvent_WhenTeacherHasAlreadyBeenRemoved()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -252,7 +256,7 @@ public class GroupTutorialTests
     public void RemoveTeacher_ShouldReturnSuccess_WhenTeacherIsRemoved()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -278,7 +282,7 @@ public class GroupTutorialTests
     public void RemoveTeacher_ShouldRaiseDomainEvent_WhenTeacherIsRemoved()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -306,7 +310,7 @@ public class GroupTutorialTests
     public void RemoveTeacher_ShouldNotRaiseDomainEvent_WhenTakesEffectOnIsSpecified()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -335,7 +339,7 @@ public class GroupTutorialTests
     public void RemoveTeacher_ShouldTakeEffectToday_WhenTakesEffectOnIsInThePast()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -367,7 +371,7 @@ public class GroupTutorialTests
     public void EnrolStudent_ShouldReturnFailure_WhenTutorialHasExpired()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -390,7 +394,7 @@ public class GroupTutorialTests
     public void EnrolStudent_ShouldReturnFailure_WhenTutorialHasBeenDeleted()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -415,7 +419,7 @@ public class GroupTutorialTests
     public void EnrolStudent_ShouldReturnSuccessWithSameId_WhenStudentIsAlreadyEnrolled()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -443,7 +447,7 @@ public class GroupTutorialTests
     public void EnrolStudent_ShouldReturnSuccessWithNewId_WhenStudentWasPreviouslyEnrolled()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -477,7 +481,7 @@ public class GroupTutorialTests
         // Arrange
         DateOnly? effectiveTo = string.IsNullOrWhiteSpace(effectiveToDate) ? null : DateOnly.Parse(effectiveToDate);
 
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -487,6 +491,8 @@ public class GroupTutorialTests
         {
             StudentId = "123456789"
         };
+
+        sut.ClearDomainEvents();
 
         // Act
         var result = sut.EnrolStudent(student, effectiveTo);
@@ -503,7 +509,7 @@ public class GroupTutorialTests
     public void UnenrolStudent_ShouldReturnSuccess_WhenStudentIsNotEnrolled()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -527,7 +533,7 @@ public class GroupTutorialTests
     public void UnenrolStudent_ShouldNotRaiseDomainEvent_WhenStudentIsNotEnrolled()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -537,6 +543,8 @@ public class GroupTutorialTests
         {
             StudentId = "123456789"
         };
+
+        sut.ClearDomainEvents();
 
         // Act
         var result = sut.UnenrolStudent(student);
@@ -551,7 +559,7 @@ public class GroupTutorialTests
     public void UnenrolStudent_ShouldReturnSuccess_WhenStudentHasAlreadyBeenUnenrolled()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -578,7 +586,7 @@ public class GroupTutorialTests
     public void UnenrolStudent_ShouldNotRaiseDomainEvent_WhenStudentHasAlreadyBeenUnenrolled()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -608,7 +616,7 @@ public class GroupTutorialTests
     public void UnenrolStudent_ShouldReturnSuccess_WhenStudentIsUnenrolled()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -634,7 +642,7 @@ public class GroupTutorialTests
     public void UnenrolStudent_ShouldRaiseDomainEvent_WhenStudentIsUnenrolled()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -662,7 +670,7 @@ public class GroupTutorialTests
     public void UnenrolStudent_ShouldNotRaiseDomainEvent_WhenTakesEffectOnIsSpecified()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
@@ -691,7 +699,7 @@ public class GroupTutorialTests
     public void UnenrolStudent_ShouldTakeEffectToday_WhenTakesEffectOnIsInThePast()
     {
         // Arrange
-        var sut = new GroupTutorial(
+        var sut = GroupTutorial.Create(
             Guid.NewGuid(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
