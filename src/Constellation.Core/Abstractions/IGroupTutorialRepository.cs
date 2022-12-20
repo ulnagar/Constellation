@@ -1,13 +1,14 @@
-﻿using Constellation.Core.Models.GroupTutorials;
+﻿#nullable enable
+namespace Constellation.Core.Abstractions;
+
+using Constellation.Core.Models.GroupTutorials;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Core.Abstractions;
-
 public interface IGroupTutorialRepository
 {
-    Task<GroupTutorial> GetWholeAggregate(Guid id, CancellationToken cancellationToken = default);
-    Task<GroupTutorial> GetById(Guid id, CancellationToken cancellationToken = default);
+    Task<GroupTutorial?> GetWholeAggregate(Guid id, CancellationToken cancellationToken = default);
+    Task<GroupTutorial?> GetById(Guid id, CancellationToken cancellationToken = default);
     void Insert(GroupTutorial tutorial);
 }

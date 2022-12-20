@@ -2,8 +2,6 @@
 using Constellation.Application.Features.API.Schools.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.API.Controllers
 {

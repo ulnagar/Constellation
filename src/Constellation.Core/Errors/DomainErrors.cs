@@ -22,5 +22,9 @@ public static class DomainErrors
         public static readonly Func<Guid, Error> TutorialNotFound = id => new Error(
             "GroupTutorials.GroupTutorial.TutorialNotFound",
             $"A tutorial with the Id {id} could not be found");
+
+        public static readonly Error CouldNotCreateTutorial = new(
+            "GroupTutorials.GroupTutorial.CouldNotCreate",
+            "There was an error attempting to create the group tutorial");
     }
 }

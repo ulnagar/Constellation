@@ -27,7 +27,8 @@ public sealed class IdempotentDomainEventHandler<TDomainEvent> : IDomainEventHan
                     outboxMessageConsumer =>
                         outboxMessageConsumer.Id == notification.Id &&
                         outboxMessageConsumer.Name == consumer,
-                    cancellationToken));
+                    cancellationToken))
+            return;
 
         await _decorated.Handle(notification, cancellationToken);
 

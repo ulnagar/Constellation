@@ -53,6 +53,8 @@ public static class ServicesRegistration
         // Import Mediatr handlers from Application and Infrastructure projects
         services.AddMediatR(new[] { Constellation.Application.AssemblyReference.Assembly, Constellation.Infrastructure.AssemblyReference.Assembly});
 
+        services.Decorate(typeof(INotificationHandler<>), typeof(IdempotentDomainEventHandler<>));
+
         services.AddApplication();
 
         // Add any other missing services as their interfaces
@@ -113,8 +115,6 @@ public static class ServicesRegistration
         services.AddSingleton(Log.Logger);
 
         services.AddMediatR(new[] { Assembly.GetExecutingAssembly(), typeof(IAppDbContext).Assembly });
-
-        services.Decorate(typeof(INotificationHandler<>), typeof(IdempotentDomainEventHandler<>));
 
         services.AddApplication();
 

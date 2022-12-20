@@ -9,6 +9,7 @@ using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<IAppDbContext>();
 builder.Services.AddRazorPages();
 builder.Services.AddMvc()
     .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
+builder.Services.AddDateOnlyTimeOnlyStringConverters();
 
 var app = builder.Build();
 
@@ -102,5 +105,24 @@ app.MapRazorPages();
 app.MapControllers();
 
 app.MapControllerRoute(name: "areas", pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+app.Map("/services", hostBuilder => hostBuilder.Run(async context =>
+{
+    var sb = new StringBuilder();
+    sb.Append("<h1>Registered Services</h1>");
+    sb.Append("<table><thead>");
+    sb.Append("<tr><th>Type</th><th>Lifetime</th><th>Instance</th></tr>");
+    sb.Append("</thead></tbody>");
+    foreach (var svc in builder.Services)
+    {
+        sb.Append("<tr>");
+        sb.Append($"<td>{svc.ServiceType.FullName}</td>");
+        sb.Append($"<td>{svc.Lifetime}</td>");
+        sb.Append($"<td>{svc.ImplementationType?.FullName}</td>");
+        sb.Append("</tr>");
+    }
+    sb.Append("</tbody></table>");
+    await context.Response.WriteAsync(sb.ToString());
+}));
 
 app.Run();

@@ -31,7 +31,12 @@ public class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob, IHangfireJob
         foreach (OutboxMessage message in messages)
         {
             var domainEvent = JsonConvert
-                .DeserializeObject<IDomainEvent>(message.Content);
+                .DeserializeObject<IDomainEvent>(
+                    message.Content,
+                    new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.All
+                    });
 
             if (domainEvent is null)
             {
