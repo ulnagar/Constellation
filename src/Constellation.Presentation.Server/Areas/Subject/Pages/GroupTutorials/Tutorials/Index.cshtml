@@ -1,4 +1,74 @@
 ﻿@page
-@model Constellation.Presentation.Server.Areas.Subject.Pages.GroupTutorials.Tutorials.IndexModel
-@{
-}
+@using Constellation.Presentation.Server.Areas.Subject.Pages.GroupTutorials.Tutorials;
+@model IndexModel
+
+<h2>Group Tutorials</h2>
+
+<div>
+    @{
+        var all_style = "btn-outline-secondary";
+        var active_style = all_style;
+        var inactive_style = all_style;
+        var future_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case IndexModel.FilterDto.All:
+                all_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Active:
+                active_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Inactive:
+                inactive_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Future:
+                future_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Active" class="btn @active_style">Active</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Inactive" class="btn @inactive_style">Inactive</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Future" class="btn @future_style">Future</a>
+    </div>
+
+    <a asp-page="Upsert" class="btn btn-warning">Create New</a>
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Teachers</th>
+            <th># Students</th>
+            <th></th>
+        </tr>
+    </thead>
+    @foreach (var item in Model.Tutorials)
+    {
+        <tr>
+            <td></td>
+            <td>@item.Name</td>
+            <td>@item.StartDate.ToShortDateString()</td>
+            <td>@item.EndDate.ToShortDateString()</td>
+            <td>
+                @foreach (var teacher in item.Teachers)
+                {
+                    <span>@teacher</span>
+                }
+            </td>
+            <td>@item.Students.Count()</td>
+            <td>
+                <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+            </td>
+        </tr>
+    }
+</table>

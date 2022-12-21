@@ -1,41 +1,54 @@
-﻿using Constellation.Application.Features.Home.Queries;
+﻿#nullable enable
+namespace Constellation.Presentation.Server.BaseModels;
+
+using Constellation.Application.Features.Home.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Constellation.Presentation.Server.BaseModels
+public class BasePageModel : PageModel, IBaseModel
 {
-    public class BasePageModel : PageModel, IBaseModel
-    {
-        public IDictionary<string, int> Classes { get; set; }
+    public IDictionary<string, int> Classes { get; set; }
+    public ErrorDisplay Error { get; set; }
 
-        public BasePageModel()
+    public BasePageModel()
+    {
+        Classes = new Dictionary<string, int>();
+    }
+
+    public async Task GetClasses(IUnitOfWork unitOfWork)
+    {
+        var username = User.Identity?.Name;
+
+        if (username is null)
         {
-            Classes = new Dictionary<string, int>();
+            return;
         }
 
-        public async Task GetClasses(IUnitOfWork unitOfWork)
+        var teacher = await unitOfWork.Staff.FromEmailForExistCheck(username);
+
+        if (teacher != null)
         {
-            var username = User.Identity.Name;
-            var teacher = await unitOfWork.Staff.FromEmailForExistCheck(username);
+            var entries = unitOfWork.CourseOfferings.AllForTeacher(teacher.StaffId);
 
-            if (teacher != null)
+            foreach (var entry in entries)
             {
-                var entries = unitOfWork.CourseOfferings.AllForTeacher(teacher.StaffId);
-
-                foreach (var entry in entries)
-                {
-                    Classes.Add(entry.Name, entry.Id);
-                }
+                Classes.Add(entry.Name, entry.Id);
             }
         }
+    }
 
-        public async Task GetClasses(IMediator mediator)
+    public async Task GetClasses(IMediator mediator)
+    {
+        var username = User.Identity?.Name;
+
+        if (username is null)
         {
-            var username = User.Identity.Name;
-            Classes = await mediator.Send(new GetUsersClassesQuery { Username = username });
+            return;
         }
+
+        Classes = await mediator.Send(new GetUsersClassesQuery { Username = username });
     }
 }

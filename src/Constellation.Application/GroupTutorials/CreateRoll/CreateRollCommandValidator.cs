@@ -3,7 +3,7 @@
 using FluentValidation;
 using System;
 
-internal class CreateRollCommandValidator : AbstractValidator<CreateRollCommand>
+public class CreateRollCommandValidator : AbstractValidator<CreateRollCommand>
 {
 	public CreateRollCommandValidator()
 	{

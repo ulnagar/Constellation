@@ -22,6 +22,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             _context = context;
         }
 
+        public async Task<List<Student>> GetListFromIds(
+            List<string> studentIds,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<Student>()
+                .Where(student => studentIds.Contains(student.StudentId))
+                .ToListAsync(cancellationToken);
+
+
         public async Task<Student> ForDetailDisplayAsync(string id)
         {
             return await _context.Students

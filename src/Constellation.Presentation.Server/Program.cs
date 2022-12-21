@@ -2,12 +2,15 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
+using Constellation.Presentation.Server.Helpers.HtmlGenerator;
 using Constellation.Presentation.Server.Infrastructure;
 using Constellation.Presentation.Server.Services;
 using FluentValidation;
 using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using System.Text;
 
@@ -43,6 +46,8 @@ builder.Services.AddMvc()
     .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
 builder.Services.AddDateOnlyTimeOnlyStringConverters();
+
+builder.Services.Replace(ServiceDescriptor.Singleton<IHtmlGenerator, CustomHtmlGenerator>());
 
 var app = builder.Build();
 

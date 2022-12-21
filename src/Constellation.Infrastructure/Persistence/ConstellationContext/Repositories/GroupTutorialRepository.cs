@@ -14,6 +14,15 @@ internal sealed class GroupTutorialRepository : IGroupTutorialRepository
         _dbContext = dbContext;
     }
 
+    public async Task<List<GroupTutorial>> GetAllWithTeachersAndStudents(
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<GroupTutorial>()
+            .AsSplitQuery()
+            .Include(tutorial => tutorial.Enrolments)
+            .Include(tutorial => tutorial.Teachers)
+            .ToListAsync(cancellationToken);
+
     public async Task<GroupTutorial?> GetWholeAggregate(
         Guid id, 
         CancellationToken cancellationToken = default) =>

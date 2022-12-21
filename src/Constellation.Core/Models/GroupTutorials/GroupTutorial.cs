@@ -52,6 +52,13 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
         return tutorial;
     }
 
+    public void Edit(string name, DateOnly startDate, DateOnly endDate)
+    {
+        Name = name;
+        StartDate = startDate;
+        EndDate = endDate;
+    }
+
     public List<TutorialEnrolment> GetActiveEnrolmentsForDate(DateOnly date) =>
         _enrolments
             .Where(member =>

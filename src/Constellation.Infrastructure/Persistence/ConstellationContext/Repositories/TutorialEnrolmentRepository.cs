@@ -19,7 +19,23 @@ internal sealed class TutorialEnrolmentRepository : ITutorialEnrolmentRepository
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<TutorialEnrolment>()
-            .FirstOrDefaultAsync(tutorial => tutorial.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(enrolment => enrolment.Id == id, cancellationToken);
+
+    public async Task<List<TutorialEnrolment>> GetActiveForTutorial(
+        Guid tutorialId,
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<TutorialEnrolment>()
+            .Where(enrolment => !enrolment.IsDeleted && enrolment.TutorialId == tutorialId)
+            .ToListAsync(cancellationToken);
+
+    public async Task<int?> GetCountForTutorial(
+        Guid tutorialId,
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<TutorialEnrolment>()
+            .CountAsync(enrolment => enrolment.TutorialId == tutorialId && !enrolment.IsDeleted, cancellationToken);
+
 
     public void Insert(TutorialEnrolment enrolment) =>
         _dbContext.Set<TutorialEnrolment>().Add(enrolment);

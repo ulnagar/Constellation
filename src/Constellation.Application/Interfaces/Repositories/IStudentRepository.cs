@@ -4,12 +4,14 @@ using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
 {
     public interface IStudentRepository
     {
+        Task<List<Student>> GetListFromIds(List<string> studentIds, CancellationToken cancellationToken = default);
         Task<Student> GetForExistCheck(string id);
         Task<ICollection<Student>> AllWithAbsenceScanSettings();
         Task<ICollection<Student>> AllActiveAsync();

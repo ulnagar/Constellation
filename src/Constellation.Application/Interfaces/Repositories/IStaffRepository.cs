@@ -3,12 +3,14 @@ using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
 {
     public interface IStaffRepository
     {
+        Task<List<Staff>> GetListFromIds(List<string> staffIds, CancellationToken cancellationToken = default);
         Staff WithDetails(string id);
         Staff WithFilter(Expression<Func<Staff, bool>> predicate);
         Task<Staff> GetForExistCheck(string id);

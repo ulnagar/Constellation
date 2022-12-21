@@ -38,6 +38,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                     .ThenInclude(member => member.Faculty);
         }
 
+        public async Task<List<Staff>> GetListFromIds(
+            List<string> staffIds,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<Staff>()
+                .Where(teacher => staffIds.Contains(teacher.StaffId))
+                .ToListAsync(cancellationToken);
+
         public Staff WithDetails(string id)
         {
             return Collection()
