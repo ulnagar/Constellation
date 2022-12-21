@@ -1,0 +1,166 @@
+﻿@page "{id:Guid}"
+@model Constellation.Presentation.Server.Areas.Subject.Pages.GroupTutorials.Tutorials.DetailsModel
+
+<h2>Group Tutorial Details</h2>
+
+<div>
+    <a asp-page="Upsert" asp-route-id="@Model.Tutorial.Id" class="btn btn-warning">Edit</a>
+    
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div>
+    <dl class="row">
+        <dt class="col-md-2">
+            <label asp-for="Tutorial.Id"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Tutorial.Id</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Tutorial.Name"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Tutorial.Name</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Tutorial.StartDate">Start Date</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Tutorial.StartDate.ToShortDateString()</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Tutorial.EndDate">End Date</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Tutorial.EndDate.ToShortDateString()</span>
+        </dd>
+    </dl>
+</div>
+
+<hr />
+
+<div>
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            <a class="nav-link active" href="#students" data-toggle="tab" role="tab">
+                Students
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#teachers" data-toggle="tab" role="tab">
+                Teachers
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#rolls" data-toggle="tab" role="tab">
+                Rolls
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="students" class="tab-pane active">
+            <h3>Student List</h3>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Grade</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var student in Model.Tutorial.Students)
+                    {
+                        <tr>
+                            <td></td>
+                            <td>@student.Name</td>
+                            <td>@student.Grade</td>
+                            <td></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="teachers" class="tab-pane">
+            <h3>Teacher List</h3>
+
+            <button class="btn btn-warning" data-toggle="modal" data-target="#teacherAssignmentModal">Add Teacher</button>
+
+            <hr />
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var teacher in Model.Tutorial.Teachers)
+                    {
+                        <tr>
+                            <td></td>
+                            <td>@teacher.Name</td>
+                            <td></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="rolls" class="tab-pane">
+            <h3>Roll List</h3>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Date</th>
+                        <th>Marked</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var roll in Model.Tutorial.Rolls)
+                    {
+                        <tr>
+                            <td></td>
+                            <td>@roll.Date.ToShortDateString()</td>
+                            <td>@roll.Completed</td>
+                            <td></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (Model.Error is not null)
+{
+    <vc:error-display-redirect error="@Model.Error">
+    </vc:error-display-redirect>
+}
+
+<vc:tutorial-teacher-assignment></vc:tutorial-teacher-assignment>
+
+@section scripts {
+        <script>
+            $('#teacherAssignmentSubmitButton').click(function (e) {
+                e.preventDefault();
+                $('#teacherAssignmentModal').modal('hide');
+                $('#teacherAssignmentForm').submit();
+            });
+        </script>
+}
