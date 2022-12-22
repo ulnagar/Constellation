@@ -27,7 +27,7 @@ internal sealed class EditGroupTutorialCommandHandler
 
         if (tutorial is null)
         {
-            return Result.Failure(DomainErrors.GroupTutorials.TutorialNotFound(request.Id));
+            return Result.Failure(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.Id));
         }
 
         tutorial.Edit(request.Name, request.StartDate, request.EndDate);

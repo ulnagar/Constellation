@@ -20,7 +20,7 @@ internal sealed class TutorialEnrolmentConfiguration : IEntityTypeConfiguration<
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne<GroupTutorial>()
-            .WithMany()
+            .WithMany(t => t.Enrolments)
             .HasForeignKey(e => e.TutorialId)
             .OnDelete(DeleteBehavior.Restrict);
 

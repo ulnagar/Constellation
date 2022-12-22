@@ -75,7 +75,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
 
         if (hasEndedOrBeenDeleted)
         {
-            return Result.Failure<TutorialTeacher>(DomainErrors.GroupTutorials.TutorialHasExpired);
+            return Result.Failure<TutorialTeacher>(DomainErrors.GroupTutorials.GroupTutorial.TutorialHasExpired);
         }
 
         if (_teachers.Any(enrol => enrol.StaffId == teacher.StaffId && !enrol.IsDeleted))
@@ -128,7 +128,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
 
         if (hasEndedOrBeenDeleted)
         {
-            return Result.Failure<TutorialEnrolment>(DomainErrors.GroupTutorials.TutorialHasExpired);
+            return Result.Failure<TutorialEnrolment>(DomainErrors.GroupTutorials.GroupTutorial.TutorialHasExpired);
         }
 
         if (_enrolments.Any(enrol => enrol.StudentId == student.StudentId && !enrol.IsDeleted))
@@ -177,7 +177,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
     {
         if (Rolls.Any(roll => roll.SessionDate == rollDate))
         {
-            return Result.Failure<TutorialRoll>(DomainErrors.GroupTutorials.RollAlreadyExistsForDate(rollDate));
+            return Result.Failure<TutorialRoll>(DomainErrors.GroupTutorials.TutorialRoll.RollAlreadyExistsForDate(rollDate));
         }
 
         var roll = new TutorialRoll(Guid.NewGuid(), this, rollDate);

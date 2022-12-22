@@ -51,6 +51,14 @@ internal sealed class GroupTutorialRepository : IGroupTutorialRepository
             .Include(tutorial => tutorial.Teachers)
             .FirstOrDefaultAsync(tutorial => tutorial.Id == id, cancellationToken);
 
+    public async Task<GroupTutorial?> GetWithStudentsById(
+    Guid id,
+    CancellationToken cancellationToken = default) =>
+    await _dbContext
+        .Set<GroupTutorial>()
+        .Include(tutorial => tutorial.Enrolments)
+        .FirstOrDefaultAsync(tutorial => tutorial.Id == id, cancellationToken);
+
     public void Insert(GroupTutorial tutorial) =>
         _dbContext.Set<GroupTutorial>().Add(tutorial);
 }

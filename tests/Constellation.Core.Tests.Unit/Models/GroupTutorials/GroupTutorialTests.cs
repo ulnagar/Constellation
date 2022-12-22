@@ -27,7 +27,7 @@ public class GroupTutorialTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(DomainErrors.GroupTutorials.TutorialHasExpired.Code);
+        result.Error.Code.Should().Be(DomainErrors.GroupTutorials.GroupTutorial.TutorialHasExpired.Code);
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class GroupTutorialTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(DomainErrors.GroupTutorials.TutorialHasExpired.Code);
+        result.Error.Code.Should().Be(DomainErrors.GroupTutorials.GroupTutorial.TutorialHasExpired.Code);
     }
 
     [Fact]
@@ -387,7 +387,7 @@ public class GroupTutorialTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(DomainErrors.GroupTutorials.TutorialHasExpired.Code);
+        result.Error.Code.Should().Be(DomainErrors.GroupTutorials.GroupTutorial.TutorialHasExpired.Code);
     }
 
     [Fact]
@@ -412,7 +412,7 @@ public class GroupTutorialTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be(DomainErrors.GroupTutorials.TutorialHasExpired.Code);
+        result.Error.Code.Should().Be(DomainErrors.GroupTutorials.GroupTutorial.TutorialHasExpired.Code);
     }
 
     [Fact]

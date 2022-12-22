@@ -29,7 +29,7 @@ internal sealed class CreateGroupTutorialCommandHandler : ICommandHandler<Create
         if (tutorialResult.IsFailure)
         {
             //TODO: Log error
-            return Result.Failure<Guid>(DomainErrors.GroupTutorials.CouldNotCreateTutorial);
+            return Result.Failure<Guid>(DomainErrors.GroupTutorials.GroupTutorial.CouldNotCreateTutorial);
         }
 
         _tutorialRepository.Insert(tutorialResult.Value);

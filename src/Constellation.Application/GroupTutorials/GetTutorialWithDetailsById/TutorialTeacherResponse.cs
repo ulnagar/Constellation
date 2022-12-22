@@ -4,4 +4,5 @@ using System;
 
 public sealed record TutorialTeacherResponse(
     Guid Id,
-    string Name);
+    string Name,
+    DateOnly? Until);

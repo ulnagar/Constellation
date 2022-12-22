@@ -67,6 +67,10 @@
     <div class="tab-content">
         <div id="students" class="tab-pane active">
             <h3>Student List</h3>
+            
+            <button class="btn btn-warning" data-toggle="modal" data-target="#studentEnrolmentModal">Add Student</button>
+
+            <hr />
 
             <table class="table-striped table-hover data-table">
                 <thead>
@@ -74,17 +78,21 @@
                         <th></th>
                         <th>Name</th>
                         <th>Grade</th>
+                        <th>Active To</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var student in Model.Tutorial.Students)
+                    @foreach (var student in Model.Tutorial.Students.OrderBy(student => student.Until))
                     {
                         <tr>
                             <td></td>
                             <td>@student.Name</td>
                             <td>@student.Grade</td>
-                            <td></td>
+                            <td>@(student.Until.HasValue ? student.Until.Value.ToShortDateString() : "Indefinitely")</td>
+                            <td>
+                                <a asp-page-handler="RemoveStudent" asp-route-enrolmentId="@student.Id" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -103,16 +111,20 @@
                     <tr>
                         <th></th>
                         <th>Name</th>
+                        <th>Active To</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var teacher in Model.Tutorial.Teachers)
+                    @foreach (var teacher in Model.Tutorial.Teachers.OrderBy(teacher => teacher.Until))
                     {
                         <tr>
                             <td></td>
                             <td>@teacher.Name</td>
-                            <td></td>
+                            <td>@(teacher.Until.HasValue ? teacher.Until.Value.ToShortDateString() : "Indefinitely")</td>
+                            <td>
+                                <a asp-page-handler="RemoveTeacher" asp-route-teacherId="@teacher.Id" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -153,14 +165,115 @@
     </vc:error-display-redirect>
 }
 
+@if (Model.StudentRemoval is not null)
+{
+    <div class="modal fade show d-block" tabindex="-1" id="studentRemovalModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-page-handler="RemoveStudent" id="studentRemovalForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Tutorial Student Removal</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="form-group col">
+                                <span class="control-label">Student</span>
+                                <input asp-for="StudentRemoval.Id" type="hidden" />
+                                @Model.StudentRemoval.Name
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-6">
+                                <span class="control-label">Remove Immediately?</span>
+                            </div>
+                            <div class="form-group col-6">
+                                <input asp-for="StudentRemoval.Immediate" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-6">
+                                <span class="control-label">Or at specific date?</span>
+                            </div>
+                            <div class="form-group col-6">
+                                <input asp-for="StudentRemoval.EffectiveOn" class="form-control" type="date" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a asp-page="Details" asp-route-id="@Model.Id" class="btn btn-secondary" data-dismiss="modal">Cancel</a>
+                        <input type="submit" value="Save" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.TeacherRemoval is not null)
+{
+    <div class="modal fade show d-block" tabindex="-1" id="teacherRemovalModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-page-handler="RemoveTeacher" id="teacherRemovalForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Tutorial Teacher Removal</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="form-group col">
+                                <span class="control-label">Staff Member</span>
+                                <input asp-for="TeacherRemoval.Id" type="hidden" />
+                                @Model.TeacherRemoval.Name
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-6">
+                                <span class="control-label">Remove Immediately?</span>
+                            </div>
+                            <div class="form-group col-6">
+                                <input asp-for="TeacherRemoval.Immediate" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-6">
+                                <span class="control-label">Or at specific date?</span>
+                            </div>
+                            <div class="form-group col-6">
+                                <input asp-for="TeacherRemoval.EffectiveOn" class="form-control" type="date" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a asp-page="Details" asp-route-id="@Model.Id" class="btn btn-secondary" data-dismiss="modal">Cancel</a>
+                        <input type="submit" value="Save" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
 <vc:tutorial-teacher-assignment></vc:tutorial-teacher-assignment>
 
+<vc:tutorial-student-enrolment></vc:tutorial-student-enrolment>
+
 @section scripts {
-        <script>
-            $('#teacherAssignmentSubmitButton').click(function (e) {
-                e.preventDefault();
-                $('#teacherAssignmentModal').modal('hide');
-                $('#teacherAssignmentForm').submit();
-            });
-        </script>
+    <script>
+        $('#teacherAssignmentSubmitButton').click(function (e) {
+            e.preventDefault();
+            $('#teacherAssignmentModal').modal('hide');
+            $('#teacherAssignmentForm').submit();
+        });
+
+        $('#studentEnrolmentSubmitButton').click(function (e) {
+            e.preventDefault();
+            $('#studentEnrolmentModal').modal('hide');
+            $('#studentEnrolmentForm').submit();
+        });
+
+    </script>
 }

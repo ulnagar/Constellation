@@ -1,35 +1,32 @@
-﻿namespace Constellation.Application.GroupTutorials.AddTeacherToTutorial;
+﻿namespace Constellation.Application.GroupTutorials.RemoveTeacherFromTutorial;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
-using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class AddTeacherToTutorialCommandHandler
-    : ICommandHandler<AddTeacherToTutorialCommand>
+internal sealed class RemoveTeacherFromTutorialCommandHandler
+    : ICommandHandler<RemoveTeacherFromTutorialCommand>
 {
     private readonly IGroupTutorialRepository _groupTutorialRepository;
-    private readonly ITutorialTeacherRepository _tutorialTeacherRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public AddTeacherToTutorialCommandHandler(
+    public RemoveTeacherFromTutorialCommandHandler(
         IGroupTutorialRepository groupTutorialRepository,
-        ITutorialTeacherRepository tutorialTeacherRepository,
         IStaffRepository staffRepository,
         IUnitOfWork unitOfWork)
     {
         _groupTutorialRepository = groupTutorialRepository;
-        _tutorialTeacherRepository = tutorialTeacherRepository;
         _staffRepository = staffRepository;
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result> Handle(AddTeacherToTutorialCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RemoveTeacherFromTutorialCommand request, CancellationToken cancellationToken)
     {
         var tutorial = await _groupTutorialRepository.GetWithTeachersById(request.TutorialId, cancellationToken);
 
@@ -38,24 +35,21 @@ internal sealed class AddTeacherToTutorialCommandHandler
             return Result.Failure(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
         }
 
-        var teacher = await _staffRepository.GetForExistCheck(request.StaffId);
+        var teacherRecord = tutorial.Teachers.FirstOrDefault(teacher => teacher.Id == request.TeacherId);
 
-        if (teacher is null)
+        if (teacherRecord is null)
         {
-            return Result.Failure(new Error(
-                "GroupTutorials.TutorialTeacher.TeacherNotFound",
-                $"Could not find a teacher with the id {request.StaffId}"));
+            return Result.Failure(DomainErrors.GroupTutorials.TutorialTeacher.NotFound);
         }
 
-        var result = tutorial.AddTeacher(teacher, request.EffectiveTo);
+        var staffEntry = await _staffRepository.GetForExistCheck(teacherRecord.StaffId);
 
-        if (result.IsFailure) 
+        if (staffEntry is null)
         {
-            return Result.Failure(result.Error);
+            return Result.Failure(DomainErrors.Partners.Staff.NotFound(teacherRecord.StaffId));
         }
 
-        if (result.Value.CreatedAt == DateTime.MinValue)
-            _tutorialTeacherRepository.Insert(result.Value);
+        tutorial.RemoveTeacher(staffEntry, request.TakesEffectOn);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

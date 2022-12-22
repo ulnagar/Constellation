@@ -193,16 +193,18 @@ public static class ServicesRegistration
 
         services.AddDbContext<AppDbContext>(
             (sp, options) =>
-        {
-            options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection"),
-                b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
+            {
+                options.UseSqlServer(
+                    configuration.GetConnectionString("DefaultConnection"),
+                    b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
 
-            options.AddInterceptors(new List<IInterceptor> {
-                sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>(),
-                sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
+                options.EnableSensitiveDataLogging(true);
+
+                options.AddInterceptors(new List<IInterceptor> {
+                    sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>(),
+                    sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
+                });
             });
-        });
 
         services.AddScoped<IAppDbContext, AppDbContext>();
         services.AddScoped<AppDbContext>();

@@ -13,5 +13,7 @@ public interface IGroupTutorialRepository
     Task<GroupTutorial?> GetWholeAggregate(Guid id, CancellationToken cancellationToken = default);
     Task<GroupTutorial?> GetById(Guid id, CancellationToken cancellationToken = default);
     Task<GroupTutorial?> GetWithTeachersById(Guid guid, CancellationToken cancellationToken = default);
+    Task<GroupTutorial?> GetWithStudentsById(Guid guid, CancellationToken cancellationToken = default);
+
     void Insert(GroupTutorial tutorial);
 }

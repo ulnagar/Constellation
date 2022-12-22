@@ -1,13 +1,20 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.GroupTutorials.Tutorials;
 
+using Constellation.Application.GroupTutorials.AddStudentToTutorial;
+using Constellation.Application.GroupTutorials.AddTeacherToTutorial;
 using Constellation.Application.GroupTutorials.GetTutorialWithDetailsById;
-using Constellation.Core.Primitives;
+using Constellation.Application.GroupTutorials.RemoveStudentFromTutorial;
+using Constellation.Application.GroupTutorials.RemoveTeacherFromTutorial;
+using Constellation.Core.Errors;
+using Constellation.Core.Shared;
+using Constellation.Presentation.Server.Areas.Subject.Models;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Pages.Shared.Components.StaffTrainingReport;
+using Constellation.Presentation.Server.Pages.Shared.Components.TutorialStudentEnrolment;
 using Constellation.Presentation.Server.Pages.Shared.Components.TutorialTeacherAssignment;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using System.Threading;
 
 public class DetailsModel : BasePageModel
 {
@@ -24,11 +31,27 @@ public class DetailsModel : BasePageModel
     public Guid Id { get; set; }
 
     [BindProperty]
+    public TutorialStudentEnrolmentSelection StudentEnrolment { get; set; }
+
+    [BindProperty]
+    public TutorialStudentRemovalSelection StudentRemoval { get; set; }
+
+    [BindProperty]
     public TutorialTeacherAssignmentSelection TeacherAssignment { get; set; }
+
+    [BindProperty]
+    public TutorialTeacherRemovalSelection TeacherRemoval { get; set; }
 
     public GroupTutorialDetailResponse Tutorial { get; set; }
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
+    {
+        await GetPageInformation(cancellationToken);
+
+        return Page();
+    }
+
+    private async Task GetPageInformation(CancellationToken cancellationToken = default)
     {
         await GetClasses(_mediator);
 
@@ -50,17 +73,198 @@ public class DetailsModel : BasePageModel
                 new List<TutorialTeacherResponse>(),
                 new List<TutorialEnrolmentResponse>(),
                 new List<TutorialRollResponse>());
+        } 
+        else
+        {
+            Tutorial = result.Value;
+        }
+    }
+
+    public async Task<IActionResult> OnPostEnrolStudent()
+    {
+        if (string.IsNullOrWhiteSpace(StudentEnrolment.StudentId))
+        {
+            await GetPageInformation();
+            return Page();
+        }
+
+        DateOnly? effectiveDate = (StudentEnrolment.LimitedTime) ? DateOnly.FromDateTime(StudentEnrolment.EffectiveTo) : null;
+
+        var result = await _mediator.Send(new AddStudentToTutorialCommand(Id, StudentEnrolment.StudentId, effectiveDate));
+
+        if (result.IsFailure)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = result.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/GroupTutorials/Tutorials/Details", values: new { area = "Subject", Id = Id })
+            };
+
+            Tutorial = new(
+                Id,
+                null,
+                DateOnly.MinValue,
+                DateOnly.MinValue,
+                new List<TutorialTeacherResponse>(),
+                new List<TutorialEnrolmentResponse>(),
+                new List<TutorialRollResponse>());
 
             return Page();
         }
 
-        Tutorial = result.Value;
+        StudentEnrolment = new();
 
-        return Page();
+        return RedirectToPage("Details", new { Id });
     }
 
     public async Task<IActionResult> OnPostAssignTeacher()
     {
-        return RedirectToPage("");
+        if (string.IsNullOrWhiteSpace(TeacherAssignment.StaffId))
+        {
+            await GetPageInformation();
+            return Page();
+        }
+
+        DateOnly? effectiveDate = (TeacherAssignment.LimitedTime) ? DateOnly.FromDateTime(TeacherAssignment.EffectiveTo) : null;
+
+        var result = await _mediator.Send(new AddTeacherToTutorialCommand(Id, TeacherAssignment.StaffId, effectiveDate));
+
+        if (result.IsFailure)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = result.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/GroupTutorials/Tutorials/Details", values: new { area = "Subject", Id = Id })
+            };
+
+            Tutorial = new(
+                Id,
+                null,
+                DateOnly.MinValue,
+                DateOnly.MinValue,
+                new List<TutorialTeacherResponse>(),
+                new List<TutorialEnrolmentResponse>(),
+                new List<TutorialRollResponse>());
+
+            return Page();
+        }
+
+        TeacherAssignment = new();
+
+        return RedirectToPage("Details", new { Id });
+    }
+
+    public async Task<IActionResult> OnGetRemoveTeacher(Guid teacherId)
+    {
+        await GetPageInformation();
+
+        var teacherRecord = Tutorial.Teachers.FirstOrDefault(teacher => teacher.Id == teacherId);
+
+        if (teacherRecord == null)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = DomainErrors.GroupTutorials.TutorialTeacher.NotFound,
+                RedirectPath = _linkGenerator.GetPathByPage("/GroupTutorials/Tutorials/Details", values: new { area = "Subject", Id = Id })
+            };
+
+            return Page();
+        }
+
+        TeacherRemoval = new()
+        {
+            Id = teacherId,
+            Name = teacherRecord.Name
+        };
+
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostRemoveTeacher()
+    {
+        DateOnly? effectiveDate = (!TeacherRemoval.Immediate) ? DateOnly.FromDateTime(TeacherRemoval.EffectiveOn) : null;
+
+        var result = await _mediator.Send(new RemoveTeacherFromTutorialCommand(Id, TeacherRemoval.Id, effectiveDate));
+
+        TeacherRemoval = null;
+
+        if (result.IsFailure)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = result.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/GroupTutorials/Tutorials/Details", values: new { area = "Subject", Id = Id })
+            };
+
+            Tutorial = new(
+                Id,
+                null,
+                DateOnly.MinValue,
+                DateOnly.MinValue,
+                new List<TutorialTeacherResponse>(),
+                new List<TutorialEnrolmentResponse>(),
+                new List<TutorialRollResponse>());
+
+            return Page();
+        }
+
+        return RedirectToPage("Details", new { Id = Id });
+    }
+
+    public async Task<IActionResult> OnGetRemoveStudent(Guid enrolmentId)
+    {
+        await GetPageInformation();
+
+        var enrolmentRecord = Tutorial.Students.FirstOrDefault(enrolment => enrolment.Id == enrolmentId);
+
+        if (enrolmentRecord == null)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = DomainErrors.GroupTutorials.TutorialEnrolment.NotFound,
+                RedirectPath = _linkGenerator.GetPathByPage("/GroupTutorials/Tutorials/Details", values: new { area = "Subject", Id = Id })
+            };
+
+            return Page();
+        }
+
+        StudentRemoval = new()
+        {
+            Id = enrolmentId,
+            Name = enrolmentRecord.Name
+        };
+
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostRemoveStudent()
+    {
+        DateOnly? effectiveDate = (!StudentRemoval.Immediate) ? DateOnly.FromDateTime(StudentRemoval.EffectiveOn) : null;
+
+        var result = await _mediator.Send(new RemoveStudentFromTutorialCommand(Id, StudentRemoval.Id, effectiveDate));
+
+        StudentRemoval = null;
+
+        if (result.IsFailure)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = result.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/GroupTutorials/Tutorials/Details", values: new { area = "Subject", Id = Id })
+            };
+
+            Tutorial = new(
+                Id,
+                null,
+                DateOnly.MinValue,
+                DateOnly.MinValue,
+                new List<TutorialTeacherResponse>(),
+                new List<TutorialEnrolmentResponse>(),
+                new List<TutorialRollResponse>());
+
+            return Page();
+        }
+
+        return RedirectToPage("Details", new { Id = Id });
     }
 }

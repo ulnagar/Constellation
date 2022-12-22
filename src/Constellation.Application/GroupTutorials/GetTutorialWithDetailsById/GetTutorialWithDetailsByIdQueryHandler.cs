@@ -33,7 +33,7 @@ internal sealed class GetTutorialWithDetailsByIdQueryHandler
 
         if (tutorial is null)
         {
-            return Result.Failure<GroupTutorialDetailResponse>(DomainErrors.GroupTutorials.TutorialNotFound(request.Id));
+            return Result.Failure<GroupTutorialDetailResponse>(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.Id));
         }
 
         var teacherLinks = tutorial.Teachers.Where(teacher => !teacher.IsDeleted).ToList();
@@ -46,7 +46,8 @@ internal sealed class GetTutorialWithDetailsByIdQueryHandler
             .Select(teacher => 
                 new TutorialTeacherResponse(
                     teacher.Id, 
-                    teacherEntities.First(entity => entity.StaffId == teacher.StaffId).DisplayName))
+                    teacherEntities.First(entity => entity.StaffId == teacher.StaffId).DisplayName,
+                    teacher.EffectiveTo))
             .ToList();
 
         var students = studentLinks
@@ -54,7 +55,8 @@ internal sealed class GetTutorialWithDetailsByIdQueryHandler
                 new TutorialEnrolmentResponse(
                     student.Id,
                     studentEntities.First(entity => entity.StudentId == student.StudentId).DisplayName,
-                    studentEntities.First(entity => entity.StudentId == student.StudentId).CurrentGrade.AsName()))
+                    studentEntities.First(entity => entity.StudentId == student.StudentId).CurrentGrade.AsName(),
+                    student.EffectiveTo))
             .ToList();
 
         var response = new GroupTutorialDetailResponse(
