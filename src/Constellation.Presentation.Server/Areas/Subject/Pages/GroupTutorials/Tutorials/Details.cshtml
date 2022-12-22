@@ -156,7 +156,9 @@
                             <td>@roll.Date.ToLongDateString()</td>
                             <td>@(roll.Completed ? "Submitted" : "Unsubmitted")</td>
                             <td>@roll.PresentStudents / @roll.TotalStudents</td>
-                            <td></td>
+                            <td> 
+                                <a asp-page="Roll" asp-route-tutorialId="@Model.Id" asp-route-rollId="@roll.Id" asp-route-mode="Edit" class="btn btn-sm btn-secondary btn-show-hover">More Info...</a>
+                            </td>
                         </tr>
                     }
                 </tbody>

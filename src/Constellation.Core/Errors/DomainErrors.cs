@@ -66,6 +66,10 @@ public static class DomainErrors
             public static readonly Func<DateOnly, Error> RollDateInvalid = rollDate => new Error(
                 "GroupTutorials.TutorialRoll.RollDateInvalid",
                 $"Cannot create a roll for {rollDate.ToShortDateString()} as this is not a valid date for this tutorial");
+
+            public static readonly Func<Guid, Error> NotFound = id => new Error(
+                "GroupTutorials.TutorialRoll.NotFound",
+                $"A roll with the Id {id} could not be found");
         }
 
     }
