@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.GroupTutorials;
 
+using Constellation.Core.Enums;
 using Constellation.Core.Primitives;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,7 @@ public sealed class TutorialRoll : Entity, IAuditableEntity
     public Guid TutorialId { get; set; }
     public DateOnly SessionDate { get; set; }
     public string StaffId { get; set; }
+    public TutorialRollStatus Status => GetStatus();
     public IReadOnlyCollection<TutorialRollStudent> Students => _students;
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -33,21 +35,50 @@ public sealed class TutorialRoll : Entity, IAuditableEntity
     public string DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
 
-    public void AddStudent(string studentId)
+    public void AddStudent(string studentId, bool enrolled)
     {
-        if (_students.All(student => student.StudentId != studentId))
+        var existingEntry = _students.FirstOrDefault(student => student.StudentId == studentId);
+
+        if (existingEntry is not null)
+        {
+            if (enrolled && !existingEntry.Enrolled)
+                existingEntry.Enrolled = true;
+        } 
+        else
         {
             var student = new TutorialRollStudent
             {
-                StudentId = studentId
+                StudentId = studentId,
+                Enrolled = enrolled
             };
 
             _students.Add(student);
         }
     }
 
+    public void RemoveStudent(string studentId)
+    {
+        var existingEntry = _students.FirstOrDefault(student => student.StudentId == studentId);
+
+        if (existingEntry is not null)
+        {
+            _students.Remove(existingEntry);
+        }
+    }
+
     public void Cancel()
     {
         IsDeleted = true;
+    }
+
+    private TutorialRollStatus GetStatus()
+    {
+        if (IsDeleted)
+            return TutorialRollStatus.Cancelled;
+
+        if (!string.IsNullOrWhiteSpace(StaffId))
+            return TutorialRollStatus.Submitted;
+
+        return TutorialRollStatus.Unsubmitted;
     }
 }

@@ -26,7 +26,7 @@ internal sealed class TutorialRollStudentConfiguration : IEntityTypeConfiguratio
 
         builder
             .HasOne<TutorialRoll>()
-            .WithMany()
+            .WithMany(r => r.Students)
             .HasForeignKey(x => x.TutorialRollId)
             .OnDelete(DeleteBehavior.Restrict);
     }

@@ -180,13 +180,18 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
             return Result.Failure<TutorialRoll>(DomainErrors.GroupTutorials.TutorialRoll.RollAlreadyExistsForDate(rollDate));
         }
 
+        if (rollDate < StartDate || rollDate > EndDate)
+        {
+            return Result.Failure<TutorialRoll>(DomainErrors.GroupTutorials.TutorialRoll.RollDateInvalid(rollDate));
+        }
+
         var roll = new TutorialRoll(Guid.NewGuid(), this, rollDate);
 
         var students = GetActiveEnrolmentsForDate(rollDate).Select(member => member.StudentId);
 
         foreach (var studentId in students)
         {
-            roll.AddStudent(studentId);
+            roll.AddStudent(studentId, true);
         }
 
         _rolls.Add(roll);

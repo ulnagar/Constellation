@@ -134,22 +134,28 @@
         <div id="rolls" class="tab-pane">
             <h3>Roll List</h3>
 
+            <button class="btn btn-warning" data-toggle="modal" data-target="#rollCreateModal">Add Roll</button>
+
+            <hr />
+
             <table class="table-striped table-hover data-table">
                 <thead>
                     <tr>
                         <th></th>
                         <th>Date</th>
-                        <th>Marked</th>
+                        <th>Status</th>
+                        <th>Students</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var roll in Model.Tutorial.Rolls)
+                    @foreach (var roll in Model.Tutorial.Rolls.OrderBy(roll => roll.Date))
                     {
                         <tr>
                             <td></td>
-                            <td>@roll.Date.ToShortDateString()</td>
-                            <td>@roll.Completed</td>
+                            <td>@roll.Date.ToLongDateString()</td>
+                            <td>@(roll.Completed ? "Submitted" : "Unsubmitted")</td>
+                            <td>@roll.PresentStudents / @roll.TotalStudents</td>
                             <td></td>
                         </tr>
                     }
@@ -261,6 +267,8 @@
 
 <vc:tutorial-student-enrolment></vc:tutorial-student-enrolment>
 
+<vc:tutorial-roll-create></vc:tutorial-roll-create>
+
 @section scripts {
     <script>
         $('#teacherAssignmentSubmitButton').click(function (e) {
@@ -275,5 +283,10 @@
             $('#studentEnrolmentForm').submit();
         });
 
+        $('#rollCreateSubmitButton').click(function (e) {
+            e.preventDefault();
+            $('#rollCreateModal').modal('hide');
+            $('#rollCreateForm').submit();
+        });
     </script>
 }

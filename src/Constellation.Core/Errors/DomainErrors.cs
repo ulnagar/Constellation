@@ -62,6 +62,10 @@ public static class DomainErrors
             public static readonly Func<DateOnly, Error> RollAlreadyExistsForDate = rollDate => new Error(
                 "GroupTutorials.TutorialRoll.RollAlreadyExistsForDate",
                 $"A roll for date {rollDate.ToShortDateString()} already exists");
+
+            public static readonly Func<DateOnly, Error> RollDateInvalid = rollDate => new Error(
+                "GroupTutorials.TutorialRoll.RollDateInvalid",
+                $"Cannot create a roll for {rollDate.ToShortDateString()} as this is not a valid date for this tutorial");
         }
 
     }

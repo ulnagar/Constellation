@@ -14,6 +14,7 @@ public interface IGroupTutorialRepository
     Task<GroupTutorial?> GetById(Guid id, CancellationToken cancellationToken = default);
     Task<GroupTutorial?> GetWithTeachersById(Guid guid, CancellationToken cancellationToken = default);
     Task<GroupTutorial?> GetWithStudentsById(Guid guid, CancellationToken cancellationToken = default);
+    Task<GroupTutorial?> GetWithRollsById(Guid id, CancellationToken cancellationToken = default);
 
     void Insert(GroupTutorial tutorial);
 }

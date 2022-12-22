@@ -5,4 +5,6 @@ using System;
 public sealed record TutorialRollResponse(
     Guid Id,
     DateOnly Date,
-    bool Completed);
+    bool Completed,
+    int TotalStudents,
+    int PresentStudents);

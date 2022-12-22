@@ -81,6 +81,9 @@ namespace Constellation.Infrastructure.Jobs
                 {
                     _logger.LogWarning("{id}: {emailAddress}: Failed to create user", JobId, emailAddress);
 
+                    foreach (var error in result.Errors)
+                        _logger.LogWarning("{id}: {emailAddress}: Failed to create user : {error}", JobId, emailAddress, error.Description);
+
                     return;
                 }
 

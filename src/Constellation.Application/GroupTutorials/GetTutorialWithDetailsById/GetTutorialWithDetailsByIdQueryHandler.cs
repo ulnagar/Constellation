@@ -66,7 +66,15 @@ internal sealed class GetTutorialWithDetailsByIdQueryHandler
             tutorial.EndDate,
             teachers,
             students,
-            tutorial.Rolls.Select(roll => new TutorialRollResponse(roll.Id, roll.SessionDate, !string.IsNullOrWhiteSpace(roll.StaffId))).ToList());
+            tutorial.Rolls
+                .Select(roll => 
+                    new TutorialRollResponse(
+                        roll.Id, 
+                        roll.SessionDate, 
+                        !string.IsNullOrWhiteSpace(roll.StaffId), 
+                        roll.Students.Count, 
+                        roll.Students.Count(student => student.Present)))
+                .ToList());
 
         return response;
     }
