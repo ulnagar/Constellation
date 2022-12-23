@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Pages.GroupTutorials.T
 using Constellation.Application.GroupTutorials.AddStudentToTutorial;
 using Constellation.Application.GroupTutorials.AddTeacherToTutorial;
 using Constellation.Application.GroupTutorials.CreateRoll;
+using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.GroupTutorials.GetTutorialWithDetailsById;
 using Constellation.Application.GroupTutorials.RemoveStudentFromTutorial;
 using Constellation.Application.GroupTutorials.RemoveTeacherFromTutorial;
@@ -293,5 +294,17 @@ public class DetailsModel : BasePageModel
         StudentRemoval = null;
 
         return Page();
+    }
+
+    public async Task<IActionResult> OnGetDownloadReport()
+    {
+        var fileDto = await _mediator.Send(new GenerateTutorialAttendanceReportQuery(Id));
+
+        if (!fileDto.IsSuccess)
+        {
+            return Page();
+        }
+
+        return File(fileDto.Value.FileData, fileDto.Value.FileType, fileDto.Value.FileName);
     }
 }

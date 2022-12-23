@@ -2,6 +2,7 @@
 
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,9 +12,9 @@ public sealed record CanSubmitGroupTutorialRollRequirement : IAuthorizationRequi
 
 public sealed class IsCurrentTeacherAddedToTutorial : AuthorizationHandler<CanSubmitGroupTutorialRollRequirement, Guid>
 {
-    private readonly DbContext _context;
+    private readonly AppDbContext _context;
 
-    public IsCurrentTeacherAddedToTutorial(DbContext context)
+    public IsCurrentTeacherAddedToTutorial(AppDbContext context)
     {
         _context = context;
     }

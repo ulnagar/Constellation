@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Features.MandatoryTraining.Models;
+using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Core.Models.MandatoryTraining;
 using System.Collections.Generic;
 using System.IO;
@@ -15,5 +16,6 @@ namespace Constellation.Application.Interfaces.Services
         Task<MemoryStream> CreateTrainingModuleReportFile(ModuleDetailsDto data);
         Task<MemoryStream> CreateTrainingModuleStaffReportFile(StaffCompletionListDto data);
         List<TrainingModule> ImportMandatoryTrainingDataFromFile(MemoryStream excelFile);
+        Task<MemoryStream> CreateGroupTutorialAttendanceFile(TutorialDetailsDto data);
     }
 }
