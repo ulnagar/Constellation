@@ -1,15 +1,16 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.GroupTutorials.Tutorials;
 
-using Constellation.Application.Features.MandatoryTraining.Commands;
 using Constellation.Application.GroupTutorials.CreateGroupTutorial;
 using Constellation.Application.GroupTutorials.EditGroupTutorial;
 using Constellation.Application.GroupTutorials.GetTutorialById;
-using Constellation.Core.Primitives;
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+[Authorize(Policy = AuthPolicies.CanEditGroupTutorials)]
 public class UpsertModel : BasePageModel
 {
     private readonly IMediator _mediator;

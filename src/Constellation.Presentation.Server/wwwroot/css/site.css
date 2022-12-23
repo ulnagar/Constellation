@@ -275,3 +275,37 @@ img.training.status-icon.blink {
 .page-menu {
     overflow: auto;
 }
+
+/* Change Checkbox input into css toggle switch */
+
+input.checkbox-toggle {
+    position: relative;
+    height: 30px;
+    width: 60px;
+    -webkit-appearance: none;
+    background: red;
+    outline: none;
+    border-radius: 15px;
+}
+
+input.checkbox-toggle:checked {
+    background: green;
+}
+
+input.checkbox-toggle:before {
+    cursor: pointer;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    transform: scale(0.85);
+    border-radius: 50%;
+    background: white;
+    transition: .5s;
+}
+
+input.checkbox-toggle:checked:before {
+    left: 30px;
+}

@@ -1,10 +1,19 @@
 ﻿@page "{id:Guid}"
 @model Constellation.Presentation.Server.Areas.Subject.Pages.GroupTutorials.Tutorials.DetailsModel
+@inject IAuthorizationService AuthorizationService
+
+@{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+    var canSubmitTest = await AuthorizationService.AuthorizeAsync(User, Model.Id, AuthPolicies.CanSubmitGroupTutorialRolls);
+}
 
 <h2>Group Tutorial Details</h2>
 
 <div>
-    <a asp-page="Upsert" asp-route-id="@Model.Tutorial.Id" class="btn btn-warning">Edit</a>
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="Upsert" asp-route-id="@Model.Tutorial.Id" class="btn btn-warning">Edit</a>
+    }
     
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
@@ -68,7 +77,10 @@
         <div id="students" class="tab-pane active">
             <h3>Student List</h3>
             
-            <button class="btn btn-warning" data-toggle="modal" data-target="#studentEnrolmentModal">Add Student</button>
+            @if (canEditTest.Succeeded)
+            {
+                <button class="btn btn-warning" data-toggle="modal" data-target="#studentEnrolmentModal">Add Student</button>
+            }
 
             <hr />
 
@@ -91,7 +103,10 @@
                             <td>@student.Grade</td>
                             <td>@(student.Until.HasValue ? student.Until.Value.ToShortDateString() : "Indefinitely")</td>
                             <td>
-                                <a asp-page-handler="RemoveStudent" asp-route-enrolmentId="@student.Id" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                                @if (canEditTest.Succeeded)
+                                {
+                                    <a asp-page-handler="RemoveStudent" asp-route-enrolmentId="@student.Id" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                                }
                             </td>
                         </tr>
                     }
@@ -102,7 +117,10 @@
         <div id="teachers" class="tab-pane">
             <h3>Teacher List</h3>
 
-            <button class="btn btn-warning" data-toggle="modal" data-target="#teacherAssignmentModal">Add Teacher</button>
+            @if (canEditTest.Succeeded)
+            {
+                <button class="btn btn-warning" data-toggle="modal" data-target="#teacherAssignmentModal">Add Teacher</button>
+            }
 
             <hr />
 
@@ -123,7 +141,10 @@
                             <td>@teacher.Name</td>
                             <td>@(teacher.Until.HasValue ? teacher.Until.Value.ToShortDateString() : "Indefinitely")</td>
                             <td>
-                                <a asp-page-handler="RemoveTeacher" asp-route-teacherId="@teacher.Id" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                                @if (canEditTest.Succeeded)
+                                {
+                                    <a asp-page-handler="RemoveTeacher" asp-route-teacherId="@teacher.Id" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                                }
                             </td>
                         </tr>
                     }
@@ -134,7 +155,10 @@
         <div id="rolls" class="tab-pane">
             <h3>Roll List</h3>
 
-            <button class="btn btn-warning" data-toggle="modal" data-target="#rollCreateModal">Add Roll</button>
+            @if (canSubmitTest.Succeeded)
+            {
+                <button class="btn btn-warning" data-toggle="modal" data-target="#rollCreateModal">Add Roll</button>
+            }
 
             <hr />
 
@@ -157,7 +181,7 @@
                             <td>@(roll.Completed ? "Submitted" : "Unsubmitted")</td>
                             <td>@roll.PresentStudents / @roll.TotalStudents</td>
                             <td> 
-                                <a asp-page="Roll" asp-route-tutorialId="@Model.Id" asp-route-rollId="@roll.Id" asp-route-mode="Edit" class="btn btn-sm btn-secondary btn-show-hover">More Info...</a>
+                                <a asp-page="Roll" asp-route-tutorialId="@Model.Id" asp-route-rollId="@roll.Id" asp-route-mode="View" class="btn btn-sm btn-secondary btn-show-hover">More Info...</a>
                             </td>
                         </tr>
                     }

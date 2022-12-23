@@ -4,6 +4,7 @@ using Constellation.Core.DomainEvents;
 using Constellation.Core.Errors;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -197,5 +198,19 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
         _rolls.Add(roll);
 
         return roll;
+    }
+
+    public Result SubmitRoll(TutorialRoll roll, Staff staffMember, Dictionary<string, bool> studentPresence)
+    {
+        if (roll.Status != Enums.TutorialRollStatus.Unsubmitted)
+        {
+            return Result.Failure(DomainErrors.GroupTutorials.TutorialRoll.SubmitInvalidStatus);
+        }
+
+        roll.Submit(staffMember.StaffId, studentPresence);
+
+        RaiseDomainEvent(new TutorialRollSubmittedDomainEvent(Guid.NewGuid(), Id, roll.Id));
+
+        return Result.Success();
     }
 }

@@ -1,6 +1,12 @@
 ﻿@page
-@using Constellation.Presentation.Server.Areas.Subject.Pages.GroupTutorials.Tutorials;
 @model IndexModel
+@inject IAuthorizationService AuthorizationService
+@using Constellation.Presentation.Server.Areas.Subject.Pages.GroupTutorials.Tutorials;
+
+@{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+}
+
 
 <h2>Group Tutorials</h2>
 
@@ -35,7 +41,10 @@
         <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Future" class="btn @future_style">Future</a>
     </div>
 
-    <a asp-page="Upsert" class="btn btn-warning">Create New</a>
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="Upsert" class="btn btn-warning">Create New</a>
+    }
 </div>
 
 <hr />

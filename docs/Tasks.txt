@@ -2,10 +2,10 @@
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 	GROUP TUTORIALS
-		Track tutorials, staff involved, and the students enrolled
-		Allow staff to create rolls for tutorial sessions, that include the status of each student enrolled for the session
+		*Track tutorials, staff involved, and the students enrolled
+		*Allow staff to create rolls for tutorial sessions, that include the status of each student enrolled for the session
 		Provide ability to re-sync rolls against current enrolments
-		Provide ability for staff to add one-off attendees to rolls without enrolling them in the tutorial
+		*Provide ability for staff to add one-off attendees to rolls without enrolling them in the tutorial
 		*Link the creation of tutorials to the automatic generation of a Team, and add all staff as owners, and all students as members
 		*When a student is enrolled in the tutorial, automatically add them to the Team
 		*When a student is removed from the tutorial, automatically remove them from the Team
@@ -15,8 +15,8 @@ CURRENT TASK
 			- student attendance as a group over time
 			- individual student attendance
 
-		- Add DomainEvents to the GroupTutorial methods
-		- Add DomainEventHandler and OutboxProcessorJob
+		*- Add DomainEvents to the GroupTutorial methods
+		*- Add DomainEventHandler and OutboxProcessorJob
 		- Add job to scan for expired teacher and student group tutorial links (EffectiveTo) and raise appropriate events
 
 

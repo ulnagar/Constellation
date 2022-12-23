@@ -66,6 +66,23 @@ public sealed class TutorialRoll : Entity, IAuditableEntity
         }
     }
 
+    public void Submit(string staffId, Dictionary<string, bool> students)
+    {
+        StaffId = staffId;
+
+        foreach (var entry in students)
+        {
+            var student = Students.FirstOrDefault(student => student.StudentId == entry.Key);
+
+            if (student is null)
+            {
+                continue;
+            }
+
+            student.Present = entry.Value;
+        }
+    }
+
     public void Cancel()
     {
         IsDeleted = true;

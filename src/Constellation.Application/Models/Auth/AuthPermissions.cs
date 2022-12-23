@@ -46,4 +46,7 @@ public class AuthPermissions
     public const string PortalSchoolsAdmin = "Portal.Schools.Admin";
 
     public const string UtilityAdmin = "Utility.Admin";
+
+    public const string GroupTutorialsView = "GroupTutorials.View";
+    public const string GroupTutorialsEdit = "GroupTutorials.Edit";
 }

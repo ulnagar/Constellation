@@ -1,10 +1,13 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.GroupTutorials.Tutorials;
 
 using Constellation.Application.GroupTutorials.GetAllTutorials;
+using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+[Authorize(Policy = AuthPolicies.CanViewGroupTutorials)]
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;

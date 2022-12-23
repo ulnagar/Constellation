@@ -306,6 +306,8 @@ public static class ServicesRegistration
         services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByRoute>();
         services.AddScoped<IAuthorizationHandler, HasRequiredMandatoryTrainingModulePermissions>();
         services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByResource>();
+        services.AddScoped<IAuthorizationHandler, IsCurrentTeacherAddedToTutorial>();
+        services.AddScoped<IAuthorizationHandler, HasRequiredGroupTutorialModulePermissions>();
 
         var clientId = configuration["Authentication:Microsoft:ClientId"];
         var clientSecret = configuration["Authentication:Microsoft:ClientSecret"];

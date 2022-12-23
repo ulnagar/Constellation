@@ -6,6 +6,7 @@ using Constellation.Application.GroupTutorials.CreateRoll;
 using Constellation.Application.GroupTutorials.GetTutorialWithDetailsById;
 using Constellation.Application.GroupTutorials.RemoveStudentFromTutorial;
 using Constellation.Application.GroupTutorials.RemoveTeacherFromTutorial;
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Areas.Subject.Models;
@@ -14,19 +15,26 @@ using Constellation.Presentation.Server.Pages.Shared.Components.TutorialRollCrea
 using Constellation.Presentation.Server.Pages.Shared.Components.TutorialStudentEnrolment;
 using Constellation.Presentation.Server.Pages.Shared.Components.TutorialTeacherAssignment;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using System.Threading;
 
+[Authorize(Policy = AuthPolicies.CanViewGroupTutorials)]
 public class DetailsModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly IAuthorizationService _authorizationService;
 
-    public DetailsModel(IMediator mediator, LinkGenerator linkGenerator)
+    public DetailsModel(
+        IMediator mediator,
+        LinkGenerator linkGenerator,
+        IAuthorizationService authorizationService)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _authorizationService = authorizationService;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -58,6 +66,13 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostEnrolStudent()
     {
+        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+
+        if (!isAuthorised.Succeeded)
+        {
+            return ShowError(DomainErrors.Permissions.Unauthorised);
+        }
+
         if (string.IsNullOrWhiteSpace(StudentEnrolment.StudentId))
         {
             await GetPageInformation();
@@ -80,6 +95,13 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAssignTeacher()
     {
+        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+
+        if (!isAuthorised.Succeeded)
+        {
+            return ShowError(DomainErrors.Permissions.Unauthorised);
+        }
+
         if (string.IsNullOrWhiteSpace(TeacherAssignment.StaffId))
         {
             await GetPageInformation();
@@ -102,6 +124,13 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetRemoveTeacher(Guid teacherId)
     {
+        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+
+        if (!isAuthorised.Succeeded)
+        {
+            return ShowError(DomainErrors.Permissions.Unauthorised);
+        }
+
         await GetPageInformation();
 
         var teacherRecord = Tutorial.Teachers.FirstOrDefault(teacher => teacher.Id == teacherId);
@@ -122,6 +151,13 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostRemoveTeacher()
     {
+        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+
+        if (!isAuthorised.Succeeded)
+        {
+            return ShowError(DomainErrors.Permissions.Unauthorised);
+        }
+
         DateOnly? effectiveDate = (!TeacherRemoval.Immediate) ? DateOnly.FromDateTime(TeacherRemoval.EffectiveOn) : null;
 
         var result = await _mediator.Send(new RemoveTeacherFromTutorialCommand(Id, TeacherRemoval.Id, effectiveDate));
@@ -138,6 +174,13 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetRemoveStudent(Guid enrolmentId)
     {
+        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+
+        if (!isAuthorised.Succeeded)
+        {
+            return ShowError(DomainErrors.Permissions.Unauthorised);
+        }
+
         await GetPageInformation();
 
         var enrolmentRecord = Tutorial.Students.FirstOrDefault(enrolment => enrolment.Id == enrolmentId);
@@ -158,6 +201,13 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostRemoveStudent()
     {
+        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+
+        if (!isAuthorised.Succeeded)
+        {
+            return ShowError(DomainErrors.Permissions.Unauthorised);
+        }
+
         DateOnly? effectiveDate = (!StudentRemoval.Immediate) ? DateOnly.FromDateTime(StudentRemoval.EffectiveOn) : null;
 
         var result = await _mediator.Send(new RemoveStudentFromTutorialCommand(Id, StudentRemoval.Id, effectiveDate));
@@ -174,6 +224,13 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostCreateRoll()
     {
+        var isAuthorised = await _authorizationService.AuthorizeAsync(User, Id, AuthPolicies.CanSubmitGroupTutorialRolls);
+
+        if (!isAuthorised.Succeeded)
+        {
+            return ShowError(DomainErrors.Permissions.Unauthorised);
+        }
+
         var result = await _mediator.Send(new CreateRollCommand(Id, DateOnly.FromDateTime(RollCreate.RollDate)));
 
         if (result.IsFailure)

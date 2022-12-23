@@ -5,6 +5,13 @@ using System;
 
 public static class DomainErrors
 {
+    public static class Permissions
+    {
+        public static readonly Error Unauthorised = new Error(
+            "Permissions.Unauthorised",
+            "You do not have the required permissions to perform this action");
+    }
+
     public static class Partners
     {
         public static class Staff
@@ -12,6 +19,10 @@ public static class DomainErrors
             public static readonly Func<string, Error> NotFound = id => new Error(
                 "Partners.Staff.TeacherNotFound",
                 $"A teacher with the Id {id} could not be found");
+
+            public static readonly Func<string, Error> NotFoundByEmail = email => new Error(
+                "Partners.Staff.TeacherNotFound",
+                $"A teacher with the Email Address {email} could not be found");
         }
 
         public static class Student
@@ -70,6 +81,18 @@ public static class DomainErrors
             public static readonly Func<Guid, Error> NotFound = id => new Error(
                 "GroupTutorials.TutorialRoll.NotFound",
                 $"A roll with the Id {id} could not be found");
+
+            public static readonly Error SubmitInvalidStatus = new Error(
+                "GroupTutorials.TutorialRoll.SubmitInvalidStatus",
+                "Cannot submit a roll that has been cancelled or previously submitted");
+
+            public static readonly Func<string, Error> StudentNotFound = student => new Error(
+                "GroupTutorials.TutorialRoll.StudentNotFound",
+                $"Cannot find an attendance record for student with Id {student} attached to the roll");
+
+            public static readonly Func<string, Error> RemoveEnrolledStudent = student => new Error(
+                "GroupTutorials.TutorialRoll.RemoveEnrolledStudent",
+                $"Cannot remove student with Id {student} from the roll as they are enrolled in the tutorial");
         }
 
     }

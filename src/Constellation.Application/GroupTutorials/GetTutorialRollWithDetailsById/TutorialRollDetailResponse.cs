@@ -6,7 +6,10 @@ using System.Collections.Generic;
 
 public sealed record TutorialRollDetailResponse(
     Guid Id,
+    Guid TutorialId,
+    string TutorialName,
     DateOnly SessionDate,
     string StaffId,
+    string StaffName,
     TutorialRollStatus Status,
-    IReadOnlyCollection<TutorialRollStudentReponse> Students);
+    IReadOnlyCollection<TutorialRollStudentResponse> Students);

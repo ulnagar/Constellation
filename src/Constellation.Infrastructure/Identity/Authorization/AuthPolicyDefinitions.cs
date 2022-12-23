@@ -31,6 +31,15 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanViewFacultyDetails, policy =>
             policy.RequireRole(AuthRoles.StaffMember, AuthRoles.Editor, AuthRoles.Admin));
 
+        options.AddPolicy(AuthPolicies.CanViewGroupTutorials, policy =>
+            policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.GroupTutorialsView));
+
+        options.AddPolicy(AuthPolicies.CanEditGroupTutorials, policy =>
+            policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.GroupTutorialsEdit));
+
+        options.AddPolicy(AuthPolicies.CanSubmitGroupTutorialRolls, policy =>
+            policy.Requirements.Add(new CanSubmitGroupTutorialRollRequirement()));
+
         return options;
     }
 }
