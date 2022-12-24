@@ -440,12 +440,71 @@ public class ExcelService : IExcelService, IScopedService
         dateDetail.Bold = true;
         dateDetail.Size = 16;
 
-        workSheet.Cells[5, 1].LoadFromCollection(data.Rolls);
+        var students = data.Rolls
+            .SelectMany(roll => roll.Students)
+            .OrderBy(student => student.Grade)
+            .ThenBy(student => student.Name)
+            .GroupBy(student => student.StudentId)
+            .ToList();
 
-        //var rolls = data.Rolls.OrderBy(roll => roll.SessionDate).ToList();
-        //var students = data.Rolls.SelectMany(roll => roll.Students).OrderBy(student => student.Grade).ThenBy(student => student.Name).ToList();
+        var rolls = data.Rolls.OrderBy(roll => roll.SessionDate).ToList();
 
-        //workSheet.Cells[5, 2].LoadFromCollection(rolls)
+        int startColumn = 3;
+        int startRow = 5;
+
+        for (int i = 0; i < rolls.Count; i++)
+        {
+            workSheet.Cells[startRow, startColumn + i].Value = rolls[i].SessionDate.ToShortDateString();
+            workSheet.Cells[startRow, startColumn + i].Style.Numberformat.Format = "dd/MM/yyyy";
+
+            workSheet.Cells[startRow + 1, startColumn + i].Value = rolls[i].StaffName;
+        }
+
+        startRow += 2;
+        startColumn -= 2;
+
+        for (int i = 0; i < students.Count; i++)
+        {
+            var student = students[i];
+
+            workSheet.Cells[startRow + i, startColumn].Value = student.First().Name;
+            workSheet.Cells[startRow + i, startColumn + 1].Value = student.First().Grade;
+
+            for(int j = 0; j < rolls.Count; j++)
+            {
+                string text = string.Empty;
+                bool enrolled = false;
+
+                var entry = rolls[j].Students.FirstOrDefault(student => student.StudentId == students[i].Key);
+
+                if (entry is null)
+                {
+                    // Student was not included in this roll
+                    text = "-";
+                }
+                else
+                {
+                    text = (entry.Present ? "Y" : "N");
+                    enrolled = entry.Enrolled;
+                }
+
+                workSheet.Cells[startRow + i, startColumn + 2 + j].Value = text;
+
+                if (enrolled)
+                {
+                    workSheet.Cells[startRow + i, startColumn + 2 + j].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    workSheet.Cells[startRow + i, startColumn + 2 + j].Style.Fill.BackgroundColor.SetColor(Color.LightGreen);
+                } 
+                else
+                {
+                    workSheet.Cells[startRow + i, startColumn + 2 + j].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    workSheet.Cells[startRow + i, startColumn + 2 + j].Style.Fill.BackgroundColor.SetColor(Color.LightGray);
+                }
+            }
+        }
+
+        workSheet.View.FreezePanes(7, 3);
+        workSheet.Cells[5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
         var memoryStream = new MemoryStream();
         await excel.SaveAsAsync(memoryStream);
