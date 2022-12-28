@@ -139,6 +139,8 @@
                                 {
                                     <a asp-action="DeleteAssignment" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.AssignmentId" class="dropdown-item">Remove Role</a>
                                 }
+                                <div class="dropdown-divider"></div>
+                                <a asp-action="RepairUserAccount" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.Id" class="dropdown-item">Repair Account</a>
                             </div>
                         </div>
                     }

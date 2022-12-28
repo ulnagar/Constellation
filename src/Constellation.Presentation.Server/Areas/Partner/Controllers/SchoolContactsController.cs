@@ -300,5 +300,13 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             return Redirect(Request.GetTypedHeaders().Referer.ToString());
         }
+
+        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
+        public async Task<IActionResult> RepairUserAccount(int id)
+        {
+            await _authService.RepairSchoolContactUser(id);
+
+            return RedirectToAction("Index");
+        }
     }
 }
