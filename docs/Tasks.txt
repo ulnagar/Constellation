@@ -11,13 +11,13 @@ CURRENT TASK
 		*When a student is removed from the tutorial, automatically remove them from the Team
 		*Include the same operations for staff
 		*Prevent duplicate rolls from being created (limit to one per day per tutorial)
-		Create reports for each tutorial 
+		*Create reports for each tutorial 
 			- student attendance as a group over time
 			- individual student attendance
 
 		*- Add DomainEvents to the GroupTutorial methods
 		*- Add DomainEventHandler and OutboxProcessorJob
-		- Add job to scan for expired teacher and student group tutorial links (EffectiveTo) and raise appropriate events
+		*- Add job to scan for expired teacher and student group tutorial links (EffectiveTo) and raise appropriate events
 
 
 	SCHOOL CONTACTS

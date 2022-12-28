@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 public interface IGroupTutorialRepository
 {
     Task<List<GroupTutorial>> GetAllWithTeachersAndStudents(CancellationToken cancellationToken = default);
+    Task<List<GroupTutorial>> GetAllWithTeachersAndStudentsWhereAccessExpired(CancellationToken cancellationToken = default);
     Task<GroupTutorial?> GetWholeAggregate(Guid id, CancellationToken cancellationToken = default);
     Task<GroupTutorial?> GetById(Guid id, CancellationToken cancellationToken = default);
     Task<GroupTutorial?> GetWithTeachersById(Guid guid, CancellationToken cancellationToken = default);

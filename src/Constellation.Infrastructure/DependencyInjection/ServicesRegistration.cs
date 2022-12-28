@@ -140,7 +140,8 @@ public static class ServicesRegistration
         services.AddScoped<ISentralReportSyncJob, SentralReportSyncJob>();
         services.AddScoped<IUserManagerJob, UserManagerJob>();
         services.AddScoped<IMandatoryTrainingReminderJob, MandatoryTrainingReminderJob>();
-        services.AddScoped<ProcessOutboxMessagesJob>();
+        services.AddScoped<IProcessOutboxMessagesJob, ProcessOutboxMessagesJob>();
+        services.AddScoped<IGroupTutorialExpiryScanJob, GroupTutorialExpiryScanJob>();
 
         services.AddScoped(typeof(IJobDispatcherService<>), typeof(JobDispatcherService<>));
 

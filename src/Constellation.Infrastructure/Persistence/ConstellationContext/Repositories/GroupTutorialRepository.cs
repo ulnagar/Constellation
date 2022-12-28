@@ -23,6 +23,26 @@ internal sealed class GroupTutorialRepository : IGroupTutorialRepository
             .Include(tutorial => tutorial.Teachers)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<GroupTutorial>> GetAllWithTeachersAndStudentsWhereAccessExpired(
+        CancellationToken cancellationToken = default)
+    {
+        var dateOnlyToday = DateOnly.FromDateTime(DateTime.Today);
+
+        return await _dbContext
+            .Set<GroupTutorial>()
+            .AsSplitQuery()
+            .Include(tutorial => tutorial.Enrolments)
+            .Include(tutorial => tutorial.Teachers)
+            .Where(tutorial =>
+                tutorial.Enrolments.Any(enrol =>
+                    !enrol.IsDeleted &&
+                    enrol.EffectiveTo < dateOnlyToday) ||
+                tutorial.Teachers.Any(member =>
+                    !member.IsDeleted &&
+                    member.EffectiveTo < dateOnlyToday))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<GroupTutorial?> GetWholeAggregate(
         Guid id, 
         CancellationToken cancellationToken = default) =>
