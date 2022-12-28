@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 public class BasePageModel : PageModel, IBaseModel
 {
     public IDictionary<string, int> Classes { get; set; }
-    public ErrorDisplay Error { get; set; }
+    public ErrorDisplay? Error { get; set; }
 
     public BasePageModel()
     {

@@ -193,12 +193,6 @@
     </div>
 </div>
 
-@if (Model.Error is not null)
-{
-    <vc:error-display-redirect error="@Model.Error">
-    </vc:error-display-redirect>
-}
-
 @if (Model.StudentRemoval is not null)
 {
     <div class="modal fade show d-block" tabindex="-1" id="studentRemovalModal">

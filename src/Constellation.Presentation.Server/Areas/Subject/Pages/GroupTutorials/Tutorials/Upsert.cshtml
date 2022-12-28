@@ -50,12 +50,6 @@
     </div>
 </form>
 
-@if (Model.Error is not null)
-{
-    <vc:error-display-redirect error="@Model.Error">
-    </vc:error-display-redirect>
-}
-
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }

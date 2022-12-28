@@ -1,10 +1,7 @@
-﻿using System.Collections.Generic;
+﻿namespace Constellation.Presentation.Server.BaseModels;
 
-namespace Constellation.Presentation.Server.BaseModels
+public interface IBaseModel
 {
-    public interface IBaseModel
-    {
-        public IDictionary<string, int> Classes { get; set; }
-
-    }
+    public IDictionary<string, int> Classes { get; set; }
+    public ErrorDisplay Error { get; set; }
 }

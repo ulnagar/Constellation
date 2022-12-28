@@ -11,5 +11,7 @@ namespace Constellation.Presentation.Server.BaseModels
 
         // Application Settings
         public IDictionary<string, int> Classes { get; set; }
+        public ErrorDisplay Error { get; set; }
+
     }
 }

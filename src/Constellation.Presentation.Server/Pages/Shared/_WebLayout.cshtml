@@ -1,5 +1,4 @@
-﻿@using System.IO;
-@model Constellation.Presentation.Server.BaseModels.IBaseModel
+﻿@model Constellation.Presentation.Server.BaseModels.IBaseModel
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,6 +28,12 @@
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
+
+        @if (Model.Error is not null)
+        {
+            <vc:error-display-redirect error="@Model.Error">
+            </vc:error-display-redirect>
+        }
     </div>
 
     <footer class="border-top footer fixed-bottom">
@@ -49,6 +54,15 @@
     <script src="~/lib/summernote/summernote.min.js"></script>
     <script src="~/lib/summernote/summernote-bs4.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @if (Model.Error is not null)
+    {
+        <script>
+            $(document).ready(function () {
+                $('#errorModal').modal('show');
+            });
+        </script>
+    }
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
