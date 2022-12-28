@@ -1,10 +1,10 @@
-﻿namespace Constellation.Presentation.Server.Areas.Partner.Models;
+﻿namespace Constellation.Presentation.Server.Pages.Shared.Components.TeacherAddFaculty;
 
 using Constellation.Core.Enums;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-public class Staff_FacultyAssignmentViewModel : BaseViewModel
+public class TeacherAddFacultySelection : BaseViewModel
 {
     public string StaffId { get; set; }
     public string StaffName { get; set; }

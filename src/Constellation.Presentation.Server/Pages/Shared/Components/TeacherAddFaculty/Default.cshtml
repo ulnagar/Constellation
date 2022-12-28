@@ -1,5 +1,5 @@
 ﻿@using Constellation.Core.Enums;
-@model Staff_FacultyAssignmentViewModel
+@model TeacherAddFacultySelection
 
 <div class="modal fade" id="addMembership">
     <div class="modal-dialog">
@@ -10,10 +10,10 @@
                 </div>
                 <div class="modal-body">
                     <div>
-                        @Html.HiddenFor(model => model.StaffId)
                         <div class="row">
                             <div class="form-group col-md-10 offset-1">
                                 <span class="control-label">Staff member </span>
+                                @Html.HiddenFor(model => model.StaffId)
                                 <input asp-for="StaffName" class="form-control" readonly="readonly" />
                             </div>
                         </div>

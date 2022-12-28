@@ -2,6 +2,7 @@
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using Constellation.Presentation.Server.Pages.Shared.Components.TeacherAddFaculty;
 using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Models
@@ -15,7 +16,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
         public List<ContactDto> SchoolStaff { get; set; } = new();
         public List<FacultyDto> Faculties { get; set; } = new();
 
-        public Staff_FacultyAssignmentViewModel FacultyAssignmentDto { get; set; } = new();
+        public TeacherAddFacultySelection FacultyAssignmentDto { get; set; } = new();
 
         public class StaffDto
         {

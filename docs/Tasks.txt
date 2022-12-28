@@ -24,7 +24,7 @@ CURRENT TASK
 		* Add repair user option to school contacts actions list
 
 	STAFF
-		Fix Faculty section of Staff Details page
+		* Fix Faculty section of Staff Details page
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~

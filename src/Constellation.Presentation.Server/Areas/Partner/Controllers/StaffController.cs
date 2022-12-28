@@ -7,6 +7,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using Constellation.Presentation.Server.Pages.Shared.Components.TeacherAddFaculty;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -219,16 +220,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             viewModel.SchoolStaff = staff.School.StaffAssignments.Where(role => !role.IsDeleted).Select(Staff_DetailsViewModel.ContactDto.ConvertFromRoleAssignment).ToList();
             viewModel.Faculties = staff.Faculties.Where(membership => !membership.IsDeleted).Select(Staff_DetailsViewModel.FacultyDto.ConvertFromFacultyMembership).ToList();
 
-            var facultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
-
-            // ViewModel properties for add faculty membership modal
-            viewModel.FacultyAssignmentDto = new Staff_FacultyAssignmentViewModel
-            {
-                StaffId = id,
-                StaffName = staff.DisplayName,
-                Faculties = new SelectList(facultyList, "Key", "Value")
-            };
-
             return View(viewModel);
         }
 
@@ -329,7 +320,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> _AddFacultyMembership(Staff_FacultyAssignmentViewModel viewModel)
+        public async Task<IActionResult> _AddFacultyMembership(TeacherAddFacultySelection viewModel)
         {
             if (!ModelState.IsValid)
                 return RedirectToAction("Details", new { id = viewModel.StaffId });
