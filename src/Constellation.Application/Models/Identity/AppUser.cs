@@ -17,5 +17,6 @@ namespace Constellation.Application.Models.Identity
         public int SchoolContactId { get; set; }
         public bool IsStaffMember { get; set; }
         public string StaffId { get; set; }
+        public bool IsParent { get; set; }
     }
 }

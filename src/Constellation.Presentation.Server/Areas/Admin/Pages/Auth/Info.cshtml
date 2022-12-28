@@ -1,23 +1,39 @@
-﻿@page
+﻿@page "{EmailAddress}"
 @model Constellation.Presentation.Server.Areas.Admin.Pages.Auth.InfoModel
 
-<h2>Current User Service</h2>
+<h2>User Details</h2>
 <dl>
     <dt>UserName</dt>
-    <dd>@Model.CurrentUserServiceName</dd>
+    <dd>@Model.AppUser.DisplayName</dd>
+    <dt>Email Address</dt>
+    <dd>@Model.AppUser.Email</dd>
 </dl>
 
 <h2>Claims</h2>
+@{
+    var claimList = Model.Claims
+        .GroupBy(claim => claim.Type)
+        .OrderBy(group => group.Key.Split('/').Last())
+        .ToList();
+}
+
 <dl>
-    @foreach (var claim in Model.Claims){
-        <dt>@claim.Type</dt>
-        <dd>@claim.Value</dd>
+    @foreach (var group in claimList)
+    {
+        <dt>@group.Key</dt>
+        <dd>
+            @foreach (var entry in group.OrderBy(claim => claim.Value).DistinctBy(claim => claim.Value))
+            {
+                @entry.Value<br />
+            }
+        </dd>
     }
 </dl>
 
 <h2>Roles</h2>
 <ul>
-    @foreach (var role in Model.Roles){
+    @foreach (var role in Model.Roles)
+    {
         <li>@role</li>
     }
 </ul>

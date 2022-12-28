@@ -17,5 +17,6 @@ namespace Constellation.Application.Interfaces.Services
         Task AuditSchoolContactUsers();
         Task<UserAuditDto> VerifyContactAccess(string email);
         Task RepairSchoolContactUser(int schoolContactId);
+        Task AuditParentUsers();
     }
 }

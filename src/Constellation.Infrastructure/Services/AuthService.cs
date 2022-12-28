@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
 using Constellation.Application.DTOs;
+using Constellation.Application.Features.Auth.Command;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
@@ -15,13 +16,20 @@ using System.Threading.Tasks;
 
 public class AuthService : IAuthService, IScopedService
 {
+    private readonly IMediator _mediator;
+
     private IAppDbContext _context { get; set; }
     private UserManager<AppUser> _userManager { get; set; }
     private RoleManager<AppRole> _roleManager { get; set; }
 
-    public AuthService(IAppDbContext context, UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
+    public AuthService(
+        IAppDbContext context,
+        IMediator mediator,
+        UserManager<AppUser> userManager,
+        RoleManager<AppRole> roleManager)
     {
         _context = context;
+        _mediator = mediator;
         _userManager = userManager;
         _roleManager = roleManager;
     }
@@ -339,6 +347,36 @@ public class AuthService : IAuthService, IScopedService
         foreach (var contact in contacts)
         {
             await RepairSchoolContactUser(contact);
+        }
+    }
+
+    public async Task AuditParentUsers()
+    {
+        // Get list of Parents
+        var families = await _context.StudentFamilies
+            .Include(family => family.Parent1)
+            .Include(family => family.Parent2)
+            .Where(family => family.Students.All(student => !student.IsDeleted))
+            .ToListAsync();
+
+        // Find each Parent in AppUsers
+        foreach (var family in families)
+        {
+            if (!string.IsNullOrEmpty(family.Parent1.EmailAddress))
+                await _mediator.Send(new RegisterParentContactAsUserCommand
+                {
+                    FirstName = family.Parent1.FirstName,
+                    LastName = family.Parent1.LastName,
+                    EmailAddress = family.Parent1.EmailAddress
+                });
+
+            if (!string.IsNullOrEmpty(family.Parent2.EmailAddress))
+                await _mediator.Send(new RegisterParentContactAsUserCommand
+                {
+                    FirstName = family.Parent2.FirstName,
+                    LastName = family.Parent2.LastName,
+                    EmailAddress = family.Parent2.EmailAddress
+                });
         }
     }
 

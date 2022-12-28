@@ -309,3 +309,10 @@ input.checkbox-toggle:before {
 input.checkbox-toggle:checked:before {
     left: 30px;
 }
+
+
+/* Prevent page footer from covering content */
+
+main {
+    min-height: 100vh;
+}

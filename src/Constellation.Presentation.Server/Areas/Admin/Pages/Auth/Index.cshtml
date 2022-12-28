@@ -1,0 +1,64 @@
+﻿@page
+@model IndexModel
+
+<div class="quick-links">
+    <h3>Users</h3>
+
+    <a class="btn btn-success btn-block">Staff: @Model.StaffUserCount</a>
+    <a class="btn btn-success btn-block">School Contact: @Model.SchoolContactUserCount</a>
+    <a class="btn btn-success btn-block">Parent: @Model.ParentUserCount</a>
+
+    <h3>Roles</h3>
+
+    @foreach (var role in Model.Roles.OrderBy(role => role.Name))
+    {
+        <a class="btn btn-success btn-block">@role.Name: @role.MemberCount</a>
+    }
+</div>
+
+<div class="user-management">
+    <h3>User Management</h3>
+    <hr />
+    <table class="data-table table table-striped">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Access</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Users.Any())
+            {
+                @foreach (var user in Model.Users.OrderBy(user => user.LastName))
+                {
+                    <tr>
+                        <td>
+                            @user.Name<br />
+                            @user.Email
+                        </td>
+                        <td>
+                            @foreach (var role in user.Roles)
+                            {
+                                <span class="badge badge-secondary">@role</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                                <div class="dropdown-menu">
+                                    <a asp-page="Info" asp-route-emailAddress="@user.Email" class="dropdown-item">View Info...</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            } else
+            {
+                <tr>
+                    <td colspan="3">No Items Found!</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

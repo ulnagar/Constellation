@@ -40,6 +40,9 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanSubmitGroupTutorialRolls, policy =>
             policy.Requirements.Add(new CanSubmitGroupTutorialRollRequirement()));
 
+        options.AddPolicy(AuthPolicies.IsSiteAdmin, policy =>
+            policy.RequireRole(AuthRoles.Admin));
+
         return options;
     }
 }

@@ -27,6 +27,19 @@ CURRENT TASK
 		* Fix Faculty section of Staff Details page
 
 
+	ADMIN AUTH DASHBOARD
+		Build users page and include links from index
+		Build base audit user method that can handle all user types
+			Link to the actions drop down in the users page and the index page
+		Add Lock and Unlock user options in the actions dropdown
+		Link the roles and roles edit pages to the new dashboard
+		Add dashboard/index page to global nav
+		Move index page onget method to mediator query
+
+	ABSENCES
+		Update link in SMS to parents to point to new parent portal instead of old absences pages.
+		Add logger to old absences pages to allow data collection on how often they are hit.
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~

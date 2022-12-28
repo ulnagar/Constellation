@@ -1,0 +1,16 @@
+﻿.quick-links {
+    width: 27%;
+    margin-right: 3%;
+    float: left;
+}
+
+.user-management {
+    width: 70%;
+    float: right;
+}
+
+.text-center {
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid orange;
+}
