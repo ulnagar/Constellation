@@ -5,6 +5,21 @@ using System;
 
 public static class DomainErrors
 {
+    public static class Auth
+    {
+        public static readonly Error UserNotFound = new Error(
+            "Auth.UserNotFound",
+            "Cannot find a user that matches the entry");
+
+        public static readonly Error RoleNotFound = new Error(
+            "Auth.RoleNotFound",
+            "Cannot find a role that matches the entry");
+
+        public static readonly Func<string, Error> CannotUpdateRole = (role) => new Error(
+            "Auth.CannotUpdateRole",
+            $"Cannot update role {role}");
+    }
+
     public static class Permissions
     {
         public static readonly Error Unauthorised = new Error(

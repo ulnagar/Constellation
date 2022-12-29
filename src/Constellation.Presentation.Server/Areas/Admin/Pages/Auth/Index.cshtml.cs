@@ -32,6 +32,7 @@ public class IndexModel : BasePageModel
 
     public class UserRoleDetailsDto
     {
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public int MemberCount { get; set; }
     }
@@ -61,6 +62,7 @@ public class IndexModel : BasePageModel
 
             Roles.Add(new UserRoleDetailsDto
             {
+                Id = role.Id,
                 Name = role.Name,
                 MemberCount = members.Count()
             });

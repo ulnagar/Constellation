@@ -12,7 +12,7 @@
 
     @foreach (var role in Model.Roles.OrderBy(role => role.Name))
     {
-        <a class="btn btn-success btn-block">@role.Name: @role.MemberCount</a>
+        <a asp-page="Role" asp-route-roleId="@role.Id" class="btn btn-success btn-block">@role.Name: @role.MemberCount</a>
     }
 </div>
 

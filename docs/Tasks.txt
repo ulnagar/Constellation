@@ -32,7 +32,7 @@ CURRENT TASK
 		Build base audit user method that can handle all user types
 			Link to the actions drop down in the users page and the index page
 		Add Lock and Unlock user options in the actions dropdown
-		Link the roles and roles edit pages to the new dashboard
+		*Link the roles and roles edit pages to the new dashboard
 		Add dashboard/index page to global nav
 		Move index page onget method to mediator query
 
