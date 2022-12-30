@@ -4,9 +4,9 @@
 <div class="quick-links">
     <h3>Users</h3>
 
-    <a class="btn btn-success btn-block">Staff: @Model.StaffUserCount</a>
-    <a class="btn btn-success btn-block">School Contact: @Model.SchoolContactUserCount</a>
-    <a class="btn btn-success btn-block">Parent: @Model.ParentUserCount</a>
+    <a asp-page="Users" asp-route-selectedUserType="Staff" class="btn btn-success btn-block">Staff: @Model.StaffUserCount</a>
+    <a asp-page="Users" asp-route-selectedUserType="School" class="btn btn-success btn-block">School Contact: @Model.SchoolContactUserCount</a>
+    <a asp-page="Users" asp-route-selectedUserType="Parent" class="btn btn-success btn-block">Parent: @Model.ParentUserCount</a>
 
     <h3>Roles</h3>
 
@@ -48,12 +48,14 @@
                                 <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
                                 <div class="dropdown-menu">
                                     <a asp-page="Info" asp-route-emailAddress="@user.Email" class="dropdown-item">View Info...</a>
+                                    <a asp-page-handler="Audit" asp-route-userId="@user.Id" class="dropdown-item">Audit Access</a>
                                 </div>
                             </div>
                         </td>
                     </tr>
                 }
-            } else
+            } 
+            else
             {
                 <tr>
                     <td colspan="3">No Items Found!</td>

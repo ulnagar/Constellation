@@ -2,12 +2,43 @@
 @model Constellation.Presentation.Server.Areas.Admin.Pages.Auth.InfoModel
 
 <h2>User Details</h2>
-<dl>
-    <dt>UserName</dt>
-    <dd>@Model.AppUser.DisplayName</dd>
-    <dt>Email Address</dt>
-    <dd>@Model.AppUser.Email</dd>
-</dl>
+
+<div class="page-menu">
+    <a asp-page="Edit" asp-route-id="@Model.AppUser.Id" class="btn btn-warning">Edit</a>
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div class="row">
+    <div class="col">
+        <dl>
+            <dt>UserName</dt>
+            <dd>@Model.AppUser.DisplayName</dd>
+            <dt>Email Address</dt>
+            <dd>@Model.AppUser.Email</dd>
+        </dl>
+    </div>
+    <div class="col">
+        <dl>
+            <dt>Is Staff User?</dt>
+            <dd>@Model.AppUser.IsStaffMember</dd>
+            <dt>Is School Contact User?</dt>
+            <dd>@Model.AppUser.IsSchoolContact</dd>
+            <dt>Is Parent User?</dt>
+            <dd>@Model.AppUser.IsParent</dd>
+        </dl>
+    </div>
+    <div class="col">
+        <dl>
+            <dt>Staff User Id</dt>
+            <dd>@Model.AppUser.StaffId &nbsp;</dd>
+            <dt>School Contact Id</dt>
+            <dd>@Model.AppUser.SchoolContactId &nbsp;</dd>
+        </dl>
+    </div>
+</div>
+
 
 <h2>Claims</h2>
 @{

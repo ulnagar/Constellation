@@ -28,12 +28,12 @@ CURRENT TASK
 
 
 	ADMIN AUTH DASHBOARD
-		Build users page and include links from index
-		Build base audit user method that can handle all user types
-			Link to the actions drop down in the users page and the index page
-		Add Lock and Unlock user options in the actions dropdown
+		*Build users page and include links from index
+		*Build base audit user method that can handle all user types
+			*Link to the actions drop down in the users page and the index page
+		#Add Lock and Unlock user options in the actions dropdown
 		*Link the roles and roles edit pages to the new dashboard
-		Add dashboard/index page to global nav
+		*Add dashboard/index page to global nav
 		Move index page onget method to mediator query
 
 	ABSENCES
