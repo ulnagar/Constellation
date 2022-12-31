@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth;
 
 using Constellation.Application.AdminDashboards.AuditUser;
-using Constellation.Application.AdminDashboards.LockUser;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
@@ -114,42 +113,6 @@ public class IndexModel : BasePageModel
     public async Task<IActionResult> OnGetAudit(Guid userId)
     {
         var result = await _mediator.Send(new AuditUserCommand(userId));
-
-        if (result.IsFailure)
-        {
-            Error = new ErrorDisplay
-            {
-                Error = result.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Auth/Index", values: new { area = "Admin" })
-            };
-
-            return Page();
-        }
-
-        return RedirectToPage("Index");
-    }
-
-    public async Task<IActionResult> OnGetLock(Guid userId)
-    {
-        var result = await _mediator.Send(new LockUserCommand(userId));
-
-        if (result.IsFailure)
-        {
-            Error = new ErrorDisplay
-            {
-                Error = result.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Auth/Index", values: new { area = "Admin" })
-            };
-
-            return Page();
-        }
-
-        return RedirectToPage("Index");
-    }
-
-    public async Task<IActionResult> OnGetUnlock(Guid userId)
-    {
-        var result = await _mediator.Send(new UnlockUserCommand(userId));
 
         if (result.IsFailure)
         {

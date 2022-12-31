@@ -1,22 +1,19 @@
 using Constellation.Application.Interfaces.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
 {
     public class ParentsModel : PageModel
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly Serilog.ILogger _logger;
 
-        public ParentsModel(IUnitOfWork unitOfWork)
+        public ParentsModel(IUnitOfWork unitOfWork, Serilog.ILogger logger)
         {
             _unitOfWork = unitOfWork;
-
+            _logger = logger.ForContext<ParentsModel>();
             Explanations = new List<AbsenceDto>();
         }
 
@@ -47,7 +44,9 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
 
             StudentId = student.StudentId;
             StudentName = student.DisplayName;
-            
+
+            _logger.Information("Request for load of page for {student}", StudentName);
+
             // If there are any absences that do not have a response, continue
             if (absences.Count > 0)
             {

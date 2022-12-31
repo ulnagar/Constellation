@@ -34,11 +34,11 @@ CURRENT TASK
 		#Add Lock and Unlock user options in the actions dropdown
 		*Link the roles and roles edit pages to the new dashboard
 		*Add dashboard/index page to global nav
-		Move index page onget method to mediator query
+		#Move index page onget method to mediator query
 
 	ABSENCES
-		Update link in SMS to parents to point to new parent portal instead of old absences pages.
-		Add logger to old absences pages to allow data collection on how often they are hit.
+		*Update link in SMS to parents to point to new parent portal instead of old absences pages.
+		*Add logger to old absences pages to allow data collection on how often they are hit.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS

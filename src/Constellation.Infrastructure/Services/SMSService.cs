@@ -31,7 +31,7 @@ namespace Constellation.Infrastructure.Services
             var student = absences.First().Student;
             var date = absences.First().Date;
 
-            var link = $"https://acos.aurora.nsw.edu.au/Portal/Absences/Parents/{student.StudentId}";
+            var link = $"https://acos.aurora.nsw.edu.au/parents";
             link = await _linkShortenerService.ShortenURL(link);
 
             var messageText = $"{student.FirstName} was reported absent from the following classes on {date.ToShortDateString()}\r\n{classListString}To explain these absences, please click here {link}";
