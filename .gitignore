@@ -385,3 +385,4 @@ appsettings.*.json
 /src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/webfonts
 /src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/attribution.js
 /src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/LICENSE.txt
+/src/Constellation.Portal.Schools.Server/wwwroot/lib/server
