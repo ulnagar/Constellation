@@ -40,6 +40,9 @@ CURRENT TASK
 		*Update link in SMS to parents to point to new parent portal instead of old absences pages.
 		*Add logger to old absences pages to allow data collection on how often they are hit.
 
+	SCHOOL PORTAL
+		Convert from Blazor Server to Blazor WASM
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~
