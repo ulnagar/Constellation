@@ -8,8 +8,16 @@ using Constellation.Application.Interfaces.Jobs.AbsenceClassworkNotificationJob;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
-using Constellation.Infrastructure.GatewayConfigurations;
-using Constellation.Infrastructure.Gateways;
+using Constellation.Core.Abstractions;
+using Constellation.Infrastructure.ExternalServices.AdobeConnect;
+using Constellation.Infrastructure.ExternalServices.Canvas;
+using Constellation.Infrastructure.ExternalServices.CESE;
+using Constellation.Infrastructure.ExternalServices.Email;
+using Constellation.Infrastructure.ExternalServices.LinkShortener;
+using Constellation.Infrastructure.ExternalServices.NetworkStatistics;
+using Constellation.Infrastructure.ExternalServices.SchoolRegister;
+using Constellation.Infrastructure.ExternalServices.Sentral;
+using Constellation.Infrastructure.ExternalServices.SMS;
 using Constellation.Infrastructure.Idempotence;
 using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
@@ -92,14 +100,57 @@ public static class ServicesRegistration
         services.AddConstellationContext(configuration)
             .AddExternalServiceGateways()
             .AddEmailTemplateEngine();
-
+        
         services.AddSchoolPortalAuthentication();
+
+        services.AddScoped<IStudentRepository, StudentRepository>();
+        services.AddScoped<IGroupTutorialRepository, GroupTutorialRepository>();
+        services.AddScoped<IStaffRepository, StaffRepository>();
+        services.AddScoped<ITutorialEnrolmentRepository, TutorialEnrolmentRepository>();
+        services.AddScoped<ITutorialRollRepository, TutorialRollRepository>();
+        services.AddScoped<ITutorialTeacherRepository, TutorialTeacherRepository>();
+        services.AddScoped<ISchoolContactRepository, SchoolContactRepository>();
+        services.AddScoped<IStudentFamilyRepository, StudentFamilyRepository>();
 
         services.AddSingleton(Log.Logger);
 
         services.AddMediatR(new[] { Assembly.GetExecutingAssembly(), typeof(IAppDbContext).Assembly });
 
         services.AddApplication();
+
+        return services;
+    }
+
+    public static IServiceCollection AddNewSchoolPortalAuthentication(IServiceCollection services)
+    {
+        services.AddDefaultIdentity<AppUser>()
+            .AddRoles<AppRole>()
+            .AddUserManager<UserManager<AppUser>>()
+            .AddRoleManager<RoleManager<AppRole>>()
+            .AddSignInManager<SignInManager<AppUser>>()
+            .AddEntityFrameworkStores<AppDbContext>();
+
+        // Due to IS5 stupidity, the subsite configuration must be lower case:
+        // https://stackoverflow.com/questions/62563174/identityserver4-authorization-error-not-matching-redirect-uri
+
+        services.AddIdentityServer(opts =>
+            {
+                opts.KeyManagement.KeyPath = "Keys";
+                opts.KeyManagement.RotationInterval = TimeSpan.FromDays(30);
+                opts.KeyManagement.PropagationTime = TimeSpan.FromDays(2);
+                opts.KeyManagement.RetentionDuration = TimeSpan.FromDays(7);
+            })
+            .AddApiAuthorization<AppUser, AppDbContext>()
+            .AddProfileService<WASMAuthenticationProfileService>();
+
+        services.AddAuthentication()
+            .AddIdentityServerJwt();
+
+        services.ConfigureApplicationCookie(options =>
+        {
+            options.Cookie.Name = "Constellation.Schools.Identity";
+            options.ExpireTimeSpan = TimeSpan.FromHours(1);
+        });
 
         return services;
     }
@@ -150,27 +201,14 @@ public static class ServicesRegistration
 
     internal static IServiceCollection AddExternalServiceGateways(this IServiceCollection services)
     {
-        services.AddTransient<IAdobeConnectGatewayConfiguration, AdobeConnectGatewayConfiguration>();
-        services.AddScoped<IAdobeConnectGateway, AdobeConnectGateway>();
-
-        services.AddTransient<ICanvasGatewayConfiguration, CanvasGatewayConfiguration>();
-        services.AddScoped<ICanvasGateway, CanvasGateway>();
-
-        services.AddScoped<ICeseGateway, CeseGateway>();
-
-        services.AddTransient<ILinkShortenerGatewayConfiguration, LinkShortenerGatewayConfiguration>();
-        services.AddScoped<ILinkShortenerGateway, LinkShortenerGateway>();
-
-        services.AddTransient<INetworkStatisticsGatewayConfiguration, NetworkStatisticsGatewayConfiguration>();
-        services.AddScoped<INetworkStatisticsGateway, NetworkStatisticsGateway>();
-
-        services.AddScoped<ISchoolRegisterGateway, SchoolRegisterGateway>();
-
-        services.AddTransient<ISentralGatewayConfiguration, SentralGatewayConfiguration>();
-        services.AddScoped<ISentralGateway, SentralGateway>();
-
-        services.AddTransient<ISMSGatewayConfiguration, SMSGatewayConfiguration>();
-        services.AddScoped<ISMSGateway, SMSGateway>();
+        services.AddAdobeConnectExternalService();
+        services.AddCanvasExternalService();
+        services.AddCeseExternalService();
+        services.AddLinkShortenerExternalService();
+        services.AddNetworkStatisticsExternalService();
+        services.AddSchoolRegisterExternalService();
+        services.AddSentralExternalService();
+        services.AddSMSExternalService();
 
         return services;
     }
@@ -230,12 +268,9 @@ public static class ServicesRegistration
     // But would need to figure out how to separately deal with attachments.
     // Or, pull back and include the type and the reference, so the processor would compile the entire email itself
     // e.g. EmailType = "StudentAbsenceNotification", Data = "{ studentId: 432109876, absenceId: xxxxx }"
-    internal static IServiceCollection AddEmailTemplateEngine(this IServiceCollection services)
+    public static IServiceCollection AddEmailTemplateEngine(this IServiceCollection services)
     {
-        services.AddTransient<IEmailGatewayConfiguration, EmailGatewayConfiguration>();
-        services.AddScoped<IEmailGateway, EmailGateway>();
-
-        services.AddScoped<IEmailService, EmailService>();
+        services.AddEmailExternalService();
 
         services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
 
@@ -247,7 +282,6 @@ public static class ServicesRegistration
         services.AddScoped<IAbsenceService, AbsenceService>();
         services.AddScoped<IActiveDirectoryActionsService, ActiveDirectoryActionsService>();
         services.AddScoped<IAdobeConnectRoomService, AdobeConnectRoomService>();
-        services.AddScoped<IAdobeConnectService, AdobeConnectService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICalendarService, CalendarService>();
         services.AddScoped<ICasualService, CasualService>();
@@ -265,9 +299,7 @@ public static class ServicesRegistration
         services.AddScoped<IPDFService, PDFService>();
         services.AddScoped<ISchoolContactService, SchoolContactService>();
         services.AddScoped<ISchoolService, SchoolService>();
-        services.AddScoped<ISentralService, SentralService>();
         services.AddScoped<ISessionService, SessionService>();
-        services.AddScoped<ISMSService, SMSService>();
         services.AddScoped<IStaffService, StaffService>();
         services.AddScoped<IStudentService, StudentService>();
 
@@ -375,7 +407,7 @@ public static class ServicesRegistration
             opts.KeyManagement.RetentionDuration = TimeSpan.FromDays(7);
         })
             .AddApiAuthorization<AppUser, AppDbContext>()
-            .AddProfileService<ParentPortalProfileService>();
+            .AddProfileService<WASMAuthenticationProfileService>();
 
         services.AddAuthentication()
             .AddIdentityServerJwt();

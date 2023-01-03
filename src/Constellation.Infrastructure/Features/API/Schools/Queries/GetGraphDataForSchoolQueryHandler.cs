@@ -19,6 +19,11 @@ namespace Constellation.Infrastructure.Features.API.Schools.Queries
         private readonly IAppDbContext _context;
         private readonly INetworkStatisticsGateway _gateway;
 
+        public GetGraphDataForSchoolQueryHandler(IAppDbContext _context)
+        {
+            this._context = _context;
+        }
+
         public GetGraphDataForSchoolQueryHandler(IAppDbContext context, INetworkStatisticsGateway gateway)
         {
             _context = context;
@@ -27,6 +32,9 @@ namespace Constellation.Infrastructure.Features.API.Schools.Queries
 
         public async Task<GraphData> Handle(GetGraphDataForSchoolQuery request, CancellationToken cancellationToken)
         {
+            if (_gateway is null)
+                return null;
+
             var school = await _context.Schools
                 .Include(school => school.Students)
                 .FirstOrDefaultAsync(school => school.Code == request.SchoolCode);

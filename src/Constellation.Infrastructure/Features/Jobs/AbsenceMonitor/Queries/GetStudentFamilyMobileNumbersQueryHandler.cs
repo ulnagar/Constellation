@@ -15,6 +15,11 @@ namespace Constellation.Infrastructure.Features.Jobs.AbsenceMonitor.Queries
         private readonly IAppDbContext _context;
         private readonly ISentralGatewayConfiguration _settings;
 
+        public GetStudentFamilyMobileNumbersQueryHandler(IAppDbContext context)
+        {
+            _context = context;
+        }
+
         public GetStudentFamilyMobileNumbersQueryHandler(IAppDbContext context, ISentralGatewayConfiguration settings)
         {
             _context = context;
@@ -32,7 +37,7 @@ namespace Constellation.Infrastructure.Features.Jobs.AbsenceMonitor.Queries
             if (studentFamily == null)
                 return phoneNumbers;
 
-            switch (_settings.ContactPreference)
+            switch (_settings?.ContactPreference)
             {
                 case ISentralGatewayConfiguration.ContactPreferenceOptions.MotherFirstThenFather:
                     if (studentFamily.Parent2.MobileNumber.StartsWith("04"))
@@ -57,6 +62,18 @@ namespace Constellation.Infrastructure.Features.Jobs.AbsenceMonitor.Queries
 
                     break;
                 case ISentralGatewayConfiguration.ContactPreferenceOptions.BothParentsIfPresent:
+                    if (studentFamily.Parent2.MobileNumber.StartsWith("04"))
+                    {
+                        phoneNumbers.Add(studentFamily.Parent2.MobileNumber);
+                    }
+
+                    if (studentFamily.Parent1.MobileNumber.StartsWith("04"))
+                    {
+                        phoneNumbers.Add(studentFamily.Parent1.MobileNumber);
+                    }
+
+                    break;
+                default:
                     if (studentFamily.Parent2.MobileNumber.StartsWith("04"))
                     {
                         phoneNumbers.Add(studentFamily.Parent2.MobileNumber);

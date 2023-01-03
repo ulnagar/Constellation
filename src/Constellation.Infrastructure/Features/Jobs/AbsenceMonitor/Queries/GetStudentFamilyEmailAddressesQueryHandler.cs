@@ -15,6 +15,11 @@ namespace Constellation.Infrastructure.Features.Jobs.AbsenceMonitor.Queries
         private readonly IAppDbContext _context;
         private readonly ISentralGatewayConfiguration _settings;
 
+        public GetStudentFamilyEmailAddressesQueryHandler(IAppDbContext context)
+        {
+            _context = context;
+        }
+
         public GetStudentFamilyEmailAddressesQueryHandler(IAppDbContext context, ISentralGatewayConfiguration settings)
         {
             _context = context;
@@ -32,7 +37,7 @@ namespace Constellation.Infrastructure.Features.Jobs.AbsenceMonitor.Queries
             if (studentFamily == null)
                 return emailAddresses;
 
-            switch (_settings.ContactPreference)
+            switch (_settings?.ContactPreference)
             {
                 case ISentralGatewayConfiguration.ContactPreferenceOptions.MotherFirstThenFather:
                     if (!string.IsNullOrWhiteSpace(studentFamily?.Parent2?.EmailAddress))
@@ -57,6 +62,18 @@ namespace Constellation.Infrastructure.Features.Jobs.AbsenceMonitor.Queries
 
                     break;
                 case ISentralGatewayConfiguration.ContactPreferenceOptions.BothParentsIfPresent:
+                    if (!string.IsNullOrWhiteSpace(studentFamily?.Parent2?.EmailAddress))
+                    {
+                        emailAddresses.Add(studentFamily.Parent2.EmailAddress);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(studentFamily?.Parent1?.EmailAddress))
+                    {
+                        emailAddresses.Add(studentFamily.Parent1.EmailAddress);
+                    }
+
+                    break;
+                default:
                     if (!string.IsNullOrWhiteSpace(studentFamily?.Parent2?.EmailAddress))
                     {
                         emailAddresses.Add(studentFamily.Parent2.EmailAddress);

@@ -17,6 +17,12 @@ namespace Constellation.Infrastructure.Features.Gateways.CanvasGateway.Notificat
         private readonly ICanvasGateway _gateway;
         private readonly ILogger<ICanvasGateway> _logger;
 
+        public CanvasAssignmentSubmissionUploadedNotificationHandler(IAppDbContext context, ILogger<ICanvasGateway> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
+
         public CanvasAssignmentSubmissionUploadedNotificationHandler(IAppDbContext context, ICanvasGateway gateway, ILogger<ICanvasGateway> logger)
         {
             _context = context;
@@ -26,6 +32,12 @@ namespace Constellation.Infrastructure.Features.Gateways.CanvasGateway.Notificat
 
         public async Task Handle(CanvasAssignmentSubmissionUploadedNotification notification, CancellationToken cancellationToken)
         {
+            if (_gateway is null)
+            {
+                _logger.LogError("Canvas Gateway is not available in this application!");
+                return;
+            }
+
             _logger.LogInformation("Starting CanvasAssignmentSubmissionUploaded action for Submission ID {id}", notification.Id);
 
             var submission = await _context.CanvasAssignmentsSubmissions

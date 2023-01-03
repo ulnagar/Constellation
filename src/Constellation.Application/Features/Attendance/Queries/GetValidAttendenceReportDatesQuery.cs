@@ -16,6 +16,7 @@ public class GetValidAttendenceReportDatesQueryHandler : IRequestHandler<GetVali
 {
     private readonly ISentralGateway _sentralGateway;
 
+    public GetValidAttendenceReportDatesQueryHandler() { }
     public GetValidAttendenceReportDatesQueryHandler(ISentralGateway sentralGateway)
     {
         _sentralGateway = sentralGateway;
@@ -23,6 +24,11 @@ public class GetValidAttendenceReportDatesQueryHandler : IRequestHandler<GetVali
 
     public async Task<IList<ValidAttendenceReportDate>> Handle(GetValidAttendenceReportDatesQuery request, CancellationToken cancellationToken)
     {
+        if (_sentralGateway is null)
+        {
+            return new List<ValidAttendenceReportDate>();
+        }
+
         return await _sentralGateway.GetValidAttendanceReportDatesFromCalendar(DateTime.Today.Year.ToString());
     }
 }

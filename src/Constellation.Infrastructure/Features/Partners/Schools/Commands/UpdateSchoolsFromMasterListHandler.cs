@@ -1,8 +1,5 @@
 ﻿using Constellation.Application.Features.Partners.Schools.Commands;
 using Constellation.Application.Interfaces.Gateways;
-using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Features.Partners.Schools.Commands
 {
@@ -10,6 +7,11 @@ namespace Constellation.Infrastructure.Features.Partners.Schools.Commands
     {
         private readonly IMediator _mediator;
         private readonly ICeseGateway _ceseGateway;
+
+        public UpdateSchoolsFromMasterListHandler(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
 
         public UpdateSchoolsFromMasterListHandler(IMediator mediator, ICeseGateway ceseGateway)
         {
@@ -19,6 +21,9 @@ namespace Constellation.Infrastructure.Features.Partners.Schools.Commands
 
         public async Task<Unit> Handle(UpdateSchoolsFromMasterList request, CancellationToken cancellationToken)
         {
+            if (_ceseGateway is null)
+                return Unit.Value;
+
             var jsonObjects = await _ceseGateway.GetSchoolsFromMasterData();
 
             foreach (var jsonObject in jsonObjects)

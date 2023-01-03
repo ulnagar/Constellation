@@ -5,10 +5,6 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
-using MediatR;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Services
 {
@@ -17,9 +13,8 @@ namespace Constellation.Infrastructure.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMediator _mediator;
-
-        private IEnrolmentService _enrolService { get; set; }
-        private IDeviceService _deviceService { get; set; }
+        private readonly IEnrolmentService _enrolService;
+        private readonly IDeviceService _deviceService;
 
         public StudentService(IUnitOfWork unitOfWork, IEnrolmentService enrolmentService,
             IDeviceService deviceService, IMediator mediator)

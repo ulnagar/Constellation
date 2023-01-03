@@ -24,6 +24,18 @@ namespace Constellation.Infrastructure.Features.Attendance.Queries
         private readonly IMapper _mapper;
         private readonly IPDFService _pdfService;
 
+        public GetStudentAttendanceReportQueryHandler(
+            IAppDbContext context,
+            IMapper mapper,
+            IPDFService pdfService,
+            IRazorViewToStringRenderer renderService)
+        {
+            _context = context;
+            _mapper = mapper;
+            _pdfService = pdfService;
+            _renderService = renderService;
+        }
+
         public GetStudentAttendanceReportQueryHandler(IAppDbContext context, ISentralGateway sentralGateway, 
             IRazorViewToStringRenderer renderService, IMapper mapper, IPDFService pdfService)
         {
@@ -36,6 +48,9 @@ namespace Constellation.Infrastructure.Features.Attendance.Queries
 
         public async Task<StoredFile> Handle(GetStudentAttendanceReportQuery request, CancellationToken cancellationToken)
         {
+            if (_sentralGateway is null)
+                return null;
+
             var student = await _context.Students
                 .SingleOrDefaultAsync(student => student.StudentId == request.StudentId, cancellationToken);
 

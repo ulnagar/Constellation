@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.Features.Faculties.Commands;
 
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,16 +14,18 @@ public record CreateFacultyCommand(
 
 public class CreateFacultyCommandHandler : IRequestHandler<CreateFacultyCommand>
 {
-    private readonly IAppDbContext _context;
+    private readonly IFacultyRepository _facultyRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateFacultyCommandHandler(IAppDbContext context)
+    public CreateFacultyCommandHandler(IFacultyRepository facultyRepository, IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _facultyRepository = facultyRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Unit> Handle(CreateFacultyCommand request, CancellationToken cancellationToken)
     {
-        var exists = await _context.Faculties.AnyAsync(faculty => !faculty.IsDeleted && faculty.Name == request.Name, cancellationToken);
+        var exists = await _facultyRepository.ExistsWithName(request.Name, cancellationToken);
 
         if (!exists)
         {
@@ -33,8 +35,8 @@ public class CreateFacultyCommandHandler : IRequestHandler<CreateFacultyCommand>
                 Colour = request.Colour
             };
 
-            _context.Faculties.Add(faculty);
-            await _context.SaveChangesAsync(cancellationToken);
+            _facultyRepository.Insert(faculty);
+            await _unitOfWork.CompleteAsync(cancellationToken);
         }
         
         return Unit.Value;

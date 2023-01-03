@@ -47,6 +47,21 @@ CURRENT TASK
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+REFACTOR:
+	*Move the external connections to separate subfolders, including the gateway, configuration, and service.
+		e.g. \ExternalServices
+				\Sentral
+					SentralGateway
+					SentralGatewayConfiguration
+					SentralGatewayService
+	*Create separate public servicecollection extensions for each external service
+	Remove all direct usage of external services from mediator handlers and enforce service usage
+	 This doesn't solve the issue where Mediatr handlers would be automatically registered - would need
+	  to move each to a separate project for that
+	 Mediatr Handlers are all that are registered. The Command or Query itself can be in a shared project, 
+	  but there wouldn't be any handler to process.
+
+
 APP PERMISSIONS:
 	Implement generic permissions as per https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-6.0#use-a-handler-for-multiple-requirements
 	Permission Structure:

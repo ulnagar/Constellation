@@ -22,7 +22,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Constellation.Infrastructure\Constellation.Infrastructure.csproj" />
-    <ProjectReference Include="..\Constellation.Portal.Parents.Client\Constellation.Portal.Parents.Client.csproj" />
+    <ProjectReference Include="..\Constellation.Portal.Schools.Client\Constellation.Portal.Schools.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="logs\" />
   </ItemGroup>
 
 </Project>

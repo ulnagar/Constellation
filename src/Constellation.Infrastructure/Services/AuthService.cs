@@ -17,10 +17,9 @@ using System.Threading.Tasks;
 public class AuthService : IAuthService, IScopedService
 {
     private readonly IMediator _mediator;
-
-    private IAppDbContext _context { get; set; }
-    private UserManager<AppUser> _userManager { get; set; }
-    private RoleManager<AppRole> _roleManager { get; set; }
+    private readonly IAppDbContext _context;
+    private readonly UserManager<AppUser> _userManager;
+    private readonly RoleManager<AppRole> _roleManager;
 
     public AuthService(
         IAppDbContext context,

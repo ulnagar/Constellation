@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 public class ProcessCanvasOperationCommandHandler : IRequestHandler<ProcessCanvasOperationCommand, ServiceOperationResult<CanvasOperation>>
 {
     private readonly ICanvasGateway _canvasGateway;
+    
+    public ProcessCanvasOperationCommandHandler() { }
 
     public ProcessCanvasOperationCommandHandler(ICanvasGateway canvasGateway)
     {
@@ -23,6 +25,12 @@ public class ProcessCanvasOperationCommandHandler : IRequestHandler<ProcessCanva
         {
             Success = false
         };
+
+        if (_canvasGateway is null)
+        {
+            result.Errors.Add($" Canvas Gateway not available in this application!");
+            return result;
+        }
 
         result.Errors.Add($" Processing operation {request.Operation.Id}");
 

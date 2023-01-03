@@ -1,7 +1,9 @@
 using Blazored.Modal;
+using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Presentation.Portal.Schools.Pages.Auth;
+using Constellation.Presentation.Portal.Schools.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
@@ -30,6 +32,8 @@ namespace Constellation.Presentation.Portal.Schools
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSchoolPortalInfrastructureComponents(Configuration);
+
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             services.AddBlazoredModal();
 

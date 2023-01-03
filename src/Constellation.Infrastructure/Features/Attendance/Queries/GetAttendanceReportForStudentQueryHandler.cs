@@ -20,6 +20,16 @@ public class GetAttendanceReportForStudentQueryHandler : IRequestHandler<GetAtte
     private readonly IRazorViewToStringRenderer _renderService;
     private readonly IPDFService _pdfService;
 
+    public GetAttendanceReportForStudentQueryHandler(
+        IAppDbContext context,
+        IRazorViewToStringRenderer renderService,
+        IPDFService pdfService)
+    {
+        _context = context;
+        _renderService = renderService;
+        _pdfService = pdfService;
+    }
+
     public GetAttendanceReportForStudentQueryHandler(IAppDbContext context, ISentralGateway sentralGateway, 
         IRazorViewToStringRenderer renderService, IPDFService pdfService)
     {
@@ -31,6 +41,9 @@ public class GetAttendanceReportForStudentQueryHandler : IRequestHandler<GetAtte
 
     public async Task<MemoryStream> Handle(GetAttendanceReportForStudentQuery request, CancellationToken cancellationToken)
     {
+        if (_sentralGateway is null)
+            return null;
+
         var student = await _context.Students
             .FirstOrDefaultAsync(student => student.StudentId == request.StudentId, cancellationToken);
 

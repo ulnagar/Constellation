@@ -20,6 +20,12 @@ namespace Constellation.Infrastructure.Features.Subjects.Assignments.Queries
         private readonly ICanvasGateway _canvasGateway;
         private readonly IMapper _mapper;
 
+        public GetAssignmentsFromCourseForDropdownSelectionQueryHandler(IAppDbContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
+
         public GetAssignmentsFromCourseForDropdownSelectionQueryHandler(IAppDbContext context, ICanvasGateway canvasGateway, IMapper mapper)
         {
             _context = context;
@@ -28,6 +34,9 @@ namespace Constellation.Infrastructure.Features.Subjects.Assignments.Queries
         }
         public async Task<ValidateableResponse<ICollection<AssignmentFromCourseForDropdownSelection>>> Handle(GetAssignmentsFromCourseForDropdownSelectionQuery request, CancellationToken cancellationToken)
         {
+            if (_canvasGateway is null)
+                return new ValidateableResponse<ICollection<AssignmentFromCourseForDropdownSelection>>(new List<AssignmentFromCourseForDropdownSelection>(), new List<string> { "Canvas Gateway is not added to this application" });
+
             var offering = await _context.Offerings
                 .FirstOrDefaultAsync(offering => offering.CourseId == request.CourseId && offering.EndDate >= DateTime.Now, cancellationToken);
 

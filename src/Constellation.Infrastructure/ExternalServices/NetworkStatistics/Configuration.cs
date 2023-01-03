@@ -1,0 +1,18 @@
+﻿using Constellation.Application.Interfaces.GatewayConfigurations;
+using Constellation.Infrastructure.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+
+namespace Constellation.Infrastructure.ExternalServices.NetworkStatistics
+{
+    public class Configuration : INetworkStatisticsGatewayConfiguration, ITransientService
+    {
+        public Configuration(IConfiguration configuration)
+        {
+            Url = configuration["AppSettings:NetworkStatisticsGateway:ServerUrl"];
+            Key = configuration["AppSettings:NetworkStatisticsGateway:Key"];
+        }
+
+        public string Url { get; set; }
+        public string Key { get; set; }
+    }
+}
