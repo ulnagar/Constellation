@@ -141,13 +141,14 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-//app.UseIdentityServer();
-//app.UseAuthentication();
-//app.UseAuthorization();
+app.UseIdentityServer();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
+app.UseAuthentication();;
 
 app.Run();
  
