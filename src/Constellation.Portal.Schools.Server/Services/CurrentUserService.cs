@@ -9,7 +9,7 @@ using System.Security.Claims;
 /// </summary>
 public class CurrentUserService : ICurrentUserService
 {
-    private IHttpContextAccessor _httpContextAccessor;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public CurrentUserService(IHttpContextAccessor httpContextAccessor)
     {
@@ -18,7 +18,7 @@ public class CurrentUserService : ICurrentUserService
 
     private ClaimsPrincipal? User => _httpContextAccessor.HttpContext?.User;
 
-    public string UserName => User is not null && User.Identity!.IsAuthenticated ? User.Identity.Name! : string.Empty;
+    public string? UserName => User is not null && User.Identity is not null && User.Identity.IsAuthenticated ? User.Identity.Name : string.Empty;
 
-    public bool IsAuthenticated => User != null && User.Identity!.IsAuthenticated;
+    public bool IsAuthenticated => User is not null && User.Identity is not null && User.Identity.IsAuthenticated;
 }

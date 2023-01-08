@@ -24,10 +24,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 LoggingConfiguration.SetupLogging(builder.Configuration, Serilog.Events.LogEventLevel.Debug);
 
-// If the absences entities are converted to aggregate root and children, then there should be no need
-// for this application to have or need access to the External Gateways, or the Email Templates (emails
-// would then be sent as outbox messages, not by the front-end application specifically).
-
 builder.Services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
 builder.Services.AddScoped<UpdateAuditableEntitiesInterceptor>();
 
@@ -116,6 +112,7 @@ builder.Services.Scan(selector =>
 
 builder.Services.AddEmailTemplateEngine();
 
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
@@ -124,6 +121,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseMigrationsEndPoint();
     app.UseWebAssemblyDebugging();
 }
 else
@@ -133,7 +131,6 @@ else
     app.UseHsts();
 }
 
-//app.UsePathBase("/schools");
 app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();
@@ -148,7 +145,5 @@ app.UseAuthorization();
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
-app.UseAuthentication();;
 
 app.Run();
- 

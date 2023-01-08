@@ -1,37 +1,38 @@
-﻿#nullable disable
-namespace Constellation.Portal.Schools.Server.Areas.Identity.Pages.Account;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+#nullable disable
 
-using Constellation.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-public class LogoutModel : PageModel
+namespace Constellation.Portal.Schools.Server.Areas.Identity.Pages.Account
 {
-    private readonly SignInManager<IdentityUser> _signInManager;
-    private readonly Serilog.ILogger _logger;
-
-    public LogoutModel(SignInManager<IdentityUser> signInManager, Serilog.ILogger logger)
+    public class LogoutModel : PageModel
     {
-        _signInManager = signInManager;
-        _logger = logger.ForContext<IAuthService>();
-    }
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly ILogger<LogoutModel> _logger;
 
-    public async Task<IActionResult> OnPost(string returnUrl = null)
-    {
-        var username = User.Identity.Name;
-
-        await _signInManager.SignOutAsync();
-        _logger.Information("User {user} logged out.", username);
-        if (returnUrl != null)
+        public LogoutModel(SignInManager<IdentityUser> signInManager, ILogger<LogoutModel> logger)
         {
-            return LocalRedirect(returnUrl);
+            _signInManager = signInManager;
+            _logger = logger;
         }
-        else
+
+        public async Task<IActionResult> OnPost(string returnUrl = null)
         {
-            // This needs to be a redirect so that the browser performs a new
-            // request and the identity for the user gets updated.
-            return RedirectToPage();
+            await _signInManager.SignOutAsync();
+            _logger.LogInformation("User logged out.");
+            if (returnUrl != null)
+            {
+                return LocalRedirect(returnUrl);
+            }
+            else
+            {
+                // This needs to be a redirect so that the browser performs a new
+                // request and the identity for the user gets updated.
+                return RedirectToPage();
+            }
         }
     }
 }

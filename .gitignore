@@ -386,3 +386,5 @@ appsettings.*.json
 /src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/attribution.js
 /src/Constellation.Portal.Parents.Client/wwwroot/private/font-awesome/LICENSE.txt
 /src/Constellation.Portal.Schools.Server/wwwroot/lib/server
+/src/Constellation.Portal.Schools.Client/wwwroot/lib/twitter-bootstrap
+/src/Constellation.Portal.Schools.Client/wwwroot/private/font-awesome

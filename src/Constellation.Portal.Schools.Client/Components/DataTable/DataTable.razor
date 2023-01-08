@@ -1,0 +1,30 @@
+﻿@typeparam TItem
+
+<table class="table table-striped">
+    <thead>
+        <tr>@TableHeader</tr>
+    </thead>
+    <tbody>
+        @if (Items.Count == 0)
+        {
+            <tr class="group"><td colspan="100%">Nothing to see here!</td></tr>
+        }
+        @foreach (var item in Items)
+        {
+            <tr>@RowTemplate(item)</tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    @namespace Constellation.Portal.Schools.Client.Components
+
+    [Parameter]
+    public RenderFragment TableHeader { get; set; }
+
+    [Parameter]
+    public RenderFragment<TItem> RowTemplate { get; set; }
+
+    [Parameter]
+    public IReadOnlyList<TItem> Items { get; set; }
+}
