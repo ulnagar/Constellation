@@ -2,6 +2,7 @@
 
 namespace Constellation.Portal.Schools.Server.Controllers;
 
+using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -30,5 +31,36 @@ public class BaseAPIController : ControllerBase
         }
 
         return null;
+    }
+
+    protected async Task<bool> IsUserAdmin(AppUser user)
+    {
+        if (User.Identity is not null && User.Identity.IsAuthenticated)
+        {
+            var roles = await UserManager.GetRolesAsync(user);
+            if (roles.Contains(AuthRoles.Admin))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected List<string> GetCurrentUserSchools()
+    {
+        var schoolCodes = new List<string>();
+
+        if (User.Identity is not null && User.Identity.IsAuthenticated)
+        {
+            var schoolCodeClaims = User.FindAll(AuthClaimType.SchoolCode);
+
+            if (schoolCodeClaims is null || schoolCodeClaims.Count() == 0)
+                return schoolCodes;
+
+            schoolCodes = schoolCodeClaims.Select(claim => claim.Value).ToList();
+        }
+
+        return schoolCodes;
     }
 }

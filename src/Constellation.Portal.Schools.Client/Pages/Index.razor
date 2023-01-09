@@ -1,20 +1,38 @@
 ﻿@page "/"
+@attribute [Authorize]
+@inject HttpClient Http;
 
-<h1>Welcome to the Aurora College Schools Portal</h1>
+<h1>Aurora College Schools Portal</h1>
 
-<p>This portal can be used to access information from Aurora College about your child.</p>
+@foreach (var group in Students.GroupBy(student => student.CurrentGrade))
+{
+    var yearTitle = $"Year {(int)group.Key}";
 
-<p>Please use the menu to select the area you wish to investigate:
-    <dl>
-        <dt>Attendance</dt>
-        <dd>View attendance information including explained an unexplained absences</dd>
-        <dt>Awards</dt>
-        <dd>View awards issued to your child</dd>
-        <dt>Reports</dt>
-        <dd>Download reports issued by Aurora College for your child</dd>
-        <dt>Timetable</dt>
-        <dd>View and download a copy of your childs Aurora College timetable</dd>
-        <dt>Contacts</dt>
-        <dd>Send a message to your childs class teachers or to the school administration</dd>
-    </dl>
-</p>
+    <TitleDivider Title="@yearTitle" />
+
+    <div class="flex-row">
+        @foreach (var student in group)
+        {
+            <StudentCard Student="student" />
+        }
+    </div>
+}
+
+@code{
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    public List<StudentDto> Students { get; set; } = new List<StudentDto>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            var students = await Http.GetFromJsonAsync<List<StudentDto>>($"api/Students/FromSchool/{SelectedSchool.Code}");
+            Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();    
+        }
+    }
+}

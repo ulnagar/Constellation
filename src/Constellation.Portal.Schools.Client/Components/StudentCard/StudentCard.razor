@@ -1,0 +1,16 @@
+﻿@using Constellation.Application.DTOs
+
+<div class="card m-3 float-start">
+    <img class="card-img-top" src="@Student.PhotoSrc">
+    <div class="card-body">
+        <h5 class="card-title">@Student.FirstName @Student.LastName</h5>
+        <p class="card-text">Grade: @Student.CurrentGrade</p>
+    </div>
+</div>
+
+@code {
+    @namespace Constellation.Portal.Schools.Client.Components
+
+    [Parameter]
+    public StudentDto Student { get; set; }
+}

@@ -37,6 +37,7 @@ public class LoginModel : PageModel
     {
         [Required]
         [EmailAddress]
+        [RegularExpression(@"^\w+([-+.']\w+)*@det.nsw.edu.au$", ErrorMessage = "Invalid Email.")]
         public string Email { get; set; } = string.Empty;
 
         [Required]

@@ -42,6 +42,7 @@ CURRENT TASK
 
 	SCHOOL PORTAL
 		Convert from Blazor Server to Blazor WASM
+		- Update the Login page to include actual logic
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
