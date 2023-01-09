@@ -1,4 +1,6 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Features.Portal.School.Contacts.Models;
+using Constellation.Application.Features.Portal.School.Contacts.Queries;
 using Constellation.Application.Features.Portal.School.Home.Commands;
 using Constellation.Application.Features.Portal.School.Home.Queries;
 using MediatR;
@@ -39,6 +41,12 @@ public class SchoolsController : BaseAPIController
         var schoolDtos = await _mediator.Send(new ConvertListOfSchoolCodesToSchoolListCommand { SchoolCodes = schoolCodes });
 
         return schoolDtos.ToList();
+    }
+
+    [HttpGet("{code}/Details")]
+    public async Task<SchoolContactDetails> GetDetails(string code)
+    {
+        return await _mediator.Send(new GetSchoolContactDetailsQuery { Code = code });
     }
 
 }

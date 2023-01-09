@@ -1,0 +1,88 @@
+﻿@using Blazored.Modal
+@using Blazored.Modal.Services
+@using Constellation.Application.Features.Portal.School.Contacts.Commands
+@using Constellation.Application.Features.Partners.SchoolContacts.Models
+@using System.ComponentModel.DataAnnotations
+
+@inject HttpClient Http
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div class="row m-3">
+    <div class="col w-auto">
+        <div class="mb-3 row mt-3">
+            <label class="col-5">Name</label>
+            <div class="col font-weight-bold">@Contact.FirstName @Contact.LastName</div>
+        </div>
+
+        <div class="mb-3 row mt-3">
+            <label class="col-5">Phone Number</label>
+            <div class="col font-weight-bold"><PhoneNumber Number="@Contact.PhoneNumber" /></div>
+        </div>
+
+        <div class="mb-3 row mt-3">
+            <label class="col-5">Email Address</label>
+            <div class="col font-weight-bold"><EmailAddress Email="@Contact.EmailAddress" /></div>
+        </div>
+
+        <div class="mb-3 row mt-3">
+            <label class="col-5">Position</label>
+            <div class="col font-weight-bold">@Contact.Position</div>
+        </div>
+
+        <EditForm Model="Command">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3 row mt-3">
+                <label class="col-5">Reason for cancelling</label>
+                <div class="col">
+                    <InputText @bind-Value="Command.Comment" class="form-control" />
+                </div>
+                <div class="w-100"></div>
+                <div class="offset-5 col">
+                    &nbsp;
+                    <ValidationSummary />
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="ms-auto me-3">
+                    <button class="btn btn-primary mr-3" @onclick="@RequestRemoval">Update</button>
+                    <button class="btn btn-danger" @onclick="@Cancel">Close</button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    @namespace Constellation.Portal.Schools.Client.Components
+
+    [CascadingParameter] public BlazoredModalInstance BlazoredModal { get; set; }
+
+    [Parameter] public ContactWithRoleForList Contact { get; set; }
+
+    public RequestRemovalOfSchoolContactCommand Command { get; set; } = new();
+
+    async Task RequestRemoval()
+    {
+        if (string.IsNullOrWhiteSpace(Command.Comment))
+        {
+            return;
+        }
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        Command.AssignmentId = Contact.AssignmentId;
+        Command.CancelledBy = authState.User.Identity.Name;
+        Command.CancelledAt = DateTime.Now;
+
+        await Http.PostAsJsonAsync<RequestRemovalOfSchoolContactCommand>($"api/Contacts/{Contact.ContactId}/Remove", Command);
+
+        await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+    }
+
+    async Task Cancel()
+    {
+        await BlazoredModal.CloseAsync(ModalResult.Cancel());
+    }
+}

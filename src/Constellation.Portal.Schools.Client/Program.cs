@@ -1,3 +1,4 @@
+using Blazored.Modal;
 using Constellation.Portal.Schools.Client;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
@@ -15,6 +16,8 @@ builder.Services.AddHttpClient("Constellation.Portal.Schools.ServerAPI", client 
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("Constellation.Portal.Schools.ServerAPI"));
 
 builder.Services.AddApiAuthorization();
+
+builder.Services.AddBlazoredModal();
 
 // Update culture to always run in en-AU location to ensure that dates are formatted correctly
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-AU");

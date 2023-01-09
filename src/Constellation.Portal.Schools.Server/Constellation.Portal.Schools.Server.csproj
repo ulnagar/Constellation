@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>Constellation.Portal.Parents.Server-13334689-E056-407D-9CD1-BF3F236C6720</UserSecretsId>
+    <UserSecretsId>Constellation.Portal.Schools.Server-13334689-E056-407D-9CD1-BF3F236C6720</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
