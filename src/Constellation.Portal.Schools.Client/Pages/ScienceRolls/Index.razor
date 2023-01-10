@@ -1,0 +1,167 @@
+﻿@page "/ScienceRolls/"
+@using Constellation.Application.Features.Portal.School.ScienceRolls.Models;
+
+@attribute [Authorize]
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<Loader IsLoading="@IsLoading">
+    <h2>Science Practical Rolls</h2>
+
+    <div>
+        @{
+            var all_style = "btn-outline-secondary";
+            var pending_style = all_style;
+            var overdue_style = all_style;
+            var completed_style = all_style;
+
+            switch (FilterType)
+            {
+                case FilterCategory.All:
+                    all_style = "btn-primary";
+                    break;
+                case FilterCategory.Pending:
+                    pending_style = "btn-primary";
+                    break;
+                case FilterCategory.Overdue:
+                    overdue_style = "btn-primary";
+                    break;
+                case FilterCategory.Complete:
+                    completed_style = "btn-primary";
+                    break;
+            }
+        }
+
+        <div class="btn-group">
+            <button class="btn @all_style" @onclick="() => ChangeFilterCategory(FilterCategory.All)">All</button>
+            <button class="btn @pending_style" @onclick="() => ChangeFilterCategory(FilterCategory.Pending)">Pending</button>
+            <button class="btn @overdue_style" @onclick="() => ChangeFilterCategory(FilterCategory.Overdue)">Overdue</button>
+            <button class="btn @completed_style" @onclick="() => ChangeFilterCategory(FilterCategory.Complete)">Completed</button>
+        </div>
+    </div>
+
+    <hr />
+
+    <GroupedDataTable Items="FilteredLessons.GroupBy(lesson => lesson.Grade).ToList()" TItem="ScienceLessonRollForList" TKey="string">
+        <TableHeader>
+                <th></th>
+                <th>Lesson</th>
+                <th>Due Date</th>
+                <th>Course</th>
+                <th>Attendance</th>
+        </TableHeader>
+        <GroupRowTemplate Context="entry">
+            <td colspan="6">@entry.Grade</td>
+        </GroupRowTemplate>
+        <RowTemplate Context="entry">
+            <td>
+                @if (entry.IsSubmitted)
+                {
+                    <i class="fas fa-check"></i>
+                }
+                else if (entry.IsOverdue)
+                {
+                    <i class="fas fa-exclamation"></i>
+                }
+                else
+                {
+                    <i class="fas fa-clock"></i>
+                }
+            </td>
+            <td>@entry.LessonName</td>
+            <td>@entry.LessonDueDate.ToShortDateString()</td>
+            <td>@entry.Grade @entry.LessonCourseName</td>
+            <td>
+                @if (entry.IsSubmitted)
+                {
+                    <button class="btn btn-success btn-sm" @onclick="() => ViewRoll(entry.Id)">@entry.Statistics</button>
+                }
+                else
+                {
+                    <button class="btn btn-warning btn-sm" @onclick="() => SubmitRoll(entry.Id)">Submit Roll</button>
+                }
+            </td>
+        </RowTemplate>
+    </GroupedDataTable>
+</Loader>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    private bool IsLoading { get; set; } = false;
+
+    public List<ScienceLessonRollForList> Lessons { get; set; } = new();
+    public List<ScienceLessonRollForList> FilteredLessons { get; set; } = new();
+    public FilterCategory FilterType { get; set; } = FilterCategory.Pending;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IsLoading = true;
+
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            Lessons = await Http.GetFromJsonAsync<List<ScienceLessonRollForList>>($"api/Rolls/ForSchool/{SelectedSchool.Code}");
+
+            FilterLessons();
+        }
+
+        IsLoading = false;
+    }
+
+    public enum FilterCategory
+    {
+        All,
+        Pending,
+        Overdue,
+        Complete
+    }
+
+    private void ChangeFilterCategory(FilterCategory type)
+    {
+        FilterType = type;
+
+        FilterLessons();
+    }
+
+    private void FilterLessons()
+    {
+        switch (FilterType)
+        {
+            case FilterCategory.Pending:
+                FilteredLessons = Lessons
+                    .Where(lesson => !lesson.IsSubmitted)
+                    .ToList();
+                break;
+            case FilterCategory.Overdue:
+                FilteredLessons = Lessons
+                    .Where(lesson => lesson.IsOverdue)
+                    .ToList();
+                break;
+            case FilterCategory.Complete:
+                FilteredLessons = Lessons
+                    .Where(lesson => lesson.IsSubmitted)
+                    .ToList();
+                break;
+            case FilterCategory.All:
+                FilteredLessons = Lessons.ToList();
+                break;
+        }
+
+        FilteredLessons = FilteredLessons.OrderBy(lesson => lesson.Grade).ThenBy(lesson => lesson.LessonCourseName).ThenBy(lesson => lesson.LessonDueDate).ToList();
+    }
+
+    private void ViewRoll(Guid RollId)
+    {
+        NavigationManager.NavigateTo($"ScienceRolls/{RollId}");
+    }
+
+    private void SubmitRoll(Guid RollId)
+    {
+        NavigationManager.NavigateTo($"ScienceRolls/{RollId}/Submit");
+    }
+}

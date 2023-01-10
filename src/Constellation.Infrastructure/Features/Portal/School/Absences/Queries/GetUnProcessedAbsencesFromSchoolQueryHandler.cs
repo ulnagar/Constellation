@@ -39,7 +39,7 @@ namespace Constellation.Infrastructure.Features.Portal.School.Absences.Queries
             //return _mapper.Map<ICollection<AbsenceForPortalList>>(unexplainedAbsencesForThisYear);
 
             return await _context.Absences
-                .Where(absence => absence.Student.SchoolCode == request.SchoolCode && !absence.Student.IsDeleted) //&& absence.Date.Year == DateTime.Today.Year)
+                .Where(absence => absence.Student.SchoolCode == request.SchoolCode && !absence.Student.IsDeleted && absence.Date.Year == DateTime.Today.Year)
                 .Where(absence =>
                     !absence.ExternallyExplained &&
                     ((absence.Type == Absence.Partial && absence.Responses.Count(response => response.VerificationStatus != AbsenceResponse.Pending) == 0) ||

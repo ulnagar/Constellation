@@ -2,12 +2,7 @@
 using Constellation.Application.Features.Portal.School.ScienceRolls.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Features.Portal.School.ScienceRolls.Commands
 {

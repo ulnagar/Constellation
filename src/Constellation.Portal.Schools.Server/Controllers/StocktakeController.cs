@@ -22,6 +22,8 @@ public class StocktakeController : BaseAPIController
     {
         var user = await GetCurrentUser();
 
+        Command.CancelledBy = user.Email;
+
         _logger.Information("Requested to remove Stocktake Sighting by {user} with details {@details}", user.DisplayName, Command);
 
         await _mediator.Send(Command);
