@@ -10,71 +10,77 @@
 @inject NavigationManager NavigationManager
 @inject IModalService Modal
 
-<h2>School Contact Information</h2>
+<Loader IsLoading="@IsLoading">
+    <h2>School Contact Information</h2>
 
-<hr />
+    <hr />
 
-<div class="form-horizontal">
-    <div class="form-group row">
-        <label class="col-md-2 text-bold">School Name</label>
-        <div class="col-md-6">(@SchoolDetails.Code) @SchoolDetails.Name</div>
+    <div class="form-horizontal">
+        <div class="form-group row">
+            <label class="col-md-2 text-bold">School Name</label>
+            <div class="col-md-6">(@SchoolDetails.Code) @SchoolDetails.Name</div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-2 text-bold">Address</label>
+            <div class="col-md-3">@SchoolDetails.Address</div>
+            <label class="col-md-2 text-bold">Town</label>
+            <div class="col-md-3">@SchoolDetails.Town @SchoolDetails.PostCode</div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-2 text-bold">Phone</label>
+            <div class="col-md-3"><PhoneNumber Number="@SchoolDetails.PhoneNumber" /></div>
+            <label class="col-md-2 text-bold">Fax</label>
+            <div class="col-md-3"><PhoneNumber Number="@SchoolDetails.FaxNumber" /></div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-2 text-bold">Email Address</label>
+            <div class="col-md-6"><EmailAddress Email="@SchoolDetails.EmailAddress" /></div>
+        </div>
     </div>
 
-    <div class="form-group row">
-        <label class="col-md-2 text-bold">Address</label>
-        <div class="col-md-3">@SchoolDetails.Address</div>
-        <label class="col-md-2 text-bold">Town</label>
-        <div class="col-md-3">@SchoolDetails.Town @SchoolDetails.PostCode</div>
+    <hr />
+
+    <div class="form-group row mt-6">
+        <div class="col-md-6"><h4 class="mt-2 mb-0">Contacts:</h4></div>
+        <div class="offset-1 col-md-3"><button class="btn btn-success" @onclick="NewContact">Add New Contact</button></div>
     </div>
 
-    <div class="form-group row">
-        <label class="col-md-2 text-bold">Phone</label>
-        <div class="col-md-3"><PhoneNumber Number="@SchoolDetails.PhoneNumber" /></div>
-        <label class="col-md-2 text-bold">Fax</label>
-        <div class="col-md-3"><PhoneNumber Number="@SchoolDetails.FaxNumber" /></div>
-    </div>
-
-    <div class="form-group row">
-        <label class="col-md-2 text-bold">Email Address</label>
-        <div class="col-md-6"><EmailAddress Email="@SchoolDetails.EmailAddress" /></div>
-    </div>
-</div>
-
-<hr />
-
-<div class="form-group row mt-6">
-    <div class="col-md-6"><h4 class="mt-2 mb-0">Contacts:</h4></div>
-    <div class="offset-1 col-md-3"><button class="btn btn-success" @onclick="NewContact">Add New Contact</button></div>
-</div>
-
-<GroupedDataTable Items="Contacts.GroupBy(contact => contact.Position).ToList()" TItem="ContactWithRoleForList" TKey="string">
-    <TableHeader>
-        <th>Name</th>
-        <th>Phone</th>
-        <th>Email</th>
-        <th>Action</th>
-    </TableHeader>
-    <GroupRowTemplate Context="entry">
-        <td colspan="6">@entry.Position</td>
-    </GroupRowTemplate>
-    <RowTemplate Context="entry">
-        <td>@entry.FirstName @entry.LastName</td>
-        <td><PhoneNumber Number="@entry.PhoneNumber"/></td>
-        <td><EmailAddress Email="@entry.EmailAddress" /></td>
-        <td><button class="btn btn-sm btn-outline-danger button-hover" @onclick="(() => RemoveContact(entry.AssignmentId))">Remove</button></td>
-    </RowTemplate>
-</GroupedDataTable>
+    <GroupedDataTable Items="Contacts.GroupBy(contact => contact.Position).ToList()" TItem="ContactWithRoleForList" TKey="string">
+        <TableHeader>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Action</th>
+        </TableHeader>
+        <GroupRowTemplate Context="entry">
+            <td colspan="6">@entry.Position</td>
+        </GroupRowTemplate>
+        <RowTemplate Context="entry">
+            <td>@entry.FirstName @entry.LastName</td>
+            <td><PhoneNumber Number="@entry.PhoneNumber"/></td>
+            <td><EmailAddress Email="@entry.EmailAddress" /></td>
+            <td><button class="btn btn-sm btn-outline-danger button-hover" @onclick="(() => RemoveContact(entry.AssignmentId))">Remove</button></td>
+        </RowTemplate>
+    </GroupedDataTable>
+</Loader>
 
 @code {
     [CascadingParameter]
     public SchoolDto SelectedSchool { get; set; }
     public SchoolDto CurrentlySelectedSchool { get; set; }
 
+    private bool IsLoading { get; set; } = false;
+
     public SchoolContactDetails SchoolDetails { get; set; } = new();
     public ICollection<ContactWithRoleForList> Contacts { get; set; } = new List<ContactWithRoleForList>();
 
     protected override async Task OnParametersSetAsync()
     {
+        IsLoading = true;
+
         if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
         {
             CurrentlySelectedSchool = SelectedSchool;
@@ -83,6 +89,8 @@
             Contacts = await Http.GetFromJsonAsync<List<ContactWithRoleForList>>($"api/Contacts/FromSchool/{SelectedSchool.Code}");
             OrderContacts();
         }
+
+        IsLoading = false;
     }
 
     void OrderContacts()

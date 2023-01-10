@@ -1,5 +1,5 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
+﻿namespace Constellation.Infrastructure.Features.Attendance.Queries;
+
 using Constellation.Application.Extensions;
 using Constellation.Application.Features.Attendance.Queries;
 using Constellation.Application.Interfaces.Gateways;
@@ -7,112 +7,107 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.Templates.Views.Documents.Attendance;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Net.Mime;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Constellation.Infrastructure.Features.Attendance.Queries
+public class GetStudentAttendanceReportQueryHandler : IRequestHandler<GetStudentAttendanceReportQuery, StoredFile>
 {
-    public class GetStudentAttendanceReportQueryHandler : IRequestHandler<GetStudentAttendanceReportQuery, StoredFile>
+    private readonly IAppDbContext _context;
+    private readonly ISentralGateway _sentralGateway;
+    private readonly IRazorViewToStringRenderer _renderService;
+    private readonly IPDFService _pdfService;
+
+    public GetStudentAttendanceReportQueryHandler(
+        IAppDbContext context,
+        IPDFService pdfService,
+        IRazorViewToStringRenderer renderService)
     {
-        private readonly IAppDbContext _context;
-        private readonly ISentralGateway _sentralGateway;
-        private readonly IRazorViewToStringRenderer _renderService;
-        private readonly IMapper _mapper;
-        private readonly IPDFService _pdfService;
+        _context = context;
+        _pdfService = pdfService;
+        _renderService = renderService;
+    }
 
-        public GetStudentAttendanceReportQueryHandler(
-            IAppDbContext context,
-            IMapper mapper,
-            IPDFService pdfService,
-            IRazorViewToStringRenderer renderService)
+    public GetStudentAttendanceReportQueryHandler(
+        IAppDbContext context,
+        ISentralGateway sentralGateway,
+        IRazorViewToStringRenderer renderService,
+        IPDFService pdfService)
+    {
+        _context = context;
+        _sentralGateway = sentralGateway;
+        _renderService = renderService;
+        _pdfService = pdfService;
+    }
+
+    public async Task<StoredFile> Handle(GetStudentAttendanceReportQuery request, CancellationToken cancellationToken)
+    {
+        var excludedDates = _sentralGateway switch
         {
-            _context = context;
-            _mapper = mapper;
-            _pdfService = pdfService;
-            _renderService = renderService;
-        }
+            null => new List<DateTime>(),
+            _ => await _sentralGateway.GetExcludedDatesFromCalendar(request.StartDate.Year.ToString())
+        };
 
-        public GetStudentAttendanceReportQueryHandler(IAppDbContext context, ISentralGateway sentralGateway, 
-            IRazorViewToStringRenderer renderService, IMapper mapper, IPDFService pdfService)
+        var student = await _context.Students
+            .SingleOrDefaultAsync(student => student.StudentId == request.StudentId, cancellationToken);
+
+        var viewModel = new AttendanceReportViewModel
         {
-            _context = context;
-            _sentralGateway = sentralGateway;
-            _renderService = renderService;
-            _mapper = mapper;
-            _pdfService = pdfService;
-        }
+            StudentName = student.DisplayName,
+            StartDate = request.StartDate.VerifyStartOfFortnight(),
+            ExcludedDates = excludedDates
+        };
 
-        public async Task<StoredFile> Handle(GetStudentAttendanceReportQuery request, CancellationToken cancellationToken)
+        var endDate = viewModel.StartDate.AddDays(12);
+        var absences = await _context.Absences
+            .Where(absence => absence.StudentId == student.StudentId && absence.Date <= endDate && absence.Date >= viewModel.StartDate)
+            .ToListAsync(cancellationToken);
+
+        viewModel.Absences = absences.Select(AttendanceReportViewModel.AbsenceDto.ConvertFromAbsence).ToList();
+
+        var ReportableDates = viewModel.StartDate.Range(endDate).ToList();
+        foreach (var date in ReportableDates)
         {
-            if (_sentralGateway is null)
-                return null;
-
-            var student = await _context.Students
-                .SingleOrDefaultAsync(student => student.StudentId == request.StudentId, cancellationToken);
-
-            var viewModel = new AttendanceReportViewModel
+            var entry = new AttendanceReportViewModel.DateSessions
             {
-                StudentName = student.DisplayName,
-                StartDate = request.StartDate.VerifyStartOfFortnight(),
-                ExcludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(request.StartDate.Year.ToString())
+                Date = date,
+                DayNumber = date.GetDayNumber()
             };
 
-            var endDate = viewModel.StartDate.AddDays(12);
-            var absences = await _context.Absences
-                .Where(absence => absence.StudentId == student.StudentId && absence.Date <= endDate && absence.Date >= viewModel.StartDate)
-                .ToListAsync(cancellationToken);
+            var sessions = await _context.Sessions
+                .Include(s => s.Offering)
+                    .ThenInclude(offering => offering.Course)
+                .Include(s => s.Period)
+                .Where(s =>
+                    // Is the Offering (Class) valid for the date selected?
+                    s.Offering.StartDate <= date && s.Offering.EndDate >= date &&
+                    // Is the Student enrolled in the Offering at the date selected?
+                    s.Offering.Enrolments.Any(e => e.StudentId == request.StudentId && e.DateCreated <= date && (!e.DateDeleted.HasValue || e.DateDeleted.Value >= date)) &&
+                    // Is the Session valid for the Offering at the date selected?
+                    s.DateCreated <= date && (!s.DateDeleted.HasValue || s.DateDeleted.Value >= date) &&
+                    // Is the Session for the Cycle Day selected?
+                    s.Period.Day == date.GetDayNumber() &&
+                    s.Period.Type != "Other")
+                .ToListAsync();
 
-            viewModel.Absences = absences.Select(AttendanceReportViewModel.AbsenceDto.ConvertFromAbsence).ToList();
+            entry.SessionsByOffering = sessions.OrderBy(s => s.Period.StartTime).GroupBy(s => s.OfferingId).Select(AttendanceReportViewModel.SessionByOffering.ConvertFromSessionGroup).ToList();
 
-            var ReportableDates = viewModel.StartDate.Range(endDate).ToList();
-            foreach (var date in ReportableDates)
-            {
-                var entry = new AttendanceReportViewModel.DateSessions
-                {
-                    Date = date,
-                    DayNumber = date.GetDayNumber()
-                };
-
-                var sessions = await _context.Sessions
-                    .Include(s => s.Offering)
-                        .ThenInclude(offering => offering.Course)
-                    .Include(s => s.Period)
-                    .Where(s =>
-                        // Is the Offering (Class) valid for the date selected?
-                        s.Offering.StartDate <= date && s.Offering.EndDate >= date &&
-                        // Is the Student enrolled in the Offering at the date selected?
-                        s.Offering.Enrolments.Any(e => e.StudentId == request.StudentId && e.DateCreated <= date && (!e.DateDeleted.HasValue || e.DateDeleted.Value >= date)) &&
-                        // Is the Session valid for the Offering at the date selected?
-                        s.DateCreated <= date && (!s.DateDeleted.HasValue || s.DateDeleted.Value >= date) &&
-                        // Is the Session for the Cycle Day selected?
-                        s.Period.Day == date.GetDayNumber() &&
-                        s.Period.Type != "Other")
-                    .ToListAsync();
-
-                entry.SessionsByOffering = sessions.OrderBy(s => s.Period.StartTime).GroupBy(s => s.OfferingId).Select(AttendanceReportViewModel.SessionByOffering.ConvertFromSessionGroup).ToList();
-
-                viewModel.DateData.Add(entry);
-            }
-
-            var fileName = $"{student.LastName}, {student.FirstName} - {request.StartDate:yyyy-MM-dd} - Attendance Report.pdf";
-
-            var headerString = await _renderService.RenderViewToStringAsync("/Views/Documents/Attendance/AttendanceReportHeader.cshtml", viewModel);
-            var htmlString = await _renderService.RenderViewToStringAsync("/Views/Documents/Attendance/AttendanceReport.cshtml", viewModel);
-
-            var pdfStream = _pdfService.StringToPdfStream(htmlString, headerString);
-
-            var result = new StoredFile
-            {
-                Name = fileName,
-                FileData = pdfStream.ToArray(),
-                FileType = MediaTypeNames.Application.Pdf
-            };
-
-            return result;
+            viewModel.DateData.Add(entry);
         }
+
+        var fileName = $"{student.LastName}, {student.FirstName} - {request.StartDate:yyyy-MM-dd} - Attendance Report.pdf";
+
+        var headerString = await _renderService.RenderViewToStringAsync("/Views/Documents/Attendance/AttendanceReportHeader.cshtml", viewModel);
+        var htmlString = await _renderService.RenderViewToStringAsync("/Views/Documents/Attendance/AttendanceReport.cshtml", viewModel);
+
+        var pdfStream = _pdfService.StringToPdfStream(htmlString, headerString);
+
+        var result = new StoredFile
+        {
+            Name = fileName,
+            FileData = pdfStream.ToArray(),
+            FileType = MediaTypeNames.Application.Pdf
+        };
+
+        return result;
     }
 }

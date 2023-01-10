@@ -1,0 +1,124 @@
+﻿@page "/Absences/Whole/{AbsenceId:guid}/Explain"
+
+@using Constellation.Application.Features.Portal.School.Absences.Commands;
+@using Constellation.Application.Features.Portal.School.Absences.Models;
+
+@attribute [Authorize]
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<Loader IsLoading="@IsLoading">
+    <h1>Whole Absence Explanation</h1>
+
+    <div>
+        <EditForm Model="Command" OnValidSubmit="SubmitResponse">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3 row">
+                <label class="form-label col-md-2">Absence Date</label>
+                <div class="col-md-6">@Absence?.Date.ToShortDateString()</div>
+            </div>
+
+            <div class="mb-3 row">
+                <label class="form-label col-md-2">Student Name</label>
+                <div class="col-md-6">@Absence?.StudentName</div>
+            </div>
+
+            <div class="mb-3 row">
+                <label class="form-label col-md-2">Class Name</label>
+                <div class="col-md-6">@Absence?.ClassName</div>
+            </div>
+
+            <div class="mb-3 row">
+                <label class="form-label col-md-2">Period Name</label>
+                <div class="col-md-6">@Absence?.PeriodName</div>
+            </div>
+
+            <div class="mb-3 row">
+                <label class="form-label col-md-2">Absence Timeframe</label>
+                <div class="col-md-6">@Absence?.AbsenceTimeframe</div>
+            </div>
+
+            <div class="mb-3 row">
+                <label class="form-label col-md-2">Comment</label>
+                <div class="col-md-6">
+                    <InputTextArea @bind-Value="Command.Comment" rows="5" cols="100" class="form-control" />
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <div class="offset-1 col-md-3">
+                    <button class="btn btn-success btn-block btn-lg" type="submit">Submit</button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+</Loader>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    private bool IsLoading { get; set; } = false;
+
+    [Parameter]
+    public Guid AbsenceId { get; set; }
+    public Guid CurrentAbsenceId { get; set; }
+
+    public WholeAbsenceForSchoolExplanation Absence { get; set; }
+
+    public ProvideSchoolAbsenceExplanationCommand Command { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IsLoading = true;
+
+        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool == null)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+        }
+
+        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool != null)
+        {
+            NavigationManager.NavigateTo("Absences");
+        }
+
+        if (AbsenceId != Guid.NewGuid())
+        {
+            if (AbsenceId != CurrentAbsenceId)
+            {
+                Absence = await Http.GetFromJsonAsync<WholeAbsenceForSchoolExplanation>($"api/Absences/Whole/{AbsenceId}");
+                Command = new();
+
+                Command.AbsenceId = AbsenceId;
+            }
+
+            CurrentAbsenceId = AbsenceId;
+        } else
+        {
+            Absence = new();
+            Command = new();
+        }
+
+        IsLoading = false;
+    }
+
+    private async Task SubmitResponse()
+    {
+        IsLoading = true;
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        Command.UserEmail = authState.User.Identity.Name;
+
+        await Http.PostAsJsonAsync<ProvideSchoolAbsenceExplanationCommand>($"api/Absences/Whole/{AbsenceId}/Explain", Command);
+
+        NavigationManager.NavigateTo("Absences");
+
+        IsLoading = false;
+    }
+}

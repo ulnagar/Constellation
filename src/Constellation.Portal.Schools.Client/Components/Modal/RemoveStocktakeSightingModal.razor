@@ -5,36 +5,36 @@
 @using MediatR
 @using System.ComponentModel.DataAnnotations
 
-@inject IMediator Mediator
+@inject HttpClient Http
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div class="row m-3">
     <div class="col w-auto">
-        <div class="form-group row mt-3">
-            <label class="col-5">Serial / Asset</label>
+        <div class="MB-3 row mt-3">
+            <label class="form-label col-5">Serial / Asset</label>
             <div class="col font-weight-bold">@Sighting.SerialNumber / @Sighting.AssetNumber</div>
         </div>
 
-        <div class="form-group row mt-3">
-            <label class="col-5">Description</label>
+        <div class="mb-3 row mt-3">
+            <label class="form-label col-5">Description</label>
             <div class="col font-weight-bold">@Sighting.Description</div>
         </div>
 
-        <div class="form-group row mt-3">
-            <label class="col-5">User</label>
+        <div class="mb-3 row mt-3">
+            <label class="form-label col-5">User</label>
             <div class="col font-weight-bold">@Sighting.UserName</div>
         </div>
 
-        <div class="form-group row mt-3">
-            <label class="col-5">Sighted</label>
+        <div class="mb-3 row mt-3">
+            <label class="form-label col-5">Sighted</label>
             <div class="col font-weight-bold">@Sighting.SightedBy (@Sighting.SightedAt.ToShortDateString())</div>
         </div>
 
         <EditForm Model="Command">
             <DataAnnotationsValidator />
 
-            <div class="form-group row mt-3">
-                <label class="col-5">Reason for cancelling</label>
+            <div class="mb-3 row mt-3">
+                <label class="form-label col-5">Reason for cancelling</label>
                 <div class="col">
                     <InputText @bind-Value="Command.Comment" class="form-control" />
                 </div>
@@ -46,8 +46,8 @@
             </div>
 
             <div class="row mt-3">
-                <div class="ml-auto mr-3">
-                    <button class="btn btn-primary mr-3" @onclick="@CancelSighting">Update</button>
+                <div class="ms-auto me-3">
+                    <button class="btn btn-primary me-3" @onclick="@CancelSighting">Update</button>
                     <button class="btn btn-danger" @onclick="@Cancel">Close</button>
                 </div>
             </div>
@@ -77,7 +77,7 @@
         Command.CancelledBy = authState.User.Identity.Name;
         Command.CancelledAt = DateTime.Now;
 
-        await Mediator.Send(Command);
+        await Http.PostAsJsonAsync<CancelStocktakeSightingCommand>($"api/Stocktake/{Sighting.Id}/Remove", Command);
 
         await BlazoredModal.CloseAsync(ModalResult.Ok(true));
     }

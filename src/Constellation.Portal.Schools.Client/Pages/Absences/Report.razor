@@ -1,0 +1,194 @@
+﻿@page "/Absences/Reports/"
+
+@using System.Text
+@using System.ComponentModel.DataAnnotations
+@using Constellation.Application.Extensions;
+@using Constellation.Core.Models;
+
+@attribute [Authorize]
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+<Loader IsLoading="@IsLoading">
+    <h1>Attendance Report</h1>
+
+    <span>Reports for a single student will be downloaded as PDF files. Reports for all students will be downloaded as a zip file.</span>
+
+    <div>
+        <EditForm Model="@formModel" OnValidSubmit="ProcessForm">
+            <div class="mb-3 row mt-3">
+                <div class="col-3"><label>Student(s)</label></div>
+                <div class="col-5 font-weight-bold">
+                    <select class="form-control" @bind="StudentSelect">
+                        <option value="">-- Select Student --</option>
+                        <option value="GRADE-ALL" class="text-bold"> -- All Students</option>
+                        @foreach (var group in StudentsToSelect.GroupBy(student => student.CurrentGrade))
+                        {
+                            <option value="GRADE-@group.Key.AsNumber()" class="text-bold"> -- @group.Key.AsName()</option>
+                            foreach (var student in group)
+                            {
+                                <option value="@student.StudentId">@student.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3 row mt-3">
+                <div class="col-8">
+                    <h5>
+                        @foreach (var student in SelectedStudents)
+                        {
+                            <span class="badge badge-info no-select" @onclick="() => RemoveStudent(student)"> @student.Name </span>
+                        }
+                    </h5>
+                </div>
+            </div>
+
+            <div class="mb-3 row mt-3">
+                <div class="col-3"><label>Date to report</label></div>
+                <div class="col-5 font-weight-bold">
+                    <InputDate @bind-Value="formModel.StartDate" class="form-control"></InputDate>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <div class="offset-1 col-md-3">
+                    <button class="btn btn-success btn-block btn-lg" type="submit">Submit</button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+</Loader>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    private bool IsLoading { get; set; } = false;
+
+    public List<StudentDto> AllStudents { get; set; } = new();
+    public List<StudentDto> StudentsToSelect { get; set; } = new();
+    public List<StudentDto> SelectedStudents { get; set; } = new();
+
+    public AttendanceReportSelectForm formModel { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IsLoading = true;
+
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            var students = await Http.GetFromJsonAsync<List<StudentDto>>($"api/Students/FromSchool/{SelectedSchool.Code}");
+            AllStudents = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+            StudentsToSelect = AllStudents;
+            SelectedStudents = new();
+        }
+
+        IsLoading = false;
+    }
+
+    string StudentSelect
+    {
+        get => string.Empty;
+        set => AddStudent(value);
+    }
+
+    private void AddStudent(string studentId)
+    {
+        // Get value of selected student but reset the ui
+        // https://stackoverflow.com/questions/58193797/canceling-event-onchange-or-retrieving-the-old-value-in-blazor
+
+        if (studentId.Contains("GRADE"))
+        {
+            // A grade was selected, not an individual student
+            var grade = studentId.Split('-').Last();
+            var students = StudentsToSelect.Where(student => student.CurrentGrade.AsNumber() == grade).ToList();
+            if (grade == "ALL")
+                students = StudentsToSelect.ToList();
+
+            foreach (var student in students)
+            {
+                SelectedStudents.Add(student);
+                StudentsToSelect.Remove(student);
+            }
+        }
+        else
+        {
+            var student = StudentsToSelect.First(student => student.StudentId == studentId);
+            SelectedStudents.Add(student);
+            StudentsToSelect.Remove(student);
+        }
+
+        SelectedStudents = SelectedStudents.Distinct()
+            .OrderBy(student => student.CurrentGrade)
+            .ThenBy(student => student.LastName)
+            .ThenBy(student => student.FirstName)
+            .ToList();
+    }
+
+    private void RemoveStudent(StudentDto student)
+    {
+        StudentsToSelect.Add(student);
+        SelectedStudents.Remove(student);
+    }
+
+    private async void ProcessForm()
+    {
+        try
+        {
+            IsLoading = true;
+
+            foreach (var student in SelectedStudents)
+            {
+                formModel.Students.Add(student.StudentId);
+            }
+
+            var response = await Http.PostAsJsonAsync<AttendanceReportSelectForm>($"api/Absences/Report", formModel);
+
+            // This returns the file in the response variable.
+            // Need to push it to the browser as a file download, possibly using JS
+            // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0
+
+            var fileStream = response.Content.ReadAsStream();
+            string fileName = string.Empty;
+
+            if (SelectedStudents.Count > 1)
+            {
+                fileName = "Attendance Reports.zip";
+            }
+            else
+            {
+                var student = SelectedStudents.First();
+
+                fileName = $"{student.LastName}, {student.FirstName} - {formModel.StartDate:yyyy-MM-dd} - Attendance Report.pdf";
+            }
+
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        finally
+        {
+            IsLoading = false;
+            NavigationManager.NavigateTo("Absences");
+        }
+    }
+
+    public class AttendanceReportSelectForm
+    {
+        [Required]
+        public List<string> Students { get; set; } = new();
+        [Required]
+        public DateTime StartDate { get; set; } = DateTime.Today;
+    }
+}

@@ -1,32 +1,40 @@
 ﻿@page "/"
+
 @attribute [Authorize]
-@inject HttpClient Http;
 
-<h1>Aurora College Schools Portal</h1>
+@inject HttpClient Http
 
-@foreach (var group in Students.GroupBy(student => student.CurrentGrade))
-{
-    var yearTitle = $"Year {(int)group.Key}";
+<Loader IsLoading="@IsLoading">
+    <h1>Aurora College Schools Portal</h1>
 
-    <TitleDivider Title="@yearTitle" />
+    @foreach (var group in Students.GroupBy(student => student.CurrentGrade))
+    {
+        var yearTitle = $"Year {(int)group.Key}";
 
-    <div class="flex-row">
-        @foreach (var student in group)
-        {
-            <StudentCard Student="student" />
-        }
-    </div>
-}
+        <TitleDivider Title="@yearTitle" />
+
+        <div class="flex-row">
+            @foreach (var student in group)
+            {
+                <StudentCard Student="student" />
+            }
+        </div>
+    }
+</Loader>
 
 @code{
     [CascadingParameter]
     public SchoolDto SelectedSchool { get; set; }
     public SchoolDto CurrentlySelectedSchool { get; set; }
 
+    private bool IsLoading { get; set; } = false;
+
     public List<StudentDto> Students { get; set; } = new List<StudentDto>();
 
     protected override async Task OnParametersSetAsync()
     {
+        IsLoading = true;
+
         if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
         {
             CurrentlySelectedSchool = SelectedSchool;
@@ -34,5 +42,7 @@
             var students = await Http.GetFromJsonAsync<List<StudentDto>>($"api/Students/FromSchool/{SelectedSchool.Code}");
             Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();    
         }
+
+        IsLoading = false;
     }
 }

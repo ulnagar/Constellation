@@ -1,0 +1,165 @@
+﻿@page "/Absences/Partial/{ResponseId:guid}/Verify"
+
+@using Constellation.Application.Features.Portal.School.Absences.Commands;
+@using Constellation.Application.Features.Portal.School.Absences.Models;
+
+@attribute [Authorize]
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<Loader IsLoading="@IsLoading">
+    <h1>Partial Absence Verification</h1>
+
+    <div>
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Absence Date</label>
+            <div class="col-md-6">@Response?.AbsenceDate.ToShortDateString()</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Student Name</label>
+            <div class="col-md-6">@Response?.StudentName</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Class Name</label>
+            <div class="col-md-6">@Response?.ClassName</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Period Name</label>
+            <div class="col-md-6">@Response?.AbsencePeriodName</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Absence Timeframe</label>
+            <div class="col-md-6">@Response?.AbsenceTimeframe</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Explanation</label>
+            <div class="col-md-6">@Response?.Explanation</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Comment</label>
+            <div class="col-md-6">
+                <textarea @bind="Comment" rows="5" cols="100" class="form-control"></textarea>
+                <span class="text-danger">@CommentValidationText</span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <div class="offset-1 col-md-3">
+                <button class="btn btn-success btn-block btn-lg" @onclick="VerifyResponse">Verify</button>
+            </div>
+            <div class="offset-2 col-md-3">
+                <button class="btn btn-warning btn-block btn-lg" @onclick="RejectResponse">Reject</button>
+            </div>
+        </div>
+    </div>
+</Loader>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    private bool IsLoading { get; set; } = false;
+
+    [Parameter]
+    public Guid ResponseId { get; set; }
+    public Guid CurrentResponseId { get; set; }
+
+    public PartialAbsenceResponseForVerification Response { get; set; }
+
+    public string Comment { get; set; }
+    public string CommentValidationText { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IsLoading = true;
+
+        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool == null)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+        }
+
+        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool != null)
+        {
+            NavigationManager.NavigateTo("Absences");
+        }
+
+        if (ResponseId != Guid.NewGuid())
+        {
+            if (ResponseId != CurrentResponseId)
+            {
+                Response = await Http.GetFromJsonAsync<PartialAbsenceResponseForVerification>($"api/Absences/Partial/{ResponseId}");
+
+                Comment = "";
+                CommentValidationText = "";    
+            }
+
+            CurrentResponseId = ResponseId;
+        } else
+        {
+            Response = new PartialAbsenceResponseForVerification();
+        }
+
+        IsLoading = false;
+    }
+
+    private async Task VerifyResponse()
+    {
+        IsLoading = true;
+
+        CommentValidationText = "";
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var command = new VerifyAbsenceResponseCommand
+        {
+            AbsenceId = Response.AbsenceId,
+            ResponseId = ResponseId,
+            UserEmail = authState.User.Identity.Name,
+            Comment = Comment
+        };
+
+        await Http.PostAsJsonAsync<VerifyAbsenceResponseCommand>($"api/Absences/Partial/{ResponseId}/Verify", command);
+
+        NavigationManager.NavigateTo("Absences");
+
+        IsLoading = false;
+    }
+
+    private async Task RejectResponse()
+    {
+        IsLoading = true;
+
+        CommentValidationText = "";
+
+        if(string.IsNullOrWhiteSpace(Comment) || Comment.Length < 5)
+        {
+            CommentValidationText = "You must enter a comment to reject the students explanation for this absence!";
+            return;
+        }
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var command = new RejectAbsenceResponseCommand
+        {
+            AbsenceId = Response.AbsenceId,
+            ResponseId = ResponseId,
+            UserEmail = authState.User.Identity.Name,
+            Comment = Comment
+        };
+
+        await Http.PostAsJsonAsync<RejectAbsenceResponseCommand>($"api/Absences/Partial/{ResponseId}/Reject", command);
+
+        NavigationManager.NavigateTo("Absences");
+
+        IsLoading = false;
+    }
+}

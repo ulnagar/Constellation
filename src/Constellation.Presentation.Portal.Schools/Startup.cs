@@ -1,6 +1,7 @@
 using Blazored.Modal;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
+using Constellation.Core.Abstractions;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Presentation.Portal.Schools.Pages.Auth;
 using Constellation.Presentation.Portal.Schools.Services;
