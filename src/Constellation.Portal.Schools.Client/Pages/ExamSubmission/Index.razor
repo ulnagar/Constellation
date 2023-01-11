@@ -1,0 +1,264 @@
+﻿@page "/Exams/"
+
+@using Constellation.Application.Features.Portal.School.Assignments.Commands;
+@using Constellation.Application.Features.Portal.School.Assignments.Models;
+@using Constellation.Application.Features.Portal.School.Home.Models;
+
+@attribute [Authorize]
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
+@inject NavigationManager navManager
+
+<Loader IsLoading="@IsLoading">
+    <h2>Exam Uploads</h2>
+
+    <div class="row">
+        <div class="col-6 border border-info">
+            <div class="mb-3 row mt-3">
+                <div class="col-3"><label>Student</label></div>
+                <div class="col font-weight-bold">
+                    <select class="form-control" @onchange="SelectNewStudent">
+                        <option value="">-- Select --</option>
+                        @foreach (var student in Students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName))
+                        {
+                            <option value="@student.StudentId" selected=@(SelectedStudent?.StudentId == student.StudentId)>(@student.CurrentGrade) @student.DisplayName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3 row mt-3">
+                <div class="col-3"><label>Course</label></div>
+                <div class="col font-weight-bold">
+                    @if (SelectedStudent == null)
+                    {
+                            
+                    } 
+                    else
+                    {
+                        <select class="form-control" @onchange="SelectNewCourse">
+                            @if (SelectedCourse == null)
+                            {
+                                <option value="" selected>-- Select --</option>
+                            } else
+                            {
+                                <option value="">-- Select --</option>
+                            }
+                            @foreach (var course in Courses)
+                            {
+                                <option value="@course.Id" selected=@(SelectedCourse?.Id == course.Id)>@course.DisplayName</option>
+                            }
+                        </select>
+                    }
+                </div>
+            </div>
+
+            <div class="mb-3 row mt-3">
+                <div class="col-3"><label>Assignment</label></div>
+                <div class="col font-weight-bold">
+                    @if (SelectedCourse == null)
+                    {
+                            
+                    } 
+                    else
+                    {
+                        <select class="form-control" @onchange="SelectNewAssignment">
+                            @if (SelectedAssignment == null)
+                            {
+                                <option value="" selected>-- Select --</option>
+                            } else
+                            {
+                                <option value="">-- Select --</option>
+                            }
+                            @foreach (var assignment in Assignments)
+                            {
+                                <option value="@assignment.Id" selected=@(SelectedAssignment?.Id == assignment.Id)>@assignment.Name (Due: @assignment.DueDate.ToShortDateString())</option>
+                            }
+                        </select>
+                    }
+                </div>
+            </div>
+
+            <div class="mb-3 row mt-3">
+                <div class="col-3"><label>File</label></div>
+                <div class="col font-weight-bold">
+                    <InputFile OnChange="UploadFile" disabled="@(SelectedAssignment == null)" />
+                    <br />
+                    <span class="text-danger">Maximum file upload size is 10Mb. Only PDF files are accepted.</span>
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <div class="col">
+                    <span class="text-danger">@Message</span>
+                </div>
+            </div>
+
+            <div class="mb-3 row mt-3">
+                <div class="col-3 col-offset-1">
+                    <button type="submit" class="btn btn-primary" disabled="@(!OkToSubmit)" @onclick="SubmitForm">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</Loader>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    private bool IsLoading { get; set; } = false;
+
+    public ICollection<StudentFromSchoolForDropdownSelection> Students { get; set; } = new List<StudentFromSchoolForDropdownSelection>();
+
+    public StudentFromSchoolForDropdownSelection SelectedStudent { get; set; }
+
+    public ICollection<StudentCourseForDropdownSelection> Courses { get; set; } = new List<StudentCourseForDropdownSelection>();
+
+    public StudentCourseForDropdownSelection SelectedCourse { get; set; }
+
+    public ICollection<StudentAssignmentForCourse> Assignments { get; set; } = new List<StudentAssignmentForCourse>();
+
+    public StudentAssignmentForCourse SelectedAssignment { get; set; }
+
+    public UploadStudentAssignmentSubmissionCommand Command { get; set; } = new UploadStudentAssignmentSubmissionCommand();
+
+    public IBrowserFile File { get; set; }
+
+    public bool OkToSubmit = false;
+
+    public string Message { get; set; }
+
+    // Allow user to select:
+    // 1. A Student
+    // 2. A Course the student is enrolled in
+    // 3. An Assessment from that course
+    //
+    // Then:
+    // 4. Upload a file to be submitted to the assessment as the student
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IsLoading = true;
+
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            var students = await Http.GetFromJsonAsync<List<StudentFromSchoolForDropdownSelection>>($"api/Students/ForDropdown/{SelectedSchool.Code}");
+
+            Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+        }
+
+        IsLoading = false;
+    }
+
+    private async Task GetCoursesForSelectedStudent()
+    {
+        IsLoading = true;
+
+        if (SelectedStudent != null)
+        {
+            var courses = await Http.GetFromJsonAsync<List<StudentCourseForDropdownSelection>>($"api/Exams/Courses/{SelectedStudent.StudentId}");
+            Courses = courses.OrderBy(course => course.Name).ToList();
+        } 
+        else
+        {
+            Courses = new List<StudentCourseForDropdownSelection>();
+        }
+
+        IsLoading = false;
+    }
+
+    private async Task GetAssignmentsForSelectedCourse()
+    {
+        if (SelectedCourse != null)
+        {
+            var assignments = await Http.GetFromJsonAsync<List<StudentAssignmentForCourse>>($"api/Exams/Assignments/{SelectedCourse.Id}");
+            Assignments = assignments.OrderBy(assignment => assignment.DueDate).ToList();
+        } else
+        {
+            Assignments = new List<StudentAssignmentForCourse>();
+        }
+    }
+
+    private async Task SelectNewStudent(ChangeEventArgs e)
+    {
+        var studentId = e.Value.ToString();
+
+        SelectedStudent = Students.First(student => student.StudentId == studentId);
+
+        await GetCoursesForSelectedStudent();
+
+        SelectedCourse = null;
+
+        SelectedAssignment = null;
+    }
+
+    private async Task SelectNewCourse(ChangeEventArgs e)
+    {
+        if (e.Value.ToString() == "")
+            return;
+
+        var courseId = Int32.Parse(e.Value.ToString());
+
+        SelectedCourse = Courses.First(course => course.Id == courseId);
+
+        SelectedAssignment = null;
+
+        await GetAssignmentsForSelectedCourse();
+    }
+
+    private void SelectNewAssignment(ChangeEventArgs e)
+    {
+        var assignmentId = new Guid(e.Value.ToString());
+
+        SelectedAssignment = Assignments.First(assignment => assignment.Id == assignmentId);
+
+        // Show the upload box!
+    }
+
+    private async Task UploadFile(InputFileChangeEventArgs e)
+    {
+        OkToSubmit = false;
+        Message = "";
+
+        foreach (var file in e.GetMultipleFiles(1))
+        {
+            File = file;
+        }
+
+        Command.File = new FileDto
+        {
+            FileName = File.Name,
+            FileType = File.ContentType
+        };
+
+        try
+        {
+            long maxFileSize = 10485760;
+            await using var target = new MemoryStream();
+            await File.OpenReadStream(maxFileSize).CopyToAsync(target);
+            Command.File.FileData = target.ToArray();
+        }
+        catch (Exception ex)
+        {
+            //Whats going on here?
+            Message = "An error has occurred uploading this file. Please check and try again!";
+            return;
+        }
+
+        OkToSubmit = true;
+    }
+
+    private async Task SubmitForm()
+    {
+        Command.StudentId = SelectedStudent.StudentId;
+        Command.AssignmentId = SelectedAssignment.Id;
+
+        await Http.PostAsJsonAsync<UploadStudentAssignmentSubmissionCommand>($"api/Exams/Upload", Command);
+
+        navManager.NavigateTo("");
+    }
+}
