@@ -1,0 +1,92 @@
+﻿@page "/Reports/"
+@using Constellation.Application.Features.Portal.School.Reports.Models;
+
+@attribute [Authorize]
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+<Loader IsLoading="@IsLoading">
+    <h2>School Reports</h2>
+
+    <div>
+        <div class="mt-3">
+            <GroupedDataTable Items="Reports.GroupBy(report => report.StudentName).ToList()" TItem="StudentReportForDownload" TKey="string">
+                <TableHeader>
+                    <th>Year</th>
+                    <th>Report</th>
+                    <th>Action</th>
+                </TableHeader>
+                <GroupRowTemplate Context="entry">
+                    <td colspan="6">@entry.StudentName @entry.StudentCurrentGrade</td>
+                </GroupRowTemplate>
+                <RowTemplate Context="entry">
+                    <td>@entry.Year</td>
+                    <td>@entry.ReportingPeriod</td>
+                    <td><button class="btn btn-info btn-show-hover" @onclick="() => DownloadReport(entry.Id)">Download</button></td>
+                </RowTemplate>
+            </GroupedDataTable>
+        </div>
+    </div>
+</Loader>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    private bool IsLoading { get; set; } = false;
+
+    public ICollection<StudentReportForDownload> Reports { get; set; } = new List<StudentReportForDownload>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IsLoading = true;
+
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            Reports = await Http.GetFromJsonAsync<List<StudentReportForDownload>>($"api/Reports/ForSchool/{SelectedSchool.Code}");
+
+            Reports = Reports.OrderBy(absence => absence.StudentCurrentGrade).ThenBy(absence => absence.StudentLastName).ThenBy(absence => absence.StudentFirstName).ToList();
+        }
+
+        IsLoading = false;
+    }
+
+    private async Task DownloadReport(Guid ReportId)
+    {
+        try
+        {
+            IsLoading = true;
+
+            var response = await Http.PostAsJsonAsync<Guid>($"api/Reports/Download", ReportId);
+
+            // This returns the file in the response variable.
+            // Need to push it to the browser as a file download, possibly using JS
+            // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0
+
+            var fileStream = response.Content.ReadAsStream();
+            string fileName = string.Empty;
+
+            var report = Reports.First(report => report.Id == ReportId);
+
+            fileName = $"{report.StudentLastName}, {report.StudentFirstName} - {report.ReportingPeriod}.pdf";
+
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+}
