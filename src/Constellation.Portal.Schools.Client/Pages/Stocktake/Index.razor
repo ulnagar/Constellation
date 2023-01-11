@@ -1,0 +1,219 @@
+﻿@page "/Stocktake/"
+@using Blazored.Modal.Services;
+@using Blazored.Modal;
+@using Constellation.Application.Features.Portal.School.Stocktake.Models;
+
+@attribute [Authorize]
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IModalService Modal
+
+<Loader IsLoading="@IsLoading">
+    <h2>Stocktake Data Collection</h2>
+
+    @if (StocktakeEventId != Guid.Empty)
+    {
+        <div>
+            <a onclick="@(() => SubmitSighting(CurrentlySelectedStocktake.Id))" class="btn btn-primary">Sight Device</a>
+        </div>
+    }
+
+    <hr />
+
+    <div class="form-horizontal">
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Stocktake</label>
+            <div class="col-md-6">
+                @if (ShowChangeStocktakeBox)
+                    {
+                        <select class="form-control" @onchange="ChangeStocktake" @onblur="RestoreStocktakeLabel">
+                            @foreach (var stocktake in StocktakeEvents)
+                            {
+                                var selected = CurrentlySelectedStocktake.Id == stocktake.Id;
+                                <option value="@stocktake.Id" selected="@selected">@stocktake.Name</option>
+                            }
+                        </select>
+                    } else
+                    {
+                        @CurrentlySelectedStocktake?.Name
+                        @if (StocktakeEvents.Count > 1)
+                        {
+                            <button class="btn btn-sm btn-secondary ml-4" @onclick="ToggleChangeStocktakeBox">Change</button>
+                        }
+                    }
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Start Date</label>
+            <div class="col-md-3">@CurrentlySelectedStocktake?.StartDate.ToShortDateString()</div>
+            <label class="form-label col-md-2">End Date</label>
+            <div class="col-md-3">@CurrentlySelectedStocktake?.EndDate.ToShortDateString()</div>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="mb-3 row mt-6">
+        <div class="col-md-6"><h4 class="mt-2 mb-0">Recorded sightings:</h4></div>
+        <div class="offset-1 col-md-3"><input @oninput="ChangeFilter" class="form-control" placeholder="Search" /></div>
+    </div>
+
+    <DataTable Items="FilteredSightings.ToList()" TItem="StocktakeSightingsForList">
+        <TableHeader>
+                <th>Serial / Asset</th>
+                <th>Description</th>
+                <th>User</th>
+                <th>Sighted</th>
+                <th></th>
+        </TableHeader>
+        <RowTemplate Context="entry">
+            <td>@entry.SerialNumber / @entry.AssetNumber</td>
+            <td>@entry.Description</td>
+            <td>@entry.UserName</td>
+            <td>@entry.SightedBy (@entry.SightedAt.ToShortDateString())</td>
+            <td><button class="btn btn-sm btn-outline-danger button-hover" @onclick="(() => CancelSighting(entry))">Delete</button></td>
+        </RowTemplate>
+    </DataTable>
+</Loader>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    private bool IsLoading { get; set; } = false;
+
+    public ICollection<StocktakeEventsForList> StocktakeEvents { get; set; } = new List<StocktakeEventsForList>();
+    public StocktakeEventsForList CurrentlySelectedStocktake { get; set; }
+    public ICollection<StocktakeSightingsForList> Sightings { get; set; } = new List<StocktakeSightingsForList>();
+    public ICollection<StocktakeSightingsForList> FilteredSightings { get; set; } = new List<StocktakeSightingsForList>();
+
+    public Guid StocktakeEventId { get; set; } = Guid.Empty;
+    public string Filter { get; set; } = "";
+
+    private bool ShowChangeStocktakeBox = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IsLoading = true;
+
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            StocktakeEvents = await Http.GetFromJsonAsync<List<StocktakeEventsForList>>($"api/Stocktake/Events");
+
+            if (StocktakeEvents.Any())
+            {
+                if (StocktakeEventId == Guid.Empty)
+                {
+                    CurrentlySelectedStocktake = StocktakeEvents.FirstOrDefault();
+                    StocktakeEventId = CurrentlySelectedStocktake.Id;
+                } else
+                {
+                    CurrentlySelectedStocktake = StocktakeEvents.First(stocktake => stocktake.Id == StocktakeEventId);
+                }
+
+                await UpdateSightings(); 
+            } else
+            {
+                var parameters = new ModalParameters();
+                parameters.Add("Text", "Sorry, we could not find an active stocktake event to view.");
+
+                var modal = Modal.Show<FeedbackModal>("No Stocktake Event Found", parameters);
+                var result = await modal.Result;
+
+                NavigationManager.NavigateTo("");
+            }
+        }
+
+        IsLoading = false;
+    }
+
+    private async Task UpdateSightings()
+    {
+        IsLoading = true;
+
+        if (StocktakeEventId != Guid.Empty)
+        {
+            Sightings = await Http.GetFromJsonAsync<List<StocktakeSightingsForList>>($"api/Stocktake/Events/{StocktakeEventId}/Sightings/{SelectedSchool.Code}");
+            FilteredSightings = Sightings;
+        }
+
+        IsLoading = false;
+    }
+
+    private void ChangeFilter(ChangeEventArgs e)
+    {
+        Filter = e.Value.ToString();
+
+        FilterSightings();
+    }
+
+    private void FilterSightings()
+    {
+        if (Filter.Length < 3)
+        {
+            FilteredSightings = Sightings.ToList();
+            return;
+        }
+
+        var filteredSightings = Sightings.Where(sighting =>
+            (sighting.AssetNumber != null && sighting.AssetNumber.Contains(Filter, StringComparison.CurrentCultureIgnoreCase)) ||
+            (sighting.SerialNumber != null && sighting.SerialNumber.Contains(Filter, StringComparison.CurrentCultureIgnoreCase)) ||
+            (sighting.Description != null && sighting.Description.Contains(Filter, StringComparison.CurrentCultureIgnoreCase)) ||
+            (sighting.UserName != null && sighting.UserName.Contains(Filter, StringComparison.CurrentCultureIgnoreCase)) ||
+            (sighting.SightedBy != null && sighting.SightedBy.Contains(Filter, StringComparison.CurrentCultureIgnoreCase)));
+
+        FilteredSightings = filteredSightings.ToList();
+    }
+
+    private void SubmitSighting(Guid StocktakeId)
+    {
+        NavigationManager.NavigateTo($"Stocktake/Submit/{StocktakeId}");
+    }
+
+    private void ToggleChangeStocktakeBox()
+    {
+        ShowChangeStocktakeBox = true;
+    }
+
+    private void RestoreStocktakeLabel()
+    {
+        ShowChangeStocktakeBox = false;
+    }
+
+    private async Task ChangeStocktake(ChangeEventArgs e)
+    {
+        var stocktakeId = e.Value.ToString();
+
+        StocktakeEventId = Guid.Parse(stocktakeId);
+        CurrentlySelectedStocktake = StocktakeEvents.First(stocktake => stocktake.Id.ToString() == stocktakeId);
+        await UpdateSightings();
+
+        ShowChangeStocktakeBox = false;
+    }
+
+    async Task CancelSighting(StocktakeSightingsForList sighting)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Sighting", sighting);
+
+        var modal = Modal.Show<RemoveStocktakeSightingModal>("Delete Sighting Record", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var success = (bool) result.Data;
+
+            if (success)
+            {
+                Sightings.Remove(sighting);
+            }
+        }
+
+        StateHasChanged();
+    }
+}

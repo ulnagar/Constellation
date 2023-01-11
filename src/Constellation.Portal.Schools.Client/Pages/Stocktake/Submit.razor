@@ -1,0 +1,259 @@
+﻿@page "/Stocktake/Submit/{StocktakeId:guid}"
+
+@using Blazored.FluentValidation
+@using Constellation.Application.Features.Portal.School.Home.Models;
+@using Constellation.Application.Features.Portal.School.Stocktake.Commands;
+@using Constellation.Core.Models.Stocktake
+
+@attribute [Authorize]
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<Loader IsLoading="@IsLoading">
+    <h2>Stocktake Device Sighting</h2>
+
+    <div class="form-horizontal">
+        <EditForm Model="Command" OnValidSubmit="SubmitResponse">
+            <FluentValidationValidator />
+            <ValidationSummary />
+
+            <div class="mb-3 row">
+                <div class="col-md-8 alert alert-warning">
+                    Please note that the following are not included in the stocktake and do not need to be entered:
+                    <ul>
+                        <li>Device accessories, such as chargers or pens</li>
+                        <li>Keyboards and mice</li>
+                        <li>Headsets and webcams</li>
+                        <li>Laptop docks</li>
+                    </ul>
+                    If you are unsure, please contact the Technology Support Team on <strong>1300 610 733</strong> or at <strong>support@aurora.nsw.edu.au</strong> first.
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label class="form-label col-md-2">Asset Number</label>
+                <div class="col-md-3">
+                    <InputText @bind-Value="Command.AssetNumber" class="form-control" placeholder="e.g. AC00000000" />
+                </div>
+                <div class="col-md-5 alert alert-warning">
+                    The Aurora College asset number is on a white label with a black barcode. Asset numbers start with AC and contain eight digits. You only need to enter the digits, without the leading zeroes. E.g. AC00001234 becomes 1234.
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label class="form-label col-md-2">Serial Number</label>
+                <div class="col-md-3">
+                    <InputText @bind-Value="Command.SerialNumber" class="form-control" placeholder="e.g. LT01F123" />
+                </div>
+                <div class="col-md-5 alert alert-warning">
+                    The vendor serial number for the equipment. This can be in a range of locations, depending on the vendor. Student laptop serial numbers are usually on a sticker on the bottom of the device.
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label class="form-label col-md-2">Device Description</label>
+                <div class="col-md-3">
+                    <InputText @bind-Value="Command.Description" class="form-control" placeholder="e.g. Lenovo Laptop" />
+                </div>
+                <div class="col-md-5 alert alert-warning">
+                    A description or the type of the device. E.g. "Lenovo Laptop", or "HP Monitor", etc.
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <div class="col-md-5">
+                    <div class="mb-3 row">
+                        <label class="form-label col-md-5">User Type</label>
+                        <div class="col-md-7 ps-1">
+                            <select @onchange="UpdateUserType" class="form-control">
+                                <option value="">-- Select --</option>
+                                <option value="@StocktakeSighting.UserTypes.Student">@StocktakeSighting.UserTypes.Student</option>
+                                <option value="@StocktakeSighting.UserTypes.Staff">@StocktakeSighting.UserTypes.Staff</option>
+                                <option value="@StocktakeSighting.UserTypes.School">@StocktakeSighting.UserTypes.School</option>
+                                <option value="@StocktakeSighting.UserTypes.CommunityMember">@StocktakeSighting.UserTypes.CommunityMember</option>
+                                <option value="@StocktakeSighting.UserTypes.Other">@StocktakeSighting.UserTypes.Other</option>
+                            </select>
+                        </div>
+                        <div class="w-100"></div>
+                        <label class="form-label col-md-5 mt-3">User</label>
+                        <div class="col-md-7 mt-3 ps-1">
+                            @if (Command.UserType == StocktakeSighting.UserTypes.Student)
+                            {
+                                // Show student list
+                                <select @onchange="UpdateStudentUser" class="form-control">
+                                    <option value="">-- Select --</option>
+                                    @foreach (var student in Students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName))
+                                    {
+                                        <option value="@student.DisplayName">@student.DisplayName (@student.CurrentGrade)</option>
+                                    }
+                                </select>
+                            } else if (Command.UserType == StocktakeSighting.UserTypes.Staff)
+                            {
+                                // Show staff list
+                                <select @onchange="UpdateStaffUser" class="form-control">
+                                    <option value="">-- Select --</option>
+                                    @foreach (var staff in StaffMembers.OrderBy(staff => staff.LastName))
+                                    {
+                                        <option value="@staff.DisplayName">@staff.DisplayName</option>
+                                    }
+                                </select>
+                            } else if (Command.UserType == StocktakeSighting.UserTypes.School)
+                            {
+                                // Show school list
+                                <InputText @bind-Value="Command.UserName" class="form-control" />
+                            } else if (Command.UserType == StocktakeSighting.UserTypes.CommunityMember || Command.UserType == StocktakeSighting.UserTypes.Other)
+                            {
+                                // Show text box
+                                <InputText @bind-Value="Command.UserName" class="form-control" />
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5 alert alert-warning">
+                    Select the type of user (Student, Aurora College Staff Member, School, Community Member, or Other), and then the relevant user.
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label class="form-label col-md-2">Comment</label>
+                <div class="col-md-3">
+                    <InputTextArea @bind-Value="Command.Comment" rows="5" cols="100" class="form-control" />
+                </div>
+                <div class="col-md-5 alert alert-warning">
+                    Any notes you have about the condition of the device. E.g. "Has a cracked screen", or "Missing pen", etc.
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <div class="offset-1 col-md-3">
+                    <button class="btn btn-success btn-block btn-lg" type="submit">Submit</button>
+                </div>
+                <div class="col-md-1 ms-3">
+                    <button class="btn btn-danger btn-block btn-lg" @onclick="Cancel">Cancel</button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+</Loader>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    private bool IsLoading { get; set; } = false;
+
+    [Parameter]
+    public Guid StocktakeId { get; set; }
+    public Guid CurrentStocktakeId { get; set; }
+
+    public RegisterSightedDeviceForStocktakeCommand Command { get; set; } = new();
+
+    public List<StudentFromSchoolForDropdownSelection> Students { get; set; } = new();
+    public List<StaffFromSchoolForDropdownSelection> StaffMembers { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IsLoading = true;
+
+        // Is this the first time the page has rendered?
+        // (Selected Site School exists) and (Page School is not Selected Site School) and (Page School is empty)
+        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool == null)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+        }
+
+        // Has the school been changed at the site level?
+        // (Selected Site School exists) and (Page School is not Selected Site School) and (Page School is no empty)
+        if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool != null)
+        {
+            NavigationManager.NavigateTo("Stocktake");
+        }
+
+        // Is there a valid Stocktake Event Id?
+        if (StocktakeId != Guid.NewGuid())
+        {
+            // Has this Stocktake Event been loaded before?
+            // (Parameter Id is not Page Cached Id)
+            if (StocktakeId != CurrentStocktakeId)
+            {
+                Command = new();
+
+                Command.StocktakeEventId = StocktakeId;
+                CurrentStocktakeId = StocktakeId;
+
+                var students = await Http.GetFromJsonAsync<List<StudentFromSchoolForDropdownSelection>>($"api/Students/ForDropdown/{SelectedSchool.Code}");
+                Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+
+                var staffMembers = await Http.GetFromJsonAsync<List<StaffFromSchoolForDropdownSelection>>($"api/Staff/ForDropdown/{SelectedSchool.Code}");
+                StaffMembers = staffMembers.OrderBy(staff => staff.LastName).ToList();
+
+                Command.LocationCategory = StocktakeSighting.LocationCategories.PublicSchool;
+                Command.LocationName = CurrentlySelectedSchool.Name;
+                Command.LocationCode = CurrentlySelectedSchool.Code;
+            }
+        } else
+        {
+            NavigationManager.NavigateTo("Stocktake");
+        }
+
+        IsLoading = false;
+    }
+
+    private void Cancel() => NavigationManager.NavigateTo("Stocktake");
+
+    private void UpdateUserType(ChangeEventArgs e)
+    {
+        var userType = e.Value.ToString();
+
+        Command.UserType = userType;
+        Command.UserName = "";
+
+        if (userType == StocktakeSighting.UserTypes.School)
+        {
+            Command.UserName = CurrentlySelectedSchool.Name;
+            Command.UserCode = CurrentlySelectedSchool.Code;        
+        }
+    }
+
+    private void UpdateStudentUser(ChangeEventArgs e)
+    {
+        var userName = e.Value.ToString();
+
+        Command.UserName = userName;
+
+        if (string.IsNullOrWhiteSpace(userName))
+        {
+            Command.UserCode = null;
+            return;
+        }
+
+        Command.UserCode = Students.Where(student => student.DisplayName == userName).Select(student => student.StudentId).First();
+    }
+
+    private void UpdateStaffUser(ChangeEventArgs e)
+    {
+        var userName = e.Value.ToString();
+
+        Command.UserName = userName;
+
+        Command.UserCode = StaffMembers.Where(staff => staff.DisplayName == userName).Select(staff => staff.StaffId).First();
+    }
+
+    private async Task SubmitResponse()
+    {
+        IsLoading = true;
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        Command.SightedBy = authState.User.Identity.Name;
+        Command.SightedAt = DateTime.Now;
+
+        await Http.PostAsJsonAsync<RegisterSightedDeviceForStocktakeCommand>($"api/Stocktake/Submit", Command);
+
+        IsLoading = false;
+        NavigationManager.NavigateTo("Stocktake");
+    }
+}
