@@ -1,0 +1,58 @@
+﻿.btn-pull-right {
+    margin-right: 2.5rem;
+    margin-left: auto;
+    display: block;
+}
+
+.Timetable-Week {
+    margin-top: 1rem;
+    /*border: 1px solid red;*/
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    align-content: stretch;
+}
+
+.Timetable-Day {
+    /*border: 1px solid green;*/
+    /*margin: 2px;*/
+    display: flex;
+    padding: 0.5rem 0;
+    flex-direction: column;
+    align-items: stretch;
+    align-content: stretch;
+}
+
+.Timetable-Day-Title {
+    height: 2rem;
+    text-align: center;
+    font-weight: bolder;
+    margin: 2px 1px;
+}
+
+.Timetable-Day-Period {
+    border: 1px solid green;
+    height: 7rem;
+    margin: 2px;
+    padding: 0.5rem;
+    text-align: center;
+    width: 10vw;
+    background-color: azure;
+}
+
+.Timetable-Day-Period.Inactive {
+    /*background-color: cornflowerblue;*/
+}
+
+.Timetable-Day-Period.Active {
+    background-color: darkseagreen;
+    font-weight: bold;
+}
+
+.Timetable-Day-Period.Break {
+    background-color: lightyellow;
+}
+
+.Timetable-Day-Period.Other {
+    background-color: lightgray;
+}

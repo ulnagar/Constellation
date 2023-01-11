@@ -1,0 +1,61 @@
+﻿@page "/Timetables/"
+
+@using Constellation.Application.Extensions;
+
+@attribute [Authorize]
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<Loader IsLoading="@IsLoading">
+    <h2>Student Timetables</h2>
+
+    <hr />
+
+    <GroupedDataTable Items="Students.GroupBy(student => student.CurrentGrade).ToList()" TItem="StudentDto" TKey="Core.Enums.Grade">
+        <TableHeader>
+            <th></th>
+            <th>Name</th>
+            <th></th>
+        </TableHeader>
+        <GroupRowTemplate Context="entry">
+            <td colspan="3">@entry.CurrentGrade.AsName()</td>
+        </GroupRowTemplate>
+        <RowTemplate Context="entry">
+            <td></td>
+            <td>@entry.Name</td>
+            <td><button class="btn btn-sm btn-primary" @onclick="() => ViewTimetable(entry.StudentId)">View Timetable</button></td>
+        </RowTemplate>
+    </GroupedDataTable>
+</Loader>
+
+@code {
+    [CascadingParameter]
+    public SchoolDto SelectedSchool { get; set; }
+    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    private bool IsLoading { get; set; } = false;
+
+    public List<StudentDto> Students { get; set; } = new List<StudentDto>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IsLoading = true;
+
+        if (SelectedSchool != null && SelectedSchool != CurrentlySelectedSchool)
+        {
+            CurrentlySelectedSchool = SelectedSchool;
+
+            var students = await Http.GetFromJsonAsync<List<StudentDto>>($"api/Students/FromSchool/{SelectedSchool.Code}");
+
+            Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();    
+        }
+
+        IsLoading = false;
+    }
+
+    public void ViewTimetable(string studentId)
+    {
+        NavigationManager.NavigateTo($"Timetables/View/{studentId}");
+    }
+}
