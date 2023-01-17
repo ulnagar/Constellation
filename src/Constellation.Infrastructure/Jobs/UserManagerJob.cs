@@ -111,7 +111,7 @@ namespace Constellation.Infrastructure.Jobs
             else if (groupSuccess.Errors.Any(error => error.Code == "UserAlreadyInRole"))
                 _logger.Information("{id}: {emailAddress}: User already present in role {defaultRole}", JobId, emailAddress, defaultRole);
             else
-                _logger.LogWarning("{id}: {emailAddress}: Failed to add user to role {defaultRole}", JobId, emailAddress, defaultRole);
+                _logger.Warning("{id}: {emailAddress}: Failed to add user to role {defaultRole}", JobId, emailAddress, defaultRole);
         }
     }
 }
