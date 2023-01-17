@@ -4,6 +4,7 @@ using Constellation.Infrastructure.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Net;
+using System.Net.Http.Json;
 
 namespace Constellation.Infrastructure.ExternalServices.LinkShortener
 {

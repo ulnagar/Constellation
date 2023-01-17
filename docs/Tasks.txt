@@ -42,7 +42,7 @@ CURRENT TASK
 
 	SCHOOL PORTAL
 		Convert from Blazor Server to Blazor WASM
-		- Update the Login page to include actual logic
+		 * - Update the Login page to include actual logic
 		- Modify the awards section to mirror the parents portal
 		- Consolidate the server-side controllers that do not have much use (e.g. put the students and staff into the SCHOOL controller, etc.)
 		- Refactor the exam submission flow to make it more wizard-like
