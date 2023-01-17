@@ -331,7 +331,7 @@ namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
 
             var response = await Request<RoomCreation>("sco-update", actionParams);
 
-            if (response.Status.Code != "Ok")
+            if (response.Status.Code.ToLower() != "ok")
             {
                 return null;
             }

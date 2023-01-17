@@ -241,9 +241,11 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 
             if (viewModel.CreateRoom)
             {
+                offering = await _unitOfWork.CourseOfferings.ForCoverCreationAsync(offering.Id);
+
                 await _adobeConnectService.CreateRoom(offering);
 
-                await _operationsService.CreateClassroomMSTeam(offering.Id, DateTime.Now);
+                //await _operationsService.CreateClassroomMSTeam(offering.Id, DateTime.Now);
             }
 
             var lessons = await _unitOfWork.Lessons.GetAllForCourse(offering.CourseId);
@@ -265,7 +267,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             var viewModel = await CreateViewModel<Classes_UpdateViewModel>();
             viewModel.IsNew = true;
             var courses = await _unitOfWork.Courses.ForSelectionAsync();
-            var courseList = courses.Select(course => new { course.Id, Name = $"Year {(int)course.Grade:D2} {course.Name}", Grouping = course.Faculty.ToString() });
+            var courseList = courses.Select(course => new { course.Id, Name = $"Year {(int)course.Grade:D2} {course.Name}", Grouping = course.Faculty.Name });
             viewModel.CourseList = new SelectList(courseList, "Id", "Name", null, "Grouping");
 
             return View("Update", viewModel);

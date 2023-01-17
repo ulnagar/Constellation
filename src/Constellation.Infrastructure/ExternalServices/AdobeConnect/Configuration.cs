@@ -19,7 +19,7 @@ namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
             Username = configuration["AppSettings:AdobeConnectGateway:Username"];
             Password = configuration["AppSettings:AdobeConnectGateway:Password"];
             BaseFolder = settings.AdobeConnectDefaultFolder;
-            TemplateSco = "";
+            TemplateSco = "43187376";
 
             Groups = Enum.GetValues(typeof(AdobeConnectGroup))
                 .Cast<AdobeConnectGroup>()

@@ -153,6 +153,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         public async Task<ICollection<Course>> ForSelectionAsync()
         {
             return await _context.Courses
+                .Include(course => course.Faculty)
                 .OrderBy(course => course.Grade)
                 .ThenBy(course => course.Name)
                 .ToListAsync();

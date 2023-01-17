@@ -4,11 +4,6 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
@@ -82,7 +77,7 @@ namespace Constellation.Infrastructure.Jobs
                     _logger.Warning("{id}: {emailAddress}: Failed to create user: {@errors}", JobId, emailAddress, result.Errors);
 
                     foreach (var error in result.Errors)
-                        _logger.LogWarning("{id}: {emailAddress}: Failed to create user : {error}", JobId, emailAddress, error.Description);
+                        _logger.Warning("{id}: {emailAddress}: Failed to create user : {error}", JobId, emailAddress, error.Description);
 
                     return;
                 }

@@ -44,11 +44,11 @@ namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
                 name: "Aurora College - " + offering.EndDate.Year + " - " + offering.Name,
                 year: offering.EndDate.Year.ToString(),
                 grade: "Year " + zeroFillGrade,
-                dateStart: offering.StartDate.Year + "-" + offering.StartDate.Month + "-" + offering.StartDate.Day,
-                dateEnd: offering.EndDate.Year + "-" + offering.EndDate.Month + "-" + offering.EndDate.Day,
+                dateStart: offering.StartDate.Year + "-" + offering.StartDate.Month.ToString().PadLeft(2, '0') + "-" + offering.StartDate.Day.ToString().PadLeft(2, '0'),
+                dateEnd: offering.EndDate.Year + "-" + offering.EndDate.Month.ToString().PadLeft(2, '0') + "-" + offering.EndDate.Day.ToString().PadLeft(2, '0'),
                 urlPath: "aurora-" + offering.EndDate.Year + "-" + offering.Name,
                 useTemplate: true,
-                faculty: offering.Course.Faculty.ToString(),
+                faculty: offering.Course.Faculty.Name,
                 detectParentFolder: true,
                 parentFolder: ""
             );
