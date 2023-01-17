@@ -1,5 +1,6 @@
 ﻿@page "/Awards/"
 @using Constellation.Application.Features.Awards.Models;
+@using Constellation.Application.Features.Awards.Queries;
 @using Constellation.Application.Features.Portal.School.Home.Models;
 
 @attribute [Authorize]
@@ -27,46 +28,77 @@
             </div>
 
             <div class="row mt-3">
-                <h4>Total Award Tally</h4>
-                <table class="table table-striped text-center">
-                    <thead>
-                        <tr>
-                            <th>Astra Awards</th>
-                            <th>Stellar Awards</th>
-                            <th>Galaxy Medals</th>
-                            <th>Universal Achiever Awards</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Awards.Count == 0)
-                        {
-                            <tr class="group"><td colspan="100%">Nothing to see here!</td></tr>
-                        } else
-                        {
-                            <tr>
-                                <td>@Awards.Count(award => award.Type == "Astra Award")</td>
-                                <td>@Awards.Count(award => award.Type == "Stellar Award")</td>
-                                <td>@Awards.Count(award => award.Type == "Galaxy Medal")</td>
-                                <td>@Awards.Count(award => award.Type == "Aurora Universal Achiever")</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                <h4>Award Tally</h4>
+
+                <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+                    <span class="row d-flex align-items-center">
+                        @*Display as flex to enable vertical centering of the button in the second div*@
+                        <div class="fa-icon-sizing">
+                            <i class="fad fa-star-shooting fa-3x app-theme"></i>
+                        </div>
+                        <div class="col">
+                            <div class="h4">@AwardSummary.Astras Astra awards</div>
+                            <span class="fst-italic">Astra awards are given out by classroom teachers.</span>
+                        </div>
+                    </span>
+                </div>
+
+                <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+                    <span class="row d-flex align-items-center">
+                        @*Display as flex to enable vertical centering of the button in the second div*@
+                        <div class="fa-icon-sizing">
+                            <i class="fad fa-star-christmas fa-3x app-theme"></i>
+                        </div>
+                        <div class="col">
+                            <div class="h4">@AwardSummary.Stellars Stellar awards</div>
+                            <span class="fst-italic">5 Astra awards = 1 Stellar award.</span>
+                        </div>
+                    </span>
+                </div>
+
+                <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+                    <span class="row d-flex align-items-center">
+                        @*Display as flex to enable vertical centering of the button in the second div*@
+                        <div class="fa-icon-sizing">
+                            <i class="fad fa-solar-system fa-3x app-theme"></i>
+                        </div>
+                        <div class="col">
+                            <div class="h4">@AwardSummary.Galaxies Galaxy medals</div>
+                            <span class="fst-italic">5 Stellar awards = 1 Galaxy Medal.</span>
+                        </div>
+                    </span>
+                </div>
+
+                <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+                    <span class="row d-flex align-items-center">
+                        @*Display as flex to enable vertical centering of the button in the second div*@
+                        <div class="fa-icon-sizing">
+                            <i class="fad fa-galaxy fa-3x app-theme"></i>
+                        </div>
+                        <div class="col">
+                            <div class="h4">@AwardSummary.Universals Universal Achiever awards</div>
+                            <span class="fst-italic">5 Galaxy medals = 1 Universal Achiever award.</span>
+                        </div>
+                    </span>
+                </div>
             </div>
 
             <div class="row mt-3">
-                <h4>Recent Awards</h4>
-                <DataTable Items="AwardsForDisplay.ToList()" TItem="StudentAwardsForList">
-                    <TableHeader>
-                        <th>Date</th>
-                        <th>Type</th>
-                    </TableHeader>
-                    <RowTemplate Context="entry">
-                        <td width="33%">@entry.AwardedOn.ToLongDateString()</td>
-                        <td>@entry.Type</td>
-                    </RowTemplate>
-                </DataTable>
+                <h4>Recent Award List</h4>
+
+                @foreach (var award in AwardSummary.RecentAwards.OrderByDescending(award => award.AwardedOn).ToList())
+                {
+                    <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+                        <span class="row d-flex align-items-center">
+                            <div class="col">
+                                <div class="h4">@award.Type</div>
+                                <span class="fst-italic">Issued on @award.AwardedOn.ToShortDateString()</span>
+                            </div>
+                        </span>
+                    </div>
+                }
             </div>
+
         </div>
     </div>
 </Loader>
@@ -81,8 +113,7 @@
     public ICollection<StudentFromSchoolForDropdownSelection> Students { get; set; } = new List<StudentFromSchoolForDropdownSelection>();
     public StudentFromSchoolForDropdownSelection SelectedStudent { get; set; }
 
-    public ICollection<StudentAwardsForList> Awards { get; set; } = new List<StudentAwardsForList>();
-    public ICollection<StudentAwardsForList> AwardsForDisplay { get; set; } = new List<StudentAwardsForList>();
+    public StudentAwardSummary AwardSummary { get; set; } = new();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -97,9 +128,6 @@
             Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
 
             SelectedStudent = null;
-
-            Awards = new List<StudentAwardsForList>();
-            AwardsForDisplay = new List<StudentAwardsForList>();
         }
 
         IsLoading = false;
@@ -127,14 +155,7 @@
 
         if (SelectedStudent != null)
         {
-            var awards = await Http.GetFromJsonAsync<List<StudentAwardsForList>>($"api/Awards/ForStudent/{SelectedStudent.StudentId}");
-
-            Awards = awards.ToList();
-            AwardsForDisplay = Awards.OrderByDescending(award => award.AwardedOn).Take(10).ToList();
-        } else
-        {
-            Awards = new List<StudentAwardsForList>();
-            AwardsForDisplay = new List<StudentAwardsForList>();
+            AwardSummary = await Http.GetFromJsonAsync<StudentAwardSummary>($"api/Awards/ForStudent/{SelectedStudent.StudentId}");
         }
 
         IsLoading = false;
