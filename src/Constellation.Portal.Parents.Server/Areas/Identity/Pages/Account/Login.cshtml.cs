@@ -152,7 +152,7 @@ public class LoginModel : PageModel
         }
 
         // Log out all other sessions
-        await _userManager.UpdateSecurityStampAsync(user);
+        //await _userManager.UpdateSecurityStampAsync(user);
 
         // Log user in
         await _signInManager.SignInAsync(user, false);
