@@ -70,7 +70,7 @@ namespace Constellation.Infrastructure.Jobs
                 var user = new AppUser
                 {
                     Email = emailAddress,
-                    UserName = $"{firstName} {lastName}",
+                    UserName = emailAddress,
                     FirstName = firstName,
                     LastName = lastName,
                 };
