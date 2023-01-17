@@ -217,7 +217,7 @@ public class AuthService : IAuthService, IScopedService
                 // Create new user
                 user = new AppUser
                 {
-                    UserName = $"{member.FirstName} {member.LastName}",
+                    UserName = member.EmailAddress,
                     Email = member.EmailAddress,
                     FirstName = member.FirstName,
                     LastName = member.LastName,
