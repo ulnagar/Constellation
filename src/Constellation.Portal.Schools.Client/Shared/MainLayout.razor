@@ -65,17 +65,57 @@
     private bool ShowChangeSchoolBox = false;
     private ClaimsPrincipal User { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    private bool FetchingData { get; set; } = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         var authState = await authenticationStateTask;
         User = authState.User;
 
         if (User.Identity.IsAuthenticated)
         {
-            Schools = await Http.GetFromJsonAsync<List<SchoolDto>>($"api/Schools");
-            SelectedSchool = Schools.OrderBy(school => school.Code).First();
+            Console.WriteLine("User Logged In - OnAfterRenderAsync");
+
+            if (!FetchingData && Schools.Count == 0)
+            {
+                Console.WriteLine("Retrieving schools list - OnAfterRenderAsync");
+
+                FetchingData = true;
+
+                Schools = await Http.GetFromJsonAsync<List<SchoolDto>>($"api/Schools");
+                SelectedSchool = Schools.OrderBy(school => school.Code).First();
+
+                FetchingData = false;
+
+                StateHasChanged();
+            } else
+            {
+                Console.WriteLine("Already retrieving schools list - skipping - OnAfterRenderAsync");
+            }
+        } 
+        else
+        {
+            Console.WriteLine("User Not Logged In - OnAfterRenderAsync");
         }
     }
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    var authState = await authenticationStateTask;
+    //    User = authState.User;
+
+    //    if (User.Identity.IsAuthenticated)
+    //    {
+    //        Console.WriteLine("User Logged In - OnInitializedAsync");
+
+    //        Schools = await Http.GetFromJsonAsync<List<SchoolDto>>($"api/Schools");
+    //        SelectedSchool = Schools.OrderBy(school => school.Code).First();
+    //    }
+    //    else
+    //    {
+    //        Console.WriteLine("User Not Logged In - OnInitializedAsync");
+    //    }
+    //}
 
     private void ToggleChangeSchoolBox()
     {
@@ -103,6 +143,6 @@
 
     private void Login()
     {
-        NavManager.NavigateTo("/authentication/LogIn");
+        NavManager.NavigateTo("authentication/LogIn");
     }
 }

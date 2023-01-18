@@ -139,10 +139,7 @@ public class LoginModel : PageModel
 
                 _logger.LogInformation(" - Login succeeded for {user}", Input.Email);
 
-                if (string.IsNullOrWhiteSpace(returnUrl))
-                    return LocalRedirect(returnUrl!);
-                else
-                    return LocalRedirect("");
+                return LocalRedirect(returnUrl!);
             }
 
             // Build/rebuild schools claim
@@ -152,10 +149,7 @@ public class LoginModel : PageModel
 
             _logger.LogInformation(" - Login succeeded for {user}", Input.Email);
 
-            if (string.IsNullOrWhiteSpace(returnUrl))
-                return LocalRedirect(returnUrl!);
-            else
-                return LocalRedirect("");
+            return LocalRedirect(returnUrl!);
         }
 
         return Page();

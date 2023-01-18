@@ -63,7 +63,7 @@ builder.Services.AddIdentityServer(opts =>
     .AddApiAuthorization<AppUser, AppDbContext>()
     .AddProfileService<WASMAuthenticationProfileService>();
 
-builder.Services.AddAuthentication()
+builder.Services.AddAuthentication("Constellation.Schools.Identity")
     .AddIdentityServerJwt();
 
 builder.Services.ConfigureApplicationCookie(opts =>
@@ -131,6 +131,7 @@ else
     app.UseHsts();
 }
 
+app.UsePathBase("/schools/");
 app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();
