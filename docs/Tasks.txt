@@ -19,13 +19,11 @@ CURRENT TASK
 		*- Add DomainEventHandler and OutboxProcessorJob
 		*- Add job to scan for expired teacher and student group tutorial links (EffectiveTo) and raise appropriate events
 
-
 	SCHOOL CONTACTS
 		* Add repair user option to school contacts actions list
 
 	STAFF
 		* Fix Faculty section of Staff Details page
-
 
 	ADMIN AUTH DASHBOARD
 		*Build users page and include links from index
