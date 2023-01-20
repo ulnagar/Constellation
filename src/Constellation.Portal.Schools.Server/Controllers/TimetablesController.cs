@@ -1,10 +1,9 @@
-﻿using Constellation.Application.DTOs;
-using Constellation.Application.Features.Portal.School.Reports.Queries;
+﻿namespace Constellation.Portal.Schools.Server.Controllers;
+
+using Constellation.Application.DTOs;
 using Constellation.Application.Features.Portal.School.Timetables.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-
-namespace Constellation.Portal.Schools.Server.Controllers;
 
 [Route("api/[controller]")]
 public class TimetablesController : BaseAPIController

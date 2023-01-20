@@ -1,9 +1,9 @@
-﻿using Constellation.Application.Features.Portal.School.Reports.Models;
+﻿namespace Constellation.Portal.Schools.Server.Controllers;
+
+using Constellation.Application.Features.Portal.School.Reports.Models;
 using Constellation.Application.Features.Portal.School.Reports.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-
-namespace Constellation.Portal.Schools.Server.Controllers;
 
 [Route("api/[controller]")]
 public class ReportsController : BaseAPIController

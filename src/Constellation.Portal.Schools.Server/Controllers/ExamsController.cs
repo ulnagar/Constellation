@@ -3,11 +3,8 @@
 using Constellation.Application.Features.Portal.School.Assignments.Commands;
 using Constellation.Application.Features.Portal.School.Assignments.Models;
 using Constellation.Application.Features.Portal.School.Assignments.Queries;
-using Constellation.Core.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using static System.Net.WebRequestMethods;
 
 [Route("api/[controller]")]
 public class ExamsController : BaseAPIController

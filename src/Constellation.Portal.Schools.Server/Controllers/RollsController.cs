@@ -1,10 +1,10 @@
-﻿using Constellation.Application.Features.Portal.School.ScienceRolls.Commands;
+﻿namespace Constellation.Portal.Schools.Server.Controllers;
+
+using Constellation.Application.Features.Portal.School.ScienceRolls.Commands;
 using Constellation.Application.Features.Portal.School.ScienceRolls.Models;
 using Constellation.Application.Features.Portal.School.ScienceRolls.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-
-namespace Constellation.Portal.Schools.Server.Controllers;
 
 [Route("api/[controller]")]
 public class RollsController : BaseAPIController

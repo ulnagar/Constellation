@@ -3,11 +3,8 @@
 using Constellation.Application.Features.Portal.School.Stocktake.Commands;
 using Constellation.Application.Features.Portal.School.Stocktake.Models;
 using Constellation.Application.Features.Portal.School.Stocktake.Queries;
-using Constellation.Core.Models.Stocktake;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using static System.Net.WebRequestMethods;
 
 [Route("api/[controller]")]
 public class StocktakeController : BaseAPIController

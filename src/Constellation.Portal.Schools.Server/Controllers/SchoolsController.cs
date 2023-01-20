@@ -1,12 +1,12 @@
-﻿using Constellation.Application.DTOs;
+﻿namespace Constellation.Portal.Schools.Server.Controllers;
+
+using Constellation.Application.DTOs;
 using Constellation.Application.Features.Portal.School.Contacts.Models;
 using Constellation.Application.Features.Portal.School.Contacts.Queries;
 using Constellation.Application.Features.Portal.School.Home.Commands;
 using Constellation.Application.Features.Portal.School.Home.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-
-namespace Constellation.Portal.Schools.Server.Controllers;
 
 [Route("api/[controller]")]
 public class SchoolsController : BaseAPIController
