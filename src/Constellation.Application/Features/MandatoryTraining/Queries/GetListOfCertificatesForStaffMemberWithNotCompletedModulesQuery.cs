@@ -4,6 +4,7 @@ using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Interfaces.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -87,6 +88,8 @@ public class GetListOfCertificatesForStaffMemberWithNotCompletedModulesQueryHand
             }
         }
 
+        var duplicateEntries = new List<CompletionRecordExtendedDetailsDto>();
+
         // - Remove all superceded entries
         foreach (var record in data.Modules)
         {
@@ -100,7 +103,17 @@ public class GetListOfCertificatesForStaffMemberWithNotCompletedModulesQueryHand
             {
                 record.IsLatest = true;
                 record.CalculateExpiry();
+
+                foreach (var duplicate in duplicates)
+                {
+                    duplicateEntries.Add(duplicate);
+                }
             }
+        }
+
+        foreach (var entry in duplicateEntries)
+        {
+            data.Modules.Remove(entry);
         }
 
         return data;
