@@ -312,9 +312,9 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> DeleteFacultyRole(Guid id)
+        public async Task<IActionResult> DeleteFacultyRole(Guid membershipId)
         {
-            await _mediator.Send(new RemoveFacultyMembershipFromStaffMemberCommand { MembershipId = id });
+            await _mediator.Send(new RemoveFacultyMembershipFromStaffMemberCommand { MembershipId = membershipId });
 
             return RedirectToAction("Index");
         }
