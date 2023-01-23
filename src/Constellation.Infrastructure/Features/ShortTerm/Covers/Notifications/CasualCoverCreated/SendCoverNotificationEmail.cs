@@ -6,6 +6,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.Templates.Views.Documents.Covers;
@@ -30,11 +31,12 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
         private readonly IPDFService _pdfService;
         private readonly IEmailGateway _emailGateway;
         private readonly ICalendarService _calendarService;
+        private readonly ITeamRepository _teamRepository;
         private readonly ILogger _logger;
 
         public SendCoverNotificationEmail(IAppDbContext context, UserManager<AppUser> userManager,
             IRazorViewToStringRenderer razorService, IPDFService pdfService, IEmailGateway emailGateway,
-            ICalendarService calendarService, ILogger logger)
+            ICalendarService calendarService, ILogger logger, ITeamRepository teamRepository)
         {
             _context = context;
             _userManager = userManager;
@@ -42,6 +44,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
             _pdfService = pdfService;
             _emailGateway = emailGateway;
             _calendarService = calendarService;
+            _teamRepository = teamRepository;
             _logger = logger.ForContext<SendCoverNotificationEmail>();
         }
 
@@ -76,17 +79,12 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
 
             var additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
 
-            var teamLink = await _context.Teams
-                .FirstOrDefaultAsync(team => team.Name.Contains(offering.Name) && team.Name.Contains(offering.EndDate.Year.ToString()), cancellationToken);
-
-            if (teamLink == null)
+            var teamLink = await _teamRepository.GetLinkByOffering(offering.Name, offering.EndDate.Year.ToString(), cancellationToken);
+                
+            if (string.IsNullOrWhiteSpace(teamLink))
             {
                 _logger.Warning("Could not find team for {class} while attempting to send email for cover {id}", offering.Name, cover.Id);
-                teamLink = new Team
-                {
-                    Link = "https://teams.microsoft.com",
-                    Name = $"AC - {offering.EndDate.Year} - {offering.Name}"
-                };
+                teamLink = "https://teams.microsoft.com";
             }
 
             var primaryRecipients = new Dictionary<string, string>(); // Casual, Classroom Teacher
@@ -209,7 +207,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
                 EndDate = cover.EndDate,
                 HasAdobeAccount = true,
                 Preheader = "",
-                ClassWithLink = new Dictionary<string, string> { { teamLink.Name, teamLink.Link } }
+                ClassWithLink = new Dictionary<string, string> { { "Class Team", teamLink } }
             };
 
             if (singleDayCover)
@@ -219,7 +217,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
                 // Create and add ICS files
                 var uid = $"{cover.Id}-{cover.Offering.Id}-{cover.StartDate:yyyyMMdd}";
                 var summary = $"Aurora College Cover - {cover.Offering.Name}";
-                var location = $"{teamLink.Name} ({teamLink.Link})";
+                var location = $"Class Team ({teamLink})";
                 var description = body;
 
                 // What cycle day does the cover fall on?

@@ -1,12 +1,61 @@
-﻿using System;
+﻿namespace Constellation.Core.Models;
 
-namespace Constellation.Core.Models
+using Constellation.Core.DomainEvents;
+using Constellation.Core.Primitives;
+using System;
+using System.Web;
+
+public class Team : AggregateRoot
 {
-    public class Team
+    private Team(
+        Guid id,
+        string name,
+        string description)
+        : base(id)
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public string Link { get; set; }
+        UpdateTeamDetails(name, description);
+    }
+
+    public string Name { get; private set; }
+    public string Description { get; private set; }
+    public string Link { get; private set; }
+    public bool IsArchived { get; private set; }
+
+    public static Team Create(Guid id, string name, string description, string generalChannelId)
+    {
+        var team = new Team(id, name, description);
+
+        team.CreateLinkFromPart(generalChannelId);
+
+        team.RaiseDomainEvent(new MicrosoftTeamRegisteredDomainEvent(Guid.NewGuid(), team.Id));
+
+        return team;
+    }
+
+    private void CreateLinkFromPart(string generalChannelId)
+    {
         // Link format is https://teams.microsoft.com/l/team/{General Channel Id}/conversations?groupId={Group Id}&tenantId={Tenant Id}
+
+        Link = $"https://teams.microsoft.com/l/team/{HttpUtility.UrlEncode(generalChannelId)}/conversations?groupId={HttpUtility.UrlEncode(Id.ToString())}&tenantId={HttpUtility.UrlEncode("05a0e69a-418a-47c1-9c25-9387261bf991")}";
+    }
+
+    public void UpdateTeamDetails(string name, string description)
+    {
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            Name = name.Trim();
+        }
+
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            Description = description.Trim();
+        }
+    }
+
+    public void ArchiveTeam()
+    {
+        IsArchived = true;
+
+        RaiseDomainEvent(new MicrosoftTeamArchivedDomainEvent(Guid.NewGuid(), Id));
     }
 }

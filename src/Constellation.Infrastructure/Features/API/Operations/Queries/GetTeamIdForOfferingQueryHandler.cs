@@ -1,28 +1,27 @@
-﻿using Constellation.Application.Features.API.Operations.Queries;
-using Constellation.Application.Interfaces.Repositories;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿namespace Constellation.Infrastructure.Features.API.Operations.Queries;
 
-namespace Constellation.Infrastructure.Features.API.Operations.Queries
+using Constellation.Application.Features.API.Operations.Queries;
+using Constellation.Core.Abstractions;
+
+public class GetTeamIdForOfferingQueryHandler : IRequestHandler<GetTeamIdForOfferingQuery, string>
 {
-    public class GetTeamIdForOfferingQueryHandler : IRequestHandler<GetTeamIdForOfferingQuery, string>
+    private readonly ITeamRepository _teamRepository;
+
+    public GetTeamIdForOfferingQueryHandler(ITeamRepository teamRepository)
     {
-        private readonly IAppDbContext _context;
+        _teamRepository = teamRepository;
+    }
 
-        public GetTeamIdForOfferingQueryHandler(IAppDbContext context)
+    public async Task<string> Handle(GetTeamIdForOfferingQuery request, CancellationToken cancellationToken)
+    {
+        var id = await _teamRepository
+            .GetIdByOffering(request.ClassName, request.Year, cancellationToken);
+
+        if (id is null || id == Guid.Empty)
         {
-            _context = context;
+            return null;
         }
 
-        public async Task<string> Handle(GetTeamIdForOfferingQuery request, CancellationToken cancellationToken)
-        {
-            return await _context.Teams
-                .Where(team => team.Name.Contains(request.ClassName) && team.Name.Contains(request.Year))
-                .Select(team => team.Id.ToString())
-                .FirstOrDefaultAsync(cancellationToken);
-        }
+        return id.ToString();
     }
 }

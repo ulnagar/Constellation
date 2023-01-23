@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.Templates.Views.Emails.Covers;
@@ -26,16 +27,18 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
         private readonly IRazorViewToStringRenderer _razorService;
         private readonly IEmailGateway _emailGateway;
         private readonly ICalendarService _calendarService;
+        private readonly ITeamRepository _teamRepository;
 
         public SendCoverCancellationEmail(IAppDbContext context, UserManager<AppUser> userManager,
             IRazorViewToStringRenderer razorService, IEmailGateway emailGateway,
-            ICalendarService calendarService)
+            ICalendarService calendarService, ITeamRepository teamRepository)
         {
             _context = context;
             _userManager = userManager;
             _razorService = razorService;
             _emailGateway = emailGateway;
             _calendarService = calendarService;
+            _teamRepository = teamRepository;
         }
 
         public async Task Handle(CasualCoverCancelledNotification notification, CancellationToken cancellationToken)
@@ -64,8 +67,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
 
             var additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
 
-            var teamLink = await _context.Teams
-                .FirstOrDefaultAsync(team => team.Name.Contains(offering.Name) && team.Name.Contains(cover.EndDate.Year.ToString()), cancellationToken);
+            var teamLink = await _teamRepository.GetLinkByOffering(offering.Name, offering.EndDate.Year.ToString(), cancellationToken);
 
             var primaryRecipients = new Dictionary<string, string>(); // Casual, Classroom Teacher
             var secondaryRecipients = new Dictionary<string, string>(); // Head Teacher, Additional Recipients
@@ -107,7 +109,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
                 EndDate = cover.EndDate,
                 HasAdobeAccount = true,
                 Preheader = "",
-                ClassWithLink = new Dictionary<string, string> { { teamLink.Name, teamLink.Link } }
+                ClassWithLink = new Dictionary<string, string> { { "Class Team", teamLink } }
             };
 
             if (singleDayCover)
@@ -117,7 +119,7 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
                 // Create and add ICS files
                 var uid = $"{cover.Id}-{cover.Offering.Id}-{cover.StartDate:yyyyMMdd}";
                 var summary = $"Aurora College Cover - {cover.Offering.Name}";
-                var location = $"{teamLink.Name} ({teamLink.Link}";
+                var location = $"Class Team ({teamLink}";
                 var description = body;
 
                 // What cycle day does the cover fall on?

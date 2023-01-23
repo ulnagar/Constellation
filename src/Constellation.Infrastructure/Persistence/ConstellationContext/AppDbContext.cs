@@ -66,7 +66,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public DbSet<CanvasAssignment> CanvasAssignments { get; set; }
         public DbSet<CanvasAssignmentSubmission> CanvasAssignmentsSubmissions { get; set; }
         public DbSet<StudentReport> StudentReports { get; set; }
-        public DbSet<Team> Teams { get; set; }
         public DbSet<StocktakeEvent> StocktakeEvents { get; set; }
         public DbSet<StocktakeSighting> StocktakeSightings { get; set; }
         public DbSet<StudentAward> StudentAward { get; set; }

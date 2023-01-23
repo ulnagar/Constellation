@@ -46,9 +46,4 @@ public class IndexModel : BasePageModel
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync()
-    {
-        await _mediator.Send(new TestCommand());
-        return Page();
-    }
 }

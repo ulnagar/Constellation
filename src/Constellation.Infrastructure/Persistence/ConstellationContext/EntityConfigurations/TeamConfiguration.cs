@@ -8,6 +8,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
     {
         public void Configure(EntityTypeBuilder<Team> builder)
         {
+            builder.ToTable("LinkedSystems_Teams");
+
             builder.HasKey(team => team.Id);
         }
     }

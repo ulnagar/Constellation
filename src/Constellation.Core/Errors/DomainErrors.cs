@@ -48,6 +48,20 @@ public static class DomainErrors
         }
     }
 
+    public static class LinkedSystems
+    {
+        public static class Teams
+        {
+            public static readonly Error TeamNotFoundInDatabase = new(
+                "LinkedSystems.Teams.TeamNotFoundInDatabase",
+                "The Team could not be found in the database");
+
+            public static readonly Func<Guid, Error> AlreadyExists = id => new Error(
+                "LinkedSystems.Teams.AlreadyExists",
+                $"The Team with Id {id} could not be created because it already exists in the database");
+        }
+    }
+
     public static class GroupTutorials
     {
         public static class GroupTutorial

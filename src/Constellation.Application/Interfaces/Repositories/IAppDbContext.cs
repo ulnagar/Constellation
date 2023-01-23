@@ -49,7 +49,6 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<StoredFile> StoredFiles { get; set; }
         DbSet<CanvasAssignment> CanvasAssignments { get; set; }
         DbSet<CanvasAssignmentSubmission> CanvasAssignmentsSubmissions { get; set; }
-        DbSet<Team> Teams { get; set; }
         DbSet<StocktakeEvent> StocktakeEvents { get; set; }
         DbSet<StocktakeSighting> StocktakeSightings { get; set; }
         DbSet<StudentAward> StudentAward { get; set; }

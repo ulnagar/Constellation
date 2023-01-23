@@ -320,20 +320,5 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
                 await _unitOfWork.CompleteAsync();
             }
         }
-
-        // POST api/v1/Operations/RegisterTeam
-        [Route("RegisterTeam")]
-        [HttpPost]
-        public async Task RegisterTeam([FromBody]RegisterTeam team)
-        {
-            var command = new CreateTeamCommand
-            {
-                Id = team.Id,
-                Name = team.Name,
-                ChannelId = team.GeneralChannelId
-            };
-
-            await _mediator.Send(command);
-        }
     }
 }
