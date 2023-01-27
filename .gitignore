@@ -388,3 +388,4 @@ appsettings.*.json
 /src/Constellation.Portal.Schools.Server/wwwroot/lib/server
 /src/Constellation.Portal.Schools.Client/wwwroot/lib/twitter-bootstrap
 /src/Constellation.Portal.Schools.Client/wwwroot/private/font-awesome
+/src/Constellation.Infrastructure.HangfireServer/docker-compose-test.yml

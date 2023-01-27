@@ -88,7 +88,41 @@ public static class ServicesRegistration
 
         services.AddSingleton(Log.Logger);
 
-        services.AddMediatR(new[] { Assembly.GetExecutingAssembly(), typeof(IAppDbContext).Assembly });
+        services.AddMediatR(new[] { Constellation.Application.AssemblyReference.Assembly, Constellation.Infrastructure.AssemblyReference.Assembly, Constellation.Core.AssemblyReference.Assembly });
+
+        // Search for an register all the Repository classes that are located at
+        // Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
+        services.Scan(selector =>
+            selector.FromAssemblies(
+                Constellation.Application.AssemblyReference.Assembly,
+                Constellation.Infrastructure.AssemblyReference.Assembly)
+            .AddClasses(classes => classes.InNamespaceOf<UnitOfWork>(), false)
+            .UsingRegistrationStrategy(RegistrationStrategy.Skip)
+            .AsMatchingInterface()
+            .WithScopedLifetime());
+
+        // Search for and register all the Services classes that are located at
+        // Constellation.Infrastructure.Services
+        services.Scan(selector =>
+            selector.FromAssemblies(
+                Constellation.Application.AssemblyReference.Assembly,
+                Constellation.Infrastructure.AssemblyReference.Assembly)
+            .AddClasses(classes => classes.InNamespaceOf<AuthService>(), false)
+            .UsingRegistrationStrategy(RegistrationStrategy.Skip)
+            .AsMatchingInterface()
+            .WithScopedLifetime());
+
+        // Add any other missing services as their interfaces
+        services.Scan(selector =>
+            selector.FromAssemblies(
+                Constellation.Application.AssemblyReference.Assembly,
+                Constellation.Infrastructure.AssemblyReference.Assembly)
+            .AddClasses(false)
+            .UsingRegistrationStrategy(RegistrationStrategy.Skip)
+            .AsMatchingInterface()
+            .WithScopedLifetime());
+
+        services.Decorate(typeof(INotificationHandler<>), typeof(IdempotentDomainEventHandler<>));
 
         services.AddApplication();
 

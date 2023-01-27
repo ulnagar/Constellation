@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="docker-compose-test.yml" />
     <None Remove="docker-compose.template.yml" />
     <None Remove="docker-compose.yml" />
   </ItemGroup>
