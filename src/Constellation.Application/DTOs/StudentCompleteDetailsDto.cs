@@ -65,6 +65,7 @@ namespace Constellation.Application.DTOs
             public void Mapping(Profile profile)
             {
                 profile.CreateMap<CourseOffering, Offering>()
+                    .ForMember(dest => dest.OfferingId, opt => opt.MapFrom(src => src.Id))
                     .ForMember(dest => dest.Teachers, opt => opt.MapFrom(src => src.Sessions.Where(session => !session.IsDeleted).Select(session => session.Teacher.DisplayName).Distinct()));
             }
         }
