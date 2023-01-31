@@ -1,5 +1,4 @@
-﻿using Constellation.Core.Enums;
-using Constellation.Core.Models;
+﻿using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -11,6 +10,8 @@ namespace Constellation.Application.Interfaces.Repositories
     public interface IStaffRepository
     {
         Task<List<Staff>> GetListFromIds(List<string> staffIds, CancellationToken cancellationToken = default);
+        Task<List<Staff>> GetCurrentTeachersForOffering(int offeringId, CancellationToken cancellationToken = default);
+        Task<List<Staff>> GetFacultyHeadTeachers(Guid facultyId, CancellationToken cancellationToken = default);
         Staff WithDetails(string id);
         Staff WithFilter(Expression<Func<Staff, bool>> predicate);
         Task<Staff> GetForExistCheck(string id);

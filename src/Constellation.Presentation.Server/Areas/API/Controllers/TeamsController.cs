@@ -5,6 +5,7 @@ using Constellation.Application.Teams.CreateTeam;
 using Constellation.Application.Teams.DeleteTeam;
 using Constellation.Application.Teams.GetAllTeams;
 using Constellation.Application.Teams.GetTeamById;
+using Constellation.Application.Teams.GetTeamMembershipById;
 using Constellation.Application.Teams.Models;
 using Constellation.Presentation.Server.Areas.API.Models;
 using MediatR;
@@ -50,6 +51,21 @@ public class TeamsController : ControllerBase
         }
 
         _logger.Warning("Failed to retrieve team {teamId} with errors {@errors}", Id, teamRequest.Error);
+
+        return null;
+    }
+
+    [HttpGet("{id:guid}/Students")]
+    public async Task<List<TeamMembershipResponse>> GetTeamMembership([FromRoute] Guid Id)
+    {
+        var teamMemberRequest = await _mediator.Send(new GetTeamMembershipByIdQuery(Id));
+
+        if (teamMemberRequest.IsSuccess)
+        {
+            return teamMemberRequest.Value;
+        }
+
+        _logger.Warning("Failed to retrieve team membership for {teamId} with errors {@errors}", Id, teamMemberRequest.Error);
 
         return null;
     }

@@ -1,53 +1,19 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
-	GROUP TUTORIALS
-		*Track tutorials, staff involved, and the students enrolled
-		*Allow staff to create rolls for tutorial sessions, that include the status of each student enrolled for the session
-		Provide ability to re-sync rolls against current enrolments
-		*Provide ability for staff to add one-off attendees to rolls without enrolling them in the tutorial
-		*Link the creation of tutorials to the automatic generation of a Team, and add all staff as owners, and all students as members
-		*When a student is enrolled in the tutorial, automatically add them to the Team
-		*When a student is removed from the tutorial, automatically remove them from the Team
-		*Include the same operations for staff
-		*Prevent duplicate rolls from being created (limit to one per day per tutorial)
-		*Create reports for each tutorial 
-			- student attendance as a group over time
-			- individual student attendance
 
-		*- Add DomainEvents to the GroupTutorial methods
-		*- Add DomainEventHandler and OutboxProcessorJob
-		*- Add job to scan for expired teacher and student group tutorial links (EffectiveTo) and raise appropriate events
-
-	SCHOOL CONTACTS
-		* Add repair user option to school contacts actions list
-
-	STAFF
-		* Fix Faculty section of Staff Details page
-
-	ADMIN AUTH DASHBOARD
-		*Build users page and include links from index
-		*Build base audit user method that can handle all user types
-			*Link to the actions drop down in the users page and the index page
-		#Add Lock and Unlock user options in the actions dropdown
-		*Link the roles and roles edit pages to the new dashboard
-		*Add dashboard/index page to global nav
-		#Move index page onget method to mediator query
-
-	ABSENCES
-		*Update link in SMS to parents to point to new parent portal instead of old absences pages.
-		*Add logger to old absences pages to allow data collection on how often they are hit.
-
-	SCHOOL PORTAL
-		Convert from Blazor Server to Blazor WASM
-		 * - Update the Login page to include actual logic
-		 * - Modify the awards section to mirror the parents portal
-		- Consolidate the server-side controllers that do not have much use (e.g. put the students and staff into the SCHOOL controller, etc.)
-		- Refactor the exam submission flow to make it more wizard-like
+TEAMS
+	GetTeamMembershipByIdQueryHandler:
+		Test extracting covering teacher emails from the offering before using
+		Find a way to track and include teachers involved in one-on-one tutorials
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+SCHOOL PORTAL:
+	Consolidate the server-side controllers that do not have much use (e.g. put the students and staff into the SCHOOL controller, etc.)
+	Refactor the exam submission flow to make it more wizard-like
 
 REFACTOR:
 	*Move the external connections to separate subfolders, including the gateway, configuration, and service.
@@ -69,9 +35,6 @@ APP PERMISSIONS:
 	Permission Structure:
 	 SchoolContact = Portal.School.User
 	 Parent = Portal.Parent.User
-
-TEAMS:
-	Periodic Team sync to ensure that all classes have registered Teams in the application
 
 SENTRAL:
 	** Parent Portal only access Sentral directly inside APPLICATION\FEATURES\ATTENDANCE\QUERIES\GETVALIDATTENDANCEREPORTDATESQUERY

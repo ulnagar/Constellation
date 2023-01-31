@@ -18,7 +18,6 @@ internal sealed class FacultyRepository : IFacultyRepository
             .Set<Faculty>()
             .AnyAsync(faculty => !faculty.IsDeleted && faculty.Name == name, cancellationToken);
 
-
     public void Insert(Faculty faculty) =>
         _dbContext
             .Set<Faculty>()

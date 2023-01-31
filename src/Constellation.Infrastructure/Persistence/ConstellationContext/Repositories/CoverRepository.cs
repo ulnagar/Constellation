@@ -21,6 +21,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             _context = context;
         }
 
+        public async Task<List<string>> GetCurrentCoveringTeachersForOffering(
+            int offeringId, 
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<ClassCover>()
+                .Where(cover => 
+                    cover.OfferingId == offeringId &&
+                    cover.StartDate <= DateTime.Today &&
+                    cover.EndDate >= DateTime.Today)
+                .Select(cover => (cover is CasualClassCover) ? ((CasualClassCover)cover).Casual.EmailAddress : ((TeacherClassCover)cover).Staff.EmailAddress)
+                .ToListAsync(cancellationToken);
+
         public async Task<ICollection<ClassCover>> ForListAsync(Expression<Func<ClassCover, bool>> predicate)
         {
             return await _context.Covers

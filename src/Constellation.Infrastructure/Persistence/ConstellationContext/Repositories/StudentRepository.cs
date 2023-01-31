@@ -30,6 +30,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Where(student => studentIds.Contains(student.StudentId))
                 .ToListAsync(cancellationToken);
 
+        public async Task<List<Student>> GetCurrentEnrolmentsForOffering(
+            int offeringId,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<Student>()
+                .Where(student => student.Enrolments.Any(enrolment => enrolment.OfferingId == offeringId && !enrolment.IsDeleted))
+                .ToListAsync(cancellationToken);
 
         public async Task<Student> ForDetailDisplayAsync(string id)
         {

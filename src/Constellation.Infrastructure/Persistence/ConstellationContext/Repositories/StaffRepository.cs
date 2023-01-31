@@ -1,13 +1,8 @@
 ﻿using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
-using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
 {
@@ -44,6 +39,27 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             await _context
                 .Set<Staff>()
                 .Where(teacher => staffIds.Contains(teacher.StaffId))
+                .ToListAsync(cancellationToken);
+
+        public async Task<List<Staff>> GetCurrentTeachersForOffering(
+            int offeringId,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<Staff>()
+                .Where(teacher => teacher.CourseSessions.Any(session => session.OfferingId == offeringId && !session.IsDeleted))
+                .ToListAsync(cancellationToken);
+
+        public async Task<List<Staff>> GetFacultyHeadTeachers(
+            Guid facultyId,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<Staff>()
+                .Where(teacher => 
+                    teacher.Faculties
+                        .Any(faculty => 
+                            faculty.FacultyId == facultyId && 
+                            faculty.Role == FacultyMembershipRole.Manager && 
+                            !faculty.IsDeleted))
                 .ToListAsync(cancellationToken);
 
         public Staff WithDetails(string id)
