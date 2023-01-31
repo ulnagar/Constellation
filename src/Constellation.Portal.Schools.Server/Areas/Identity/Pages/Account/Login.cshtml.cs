@@ -46,7 +46,7 @@ public class LoginModel : PageModel
     {
         [Required]
         [EmailAddress]
-        [RegularExpression(@"^\w+([-+.']\w+)*@det.nsw.edu.au$", ErrorMessage = "Invalid Email.")]
+        [RegularExpression(@"^(?:~+.*$)|\w+(?:[-+.']\w+)*@det.nsw.edu.au$", ErrorMessage = "Invalid Email.")]
         public string Email { get; set; } = string.Empty;
 
         [Required]
@@ -66,6 +66,23 @@ public class LoginModel : PageModel
         if (ModelState.IsValid)
         {
             _logger.LogInformation($"Starting Login Attempt by {Input.Email}");
+
+#if DEBUG
+            if (Input.Email.StartsWith('~'))
+            {
+                Input.Email = Input.Email.Replace("~", "");
+
+                await _mediator.Send(new UpdateUserSchoolsClaimCommand { EmailAddress = Input.Email });
+                
+                var bypassUser = await _userManager.FindByEmailAsync(Input.Email);
+
+                await _signInManager.SignInAsync(bypassUser, false);
+
+                _logger.LogInformation(" - BYPASS Login succeeded for {user}", Input.Email);
+
+                return LocalRedirect(returnUrl!);
+            }
+#endif
 
             // Check valid domain login
             _logger.LogInformation(" - Attempting domain login by {user}", Input.Email);

@@ -47,7 +47,7 @@ public class BaseAPIController : ControllerBase
         return false;
     }
 
-    protected List<string> GetCurrentUserSchools()
+    protected async Task<List<string>> GetCurrentUserSchools()
     {
         var schoolCodes = new List<string>();
 
@@ -55,7 +55,15 @@ public class BaseAPIController : ControllerBase
         {
             var schoolCodeClaims = User.FindAll(AuthClaimType.SchoolCode);
 
-            if (schoolCodeClaims is null || schoolCodeClaims.Count() == 0)
+            if (schoolCodes is null || !schoolCodes.Any())
+            {
+                var user = await GetCurrentUser();
+
+                var claims = await _userManager.GetClaimsAsync(user);
+                schoolCodeClaims = claims.Where(claim => claim.Type == "Schools").ToList();
+            }
+
+            if (schoolCodeClaims is null || !schoolCodeClaims.Any())
                 return schoolCodes;
 
             schoolCodes = schoolCodeClaims.Select(claim => claim.Value).ToList();
