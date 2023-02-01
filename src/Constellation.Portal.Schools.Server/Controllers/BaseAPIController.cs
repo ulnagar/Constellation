@@ -60,13 +60,28 @@ public class BaseAPIController : ControllerBase
                 var user = await GetCurrentUser();
 
                 var claims = await _userManager.GetClaimsAsync(user);
+
                 schoolCodeClaims = claims.Where(claim => claim.Type == "Schools").ToList();
             }
 
             if (schoolCodeClaims is null || !schoolCodeClaims.Any())
                 return schoolCodes;
 
-            schoolCodes = schoolCodeClaims.Select(claim => claim.Value).ToList();
+            foreach (var claim in schoolCodeClaims)
+            {
+                if (claim.Value.Contains(','))
+                {
+                    var codes = claim.Value.Split(',');
+                    foreach (var code in codes)
+                    {
+                        schoolCodes.Add(code);
+                    }
+                }
+                else
+                {
+                    schoolCodes.Add(claim.Value);
+                }
+            }
         }
 
         return schoolCodes;
