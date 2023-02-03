@@ -79,6 +79,15 @@ public static class ServicesRegistration
     }
     public static IServiceCollection AddHangfireServerInfrastructureComponents(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddMediatR(new[] { Constellation.Application.AssemblyReference.Assembly, Constellation.Infrastructure.AssemblyReference.Assembly, Constellation.Core.AssemblyReference.Assembly });
+
+        services.Scan(selector =>
+            selector
+                .FromAssemblies(Constellation.Application.AssemblyReference.Assembly)
+                .RegisterHandlers(typeof(INotificationHandler<>)));
+
+        services.Decorate(typeof(INotificationHandler<>), typeof(IdempotentDomainEventHandler<>));
+
         services.AddConstellationContext(configuration)
             .AddTrackItContext(configuration);
 
@@ -87,8 +96,6 @@ public static class ServicesRegistration
             .AddHangfireJobs();
 
         services.AddSingleton(Log.Logger);
-
-        services.AddMediatR(new[] { Constellation.Application.AssemblyReference.Assembly, Constellation.Infrastructure.AssemblyReference.Assembly, Constellation.Core.AssemblyReference.Assembly });
 
         // Search for an register all the Repository classes that are located at
         // Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
@@ -113,17 +120,15 @@ public static class ServicesRegistration
             .WithScopedLifetime());
 
         // Add any other missing services as their interfaces
-        services.Scan(selector =>
-            selector.FromAssemblies(
-                Constellation.Application.AssemblyReference.Assembly,
-                Constellation.Infrastructure.AssemblyReference.Assembly)
-            .AddClasses(false)
-            .UsingRegistrationStrategy(RegistrationStrategy.Skip)
-            .AsMatchingInterface()
-            .WithScopedLifetime());
-
-        services.Decorate(typeof(INotificationHandler<>), typeof(IdempotentDomainEventHandler<>));
-
+        //services.Scan(selector =>
+        //    selector.FromAssemblies(
+        //        Constellation.Application.AssemblyReference.Assembly,
+        //        Constellation.Infrastructure.AssemblyReference.Assembly)
+        //    .AddClasses(false)
+        //    .UsingRegistrationStrategy(RegistrationStrategy.Skip)
+        //    .AsMatchingInterface()
+        //    .WithScopedLifetime());
+        
         services.AddApplication();
 
         return services;

@@ -28,6 +28,7 @@ public class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob, IHangfireJob
         var messages = await _context
             .Set<OutboxMessage>()
             .Where(m => m.ProcessedOn == null)
+            .OrderBy(m => m.OccurredOn)
             .Take(20)
             .ToListAsync(token);
 
@@ -55,6 +56,7 @@ public class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob, IHangfireJob
                     3,
                     attempt => TimeSpan.FromMilliseconds(50 * attempt));
 
+            // To Prevent Circular Dependency Issues: https://www.davidguida.net/mediatr-how-to-use-decorators-to-add-retry-policies/
             PolicyResult result = await policy.ExecuteAndCaptureAsync(() => 
                 _publisher.Publish(domainEvent, token));
 
