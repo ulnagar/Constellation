@@ -2,7 +2,7 @@ using Constellation.Core.Models;
 using System.Collections.Generic;
 
 namespace Constellation.Application.DTOs
-{
+{ 
     public class MSTeamOperationsList
     {
         public ICollection<StudentMSTeamOperation> StudentOperations { get; set; }
@@ -12,6 +12,7 @@ namespace Constellation.Application.DTOs
         public ICollection<StudentEnrolledMSTeamOperation> EnrolmentOperations { get; set; }
         public ICollection<TeacherEmployedMSTeamOperation> EmploymentOperations { get; set; }
         public ICollection<ContactAddedMSTeamOperation> ContactOperations { get; set; }
+        public ICollection<GroupTutorialCreatedMSTeamOperation> TutorialOperations { get; set; }
 
         public MSTeamOperationsList()
         {
@@ -22,6 +23,7 @@ namespace Constellation.Application.DTOs
             EnrolmentOperations = new List<StudentEnrolledMSTeamOperation>();
             EmploymentOperations = new List<TeacherEmployedMSTeamOperation>();
             ContactOperations = new List<ContactAddedMSTeamOperation>();
+            TutorialOperations = new List<GroupTutorialCreatedMSTeamOperation>();
         }
     }
 }

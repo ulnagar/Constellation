@@ -182,6 +182,18 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
                 returnData.Add(teamOperation);
             }
 
+            foreach (var operation in operations.TutorialOperations)
+            {
+                var teamOperation = new TeamsOperation
+                {
+                    Id = operation.Id,
+                    TeamName = $"AC - {operation.GroupTutorial.EndDate:yyyy} - {operation.GroupTutorial.Name}",
+                    Action = "Group"
+                };
+
+                returnData.Add(teamOperation);
+            }
+
             foreach (var operation in operations.EnrolmentOperations)
             {
                 var teamOperation = new TeamsOperation

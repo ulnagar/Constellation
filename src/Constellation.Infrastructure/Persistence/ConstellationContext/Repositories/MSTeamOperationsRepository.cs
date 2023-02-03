@@ -75,6 +75,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                     .ToListAsync(),
                 ContactOperations = await _context.MSTeamOperations.OfType<ContactAddedMSTeamOperation>().Include(op => op.Contact)
                     .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
+                    .ToListAsync(),
+                TutorialOperations = await _context.MSTeamOperations.OfType<GroupTutorialCreatedMSTeamOperation>().Include(op => op.GroupTutorial)
+                    .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
                     .ToListAsync()
             };
 
@@ -106,6 +109,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                     .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
                     .ToListAsync(),
                 ContactOperations = await _context.MSTeamOperations.OfType<ContactAddedMSTeamOperation>().Include(op => op.Contact)
+                    .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
+                    .ToListAsync(),
+                TutorialOperations = await _context.MSTeamOperations.OfType<GroupTutorialCreatedMSTeamOperation>().Include(op => op.GroupTutorial)
                     .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
                     .ToListAsync()
             };
