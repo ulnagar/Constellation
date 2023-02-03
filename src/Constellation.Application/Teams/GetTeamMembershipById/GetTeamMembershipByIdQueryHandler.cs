@@ -87,7 +87,18 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
         // Covering Teachers
 
-        //var coveringTeachers = await _coverRepository.GetCurrentCoveringTeachersForOffering(course.Id, cancellationToken);
+        var coveringTeachers = await _coverRepository.GetCurrentCoveringTeachersForOffering(course.Id, cancellationToken);
+
+        foreach (var teacher in coveringTeachers)
+        {
+            var entry = new TeamMembershipResponse(
+                team.Id,
+                teacher,
+                TeamsMembershipLevel.Owner.Value);
+
+            if (!returnData.Any(value => value.EmailAddress == entry.EmailAddress))
+                returnData.Add(entry);
+        }
 
         // Head Teachers
 

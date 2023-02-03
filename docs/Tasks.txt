@@ -2,11 +2,6 @@
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-TEAMS
-	GetTeamMembershipByIdQueryHandler:
-		Test extracting covering teacher emails from the offering before using
-		Find a way to track and include teachers involved in one-on-one tutorials
-
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~

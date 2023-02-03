@@ -55,7 +55,7 @@ public class TeamsController : ControllerBase
         return null;
     }
 
-    [HttpGet("{id:guid}/Students")]
+    [HttpGet("{id:guid}/Members")]
     public async Task<List<TeamMembershipResponse>> GetTeamMembership([FromRoute] Guid Id)
     {
         var teamMemberRequest = await _mediator.Send(new GetTeamMembershipByIdQuery(Id));
