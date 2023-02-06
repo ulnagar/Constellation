@@ -1,7 +1,8 @@
 ﻿using Constellation.Application.Features.ShortTerm.Covers.Notifications;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Covers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -15,16 +16,17 @@ namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Notifications.C
     public class CancelAdobeConnectAccessRequests : INotificationHandler<CasualCoverCancelledNotification>
     {
         private readonly IAppDbContext _context;
+        private readonly IClassCoverRepository _classCoverRepository;
 
-        public CancelAdobeConnectAccessRequests(IAppDbContext context)
+        public CancelAdobeConnectAccessRequests(IAppDbContext context, IClassCoverRepository classCoverRepository)
         {
             _context = context;
+            _classCoverRepository = classCoverRepository;
         }
 
         public async Task Handle(CasualCoverCancelledNotification notification, CancellationToken cancellationToken)
         {
-            var cover = (CasualClassCover)await _context.Covers
-                .FirstOrDefaultAsync(cover => cover.Id == notification.CoverId, cancellationToken);
+            var cover = await _classCoverRepository.GetById(notification.CoverId, cancellationToken);
 
             if (cover == null)
             {

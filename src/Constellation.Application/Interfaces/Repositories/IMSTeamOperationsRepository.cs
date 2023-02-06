@@ -3,6 +3,7 @@ using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
@@ -17,5 +18,8 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<MSTeamOperationsList> OverdueToProcess();
         MSTeamOperationsList Recent();
         Task<MSTeamOperation> ForMarkingCompleteOrCancelled(int id);
+
+        Task<List<MSTeamOperation>> GetByCoverId(Guid coverId, CancellationToken cancellationToken = default);
+        void Insert(MSTeamOperation operation);
     }
 }

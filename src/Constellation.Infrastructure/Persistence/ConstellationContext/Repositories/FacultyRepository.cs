@@ -13,6 +13,28 @@ internal sealed class FacultyRepository : IFacultyRepository
         _dbContext = dbContext;
     }
 
+    public async Task<Faculty?> GetByOfferingId(
+        int offeringId,
+        CancellationToken cancellationToken = default)
+    {
+        Guid? facultyId = await _dbContext
+            .Set<CourseOffering>()
+            .Where(offering => offering.Id == offeringId)
+            .Select(offering => offering.Course.FacultyId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (facultyId is null)
+        {
+            return null;
+        }
+
+        return await _dbContext
+            .Set<Faculty>()
+            .Where(faculty => faculty.Id == facultyId)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+        
+
     public async Task<bool> ExistsWithName(string name, CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<Faculty>()

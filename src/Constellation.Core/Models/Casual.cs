@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Constellation.Core.Models.Covers;
 
 namespace Constellation.Core.Models
 {
@@ -10,7 +11,6 @@ namespace Constellation.Core.Models
             IsDeleted = false;
             DateEntered = DateTime.Now;
 
-            ClassCovers = new List<CasualClassCover>();
             AdobeConnectOperations = new List<CasualAdobeConnectOperation>();
             MSTeamOperations = new List<CasualMSTeamOperation>();
         }
@@ -27,7 +27,6 @@ namespace Constellation.Core.Models
         public School School { get; set; }
         public string EmailAddress => PortalUsername + "@det.nsw.edu.au";
         public string DisplayName => FirstName + " " + LastName;
-        public ICollection<CasualClassCover> ClassCovers { get; set; }
         public ICollection<CasualAdobeConnectOperation> AdobeConnectOperations { get; set; }
         public ICollection<CasualMSTeamOperation> MSTeamOperations { get; set; }
     }

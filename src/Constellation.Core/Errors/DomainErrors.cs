@@ -20,45 +20,13 @@ public static class DomainErrors
             $"Cannot update role {role}");
     }
 
-    public static class Permissions
+    public static class ClassCovers
     {
-        public static readonly Error Unauthorised = new Error(
-            "Permissions.Unauthorised",
-            "You do not have the required permissions to perform this action");
-    }
-
-    public static class Partners
-    {
-        public static class Staff
+        public static class Cover
         {
-            public static readonly Func<string, Error> NotFound = id => new Error(
-                "Partners.Staff.TeacherNotFound",
-                $"A teacher with the Id {id} could not be found");
-
-            public static readonly Func<string, Error> NotFoundByEmail = email => new Error(
-                "Partners.Staff.TeacherNotFound",
-                $"A teacher with the Email Address {email} could not be found");
-        }
-
-        public static class Student
-        {
-            public static readonly Func<string, Error> NotFound = id => new Error(
-                "Partners.Student.NotFound",
-                $"A student with the Id {id} could not be found");
-        }
-    }
-
-    public static class LinkedSystems
-    {
-        public static class Teams
-        {
-            public static readonly Error TeamNotFoundInDatabase = new(
-                "LinkedSystems.Teams.TeamNotFoundInDatabase",
-                "The Team could not be found in the database");
-
-            public static readonly Func<Guid, Error> AlreadyExists = id => new Error(
-                "LinkedSystems.Teams.AlreadyExists",
-                $"The Team with Id {id} could not be created because it already exists in the database");
+            public static readonly Func<Guid, Error> NotFound = id => new Error(
+                "ClassCovers.Cover.NotFound",
+                $"A Class Cover with the Id {id} could not be found");
         }
     }
 
@@ -125,4 +93,47 @@ public static class DomainErrors
         }
 
     }
+
+    public static class LinkedSystems
+    {
+        public static class Teams
+        {
+            public static readonly Error TeamNotFoundInDatabase = new(
+                "LinkedSystems.Teams.TeamNotFoundInDatabase",
+                "The Team could not be found in the database");
+
+            public static readonly Func<Guid, Error> AlreadyExists = id => new Error(
+                "LinkedSystems.Teams.AlreadyExists",
+                $"The Team with Id {id} could not be created because it already exists in the database");
+        }
+    }
+
+    public static class Partners
+    {
+        public static class Staff
+        {
+            public static readonly Func<string, Error> NotFound = id => new Error(
+                "Partners.Staff.TeacherNotFound",
+                $"A teacher with the Id {id} could not be found");
+
+            public static readonly Func<string, Error> NotFoundByEmail = email => new Error(
+                "Partners.Staff.TeacherNotFound",
+                $"A teacher with the Email Address {email} could not be found");
+        }
+
+        public static class Student
+        {
+            public static readonly Func<string, Error> NotFound = id => new Error(
+                "Partners.Student.NotFound",
+                $"A student with the Id {id} could not be found");
+        }
+    }
+
+    public static class Permissions
+    {
+        public static readonly Error Unauthorised = new Error(
+            "Permissions.Unauthorised",
+            "You do not have the required permissions to perform this action");
+    }
+
 }

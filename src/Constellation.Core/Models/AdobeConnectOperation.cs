@@ -1,4 +1,5 @@
 ﻿using Constellation.Core.Enums;
+using Constellation.Core.Models.Covers;
 using System;
 
 namespace Constellation.Core.Models
@@ -14,8 +15,7 @@ namespace Constellation.Core.Models
         public DateTime DateScheduled { get; set; }
         public bool IsCompleted { get; set; }
         public bool IsDeleted { get; set; }
-        public int? CoverId { get; set; }
-        public ClassCover Cover { get; set; }
+        public Guid CoverId { get; set; }
 
         public void Delete()
         {

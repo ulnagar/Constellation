@@ -1,6 +1,6 @@
 ﻿using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Providers;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Covers;
 using Constellation.Presentation.Server.BaseModels;
 using System;
 using System.Collections.Generic;

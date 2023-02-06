@@ -41,15 +41,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Include(o => o.Resources);
         }
 
-        public async Task<Faculty?> GetOfferingFaculty(
-            int offeringId,
+        public async Task<CourseOffering?> GetById(
+            int offeringId, 
             CancellationToken cancellationToken = default) =>
             await _context
                 .Set<CourseOffering>()
                 .Where(offering => offering.Id == offeringId)
-                .Select(offering => offering.Course.Faculty)
                 .FirstOrDefaultAsync(cancellationToken);
-
 
         public CourseOffering WithDetails(int id)
         {

@@ -1,13 +1,8 @@
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
-using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
 {
@@ -18,6 +13,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         {
             _context = context;
         }
+
+        public async Task<List<AdobeConnectOperation>> GetByCoverId(
+            Guid coverId,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<AdobeConnectOperation>()
+                .Where(operation => operation.CoverId == coverId)
+                .ToListAsync(cancellationToken);
 
         private IQueryable<AdobeConnectOperation> Collection()
         {
@@ -120,5 +123,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             return await _context.AdobeConnectOperations
                 .SingleOrDefaultAsync(operation => operation.Id == id);
         }
+
+        public void Insert(AdobeConnectOperation operation) =>
+            _context.Set<AdobeConnectOperation>().Add(operation);
     }
 }

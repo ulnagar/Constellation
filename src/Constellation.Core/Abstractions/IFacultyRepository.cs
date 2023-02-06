@@ -7,5 +7,7 @@ using System.Threading.Tasks;
 public interface IFacultyRepository
 {
     Task<bool> ExistsWithName(string name, CancellationToken cancellationToken = default);
+    Task<Faculty?> GetByOfferingId(int offeringId, CancellationToken cancellationToken = default);
+
     void Insert(Faculty faculty);
 }

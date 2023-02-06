@@ -12,6 +12,8 @@ namespace Constellation.Core.Models
         public DateTime DateScheduled { get; set; }
         public bool IsCompleted { get; set; }
         public bool IsDeleted { get; set; }
+        public Guid CoverId { get; set; }
+
 
         public void Complete()
         {
@@ -40,17 +42,12 @@ namespace Constellation.Core.Models
     {
         public string StaffId { get; set; }
         public Staff Staff { get; set; }
-        public int? CoverId { get; set; }
-        public TeacherClassCover Cover { get; set; }
     }
 
     public class CasualMSTeamOperation : OfferingMSTeamOperation
     {
         public int CasualId { get; set; }
         public Casual Casual { get; set; }
-        public int CoverId { get; set; }
-        public CasualClassCover Cover { get; set; }
-
     }
 
     public class GroupMSTeamOperation : OfferingMSTeamOperation
