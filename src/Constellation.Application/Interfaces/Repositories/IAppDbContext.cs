@@ -1,8 +1,6 @@
 ﻿using Constellation.Application.Models;
-using Constellation.Application.Models.EmailQueue;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
-using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Models.Stocktake;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -23,7 +21,6 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<Casual> Casuals { get; set; }
         DbSet<ClassworkNotification> ClassworkNotifications { get; set; }
         DbSet<Course> Courses { get; set; }
-        DbSet<ClassCover> Covers { get; set; }
         DbSet<DeviceAllocation> DeviceAllocations { get; set; }
         DbSet<DeviceNotes> DeviceNotes { get; set; }
         DbSet<Device> Devices { get; set; }

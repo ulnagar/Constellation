@@ -3,6 +3,7 @@ using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
@@ -18,5 +19,8 @@ namespace Constellation.Application.Interfaces.Repositories
         AdobeConnectOperationsList AllRecent();
         Task<ICollection<AdobeConnectOperation>> AllRecentAsync();
         Task<AdobeConnectOperation> ForProcessingAsync(int id);
+
+        Task<List<AdobeConnectOperation>> GetByCoverId(Guid coverId, CancellationToken cancellationToken = default);
+        void Insert(AdobeConnectOperation adobeConnectOperation);
     }
 }

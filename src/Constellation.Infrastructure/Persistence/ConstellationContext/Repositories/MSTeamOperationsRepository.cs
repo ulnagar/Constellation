@@ -156,5 +156,16 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             return await _context.MSTeamOperations
                 .SingleOrDefaultAsync(operation => operation.Id == id);
         }
+
+        public async Task<List<MSTeamOperation>> GetByCoverId(
+            Guid coverId, 
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<MSTeamOperation>()
+                .Where(operation => operation.CoverId == coverId)
+                .ToListAsync(cancellationToken);
+
+        public void Insert(MSTeamOperation operation) =>
+            _context.Set<MSTeamOperation>().Add(operation);
     }
 }

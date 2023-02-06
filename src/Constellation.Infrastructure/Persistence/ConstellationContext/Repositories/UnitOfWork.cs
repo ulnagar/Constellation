@@ -2,7 +2,7 @@
 
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Covers;
 using Microsoft.AspNetCore.Identity;
 
 public class UnitOfWork : IUnitOfWork
@@ -14,7 +14,6 @@ public class UnitOfWork : IUnitOfWork
     public IAdobeConnectRoomRepository AdobeConnectRooms { get; set; }
     public IAppAccessTokenRepository AppAccessTokens { get; set; }
     public ICasualRepository Casuals { get; set; }
-    public IClassCoverRepository<CasualClassCover> CasualClassCovers { get; set; }
     public ICourseOfferingRepository CourseOfferings { get; set; }
     public ICourseRepository Courses { get; set; }
     public IDeviceAllocationRepository DeviceAllocations { get; set; }
@@ -31,9 +30,7 @@ public class UnitOfWork : IUnitOfWork
     public ISettingRepository Settings { get; set; }
     public IStaffRepository Staff { get; set; }
     public IStudentRepository Students { get; set; }
-    public IClassCoverRepository<TeacherClassCover> TeacherClassCovers { get; set; }
     public ITimetablePeriodRepository Periods { get; set; }
-    public ICoverRepository Covers { get; set; }
     public ICanvasOperationsRepository CanvasOperations { get; set; }
     public IClassworkNotificationRepository ClassworkNotifications { get; set; }
     public IJobActivationRepository JobActivations { get; set; }
@@ -51,7 +48,6 @@ public class UnitOfWork : IUnitOfWork
         AdobeConnectOperations = new AdobeConnectOperationsRepository(context);
         AdobeConnectRooms = new AdobeConnectRoomRepository(context);
         AppAccessTokens = new AppAccessTokenRepository(context);
-        CasualClassCovers = new CasualClassCoverRepository(context);
         Casuals = new CasualRepository(context);
         CourseOfferings = new CourseOfferingRepository(context);
         Courses = new CourseRepository(context);
@@ -69,9 +65,7 @@ public class UnitOfWork : IUnitOfWork
         Settings = new SettingRepository(context);
         Staff = new StaffRepository(context);
         Students = new StudentRepository(context);
-        TeacherClassCovers = new TeacherClassCoverRepository(context);
         Periods = new TimetablePeriodRepository(context);
-        Covers = new CoverRepository(context);
         CanvasOperations = new CanvasOperationsRepository(context);
         ClassworkNotifications = new ClassworkNotificationRepository(context);
         JobActivations = new JobActivationRepository(context);

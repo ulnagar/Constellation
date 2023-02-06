@@ -8,7 +8,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Covers;
 using Constellation.Infrastructure.Templates.Views.Documents.Covers;
 using Constellation.Infrastructure.Templates.Views.Emails.Covers;
 using MediatR;

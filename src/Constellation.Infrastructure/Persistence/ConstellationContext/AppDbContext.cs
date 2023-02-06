@@ -5,6 +5,7 @@ using Constellation.Application.Models;
 using Constellation.Application.Models.EmailQueue;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Models.Stocktake;
 using Constellation.Core.Primitives;
@@ -52,7 +53,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public DbSet<DeviceNotes> DeviceNotes { get; set; }
         public DbSet<DeviceAllocation> DeviceAllocations { get; set; }
         public DbSet<Casual> Casuals { get; set; }
-        public DbSet<ClassCover> Covers { get; set; }
         public DbSet<Absence> Absences { get; set; }
         public DbSet<AbsenceResponse> AbsenceResponse { get; set; }
         public DbSet<StudentWholeAbsence> WholeAbsences { get; set; }

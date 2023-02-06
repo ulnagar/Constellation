@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ValidationResult = Constellation.Core.Shared.ValidationResult;
 
 public class RequestValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
@@ -27,19 +26,24 @@ public class RequestValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
             return await next();
         }
 
-        Error[] errors = _validators
-            .Select(validator => validator.Validate(request))
-            .SelectMany(validationResult => validationResult.Errors)
-            .Where(validationFailure => validationFailure is not null)
-            .Select(failure => new Error(
-                failure.PropertyName, 
-                failure.ErrorMessage))
-            .Distinct()
-            .ToArray();
+        List<Error> errors = new();
+
+        foreach (var validator in _validators)
+        {
+            var validationResult = await validator.ValidateAsync(request);
+            var validationErrors = validationResult.Errors
+                .Where(validationFailure => validationFailure is not null)
+                .Select(failure => new Error(
+                    failure.PropertyName,
+                    failure.ErrorMessage))
+                .Distinct();
+
+            errors.AddRange(validationErrors);
+        }
 
         if (errors.Any())
         {
-            return CreateValidationResult<TResponse>(errors);
+            return CreateValidationResult<TResponse>(errors.ToArray());
         }
 
         return await next();

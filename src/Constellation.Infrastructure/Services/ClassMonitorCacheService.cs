@@ -2,7 +2,7 @@
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Comparators;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Covers;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;

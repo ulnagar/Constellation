@@ -144,7 +144,7 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
                 return View(viewModel);
             }
 
-            await _mediator.Send(new CreateNewCoverCommand { CoverDto = viewModel.Cover });
+            await _mediator.Send(new CreateCoverCommand { CoverDto = viewModel.Cover });
             
             await _unitOfWork.CompleteAsync();
             return RedirectToAction("Index");

@@ -1,5 +1,4 @@
-﻿using Constellation.Core.Models;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
@@ -11,7 +10,6 @@ namespace Constellation.Application.Interfaces.Repositories
         IAdobeConnectRoomRepository AdobeConnectRooms { get; set; }
         IAppAccessTokenRepository AppAccessTokens { get; set; }
         ICasualRepository Casuals { get; set; }
-        IClassCoverRepository<CasualClassCover> CasualClassCovers { get; set; }
         ICourseOfferingRepository CourseOfferings { get; set; }
         ICourseRepository Courses { get; set; }
         IDeviceAllocationRepository DeviceAllocations { get; set; }
@@ -28,9 +26,7 @@ namespace Constellation.Application.Interfaces.Repositories
         ISettingRepository Settings { get; set; }
         IStaffRepository Staff { get; set; }
         IStudentRepository Students { get; set; }
-        IClassCoverRepository<TeacherClassCover> TeacherClassCovers { get; set; }
         ITimetablePeriodRepository Periods { get; set; }
-        ICoverRepository Covers { get; set; }
         ICanvasOperationsRepository CanvasOperations { get; set; }
         IClassworkNotificationRepository ClassworkNotifications { get; set; }
         IJobActivationRepository JobActivations { get; set; }

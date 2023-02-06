@@ -2,6 +2,12 @@
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+	CLASS COVERS:
+		Refactor to use Aggregate Root functionality
+		Migrate to domain events
+		Refactor existing code to use new model
+		Create unit tests for new domain model methods and events
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~
