@@ -1,8 +1,11 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Covers;
+using Constellation.Core.ValueObjects;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Services
@@ -37,6 +40,7 @@ namespace Constellation.Application.Interfaces.Services
 
 
         // Cover Emails
+        Task SendCancelledCoverEmail(ClassCover cover, CourseOffering offering, EmailAddress coveringTeacher, List<EmailAddress> primaryRecipients, List<EmailAddress> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, CancellationToken cancellationToken);
         Task SendCancelledCoverEmail(EmailDtos.CoverEmail resource);
         Task SendNewCoverEmail(EmailDtos.CoverEmail resource);
         Task SendUpdatedCoverEmail(EmailDtos.CoverEmail resource);

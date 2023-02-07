@@ -1,9 +1,12 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.EmailRequests;
+using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Covers;
+using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Templates.Views.Emails.Absences;
 using Constellation.Infrastructure.Templates.Views.Emails.Auth;
@@ -12,10 +15,7 @@ using Constellation.Infrastructure.Templates.Views.Emails.Lessons;
 using Constellation.Infrastructure.Templates.Views.Emails.MandatoryTraining;
 using Constellation.Infrastructure.Templates.Views.Emails.MissedWork;
 using Constellation.Infrastructure.Templates.Views.Emails.RollMarking;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Net.Mail;
 
 namespace Constellation.Infrastructure.ExternalServices.Email;
 
@@ -23,13 +23,18 @@ public class Service : IEmailService, IScopedService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEmailGateway _emailSender;
+    private readonly ICalendarService _calendarService;
     private readonly IRazorViewToStringRenderer _razorService;
 
-    public Service(IUnitOfWork unitOfWork, IEmailGateway emailSender,
+    public Service(
+        IUnitOfWork unitOfWork,
+        IEmailGateway emailSender,
+        ICalendarService calendarService,
         IRazorViewToStringRenderer razorService)
     {
         _unitOfWork = unitOfWork;
         _emailSender = emailSender;
+        _calendarService = calendarService;
         _razorService = razorService;
     }
 
@@ -497,6 +502,61 @@ public class Service : IEmailService, IScopedService
                 ccRecipients.Add(entry.Key, entry.Value);
 
         await _emailSender.Send(toRecipients, ccRecipients, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
+    }
+
+    public async Task SendCancelledCoverEmail(
+        ClassCover cover,
+        CourseOffering offering,
+        EmailAddress coveringTeacher,
+        List<EmailAddress> primaryRecipients,
+        List<EmailAddress> secondaryRecipients,
+        TimeOnly startTime,
+        TimeOnly endTime,
+        string teamLink,
+        CancellationToken cancellationToken)
+    {
+        // Determine whether email or invite
+        var singleDayCover = cover.StartDate == cover.EndDate;
+
+        // Prepare attachments
+        var attachments = new List<Attachment>();
+
+        // Send
+        var viewModel = new CancelledCoverEmailViewModel
+        {
+            ToName = coveringTeacher.Name,
+            Title = $"Cancelled Aurora Class Cover - {offering.Name}",
+            SenderName = "Cathy Crouch",
+            SenderTitle = "Casual Coordinator",
+            StartDate = cover.StartDate.ToDateTime(TimeOnly.MinValue),
+            EndDate = cover.EndDate.ToDateTime(TimeOnly.MinValue),
+            HasAdobeAccount = true,
+            Preheader = "",
+            ClassWithLink = new Dictionary<string, string> { { "Class Team", teamLink } }
+        };
+
+        if (singleDayCover)
+        {
+            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverAppointment.cshtml", viewModel);
+
+            // Create and add ICS files
+            var uid = $"{cover.Id}-{cover.OfferingId}-{cover.StartDate:yyyyMMdd}";
+            var summary = $"Aurora College Cover - {offering.Name}";
+            var location = $"Class Team ({teamLink}";
+            var description = body;
+
+            var appointmentStart = cover.StartDate.ToDateTime(startTime);
+            var appointmentEnd = cover.EndDate.ToDateTime(endTime);
+            var icsData = _calendarService.CancelInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, description, appointmentStart, appointmentEnd, 0);
+
+            await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData);
+        }
+        else
+        {
+            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverEmail.cshtml", viewModel);
+
+            await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments);
+        }
     }
 
     public async Task SendCancelledCoverEmail(EmailDtos.CoverEmail resource)
