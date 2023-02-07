@@ -39,7 +39,7 @@ internal sealed class CoverCancelledDomainEvent_RemoveAdobeConnectAccessHandler
 
         if (cover is null)
         {
-            _logger.Warning("{action}: Could not find cover with Id {id} in database", nameof(CoverCancelledDomainEvent), notification.CoverId);
+            _logger.Error("{action}: Could not find cover with Id {id} in database", nameof(CoverCancelledDomainEvent_RemoveAdobeConnectAccessHandler), notification.CoverId);
 
             return;
         }
@@ -49,7 +49,7 @@ internal sealed class CoverCancelledDomainEvent_RemoveAdobeConnectAccessHandler
 
         if (existingRequests is null)
         {
-            _logger.Warning("{action}: Could not find operations for cover with Id {id} in database", nameof(CoverCancelledDomainEvent), notification.CoverId);
+            _logger.Warning("{action}: Could not find operations for cover with Id {id} in database", nameof(CoverCancelledDomainEvent_RemoveAdobeConnectAccessHandler), notification.CoverId);
         }
 
         var requestsByRoom = existingRequests.GroupBy(operation => operation.ScoId);

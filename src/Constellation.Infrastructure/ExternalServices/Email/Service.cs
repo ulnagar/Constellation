@@ -16,6 +16,7 @@ using Constellation.Infrastructure.Templates.Views.Emails.MandatoryTraining;
 using Constellation.Infrastructure.Templates.Views.Emails.MissedWork;
 using Constellation.Infrastructure.Templates.Views.Emails.RollMarking;
 using System.Net.Mail;
+using static Constellation.Application.Models.EmailQueue.EmailQueueItem.EmailQueueReferenceType.Covers;
 
 namespace Constellation.Infrastructure.ExternalServices.Email;
 
@@ -434,6 +435,64 @@ public class Service : IEmailService, IScopedService
         await _emailSender.Send(toRecipients, null, $"Absence Explanation Received - {viewModel.StudentName}", body);
     }
 
+    public async Task SendNewCoverEmail(
+        ClassCover cover,
+        CourseOffering offering,
+        EmailAddress coveringTeacher,
+        List<EmailAddress> primaryRecipients,
+        List<EmailAddress> secondaryRecipients,
+        TimeOnly startTime,
+        TimeOnly endTime,
+        string teamLink,
+        List<Attachment> attachments,
+        CancellationToken cancellationToken)
+    {
+        // Determine whether email or invite
+        var singleDayCover = cover.StartDate == cover.EndDate;
+
+        // Send
+        var viewModel = new NewCoverEmailViewModel
+        {
+            ToName = coveringTeacher.Name,
+            Title = $"Aurora Class Cover - {offering.Name}",
+            SenderName = "Cathy Crouch",
+            SenderTitle = "Casual Coordinator",
+            StartDate = cover.StartDate.ToDateTime(TimeOnly.MinValue),
+            EndDate = cover.EndDate.ToDateTime(TimeOnly.MinValue),
+            HasAdobeAccount = true,
+            Preheader = "",
+            ClassWithLink = new Dictionary<string, string> { { "Class Team", teamLink } }
+        };
+
+        if (singleDayCover)
+        {
+            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverAppointment.cshtml", viewModel);
+
+            // Create and add ICS files
+            var uid = $"{cover.Id}-{cover.OfferingId}-{cover.StartDate:yyyyMMdd}";
+            var summary = $"Aurora College Cover - {offering.Name}";
+            var location = $"Class Team ({teamLink})";
+            var description = body;
+
+            // What cycle day does the cover fall on?
+            // What periods exist for this class on that cycle day?
+            // Extract start and end times for the periods to use in the appointment
+            var appointmentStart = cover.StartDate.ToDateTime(startTime);
+            var appointmentEnd = cover.EndDate.ToDateTime(endTime);
+
+            var icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, description, appointmentStart, appointmentEnd, 0);
+
+            await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData);
+        }
+        else
+        {
+            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverEmail.cshtml", viewModel);
+
+            await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments);
+        }
+
+    }
+
     public async Task SendNewCoverEmail(EmailDtos.CoverEmail resource)
     {
         var viewModel = new NewCoverEmailViewModel
@@ -513,13 +572,11 @@ public class Service : IEmailService, IScopedService
         TimeOnly startTime,
         TimeOnly endTime,
         string teamLink,
+        List<Attachment> attachments,
         CancellationToken cancellationToken)
     {
         // Determine whether email or invite
         var singleDayCover = cover.StartDate == cover.EndDate;
-
-        // Prepare attachments
-        var attachments = new List<Attachment>();
 
         // Send
         var viewModel = new CancelledCoverEmailViewModel

@@ -3,12 +3,15 @@ using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
 {
     public interface IOfferingSessionsRepository
     {
+        Task<List<OfferingSession>> GetByOfferingId(int offeringId, CancellationToken cancellationToken = default);
+        Task<List<string>> GetTimetableByOfferingId(int offeringId, CancellationToken cancellationToken = default);
         OfferingSession WithDetails(int id);
         OfferingSession WithFilter(Expression<Func<OfferingSession, bool>> predicate);
         ICollection<OfferingSession> All();

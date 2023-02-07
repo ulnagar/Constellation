@@ -39,7 +39,7 @@ internal sealed class CoverCancelledDomainEvent_RemoveMicrosoftTeamsAccessHandle
 
         if (cover is null)
         {
-            _logger.Warning("{action}: Could not find cover with Id {id} in database", nameof(CoverCancelledDomainEvent), notification.CoverId);
+            _logger.Warning("{action}: Could not find cover with Id {id} in database", nameof(CoverCancelledDomainEvent_RemoveMicrosoftTeamsAccessHandler), notification.CoverId);
 
             return;
         }

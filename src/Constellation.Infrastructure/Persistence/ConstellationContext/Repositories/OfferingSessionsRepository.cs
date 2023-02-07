@@ -3,11 +3,15 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
+using Polly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
+using static Constellation.Application.DTOs.StudentCompleteDetailsDto;
+using static Constellation.Core.Errors.DomainErrors.ClassCovers;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
 {
@@ -29,6 +33,28 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Include(s => s.Room)
                 .Include(s => s.Teacher);
         }
+
+        public async Task<List<OfferingSession>> GetByOfferingId(
+            int offeringId,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<OfferingSession>()
+                .Where(session => 
+                    session.OfferingId == offeringId && 
+                    !session.IsDeleted)
+                .ToListAsync(cancellationToken);
+
+        public async Task<List<string>> GetTimetableByOfferingId(
+            int offeringId,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<OfferingSession>()
+                .Where(session => 
+                    session.OfferingId == offeringId &&
+                    !session.IsDeleted)
+                .Select(session => session.Period.Timetable)
+                .Distinct()
+                .ToListAsync(cancellationToken);
 
         public OfferingSession WithDetails(int id)
         {
