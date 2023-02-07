@@ -44,6 +44,20 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                         session.OfferingId == offeringId))
                 .ToListAsync(cancellationToken);
 
+        public async Task<List<TimetablePeriod>> GetAll(CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<TimetablePeriod>()
+                .Where(period => !period.IsDeleted)
+                .ToListAsync(cancellationToken);
+
+        public async Task<List<TimetablePeriod>> GetAllFromTimetable(
+            List<string> timetables, 
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<TimetablePeriod>()
+                .Where(period => !period.IsDeleted && timetables.Contains(period.Timetable))
+                .ToListAsync(cancellationToken);
+
         public TimetablePeriod WithDetails(int id)
         {
             return Collection()

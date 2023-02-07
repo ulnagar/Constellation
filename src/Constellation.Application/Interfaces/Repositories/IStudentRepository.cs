@@ -13,6 +13,7 @@ namespace Constellation.Application.Interfaces.Repositories
     {
         Task<List<Student>> GetListFromIds(List<string> studentIds, CancellationToken cancellationToken = default);
         Task<List<Student>> GetCurrentEnrolmentsForOffering(int offeringId, CancellationToken cancellationToken = default);
+        Task<List<Student>> GetCurrentEnrolmentsForOfferingWithSchool(int offeringId, CancellationToken cancellationToken = default);
         Task <Student> GetForExistCheck(string id);
         Task<ICollection<Student>> AllWithAbsenceScanSettings();
         Task<ICollection<Student>> AllActiveAsync();

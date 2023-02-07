@@ -31,6 +31,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .OrderBy(r => r.Name);
         }
 
+        public async Task<List<AdobeConnectRoom>> GetByOfferingId(
+            int offeringId,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<AdobeConnectRoom>()
+                .Where(room => 
+                    room.OfferingSessions.Any(session => 
+                        session.OfferingId == offeringId && 
+                        !session.IsDeleted))
+                .Distinct()
+                .ToListAsync(cancellationToken);
+
         public AdobeConnectRoom WithDetails(string id)
         {
             return Collection()
