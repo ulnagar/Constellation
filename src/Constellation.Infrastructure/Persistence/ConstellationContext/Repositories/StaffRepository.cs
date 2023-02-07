@@ -33,6 +33,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                     .ThenInclude(member => member.Faculty);
         }
 
+        public async Task<Staff?> GetById(
+            string staffId,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<Staff>()
+                .FirstOrDefaultAsync(staff => staff.StaffId == staffId, cancellationToken);
+
         public async Task<List<Staff>> GetListFromIds(
             List<string> staffIds,
             CancellationToken cancellationToken = default) =>
@@ -61,6 +68,30 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                             faculty.Role == FacultyMembershipRole.Manager && 
                             !faculty.IsDeleted))
                 .ToListAsync(cancellationToken);
+
+        public async Task<List<Staff>> GetFacultyHeadTeachersForOffering(
+            int offeringId, 
+            CancellationToken cancellationToken = default)
+        {
+            Guid? facultyId = await _context
+                .Set<CourseOffering>()
+                .Where(offering => offering.Id == offeringId)
+                .Select(offering => offering.Course.FacultyId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (facultyId is null)
+            {
+                return null;
+            }
+
+            return await _context
+                .Set<Staff>()
+                .Where(staff => staff.Faculties.Any(member => 
+                    !member.IsDeleted && 
+                    member.FacultyId == facultyId && 
+                    member.Role == FacultyMembershipRole.Manager))
+                .ToListAsync(cancellationToken);
+        }
 
         public Staff WithDetails(string id)
         {

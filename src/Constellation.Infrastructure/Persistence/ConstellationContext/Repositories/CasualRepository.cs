@@ -1,6 +1,7 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
+using HtmlAgilityPack;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                     .ThenInclude(cover => cover.Offering)
                 .OrderBy(c => c.LastName);
         }
+
+        public async Task<Casual?> GetById(
+            int id, 
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<Casual>()
+                .FirstOrDefaultAsync(casual => casual.Id == id, cancellationToken);
 
         public async Task<bool> AnyWithId(int id)
         {

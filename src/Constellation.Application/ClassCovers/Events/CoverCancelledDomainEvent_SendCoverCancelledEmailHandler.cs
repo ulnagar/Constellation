@@ -1,21 +1,23 @@
-﻿using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Gateways;
+﻿namespace Constellation.Application.ClassCovers.Events;
+
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
-
-namespace Constellation.Application.ClassCovers.Events;
+using static Constellation.Application.DTOs.EmailRequests.ClassworkNotificationTeacherEmail;
 
 internal sealed class CoverCancelledDomainEvent_SendCoverCancelledEmailHandler
     : IDomainEventHandler<CoverCancelledDomainEvent>
@@ -24,8 +26,10 @@ internal sealed class CoverCancelledDomainEvent_SendCoverCancelledEmailHandler
     private readonly IClassCoverRepository _classCoverRepository;
     private readonly ICourseOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly IEmailGateway _emailGateway;
-    private readonly IRazorViewToStringRenderer _razorViewRenderer;
+    private readonly ICasualRepository _casualRepository;
+    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly UserManager<AppUser> _userManager;
+    private readonly IEmailService _emailService;
     private readonly ITeamRepository _teamRepository;
     private readonly ILogger _logger;
 
@@ -34,8 +38,10 @@ internal sealed class CoverCancelledDomainEvent_SendCoverCancelledEmailHandler
         IClassCoverRepository classCoverRepository,
         ICourseOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
-        IEmailGateway emailGateway,
-        IRazorViewToStringRenderer razorViewRenderer,
+        ICasualRepository casualRepository,
+        ITimetablePeriodRepository periodRepository,
+        UserManager<AppUser> userManager,
+        IEmailService emailService,
         ITeamRepository teamRepository,
         Serilog.ILogger logger)
     {
@@ -43,8 +49,10 @@ internal sealed class CoverCancelledDomainEvent_SendCoverCancelledEmailHandler
         _classCoverRepository = classCoverRepository;
         _offeringRepository = offeringRepository;
         _staffRepository = staffRepository;
-        _emailGateway = emailGateway;
-        _razorViewRenderer = razorViewRenderer;
+        _casualRepository = casualRepository;
+        _periodRepository = periodRepository;
+        _userManager = userManager;
+        _emailService = emailService;
         _teamRepository = teamRepository;
         _logger = logger.ForContext<CoverCancelledDomainEvent>();
     }
@@ -77,96 +85,106 @@ internal sealed class CoverCancelledDomainEvent_SendCoverCancelledEmailHandler
                 primaryRecipients.Add(address.Value);
             }
         }
-            
-        var casual = await _context.Casuals
-            .FirstOrDefaultAsync(casual => casual.Id == cover.CasualId, cancellationToken);
 
-        
-
-        var headTeachers = await _context.Faculties
-            .Where(faculty => faculty.Id == offering.Course.FacultyId)
-                .SelectMany(faculty => faculty.Members)
-            .Where(member => member.Role == FacultyMembershipRole.Manager && !member.IsDeleted)
-                .Select(member => member.Staff)
-                .ToListAsync(cancellationToken);
-
-        var additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
-
-        var teamLink = await _teamRepository.GetLinkByOffering(offering.Name, offering.EndDate.Year.ToString(), cancellationToken);
-
-        
-
-        primaryRecipients.Add(casual.DisplayName, casual.EmailAddress);
-
-        foreach (var teacher in teachers)
-        {
-            if (!primaryRecipients.Any(recipient => recipient.Value == teacher.EmailAddress) && !secondaryRecipients.Any(recipient => recipient.Value == teacher.EmailAddress))
-                secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
-        }
+        var headTeachers = await _staffRepository.GetFacultyHeadTeachersForOffering(cover.OfferingId, cancellationToken);
 
         foreach (var teacher in headTeachers)
         {
-            if (!primaryRecipients.Any(recipient => recipient.Value == teacher.EmailAddress) && !secondaryRecipients.Any(recipient => recipient.Value == teacher.EmailAddress))
-                secondaryRecipients.Add(teacher.DisplayName, teacher.EmailAddress);
+            if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
+            {
+                var address = EmailAddress.Create(teacher.DisplayName, teacher.EmailAddress);
+
+                if (address.IsFailure)
+                {
+                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(CoverCancelledDomainEvent_SendCoverCancelledEmailHandler), teacher.DisplayName, cover.Id);
+
+                    continue;
+                }
+
+                secondaryRecipients.Add(address.Value);
+            }
         }
 
-        foreach (var user in additionalRecipients)
+        EmailAddress coveringTeacher = null;
+
+        if (cover.TeacherType == CoverTeacherType.Casual)
         {
-            if (!primaryRecipients.Any(recipient => recipient.Value == user.Email) && !secondaryRecipients.Any(recipient => recipient.Value == user.Email))
-                secondaryRecipients.Add(user.DisplayName, user.Email);
+            var teacher = await _casualRepository.GetById(int.Parse(cover.TeacherId), cancellationToken);
+
+            if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
+            {
+                var address = EmailAddress.Create(teacher.DisplayName, teacher.EmailAddress);
+
+                if (address.IsFailure)
+                {
+                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(CoverCancelledDomainEvent_SendCoverCancelledEmailHandler), teacher.DisplayName, cover.Id);
+                }
+                else
+                {
+                    primaryRecipients.Add(address.Value);
+                    coveringTeacher = address.Value;
+                }
+            }
         }
 
-        // Determine whether email or invite
-        var singleDayCover = cover.StartDate == cover.EndDate;
-
-        // Prepare attachments
-        var attachments = new List<Attachment>();
-
-        // Send
-        var viewModel = new CancelledCoverEmailViewModel
+        if (cover.TeacherType == CoverTeacherType.Staff)
         {
-            ToName = casual.DisplayName,
-            Title = $"Cancelled Aurora Class Cover - {offering.Name}",
-            SenderName = "Cathy Crouch",
-            SenderTitle = "Casual Coordinator",
-            StartDate = cover.StartDate,
-            EndDate = cover.EndDate,
-            HasAdobeAccount = true,
-            Preheader = "",
-            ClassWithLink = new Dictionary<string, string> { { "Class Team", teamLink } }
-        };
+            var teacher = await _staffRepository.GetById(cover.TeacherId, cancellationToken);
 
-        if (singleDayCover)
-        {
-            var body = await _razorViewRenderer.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverAppointment.cshtml", viewModel);
+            if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
+            {
+                var address = EmailAddress.Create(teacher.DisplayName, teacher.EmailAddress);
 
-            // Create and add ICS files
-            var uid = $"{cover.Id}-{cover.OfferingId}-{cover.StartDate:yyyyMMdd}";
-            var summary = $"Aurora College Cover - {cover.Offering.Name}";
-            var location = $"Class Team ({teamLink}";
-            var description = body;
-
-            // What cycle day does the cover fall on?
-            // What periods exist for this class on that cycle day?
-            // Extract start and end times for the periods to use in the appointment
-            var cycleDay = cover.StartDate.GetDayNumber();
-            var periods = await _context.Periods
-                .Where(period => period.Day == cycleDay && period.OfferingSessions.Any(session => !session.IsDeleted && session.OfferingId == cover.OfferingId))
-                .ToListAsync(cancellationToken);
-            var appointmentStartTime = periods.Min(period => period.StartTime);
-            var appointmentEndTime = periods.Max(period => period.EndTime);
-            var appointmentStart = cover.StartDate.Add(appointmentStartTime);
-            var appointmentEnd = cover.EndDate.Add(appointmentEndTime);
-
-            var icsData = _calendarService.CancelInvite(uid, casual.DisplayName, casual.EmailAddress, summary, location, description, appointmentStart, appointmentEnd, 0);
-
-            await _emailGateway.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData);
+                if (address.IsFailure)
+                {
+                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(CoverCancelledDomainEvent_SendCoverCancelledEmailHandler), teacher.DisplayName, cover.Id);
+                }
+                else
+                {
+                    primaryRecipients.Add(address.Value);
+                    coveringTeacher = address.Value;
+                }
+            }
         }
-        else
-        {
-            var body = await _razorViewRenderer.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverEmail.cshtml", viewModel);
 
-            await _emailGateway.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments);
+        if (coveringTeacher is null)
+        {
+            _logger.Error("{action}: Could not create valid email address for covering teacher during processing of cover {id}", nameof(CoverCancelledDomainEvent_SendCoverCancelledEmailHandler), cover.Id);
+
+            return;
         }
+
+        var additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
+
+        foreach (var teacher in additionalRecipients)
+        {
+            if (primaryRecipients.All(entry => entry.Email != teacher.Email) && secondaryRecipients.All(entry => entry.Email != teacher.Email))
+            {
+                var address = EmailAddress.Create(teacher.DisplayName, teacher.Email);
+
+                if (address.IsFailure)
+                {
+                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(CoverCancelledDomainEvent_SendCoverCancelledEmailHandler), teacher.DisplayName, cover.Id);
+
+                    continue;
+                }
+
+                secondaryRecipients.Add(address.Value);
+            }
+        }
+
+        var teamLink = await _teamRepository.GetLinkByOffering(offering.Name, offering.EndDate.Year.ToString(), cancellationToken);
+
+        TimeOnly startTime, endTime;
+
+        if (cover.StartDate == cover.EndDate)
+        {
+            var periods = await _periodRepository.GetByDayAndOfferingId(cover.StartDate.ToDateTime(TimeOnly.MinValue).GetDayNumber(), cover.OfferingId, cancellationToken);
+
+            startTime = TimeOnly.FromTimeSpan(periods.Min(period => period.StartTime));
+            endTime = TimeOnly.FromTimeSpan(periods.Max(period => period.EndTime));
+        }
+
+        await _emailService.SendCancelledCoverEmail(cover, offering, coveringTeacher, primaryRecipients, secondaryRecipients, startTime, endTime, teamLink, cancellationToken);
     }
 }

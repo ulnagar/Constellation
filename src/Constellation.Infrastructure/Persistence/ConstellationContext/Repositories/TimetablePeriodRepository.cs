@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using static Constellation.Core.Errors.DomainErrors.ClassCovers;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
 {
@@ -29,6 +30,19 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Include(p => p.OfferingSessions)
                     .ThenInclude(offering => offering.Teacher);
         }
+
+        public async Task<List<TimetablePeriod>> GetByDayAndOfferingId(
+            int dayNumber,
+            int offeringId,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<TimetablePeriod>()
+                .Where(period => 
+                    period.Day == dayNumber && 
+                    period.OfferingSessions.Any(session => 
+                        !session.IsDeleted && 
+                        session.OfferingId == offeringId))
+                .ToListAsync(cancellationToken);
 
         public TimetablePeriod WithDetails(int id)
         {

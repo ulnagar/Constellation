@@ -2,12 +2,14 @@ using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
 {
     public interface ITimetablePeriodRepository
     {
+        Task<List<TimetablePeriod>> GetByDayAndOfferingId(int dayNumber, int offeringId, CancellationToken cancellationToken = default);
         TimetablePeriod WithDetails(int id);
         TimetablePeriod WithFilter(Expression<Func<TimetablePeriod, bool>> predicate);
         ICollection<TimetablePeriod> All();

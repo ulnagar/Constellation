@@ -2,12 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
 {
     public interface ICasualRepository
     {
+        Task<Casual?> GetById(int id, CancellationToken cancellationToken = default);
         Casual WithDetails(int id);
         Casual WithFilter(Expression<Func<Casual, bool>> predicate);
         Task<Casual> GetForExistCheck(int id);
