@@ -39,6 +39,7 @@ namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.
             foreach (var enrolment in enrolments)
             {
                 enrolment.IsDeleted = true;
+                enrolment.DateDeleted = DateTime.Now;
 
                 //Remove Class Specific Adobe Connect Access
                 foreach (var room in enrolment.Offering.Sessions.Select(session => session.Room).Distinct().ToList())
