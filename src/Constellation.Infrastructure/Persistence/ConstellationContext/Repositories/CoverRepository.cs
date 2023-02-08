@@ -27,7 +27,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         {
             // These are the dates the cover would have started if access had been given, not vice versa
             var startDate = DateTime.Today.AddDays(1);
-            var endDate = DateTime.Today.AddDays(-1);
+            var endDate = DateTime.Today;
 
             return await _context
                 .Set<ClassCover>()
