@@ -23,15 +23,21 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
         public async Task<List<string>> GetCurrentCoveringTeachersForOffering(
             int offeringId, 
-            CancellationToken cancellationToken = default) =>
-            await _context
+            CancellationToken cancellationToken = default)
+        {
+            var startDate = DateTime.Today.AddDays(-1);
+            var endDate = DateTime.Today.AddDays(1);
+
+            return await _context
                 .Set<ClassCover>()
-                .Where(cover => 
+                .Where(cover =>
                     cover.OfferingId == offeringId &&
-                    cover.StartDate <= DateTime.Today &&
-                    cover.EndDate >= DateTime.Today)
+                    cover.StartDate <= startDate &&
+                    cover.EndDate >= endDate)
                 .Select(cover => (cover is CasualClassCover) ? ((CasualClassCover)cover).Casual.EmailAddress : ((TeacherClassCover)cover).Staff.EmailAddress)
                 .ToListAsync(cancellationToken);
+
+        }
 
         public async Task<ICollection<ClassCover>> ForListAsync(Expression<Func<ClassCover, bool>> predicate)
         {
