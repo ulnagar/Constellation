@@ -57,10 +57,6 @@ internal sealed class CoverEndDateChangedDomainEvent_UpdateAdobeConnectAccessHan
 
         var requestsByRoom = existingRequests.GroupBy(operation => operation.ScoId);
 
-        // If End Date has passed, we shouldn't get here.
-        // If End Date is sooner, and access hasn't been removed, move end date of existing operation
-        // If End Date is later, and access hasn't been removed, move end date of existing operation
-
         foreach (var room in requestsByRoom)
         {
             var removeRequests = room
@@ -81,7 +77,7 @@ internal sealed class CoverEndDateChangedDomainEvent_UpdateAdobeConnectAccessHan
                         ScoId = room.Key,
                         CasualId = int.Parse(cover.TeacherId),
                         Action = AdobeConnectOperationAction.Remove,
-                        DateScheduled = DateTime.Now,
+                        DateScheduled = notification.NewEndDate.ToDateTime(TimeOnly.MinValue).AddDays(1),
                         CoverId = cover.Id
                     };
 
@@ -94,7 +90,7 @@ internal sealed class CoverEndDateChangedDomainEvent_UpdateAdobeConnectAccessHan
                         ScoId = room.Key,
                         StaffId = cover.TeacherId,
                         Action = AdobeConnectOperationAction.Remove,
-                        DateScheduled = DateTime.Now,
+                        DateScheduled = notification.NewEndDate.ToDateTime(TimeOnly.MinValue).AddDays(1),
                         CoverId = cover.Id
                     };
 
