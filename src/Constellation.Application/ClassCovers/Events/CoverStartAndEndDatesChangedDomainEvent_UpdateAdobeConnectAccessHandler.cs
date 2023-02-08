@@ -1,4 +1,6 @@
-﻿using Constellation.Application.Abstractions.Messaging;
+﻿namespace Constellation.Application.ClassCovers.Events;
+
+using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
@@ -10,8 +12,6 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-namespace Constellation.Application.ClassCovers.Events;
 
 internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateAdobeConnectAccessHandler
     : IDomainEventHandler<CoverStartAndEndDatesChangedDomainEvent>
@@ -78,7 +78,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateAdobeConnect
             {
                 foreach (var request in addRequests)
                 {
-                    request.DateScheduled = DateTime.Today.AddDays(-1);
+                    request.DateScheduled = notification.NewStartDate.ToDateTime(TimeOnly.MinValue).AddDays(-1);
                 }
             }
             else
@@ -101,17 +101,6 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateAdobeConnect
                         };
 
                         _operationsRepository.Insert(removeEarlyOperation);
-
-                        var addTimelyOperation = new CasualAdobeConnectOperation
-                        {
-                            ScoId = room.Key,
-                            CasualId = int.Parse(cover.TeacherId),
-                            Action = AdobeConnectOperationAction.Remove,
-                            DateScheduled = newActionDate,
-                            CoverId = cover.Id
-                        };
-
-                        _operationsRepository.Insert(addTimelyOperation);
                     }
                     else
                     {
@@ -125,18 +114,34 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateAdobeConnect
                         };
 
                         _operationsRepository.Insert(removeEarlyOperation);
-
-                        var addTimelyOperation = new TeacherAdobeConnectOperation
-                        {
-                            ScoId = room.Key,
-                            StaffId = cover.TeacherId,
-                            Action = AdobeConnectOperationAction.Remove,
-                            DateScheduled = newActionDate,
-                            CoverId = cover.Id
-                        };
-
-                        _operationsRepository.Insert(addTimelyOperation);
                     }
+                }
+
+                if (cover.TeacherType == CoverTeacherType.Casual)
+                {
+                    var addTimelyOperation = new CasualAdobeConnectOperation
+                    {
+                        ScoId = room.Key,
+                        CasualId = int.Parse(cover.TeacherId),
+                        Action = AdobeConnectOperationAction.Remove,
+                        DateScheduled = newActionDate,
+                        CoverId = cover.Id
+                    };
+
+                    _operationsRepository.Insert(addTimelyOperation);
+                }
+                else
+                { 
+                    var addTimelyOperation = new TeacherAdobeConnectOperation
+                    {
+                        ScoId = room.Key,
+                        StaffId = cover.TeacherId,
+                        Action = AdobeConnectOperationAction.Remove,
+                        DateScheduled = newActionDate,
+                        CoverId = cover.Id
+                    };
+
+                    _operationsRepository.Insert(addTimelyOperation);
                 }
             }
 

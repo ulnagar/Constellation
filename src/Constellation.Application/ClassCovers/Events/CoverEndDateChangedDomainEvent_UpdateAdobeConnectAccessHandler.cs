@@ -1,4 +1,6 @@
-﻿using Constellation.Application.Abstractions.Messaging;
+﻿namespace Constellation.Application.ClassCovers.Events;
+
+using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
@@ -10,8 +12,6 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-namespace Constellation.Application.ClassCovers.Events;
 
 internal sealed class CoverEndDateChangedDomainEvent_UpdateAdobeConnectAccessHandler
     : IDomainEventHandler<CoverEndDateChangedDomainEvent>

@@ -71,7 +71,7 @@ internal sealed class CoverCancelledDomainEvent_RemoveAdobeConnectAccessHandler
                     .Any(operation => operation.IsCompleted);
 
             var accessRevoked = removeRequests
-                    .Any(operation => !operation.IsCompleted);
+                    .Any(operation => operation.IsCompleted);
 
             if (accessGranted && !accessRevoked)
             {
