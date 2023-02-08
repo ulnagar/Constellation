@@ -31,7 +31,7 @@ namespace Constellation.Infrastructure.Services
 
             sb.AppendLine("DTSTART:" + start.ToUniversalTime().ToString("yyyyMMddTHHmm00"));
             sb.AppendLine("DTEND:" + end.ToUniversalTime().ToString("yyyyMMddTHHmm00"));
-            sb.AppendLine("SEQUENCE:0");
+            sb.AppendLine("SEQUENCE:" + DateTime.UtcNow.ToString("yyyyMMddTHHmm00"));
             sb.AppendLine("SUMMARY:" + summary + "");
             sb.AppendLine("LOCATION:Microsoft Teams");
             sb.AppendLine("DESCRIPTION:" + summary + "");

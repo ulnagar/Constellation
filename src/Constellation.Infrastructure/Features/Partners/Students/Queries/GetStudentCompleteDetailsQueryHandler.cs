@@ -38,7 +38,7 @@ namespace Constellation.Infrastructure.Features.Partners.Students.Queries
                 .ToListAsync(cancellationToken);
 
             viewModel.Enrolments = await _context.Enrolments
-                .Where(enrolment => enrolment.StudentId == request.StudentId && !enrolment.DateDeleted.HasValue && enrolment.Offering.EndDate > DateTime.Today)
+                .Where(enrolment => enrolment.StudentId == request.StudentId && !enrolment.IsDeleted && enrolment.Offering.EndDate > DateTime.Today)
                 .Select(enrolment => enrolment.Offering)
                 .ProjectTo<StudentCompleteDetailsDto.Offering>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
