@@ -25,8 +25,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             int offeringId, 
             CancellationToken cancellationToken = default)
         {
-            var startDate = DateTime.Today.AddDays(-1);
-            var endDate = DateTime.Today.AddDays(1);
+            // These are the dates the cover would have started if access had been given, not vice versa
+            var startDate = DateTime.Today.AddDays(1);
+            var endDate = DateTime.Today.AddDays(-1);
 
             return await _context
                 .Set<ClassCover>()
