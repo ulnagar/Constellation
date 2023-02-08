@@ -15,6 +15,7 @@ using Constellation.Infrastructure.Templates.Views.Emails.Lessons;
 using Constellation.Infrastructure.Templates.Views.Emails.MandatoryTraining;
 using Constellation.Infrastructure.Templates.Views.Emails.MissedWork;
 using Constellation.Infrastructure.Templates.Views.Emails.RollMarking;
+using Duende.IdentityServer.Models;
 using System.Net.Mail;
 using static Constellation.Application.Models.EmailQueue.EmailQueueItem.EmailQueueReferenceType.Covers;
 
@@ -445,7 +446,7 @@ public class Service : IEmailService, IScopedService
         TimeOnly endTime,
         string teamLink,
         List<Attachment> attachments,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         // Determine whether email or invite
         var singleDayCover = cover.StartDate == cover.EndDate;
@@ -528,6 +529,63 @@ public class Service : IEmailService, IScopedService
         await _emailSender.Send(toRecipients, ccRecipients, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
     }
 
+    public async Task SendUpdatedCoverEmail(
+        ClassCover cover,
+        CourseOffering offering,
+        EmailAddress coveringTeacher,
+        List<EmailAddress> primaryRecipients,
+        List<EmailAddress> secondaryRecipients,
+        DateOnly originalStartDate,
+        TimeOnly startTime,
+        TimeOnly endTime,
+        string teamLink,
+        List<Attachment> attachments,
+        CancellationToken cancellationToken = default)
+    {
+        // Determine whether email or invite
+        var singleDayCover = cover.StartDate == cover.EndDate;
+
+        var viewModel = new UpdatedCoverEmailViewModel
+        {
+            ToName = coveringTeacher.Name,
+            Title = $"[UPDATED] Aurora Class Cover - {offering.Name}",
+            SenderName = "Cathy Crouch",
+            SenderTitle = "Casual Coordinator",
+            StartDate = cover.StartDate.ToDateTime(TimeOnly.MinValue),
+            EndDate = cover.EndDate.ToDateTime(TimeOnly.MinValue),
+            HasAdobeAccount = true,
+            Preheader = "",
+            ClassWithLink = new Dictionary<string, string> { { "Class Team", teamLink } }
+        };
+
+        if (singleDayCover)
+        {
+            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverAppointment.cshtml", viewModel);
+
+            // Create and add ICS files
+            var uid = $"{cover.Id}-{cover.OfferingId}-{originalStartDate:yyyyMMdd}";
+            var summary = $"[UPDATED] Aurora Class Cover - {offering.Name}";
+            var location = $"Class Team ({teamLink})";
+            var description = body;
+
+            // What cycle day does the cover fall on?
+            // What periods exist for this class on that cycle day?
+            // Extract start and end times for the periods to use in the appointment
+            var appointmentStart = cover.StartDate.ToDateTime(startTime);
+            var appointmentEnd = cover.EndDate.ToDateTime(endTime);
+
+            var icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, description, appointmentStart, appointmentEnd, 0);
+
+            await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData);
+        }
+        else
+        {
+            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverEmail.cshtml", viewModel);
+
+            await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments);
+        }
+    }
+
     public async Task SendUpdatedCoverEmail(EmailDtos.CoverEmail resource)
     {
         var viewModel = new UpdatedCoverEmailViewModel
@@ -573,7 +631,7 @@ public class Service : IEmailService, IScopedService
         TimeOnly endTime,
         string teamLink,
         List<Attachment> attachments,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         // Determine whether email or invite
         var singleDayCover = cover.StartDate == cover.EndDate;

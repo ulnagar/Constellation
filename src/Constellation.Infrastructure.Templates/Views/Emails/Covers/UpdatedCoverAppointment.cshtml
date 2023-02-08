@@ -1,10 +1,10 @@
 ﻿@using Constellation.Infrastructure.Templates.Views.Emails.Covers
-@model UpdatedCoverEmailViewModel
+@model NewCoverEmailViewModel
 
 @{
     Layout = "/Views/Shared/EmailLayout.cshtml";
 
-    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Alert"] = "Please note that declining this calendar appointment does not cancel the cover. If you are unable to teach this class, you must contact Cathy Crouch on 0409 223 907 as soon as possible.";
     ViewData["Title"] = Model.Title;
     ViewData["SenderName"] = Model.SenderName;
     ViewData["SenderTitle"] = Model.SenderTitle;
@@ -16,7 +16,7 @@
 <ul>
     @foreach (var pair in Model.ClassWithLink)
     {
-        <li>@pair.Key 
+        <li>@pair.Key - 
             <a href="@pair.Value" target="_blank" class="button"><span style="display:block;padding:10px 20px;line-height:120%;"><span style="font-size: 14px; line-height: 16.8px;">Open Team</span></span></a>
         </li>
     }
