@@ -98,6 +98,22 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
             if (!returnData.Any(value => value.EmailAddress == entry.EmailAddress))
                 returnData.Add(entry);
+
+            var cathyEntry = new TeamMembershipResponse(
+                team.Id,
+                "catherine.crouch@det.nsw.edu.au",
+                TeamsMembershipLevel.Owner.Value);
+
+            if (!returnData.Any(value => value.EmailAddress == cathyEntry.EmailAddress))
+                returnData.Add(cathyEntry);
+
+            var karenEntry = new TeamMembershipResponse(
+                team.Id,
+                "karen.bellamy3@det.nsw.edu.au",
+                TeamsMembershipLevel.Owner.Value);
+
+            if (!returnData.Any(value => value.EmailAddress == karenEntry.EmailAddress))
+                returnData.Add(karenEntry);
         }
 
         // Head Teachers
