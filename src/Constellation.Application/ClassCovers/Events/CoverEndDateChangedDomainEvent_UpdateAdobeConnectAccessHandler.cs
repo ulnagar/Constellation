@@ -55,7 +55,9 @@ internal sealed class CoverEndDateChangedDomainEvent_UpdateAdobeConnectAccessHan
             _logger.Warning("{action}: Could not find operations for cover with Id {id} in database", nameof(CoverEndDateChangedDomainEvent_UpdateAdobeConnectAccessHandler), notification.CoverId);
         }
 
-        var requestsByRoom = existingRequests.GroupBy(operation => operation.ScoId);
+        var requestsByRoom = existingRequests
+            .Where(operation => !operation.IsDeleted)
+            .GroupBy(operation => operation.ScoId);
 
         foreach (var room in requestsByRoom)
         {
@@ -64,50 +66,83 @@ internal sealed class CoverEndDateChangedDomainEvent_UpdateAdobeConnectAccessHan
                     operation.Action == AdobeConnectOperationAction.Remove)
                 .ToList();
 
-            // Set the first unactioned remove request to change date for
-            var removeOperation = removeRequests.First(operation => !operation.IsCompleted && !operation.IsDeleted);
+            // Process removal
+            var alreadyRemoved = removeRequests.FirstOrDefault(operation => operation.IsCompleted);
 
-            if (removeOperation is null)
+            if (alreadyRemoved is null)
             {
-                // Create new operation to remove access
-                if (cover.TeacherType == CoverTeacherType.Casual)
+                foreach (var request in removeRequests)
                 {
-                    removeOperation = new CasualAdobeConnectOperation
-                    {
-                        ScoId = room.Key,
-                        CasualId = int.Parse(cover.TeacherId),
-                        Action = AdobeConnectOperationAction.Remove,
-                        DateScheduled = notification.NewEndDate.ToDateTime(TimeOnly.MinValue).AddDays(1),
-                        CoverId = cover.Id
-                    };
-
-                    _operationsRepository.Insert(removeOperation);
-                }
-                else
-                {
-                    removeOperation = new TeacherAdobeConnectOperation
-                    {
-                        ScoId = room.Key,
-                        StaffId = cover.TeacherId,
-                        Action = AdobeConnectOperationAction.Remove,
-                        DateScheduled = notification.NewEndDate.ToDateTime(TimeOnly.MinValue).AddDays(1),
-                        CoverId = cover.Id
-                    };
-
-                    _operationsRepository.Insert(removeOperation);
+                    request.DateScheduled = notification.NewEndDate.ToDateTime(TimeOnly.MinValue).AddDays(1);
                 }
             }
             else
             {
-                removeOperation.DateScheduled = notification.NewEndDate.ToDateTime(TimeOnly.MinValue).AddDays(1);
+                var previousActionDate = alreadyRemoved.DateScheduled;
+                var newActionDate = notification.NewEndDate.ToDateTime(TimeOnly.MinValue).AddDays(1);
 
-                var remainingRemoveOperations = removeRequests.Where(operation => !operation.IsCompleted && !operation.IsDeleted).Skip(1).ToList();
+                alreadyRemoved.Delete();
 
-                foreach (var operation in remainingRemoveOperations)
+                if (newActionDate > previousActionDate)
                 {
-                    operation.IsDeleted = true;
+                    // Remove access, then create new add operation
+                    if (cover.TeacherType == CoverTeacherType.Casual)
+                    {
+                        var reAddOperation = new CasualAdobeConnectOperation
+                        {
+                            ScoId = room.Key,
+                            CasualId = int.Parse(cover.TeacherId),
+                            Action = AdobeConnectOperationAction.Add,
+                            DateScheduled = DateTime.Now,
+                            CoverId = Guid.Empty
+                        };
+
+                        _operationsRepository.Insert(reAddOperation);
+                    }
+                    else
+                    {
+                        var reAddOperation = new TeacherAdobeConnectOperation
+                        {
+                            ScoId = room.Key,
+                            StaffId = cover.TeacherId,
+                            Action = AdobeConnectOperationAction.Add,
+                            DateScheduled = DateTime.Now,
+                            CoverId = Guid.Empty
+                        };
+
+                        _operationsRepository.Insert(reAddOperation);
+                    }
+                }
+
+                if (cover.TeacherType == CoverTeacherType.Casual)
+                {
+                    var removeTimelyOperation = new CasualAdobeConnectOperation
+                    {
+                        ScoId = room.Key,
+                        CasualId = int.Parse(cover.TeacherId),
+                        Action = AdobeConnectOperationAction.Remove,
+                        DateScheduled = newActionDate,
+                        CoverId = cover.Id
+                    };
+
+                    _operationsRepository.Insert(removeTimelyOperation);
+                }
+                else
+                {
+                    var removeTimelyOperation = new TeacherAdobeConnectOperation
+                    {
+                        ScoId = room.Key,
+                        StaffId = cover.TeacherId,
+                        Action = AdobeConnectOperationAction.Remove,
+                        DateScheduled = newActionDate,
+                        CoverId = cover.Id
+                    };
+
+                    _operationsRepository.Insert(removeTimelyOperation);
                 }
             }
         }
+
+        await _unitOfWork.CompleteAsync(cancellationToken);
     }
 }

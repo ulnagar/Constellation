@@ -1,4 +1,6 @@
-﻿using Constellation.Application.Abstractions.Messaging;
+﻿namespace Constellation.Application.ClassCovers.Events;
+
+using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
@@ -11,10 +13,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Application.ClassCovers.Events;
-
 internal sealed class CoverEndDateChangedDomainEvent_UpdateMicrosoftTeamsAccessHandler
-: IDomainEventHandler<CoverEndDateChangedDomainEvent>
+    : IDomainEventHandler<CoverEndDateChangedDomainEvent>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMSTeamOperationsRepository _operationsRepository;
@@ -47,75 +47,202 @@ internal sealed class CoverEndDateChangedDomainEvent_UpdateMicrosoftTeamsAccessH
         var existingRequests = await _operationsRepository
             .GetByCoverId(notification.CoverId, cancellationToken);
 
-        var removeRequests = existingRequests
+        if (existingRequests is null)
+        {
+            _logger.Warning("{action}: Could not find operations for cover with Id {id} in database", nameof(CoverEndDateChangedDomainEvent_UpdateMicrosoftTeamsAccessHandler), notification.CoverId);
+        }
+
+        var coveringTeacherRequests = existingRequests;
+
+        if (cover.TeacherType == CoverTeacherType.Casual)
+        {
+            coveringTeacherRequests = existingRequests
+                .OfType<CasualMSTeamOperation>()
+                .Where(operation => operation.CasualId == int.Parse(cover.TeacherId))
+                .ToList<MSTeamOperation>();
+        }
+        else
+        {
+            coveringTeacherRequests = existingRequests
+                .OfType<TeacherMSTeamOperation>()
+                .Where(operation => operation.StaffId == cover.TeacherId)
+                .ToList<MSTeamOperation>();
+        }
+
+        var removeRequests = coveringTeacherRequests
             .Where(operation =>
                 operation.Action == MSTeamOperationAction.Remove)
             .ToList();
 
-        // Set the first unactioned remove request to process asap
-        var removeOperations = removeRequests.Where(operation => !operation.IsCompleted && !operation.IsDeleted).ToList();
+        // Process removal
+        var alreadyRemoved = removeRequests.FirstOrDefault(operation => operation.IsCompleted);
 
-        if (removeOperations.Count == 0)
+        if (alreadyRemoved is null)
         {
-            // Create new operation to remove access
-            if (cover.TeacherType == CoverTeacherType.Casual)
-            {
-                var removeOperation = new CasualMSTeamOperation
-                {
-                    OfferingId = cover.OfferingId,
-                    CasualId = int.Parse(cover.TeacherId),
-                    CoverId = cover.Id,
-                    Action = MSTeamOperationAction.Remove,
-                    PermissionLevel = MSTeamOperationPermissionLevel.Owner,
-                    DateScheduled = notification.NewEndDate.ToDateTime(TimeOnly.MinValue).AddDays(1)
-                };
+            var newActionDate = notification.NewEndDate.ToDateTime(TimeOnly.MinValue).AddDays(1);
 
-                _operationsRepository.Insert(removeOperation);
-            }
-            else
+            foreach (var request in removeRequests)
             {
-                var removeOperation = new TeacherMSTeamOperation
-                {
-                    OfferingId = cover.OfferingId,
-                    StaffId = cover.TeacherId,
-                    CoverId = cover.Id,
-                    Action = MSTeamOperationAction.Remove,
-                    PermissionLevel = MSTeamOperationPermissionLevel.Owner,
-                    DateScheduled = notification.NewEndDate.ToDateTime(TimeOnly.MinValue).AddDays(1)
-                };
-
-                _operationsRepository.Insert(removeOperation);
+                request.DateScheduled = newActionDate;
             }
 
-            var cathyRemoveOperation = new TeacherMSTeamOperation
+            var existingCathyRemoveOperation = existingRequests
+                .OfType<TeacherMSTeamOperation>()
+                .FirstOrDefault(operation =>
+                    operation.StaffId == "1030937" &&
+                    operation.Action == MSTeamOperationAction.Remove);
+
+            if (existingCathyRemoveOperation is not null)
             {
-                OfferingId = cover.OfferingId,
-                StaffId = "1030937",
-                Action = MSTeamOperationAction.Remove,
-                PermissionLevel = MSTeamOperationPermissionLevel.Owner,
-                DateScheduled = notification.NewEndDate.ToDateTime(TimeOnly.MinValue).AddDays(1),
-                CoverId = cover.Id
-            };
+                existingCathyRemoveOperation.DateScheduled = newActionDate;
+            }
 
-            _operationsRepository.Insert(cathyRemoveOperation);
+            var existingKarenRemoveOperation = existingRequests
+                .OfType<TeacherMSTeamOperation>()
+                .FirstOrDefault(operation =>
+                    operation.StaffId == "1112830" &&
+                    operation.Action == MSTeamOperationAction.Remove);
 
-            var karenRemoveOperation = new TeacherMSTeamOperation
+            if (existingKarenRemoveOperation is not null)
             {
-                OfferingId = cover.OfferingId,
-                StaffId = "1112830",
-                Action = MSTeamOperationAction.Remove,
-                PermissionLevel = MSTeamOperationPermissionLevel.Owner,
-                DateScheduled = notification.NewEndDate.ToDateTime(TimeOnly.MinValue).AddDays(1),
-                CoverId = cover.Id
-            };
-
-            _operationsRepository.Insert(karenRemoveOperation);
+                existingKarenRemoveOperation.DateScheduled = newActionDate;
+            }
         }
         else
         {
-            foreach (var operation in removeOperations)
+            var previousActionDate = alreadyRemoved.DateScheduled;
+            var newActionDate = notification.NewEndDate.ToDateTime(TimeOnly.MinValue).AddDays(1);
+
+            if (newActionDate > previousActionDate)
             {
-                operation.DateScheduled = notification.NewEndDate.ToDateTime(TimeOnly.MinValue).AddDays(1);
+                alreadyRemoved.Delete();
+
+                // Re-Add access, then create new removal operations
+                if (cover.TeacherType == CoverTeacherType.Casual)
+                {
+                    var reAddOperation = new CasualMSTeamOperation
+                    {
+                        OfferingId = cover.OfferingId,
+                        CasualId = int.Parse(cover.TeacherId),
+                        CoverId = Guid.Empty,
+                        Action = MSTeamOperationAction.Add,
+                        PermissionLevel = MSTeamOperationPermissionLevel.Owner,
+                        DateScheduled = DateTime.Now
+                    };
+
+                    _operationsRepository.Insert(reAddOperation);
+
+                    var removeTimelyOperation = new CasualMSTeamOperation
+                    {
+                        OfferingId = cover.OfferingId,
+                        CasualId = int.Parse(cover.TeacherId),
+                        CoverId = Guid.Empty,
+                        Action = MSTeamOperationAction.Remove,
+                        PermissionLevel = MSTeamOperationPermissionLevel.Owner,
+                        DateScheduled = newActionDate
+                    };
+
+                    _operationsRepository.Insert(removeTimelyOperation);
+
+                }
+                else
+                {
+                    var reAddOperation = new TeacherMSTeamOperation
+                    {
+                        OfferingId = cover.OfferingId,
+                        StaffId = cover.TeacherId,
+                        CoverId = Guid.Empty,
+                        Action = MSTeamOperationAction.Add,
+                        PermissionLevel = MSTeamOperationPermissionLevel.Owner,
+                        DateScheduled = DateTime.Now
+                    };
+
+                    _operationsRepository.Insert(reAddOperation);
+
+                    var removeTimelyOperation = new TeacherMSTeamOperation
+                    {
+                        OfferingId = cover.OfferingId,
+                        StaffId = cover.TeacherId,
+                        CoverId = Guid.Empty,
+                        Action = MSTeamOperationAction.Remove,
+                        PermissionLevel = MSTeamOperationPermissionLevel.Owner,
+                        DateScheduled = newActionDate
+                    };
+
+                    _operationsRepository.Insert(removeTimelyOperation);
+                }
+
+                var existingCathyRemoveOperation = existingRequests
+                    .OfType<TeacherMSTeamOperation>()
+                    .FirstOrDefault(operation =>
+                        operation.StaffId == "1030937" &&
+                        operation.Action == MSTeamOperationAction.Remove &&
+                        operation.DateScheduled == alreadyRemoved.DateScheduled);
+
+                if (existingCathyRemoveOperation is not null)
+                {
+                    existingCathyRemoveOperation.Delete();
+
+                    var cathyAddOperation = new TeacherMSTeamOperation
+                    {
+                        OfferingId = cover.OfferingId,
+                        StaffId = "1030937",
+                        Action = MSTeamOperationAction.Add,
+                        PermissionLevel = MSTeamOperationPermissionLevel.Owner,
+                        DateScheduled = DateTime.Now,
+                        CoverId = Guid.Empty
+                    };
+
+                    _operationsRepository.Insert(cathyAddOperation);
+                }
+
+                var cathyRemoveOperation = new TeacherMSTeamOperation
+                {
+                    OfferingId = cover.OfferingId,
+                    StaffId = "1030937",
+                    Action = MSTeamOperationAction.Remove,
+                    PermissionLevel = MSTeamOperationPermissionLevel.Owner,
+                    DateScheduled = newActionDate,
+                    CoverId = cover.Id
+                };
+
+                _operationsRepository.Insert(cathyRemoveOperation);
+
+                var existingKarenRemoveOperation = existingRequests
+                    .OfType<TeacherMSTeamOperation>()
+                    .FirstOrDefault(operation =>
+                        operation.StaffId == "1112830" &&
+                        operation.Action == MSTeamOperationAction.Remove &&
+                        operation.DateScheduled == alreadyRemoved.DateScheduled);
+
+                if (existingKarenRemoveOperation is not null)
+                {
+                    existingKarenRemoveOperation.Delete();
+
+                    var karenAddOperation = new TeacherMSTeamOperation
+                    {
+                        OfferingId = cover.OfferingId,
+                        StaffId = "1112830",
+                        Action = MSTeamOperationAction.Add,
+                        PermissionLevel = MSTeamOperationPermissionLevel.Owner,
+                        DateScheduled = DateTime.Now,
+                        CoverId = Guid.Empty
+                    };
+
+                    _operationsRepository.Insert(karenAddOperation);
+                }
+
+                var karenRemoveOperation = new TeacherMSTeamOperation
+                {
+                    OfferingId = cover.OfferingId,
+                    StaffId = "1112830",
+                    Action = MSTeamOperationAction.Remove,
+                    PermissionLevel = MSTeamOperationPermissionLevel.Owner,
+                    DateScheduled = newActionDate,
+                    CoverId = cover.Id
+                };
+
+                _operationsRepository.Insert(karenRemoveOperation);
             }
         }
 
