@@ -61,21 +61,21 @@ public sealed class ClassCover : AggregateRoot, IAuditableEntity
 
         if (oldStartDate != StartDate && oldEndDate != EndDate)
         {
-            RaiseDomainEvent(new CoverStartAndEndDatesChangedDomainEvent(Guid.NewGuid(), oldStartDate, oldEndDate, StartDate, EndDate));
+            RaiseDomainEvent(new CoverStartAndEndDatesChangedDomainEvent(Guid.NewGuid(), Id, oldStartDate, oldEndDate, StartDate, EndDate));
 
             return;
         } 
 
         if (oldStartDate != StartDate)
         {
-            RaiseDomainEvent(new CoverStartDateChangedDomainEvent(Guid.NewGuid(), oldStartDate, StartDate));
+            RaiseDomainEvent(new CoverStartDateChangedDomainEvent(Guid.NewGuid(), Id, oldStartDate, StartDate));
 
             return;
         } 
 
         if (oldEndDate != EndDate)
         {
-            RaiseDomainEvent(new CoverEndDateChangedDomainEvent(Guid.NewGuid(), oldEndDate, EndDate));
+            RaiseDomainEvent(new CoverEndDateChangedDomainEvent(Guid.NewGuid(), Id, oldEndDate, EndDate));
 
             return;
         }
