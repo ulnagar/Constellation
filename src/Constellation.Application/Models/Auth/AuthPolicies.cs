@@ -14,4 +14,6 @@ public class AuthPolicies
     public const string CanEditGroupTutorials = "CanEditGroupTutorials";
     public const string CanSubmitGroupTutorialRolls = "CanSubmitGroupTutorialRolls";
     public const string IsSiteAdmin = "IsSiteAdmin";
+    public const string CanViewCovers = "CanViewCovers";
+    public const string CanEditCovers = "CanEditCovers";
 }

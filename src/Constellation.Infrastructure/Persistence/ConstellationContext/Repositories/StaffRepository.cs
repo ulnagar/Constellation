@@ -93,6 +93,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<List<Staff>> GetAllActive(
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<Staff>()
+                .Where(staff => !staff.IsDeleted)
+                .ToListAsync(cancellationToken);
+
         public Staff WithDetails(string id)
         {
             return Collection()

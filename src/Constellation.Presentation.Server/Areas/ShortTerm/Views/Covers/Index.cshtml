@@ -70,11 +70,11 @@
 
             <tr>
                 <td><span class="glyphicon glyphicon-@glyph"></span></td>
-                <td>@Html.DisplayFor(model => item.UserName)</td>
-                <td>@Html.DisplayFor(model => item.UserSchool)</td>
+                <td>@Html.DisplayFor(model => item.TeacherName)</td>
+                <td>@Html.DisplayFor(model => item.TeacherSchool)</td>
                 <td>@Html.DisplayFor(model => item.OfferingName)</td>
-                <td>@Html.DisplayFor(model => item.StartDate, "ShortDate")</td>
-                <td>@Html.DisplayFor(model => item.EndDate, "ShortDate")</td>
+                <td>@Html.DisplayFor(model => item.StartDate, "DateOnly")</td>
+                <td>@Html.DisplayFor(model => item.EndDate, "DateOnly")</td>
                 <td>
                     <a asp-action="Details" asp-controller="Covers" asp-area="ShortTerm" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                 </td>

@@ -1,11 +1,11 @@
-﻿using Constellation.Core.Abstractions;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
+
+using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Staff = Constellation.Core.Models.Staff;
-
-namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 internal sealed class ClassCoverRepository : IClassCoverRepository
 {
@@ -20,7 +20,18 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<ClassCover>()
-            .Where(cover => cover.EndDate >= DateOnly.FromDateTime(DateTime.Today) && !cover.IsDeleted)
+            .Where(cover => 
+                cover.EndDate >= DateOnly.FromDateTime(DateTime.Today) && 
+                !cover.IsDeleted)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<ClassCover>> GetAllUpcoming(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<ClassCover>()
+            .Where(cover => 
+                cover.StartDate > DateOnly.FromDateTime(DateTime.Today) && 
+                !cover.IsDeleted)
             .ToListAsync(cancellationToken);
 
     public async Task<List<ClassCover>> GetAllForCurrentCalendarYear(
@@ -73,6 +84,16 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
 
         return returnData.Distinct().ToList();
     }
+
+    public async Task<List<ClassCover>> GetAllWithCasualId(
+        int casualId, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<ClassCover>()
+            .Where(cover => 
+                cover.TeacherType == CoverTeacherType.Casual &&
+                cover.TeacherId == casualId.ToString())
+            .ToListAsync(cancellationToken);
 
     public void Insert(ClassCover cover) =>
         _context.Set<ClassCover>().Add(cover);

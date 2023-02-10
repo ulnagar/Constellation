@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Features.API.Schools.Queries;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
@@ -32,6 +33,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                     .ThenInclude(student => student.Enrolments)
                         .ThenInclude(enrolment => enrolment.Offering);
         }
+
+        public async Task<School?> GetById(
+            string id,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<School>()
+                .FirstOrDefaultAsync(school => school.Code == id, cancellationToken);
 
         public School WithDetails(string id)
         {

@@ -3,12 +3,15 @@ using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
 {
     public interface ISchoolRepository
     {
+        Task<School?> GetById(string id, CancellationToken cancellationToken = default);
+
         School WithDetails(string code);
         School WithFilter(Expression<Func<School, bool>> predicate);
         ICollection<School> All();

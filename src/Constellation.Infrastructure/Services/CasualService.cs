@@ -2,6 +2,7 @@
 using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using System;
@@ -13,13 +14,13 @@ namespace Constellation.Infrastructure.Services
     public class CasualService : ICasualService, IScopedService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ICoverService _coverService;
+        private readonly IClassCoverRepository _classCoverRepository;
         private readonly IDateTimeProvider _dateTimeProvider;
 
-        public CasualService(IUnitOfWork unitOfWork, ICoverService coverService, IDateTimeProvider dateTimeProvider)
+        public CasualService(IUnitOfWork unitOfWork, IClassCoverRepository classCoverRepository, IDateTimeProvider dateTimeProvider)
         {
             _unitOfWork = unitOfWork;
-            _coverService = coverService;
+            _classCoverRepository = classCoverRepository;
             _dateTimeProvider = dateTimeProvider;
         }
 
@@ -90,7 +91,7 @@ namespace Constellation.Infrastructure.Services
             return result;
         }
 
-        public async Task RemoveCasual(int casualId)
+        public async Task RemoveCasual(int casualId, CancellationToken cancellationToken = default)
         {
             // Validate entries
             var casual = await _unitOfWork.Casuals.ForEditAsync(casualId);
@@ -98,13 +99,12 @@ namespace Constellation.Infrastructure.Services
             if (casual == null)
                 return;
 
-            var outstandingCovers = await _unitOfWork.Covers.OutstandingForCasual(casualId);
+            var outstandingCovers = await _classCoverRepository.GetAllWithCasualId(casual.Id, cancellationToken);
 
             // Remove all current casual covers
             foreach (var cover in outstandingCovers)
             {
-                // TODO: Remove the cover, including operations if necessary
-                await _coverService.RemoveCasualCover(cover.Id);
+                cover.Delete();
             }
 
             casual.IsDeleted = true;

@@ -49,6 +49,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Where(offering => offering.Id == offeringId)
                 .FirstOrDefaultAsync(cancellationToken);
 
+        public async Task<List<CourseOffering>> GetAllActive(
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<CourseOffering>()
+                .Where(offering => 
+                    offering.StartDate <= DateTime.Now && 
+                    offering.EndDate >= DateTime.Now)
+                .ToListAsync(cancellationToken);
+
         public CourseOffering WithDetails(int id)
         {
             return Collection()

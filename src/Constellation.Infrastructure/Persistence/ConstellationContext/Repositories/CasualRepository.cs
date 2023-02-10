@@ -1,13 +1,7 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
-using Constellation.Infrastructure.Persistence.ConstellationContext;
-using HtmlAgilityPack;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
 {
@@ -37,6 +31,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             await _context
                 .Set<Casual>()
                 .FirstOrDefaultAsync(casual => casual.Id == id, cancellationToken);
+
+        public async Task<List<Casual>> GetAllActive(
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<Casual>()
+                .Where(casual => !casual.IsDeleted)
+                .ToListAsync(cancellationToken);
 
         public async Task<bool> AnyWithId(int id)
         {

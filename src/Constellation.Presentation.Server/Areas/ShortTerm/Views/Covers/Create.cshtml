@@ -11,30 +11,29 @@
 <form asp-action="Create" asp-controller="Covers" asp-area="ShortTerm" method="post">
     <div class="form-horizontal">
         <div asp-validation-summary="All" class="text-danger"></div>
-        @Html.HiddenFor(model => model.Cover.UserType)
         
         <div class="form-group row">
-            <label asp-for="Cover.UserId" class="col-md-2">Covering Teacher</label>
+            <label asp-for="UserId" class="col-md-2">Covering Teacher</label>
             <div class="col-md-3">
-                <select asp-for="Cover.UserId" asp-items="Model.UserList" class="form-control combo">
+                <select asp-for="UserId" asp-items="Model.UserList" class="form-control combo">
                     <option value="">-- Select --</option>
                 </select>
-                <span asp-validation-for="Cover.UserId" class="text-danger"></span>
+                <span asp-validation-for="UserId" class="text-danger"></span>
             </div>
         </div>
         
         <div class="form-group row">
-            <label asp-for="Cover.TeacherId" class="col-md-2">Classroom Teacher</label>
+            <label asp-for="TeacherId" class="col-md-2">Classroom Teacher</label>
             <div class="col-md-3">
-                <select asp-for="Cover.TeacherId" asp-items="Model.TeacherList" class="form-control combo">
+                <select asp-for="TeacherId" asp-items="Model.TeacherList" class="form-control combo">
                     <option value="">-- Select --</option>
                 </select>
-                <span asp-validation-for="Cover.TeacherId" class="text-danger"></span>
+                <span asp-validation-for="TeacherId" class="text-danger"></span>
             </div>
         </div>
         
         <div class="form-group row">
-            <label asp-for="Cover.ClassId" class="col-md-2">All Classes</label>
+            <label asp-for="ClassId" class="col-md-2">All Classes</label>
             <div class="col-md-3">
                 <select id="allClasses" multiple="multiple" name="allClasses" class="form-control">
                     @foreach (var entry in Model.MultiClassList)
@@ -53,27 +52,27 @@
         </div>
 
         <div class="form-group row">
-            <label asp-for="Cover.ClassId" class="col-md-2">Selected Classes</label>
+            <label asp-for="ClassId" class="col-md-2">Selected Classes</label>
             <div class="col-md-3">
                 <select id="selectedClasses" multiple="multiple" name="selectedClasses" class="form-control"></select>
-                <span asp-validation-for="Cover.ClassId" class="text-danger"></span>
+                <span asp-validation-for="ClassId" class="text-danger"></span>
             </div>
             <div id="class_inputs"></div>
         </div>
 
         <div class="form-group row">
-            <label asp-for="Cover.StartDate" class="col-md-2"></label>
+            <label asp-for="StartDate" class="col-md-2"></label>
             <div class="col-md-3">
-                <input asp-for="Cover.StartDate" class="form-control" />
-                <span asp-validation-for="Cover.StartDate" class="text-danger"></span>
+                <input asp-for="StartDate" class="form-control" />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
             </div>
         </div>
 
         <div class="form-group row">
-            <label asp-for="Cover.EndDate" class="col-md-2"></label>
+            <label asp-for="EndDate" class="col-md-2"></label>
             <div class="col-md-3">
-                <input asp-for="Cover.EndDate" class="form-control" />
-                <span asp-validation-for="Cover.EndDate" class="text-danger"></span>
+                <input asp-for="EndDate" class="form-control" />
+                <span asp-validation-for="EndDate" class="text-danger"></span>
             </div>
         </div>
         
