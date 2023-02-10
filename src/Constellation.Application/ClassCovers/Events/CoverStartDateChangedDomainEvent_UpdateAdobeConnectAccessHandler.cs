@@ -55,7 +55,9 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateAdobeConnectAccessH
             _logger.Warning("{action}: Could not find operations for cover with Id {id} in database", nameof(CoverStartDateChangedDomainEvent_UpdateAdobeConnectAccessHandler), notification.CoverId);
         }
 
-        var requestsByRoom = existingRequests.GroupBy(operation => operation.ScoId);
+        var requestsByRoom = existingRequests
+            .Where(operation => !operation.IsDeleted)
+            .GroupBy(operation => operation.ScoId);
 
         foreach (var room in requestsByRoom)
         {
@@ -72,13 +74,15 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateAdobeConnectAccessH
             {
                 foreach (var request in addRequests)
                 {
-                    request.DateScheduled = DateTime.Today.AddDays(-1);
+                    request.DateScheduled = notification.NewStartDate.ToDateTime(TimeOnly.MinValue).AddDays(-1);
                 }
             }
             else
             {
                 var previousActionDate = alreadyGranted.DateScheduled;
                 var newActionDate = notification.NewStartDate.ToDateTime(TimeOnly.MinValue).AddDays(-1);
+
+                alreadyGranted.Delete();
 
                 if (newActionDate.Subtract(previousActionDate) > TimeSpan.FromDays(2))
                 {
@@ -91,21 +95,10 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateAdobeConnectAccessH
                             CasualId = int.Parse(cover.TeacherId),
                             Action = AdobeConnectOperationAction.Remove,
                             DateScheduled = DateTime.Now,
-                            CoverId = cover.Id
+                            CoverId = Guid.Empty
                         };
 
                         _operationsRepository.Insert(removeEarlyOperation);
-
-                        var addTimelyOperation = new CasualAdobeConnectOperation
-                        {
-                            ScoId = room.Key,
-                            CasualId = int.Parse(cover.TeacherId),
-                            Action = AdobeConnectOperationAction.Remove,
-                            DateScheduled = newActionDate,
-                            CoverId = cover.Id
-                        };
-
-                        _operationsRepository.Insert(addTimelyOperation);
                     }
                     else
                     {
@@ -115,24 +108,42 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateAdobeConnectAccessH
                             StaffId = cover.TeacherId,
                             Action = AdobeConnectOperationAction.Remove,
                             DateScheduled = DateTime.Now,
-                            CoverId = cover.Id
+                            CoverId = Guid.Empty
                         };
 
                         _operationsRepository.Insert(removeEarlyOperation);
-
-                        var addTimelyOperation = new TeacherAdobeConnectOperation
-                        {
-                            ScoId = room.Key,
-                            StaffId = cover.TeacherId,
-                            Action = AdobeConnectOperationAction.Remove,
-                            DateScheduled = newActionDate,
-                            CoverId = cover.Id
-                        };
-
-                        _operationsRepository.Insert(addTimelyOperation);
                     }
+                }
+
+                if (cover.TeacherType == CoverTeacherType.Casual)
+                {
+                    var addTimelyOperation = new CasualAdobeConnectOperation
+                    {
+                        ScoId = room.Key,
+                        CasualId = int.Parse(cover.TeacherId),
+                        Action = AdobeConnectOperationAction.Add,
+                        DateScheduled = newActionDate,
+                        CoverId = cover.Id
+                    };
+
+                    _operationsRepository.Insert(addTimelyOperation);
+                }
+                else
+                {
+                    var addTimelyOperation = new TeacherAdobeConnectOperation
+                    {
+                        ScoId = room.Key,
+                        StaffId = cover.TeacherId,
+                        Action = AdobeConnectOperationAction.Add,
+                        DateScheduled = newActionDate,
+                        CoverId = cover.Id
+                    };
+
+                    _operationsRepository.Insert(addTimelyOperation);
                 }
             }
         }
+
+        await _unitOfWork.CompleteAsync(cancellationToken);
     }
 }

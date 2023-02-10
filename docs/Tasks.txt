@@ -10,6 +10,18 @@ CURRENT TASK
 
 		**** DONT FORGET TO REBASE ON 1.8 BEFORE FINISHING ****
 
+	ACTIONS:
+		Migrate to AccessRight concept
+		Tickets are created for access to resources, with defined start and end dates
+		Tickets are linked to the object that defines the right: e.g. cover, enrolment, session etc
+		Audit can tally the tickets to determine the ideal current state of access to a resource
+		Removing the source of the ticket (e.g. the cover expires or is cancelled) removes that ticket only, so if there is another ticket
+			that grants access to a resource, access is retained
+		Tickets should not be deletable (soft or hard) but instead the expiry date should be moved if the ticket needs to end earlier
+			than originally intended. This would allow for historic access audits, i.e. being able to tell who should have had access
+			at a particular time.
+		Tickets should include audit functions (e.g. who created it and when) separate from the expiry dates of the ticket itself.
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,8 +76,7 @@ TRACKITSYNC JOB:
 GRADES:
 	Migrate from ENUM to object
 
-ACTIONS:
-	Migrate to AccessRight concept
+
 
 HANGFIRE DASHBOARD:
 	Add TRIGGER NOW button for one-off job registration
