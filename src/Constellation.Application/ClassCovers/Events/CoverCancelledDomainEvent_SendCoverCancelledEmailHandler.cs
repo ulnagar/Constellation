@@ -14,6 +14,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -183,6 +184,6 @@ internal sealed class CoverCancelledDomainEvent_SendCoverCancelledEmailHandler
             endTime = TimeOnly.FromTimeSpan(periods.Max(period => period.EndTime));
         }
 
-        await _emailService.SendCancelledCoverEmail(cover, offering, coveringTeacher, primaryRecipients, secondaryRecipients, startTime, endTime, teamLink, cancellationToken);
+        await _emailService.SendCancelledCoverEmail(cover, offering, coveringTeacher, primaryRecipients, secondaryRecipients, startTime, endTime, teamLink, new List<Attachment>(), cancellationToken);
     }
 }

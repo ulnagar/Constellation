@@ -2,6 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Models.Covers;
+using Constellation.Core.ValueObjects;
 using System;
 
 public sealed record CreateCoverCommand(
@@ -9,6 +10,6 @@ public sealed record CreateCoverCommand(
     int OfferingId,
     DateOnly StartDate,
     DateOnly EndDate,
-    string TeacherType,
+    CoverTeacherType TeacherType,
     string TeacherId)
     : ICommand<ClassCover>;
