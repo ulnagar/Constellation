@@ -1,6 +1,9 @@
 ﻿using Constellation.Core.Abstractions;
+using Constellation.Core.Models;
 using Constellation.Core.Models.Covers;
+using Constellation.Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using Staff = Constellation.Core.Models.Staff;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
@@ -34,6 +37,42 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
             .Set<ClassCover>()
             .Where(cover => cover.Id == CoverId)
             .FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<List<string>> GetCurrentCoveringTeachersForOffering(
+        int offeringId,
+        CancellationToken cancellationToken = default)
+    {
+        List<string> returnData = new();
+
+        var covers = await _context
+            .Set<ClassCover>()
+            .Where(cover => 
+                cover.OfferingId == offeringId &&
+                !cover.IsDeleted)
+            .ToListAsync(cancellationToken);
+
+        foreach (var cover in covers)
+        {
+            if (cover.TeacherType == CoverTeacherType.Casual)
+            {
+                returnData.AddRange(await _context
+                    .Set<Casual>()
+                    .Where(casual => casual.Id == int.Parse(cover.TeacherId))
+                    .Select(casual => $"{casual.PortalUsername}@det.nsw.edu.au")
+                    .ToListAsync(cancellationToken));
+            }
+            else
+            {
+                returnData.AddRange(await _context
+                    .Set<Staff>()
+                    .Where(staff => staff.StaffId == cover.TeacherId)
+                    .Select(staff => $"{staff.PortalUsername}@det.nsw.edu.au")
+                    .ToListAsync(cancellationToken));
+            }
+        }
+
+        return returnData.Distinct().ToList();
+    }
 
     public void Insert(ClassCover cover) =>
         _context.Set<ClassCover>().Add(cover);

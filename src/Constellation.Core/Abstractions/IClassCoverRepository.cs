@@ -10,6 +10,6 @@ public interface IClassCoverRepository
     Task<List<ClassCover>> GetAllCurrentAndUpcoming(CancellationToken cancellationToken = default);
     Task<List<ClassCover>> GetAllForCurrentCalendarYear(CancellationToken cancellationToken = default);
     Task<ClassCover?> GetById(Guid CoverId, CancellationToken cancellationToken = default);
-
+    Task<List<string>> GetCurrentCoveringTeachersForOffering(int offeringId, CancellationToken cancellationToken = default);
     void Insert(ClassCover cover);
 }

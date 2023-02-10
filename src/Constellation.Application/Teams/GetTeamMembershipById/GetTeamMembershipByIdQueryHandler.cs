@@ -16,19 +16,22 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 {
     private readonly ITeamRepository _teamRepository;
     private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IFacultyRepository _facultyRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly ICoverRepository _coverRepository;
+    private readonly IClassCoverRepository _coverRepository;
 
     public GetTeamMembershipByIdQueryHandler(
         ITeamRepository teamRepository,
         ICourseOfferingRepository offeringRepository,
+        IFacultyRepository facultyRepository,
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
-        ICoverRepository coverRepository)
+        IClassCoverRepository coverRepository)
     {
         _teamRepository = teamRepository;
         _offeringRepository = offeringRepository;
+        _facultyRepository = facultyRepository;
         _studentRepository = studentRepository;
         _staffRepository = staffRepository;
         _coverRepository = coverRepository;
@@ -118,7 +121,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
         // Head Teachers
 
-        var faculty = await _offeringRepository.GetOfferingFaculty(course.Id, cancellationToken);
+        var faculty = await _facultyRepository.GetByOfferingId(course.Id, cancellationToken);
 
         if (faculty is null)
         {
