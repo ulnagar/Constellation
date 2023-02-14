@@ -1,0 +1,107 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.ShortTerm.Pages.Covers.IndexModel
+@inject IAuthorizationService AuthorizationService
+
+@{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditCovers);
+}
+
+<h2>Covers List</h2>
+
+<div>
+    @{
+        var all_style = "btn-outline-secondary";
+        var upcoming_style = all_style;
+        var current_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case IndexModel.FilterDto.All:
+                all_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Upcoming:
+                upcoming_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Current:
+                current_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Current" class="btn @current_style">Current</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Upcoming" class="btn @upcoming_style">Upcoming</a>
+    </div>
+
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="Create" asp-area="ShortTerm" class="btn btn-info">Create New</a>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th colspan="7">
+                Legend:
+                <span class="legend">
+                    <span class="glyphicon glyphicon-ok"></span> Current Cover
+                </span>
+                <span class="legend">
+                    <span class="glyphicon glyphicon-time"></span> Future Cover
+                </span>
+                <span class="legend">
+                    <span class="glyphicon glyphicon-remove"></span> Past or Cancelled Cover
+                </span>
+            </th>
+        </tr>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>School</th>
+            <th>Class</th>
+            <th>Cover From</th>
+            <th>Cover Until</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Covers)
+        {
+            var glyph = "";
+            if (item.IsCurrent)
+            {
+                glyph = "ok";
+            }
+            else if (item.IsFuture)
+            {
+                glyph = "time";
+            }
+            else
+            {
+                glyph = "remove";
+            }
+
+            <tr>
+                <td><span class="glyphicon glyphicon-@glyph"></span></td>
+                <td>@Html.DisplayFor(model => item.TeacherName)</td>
+                <td>@Html.DisplayFor(model => item.TeacherSchool)</td>
+                <td>@Html.DisplayFor(model => item.OfferingName)</td>
+                <td>@Html.DisplayFor(model => item.StartDate, "DateOnly")</td>
+                <td>@Html.DisplayFor(model => item.EndDate, "DateOnly")</td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                        <div class="dropdown-menu">
+                            <a asp-page="Update" asp-route-id="@item.Id" class="dropdown-item">Edit</a>
+                            <a asp-page-handler="Cancel" asp-route-id="@item.Id" class="dropdown-item">Cancel</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

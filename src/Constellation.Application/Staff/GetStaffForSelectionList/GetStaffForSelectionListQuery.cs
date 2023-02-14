@@ -1,7 +1,6 @@
-﻿namespace Constellation.Application.Staff.GetForSelectionList;
+﻿namespace Constellation.Application.StaffMembers.GetStaffForSelectionList;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Staff.GetStaffForSelectionList;
 using System.Collections.Generic;
 
 public sealed record GetStaffForSelectionListQuery

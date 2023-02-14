@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Staff.GetStaffForSelectionList;
+﻿namespace Constellation.Application.StaffMembers.GetStaffForSelectionList;
 
 public sealed record StaffSelectionListResponse(
     string StaffId,

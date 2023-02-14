@@ -27,53 +27,6 @@ public class CoversController : BaseController
         _mediator = mediator;
     }
 
-    public IActionResult Index()
-    {
-        return RedirectToAction("Upcoming");
-    }
-
-    public async Task<IActionResult> All(CancellationToken cancellationToken)
-    {
-        var coversRequest = await _mediator.Send(new GetAllCurrentAndFutureCoversQuery(), cancellationToken);
-
-        var viewModel = await CreateViewModel<Covers_ViewModel>();
-
-        if (coversRequest.IsSuccess)
-            viewModel.Covers = coversRequest.Value; 
-
-        return View("Index", viewModel);
-    }
-
-    public async Task<IActionResult> Upcoming(CancellationToken cancellationToken)
-    {
-        var coversRequest = await _mediator.Send(new GetFutureCoversQuery(), cancellationToken);
-
-        var viewModel = await CreateViewModel<Covers_ViewModel>();
-
-        if (coversRequest.IsSuccess)
-        {
-            viewModel.Covers = coversRequest.Value;
-        }
-
-        return View("Index", viewModel);
-    }
-
-    public async Task<IActionResult> Details(Guid id, CancellationToken cancellationToken)
-    {
-        if (id == Guid.Empty)
-            return RedirectToAction("Index");
-
-        var coverRequest = await _mediator.Send(new GetCoverWithDetailsQuery(id), cancellationToken);
-
-        if (coverRequest.IsFailure)
-            return RedirectToAction("Index");
-
-        var viewModel = await CreateViewModel<Covers_DetailsViewModel>();
-        viewModel.Cover = coverRequest.Value;
-        
-        return View(viewModel);
-    }
-
     [Authorize(Policy = AuthPolicies.CanEditCovers)]
     public async Task<IActionResult> Create(CancellationToken cancellationToken = default)
     {
@@ -284,11 +237,5 @@ public class CoversController : BaseController
         return RedirectToAction("Index");
     }
 
-    [Authorize(Policy = AuthPolicies.CanEditCovers)]
-    public async Task<IActionResult> Cancel(int id)
-    {
-        await _mediator.Send(new CancelCoverCommand { CoverId = id });
 
-        return RedirectToAction("Index");
-    }
 }
