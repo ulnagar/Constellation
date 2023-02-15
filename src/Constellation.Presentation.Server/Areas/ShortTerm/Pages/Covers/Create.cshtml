@@ -1,5 +1,151 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.ShortTerm.Pages.Covers.CreateModel
 
-@{
+<h2>Create New Cover</h2>
+
+<div class="page-menu">
+    <a asp-action="Index" asp-controller="Covers" asp-area="ShortTerm" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-page-handler="Create" method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group row">
+            <label asp-for="CoveringTeacherId" class="col-md-2">Covering Teacher</label>
+            <div class="col-md-5">
+                    <select asp-for="CoveringTeacherId" asp-items="@(new SelectList(Model.CoveringTeacherSelectionList, "Id", "DisplayName"))" class="form-control combo custom-select">
+                        <option selected="selected" value=""> -- Please Select -- </option>
+                    </select>
+                    <span asp-validation-for="CoveringTeacherId" class="text-danger"></span>
+                }
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="row">
+                <label asp-for="CoveredClasses" class="col-md-12">Selected Classes</label>
+                <div class="col-offset-1 col-md-2">
+                    <button id="ShowClassSelectList">Add Classes</button>
+                </div>
+            </div>
+            <div class="col-md-8" id="CoveredClassesList">
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="StartDate" class="col-md-2">Start Date</label>
+            <div class="col-md-8">
+                <input type="date" asp-for="StartDate" class="form-control" />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="EndDate" class="col-md-2">End Date</label>
+            <div class="col-md-8">
+                <input type="date" asp-for="EndDate" class="form-control" />
+                <span asp-validation-for="EndDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="modal" id="ClassListModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select Classes for Cover</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="row">
+                            <h5>Selected Classes:</h5>
+                        </div>
+                    </div>
+                    <div class="row" id="ModalCoveredClassesList">
+
+                    </div>
+                    @foreach (var grade in Model.ClassSelectionList.OrderBy(entry => entry.Grade).ThenBy(entry => entry.Name).GroupBy(entry => entry.Grade))
+                    {
+                        <div class="row">
+                            <div class="col-md-2">
+                                <h5>@grade.Key</h5>
+                            </div>
+                            <div class="col">
+                                @foreach (var offering in grade)
+                                {
+                                    <span id="offeringSelect-@offering.Id" class="offering" onclick="toggleClass(@offering.Id)">@offering.Name (@offering.Teacher)</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // When the button is pressed
+        //  1. show the modal with the class list
+        $('#ShowClassSelectList').click(function() {
+            $('#ClassListModal').modal('show');
+        });
+
+        // When a class div is selected
+        //  1. add it to the selected class list
+        //  2. add it to the modal selected class row
+        //  3. add it to the page selected class row
+        function selectClass(offeringId) {
+            var selectDiv = $('#offeringSelect-' + offeringId);
+            selectDiv.addClass('selected');
+            selectDiv.unbind('click');
+            selectDiv.bind('click', 'unselectClass('+offeringId+')');
+
+            var displayDiv = $('#offeringSelect-' + offeringId).clone().prop('id', 's-offeringSelect-' + offeringId);
+            displayDiv.appendTo('#ModalCoveredClassesList');
+            displayDiv.appendTo('#CoveredClassesList');
+
+            var input = $('<input>').attr('id', 'p-offeringSelect-' + offeringId)
+                .attr('name', 'CovereredClasses')
+                .attr('type', "hidden");
+            input.val(offeringId);
+            var classInputDiv = $('#CoveredClassesList');
+            classInputDiv.append(input);
+        }
+
+        // When a class div is deselected
+        //  1. remove it from the selected class list
+        //  2. remove it from the modal selected class row
+        //  3. remove it from the page selected class row
+        function unselectClass(offeringId) {
+            var selectDiv = $('#offeringSelect-' + offeringId);
+            selectDiv.removeClass('selected');
+            selectDiv.unbind('click');
+            selectDiv.bind('click', 'selectClass('+offeringId+')');
+
+            $('#s-offeringSelect-' + offeringId).remove();
+            $('#p-offeringSelect-' + offeringId).remove();
+        }
+    </script>
 }

@@ -112,6 +112,10 @@ public static class DomainErrors
     {
         public static class Staff
         {
+            public static readonly Func<int, Error> NotFoundLinkedToOffering = id => new Error(
+                "Partners.Staff.NotFoundLinkedToOffering",
+                $"Could not retrieve list of teachers for the offering {id}");
+
             public static readonly Func<string, Error> NotFound = id => new Error(
                 "Partners.Staff.TeacherNotFound",
                 $"A teacher with the Id {id} could not be found");

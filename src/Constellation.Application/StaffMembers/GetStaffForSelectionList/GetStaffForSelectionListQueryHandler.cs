@@ -2,6 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.StaffMembers.Models;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
 using System.Threading;
