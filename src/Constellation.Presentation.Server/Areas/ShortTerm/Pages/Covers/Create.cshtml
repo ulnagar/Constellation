@@ -16,7 +16,7 @@
         <div class="form-group row">
             <label asp-for="CoveringTeacherId" class="col-md-2">Covering Teacher</label>
             <div class="col-md-5">
-                    <select asp-for="CoveringTeacherId" asp-items="@(new SelectList(Model.CoveringTeacherSelectionList, "Id", "DisplayName"))" class="form-control combo custom-select">
+                    <select asp-for="CoveringTeacherId" asp-items="@(new SelectList(Model.CoveringTeacherSelectionList, "Id", "DisplayName", null, "Category"))" class="form-control combo custom-select">
                         <option selected="selected" value=""> -- Please Select -- </option>
                     </select>
                     <span asp-validation-for="CoveringTeacherId" class="text-danger"></span>
@@ -96,7 +96,6 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
             </div>
         </div>
     </div>

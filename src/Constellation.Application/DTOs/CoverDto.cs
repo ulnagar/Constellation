@@ -1,4 +1,4 @@
-﻿using Constellation.Presentation.Server.Helpers.Attributes;
+﻿using Constellation.Application.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Server.Areas.ShortTerm.Models;
 
+using Constellation.Application.Helpers;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Helpers.Attributes;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 

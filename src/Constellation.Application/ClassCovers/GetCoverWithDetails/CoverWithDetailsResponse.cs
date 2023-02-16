@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.ClassCovers.GetCoverWithDetails;
 
-using Constellation.Presentation.Server.Helpers.Attributes;
+using Constellation.Application.Helpers;
 using System;
 using System.ComponentModel.DataAnnotations;
 

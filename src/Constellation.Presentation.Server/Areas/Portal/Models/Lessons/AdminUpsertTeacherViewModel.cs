@@ -1,6 +1,6 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Application.Helpers;
+using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Helpers.Attributes;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 

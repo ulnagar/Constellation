@@ -1,10 +1,12 @@
 namespace Constellation.Presentation.Server.Areas.ShortTerm.Pages.Covers;
 
 using Constellation.Application.Casuals.GetCasualsForSelectionList;
+using Constellation.Application.ClassCovers.CreateCover;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetOfferingsForSelectionList;
 using Constellation.Application.StaffMembers.GetStaffForSelectionList;
 using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
+using Constellation.Core.ValueObjects;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -28,7 +30,7 @@ public class CreateModel : BasePageModel
     [BindProperty]
     public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     [BindProperty]
-    public List<string> CoveredClasses { get; set; } = new();
+    public List<int> CoveredClasses { get; set; } = new();
 
     public List<CoveringTeacherRecord> CoveringTeacherSelectionList { get; set; } = new();
     public List<ClassRecord> ClassSelectionList { get; set; } = new();
@@ -96,6 +98,32 @@ public class CreateModel : BasePageModel
         }
 
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostCreate(CancellationToken cancellationToken)
+    {
+        var teacher = CoveringTeacherSelectionList.First(entry => entry.Id == CoveringTeacherId);
+
+        var teacherType = teacher.Category switch
+        {
+            "Casuals" => CoverTeacherType.Casual,
+            "Teachers" => CoverTeacherType.Staff
+        };
+
+        foreach (var offering in CoveredClasses)
+        {
+            var command = new CreateCoverCommand(
+                Guid.NewGuid(),
+                offering,
+                StartDate,
+                EndDate,
+                teacherType,
+                teacher.Id);
+
+            await _mediator.Send(command, cancellationToken);
+        }
+
+        return RedirectToPage("Index");
     }
     
     public sealed record CoveringTeacherRecord(

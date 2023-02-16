@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Server.Helpers.Attributes
+﻿namespace Constellation.Application.Helpers
 {
     public static class DisplayNameDefaults
     {

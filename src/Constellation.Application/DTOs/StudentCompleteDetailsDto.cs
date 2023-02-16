@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using Constellation.Application.Common.Mapping;
+using Constellation.Application.Helpers;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
-using Constellation.Presentation.Server.Helpers.Attributes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
