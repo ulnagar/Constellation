@@ -68,7 +68,24 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
             entry.ClassName = offeringName;
 
             var offering = await _unitOfWork.CourseOfferings.GetFromYearAndName(date.Year, offeringName);
-            var teacher = await _unitOfWork.Staff.GetFromName(entry.Teacher);
+
+            Staff teacher = null;
+
+            if (string.IsNullOrWhiteSpace(entry.Teacher) && offering is not null)
+            {
+                var sessions = _unitOfWork.OfferingSessions.AllForOffering(offering.Id);
+                teacher = sessions
+                    .GroupBy(entry => entry.StaffId)
+                    .OrderByDescending(entry => entry.Count())
+                    .First()
+                    .Select(entry => entry.Teacher)
+                    .First();
+            }
+            else if (!string.IsNullOrWhiteSpace(entry.Teacher))
+            {
+                teacher = await _unitOfWork.Staff.GetFromName(entry.Teacher);
+            }
+
             var covers = new List<ClassCover>();
             var infoString = string.Empty;
             var Covered = false;
