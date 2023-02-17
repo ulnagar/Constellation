@@ -8,8 +8,6 @@ CURRENT TASK
 		Refactor existing code to use new model
 		Create unit tests for new domain model methods and events
 
-		**** DONT FORGET TO REBASE ON 1.8 BEFORE FINISHING ****
-
 	ACTIONS:
 		Migrate to AccessRight concept
 		Tickets are created for access to resources, with defined start and end dates

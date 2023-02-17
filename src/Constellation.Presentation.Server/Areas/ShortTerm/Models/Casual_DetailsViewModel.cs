@@ -1,11 +1,7 @@
-﻿using Constellation.Application.Helpers;
-using Constellation.Core.Models;
-using Constellation.Core.Models.Covers;
+﻿using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
-using System;
-using System.Collections.Generic;
+using Constellation.Presentation.Server.Helpers.Attributes;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 
 namespace Constellation.Presentation.Server.Areas.ShortTerm.Models
 {

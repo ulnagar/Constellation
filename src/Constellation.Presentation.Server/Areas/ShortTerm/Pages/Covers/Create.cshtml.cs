@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.ShortTerm.Pages.Covers;
 
 using Constellation.Application.Casuals.GetCasualsForSelectionList;
-using Constellation.Application.ClassCovers.CreateCover;
+using Constellation.Application.ClassCovers.BulkCreateCovers;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetOfferingsForSelectionList;
 using Constellation.Application.StaffMembers.GetStaffForSelectionList;
@@ -37,13 +37,62 @@ public class CreateModel : BasePageModel
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
     {
+        var pageReady = await PreparePage(cancellationToken);
+
+        if (!pageReady)
+        {
+            return RedirectToPage("Index");
+        }
+
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostCreate(CancellationToken cancellationToken)
+    {
+        var teacher = CoveringTeacherSelectionList.First(entry => entry.Id == CoveringTeacherId);
+
+        var teacherType = teacher.Category switch
+        {
+            "Casuals" => CoverTeacherType.Casual,
+            "Teachers" => CoverTeacherType.Staff
+        };
+
+        var command = new BulkCreateCoversCommand(
+            Guid.NewGuid(),
+            CoveredClasses,
+            StartDate,
+            EndDate,
+            teacherType,
+            teacher.Id);
+
+        var result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            var pageReady = await PreparePage(cancellationToken);
+
+            if (!pageReady)
+            {
+                return RedirectToPage("Index");
+            }
+
+            ModelState.AddModelError("", result.Error.Message);
+
+            return Page();
+        }
+
+        return RedirectToPage("Index");
+    }
+
+    private async Task<bool> PreparePage(CancellationToken cancellationToken = default)
+    {
         await GetClasses(_mediator);
 
         var teacherResponse = await _mediator.Send(new GetStaffForSelectionListQuery(), cancellationToken);
         var casualResponse = await _mediator.Send(new GetCasualsForSelectionListQuery(), cancellationToken);
 
         if (teacherResponse.IsFailure || casualResponse.IsFailure)
-            return RedirectToPage("Index");
+            return false;
 
         CoveringTeacherSelectionList.AddRange(teacherResponse
             .Value
@@ -75,7 +124,7 @@ public class CreateModel : BasePageModel
         var classesResponse = await _mediator.Send(new GetOfferingsForSelectionListQuery(), cancellationToken);
 
         if (classesResponse.IsFailure)
-            return RedirectToPage("Index");
+            return false;
 
         foreach (var course in classesResponse.Value)
         {
@@ -97,33 +146,7 @@ public class CreateModel : BasePageModel
                 $"Year {course.Name[..2]}"));
         }
 
-        return Page();
-    }
-
-    public async Task<IActionResult> OnPostCreate(CancellationToken cancellationToken)
-    {
-        var teacher = CoveringTeacherSelectionList.First(entry => entry.Id == CoveringTeacherId);
-
-        var teacherType = teacher.Category switch
-        {
-            "Casuals" => CoverTeacherType.Casual,
-            "Teachers" => CoverTeacherType.Staff
-        };
-
-        foreach (var offering in CoveredClasses)
-        {
-            var command = new CreateCoverCommand(
-                Guid.NewGuid(),
-                offering,
-                StartDate,
-                EndDate,
-                teacherType,
-                teacher.Id);
-
-            await _mediator.Send(command, cancellationToken);
-        }
-
-        return RedirectToPage("Index");
+        return true;
     }
     
     public sealed record CoveringTeacherRecord(
