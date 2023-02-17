@@ -3,7 +3,7 @@ using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Covers;
 using Constellation.Infrastructure.DependencyInjection;
 using System;
 using System.Threading.Tasks;

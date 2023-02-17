@@ -1,4 +1,4 @@
-using Constellation.Core.Models;
+using Constellation.Core.Models.Covers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

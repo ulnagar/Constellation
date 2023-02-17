@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Core.Abstractions;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;

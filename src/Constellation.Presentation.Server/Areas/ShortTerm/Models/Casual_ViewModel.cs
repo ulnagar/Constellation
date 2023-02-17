@@ -1,4 +1,4 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Core.Models.Covers;
 using Constellation.Presentation.Server.BaseModels;
 using System;
 using System.Collections.Generic;

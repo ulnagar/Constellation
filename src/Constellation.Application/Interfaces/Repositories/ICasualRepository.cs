@@ -1,4 +1,4 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Core.Models.Covers;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
