@@ -1,6 +1,7 @@
-﻿using Constellation.Application.DTOs;
+﻿namespace Constellation.Infrastructure.ExternalServices.Email;
+
+using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.EmailRequests;
-using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -15,11 +16,7 @@ using Constellation.Infrastructure.Templates.Views.Emails.Lessons;
 using Constellation.Infrastructure.Templates.Views.Emails.MandatoryTraining;
 using Constellation.Infrastructure.Templates.Views.Emails.MissedWork;
 using Constellation.Infrastructure.Templates.Views.Emails.RollMarking;
-using Duende.IdentityServer.Models;
 using System.Net.Mail;
-using static Constellation.Application.Models.EmailQueue.EmailQueueItem.EmailQueueReferenceType.Covers;
-
-namespace Constellation.Infrastructure.ExternalServices.Email;
 
 public class Service : IEmailService, IScopedService
 {
@@ -439,9 +436,9 @@ public class Service : IEmailService, IScopedService
     public async Task SendNewCoverEmail(
         ClassCover cover,
         CourseOffering offering,
-        EmailAddress coveringTeacher,
-        List<EmailAddress> primaryRecipients,
-        List<EmailAddress> secondaryRecipients,
+        EmailRecipient coveringTeacher,
+        List<EmailRecipient> primaryRecipients,
+        List<EmailRecipient> secondaryRecipients,
         TimeOnly startTime,
         TimeOnly endTime,
         string teamLink,
@@ -532,9 +529,9 @@ public class Service : IEmailService, IScopedService
     public async Task SendUpdatedCoverEmail(
         ClassCover cover,
         CourseOffering offering,
-        EmailAddress coveringTeacher,
-        List<EmailAddress> primaryRecipients,
-        List<EmailAddress> secondaryRecipients,
+        EmailRecipient coveringTeacher,
+        List<EmailRecipient> primaryRecipients,
+        List<EmailRecipient> secondaryRecipients,
         DateOnly originalStartDate,
         TimeOnly startTime,
         TimeOnly endTime,
@@ -624,9 +621,9 @@ public class Service : IEmailService, IScopedService
     public async Task SendCancelledCoverEmail(
         ClassCover cover,
         CourseOffering offering,
-        EmailAddress coveringTeacher,
-        List<EmailAddress> primaryRecipients,
-        List<EmailAddress> secondaryRecipients,
+        EmailRecipient coveringTeacher,
+        List<EmailRecipient> primaryRecipients,
+        List<EmailRecipient> secondaryRecipients,
         TimeOnly startTime,
         TimeOnly endTime,
         string teamLink,

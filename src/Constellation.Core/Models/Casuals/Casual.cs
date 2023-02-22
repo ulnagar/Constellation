@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Casuals;
 
 using Constellation.Core.Primitives;
+using Constellation.Core.ValueObjects;
 using System;
 
 public sealed class Casual : AggregateRoot, IAuditableEntity
@@ -40,18 +41,32 @@ public sealed class Casual : AggregateRoot, IAuditableEntity
 
     public static Casual Create(
         Guid id,
-        string firstName,
-        string lastName,
-        string displayName,
-        string emailAddress,
+        Name name,
+        EmailAddress email,
         string adobeConnectId,
         string schoolCode)
     {
-        var casual = new Casual(id, firstName, lastName, displayName, emailAddress, adobeConnectId, schoolCode);
+        var casual = new Casual(id, name.FirstName, name.LastName, name.DisplayName, email.Email, adobeConnectId, schoolCode);
 
         // Raise domain events if necessary
 
         return casual;
     }
 
+    public void Delete()
+    {
+        IsDeleted = true;
+    }
+
+    public void Update(
+        Name name,
+        string adobeConnectId,
+        string schoolCode)
+    {
+        FirstName = name.FirstName;
+        LastName = name.LastName;
+        DisplayName = name.DisplayName;
+        AdobeConnectPrincipalId = adobeConnectId;
+        SchoolCode = schoolCode;
+    }
 }

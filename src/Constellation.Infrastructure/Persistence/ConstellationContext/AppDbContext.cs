@@ -1,14 +1,9 @@
-﻿using Constellation.Application.Interfaces.Providers;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
+﻿using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models;
-using Constellation.Application.Models.EmailQueue;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Casuals;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Models.Stocktake;
-using Constellation.Core.Primitives;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ContextExtensions;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ContextSets;
 using Duende.IdentityServer.EntityFramework.Options;
@@ -16,11 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Options;
-using System;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext
 {
@@ -52,7 +43,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public DbSet<Device> Devices { get; set; }
         public DbSet<DeviceNotes> DeviceNotes { get; set; }
         public DbSet<DeviceAllocation> DeviceAllocations { get; set; }
-        public DbSet<Casual> Casuals { get; set; }
         public DbSet<Absence> Absences { get; set; }
         public DbSet<AbsenceResponse> AbsenceResponse { get; set; }
         public DbSet<StudentWholeAbsence> WholeAbsences { get; set; }

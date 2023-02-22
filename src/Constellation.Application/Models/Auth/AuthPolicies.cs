@@ -16,4 +16,5 @@ public class AuthPolicies
     public const string IsSiteAdmin = "IsSiteAdmin";
     public const string CanViewCovers = "CanViewCovers";
     public const string CanEditCovers = "CanEditCovers";
+    public const string CanEditCasuals = "CanEditCasuals";
 }

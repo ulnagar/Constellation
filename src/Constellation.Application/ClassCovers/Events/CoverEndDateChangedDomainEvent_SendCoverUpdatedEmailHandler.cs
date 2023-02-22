@@ -72,8 +72,8 @@ internal sealed class CoverEndDateChangedDomainEvent_SendCoverUpdatedEmailHandle
 
         var offering = await _offeringRepository.GetById(cover.OfferingId, cancellationToken);
 
-        var primaryRecipients = new List<EmailAddress>(); // Casual, Classroom Teacher
-        var secondaryRecipients = new List<EmailAddress>(); // Head Teacher, Additional Recipients
+        var primaryRecipients = new List<EmailRecipient>(); // Casual, Classroom Teacher
+        var secondaryRecipients = new List<EmailRecipient>(); // Head Teacher, Additional Recipients
 
         var teachers = await _staffRepository.GetCurrentTeachersForOffering(cover.OfferingId, cancellationToken);
 
@@ -81,7 +81,7 @@ internal sealed class CoverEndDateChangedDomainEvent_SendCoverUpdatedEmailHandle
         {
             if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
             {
-                var address = EmailAddress.Create(teacher.DisplayName, teacher.EmailAddress);
+                var address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
 
                 if (address.IsFailure)
                 {
@@ -100,7 +100,7 @@ internal sealed class CoverEndDateChangedDomainEvent_SendCoverUpdatedEmailHandle
         {
             if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
             {
-                var address = EmailAddress.Create(teacher.DisplayName, teacher.EmailAddress);
+                var address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
 
                 if (address.IsFailure)
                 {
@@ -112,7 +112,7 @@ internal sealed class CoverEndDateChangedDomainEvent_SendCoverUpdatedEmailHandle
             }
         }
 
-        EmailAddress coveringTeacher = null;
+        EmailRecipient coveringTeacher = null;
 
         if (cover.TeacherType == CoverTeacherType.Casual)
         {
@@ -120,7 +120,7 @@ internal sealed class CoverEndDateChangedDomainEvent_SendCoverUpdatedEmailHandle
 
             if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
             {
-                var address = EmailAddress.Create(teacher.DisplayName, teacher.EmailAddress);
+                var address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
 
                 if (address.IsFailure)
                 {
@@ -140,7 +140,7 @@ internal sealed class CoverEndDateChangedDomainEvent_SendCoverUpdatedEmailHandle
 
             if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
             {
-                var address = EmailAddress.Create(teacher.DisplayName, teacher.EmailAddress);
+                var address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
 
                 if (address.IsFailure)
                 {
@@ -167,7 +167,7 @@ internal sealed class CoverEndDateChangedDomainEvent_SendCoverUpdatedEmailHandle
         {
             if (primaryRecipients.All(entry => entry.Email != teacher.Email) && secondaryRecipients.All(entry => entry.Email != teacher.Email))
             {
-                var address = EmailAddress.Create(teacher.DisplayName, teacher.Email);
+                var address = EmailRecipient.Create(teacher.DisplayName, teacher.Email);
 
                 if (address.IsFailure)
                 {

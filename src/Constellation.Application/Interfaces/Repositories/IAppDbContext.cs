@@ -1,7 +1,6 @@
 ﻿using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Casuals;
 using Constellation.Core.Models.Stocktake;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -19,7 +18,6 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<AppSettings> AppSettings { get; set; }
         DbSet<AppAccessToken> AspNetAccessTokens { get; set; }
         DbSet<CanvasOperation> CanvasOperations { get; set; }
-        DbSet<Casual> Casuals { get; set; }
         DbSet<ClassworkNotification> ClassworkNotifications { get; set; }
         DbSet<Course> Courses { get; set; }
         DbSet<DeviceAllocation> DeviceAllocations { get; set; }

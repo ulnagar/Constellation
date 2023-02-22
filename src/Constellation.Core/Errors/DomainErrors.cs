@@ -20,6 +20,16 @@ public static class DomainErrors
             $"Cannot update role {role}");
     }
 
+    public static class Casuals
+    {
+        public static class Casual
+        {
+            public static readonly Func<Guid, Error> NotFound = id => new Error(
+                "Casuals.Casual.NotFound",
+                $"A Casual with the Id {id} could not be found");
+        }
+    }
+
     public static class ClassCovers
     {
         public static class Cover
@@ -140,4 +150,35 @@ public static class DomainErrors
             "You do not have the required permissions to perform this action");
     }
 
+    public static class ValueObjects
+    {
+        public static class EmailAddress
+        {
+            public static readonly Error EmailEmpty = new Error(
+                "ValueObjects.EmailAddress.EmailEmpty",
+                "Email Address must no tbe empty.");
+
+            public static readonly Error EmailInvalid = new Error(
+                "ValueObjects.EmailAddress.EmailInvalid",
+                "Email Address is not valid.");
+        }
+
+        public static class EmailRecipient
+        {
+            public static readonly Error NameEmpty = new Error(
+                "ValueObjects.EmailRecipient.NameEmpty",
+                "Email Recipient must have a valid name.");
+        }
+
+        public static class Name
+        {
+            public static readonly Error FirstNameEmpty = new Error(
+                "ValueObjects.Name.FirstNameEmpty",
+                "First Name must not be empty.");
+
+            public static readonly Error LastNameEmpty = new Error(
+                "ValueObjects.Name.LastNameEmpty",
+                "Last Name must not be empty.");
+        }
+    }
 }

@@ -1,14 +1,10 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
-using Constellation.Presentation.Server.Areas.ShortTerm.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
 {
@@ -29,66 +25,6 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Controllers
         public IActionResult Index()
         {
             return RedirectToAction("Active");
-        }
-
-        public async Task<IActionResult> All()
-        {
-            var casuals = await _unitOfWork.Casuals.ForListAsync(casual => true);
-
-            var viewModel = await CreateViewModel<Casual_ViewModel>();
-            viewModel.Casuals = casuals.Select(Casual_ViewModel.CasualDto.ConvertFromCasual).ToList();
-
-            return View("Index", viewModel);
-        }
-
-        public async Task<IActionResult> Inactive()
-        {
-            var casuals = await _unitOfWork.Casuals.ForListAsync(casual => casual.IsDeleted);
-
-            var viewModel = await CreateViewModel<Casual_ViewModel>();
-            viewModel.Casuals = casuals.Select(Casual_ViewModel.CasualDto.ConvertFromCasual).ToList();
-
-            return View("Index", viewModel);
-        }
-
-        public async Task<IActionResult> Active()
-        {
-            var casuals = await _unitOfWork.Casuals.ForListAsync(casual => !casual.IsDeleted);
-
-            var viewModel = await CreateViewModel<Casual_ViewModel>();
-            viewModel.Casuals = casuals.Select(Casual_ViewModel.CasualDto.ConvertFromCasual).ToList();
-
-            return View("Index", viewModel);
-        }
-
-        public async Task<IActionResult> WithoutACDetails()
-        {
-            var casuals = await _unitOfWork.Casuals.ForListAsync(casual => string.IsNullOrWhiteSpace(casual.AdobeConnectPrincipalId));
-
-            var viewModel = await CreateViewModel<Casual_ViewModel>();
-            viewModel.Casuals = casuals.Select(Casual_ViewModel.CasualDto.ConvertFromCasual).ToList();
-
-            return View("Index", viewModel);
-        }
-
-        public async Task<IActionResult> Details(int id)
-        {
-            if (id == 0)
-            {
-                return RedirectToAction("Index");
-            }
-
-            var casual = await _unitOfWork.Casuals.ForDetailsDisplayAsync(id);
-
-            if (casual == null)
-            {
-                return RedirectToAction("Index");
-            }
-
-            var viewModel = await CreateViewModel<Casual_DetailsViewModel>();
-            viewModel.Casual = Casual_DetailsViewModel.CasualDto.ConvertFromCasual(casual);
-
-            return View(viewModel);
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.CoverEditor)]

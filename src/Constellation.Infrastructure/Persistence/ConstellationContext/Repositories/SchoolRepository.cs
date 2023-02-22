@@ -1,14 +1,9 @@
 ﻿using Constellation.Application.DTOs;
-using Constellation.Application.Features.API.Schools.Queries;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
 {
@@ -40,6 +35,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             await _context
                 .Set<School>()
                 .FirstOrDefaultAsync(school => school.Code == id, cancellationToken);
+
+        public async Task<List<School>> GetAll(
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<School>()
+                .ToListAsync(cancellationToken);
 
         public School WithDetails(string id)
         {

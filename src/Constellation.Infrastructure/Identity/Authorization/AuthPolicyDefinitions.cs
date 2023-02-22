@@ -2,7 +2,6 @@
 
 using Constellation.Application.Models.Auth;
 using Microsoft.AspNetCore.Authorization;
-using System.Runtime.InteropServices;
 
 public static class AuthPolicyDefinitions
 {
@@ -49,6 +48,9 @@ public static class AuthPolicyDefinitions
 
         options.AddPolicy(AuthPolicies.CanEditCovers, policy =>
             policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.ShortTermCoversEdit));
+
+        options.AddPolicy(AuthPolicies.CanEditCasuals, policy =>
+            policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.ShortTermCasualsEdit));
 
         return options;
     }

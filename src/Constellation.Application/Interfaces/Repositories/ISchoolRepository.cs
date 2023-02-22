@@ -11,7 +11,7 @@ namespace Constellation.Application.Interfaces.Repositories
     public interface ISchoolRepository
     {
         Task<School?> GetById(string id, CancellationToken cancellationToken = default);
-
+        Task<List<School>> GetAll(CancellationToken cancellationToken = default);
         School WithDetails(string code);
         School WithFilter(Expression<Func<School, bool>> predicate);
         ICollection<School> All();
