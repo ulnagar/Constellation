@@ -1,5 +1,5 @@
 ﻿using Constellation.Core.Enums;
-using Constellation.Core.Models.Covers;
+using Constellation.Core.Models.Casuals;
 using System;
 
 namespace Constellation.Core.Models

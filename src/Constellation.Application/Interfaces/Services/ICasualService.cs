@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
 using Constellation.Application.DTOs;
-using Constellation.Core.Models.Covers;
+using Constellation.Core.Models.Casuals;
 using System.Threading;
 using System.Threading.Tasks;
 

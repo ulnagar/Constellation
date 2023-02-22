@@ -1,5 +1,5 @@
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models.Covers;
+using Constellation.Core.Models.Casuals;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

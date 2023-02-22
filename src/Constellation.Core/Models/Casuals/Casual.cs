@@ -1,9 +1,9 @@
-﻿namespace Constellation.Core.Models.Covers;
+﻿namespace Constellation.Core.Models.Casuals;
 
 using Constellation.Core.Primitives;
 using System;
 
-public sealed class Casual : Entity, IAuditableEntity
+public sealed class Casual : AggregateRoot, IAuditableEntity
 {
     private Casual(
         Guid id,
@@ -37,5 +37,21 @@ public sealed class Casual : Entity, IAuditableEntity
     public bool IsDeleted { get; set; }
     public string DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
+
+    public static Casual Create(
+        Guid id,
+        string firstName,
+        string lastName,
+        string displayName,
+        string emailAddress,
+        string adobeConnectId,
+        string schoolCode)
+    {
+        var casual = new Casual(id, firstName, lastName, displayName, emailAddress, adobeConnectId, schoolCode);
+
+        // Raise domain events if necessary
+
+        return casual;
+    }
 
 }
