@@ -36,13 +36,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
         public void Configure(EntityTypeBuilder<CasualMSTeamOperation> builder)
         {
             builder.HasOne(o => o.Casual)
-                .WithMany(c => c.MSTeamOperations)
+                .WithMany()
                 .HasForeignKey(o => o.CasualId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            builder.HasOne(o => o.Cover)
-                .WithMany(c => c.MSTeamOperations as ICollection<CasualMSTeamOperation>)
-                .HasForeignKey(o => o.CoverId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }
@@ -54,11 +49,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
             builder.HasOne(o => o.Staff)
                 .WithMany(s => s.MSTeamOperations)
                 .HasForeignKey(o => o.StaffId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            builder.HasOne(o => o.Cover)
-                .WithMany(s => s.MSTeamOperations as ICollection<TeacherMSTeamOperation>)
-                .HasForeignKey(o => o.CoverId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }

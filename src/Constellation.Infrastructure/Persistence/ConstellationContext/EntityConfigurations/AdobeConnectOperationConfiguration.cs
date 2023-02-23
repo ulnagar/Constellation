@@ -1,7 +1,6 @@
 ﻿using Constellation.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Collections.Generic;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations
 {
@@ -35,13 +34,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
         public void Configure(EntityTypeBuilder<CasualAdobeConnectOperation> builder)
         {
             builder.HasOne(o => o.Casual)
-                .WithMany(c => c.AdobeConnectOperations)
+                .WithMany()
                 .HasForeignKey(o => o.CasualId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            builder.HasOne(o => o.Cover)
-                .WithMany(c => c.AdobeConnectOperations as ICollection<CasualAdobeConnectOperation>)
-                .HasForeignKey(o => o.CoverId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }
@@ -53,11 +47,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
             builder.HasOne(o => o.Teacher)
                 .WithMany(s => s.AdobeConnectOperations)
                 .HasForeignKey(o => o.StaffId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            builder.HasOne(o => o.Cover)
-                .WithMany(s => s.AdobeConnectOperations as ICollection<TeacherAdobeConnectOperation>)
-                .HasForeignKey(o => o.CoverId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }

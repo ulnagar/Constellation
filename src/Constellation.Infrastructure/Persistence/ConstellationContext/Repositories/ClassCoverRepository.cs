@@ -68,8 +68,8 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
             {
                 returnData.AddRange(await _context
                     .Set<Casual>()
-                    .Where(casual => casual.Id == int.Parse(cover.TeacherId))
-                    .Select(casual => $"{casual.PortalUsername}@det.nsw.edu.au")
+                    .Where(casual => casual.Id == Guid.Parse(cover.TeacherId))
+                    .Select(casual => casual.EmailAddress)
                     .ToListAsync(cancellationToken));
             }
             else
@@ -93,6 +93,19 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
             .Where(cover => 
                 cover.TeacherType == CoverTeacherType.Casual &&
                 cover.TeacherId == casualId.ToString())
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<ClassCover>> GetAllForDateAndOfferingId(
+        DateOnly coverDate, 
+        int offeringId, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<ClassCover>()
+            .Where(cover => 
+                !cover.IsDeleted && 
+                coverDate >= cover.StartDate && 
+                coverDate <= cover.EndDate && 
+                cover.OfferingId == offeringId)
             .ToListAsync(cancellationToken);
 
     public void Insert(ClassCover cover) =>

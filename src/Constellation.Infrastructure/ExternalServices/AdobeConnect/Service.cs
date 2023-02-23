@@ -1,8 +1,10 @@
-﻿using Constellation.Application.DTOs;
+﻿using Constellation.Application.Casuals.UpdateCasual;
+using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
@@ -17,11 +19,17 @@ namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
         private readonly IAdobeConnectRoomService _roomService;
         private readonly IStudentService _studentService;
         private readonly IStaffService _staffService;
-        private readonly ICasualService _casualService;
+        private readonly ICasualRepository _casualRepository;
+        private readonly IMediator _mediator;
 
-        public Service(IUnitOfWork unitOfWork, IAdobeConnectGateway adobeConnectServer,
-            IAdobeConnectRoomService roomService, IStudentService studentService,
-            IStaffService staffService, ICasualService casualService)
+        public Service(
+            IUnitOfWork unitOfWork,
+            IAdobeConnectGateway adobeConnectServer,
+            IAdobeConnectRoomService roomService,
+            IStudentService studentService,
+            IStaffService staffService,
+            ICasualRepository casualRepository,
+            IMediator mediator)
         {
             _unitOfWork = unitOfWork;
 
@@ -29,7 +37,8 @@ namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
             _roomService = roomService;
             _studentService = studentService;
             _staffService = staffService;
-            _casualService = casualService;
+            _casualRepository = casualRepository;
+            _mediator = mediator;
         }
 
         public async Task<string> CreateRoom(CourseOffering offering)
@@ -71,6 +80,13 @@ namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
 
         public Task<string> GetUserPrincipalId(string username)
         {
+            var indexLocation = username.IndexOf('@');
+
+            if (indexLocation > 0)
+            {
+                username = username.Substring(0,indexLocation);
+            }
+
             return _adobeConnect.GetUserPrincipalId(username);
         }
 
@@ -177,20 +193,17 @@ namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
                 }
             }
 
-            var casuals = _unitOfWork.Casuals.AllWithoutAdobeConnectDetails();
+            var casuals = await _casualRepository.GetWithoutAdobeConnectId();
 
             foreach (var casual in casuals)
             {
-                var acPID = await _adobeConnect.GetUserPrincipalId(casual.PortalUsername);
+                var acPID = await _adobeConnect.GetUserPrincipalId(casual.EmailAddress);
 
                 if (!string.IsNullOrWhiteSpace(acPID))
                 {
-                    var casualResource = new CasualDto
-                    {
-                        AdobeConnectPrincipalId = acPID
-                    };
+                    var command = new UpdateCasualCommand(casual.Id, casual.FirstName, casual.LastName, casual.EmailAddress, casual.SchoolCode, acPID);
 
-                    await _casualService.UpdateCasual(casual.Id, casualResource);
+                    await _mediator.Send(command);
 
                     returnList.Add(new AdobeConnectUserDetailDto { ScoId = acPID, UserId = casual.Id.ToString(), UserType = "Casual", DisplayName = casual.DisplayName });
                 }
@@ -239,7 +252,7 @@ namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
                     result.Errors.Add($"  Attempting to {operation.Action} casual teacher {cOperation.Casual.DisplayName} in room {cOperation.Room.Name}");
                     if (string.IsNullOrWhiteSpace(principalId))
                     {
-                        principalId = await GetUserPrincipalId(cOperation.Casual.PortalUsername);
+                        principalId = await GetUserPrincipalId(cOperation.Casual.EmailAddress);
 
                         if (string.IsNullOrWhiteSpace(principalId))
                         {

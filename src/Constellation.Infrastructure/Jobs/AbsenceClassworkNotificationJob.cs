@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Jobs.AbsenceClassworkNotificationJob;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Covers;
 using Constellation.Infrastructure.DependencyInjection;
@@ -18,14 +19,20 @@ namespace Constellation.Infrastructure.Jobs
         private readonly IEmailService _emailService;
         private readonly ILogger<IAbsenceMonitorJob> _logger;
         private readonly IMediator _mediator;
+        private readonly IClassCoverRepository _classCoverRepository;
 
-        public AbsenceClassworkNotificationJob(IUnitOfWork unitOfWork, IEmailService emailService,
-            ILogger<IAbsenceMonitorJob> logger, IMediator mediator)
+        public AbsenceClassworkNotificationJob(
+            IUnitOfWork unitOfWork,
+            IEmailService emailService,
+            ILogger<IAbsenceMonitorJob> logger,
+            IMediator mediator,
+            IClassCoverRepository classCoverRepository)
         {
             _unitOfWork = unitOfWork;
             _emailService = emailService;
             _logger = logger;
             _mediator = mediator;
+            _classCoverRepository = classCoverRepository;
         }
 
         public async Task StartJob(Guid jobId, DateTime scanDate, CancellationToken token)
@@ -49,18 +56,11 @@ namespace Constellation.Infrastructure.Jobs
                 var students = group.Select(absence => absence.Student).Distinct().ToList();
                 var offering = group.First().Offering;
 
-                var casualCovers = await _unitOfWork.CasualClassCovers.ForClassworkNotifications(absenceDate, offeringId);
-                var teacherCovers = await _unitOfWork.TeacherClassCovers.ForClassworkNotifications(absenceDate, offeringId);
-
-                var covers = new List<ClassCover>();
-                foreach (var cover in casualCovers)
-                    covers.Add(cover);
-                foreach (var cover in teacherCovers)
-                    covers.Add(cover);
+                var covers = await _classCoverRepository.GetAllForDateAndOfferingId(DateOnly.FromDateTime(absenceDate), offeringId, token);
 
                 if (covers.Count > 0)
                 {
-                    teachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = offering.Course.FacultyId });
+                    teachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = offering.Course.FacultyId }, token);
                 }
 
                 // create notification object in database

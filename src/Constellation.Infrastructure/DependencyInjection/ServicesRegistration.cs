@@ -324,10 +324,8 @@ public static class ServicesRegistration
         services.AddScoped<IAdobeConnectRoomService, AdobeConnectRoomService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICalendarService, CalendarService>();
-        services.AddScoped<ICasualService, CasualService>();
         services.AddSingleton<IClassMonitorCacheService, ClassMonitorCacheService>();
         services.AddScoped<ICourseOfferingService, CourseOfferingService>();
-        services.AddScoped<ICoverService, CoverService>();
         services.AddScoped<IDeviceService, DeviceService>();
         services.AddScoped<IEnrolmentService, EnrolmentService>();
         services.AddScoped<IExcelService, ExcelService>();

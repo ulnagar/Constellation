@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Features\ShortTerm\Covers\Commands\**" />
+    <EmbeddedResource Remove="Features\ShortTerm\Covers\Commands\**" />
+    <None Remove="Features\ShortTerm\Covers\Commands\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="ExternalResources\logo.png" />
   </ItemGroup>
 
@@ -38,10 +44,6 @@
     <PackageReference Include="Serilog.Sinks.Seq" Version="5.1.1" />
     <PackageReference Include="System.DirectoryServices" Version="6.0.0" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="6.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Features\ShortTerm\Covers\Commands\" />
   </ItemGroup>
 
 </Project>

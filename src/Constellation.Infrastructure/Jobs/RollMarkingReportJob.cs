@@ -1,12 +1,13 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Constellation.Application.ClassCovers.GetCoversByDateAndOffering;
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Faculties.Queries;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models.Covers;
+using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -36,7 +37,7 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
 
     public async Task StartJob(Guid jobId, CancellationToken token)
     {
-        var date = DateTime.Today;
+        var date = DateOnly.FromDateTime(DateTime.Today);
 
         if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
             return;
@@ -86,7 +87,6 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
                 teacher = await _unitOfWork.Staff.GetFromName(entry.Teacher);
             }
 
-            var covers = new List<ClassCover>();
             var infoString = string.Empty;
             var Covered = false;
             var CoveredBy = string.Empty;
@@ -106,35 +106,18 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
 
             if (offering is not null)
             {
-                var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = offering.Course.FacultyId });
+                var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = offering.Course.FacultyId }, token);
                 emailDto.HeadTeachers = headTeachers.ToDictionary(member => member.EmailAddress, member => member.DisplayName);
 
-                var casualCovers = await _unitOfWork.CasualClassCovers.ForClassworkNotifications(date, offering.Id);
-                var teacherCovers = await _unitOfWork.TeacherClassCovers.ForClassworkNotifications(date, offering.Id);
+                var coversRequest = await _mediator.Send(new GetCoversByDateAndOfferingQuery(date, offering.Id));
 
-                foreach (var cover in casualCovers)
-                    covers.Add(cover);
-                foreach (var cover in teacherCovers)
-                    covers.Add(cover);
-            }
-
-            if (covers.Any())
-            {
-                foreach (var cover in covers.OrderBy(cover => cover.Id))
+                if (coversRequest.IsSuccess)
                 {
-                    if (cover.GetType().Name == nameof(CasualClassCover))
-                    {
-                        Covered = true;
-                        CoveredBy = ((CasualClassCover)cover).Casual.DisplayName;
-                        CoverType = "Casual";
-                    }
+                    var cover = coversRequest.Value.OrderBy(cover => cover.CreatedAt).Last();
 
-                    if (cover.GetType().Name == nameof(TeacherClassCover))
-                    {
-                        Covered = true;
-                        CoveredBy = ((TeacherClassCover)cover).Staff.DisplayName;
-                        CoverType = "Teacher";
-                    }
+                    Covered = true;
+                    CoveredBy = cover.TeacherName;
+                    CoverType = cover.CoverType;
                 }
             }
 
@@ -170,7 +153,7 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
             recipients.Add(teacher.Value, teacher.Key);
 
             // Email the relevant person (as outlined in the EmailSentTo field
-            await _emailService.SendDailyRollMarkingReport(emails, DateOnly.FromDateTime(date), recipients);
+            await _emailService.SendDailyRollMarkingReport(emails, date, recipients);
         }
 
         // Send emails to head teachers
@@ -189,7 +172,7 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
             recipients.Add(teacher.Value, teacher.Key);
 
             // Email the relevant person (as outlined in the EmailSentTo field
-            await _emailService.SendDailyRollMarkingReport(emails, DateOnly.FromDateTime(date), recipients);
+            await _emailService.SendDailyRollMarkingReport(emails, date, recipients);
         }
 
         // Send emails to absence administrator
@@ -205,6 +188,6 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
         if (!recipients.Any(recipient => recipient.Value == "scott.new@det.nsw.edu.au"))
             recipients.Add("Scott New", "scott.new@det.nsw.edu.au");
 
-        await _emailService.SendDailyRollMarkingReport(emailList, DateOnly.FromDateTime(date), recipients);
+        await _emailService.SendDailyRollMarkingReport(emailList, date, recipients);
     }
 }

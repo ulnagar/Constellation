@@ -9,7 +9,6 @@ namespace Constellation.Application.Interfaces.Repositories
         IAdobeConnectOperationsRepository AdobeConnectOperations { get; set; }
         IAdobeConnectRoomRepository AdobeConnectRooms { get; set; }
         IAppAccessTokenRepository AppAccessTokens { get; set; }
-        ICasualRepository Casuals { get; set; }
         ICourseOfferingRepository CourseOfferings { get; set; }
         ICourseRepository Courses { get; set; }
         IDeviceAllocationRepository DeviceAllocations { get; set; }

@@ -763,7 +763,7 @@ namespace Constellation.Infrastructure.ExternalServices.Sentral
             return result;
         }
 
-        public async Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateTime date)
+        public async Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateOnly date)
         {
             var sentralDate = date.ToString("yyyy-MM-dd");
 

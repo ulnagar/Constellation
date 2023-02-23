@@ -80,31 +80,9 @@ namespace Constellation.Infrastructure.Jobs
             if (token.IsCancellationRequested)
                 return;
 
-            _logger.LogInformation("{id}: Fixing old and outdated operation entries...", jobId);
-            await PruneAdobeConnectOperations(token);
             _logger.LogInformation("{id}: Completed", jobId);
         }
 
-        private async Task PruneAdobeConnectOperations(CancellationToken token)
-        {
-            var covers = await _unitOfWork.Covers.ForOperationCancellation();
-            var operationCount = 0;
-
-            foreach (var cover in covers)
-            {
-                var operations = cover.AdobeConnectOperations.Where(op => !op.IsCompleted && !op.IsDeleted);
-
-                foreach (var operation in operations)
-                {
-                    operationCount++;
-                    await _operationsService.CancelAdobeConnectOperation(operation.Id);
-                }
-            }
-
-            _logger.LogInformation("{id}: Found {operationCount} operations to cancel!", JobId, operationCount);
-
-            await _unitOfWork.CompleteAsync(token);
-        }
 
         private async Task ProcessOperation(AdobeConnectOperation operation)
         {

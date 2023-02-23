@@ -59,7 +59,7 @@ internal sealed class GetAllCurrentAndFutureCoversQueryHandler
 
             if (cover.TeacherType == CoverTeacherType.Casual)
             {
-                var teacher = await _casualRepository.GetById(int.Parse(cover.TeacherId), cancellationToken);
+                var teacher = await _casualRepository.GetById(Guid.Parse(cover.TeacherId), cancellationToken);
 
                 if (teacher is null)
                 {

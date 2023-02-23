@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -51,7 +52,7 @@ internal sealed class GetCoverWithDetailsQueryHandler
 
         if (cover.TeacherType == CoverTeacherType.Casual)
         {
-            var teacher = await _casualRepository.GetById(int.Parse(cover.TeacherId), cancellationToken);
+            var teacher = await _casualRepository.GetById(Guid.Parse(cover.TeacherId), cancellationToken);
 
             if (teacher is not null)
             {

@@ -13,7 +13,6 @@ public class UnitOfWork : IUnitOfWork
     public IAdobeConnectOperationsRepository AdobeConnectOperations { get; set; }
     public IAdobeConnectRoomRepository AdobeConnectRooms { get; set; }
     public IAppAccessTokenRepository AppAccessTokens { get; set; }
-    public ICasualRepository Casuals { get; set; }
     public ICourseOfferingRepository CourseOfferings { get; set; }
     public ICourseRepository Courses { get; set; }
     public IDeviceAllocationRepository DeviceAllocations { get; set; }
@@ -48,7 +47,6 @@ public class UnitOfWork : IUnitOfWork
         AdobeConnectOperations = new AdobeConnectOperationsRepository(context);
         AdobeConnectRooms = new AdobeConnectRoomRepository(context);
         AppAccessTokens = new AppAccessTokenRepository(context);
-        Casuals = new CasualRepository(context);
         CourseOfferings = new CourseOfferingRepository(context);
         Courses = new CourseRepository(context);
         DeviceAllocations = new DeviceAllocationRepository(context);

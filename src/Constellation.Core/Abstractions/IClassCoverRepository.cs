@@ -14,5 +14,6 @@ public interface IClassCoverRepository
     Task<ClassCover?> GetById(Guid CoverId, CancellationToken cancellationToken = default);
     Task<List<string>> GetCurrentCoveringTeachersForOffering(int offeringId, CancellationToken cancellationToken = default);
     Task<List<ClassCover>> GetAllWithCasualId(int casualId, CancellationToken cancellationToken = default);
+    Task<List<ClassCover>> GetAllForDateAndOfferingId(DateOnly coverDate, int OfferingId, CancellationToken cancellationToken = default);
     void Insert(ClassCover cover);
 }

@@ -114,7 +114,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_SendCoverUpdatedEm
 
         if (cover.TeacherType == CoverTeacherType.Casual)
         {
-            var teacher = await _casualRepository.GetById(int.Parse(cover.TeacherId), cancellationToken);
+            var teacher = await _casualRepository.GetById(Guid.Parse(cover.TeacherId), cancellationToken);
 
             if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
             {

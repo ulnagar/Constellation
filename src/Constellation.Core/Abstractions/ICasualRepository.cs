@@ -12,5 +12,6 @@ public interface ICasualRepository
     Task<List<Casual>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<Casual>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Casual>> GetAllInactive(CancellationToken cancellationToken = default);
+    Task<List<Casual>> GetWithoutAdobeConnectId(CancellationToken cancellationToken = default);
     void Insert(Casual casual);
 }

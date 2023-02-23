@@ -2,6 +2,7 @@
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Comparators;
+using Constellation.Core.Models.Casuals;
 using Constellation.Core.Models.Covers;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
@@ -78,7 +79,7 @@ namespace Constellation.Infrastructure.Services
                 .AsNoTracking()
                 .ToListAsync();
 
-            var casuals = await context.Casuals
+            var casuals = await context.Set<Casual>()
                 .Where(casual => !casual.IsDeleted)
                 .AsNoTracking()
                 .ToListAsync();
