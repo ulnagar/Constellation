@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Constellation.Application.ClassCovers.GetCoversByDateAndOffering;
+using Constellation.Application.ClassCovers.GetCoversSummaryByDateAndOffering;
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Faculties.Queries;
 using Constellation.Application.Interfaces.Gateways;
@@ -109,7 +109,7 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
                 var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = offering.Course.FacultyId }, token);
                 emailDto.HeadTeachers = headTeachers.ToDictionary(member => member.EmailAddress, member => member.DisplayName);
 
-                var coversRequest = await _mediator.Send(new GetCoversByDateAndOfferingQuery(date, offering.Id));
+                var coversRequest = await _mediator.Send(new GetCoversSummaryByDateAndOfferingQuery(date, offering.Id));
 
                 if (coversRequest.IsSuccess)
                 {

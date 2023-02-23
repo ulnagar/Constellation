@@ -1,5 +1,5 @@
 ﻿@model DateOnly?
 @if (Model.HasValue)
 {
-    @Model.Value.ToShortDateString("dd/MM/yyyy")
+    @Model.Value.ToString("dd/MM/yyyy")
 }

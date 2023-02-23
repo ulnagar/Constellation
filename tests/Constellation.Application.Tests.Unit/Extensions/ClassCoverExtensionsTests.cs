@@ -1,5 +1,7 @@
 ﻿using Constellation.Application.Extensions;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Covers;
+using Constellation.Core.ValueObjects;
 
 namespace Constellation.Application.Tests.Unit.Extensions;
 
@@ -8,11 +10,16 @@ public class ClassCoverExtensionsTests
     [Fact]
     public void IsCurrent_ShouldReturnFalse_IfMarkedDeleted()
     {
-		// Arrange
-		var sut = new TeacherClassCover
-		{
-			IsDeleted = true
-		};
+        // Arrange
+        var sut = ClassCover.Create(
+            Guid.NewGuid(),
+            1,
+            DateOnly.MinValue,
+            DateOnly.MaxValue,
+            CoverTeacherType.Staff,
+            "1");
+
+        sut.Delete();
 
 		// Act
 		var result = sut.IsCurrent();
@@ -25,11 +32,13 @@ public class ClassCoverExtensionsTests
     public void IsCurrent_ShouldReturnFalse_IfEndDateIsBeforeToday()
     {
         // Arrange
-        var sut = new TeacherClassCover
-        {
-            IsDeleted = false,
-            EndDate = DateTime.Today.AddDays(-1)
-        };
+        var sut = ClassCover.Create(
+            Guid.NewGuid(),
+            1,
+            DateOnly.MinValue,
+            DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
+            CoverTeacherType.Staff,
+            "1");
 
         // Act
         var result = sut.IsCurrent();
@@ -42,11 +51,13 @@ public class ClassCoverExtensionsTests
     public void IsCurrent_ShouldReturnTrue_IfEndDateIsToday()
     {
         // Arrange
-        var sut = new TeacherClassCover
-        {
-            IsDeleted = false,
-            EndDate = DateTime.Today
-        };
+        var sut = ClassCover.Create(
+            Guid.NewGuid(),
+            1,
+            DateOnly.MinValue,
+            DateOnly.FromDateTime(DateTime.Today),
+            CoverTeacherType.Staff,
+            "1");
 
         // Act
         var result = sut.IsCurrent();
@@ -59,11 +70,13 @@ public class ClassCoverExtensionsTests
     public void IsCurrent_ShouldReturnTrue_IfEndDateIsInTheFuture()
     {
         // Arrange
-        var sut = new TeacherClassCover
-        {
-            IsDeleted = false,
-            EndDate = DateTime.Today.AddDays(2)
-        };
+        var sut = ClassCover.Create(
+            Guid.NewGuid(),
+            1,
+            DateOnly.MinValue,
+            DateOnly.FromDateTime(DateTime.Today.AddDays(2)),
+            CoverTeacherType.Staff,
+            "1");
 
         // Act
         var result = sut.IsCurrent();
@@ -76,12 +89,13 @@ public class ClassCoverExtensionsTests
     public void IsCurrent_ShouldReturnFalse_IfStartDateIsInTheFuture()
     {
         // Arrange
-        var sut = new TeacherClassCover
-        {
-            IsDeleted = false,
-            EndDate = DateTime.Today.AddDays(2),
-            StartDate = DateTime.Today.AddDays(1)
-        };
+        var sut = ClassCover.Create(
+            Guid.NewGuid(),
+            1,
+            DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
+            DateOnly.FromDateTime(DateTime.Today.AddDays(3)),
+            CoverTeacherType.Staff,
+            "1");
 
         // Act
         var result = sut.IsCurrent();
@@ -94,12 +108,13 @@ public class ClassCoverExtensionsTests
     public void IsCurrent_ShouldReturnTrue_IfStartDateIsToday()
     {
         // Arrange
-        var sut = new TeacherClassCover
-        {
-            IsDeleted = false,
-            EndDate = DateTime.Today.AddDays(2),
-            StartDate = DateTime.Today
-        };
+        var sut = ClassCover.Create(
+            Guid.NewGuid(),
+            1,
+            DateOnly.FromDateTime(DateTime.Today),
+            DateOnly.MaxValue,
+            CoverTeacherType.Staff,
+            "1");
 
         // Act
         var result = sut.IsCurrent();
@@ -112,12 +127,13 @@ public class ClassCoverExtensionsTests
     public void IsCurrent_ShouldReturnTrue_IfStartDateIsInThePast()
     {
         // Arrange
-        var sut = new TeacherClassCover
-        {
-            IsDeleted = false,
-            EndDate = DateTime.Today.AddDays(2),
-            StartDate = DateTime.Today.AddDays(-1)
-        };
+        var sut = ClassCover.Create(
+            Guid.NewGuid(),
+            1,
+            DateOnly.MinValue,
+            DateOnly.MaxValue,
+            CoverTeacherType.Staff,
+            "1");
 
         // Act
         var result = sut.IsCurrent();
@@ -130,11 +146,13 @@ public class ClassCoverExtensionsTests
     public void IsFuture_ShouldReturnTrue_IfStartDateIsInTheFutureAndNotMarkedDeleted()
     {
         // Arrange
-        var sut = new TeacherClassCover
-        {
-            IsDeleted = false,
-            StartDate = DateTime.Today.AddDays(2)
-        };
+        var sut = ClassCover.Create(
+            Guid.NewGuid(),
+            1,
+            DateOnly.FromDateTime(DateTime.Today.AddDays(2)),
+            DateOnly.MaxValue,
+            CoverTeacherType.Staff,
+            "1");
 
         // Act
         var result = sut.IsFuture();
@@ -147,11 +165,15 @@ public class ClassCoverExtensionsTests
     public void IsFuture_ShouldReturnFalse_IfMarkedDeleted()
     {
         // Arrange
-        var sut = new TeacherClassCover
-        {
-            IsDeleted = true,
-            StartDate = DateTime.Today.AddDays(2)
-        };
+        var sut = ClassCover.Create(
+            Guid.NewGuid(),
+            1,
+            DateOnly.MinValue,
+            DateOnly.MaxValue,
+            CoverTeacherType.Staff,
+            "1");
+
+        sut.Delete();
 
         // Act
         var result = sut.IsFuture();
@@ -164,11 +186,13 @@ public class ClassCoverExtensionsTests
     public void IsFuture_ShouldReturnFalse_IfStartDateIsInThePast()
     {
         // Arrange
-        var sut = new TeacherClassCover
-        {
-            IsDeleted = false,
-            StartDate = DateTime.Today.AddDays(-1)
-        };
+        var sut = ClassCover.Create(
+            Guid.NewGuid(),
+            1,
+            DateOnly.MinValue,
+            DateOnly.MaxValue,
+            CoverTeacherType.Staff,
+            "1");
 
         // Act
         var result = sut.IsFuture();
@@ -181,11 +205,13 @@ public class ClassCoverExtensionsTests
     public void IsFuture_ShouldReturnFalse_IfStartDateIsToday()
     {
         // Arrange
-        var sut = new TeacherClassCover
-        {
-            IsDeleted = false,
-            StartDate = DateTime.Today
-        };
+        var sut = ClassCover.Create(
+            Guid.NewGuid(),
+            1,
+            DateOnly.FromDateTime(DateTime.Today),
+            DateOnly.MaxValue,
+            CoverTeacherType.Staff,
+            "1");
 
         // Act
         var result = sut.IsFuture();

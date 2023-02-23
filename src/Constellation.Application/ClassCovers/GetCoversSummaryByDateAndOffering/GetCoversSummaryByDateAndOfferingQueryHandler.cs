@@ -1,6 +1,4 @@
-﻿using Constellation.Application.ClassCovers.GetCoversByDateAndOffering;
-
-namespace Constellation.Application.ClassCovers.GetCoversSummaryByDateAndOffering;
+﻿namespace Constellation.Application.ClassCovers.GetCoversSummaryByDateAndOffering;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;

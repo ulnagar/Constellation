@@ -88,9 +88,9 @@ namespace Constellation.Application.DTOs
 
         public class MonitorCourseCover
         {
-            public int Id { get; set; }
-            public DateTime StartDate { get; set; }
-            public DateTime EndDate { get; set; }
+            public Guid Id { get; set; }
+            public DateOnly StartDate { get; set; }
+            public DateOnly EndDate { get; set; }
             public string PersonId { get; set; }
             public string PersonName { get; set; }
             public bool IsCurrent { get; set; } //=> (StartDate <= _dtHelper.Today() && _dtHelper.Today() <= EndDate);

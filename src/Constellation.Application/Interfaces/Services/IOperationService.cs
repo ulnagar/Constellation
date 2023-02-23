@@ -9,11 +9,9 @@ namespace Constellation.Application.Interfaces.Services
     public interface IOperationService
     {
         Task CreateStudentAdobeConnectAccess(string studentId, string roomId, DateTime schedule);
-        Task CreateCasualAdobeConnectAccess(int casualId, string roomId, DateTime schedule, int coverId);
-        Task CreateTeacherAdobeConnectAccess(string staffId, string roomId, DateTime scheduled, int coverId);
+        Task CreateTeacherAdobeConnectAccess(string staffId, string roomId, DateTime scheduled, Guid coverId);
         Task RemoveStudentAdobeConnectAccess(string studentId, string roomId, DateTime schedule);
-        Task RemoveCasualAdobeConnectAccess(int casualId, string roomId, DateTime schedule, int coverId);
-        Task RemoveTeacherAdobeConnectAccess(string staffId, string roomId, DateTime scheduled, int coverId);
+        Task RemoveTeacherAdobeConnectAccess(string staffId, string roomId, DateTime scheduled, Guid coverId);
         Task CreateTeacherAdobeConnectGroupMembership(string staffId, AdobeConnectGroup groupName, DateTime scheduled);
         Task RemoveTeacherAdobeConnectGroupMembership(string staffId, AdobeConnectGroup groupName, DateTime scheduled);
 
@@ -22,14 +20,11 @@ namespace Constellation.Application.Interfaces.Services
         void CancelAdobeConnectOperation(AdobeConnectOperation operation);
 
         Task CreateStudentMSTeamMemberAccess(string studentId, int offeringId, DateTime schedule);
-        Task CreateCasualMSTeamMemberAccess(int casualId, int offeringId, int coverId, DateTime scheduled);
-        Task CreateTeacherMSTeamMemberAccess(string staffId, int offeringId, DateTime scheduled, int? coverId);
-        Task CreateCasualMSTeamOwnerAccess(int casualId, int offeringId, int coverId, DateTime scheduled);
-        Task CreateTeacherMSTeamOwnerAccess(string staffId, int offeringId, DateTime scheduled, int? coverId);
+        Task CreateTeacherMSTeamMemberAccess(string staffId, int offeringId, DateTime scheduled, Guid? coverId);
+        Task CreateTeacherMSTeamOwnerAccess(string staffId, int offeringId, DateTime scheduled, Guid? coverId);
         Task CreateClassroomMSTeam(int offeringId, DateTime scheduled);
         Task RemoveStudentMSTeamAccess(string studentId, int offeringId, DateTime schedule);
-        Task RemoveCasualMSTeamAccess(int casualId, int offeringId, int coverId, DateTime scheduled);
-        Task RemoveTeacherMSTeamAccess(string staffId, int offeringId, DateTime scheduled, int? coverId);
+        Task RemoveTeacherMSTeamAccess(string staffId, int offeringId, DateTime scheduled, Guid? coverId);
 
         Task MarkMSTeamOperationComplete(int id);
         Task CancelMSTeamOperation(int id);

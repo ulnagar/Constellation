@@ -1,6 +1,8 @@
 namespace Constellation.Presentation.Server.Areas.ShortTerm.Pages.Casuals;
 
+using Constellation.Application.Casuals.CreateCasual;
 using Constellation.Application.Casuals.GetCasualById;
+using Constellation.Application.Casuals.UpdateCasual;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Schools.GetSchoolsForSelectionList;
 using Constellation.Application.Schools.Models;
@@ -85,7 +87,7 @@ public class UpsertModel : BasePageModel
             {
                 var result = await _mediator.Send(
                     new UpdateCasualCommand(
-                        Id,
+                        Id.Value,
                         FirstName,
                         LastName,
                         EmailAddress,

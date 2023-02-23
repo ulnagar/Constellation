@@ -4,6 +4,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
+using Microsoft.AspNetCore.Connections.Features;
 using System;
 using System.Threading.Tasks;
 
@@ -40,28 +41,7 @@ namespace Constellation.Infrastructure.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        public async Task CreateCasualAdobeConnectAccess(int casualId, string roomId, DateTime schedule, int coverId)
-        {
-            // Verify entries
-            var checkCasual = await _unitOfWork.Casuals.GetForExistCheck(casualId);
-            var checkRoom = await _unitOfWork.AdobeConnectRooms.GetForExistCheck(roomId);
-
-            if (checkCasual == null || checkRoom == null)
-                return;
-
-            var operation = new CasualAdobeConnectOperation
-            {
-                ScoId = roomId,
-                CasualId = casualId,
-                Action = AdobeConnectOperationAction.Add,
-                DateScheduled = schedule,
-                CoverId = coverId
-            };
-
-            _unitOfWork.Add(operation);
-        }
-
-        public async Task CreateTeacherAdobeConnectAccess(string staffId, string roomId, DateTime scheduled, int coverId)
+        public async Task CreateTeacherAdobeConnectAccess(string staffId, string roomId, DateTime scheduled, Guid coverId)
         {
             // Verify entries
             var checkStaff = await _unitOfWork.Staff.GetForExistCheck(staffId);
@@ -102,28 +82,7 @@ namespace Constellation.Infrastructure.Services
             _unitOfWork.Add(operation);
         }
 
-        public async Task RemoveCasualAdobeConnectAccess(int casualId, string roomId, DateTime schedule, int coverId)
-        {
-            // Verify entries
-            var checkCasual = await _unitOfWork.Casuals.GetForExistCheck(casualId);
-            var checkRoom = await _unitOfWork.AdobeConnectRooms.GetForExistCheck(roomId);
-
-            if (checkCasual == null || checkRoom == null)
-                return;
-
-            var operation = new CasualAdobeConnectOperation
-            {
-                ScoId = roomId,
-                CasualId = casualId,
-                Action = AdobeConnectOperationAction.Remove,
-                DateScheduled = schedule,
-                CoverId = coverId
-            };
-
-            _unitOfWork.Add(operation);
-        }
-
-        public async Task RemoveTeacherAdobeConnectAccess(string staffId, string roomId, DateTime scheduled, int coverId)
+        public async Task RemoveTeacherAdobeConnectAccess(string staffId, string roomId, DateTime scheduled, Guid coverId)
         {
             // Verify entries
             var checkStaff = await _unitOfWork.Staff.GetForExistCheck(staffId);
@@ -253,31 +212,7 @@ namespace Constellation.Infrastructure.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        public async Task CreateCasualMSTeamMemberAccess(int casualId, int offeringId, int coverId, DateTime scheduled)
-        {
-            // Validate entries
-            var casual = await _unitOfWork.Casuals.GetForExistCheck(casualId);
-            var offering = await _unitOfWork.CourseOfferings.GetForExistCheck(offeringId);
-            var cover = await _unitOfWork.Covers.GetForExistCheck(coverId);
-
-            if (casual == null || offering == null || cover == null)
-                return;
-
-            // Create operation
-            var operation = new CasualMSTeamOperation
-            {
-                OfferingId = offering.Id,
-                CasualId = casual.Id,
-                CoverId = cover.Id,
-                Action = MSTeamOperationAction.Add,
-                PermissionLevel = MSTeamOperationPermissionLevel.Member,
-                DateScheduled = scheduled
-            };
-
-            _unitOfWork.Add(operation);
-        }
-
-        public async Task CreateTeacherMSTeamMemberAccess(string staffId, int offeringId, DateTime scheduled, int? coverId)
+        public async Task CreateTeacherMSTeamMemberAccess(string staffId, int offeringId, DateTime scheduled, Guid? coverId)
         {
             // Validate entries
             var staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
@@ -293,38 +228,16 @@ namespace Constellation.Infrastructure.Services
                 StaffId = staffMember.StaffId,
                 Action = MSTeamOperationAction.Add,
                 PermissionLevel = MSTeamOperationPermissionLevel.Member,
-                DateScheduled = scheduled,
-                CoverId = coverId
-            };
-
-            _unitOfWork.Add(operation);
-        }
-
-        public async Task CreateCasualMSTeamOwnerAccess(int casualId, int offeringId, int coverId, DateTime scheduled)
-        {
-            // Validate entries
-            var casual = await _unitOfWork.Casuals.GetForExistCheck(casualId);
-            var offering = await _unitOfWork.CourseOfferings.GetForExistCheck(offeringId);
-            var cover = await _unitOfWork.Covers.GetForExistCheck(coverId);
-
-            if (casual == null || offering == null || cover == null)
-                return;
-
-            // Create operation
-            var operation = new CasualMSTeamOperation
-            {
-                OfferingId = offering.Id,
-                CasualId = casual.Id,
-                CoverId = cover.Id,
-                Action = MSTeamOperationAction.Add,
-                PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                 DateScheduled = scheduled
             };
 
+            if (coverId.HasValue)
+                operation.CoverId = coverId.Value;
+
             _unitOfWork.Add(operation);
         }
 
-        public async Task CreateTeacherMSTeamOwnerAccess(string staffId, int offeringId, DateTime scheduled, int? coverId)
+        public async Task CreateTeacherMSTeamOwnerAccess(string staffId, int offeringId, DateTime scheduled, Guid? coverId)
         {
             // Validate entries
             var staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
@@ -340,9 +253,11 @@ namespace Constellation.Infrastructure.Services
                 StaffId = staffMember.StaffId,
                 Action = MSTeamOperationAction.Add,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
-                DateScheduled = scheduled,
-                CoverId = coverId
+                DateScheduled = scheduled
             };
+
+            if (coverId.HasValue)
+                operation.CoverId = coverId.Value;
 
             _unitOfWork.Add(operation);
         }
@@ -574,31 +489,7 @@ namespace Constellation.Infrastructure.Services
             _unitOfWork.Add(operation);
         }
 
-        public async Task RemoveCasualMSTeamAccess(int casualId, int offeringId, int coverId, DateTime scheduled)
-        {
-            // Validate entries
-            var casual = await _unitOfWork.Casuals.GetForExistCheck(casualId);
-            var offering = await _unitOfWork.CourseOfferings.GetForExistCheck(offeringId);
-            var cover = await _unitOfWork.Covers.GetForExistCheck(coverId);
-
-            if (casual == null || offering == null || cover == null)
-                return;
-
-            // Create operation
-            var operation = new CasualMSTeamOperation
-            {
-                OfferingId = offering.Id,
-                CasualId = casual.Id,
-                CoverId = cover.Id,
-                Action = MSTeamOperationAction.Remove,
-                PermissionLevel = MSTeamOperationPermissionLevel.Owner,
-                DateScheduled = scheduled
-            };
-
-            _unitOfWork.Add(operation);
-        }
-
-        public async Task RemoveTeacherMSTeamAccess(string staffId, int offeringId, DateTime scheduled, int? coverId)
+        public async Task RemoveTeacherMSTeamAccess(string staffId, int offeringId, DateTime scheduled, Guid? coverId)
         {
             // Validate entries
             var staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
@@ -614,9 +505,11 @@ namespace Constellation.Infrastructure.Services
                 StaffId = staffMember.StaffId,
                 Action = MSTeamOperationAction.Remove,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
-                DateScheduled = scheduled,
-                CoverId = coverId
+                DateScheduled = scheduled
             };
+
+            if (coverId.HasValue)
+                operation.CoverId = coverId.Value;
 
             _unitOfWork.Add(operation);
         }

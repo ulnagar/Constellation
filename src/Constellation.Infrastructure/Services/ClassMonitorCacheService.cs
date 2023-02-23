@@ -4,6 +4,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Comparators;
 using Constellation.Core.Models.Casuals;
 using Constellation.Core.Models.Covers;
+using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
@@ -216,30 +217,26 @@ namespace Constellation.Infrastructure.Services
 
                     foreach (var cover in course.ClassCovers)
                     {
-                        switch (cover)
+                        var entry = new ClassMonitorDtos.MonitorCourseCover
                         {
-                            case CasualClassCover cCover:
-                                dto.Covers.Add(new ClassMonitorDtos.MonitorCourseCover
-                                {
-                                    Id = cCover.Id,
-                                    StartDate = cCover.StartDate,
-                                    EndDate = cCover.EndDate,
-                                    PersonId = cCover.CasualId.ToString(),
-                                    PersonName = cCover.Casual.DisplayName,
-                                    IsCurrent = cCover.StartDate <= DateTime.Today && DateTime.Today <= cCover.EndDate
-                                });
-                                break;
-                            case TeacherClassCover sCover:
-                                dto.Covers.Add(new ClassMonitorDtos.MonitorCourseCover
-                                {
-                                    Id = sCover.Id,
-                                    StartDate = sCover.StartDate,
-                                    EndDate = sCover.EndDate,
-                                    PersonId = sCover.StaffId,
-                                    PersonName = sCover.Staff.DisplayName
-                                });
-                                break;
+                            Id = cover.Id,
+                            StartDate = cover.StartDate,
+                            EndDate = cover.EndDate,
+                            PersonId = cover.TeacherId,
+                            IsCurrent = cover.StartDate <= DateOnly.FromDateTime(DateTime.Today) && DateOnly.FromDateTime(DateTime.Today) <= cover.EndDate
+                        };
+
+                        // TODO: retrieve teacher name and add to dto
+                        if (cover.TeacherType == CoverTeacherType.Casual)
+                        {
+                            entry.PersonName = string.Empty;
                         }
+                        else
+                        {
+                            entry.PersonName = string.Empty;
+                        }
+
+                        dto.Covers.Add(entry);
                     }
 
                     foreach (var teacher in course.Sessions.Where(session => !session.IsDeleted).Select(session => session.Teacher).Distinct(new StaffComparator()).ToList())
