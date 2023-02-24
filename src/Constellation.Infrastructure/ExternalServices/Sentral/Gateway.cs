@@ -287,7 +287,9 @@ namespace Constellation.Infrastructure.ExternalServices.Sentral
             if (page == null)
                 return null;
 
-            var studentTable = page.DocumentNode.SelectSingleNode("/html/body/div[6]/div/div/div[3]/div/div/div/div[2]/table");
+            // OLD XPATH - CHANGED 2023-02-24
+            //var studentTable = page.DocumentNode.SelectSingleNode("/html/body/div[6]/div/div/div[3]/div/div/div/div[2]/table");
+            var studentTable = page.DocumentNode.SelectSingleNode("/html/body/div[7]/div/div/div[3]/div/div/div/div[2]/table");
 
             if (studentTable != null)
             {
