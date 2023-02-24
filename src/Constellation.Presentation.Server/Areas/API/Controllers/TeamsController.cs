@@ -25,49 +25,52 @@ public class TeamsController : ControllerBase
         _logger = logger.ForContext<TeamsController>();
     }
 
+    [Produces(typeof(List<TeamResource>))]
     [HttpGet]
-    public async Task<List<TeamResource>> GetAllTeams()
+    public async Task<IActionResult> GetAllTeams()
     {
         var teamsRequest = await _mediator.Send(new GetAllTeamsQuery());
 
         if (teamsRequest.IsSuccess)
         {
-            return teamsRequest.Value;
+            return Ok(teamsRequest.Value);
         }
 
         _logger.Warning("Failed to retrieve all teams with errors {@error}", teamsRequest.Error);
 
-        return null;
+        return BadRequest();
     }
 
+    [Produces(typeof(TeamResource))]
     [HttpGet("{id:guid}")]
-    public async Task<TeamResource> GetTeam([FromRoute] Guid Id)
+    public async Task<IActionResult> GetTeam([FromRoute] Guid Id)
     {
         var teamRequest = await _mediator.Send(new GetTeamByIdQuery(Id));
 
         if (teamRequest.IsSuccess)
         {
-            return teamRequest.Value;
+            return Ok(teamRequest.Value);
         }
 
         _logger.Warning("Failed to retrieve team {teamId} with errors {@errors}", Id, teamRequest.Error);
 
-        return null;
+        return BadRequest();
     }
 
+    [Produces(typeof(List<TeamMembershipResponse>))]
     [HttpGet("{id:guid}/Members")]
-    public async Task<List<TeamMembershipResponse>> GetTeamMembership([FromRoute] Guid Id)
+    public async Task<IActionResult> GetTeamMembership([FromRoute] Guid Id)
     {
         var teamMemberRequest = await _mediator.Send(new GetTeamMembershipByIdQuery(Id));
 
         if (teamMemberRequest.IsSuccess)
         {
-            return teamMemberRequest.Value;
+            return Ok(teamMemberRequest.Value);
         }
 
         _logger.Warning("Failed to retrieve team membership for {teamId} with errors {@errors}", Id, teamMemberRequest.Error);
 
-        return null;
+        return BadRequest();
     }
 
     [HttpPost("{id:guid}/Archive")]
