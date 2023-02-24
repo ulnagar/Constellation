@@ -32,7 +32,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
         IGroupTutorialRepository groupTutorialRepository,
-        Serilog.ILogger logger)
+        Serilog.ILogger logger,
         IClassCoverRepository coverRepository)
     {
         _teamRepository = teamRepository;
