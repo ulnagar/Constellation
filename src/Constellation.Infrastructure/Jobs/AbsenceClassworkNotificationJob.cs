@@ -68,7 +68,7 @@ namespace Constellation.Infrastructure.Jobs
                 {
                     AbsenceDate = absenceDate,
                     Absences = group.ToList(),
-                    Covers = covers,
+                    IsCovered = covers.Any(),
                     Offering = offering,
                     OfferingId = offeringId,
                     Teachers = teachers
@@ -78,7 +78,7 @@ namespace Constellation.Infrastructure.Jobs
                     return;
 
                 // Check if the db already has an entry for this?
-                var check = await _unitOfWork.ClassworkNotifications.GetForDuplicateCheck(offeringId, absenceDate);
+                var check = await _unitOfWork.ClassworkNotifications.GetForDuplicateCheck(offeringId, absenceDate, token);
                 if (check == null)
                 {
                     _unitOfWork.Add(notification);
@@ -94,7 +94,7 @@ namespace Constellation.Infrastructure.Jobs
                         Students = notification.Absences.Select(absence => absence.Student.DisplayName).ToList(),
                         AbsenceDate = notification.AbsenceDate,
                         Teachers = notification.Teachers.Select(teacher => new ClassworkNotificationTeacherEmail.Teacher { Name = teacher.DisplayName, Email = teacher.EmailAddress}).ToList(),
-                        IsCovered = notification.Covers.Any()
+                        IsCovered = notification.IsCovered
                     };
 
                     await _emailService.SendTeacherClassworkNotificationRequest(emailNotification);

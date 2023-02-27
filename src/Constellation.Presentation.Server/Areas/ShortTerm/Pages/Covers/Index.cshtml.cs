@@ -28,7 +28,7 @@ public class IndexModel : BasePageModel
     public List<CoversListResponse> Covers = new();
 
     [BindProperty(SupportsGet = true)]
-    public FilterDto Filter { get; set; }
+    public FilterDto Filter { get; set; } = FilterDto.Current;
 
     public async Task OnGet(CancellationToken cancellationToken)
     {

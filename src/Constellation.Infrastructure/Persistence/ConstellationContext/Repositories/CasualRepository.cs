@@ -44,7 +44,7 @@ public class CasualRepository : ICasualRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Casual>()
-            .Where(casual => string.IsNullOrWhiteSpace(casual.AdobeConnectPrincipalId))
+            .Where(casual => string.IsNullOrWhiteSpace(casual.AdobeConnectId))
             .ToListAsync(cancellationToken);
 
     public void Insert(Casual casual) =>

@@ -10,7 +10,6 @@ namespace Constellation.Core.Models
         {
             Enrolments = new List<Enrolment>();
             Sessions = new List<OfferingSession>();
-            ClassCovers = new List<ClassCover>();
             Resources = new List<OfferingResource>();
             Absences = new List<Absence>();
         }
@@ -19,7 +18,6 @@ namespace Constellation.Core.Models
         {
             Enrolments = new List<Enrolment>();
             Sessions = new List<OfferingSession>();
-            ClassCovers = new List<ClassCover>();
             Resources = new List<OfferingResource>();
             Absences = new List<Absence>();
 
@@ -36,7 +34,6 @@ namespace Constellation.Core.Models
         public DateTime EndDate { get;  set; }
         public ICollection<Enrolment> Enrolments { get;  set; }
         public ICollection<OfferingSession> Sessions { get;  set; }
-        public ICollection<ClassCover> ClassCovers { get;  set; }
         public ICollection<OfferingResource> Resources { get;  set; }
         public ICollection<Lesson> Lessons { get; set; }
         public ICollection<Absence> Absences { get; set; }

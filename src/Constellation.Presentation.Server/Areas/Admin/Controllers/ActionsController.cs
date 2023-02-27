@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Admin.Models;
 using Constellation.Presentation.Server.BaseModels;
@@ -16,14 +17,17 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAdobeConnectService _adobeConnectService;
         private readonly IOperationService _operationService;
+        private readonly ICasualRepository _casualRepository;
 
         public ActionsController(IUnitOfWork unitOfWork, IConfiguration configuration,
-            IAdobeConnectService adobeConnectService, IOperationService operationService)
+            IAdobeConnectService adobeConnectService, IOperationService operationService,
+            ICasualRepository casualRepository)
             : base(unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _adobeConnectService = adobeConnectService;
             _operationService = operationService;
+            _casualRepository = casualRepository;
         }
 
         public async Task<IActionResult> Index()
@@ -72,12 +76,13 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
 
                         break;
                     case CasualAdobeConnectOperation cOperation:
+                        var casual = await _casualRepository.GetById(cOperation.CasualId);
                         var cdto = new Actions_OperationDTO
                         {
                             Id = operation.Id,
                             UserType = "Casual",
                             UserId = cOperation.CasualId.ToString(),
-                            UserName = cOperation.Casual.DisplayName,
+                            UserName = casual.DisplayName,
                             ActionType = operation.Action.ToString(),
                             RoomId = operation.ScoId,
                             RoomName = operation.Room.Name,

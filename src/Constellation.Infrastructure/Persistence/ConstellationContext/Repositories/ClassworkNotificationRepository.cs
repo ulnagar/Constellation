@@ -20,7 +20,6 @@ public class ClassworkNotificationRepository : IClassworkNotificationRepository
             .ThenInclude(absence => absence.Student)
             .Include(notification => notification.Offering)
             .Include(notification => notification.Offering.Course)
-            .Include(notification => notification.Covers)
             .Include(notification => notification.Teachers)
             .SingleOrDefaultAsync(notification => notification.Id == id, token);
     }
@@ -30,7 +29,6 @@ public class ClassworkNotificationRepository : IClassworkNotificationRepository
         return await _context.ClassworkNotifications
             .Include(notification => notification.Absences)
             .Include(notification => notification.Offering)
-            .Include(notification => notification.Covers)
             .Include(notification => notification.Teachers)
             .ToListAsync(token);
     }
@@ -40,7 +38,6 @@ public class ClassworkNotificationRepository : IClassworkNotificationRepository
         return await _context.ClassworkNotifications
             .Include(notification => notification.Absences)
             .Include(notification => notification.Offering)
-            .Include(notification => notification.Covers)
             .Include(notification => notification.Teachers)
             .SingleOrDefaultAsync(notification => notification.AbsenceDate == absenceDate && notification.OfferingId == offeringId, token);
     }

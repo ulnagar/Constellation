@@ -86,7 +86,7 @@ internal sealed class CoverCancelledDomainEvent_RemoveAdobeConnectAccessHandler
                         removeOperation = new CasualAdobeConnectOperation
                         {
                             ScoId = room.Key,
-                            CasualId = int.Parse(cover.TeacherId),
+                            CasualId = Guid.Parse(cover.TeacherId),
                             Action = AdobeConnectOperationAction.Remove,
                             DateScheduled = DateTime.Now,
                             CoverId = cover.Id

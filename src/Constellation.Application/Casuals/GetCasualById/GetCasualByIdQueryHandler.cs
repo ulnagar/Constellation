@@ -33,6 +33,6 @@ internal sealed class GetCasualByIdQueryHandler
             casual.LastName,
             casual.EmailAddress,
             casual.SchoolCode,
-            casual.AdobeConnectPrincipalId);
+            casual.AdobeConnectId);
     }
 }

@@ -87,7 +87,7 @@
                             <div class="col">
                                 @foreach (var offering in grade)
                                 {
-                                    <span id="offeringSelect-@offering.Id" class="offering" onclick="toggleClass(@offering.Id)">@offering.Name (@offering.Teacher)</span>
+                                    <span id="offeringSelect-@offering.Id" class="offering" onclick="selectClass(@offering.Id)">@offering.Name (@offering.Teacher)</span>
                                 }
                             </div>
                         </div>

@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Core.Abstractions;
+using Constellation.Core.Models;
 using Constellation.Core.Models.Casuals;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
-using Staff = Constellation.Core.Models.Staff;
 
 internal sealed class ClassCoverRepository : IClassCoverRepository
 {
@@ -17,29 +17,43 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
     }
 
     public async Task<List<ClassCover>> GetAllCurrentAndUpcoming(
-        CancellationToken cancellationToken = default) =>
-        await _context
+        CancellationToken cancellationToken = default)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        return await _context
             .Set<ClassCover>()
-            .Where(cover => 
-                cover.EndDate >= DateOnly.FromDateTime(DateTime.Today) && 
+            .Where(cover =>
+                cover.EndDate >= today &&
                 !cover.IsDeleted)
             .ToListAsync(cancellationToken);
+    }
+        
 
     public async Task<List<ClassCover>> GetAllUpcoming(
-        CancellationToken cancellationToken = default) =>
-        await _context
+        CancellationToken cancellationToken = default)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        return await _context
             .Set<ClassCover>()
-            .Where(cover => 
-                cover.StartDate > DateOnly.FromDateTime(DateTime.Today) && 
+            .Where(cover =>
+                cover.StartDate > today &&
                 !cover.IsDeleted)
             .ToListAsync(cancellationToken);
+    }
 
     public async Task<List<ClassCover>> GetAllForCurrentCalendarYear(
-        CancellationToken cancellationToken = default) =>
-        await _context
+        CancellationToken cancellationToken = default)
+    {
+        var thisYear = DateOnly.FromDateTime(new DateTime(DateTime.Today.Year, 1, 1));
+        var nextYear = DateOnly.FromDateTime(new DateTime(DateTime.Today.AddYears(1).Year, 1, 1));
+
+        return await _context
             .Set<ClassCover>()
-            .Where(cover => (cover.StartDate.Year == DateTime.Today.Year || cover.EndDate.Year == DateTime.Today.Year) && !cover.IsDeleted)
+            .Where(cover => ((cover.StartDate >= thisYear && cover.StartDate <= nextYear ) || (cover.EndDate >= thisYear && cover.EndDate <= nextYear)) && !cover.IsDeleted)
             .ToListAsync(cancellationToken);
+    }
 
     public async Task<ClassCover?> GetById(
         Guid CoverId,

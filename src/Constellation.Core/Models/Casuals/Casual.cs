@@ -20,7 +20,7 @@ public sealed class Casual : AggregateRoot, IAuditableEntity
         LastName = lastName;
         DisplayName = displayName;
         EmailAddress = emailAddress;
-        AdobeConnectPrincipalId = adobeConnectId;
+        AdobeConnectId = adobeConnectId;
         SchoolCode = schoolCode;
     }
 
@@ -28,7 +28,7 @@ public sealed class Casual : AggregateRoot, IAuditableEntity
     public string LastName { get; private set; }
     public string DisplayName { get; private set; }
     public string EmailAddress { get; private set; }
-    public string AdobeConnectPrincipalId { get; private set; }
+    public string AdobeConnectId { get; private set; }
     public string SchoolCode { get; private set; }
 
     public string CreatedBy { get; set; }
@@ -66,7 +66,7 @@ public sealed class Casual : AggregateRoot, IAuditableEntity
         FirstName = name.FirstName;
         LastName = name.LastName;
         DisplayName = name.DisplayName;
-        AdobeConnectPrincipalId = adobeConnectId;
+        AdobeConnectId = adobeConnectId;
         SchoolCode = schoolCode;
     }
 }

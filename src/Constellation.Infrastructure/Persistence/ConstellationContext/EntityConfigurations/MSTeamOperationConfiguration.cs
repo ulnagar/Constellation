@@ -35,10 +35,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
     {
         public void Configure(EntityTypeBuilder<CasualMSTeamOperation> builder)
         {
-            builder.HasOne(o => o.Casual)
-                .WithMany()
-                .HasForeignKey(o => o.CasualId)
-                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 

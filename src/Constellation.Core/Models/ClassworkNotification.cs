@@ -10,7 +10,6 @@ namespace Constellation.Core.Models
         {
             Absences = new List<Absence>();
             Teachers = new List<Staff>();
-            Covers = new List<ClassCover>();
         }
 
         public Guid Id { get; set; }
@@ -24,6 +23,6 @@ namespace Constellation.Core.Models
         public CourseOffering Offering { get; set; }
         public int OfferingId { get; set; }
         public DateTime AbsenceDate { get; set; }
-        public ICollection<ClassCover> Covers { get; set; }
+        public bool IsCovered { get; set; }
     }
 }

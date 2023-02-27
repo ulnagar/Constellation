@@ -28,7 +28,7 @@ public class IndexModel : BasePageModel
     public List<CasualsListResponse> Casuals = new();
 
     [BindProperty(SupportsGet = true)]
-    public FilterDto Filter { get; set; }
+    public FilterDto Filter { get; set; } = FilterDto.Active;
 
     public async Task OnGet(CancellationToken cancellationToken)
     {

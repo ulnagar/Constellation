@@ -31,8 +31,7 @@ namespace Constellation.Core.Models
 
     public class CasualAdobeConnectOperation : AdobeConnectOperation
     {
-        public int? CasualId { get; set; }
-        public Casual Casual { get; set; }
+        public Guid CasualId { get; set; }
     }
 
     public class TeacherAdobeConnectOperation : AdobeConnectOperation

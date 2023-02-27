@@ -47,8 +47,7 @@ namespace Constellation.Core.Models
 
     public class CasualMSTeamOperation : OfferingMSTeamOperation
     {
-        public int CasualId { get; set; }
-        public Casual Casual { get; set; }
+        public Guid CasualId { get; set; }
     }
 
     public class GroupMSTeamOperation : OfferingMSTeamOperation

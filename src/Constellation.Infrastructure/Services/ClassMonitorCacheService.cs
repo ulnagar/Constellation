@@ -121,7 +121,7 @@ namespace Constellation.Infrastructure.Services
                     Id = casual.Id.ToString(),
                     DisplayName = casual.DisplayName,
                     UserType = "Casual",
-                    UserPrincipalId = casual.AdobeConnectPrincipalId,
+                    UserPrincipalId = casual.AdobeConnectId,
                     IsDeleted = casual.IsDeleted
                 };
 
@@ -215,29 +215,29 @@ namespace Constellation.Infrastructure.Services
                         });
                     }
 
-                    foreach (var cover in course.ClassCovers)
-                    {
-                        var entry = new ClassMonitorDtos.MonitorCourseCover
-                        {
-                            Id = cover.Id,
-                            StartDate = cover.StartDate,
-                            EndDate = cover.EndDate,
-                            PersonId = cover.TeacherId,
-                            IsCurrent = cover.StartDate <= DateOnly.FromDateTime(DateTime.Today) && DateOnly.FromDateTime(DateTime.Today) <= cover.EndDate
-                        };
+                    //foreach (var cover in course.ClassCovers)
+                    //{
+                    //    var entry = new ClassMonitorDtos.MonitorCourseCover
+                    //    {
+                    //        Id = cover.Id,
+                    //        StartDate = cover.StartDate,
+                    //        EndDate = cover.EndDate,
+                    //        PersonId = cover.TeacherId,
+                    //        IsCurrent = cover.StartDate <= DateOnly.FromDateTime(DateTime.Today) && DateOnly.FromDateTime(DateTime.Today) <= cover.EndDate
+                    //    };
 
-                        // TODO: retrieve teacher name and add to dto
-                        if (cover.TeacherType == CoverTeacherType.Casual)
-                        {
-                            entry.PersonName = string.Empty;
-                        }
-                        else
-                        {
-                            entry.PersonName = string.Empty;
-                        }
+                    //    // TODO: retrieve teacher name and add to dto
+                    //    if (cover.TeacherType == CoverTeacherType.Casual)
+                    //    {
+                    //        entry.PersonName = string.Empty;
+                    //    }
+                    //    else
+                    //    {
+                    //        entry.PersonName = string.Empty;
+                    //    }
 
-                        dto.Covers.Add(entry);
-                    }
+                    //    dto.Covers.Add(entry);
+                    //}
 
                     foreach (var teacher in course.Sessions.Where(session => !session.IsDeleted).Select(session => session.Teacher).Distinct(new StaffComparator()).ToList())
                     {

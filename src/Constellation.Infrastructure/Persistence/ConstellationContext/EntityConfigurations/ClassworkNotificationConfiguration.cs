@@ -12,7 +12,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
             builder.HasOne(notification => notification.Offering).WithMany().HasForeignKey(notification => notification.OfferingId).OnDelete(DeleteBehavior.NoAction);
             builder.HasOne(notification => notification.CompletedBy).WithMany().HasForeignKey(notification => notification.StaffId).OnDelete(DeleteBehavior.NoAction);
             builder.HasMany(notification => notification.Teachers).WithMany(teacher => teacher.ClassworkNotifications);
-            builder.HasMany(notification => notification.Covers);
             builder.HasMany(notification => notification.Absences).WithMany(absence => absence.ClassworkNotifications);
         }
     }

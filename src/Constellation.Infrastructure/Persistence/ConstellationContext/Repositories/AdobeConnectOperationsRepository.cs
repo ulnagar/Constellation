@@ -58,7 +58,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Include(operation => operation.Room)
                 .Include(operation => ((StudentAdobeConnectOperation)operation).Student)
                 .Include(operation => ((TeacherAdobeConnectOperation)operation).Teacher)
-                .Include(operation => ((CasualAdobeConnectOperation)operation).Casual)
                 .Include(operation => ((TeacherAdobeConnectGroupOperation)operation).Teacher)
                 .Where(operation => operation.DateScheduled == DateTime.Today &&
                     operation.IsCompleted == false &&
@@ -72,7 +71,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Include(operation => operation.Room)
                 .Include(operation => ((StudentAdobeConnectOperation)operation).Student)
                 .Include(operation => ((TeacherAdobeConnectOperation)operation).Teacher)
-                .Include(operation => ((CasualAdobeConnectOperation)operation).Casual)
                 .Include(operation => ((TeacherAdobeConnectGroupOperation)operation).Teacher)
                 .Where(operation => operation.DateScheduled < DateTime.Today &&
                     operation.IsCompleted == false &&
@@ -92,7 +90,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 TeacherOperations = Collection().OfType<TeacherAdobeConnectOperation>().Include(op => op.Teacher).Include(op => op.Room)
                     .Where(o => (o.DateScheduled > searchDate || o.IsCompleted == false) && o.IsDeleted == false)
                     .ToList(),
-                CasualOperations = Collection().OfType<CasualAdobeConnectOperation>().Include(op => op.Casual).Include(op => op.Room)
+                CasualOperations = Collection().OfType<CasualAdobeConnectOperation>().Include(op => op.Room)
                     .Where(o => (o.DateScheduled > searchDate || o.IsCompleted == false) && o.IsDeleted == false)
                     .ToList(),
                 TeacherGroupOperations = Collection().OfType<TeacherAdobeConnectGroupOperation>().Include(op => op.Teacher)
@@ -111,7 +109,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Include(operation => operation.Room)
                 .Include(operation => ((StudentAdobeConnectOperation)operation).Student)
                 .Include(operation => ((TeacherAdobeConnectOperation)operation).Teacher)
-                .Include(operation => ((CasualAdobeConnectOperation)operation).Casual)
                 .Where(operation => (operation.DateScheduled > searchDate || operation.IsCompleted == false) && operation.IsDeleted == false)
                 .ToListAsync();
 

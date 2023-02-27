@@ -97,7 +97,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateAdobeConnect
                         var removeEarlyOperation = new CasualAdobeConnectOperation
                         {
                             ScoId = room.Key,
-                            CasualId = int.Parse(cover.TeacherId),
+                            CasualId = Guid.Parse(cover.TeacherId),
                             Action = AdobeConnectOperationAction.Remove,
                             DateScheduled = DateTime.Now,
                             CoverId = Guid.Empty
@@ -125,7 +125,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateAdobeConnect
                     var addTimelyOperation = new CasualAdobeConnectOperation
                     {
                         ScoId = room.Key,
-                        CasualId = int.Parse(cover.TeacherId),
+                        CasualId = Guid.Parse(cover.TeacherId),
                         Action = AdobeConnectOperationAction.Add,
                         DateScheduled = newActionDate,
                         CoverId = cover.Id
@@ -173,7 +173,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateAdobeConnect
                         var reAddOperation = new CasualAdobeConnectOperation
                         {
                             ScoId = room.Key,
-                            CasualId = int.Parse(cover.TeacherId),
+                            CasualId = Guid.Parse(cover.TeacherId),
                             Action = AdobeConnectOperationAction.Add,
                             DateScheduled = DateTime.Now,
                             CoverId = Guid.Empty
@@ -201,7 +201,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateAdobeConnect
                     var removeTimelyOperation = new CasualAdobeConnectOperation
                     {
                         ScoId = room.Key,
-                        CasualId = int.Parse(cover.TeacherId),
+                        CasualId = Guid.Parse(cover.TeacherId),
                         Action = AdobeConnectOperationAction.Remove,
                         DateScheduled = newActionDate,
                         CoverId = cover.Id

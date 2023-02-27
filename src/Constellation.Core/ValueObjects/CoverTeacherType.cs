@@ -1,11 +1,23 @@
-﻿using Constellation.Core.Primitives;
+﻿namespace Constellation.Core.ValueObjects;
+
+using Constellation.Core.Primitives;
 using System.Collections.Generic;
 
-namespace Constellation.Core.ValueObjects;
 public sealed class CoverTeacherType : ValueObject
 {
     public static readonly CoverTeacherType Casual = new("Casual");
     public static readonly CoverTeacherType Staff = new("Staff");
+
+    public static CoverTeacherType ByValue(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        if (value == Casual.Value) return Casual;
+        if (value == Staff.Value) return Staff;
+
+        return null;
+    }
 
     private CoverTeacherType(string value)
     {

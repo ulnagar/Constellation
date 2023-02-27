@@ -55,7 +55,7 @@ internal sealed class CoverCreatedDomainEvent_CreateAdobeConnectAccessHandler
                 var addOperation = new CasualAdobeConnectOperation
                 {
                     ScoId = room.ScoId,
-                    CasualId = int.Parse(cover.TeacherId),
+                    CasualId = Guid.Parse(cover.TeacherId),
                     Action = AdobeConnectOperationAction.Add,
                     DateScheduled = cover.StartDate.ToDateTime(TimeOnly.MinValue).AddDays(-1),
                     CoverId = cover.Id
@@ -66,7 +66,7 @@ internal sealed class CoverCreatedDomainEvent_CreateAdobeConnectAccessHandler
                 var removeOperation = new CasualAdobeConnectOperation
                 {
                     ScoId = room.ScoId,
-                    CasualId = int.Parse(cover.TeacherId),
+                    CasualId = Guid.Parse(cover.TeacherId),
                     Action = AdobeConnectOperationAction.Remove,
                     DateScheduled = cover.EndDate.ToDateTime(TimeOnly.MinValue).AddDays(1),
                     CoverId = cover.Id

@@ -1,6 +1,7 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Covers;
 
 using Constellation.Core.Models.Covers;
+using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -13,6 +14,12 @@ public class ClassCoverConfiguration : IEntityTypeConfiguration<ClassCover>
 
         builder
             .HasKey(cover => cover.Id);
+
+        builder
+            .Property(cover => cover.TeacherType)
+            .HasConversion(
+                c => c.Value, 
+                c => CoverTeacherType.ByValue(c));
 
         builder
             .Property(cover => cover.StartDate)

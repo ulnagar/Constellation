@@ -19,9 +19,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
 
             builder.HasMany(o => o.Sessions)
                 .WithOne(s => s.Offering);
-
-            builder.HasMany(o => o.ClassCovers)
-                .WithOne();
         }
     }
 }

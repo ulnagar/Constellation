@@ -142,7 +142,7 @@ public class CreateModel : BasePageModel
             ClassSelectionList.Add(new ClassRecord(
                 course.Id,
                 course.Name,
-                $"{primaryTeacher.FirstName.Take(1)} {primaryTeacher.LastName}",
+                $"{primaryTeacher.FirstName[..1]} {primaryTeacher.LastName}",
                 $"Year {course.Name[..2]}"));
         }
 

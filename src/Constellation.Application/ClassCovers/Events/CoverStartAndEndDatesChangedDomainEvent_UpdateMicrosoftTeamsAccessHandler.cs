@@ -58,7 +58,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateMicrosoftTea
         {
             coveringTeacherRequests = existingRequests
                 .OfType<CasualMSTeamOperation>()
-                .Where(operation => operation.CasualId == int.Parse(cover.TeacherId))
+                .Where(operation => operation.CasualId == Guid.Parse(cover.TeacherId))
                 .ToList<MSTeamOperation>();
         }
         else
@@ -129,7 +129,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateMicrosoftTea
                     var removeEarlyOperation = new CasualMSTeamOperation
                     {
                         OfferingId = cover.OfferingId,
-                        CasualId = int.Parse(cover.TeacherId),
+                        CasualId = Guid.Parse(cover.TeacherId),
                         CoverId = Guid.Empty,
                         Action = MSTeamOperationAction.Remove,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
@@ -141,7 +141,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateMicrosoftTea
                     var addTimelyOperation = new CasualMSTeamOperation
                     {
                         OfferingId = cover.OfferingId,
-                        CasualId = int.Parse(cover.TeacherId),
+                        CasualId = Guid.Parse(cover.TeacherId),
                         CoverId = cover.Id,
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
@@ -300,7 +300,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateMicrosoftTea
                     var reAddOperation = new CasualMSTeamOperation
                     {
                         OfferingId = cover.OfferingId,
-                        CasualId = int.Parse(cover.TeacherId),
+                        CasualId = Guid.Parse(cover.TeacherId),
                         CoverId = Guid.Empty,
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
@@ -312,7 +312,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateMicrosoftTea
                     var removeTimelyOperation = new CasualMSTeamOperation
                     {
                         OfferingId = cover.OfferingId,
-                        CasualId = int.Parse(cover.TeacherId),
+                        CasualId = Guid.Parse(cover.TeacherId),
                         CoverId = Guid.Empty,
                         Action = MSTeamOperationAction.Remove,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,

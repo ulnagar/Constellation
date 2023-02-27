@@ -248,11 +248,14 @@ namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
 
                 case "CasualAdobeConnectOperation":
                     var cOperation = operation as CasualAdobeConnectOperation;
-                    principalId = string.IsNullOrWhiteSpace(cOperation.PrincipalId) ? cOperation.Casual.AdobeConnectPrincipalId : cOperation.PrincipalId;
-                    result.Errors.Add($"  Attempting to {operation.Action} casual teacher {cOperation.Casual.DisplayName} in room {cOperation.Room.Name}");
+
+                    var casual = await _casualRepository.GetById(cOperation.CasualId);
+
+                    principalId = string.IsNullOrWhiteSpace(cOperation.PrincipalId) ? casual.AdobeConnectId : cOperation.PrincipalId;
+                    result.Errors.Add($"  Attempting to {operation.Action} casual teacher {casual.DisplayName} in room {cOperation.Room.Name}");
                     if (string.IsNullOrWhiteSpace(principalId))
                     {
-                        principalId = await GetUserPrincipalId(cOperation.Casual.EmailAddress);
+                        principalId = await GetUserPrincipalId(casual.EmailAddress);
 
                         if (string.IsNullOrWhiteSpace(principalId))
                         {

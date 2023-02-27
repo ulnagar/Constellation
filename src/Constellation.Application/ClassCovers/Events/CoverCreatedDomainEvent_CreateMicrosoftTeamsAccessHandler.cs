@@ -48,7 +48,7 @@ internal sealed class CoverCreatedDomainEvent_CreateMicrosoftTeamsAccessHandler
             var addOperation = new CasualMSTeamOperation
             {
                 OfferingId = cover.OfferingId,
-                CasualId = int.Parse(cover.TeacherId),
+                CasualId = Guid.Parse(cover.TeacherId),
                 CoverId = cover.Id,
                 Action = MSTeamOperationAction.Add,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
@@ -60,7 +60,7 @@ internal sealed class CoverCreatedDomainEvent_CreateMicrosoftTeamsAccessHandler
             var removeOperation = new CasualMSTeamOperation
             {
                 OfferingId = cover.OfferingId,
-                CasualId = int.Parse(cover.TeacherId),
+                CasualId = Guid.Parse(cover.TeacherId),
                 CoverId = cover.Id,
                 Action = MSTeamOperationAction.Remove,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,

@@ -55,7 +55,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Set<CourseOffering>()
                 .Where(offering => 
                     offering.StartDate <= DateTime.Now && 
-                    offering.EndDate >= DateTime.Now)
+                    offering.EndDate >= DateTime.Now &&
+                    offering.Sessions.Any(session => !session.IsDeleted))
                 .ToListAsync(cancellationToken);
 
         public CourseOffering WithDetails(int id)

@@ -58,7 +58,7 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateMicrosoftTeamsAcces
         {
             coveringTeacherRequests = existingRequests
                 .OfType<CasualMSTeamOperation>()
-                .Where(operation => operation.CasualId == int.Parse(cover.TeacherId))
+                .Where(operation => operation.CasualId == Guid.Parse(cover.TeacherId))
                 .ToList<MSTeamOperation>();
         }
         else
@@ -124,7 +124,7 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateMicrosoftTeamsAcces
                     var removeEarlyOperation = new CasualMSTeamOperation
                     {
                         OfferingId = cover.OfferingId,
-                        CasualId = int.Parse(cover.TeacherId),
+                        CasualId = Guid.Parse(cover.TeacherId),
                         CoverId = Guid.Empty,
                         Action = MSTeamOperationAction.Remove,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
@@ -136,7 +136,7 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateMicrosoftTeamsAcces
                     var addTimelyOperation = new CasualMSTeamOperation
                     {
                         OfferingId = cover.OfferingId,
-                        CasualId = int.Parse(cover.TeacherId),
+                        CasualId = Guid.Parse(cover.TeacherId),
                         CoverId = cover.Id,
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,

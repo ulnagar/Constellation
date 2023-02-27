@@ -33,10 +33,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
     {
         public void Configure(EntityTypeBuilder<CasualAdobeConnectOperation> builder)
         {
-            builder.HasOne(o => o.Casual)
-                .WithMany()
-                .HasForeignKey(o => o.CasualId)
-                .OnDelete(DeleteBehavior.NoAction);
+
         }
     }
 

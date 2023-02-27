@@ -77,7 +77,7 @@ internal sealed class CoverCancelledDomainEvent_RemoveMicrosoftTeamsAccessHandle
                     removeOperation = new CasualMSTeamOperation
                     {
                         OfferingId = cover.OfferingId,
-                        CasualId = int.Parse(cover.TeacherId),
+                        CasualId = Guid.Parse(cover.TeacherId),
                         CoverId = cover.Id,
                         Action = MSTeamOperationAction.Remove,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,

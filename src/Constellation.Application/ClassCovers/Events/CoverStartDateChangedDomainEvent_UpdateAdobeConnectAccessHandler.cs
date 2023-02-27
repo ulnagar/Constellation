@@ -92,7 +92,7 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateAdobeConnectAccessH
                         var removeEarlyOperation = new CasualAdobeConnectOperation
                         {
                             ScoId = room.Key,
-                            CasualId = int.Parse(cover.TeacherId),
+                            CasualId = Guid.Parse(cover.TeacherId),
                             Action = AdobeConnectOperationAction.Remove,
                             DateScheduled = DateTime.Now,
                             CoverId = Guid.Empty
@@ -120,7 +120,7 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateAdobeConnectAccessH
                     var addTimelyOperation = new CasualAdobeConnectOperation
                     {
                         ScoId = room.Key,
-                        CasualId = int.Parse(cover.TeacherId),
+                        CasualId = Guid.Parse(cover.TeacherId),
                         Action = AdobeConnectOperationAction.Add,
                         DateScheduled = newActionDate,
                         CoverId = cover.Id

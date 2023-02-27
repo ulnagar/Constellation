@@ -31,8 +31,8 @@
 
     <div class="btn-group">
         <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
-        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Active" class="btn @active_style">All</a>
-        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Inactive" class="btn @inactive_style">All</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Active" class="btn @active_style">Active</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Inactive" class="btn @inactive_style">Inactive</a>
     </div>
 
     @if (canEditTest.Succeeded)

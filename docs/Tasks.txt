@@ -2,6 +2,9 @@
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+	!!!!DB MIGRATION WILL DELETE ALL CASUALS, COVERS, MSTEAMOPERATIONS, and ADOBECONNECTOPERATIONS!!!!
+
+
 	CLASS COVERS:
 		Refactor to use Aggregate Root functionality
 		Migrate to domain events

@@ -61,7 +61,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 TeacherOperations = await _context.MSTeamOperations.OfType<TeacherMSTeamOperation>().Include(op => op.Staff).Include(op => op.Offering)
                     .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
                     .ToListAsync(),
-                CasualOperations = await _context.MSTeamOperations.OfType<CasualMSTeamOperation>().Include(op => op.Casual).Include(op => op.Offering)
+                CasualOperations = await _context.MSTeamOperations.OfType<CasualMSTeamOperation>().Include(op => op.Offering)
                     .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
                     .ToListAsync(),
                 GroupOperations = await _context.MSTeamOperations.OfType<GroupMSTeamOperation>().Include(op => op.Offering)
@@ -96,7 +96,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 TeacherOperations = await _context.MSTeamOperations.OfType<TeacherMSTeamOperation>().Include(op => op.Staff).Include(op => op.Offering)
                     .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
                     .ToListAsync(),
-                CasualOperations = await _context.MSTeamOperations.OfType<CasualMSTeamOperation>().Include(op => op.Casual).Include(op => op.Offering)
+                CasualOperations = await _context.MSTeamOperations.OfType<CasualMSTeamOperation>().Include(op => op.Offering)
                     .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
                     .ToListAsync(),
                 GroupOperations = await _context.MSTeamOperations.OfType<GroupMSTeamOperation>().Include(op => op.Offering)
@@ -131,7 +131,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 TeacherOperations = Collection().OfType<TeacherMSTeamOperation>().Include(op => op.Staff).Include(op => op.Offering)
                     .Where(o => (o.DateScheduled > searchDate || o.IsCompleted == false) && o.IsDeleted == false)
                     .ToList(),
-                CasualOperations = Collection().OfType<CasualMSTeamOperation>().Include(op => op.Casual).Include(op => op.Offering)
+                CasualOperations = Collection().OfType<CasualMSTeamOperation>().Include(op => op.Offering)
                     .Where(o => (o.DateScheduled > searchDate || o.IsCompleted == false) && o.IsDeleted == false)
                     .ToList(),
                 GroupOperations = Collection().OfType<GroupMSTeamOperation>().Include(op => op.Offering)

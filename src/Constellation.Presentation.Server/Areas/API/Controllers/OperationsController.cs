@@ -2,6 +2,7 @@
 using Constellation.Application.Features.API.Operations.Commands;
 using Constellation.Application.Features.API.Operations.Queries;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
 using Constellation.Presentation.Server.Areas.API.Models;
 using MediatR;
@@ -17,11 +18,13 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMediator _mediator;
+        private readonly ICasualRepository _casualRepository;
 
-        public OperationsController(IUnitOfWork unitOfWork, IMediator mediator)
+        public OperationsController(IUnitOfWork unitOfWork, IMediator mediator, ICasualRepository casualRepository)
         {
             _unitOfWork = unitOfWork;
             _mediator = mediator;
+            _casualRepository = casualRepository;
         }
 
         // GET api/Operations/Due
@@ -129,11 +132,13 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
 
             foreach (var operation in operations.CasualOperations)
             {
+                var casual = await _casualRepository.GetById(operation.CasualId);
+
                 var teamOperation = new TeamsOperation
                 {
                     Id = operation.Id,
                     TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
-                    UserEmail = operation.Casual.EmailAddress
+                    UserEmail = casual.EmailAddress
                 };
 
                 switch (operation.Action)
