@@ -4,7 +4,7 @@
 <h2>Create New Cover</h2>
 
 <div class="page-menu">
-    <a asp-action="Index" asp-controller="Covers" asp-area="ShortTerm" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+    <a asp-action="Index" asp-controller="Covers" asp-area="ShortTerm" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />
@@ -16,20 +16,17 @@
         <div class="form-group row">
             <label asp-for="CoveringTeacherId" class="col-md-2">Covering Teacher</label>
             <div class="col-md-5">
-                    <select asp-for="CoveringTeacherId" asp-items="@(new SelectList(Model.CoveringTeacherSelectionList, "Id", "DisplayName", null, "Category"))" class="form-control combo custom-select">
-                        <option selected="selected" value=""> -- Please Select -- </option>
-                    </select>
-                    <span asp-validation-for="CoveringTeacherId" class="text-danger"></span>
-                }
+                <select asp-for="CoveringTeacherId" asp-items="@(new SelectList(Model.CoveringTeacherSelectionList, "Id", "DisplayName", null, "Category"))" class="form-control combo custom-select">
+                    <option selected="selected" value=""> -- Please Select -- </option>
+                </select>
+                <span asp-validation-for="CoveringTeacherId" class="text-danger"></span>
             </div>
         </div>
 
         <div class="form-group row">
-            <div class="row">
-                <label asp-for="CoveredClasses" class="col-md-12">Selected Classes</label>
-                <div class="col-offset-1 col-md-2">
-                    <button id="ShowClassSelectList">Add Classes</button>
-                </div>
+            <label asp-for="CoveredClasses" class="col-md-12">Selected Classes</label>
+            <div class="col-offset-1 col-md-2">
+                <button id="ShowClassSelectList" type="button" class="btn btn-success">Add Classes</button>
             </div>
             <div class="col-md-8" id="CoveredClassesList">
             </div>
@@ -37,7 +34,7 @@
 
         <div class="form-group row">
             <label asp-for="StartDate" class="col-md-2">Start Date</label>
-            <div class="col-md-8">
+            <div class="col-md-5">
                 <input type="date" asp-for="StartDate" class="form-control" />
                 <span asp-validation-for="StartDate" class="text-danger"></span>
             </div>
@@ -45,7 +42,7 @@
 
         <div class="form-group row">
             <label asp-for="EndDate" class="col-md-2">End Date</label>
-            <div class="col-md-8">
+            <div class="col-md-5">
                 <input type="date" asp-for="EndDate" class="form-control" />
                 <span asp-validation-for="EndDate" class="text-danger"></span>
             </div>
@@ -71,12 +68,8 @@
             <div class="modal-body">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="row">
-                            <h5>Selected Classes:</h5>
-                        </div>
-                    </div>
-                    <div class="row" id="ModalCoveredClassesList">
-
+                        <h5 class="col-md-12">Selected Classes:</h5>
+                        <div class="col-md-12" id="ModalCoveredClassesList"> </div>
                     </div>
                     @foreach (var grade in Model.ClassSelectionList.OrderBy(entry => entry.Grade).ThenBy(entry => entry.Name).GroupBy(entry => entry.Grade))
                     {
@@ -87,7 +80,7 @@
                             <div class="col">
                                 @foreach (var offering in grade)
                                 {
-                                    <span id="offeringSelect-@offering.Id" class="offering" onclick="selectClass(@offering.Id)">@offering.Name (@offering.Teacher)</span>
+                                    <button id="offeringSelect-@offering.Id" class="btn btn-outline-info class-button" onClick="toggleClass(@offering.Id)">@offering.Name (@offering.Teacher)</button>
                                 }
                             </div>
                         </div>
@@ -107,44 +100,40 @@
     <script>
         // When the button is pressed
         //  1. show the modal with the class list
-        $('#ShowClassSelectList').click(function() {
+        $('#ShowClassSelectList').on('click', function() {
             $('#ClassListModal').modal('show');
         });
 
-        // When a class div is selected
-        //  1. add it to the selected class list
-        //  2. add it to the modal selected class row
-        //  3. add it to the page selected class row
-        function selectClass(offeringId) {
+        function toggleClass(offeringId) {
             var selectDiv = $('#offeringSelect-' + offeringId);
-            selectDiv.addClass('selected');
-            selectDiv.unbind('click');
-            selectDiv.bind('click', 'unselectClass('+offeringId+')');
+            if (selectDiv.hasClass('btn-info'))
+            {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
 
-            var displayDiv = $('#offeringSelect-' + offeringId).clone().prop('id', 's-offeringSelect-' + offeringId);
-            displayDiv.appendTo('#ModalCoveredClassesList');
-            displayDiv.appendTo('#CoveredClassesList');
+                $('#pd-offeringSelect-' + offeringId).remove();
+                $('#md-offeringSelect-' + offeringId).remove();
+                $('#i-offeringSelect-' + offeringId).remove();
+            } 
+            else 
+            {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info')
 
-            var input = $('<input>').attr('id', 'p-offeringSelect-' + offeringId)
-                .attr('name', 'CovereredClasses')
-                .attr('type', "hidden");
-            input.val(offeringId);
-            var classInputDiv = $('#CoveredClassesList');
-            classInputDiv.append(input);
-        }
+                var pageDisplayDiv = $('#offeringSelect-' + offeringId).clone().prop('id', 'pd-offeringSelect-' + offeringId);
+                pageDisplayDiv.appendTo('#CoveredClassesList');
+                var modalDisplayDiv = $('#offeringSelect-' + offeringId).clone().prop('id', 'md-offeringSelect-' + offeringId);
+                modalDisplayDiv.appendTo('#ModalCoveredClassesList');
 
-        // When a class div is deselected
-        //  1. remove it from the selected class list
-        //  2. remove it from the modal selected class row
-        //  3. remove it from the page selected class row
-        function unselectClass(offeringId) {
-            var selectDiv = $('#offeringSelect-' + offeringId);
-            selectDiv.removeClass('selected');
-            selectDiv.unbind('click');
-            selectDiv.bind('click', 'selectClass('+offeringId+')');
-
-            $('#s-offeringSelect-' + offeringId).remove();
-            $('#p-offeringSelect-' + offeringId).remove();
+                var input = $('<input>').attr('id', 'i-offeringSelect-' + offeringId)
+                    .attr('name', 'CoveredClasses')
+                    .attr('type', "hidden");
+                input.val(offeringId);
+                var classInputDiv = $('#CoveredClassesList');
+                classInputDiv.append(input);
+            }
         }
     </script>
 }

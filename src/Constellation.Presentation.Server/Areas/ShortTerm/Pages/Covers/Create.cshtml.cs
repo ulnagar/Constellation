@@ -11,6 +11,7 @@ using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.CanEditCovers)]
@@ -26,8 +27,11 @@ public class CreateModel : BasePageModel
     [BindProperty]
     public string CoveringTeacherId { get; set; }
     [BindProperty]
+    [DataType(DataType.Date)]
+    [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy-MM-dd}")]
     public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     [BindProperty]
+    [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy-MM-dd}")]
     public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     [BindProperty]
     public List<int> CoveredClasses { get; set; } = new();
@@ -49,6 +53,8 @@ public class CreateModel : BasePageModel
 
     public async Task<IActionResult> OnPostCreate(CancellationToken cancellationToken)
     {
+        var pageReady = await PreparePage(cancellationToken);
+
         var teacher = CoveringTeacherSelectionList.First(entry => entry.Id == CoveringTeacherId);
 
         var teacherType = teacher.Category switch
@@ -69,8 +75,6 @@ public class CreateModel : BasePageModel
 
         if (result.IsFailure)
         {
-            var pageReady = await PreparePage(cancellationToken);
-
             if (!pageReady)
             {
                 return RedirectToPage("Index");
