@@ -1,33 +1,21 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
-using Constellation.Application.GroupTutorials;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Presentation.Server.BaseModels;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 public class IndexModel : BasePageModel
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IProcessOutboxMessagesJob _job;
-    private readonly IAuthService _authService;
-    private readonly IRollMarkingReportJob _rollMarkingJob;
-    private readonly IMediator _mediator;
+    private readonly ISentralFamilyDetailsSyncJob _parentSyncJob;
 
     public IndexModel(
         IUnitOfWork unitOfWork,
-        IProcessOutboxMessagesJob job,
-        IAuthService authService,
-        IRollMarkingReportJob rollMarkingJob,
-        IMediator mediator)
+        ISentralFamilyDetailsSyncJob parentSyncJob)
     {
         _unitOfWork = unitOfWork;
-        _job = job;
-        _authService = authService;
-        _rollMarkingJob = rollMarkingJob;
-        _mediator = mediator;
+        _parentSyncJob = parentSyncJob;
     }
 
     public async Task OnGetAsync()
@@ -35,25 +23,10 @@ public class IndexModel : BasePageModel
         await GetClasses(_unitOfWork);
     }
 
-    public async Task<IActionResult> OnPostMarkRoll()
+    public async Task<IActionResult> OnPostSyncParents()
     {
-        await _rollMarkingJob.StartJob(Guid.NewGuid(), default);
+        await _parentSyncJob.StartJob(Guid.NewGuid(), default);
 
         return Page();
     }
-
-    public async Task<IActionResult> OnPostProcessOutbox()
-    {
-        await _job.StartJob(Guid.NewGuid(), default);
-
-        return Page();
-    }
-
-    public async Task<IActionResult> OnPostAuditParents()
-    {
-        await _authService.AuditParentUsers();
-
-        return Page();
-    }
-
 }

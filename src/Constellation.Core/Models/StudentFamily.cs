@@ -17,6 +17,7 @@ namespace Constellation.Core.Models
         public Parent Parent1 { get; set; }
         public Parent Parent2 { get; set; }
         public MailingAddress Address { get; set; }
+        public string EmailAddress { get; set; }
 
         public class Parent
         {
