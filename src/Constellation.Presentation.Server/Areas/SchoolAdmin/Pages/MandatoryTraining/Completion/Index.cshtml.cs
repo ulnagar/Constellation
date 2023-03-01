@@ -40,7 +40,8 @@ public class IndexModel : BasePageModel
         if (User.HasClaim(claim => claim.Type == AuthClaimType.Permission && claim.Value == AuthPermissions.MandatoryTrainingDetailsView))
         {
             CompletionRecords = await _mediator.Send(new GetListOfCompletionRecordsQuery());
-        } else
+        }
+        else
         {
             var staffId = User.FindFirst(AuthClaimType.StaffEmployeeId).Value;
             return RedirectToPage("/MandatoryTraining/Staff/Index", new { StaffId = staffId });

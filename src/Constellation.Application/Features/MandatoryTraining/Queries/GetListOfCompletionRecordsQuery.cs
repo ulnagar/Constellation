@@ -38,6 +38,18 @@ public class GetListOfCompletionRecordsQueryHandler : IRequestHandler<GetListOfC
         {
             records = records.Where(record => record.StaffId == request.StaffId);
         }
+        else
+        {
+            // Only show entries for current staff members
+            var currentStaffIds = await _context
+                .Staff
+                .Where(member => !member.IsDeleted)
+                .Select(member => member.StaffId)
+                .ToListAsync(cancellationToken);
+
+            records = records
+                .Where(record => currentStaffIds.Contains(record.StaffId));
+        }
 
         return await records.ProjectTo<CompletionRecordDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);

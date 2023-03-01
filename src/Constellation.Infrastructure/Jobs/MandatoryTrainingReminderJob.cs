@@ -153,8 +153,8 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
         }
 
         var expiredRecipients = new Dictionary<string, string>(alertRecipients);
-        if (expiredRecipients.All(entry => entry.Key != "Marnie Etheridge"))
-            expiredRecipients.Add("Marnie Etheridge", "marnie.etheridge@det.nsw.edu.au");
+        if (expiredRecipients.All(entry => entry.Key != "Cathy Crouch"))
+            expiredRecipients.Add("Cathy Crouch", "catherine.crouch@det.nsw.edu.au");
 
         foreach (var principal in entries.First().PrincipalContacts)
         {
