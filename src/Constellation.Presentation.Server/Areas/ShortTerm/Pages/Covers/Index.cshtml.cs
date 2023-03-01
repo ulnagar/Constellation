@@ -47,7 +47,7 @@ public class IndexModel : BasePageModel
         }
     }
 
-    public async Task<IActionResult> OnPostCancel(Guid Id, CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetCancel(Guid Id, CancellationToken cancellationToken)
     {
         var authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditCovers);
 

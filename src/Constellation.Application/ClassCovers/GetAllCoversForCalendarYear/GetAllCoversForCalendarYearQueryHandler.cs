@@ -105,8 +105,8 @@ internal sealed class GetAllCoversForCalendarYearQueryHandler
                 cover.TeacherType,
                 cover.StartDate,
                 cover.EndDate,
-                (cover.StartDate <= DateOnly.FromDateTime(DateTime.Today) && cover.EndDate >= DateOnly.FromDateTime(DateTime.Today)),
-                (cover.StartDate > DateOnly.FromDateTime(DateTime.Today)));
+                !cover.IsDeleted && (cover.StartDate <= DateOnly.FromDateTime(DateTime.Today) && cover.EndDate >= DateOnly.FromDateTime(DateTime.Today)),
+                !cover.IsDeleted && (cover.StartDate > DateOnly.FromDateTime(DateTime.Today)));
 
             returnData.Add(entry);
         }

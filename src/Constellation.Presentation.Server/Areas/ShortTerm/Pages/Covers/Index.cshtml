@@ -94,7 +94,7 @@
                 <td>@Html.DisplayFor(model => item.StartDate, "DateOnly")</td>
                 <td>@Html.DisplayFor(model => item.EndDate, "DateOnly")</td>
                 <td>
-                    @if (canEditTest.Succeeded)
+                    @if (canEditTest.Succeeded && (item.IsCurrent || item.IsFuture))
                     {
                         <div class="btn-group" role="group">
                             <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>

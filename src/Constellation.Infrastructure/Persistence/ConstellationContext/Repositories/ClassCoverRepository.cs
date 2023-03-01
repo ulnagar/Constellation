@@ -51,7 +51,7 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
 
         return await _context
             .Set<ClassCover>()
-            .Where(cover => ((cover.StartDate >= thisYear && cover.StartDate <= nextYear ) || (cover.EndDate >= thisYear && cover.EndDate <= nextYear)) && !cover.IsDeleted)
+            .Where(cover => ((cover.StartDate >= thisYear && cover.StartDate <= nextYear ) || (cover.EndDate >= thisYear && cover.EndDate <= nextYear)))
             .ToListAsync(cancellationToken);
     }
 

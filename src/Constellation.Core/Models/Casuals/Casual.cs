@@ -58,6 +58,13 @@ public sealed class Casual : AggregateRoot, IAuditableEntity
         IsDeleted = true;
     }
 
+    public void Restore()
+    {
+        IsDeleted = false;
+        DeletedBy = null;
+        DeletedAt = DateTime.MinValue;
+    }
+
     public void Update(
         Name name,
         string adobeConnectId,

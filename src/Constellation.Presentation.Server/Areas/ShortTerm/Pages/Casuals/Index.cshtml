@@ -66,7 +66,14 @@
                             <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
                             <div class="dropdown-menu">
                                 <a asp-page="Upsert" asp-route-id="@item.Id" class="dropdown-item">Edit</a>
-                                <a asp-page-handler="Delete" asp-route-id="@item.Id" class="dropdown-item">Delete</a>
+                                @if(item.IsActive)
+                                {
+                                    <a asp-page-handler="Delete" asp-route-id="@item.Id" class="dropdown-item">Delete</a>
+                                }
+                                else
+                                {
+                                    <a asp-page-handler="Restore" asp-route-id="@item.Id" class="dropdown-item">Restore</a>
+                                }
                             </div>
                         </div>
                     }
