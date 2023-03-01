@@ -1,40 +1,34 @@
-﻿using Constellation.Application.Features.Partners.SchoolContacts.Commands;
-using Constellation.Application.Interfaces.Repositories;
-using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
+﻿namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Commands;
 
-namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Commands
+using Constellation.Application.Features.Partners.SchoolContacts.Commands;
+
+public class CreateNewSchoolContactWithRoleCommandHandler : IRequestHandler<CreateNewSchoolContactWithRoleCommand>
 {
-    public class CreateNewSchoolContactWithRoleCommandHandler : IRequestHandler<CreateNewSchoolContactWithRoleCommand>
+    private readonly IMediator _mediator;
+
+    public CreateNewSchoolContactWithRoleCommandHandler(IMediator mediator)
     {
-        private readonly IAppDbContext _context;
-        private readonly IMediator _mediator;
+        _mediator = mediator;
+    }
 
-        public CreateNewSchoolContactWithRoleCommandHandler(IAppDbContext context, IMediator mediator)
+    public async Task<Unit> Handle(CreateNewSchoolContactWithRoleCommand request, CancellationToken cancellationToken)
+    {
+        var contactId = await _mediator.Send(new CreateNewSchoolContactCommand
         {
-            _context = context;
-            _mediator = mediator;
-        }
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            PhoneNumber = request.PhoneNumber,
+            EmailAddress = request.EmailAddress,
+            SelfRegistered = request.SelfRegistered
+        }, cancellationToken);
 
-        public async Task<Unit> Handle(CreateNewSchoolContactWithRoleCommand request, CancellationToken cancellationToken)
+        await _mediator.Send(new CreateNewAssignmentForSchoolContactCommand
         {
-            var contactId = await _mediator.Send(new CreateNewSchoolContactCommand
-            {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                PhoneNumber = request.PhoneNumber,
-                EmailAddress = request.EmailAddress
-            }, cancellationToken);
+            ContactId = contactId,
+            SchoolCode = request.SchoolCode,
+            Position = request.Position
+        }, cancellationToken);
 
-            await _mediator.Send(new CreateNewAssignmentForSchoolContactCommand
-            {
-                ContactId = contactId,
-                SchoolCode = request.SchoolCode,
-                Position = request.Position
-            }, cancellationToken);
-
-            return Unit.Value;
-        }
+        return Unit.Value;
     }
 }

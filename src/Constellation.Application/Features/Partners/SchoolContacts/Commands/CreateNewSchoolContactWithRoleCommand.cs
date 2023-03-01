@@ -11,6 +11,7 @@ namespace Constellation.Application.Features.Partners.SchoolContacts.Commands
         public string EmailAddress { get; set; }
         public string Position { get; set; }
         public string SchoolCode { get; set; }
+        public bool SelfRegistered { get; set; }
     }
 
     public class CreateNewSchoolContactWithRoleCommandValidator : AbstractValidator<CreateNewSchoolContactWithRoleCommand>

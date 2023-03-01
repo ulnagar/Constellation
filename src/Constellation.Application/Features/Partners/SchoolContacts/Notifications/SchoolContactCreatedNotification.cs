@@ -5,5 +5,6 @@ namespace Constellation.Application.Features.Partners.SchoolContacts.Notificatio
     public class SchoolContactCreatedNotification : INotification
     {
         public int Id { get; set; }
+        public bool SelfRegistered { get; set; }
     }
 }

@@ -48,6 +48,8 @@ public class ContactsController : BaseAPIController
 
         _logger.Information("Requested to create new School Contact by {user} with details {@details}", user.DisplayName, Command);
 
+        Command.SelfRegistered = true;
+
         await _mediator.Send(Command);
     }
 }
