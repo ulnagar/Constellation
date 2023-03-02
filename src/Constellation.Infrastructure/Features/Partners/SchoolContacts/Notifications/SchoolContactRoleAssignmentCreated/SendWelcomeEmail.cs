@@ -55,7 +55,7 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifica
 
                 var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Contacts/NewACCoordinatorEmail.cshtml", viewModel);
 
-                await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
+                await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
             }
 
             if (assignment.Role == SchoolContactRole.SciencePrac)
@@ -77,7 +77,7 @@ namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Notifica
 
                 var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Contacts/NewSciencePracTeacherEmail.cshtml", viewModel);
 
-                await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
+                await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
             }
         }
     }

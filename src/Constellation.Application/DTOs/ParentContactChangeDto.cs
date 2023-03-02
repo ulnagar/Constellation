@@ -4,5 +4,7 @@ public sealed record ParentContactChangeDto(
     string Name,
     string OldEmail,
     string NewEmail,
-    string StudentName,
+    string StudentFirstName,
+    string StudentLastName,
+    string StudentGrade,
     string Issue);
