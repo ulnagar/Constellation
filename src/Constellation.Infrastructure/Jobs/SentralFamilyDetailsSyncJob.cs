@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Constellation.Application.Extensions;
 using Constellation.Application.Features.Auth.Command;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
@@ -112,7 +113,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                         "Family Email",
                         string.Empty,
                         string.Empty,
-                        entry.Students.First().DisplayName,
+                        (entry.Students.FirstOrDefault() is not null) ? $"{entry.Students.First().DisplayName} ({entry.Students.First().CurrentGrade.AsName()})" : string.Empty,
                         "No Email Supplied"));
                 } 
                 else
@@ -123,7 +124,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                         "Family Email",
                         string.Empty,
                         family.FamilyEmail,
-                        entry.Students.First().DisplayName,
+                        (entry.Students.FirstOrDefault() is not null) ? $"{entry.Students.First().DisplayName} ({entry.Students.First().CurrentGrade.AsName()})" : string.Empty,
                         "Family Email Changed"));
                 }
 
@@ -131,14 +132,14 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                     $"{entry.Parent1.FirstName.Trim()} {entry.Parent1.LastName.Trim()}",
                     string.Empty,
                     entry.Parent1.EmailAddress,
-                    entry.Students.First().DisplayName, 
+                    (entry.Students.FirstOrDefault() is not null) ? $"{entry.Students.First().DisplayName} ({entry.Students.First().CurrentGrade.AsName()})" : string.Empty, 
                     "New Parent Added"));
 
                 changeLog.Add(new ParentContactChangeDto(
                     $"{entry.Parent2.FirstName.Trim()} {entry.Parent2.LastName.Trim()}",
                     string.Empty,
                     entry.Parent2.EmailAddress,
-                    entry.Students.First().DisplayName,
+                    (entry.Students.FirstOrDefault() is not null) ? $"{entry.Students.First().DisplayName} ({entry.Students.First().CurrentGrade.AsName()})" : string.Empty,
                     "New Parent Added"));
 
                 _context.Add(entry);
@@ -186,7 +187,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                         $"{entry.Parent1.FirstName.Trim()} {entry.Parent1.LastName.Trim()}",
                         entry.Parent1.EmailAddress,
                         family.FatherEmail,
-                        entry.Students.First().DisplayName,
+                        (entry.Students.FirstOrDefault() is not null) ? $"{entry.Students.First().DisplayName} ({entry.Students.First().CurrentGrade.AsName()})" : string.Empty,
                         "Parent Email Changed"));
 
                     entry.Parent1.EmailAddress = family.FatherEmail;
@@ -200,7 +201,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                         $"{entry.Parent1.FirstName.Trim()} {entry.Parent1.LastName.Trim()}",
                         string.Empty,
                         string.Empty,
-                        entry.Students.First().DisplayName,
+                        (entry.Students.FirstOrDefault() is not null) ? $"{entry.Students.First().DisplayName} ({entry.Students.First().CurrentGrade.AsName()})" : string.Empty,
                         "Parent Email Missing"));
                     }
                     else
@@ -209,7 +210,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                         $"{entry.Parent1.FirstName.Trim()} {entry.Parent1.LastName.Trim()}",
                         entry.Parent1.EmailAddress,
                         string.Empty,
-                        entry.Students.First().DisplayName,
+                        (entry.Students.FirstOrDefault() is not null) ? $"{entry.Students.First().DisplayName} ({entry.Students.First().CurrentGrade.AsName()})" : string.Empty,
                         "Parent Email Removed"));
                     }
                 }
@@ -257,7 +258,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                         $"{entry.Parent2.FirstName.Trim()} {entry.Parent2.LastName.Trim()}",
                         entry.Parent2.EmailAddress,
                         family.MotherEmail,
-                        entry.Students.First().DisplayName,
+                        (entry.Students.FirstOrDefault() is not null) ? $"{entry.Students.First().DisplayName} ({entry.Students.First().CurrentGrade.AsName()})" : string.Empty,
                         "Parent Email Changed"));
 
                     entry.Parent2.EmailAddress = family.MotherEmail;
@@ -271,7 +272,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                         $"{entry.Parent2.FirstName.Trim()} {entry.Parent2.LastName.Trim()}",
                         string.Empty,
                         string.Empty,
-                        entry.Students.First().DisplayName,
+                        (entry.Students.FirstOrDefault() is not null) ? $"{entry.Students.First().DisplayName} ({entry.Students.First().CurrentGrade.AsName()})" : string.Empty,
                         "Parent Email Missing"));
                     }
                     else
@@ -280,7 +281,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                         $"{entry.Parent2.FirstName.Trim()} {entry.Parent2.LastName.Trim()}",
                         entry.Parent2.EmailAddress,
                         string.Empty,
-                        entry.Students.First().DisplayName,
+                        (entry.Students.FirstOrDefault() is not null) ? $"{entry.Students.First().DisplayName} ({entry.Students.First().CurrentGrade.AsName()})" : string.Empty,
                         "Parent Email Removed"));
                     }
                 }
@@ -331,7 +332,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                         "Family Email",
                         string.Empty,
                         string.Empty,
-                        entry.Students.First().DisplayName,
+                        (entry.Students.FirstOrDefault() is not null) ? $"{entry.Students.First().DisplayName} ({entry.Students.First().CurrentGrade.AsName()})" : string.Empty,
                         "Family Email Missing"));
                 }
 
@@ -345,7 +346,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                             "Family Email",
                             string.Empty,
                             family.FamilyEmail,
-                            entry.Students.First().DisplayName,
+                            (entry.Students.FirstOrDefault() is not null) ? $"{entry.Students.First().DisplayName} ({entry.Students.First().CurrentGrade.AsName()})" : string.Empty,
                             "Family Email Added"));
                     }
 
@@ -355,7 +356,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                             "Family Email",
                             entry.EmailAddress,
                             family.FamilyEmail,
-                            entry.Students.First().DisplayName,
+                            (entry.Students.FirstOrDefault() is not null) ? $"{entry.Students.First().DisplayName} ({entry.Students.First().CurrentGrade.AsName()})" : string.Empty,
                             "Family Email Changed"));
                     }
 
@@ -365,7 +366,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                             "Family Email",
                             entry.EmailAddress,
                             string.Empty,
-                            entry.Students.First().DisplayName,
+                            (entry.Students.FirstOrDefault() is not null) ? $"{entry.Students.First().DisplayName} ({entry.Students.First().CurrentGrade.AsName()})" : string.Empty,
                             "Family Email Removed"));
                     }
 
@@ -377,7 +378,12 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                     if (entry.Students.All(student => student.StudentId != studentId))
                     {
                         // Student is not currently linked
-                        var student = await _context.Students.FirstOrDefaultAsync(student => student.StudentId == studentId, token);
+                        var student = await _context
+                            .Students
+                            .FirstOrDefaultAsync(student => 
+                                student.StudentId == studentId,
+                                token);
+
                         if (student != null)
                         {
                             _logger.Information("{id}: Adding student {name} to family {family} ({code})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
@@ -405,22 +411,41 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
             // Create app users for each parents
             if (!string.IsNullOrWhiteSpace(entry.Parent1.EmailAddress) && !string.IsNullOrWhiteSpace(entry.Parent1.FirstName))
             {
-                await _mediator.Send(new RegisterParentContactAsUserCommand { FirstName = entry.Parent1.FirstName, LastName = entry.Parent1.LastName, EmailAddress = entry.Parent1.EmailAddress });
+                await _mediator.Send(
+                    new RegisterParentContactAsUserCommand
+                    {
+                        FirstName = entry.Parent1.FirstName,
+                        LastName = entry.Parent1.LastName,
+                        EmailAddress = entry.Parent1.EmailAddress
+                    },
+                    token);
             }
 
             if (!string.IsNullOrWhiteSpace(entry.Parent2.EmailAddress) && !string.IsNullOrWhiteSpace(entry.Parent2.FirstName))
             {
-                await _mediator.Send(new RegisterParentContactAsUserCommand { FirstName = entry.Parent2.FirstName, LastName = entry.Parent2.LastName, EmailAddress = entry.Parent2.EmailAddress });
+                await _mediator.Send(
+                    new RegisterParentContactAsUserCommand
+                    {
+                        FirstName = entry.Parent2.FirstName,
+                        LastName = entry.Parent2.LastName,
+                        EmailAddress = entry.Parent2.EmailAddress
+                    },
+                    token);
             }
 
             // Remove app users for old and replaced email addresses
             foreach (var email in replacedEmails)
             {
                 if (email != entry.Parent1.EmailAddress && email != entry.Parent2.EmailAddress)
-                    await _mediator.Send(new RemoveOldParentEmailAddressFromUserCommand { Email = email });
+                    await _mediator.Send(
+                        new RemoveOldParentEmailAddressFromUserCommand { 
+                            Email = email 
+                        },
+                        token);
             }
         }
 
-        await _mediator.Send(new SendFamilyContactChangesReportCommand(changeLog), token);
+        if (changeLog.Count > 0)
+            await _mediator.Send(new SendFamilyContactChangesReportCommand(changeLog), token);
     }
 }

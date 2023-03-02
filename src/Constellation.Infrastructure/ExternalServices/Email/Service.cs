@@ -385,7 +385,7 @@ public class Service : IEmailService, IScopedService
         MemoryStream report,
         CancellationToken cancellationToken = default)
     {
-        var viewModel = $"<p>Attached is the Parent Contact Change Report</p>";
+        var viewModel = $"<p>Parent Contact Change Report for {DateTime.Today.ToLongDateString()} is attached.</p>";
 
         var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 

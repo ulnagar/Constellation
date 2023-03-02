@@ -529,7 +529,8 @@ public class ExcelService : IExcelService, IScopedService
 
         workSheet.Cells[4, 1].LoadFromCollection(changes, true);
 
-        workSheet.View.FreezePanes(4, 1);
+        workSheet.View.FreezePanes(5, 1);
+        workSheet.Cells[4, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFilter = true;
         workSheet.Cells[5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
         var memoryStream = new MemoryStream();
