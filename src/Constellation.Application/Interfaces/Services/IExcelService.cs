@@ -2,8 +2,10 @@
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Infrastructure.Jobs;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Services
@@ -17,5 +19,6 @@ namespace Constellation.Application.Interfaces.Services
         Task<MemoryStream> CreateTrainingModuleStaffReportFile(StaffCompletionListDto data);
         List<TrainingModule> ImportMandatoryTrainingDataFromFile(MemoryStream excelFile);
         Task<MemoryStream> CreateGroupTutorialAttendanceFile(TutorialDetailsDto data);
+        Task<MemoryStream> CreateFamilyContactDetailsChangeReport(List<ParentContactChangeDto> changes, CancellationToken cancellationToken = default);
     }
 }

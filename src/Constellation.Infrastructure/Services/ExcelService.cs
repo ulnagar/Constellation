@@ -7,6 +7,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Infrastructure.DependencyInjection;
+using Constellation.Infrastructure.Jobs;
 using OfficeOpenXml;
 using System.Data;
 using System.Drawing;
@@ -508,6 +509,32 @@ public class ExcelService : IExcelService, IScopedService
 
         var memoryStream = new MemoryStream();
         await excel.SaveAsAsync(memoryStream);
+        memoryStream.Position = 0;
+
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateFamilyContactDetailsChangeReport(List<ParentContactChangeDto> changes, CancellationToken cancellationToken = default)
+    {
+        var excel = new ExcelPackage();
+        var workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
+
+        var nameDetail = workSheet.Cells[1, 1].RichText.Add("Parent Contact Details Changed");
+        nameDetail.Bold = true;
+        nameDetail.Size = 16;
+
+        var dateDetail = workSheet.Cells[2, 1].RichText.Add($"Report generated on {DateTime.Today.ToLongDateString()}");
+        dateDetail.Bold = true;
+        dateDetail.Size = 16;
+
+        workSheet.Cells[4, 1].LoadFromCollection(changes, true);
+
+        workSheet.View.FreezePanes(4, 1);
+        workSheet.Cells[5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
+
+        var memoryStream = new MemoryStream();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        
         memoryStream.Position = 0;
 
         return memoryStream;

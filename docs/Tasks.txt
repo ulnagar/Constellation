@@ -4,6 +4,9 @@ CURRENT TASK
 
 	!!!!DB MIGRATION WILL DELETE ALL CASUALS, COVERS, MSTEAMOPERATIONS, and ADOBECONNECTOPERATIONS!!!!
 
+	SENTRALFAMILYDETAILSSYNCJOB:
+		Finalise email for change report
+
 	CLASS COVERS:
 		*Refactor to use Aggregate Root functionality
 		*Migrate to domain events

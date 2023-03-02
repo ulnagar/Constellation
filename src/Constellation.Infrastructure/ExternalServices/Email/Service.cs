@@ -17,6 +17,7 @@ using Constellation.Infrastructure.Templates.Views.Emails.MandatoryTraining;
 using Constellation.Infrastructure.Templates.Views.Emails.MissedWork;
 using Constellation.Infrastructure.Templates.Views.Emails.RollMarking;
 using System.Net.Mail;
+using System.Net.Mime;
 
 public class Service : IEmailService, IScopedService
 {
@@ -378,6 +379,28 @@ public class Service : IEmailService, IScopedService
         };
 
         await _emailSender.Send(toRecipients, null, "[Aurora College] Constellation Data Issue Identified", body);
+    }
+
+    public async Task SendParentContactChangeReportEmail(
+        MemoryStream report,
+        CancellationToken cancellationToken = default)
+    {
+        var viewModel = $"<p>Attached is the Parent Contact Change Report</p>";
+
+        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+
+        var toRecipients = new Dictionary<string, string>
+        {
+            { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" },
+            { "Aurora College", "auroracoll-h.school@det.nsw.edu.au" }
+        };
+
+        var attachments = new List<Attachment>
+        {
+            new Attachment(report, "Change Report.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        };
+
+        await _emailSender.Send(toRecipients, null, $"[Aurora College] Parent Contact Change Report - {DateTime.Today.ToLongDateString()}", body, attachments);
     }
 
     public async Task SendAdminLowCreditAlert(double credit)
@@ -851,6 +874,8 @@ public class Service : IEmailService, IScopedService
 
         await _emailSender.Send(toRecipients, settings.LessonsCoordinatorEmail, viewModel.Title, body);
     }
+
+
 
     public async Task SendServiceLogEmail(ServiceLogEmail notification)
     {

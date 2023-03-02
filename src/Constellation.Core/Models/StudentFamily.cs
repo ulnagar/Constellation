@@ -4,19 +4,11 @@ namespace Constellation.Core.Models
 {
     public class StudentFamily
     {
-        public StudentFamily()
-        {
-            Students = new List<Student>();
-            Parent1 = new Parent();
-            Parent2 = new Parent();
-            Address = new MailingAddress();
-        }
-
         public string Id { get; set; }
-        public ICollection<Student> Students { get; set; }
-        public Parent Parent1 { get; set; }
-        public Parent Parent2 { get; set; }
-        public MailingAddress Address { get; set; }
+        public List<Student> Students { get; set; } = new();
+        public Parent Parent1 { get; set; } = new();
+        public Parent Parent2 { get; set; } = new();
+        public MailingAddress Address { get; set; } = new();
         public string EmailAddress { get; set; }
 
         public class Parent

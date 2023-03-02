@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
 using Constellation.Application.Features.Auth.Command;
-using Constellation.Application.Features.Jobs.SentralFamilyDetailsSync.Notifications;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Students.SendFamilyContactChangesReport;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using MediatR;
@@ -15,7 +15,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScopedService, IHangfireJob
+public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScopedService, IHangfireJob
 {
     private readonly IAppDbContext _context;
     private readonly ILogger _logger;
@@ -31,19 +31,11 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
         _mediator = mediator;
     }
 
-    public class ParentContactChange
-    {
-        public string Name { get; set; }
-        public string OldEmail { get; set; }
-        public string NewEmail { get; set; }
-        public string StudentName { get; set; }
-    }
-
     public async Task StartJob(Guid jobId, CancellationToken token)
     {
         _logger.Information("{id}: Starting Sentral Family Details Scan.", jobId);
 
-        var changeLog = new List<ParentContactChange>();
+        var changeLog = new List<ParentContactChangeDto>();
 
         // Get the CSV file from Sentral
         // Convert to temporary objects
@@ -116,37 +108,38 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
                 // Check if email is blank and alert admin
                 if (string.IsNullOrEmpty(family.FamilyEmail))
                 {
-                    changeLog.Add(new ParentContactChange
-                    {
-                        Name = $"{family.AddressName} (Family Email)",
-                        StudentName = entry.Students.First().DisplayName
-                    });
+                    changeLog.Add(new ParentContactChangeDto(
+                        "Family Email",
+                        string.Empty,
+                        string.Empty,
+                        entry.Students.First().DisplayName,
+                        "No Email Supplied"));
                 } 
                 else
                 {
                     entry.EmailAddress = family.FamilyEmail;
 
-                    changeLog.Add(new ParentContactChange
-                    {
-                        Name = $"{family.AddressName} (Family Email)",
-                        NewEmail = family.FamilyEmail,
-                        StudentName = entry.Students.First().DisplayName
-                    });
+                    changeLog.Add(new ParentContactChangeDto(
+                        "Family Email",
+                        string.Empty,
+                        family.FamilyEmail,
+                        entry.Students.First().DisplayName,
+                        "Family Email Changed"));
                 }
 
-                changeLog.Add(new ParentContactChange
-                {
-                    Name = $"{entry.Parent1.FirstName.Trim()} {entry.Parent1.LastName.Trim()}",
-                    NewEmail = entry.Parent1.EmailAddress,
-                    StudentName = entry.Students.First().DisplayName
-                });
+                changeLog.Add(new ParentContactChangeDto(
+                    $"{entry.Parent1.FirstName.Trim()} {entry.Parent1.LastName.Trim()}",
+                    string.Empty,
+                    entry.Parent1.EmailAddress,
+                    entry.Students.First().DisplayName, 
+                    "New Parent Added"));
 
-                changeLog.Add(new ParentContactChange
-                {
-                    Name = $"{entry.Parent2.FirstName.Trim()} {entry.Parent2.LastName.Trim()}",
-                    NewEmail = entry.Parent2.EmailAddress,
-                    StudentName = entry.Students.First().DisplayName
-                });
+                changeLog.Add(new ParentContactChangeDto(
+                    $"{entry.Parent2.FirstName.Trim()} {entry.Parent2.LastName.Trim()}",
+                    string.Empty,
+                    entry.Parent2.EmailAddress,
+                    entry.Students.First().DisplayName,
+                    "New Parent Added"));
 
                 _context.Add(entry);
 
@@ -189,26 +182,36 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
 
                     replacedEmails.Add(entry.Parent1.EmailAddress);
 
-                    changeLog.Add(new ParentContactChange
-                    {
-                        Name = $"{entry.Parent1.FirstName.Trim()} {entry.Parent1.LastName.Trim()}",
-                        OldEmail = entry.Parent1.EmailAddress,
-                        NewEmail = family.FatherEmail,
-                        StudentName = entry.Students.First().DisplayName
-                    });
+                    changeLog.Add(new ParentContactChangeDto(
+                        $"{entry.Parent1.FirstName.Trim()} {entry.Parent1.LastName.Trim()}",
+                        entry.Parent1.EmailAddress,
+                        family.FatherEmail,
+                        entry.Students.First().DisplayName,
+                        "Parent Email Changed"));
 
                     entry.Parent1.EmailAddress = family.FatherEmail;
                 }
 
                 if (string.IsNullOrWhiteSpace(family.FatherEmail) && !string.IsNullOrWhiteSpace(family.FatherFirstName))
                 {
-                    changeLog.Add(new ParentContactChange
+                    if (string.IsNullOrWhiteSpace(entry.Parent1.EmailAddress))
                     {
-                        Name = $"{entry.Parent1.FirstName.Trim()} {entry.Parent1.LastName.Trim()}",
-                        OldEmail = entry.Parent1.EmailAddress,
-                        NewEmail = string.Empty,
-                        StudentName = entry.Students.First().DisplayName
-                    });
+                        changeLog.Add(new ParentContactChangeDto(
+                        $"{entry.Parent1.FirstName.Trim()} {entry.Parent1.LastName.Trim()}",
+                        string.Empty,
+                        string.Empty,
+                        entry.Students.First().DisplayName,
+                        "Parent Email Missing"));
+                    }
+                    else
+                    {
+                        changeLog.Add(new ParentContactChangeDto(
+                        $"{entry.Parent1.FirstName.Trim()} {entry.Parent1.LastName.Trim()}",
+                        entry.Parent1.EmailAddress,
+                        string.Empty,
+                        entry.Students.First().DisplayName,
+                        "Parent Email Removed"));
+                    }
                 }
 
                 if (string.IsNullOrEmpty(entry.Parent1.FirstName))
@@ -250,26 +253,36 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
 
                     replacedEmails.Add(entry.Parent2.EmailAddress);
 
-                    changeLog.Add(new ParentContactChange
-                    {
-                        Name = $"{entry.Parent2.FirstName.Trim()} {entry.Parent2.LastName.Trim()}",
-                        OldEmail = entry.Parent2.EmailAddress,
-                        NewEmail = family.MotherEmail,
-                        StudentName = entry.Students.First().DisplayName
-                    });
+                    changeLog.Add(new ParentContactChangeDto(
+                        $"{entry.Parent2.FirstName.Trim()} {entry.Parent2.LastName.Trim()}",
+                        entry.Parent2.EmailAddress,
+                        family.MotherEmail,
+                        entry.Students.First().DisplayName,
+                        "Parent Email Changed"));
 
                     entry.Parent2.EmailAddress = family.MotherEmail;
                 }
 
                 if (string.IsNullOrWhiteSpace(family.MotherEmail) && !string.IsNullOrWhiteSpace(family.MotherFirstName))
                 {
-                    changeLog.Add(new ParentContactChange
+                    if (string.IsNullOrWhiteSpace(entry.Parent2.EmailAddress))
                     {
-                        Name = $"{entry.Parent2.FirstName.Trim()} {entry.Parent2.LastName.Trim()}",
-                        OldEmail = entry.Parent2.EmailAddress,
-                        NewEmail = string.Empty,
-                        StudentName = entry.Students.First().DisplayName
-                    });
+                        changeLog.Add(new ParentContactChangeDto(
+                        $"{entry.Parent2.FirstName.Trim()} {entry.Parent2.LastName.Trim()}",
+                        string.Empty,
+                        string.Empty,
+                        entry.Students.First().DisplayName,
+                        "Parent Email Missing"));
+                    }
+                    else
+                    {
+                        changeLog.Add(new ParentContactChangeDto(
+                        $"{entry.Parent2.FirstName.Trim()} {entry.Parent2.LastName.Trim()}",
+                        entry.Parent2.EmailAddress,
+                        string.Empty,
+                        entry.Students.First().DisplayName,
+                        "Parent Email Removed"));
+                    }
                 }
 
                 if (string.IsNullOrEmpty(entry.Parent2.FirstName))
@@ -312,17 +325,49 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
                     entry.Address.PostCode = family.AddressPostCode;
                 }
 
+                if (string.IsNullOrWhiteSpace(entry.EmailAddress) && string.IsNullOrWhiteSpace(family.FamilyEmail))
+                {
+                    changeLog.Add(new ParentContactChangeDto(
+                        "Family Email",
+                        string.Empty,
+                        string.Empty,
+                        entry.Students.First().DisplayName,
+                        "Family Email Missing"));
+                }
+
                 if (entry.EmailAddress != family.FamilyEmail)
                 {
                     _logger.Information("{id}: {family} ({code}): Updated Family Email Address from {old} to {new}", jobId, family.AddressName, family.FamilyId, entry.EmailAddress, family.FamilyEmail);
 
-                    changeLog.Add(new ParentContactChange
+                    if (string.IsNullOrWhiteSpace(entry.EmailAddress) && !string.IsNullOrWhiteSpace(family.FamilyEmail))
                     {
-                        Name = $"{family.AddressName} (Family Email)",
-                        NewEmail = family.FamilyEmail,
-                        OldEmail = entry.EmailAddress,
-                        StudentName = entry.Students.First().DisplayName
-                    });
+                        changeLog.Add(new ParentContactChangeDto(
+                            "Family Email",
+                            string.Empty,
+                            family.FamilyEmail,
+                            entry.Students.First().DisplayName,
+                            "Family Email Added"));
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(entry.EmailAddress) && !string.IsNullOrWhiteSpace(family.FamilyEmail))
+                    {
+                        changeLog.Add(new ParentContactChangeDto(
+                            "Family Email",
+                            entry.EmailAddress,
+                            family.FamilyEmail,
+                            entry.Students.First().DisplayName,
+                            "Family Email Changed"));
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(entry.EmailAddress) && string.IsNullOrWhiteSpace(family.FamilyEmail))
+                    {
+                        changeLog.Add(new ParentContactChangeDto(
+                            "Family Email",
+                            entry.EmailAddress,
+                            string.Empty,
+                            entry.Students.First().DisplayName,
+                            "Family Email Removed"));
+                    }
 
                     entry.EmailAddress = family.FamilyEmail;
                 }
@@ -355,29 +400,27 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IScoped
                 }
             }
 
-            //await _context.SaveChangesAsync(token);
+            await _context.SaveChangesAsync(token);
 
             // Create app users for each parents
             if (!string.IsNullOrWhiteSpace(entry.Parent1.EmailAddress) && !string.IsNullOrWhiteSpace(entry.Parent1.FirstName))
             {
-                //await _mediator.Send(new RegisterParentContactAsUserCommand { FirstName = entry.Parent1.FirstName, LastName = entry.Parent1.LastName, EmailAddress = entry.Parent1.EmailAddress });
+                await _mediator.Send(new RegisterParentContactAsUserCommand { FirstName = entry.Parent1.FirstName, LastName = entry.Parent1.LastName, EmailAddress = entry.Parent1.EmailAddress });
             }
 
             if (!string.IsNullOrWhiteSpace(entry.Parent2.EmailAddress) && !string.IsNullOrWhiteSpace(entry.Parent2.FirstName))
             {
-                //await _mediator.Send(new RegisterParentContactAsUserCommand { FirstName = entry.Parent2.FirstName, LastName = entry.Parent2.LastName, EmailAddress = entry.Parent2.EmailAddress });
+                await _mediator.Send(new RegisterParentContactAsUserCommand { FirstName = entry.Parent2.FirstName, LastName = entry.Parent2.LastName, EmailAddress = entry.Parent2.EmailAddress });
             }
 
             // Remove app users for old and replaced email addresses
             foreach (var email in replacedEmails)
             {
-                //if (email != entry.Parent1.EmailAddress && email != entry.Parent2.EmailAddress)
-                    //await _mediator.Send(new RemoveOldParentEmailAddressFromUserCommand { Email = email });
+                if (email != entry.Parent1.EmailAddress && email != entry.Parent2.EmailAddress)
+                    await _mediator.Send(new RemoveOldParentEmailAddressFromUserCommand { Email = email });
             }
         }
 
-        var changes = changeLog.Count;
-
-        //TODO: Do something with the changelog. Send it via email as an xlsx.
+        await _mediator.Send(new SendFamilyContactChangesReportCommand(changeLog), token);
     }
 }

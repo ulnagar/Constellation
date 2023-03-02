@@ -5,6 +5,7 @@ using Constellation.Core.Models.Covers;
 using Constellation.Core.ValueObjects;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,6 +50,7 @@ namespace Constellation.Application.Interfaces.Services
         Task SendUpdatedCoverEmail(EmailDtos.CoverEmail resource);
 
         // Service Emails
+        Task SendParentContactChangeReportEmail(MemoryStream report, CancellationToken cancellationToken = default);
         Task SendServiceLogEmail(ServiceLogEmail notification);
         Task SendAdminAbsenceContactAlert(string studentName);
         Task SendAdminAbsenceSentralAlert(string studentName);
