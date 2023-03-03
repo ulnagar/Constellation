@@ -4,8 +4,10 @@ using Constellation.Application.Features.Attendance.Notifications;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,6 +33,18 @@ public class ProvideParentWholeAbsenceExplanationCommandHandler : IRequestHandle
 
     public async Task<Unit> Handle(ProvideParentWholeAbsenceExplanationCommand request, CancellationToken cancellationToken)
     {
+        var authorised = await _context.Students
+            .Where(student =>
+                student.Family.EmailAddress == request.ParentEmail ||
+                student.Family.Parent1.EmailAddress == request.ParentEmail ||
+                student.Family.Parent2.EmailAddress == request.ParentEmail)
+            .Where(student =>
+                student.Absences.Any(absence => absence.Id == request.AbsenceId))
+            .AnyAsync(cancellationToken);
+
+        if (!authorised)
+            return Unit.Value;
+        
         var absence = await _context.Absences.FindAsync(request.AbsenceId);
 
         if (absence == null)

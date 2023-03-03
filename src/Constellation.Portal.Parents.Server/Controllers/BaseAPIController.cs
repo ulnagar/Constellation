@@ -3,6 +3,8 @@
 namespace Constellation.Portal.Parents.Server.Controllers;
 
 using Constellation.Application.Models.Identity;
+using Constellation.Application.Parents.GetParentWithStudentIds;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -30,5 +32,26 @@ public class BaseAPIController : ControllerBase
         }
 
         return null;
+    }
+
+    protected async Task<bool> HasAuthorizedAccessToStudent(IMediator mediator, string studentId)
+    {
+        if (string.IsNullOrWhiteSpace(studentId)) 
+            return false;
+
+        var user = await GetCurrentUser();
+
+        if (user is null)
+            return false;
+
+        var studentIdRequest = await mediator.Send(new GetParentWithStudentIdsQuery(user.Email));
+
+        if (studentIdRequest.IsFailure)
+            return false;
+
+        if (studentIdRequest.Value.Contains(studentId))
+            return true;
+
+        return false;
     }
 }

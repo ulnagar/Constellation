@@ -153,7 +153,7 @@
         {
             ShowLoader = true;
 
-            var response = await Http.PostAsJsonAsync($"Reports/Download/{reportEntry.Id}", new { });
+            var response = await Http.PostAsJsonAsync($"Reports/Student/{SelectedStudent.StudentId}/Download/{reportEntry.Id}", new { });
             // This returns the file in the response variable.
             // Need to push it to the browser as a file download, possibly using JS
             // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0

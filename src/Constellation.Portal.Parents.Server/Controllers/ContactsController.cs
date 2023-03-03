@@ -19,9 +19,16 @@ public class ContactsController : BaseAPIController
 	[HttpGet("All/{studentId}")]
 	public async Task<ICollection<StudentSupportContact>> GetAllContacts([FromRoute] string studentId)
 	{
-		//var user = await GetCurrentUser();
+		var authorised = await HasAuthorizedAccessToStudent(_mediator, studentId);
 
-		//_logger.LogInformation("Requested to retrieve contacts for student {studentId} by user {user}", studentId, user.UserName);
+		if (!authorised)
+		{
+			return new List<StudentSupportContact>();
+		}
+
+		var user = await GetCurrentUser();
+
+		_logger.LogInformation("Requested to retrieve contacts for student {studentId} by user {user}", studentId, user.UserName);
 
 		return await _mediator.Send(new GetStudentSupportContactsQuery { StudentId = studentId });
 	}

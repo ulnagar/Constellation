@@ -12,10 +12,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class GetAbsenceDetailsForParentQuery : IRequest<AbsenceDetailDto>
-{
-    public Guid AbsenceId { get; set; }
-}
+public sealed record GetAbsenceDetailsForParentQuery(
+    string ParentEmail,
+    Guid AbsenceId)
+    : IRequest<AbsenceDetailDto>;
 
 public class AbsenceDetailDto : IMapFrom<Absence>
 {
@@ -78,6 +78,20 @@ public class GetAbsenceDetailsForParentQueryHandler : IRequestHandler<GetAbsence
 
     public async Task<AbsenceDetailDto> Handle(GetAbsenceDetailsForParentQuery request, CancellationToken cancellationToken)
     {
+        var authorised = await _context.Students
+            .Where(student =>
+                student.Family.EmailAddress == request.ParentEmail ||
+                student.Family.Parent1.EmailAddress == request.ParentEmail ||
+                student.Family.Parent2.EmailAddress == request.ParentEmail)
+            .Where(student =>
+                student.Absences.Any(absence => absence.Id == request.AbsenceId))
+            .AnyAsync(cancellationToken);
+
+        if (!authorised)
+        {
+            return new AbsenceDetailDto();
+        }
+
         return await _context.Absences
             .ProjectTo<AbsenceDetailDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(src => src.Id == request.AbsenceId, cancellationToken);

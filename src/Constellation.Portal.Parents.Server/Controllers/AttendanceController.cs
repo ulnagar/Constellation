@@ -35,7 +35,8 @@ public class AttendanceController : BaseAPIController
 
         _logger.LogInformation("Requested to retrieve absence details for id {id} by parent {name}", Id, user.UserName);
 
-        return await _mediator.Send(new GetAbsenceDetailsForParentQuery { AbsenceId = Id });
+        // This Mediator Handler is secured so that data is only returned if the parent email matches the absence id.
+        return await _mediator.Send(new GetAbsenceDetailsForParentQuery(user.Email, Id));
     }
 
     [HttpPost("ParentExplanation")]
@@ -47,6 +48,7 @@ public class AttendanceController : BaseAPIController
 
         command.ParentEmail = user.Email;
 
+        // This Mediator Handler is secured so that the data is only saved if the parent email matches the absence id.
         await _mediator.Send(command);
 
         return Ok();
@@ -61,6 +63,13 @@ public class AttendanceController : BaseAPIController
     [HttpPost("Reports/Download")]
     public async Task<IActionResult> GetAttendanceReport([FromBody] AttendanceReportRequest request)
     {
+        var authorised = await HasAuthorizedAccessToStudent(_mediator, request.StudentId);
+
+        if (!authorised)
+        {
+            return BadRequest();
+        }
+
         // Create file as stream
         var stream = await _mediator.Send(new GetAttendanceReportForStudentQuery { StudentId = request.StudentId, StartDate = request.StartDate, EndDate = request.EndDate });
 
@@ -68,6 +77,4 @@ public class AttendanceController : BaseAPIController
 
         return File(stream, "application/pdf", filename);
     }
-
-
 }

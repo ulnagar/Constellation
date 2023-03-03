@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Portal.Parents.Server.Controllers;
 
-using Constellation.Application.Features.Awards.Models;
 using Constellation.Application.Features.Awards.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +19,13 @@ public class AwardsController : BaseAPIController
     [HttpGet("Student/{id}")]
     public async Task<StudentAwardSummary> GetDetails([FromRoute] string Id)
     {
+        var authorised = await HasAuthorizedAccessToStudent(_mediator, Id);
+
+        if (!authorised)
+        {
+            return new StudentAwardSummary();
+        }
+
         var user = await GetCurrentUser();
 
         _logger.LogInformation("Requested to retrieve award details for student {id} by parent {name}", Id, user.UserName);

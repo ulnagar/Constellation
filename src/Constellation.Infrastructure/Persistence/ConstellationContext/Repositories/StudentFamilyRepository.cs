@@ -18,4 +18,17 @@ internal sealed class StudentFamilyRepository : IStudentFamilyRepository
             .Set<StudentFamily>()
             .Where(family => family.Parent1.EmailAddress == email || family.Parent2.EmailAddress == email)
             .ToListAsync(cancellationToken);
+
+    public async Task<List<string>> GetStudentIdsFromFamilyWithEmail(
+        string email,
+        CancellationToken cancellation = default) =>
+        await _context
+            .Set<StudentFamily>()
+            .Where(family => 
+                family.EmailAddress == email ||
+                family.Parent1.EmailAddress == email ||
+                family.Parent2.EmailAddress == email)
+            .SelectMany(family => family.Students)
+            .Select(student => student.StudentId)
+            .ToListAsync(cancellation);
 }

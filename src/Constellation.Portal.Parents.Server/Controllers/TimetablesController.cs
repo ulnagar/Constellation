@@ -20,12 +20,26 @@ public class TimetablesController : BaseAPIController
 	[HttpGet("{studentId}")]
 	public async Task<StudentTimetableDataDto> GetStudentTimetable([FromRoute] string studentId)
 	{
+		var authorised = await HasAuthorizedAccessToStudent(_mediator, studentId);
+
+		if (!authorised)
+		{
+			return new StudentTimetableDataDto();
+		}
+
 		return await _mediator.Send(new GetStudentTimetableDataQuery { StudentId = studentId });
 	}
 
     [HttpPost("Download/{studentId}")]
     public async Task<IActionResult> GetAttendanceReport([FromRoute] string studentId)
     {
+        var authorised = await HasAuthorizedAccessToStudent(_mediator, studentId);
+
+        if (!authorised)
+        {
+            return BadRequest();
+        }
+
         // Get Timetable Data first
         var data = await _mediator.Send(new GetStudentTimetableDataQuery { StudentId = studentId });
 
