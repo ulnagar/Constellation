@@ -1,0 +1,52 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.Partner.Pages.Students.AbsenceAuditModel
+
+@{
+    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin));
+}
+
+<h2>Student Absence Settings</h2>
+
+<div class="page-menu">
+    @if (authorised)
+    {
+        <div class="btn-group new-group" role="group">
+            <a asp-action="AbsenceSettings" asp-controller="Students" asp-area="Partner" class="btn btn-warning">Absence Settings</a>
+        </div>
+    }
+
+    <a asp-action="Index" asp-controller="Students" asp-area="Partner" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th>SRN</th>
+            <th>Name</th>
+            <th>Grade</th>
+            <th>School</th>
+            <th>Enabled?</th>
+            <th>Scan Start Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Students)
+        {
+            <tr>
+                <td>@Html.DisplayFor(model => item.SRN)</td>
+                <td>@Html.DisplayFor(model => item.Gender, "Gender") @Html.DisplayFor(model => item.Name)</td>
+                <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
+                <td>@Html.DisplayFor(model => item.School)</td>
+                <td>@Html.DisplayFor(model => item.AbsenceEnabled, "Boolean")</td>
+                <td>
+                    @if (item.AbsenceEnabledFrom.HasValue)
+                    {
+                        @item.AbsenceEnabledFrom.Value.ToShortDateString()
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
