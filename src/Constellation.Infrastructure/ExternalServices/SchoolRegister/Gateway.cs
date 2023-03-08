@@ -1,179 +1,172 @@
-﻿using Constellation.Application.DTOs.CSV;
+﻿namespace Constellation.Infrastructure.ExternalServices.SchoolRegister;
+
+using Constellation.Application.DTOs.CSV;
 using Constellation.Application.Features.Partners.SchoolContacts.Commands;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
-using MediatR;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
-namespace Constellation.Infrastructure.ExternalServices.SchoolRegister
+public class Gateway : ISchoolRegisterGateway, IScopedService
 {
-    public class Gateway : ISchoolRegisterGateway, IScopedService
+    private readonly HttpClient _client;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ISchoolContactService _schoolContactService;
+    private readonly IMediator _mediator;
+
+    public Gateway(IUnitOfWork unitOfWork, ISchoolContactService schoolContactService, IMediator mediator)
     {
-        private readonly HttpClient _client;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly ISchoolContactService _schoolContactService;
-        private readonly IMediator _mediator;
-
-        public Gateway(IUnitOfWork unitOfWork, ISchoolContactService schoolContactService, IMediator mediator)
+        var config = new HttpClientHandler
         {
-            var config = new HttpClientHandler
-            {
-                CookieContainer = new CookieContainer()
-            };
+            CookieContainer = new CookieContainer()
+        };
 
-            var proxy = WebRequest.DefaultWebProxy;
-            config.UseProxy = true;
-            config.Proxy = proxy;
+        var proxy = WebRequest.DefaultWebProxy;
+        config.UseProxy = true;
+        config.Proxy = proxy;
 
-            _client = new HttpClient(config);
-            _unitOfWork = unitOfWork;
-            _schoolContactService = schoolContactService;
-            _mediator = mediator;
-        }
+        _client = new HttpClient(config);
+        _unitOfWork = unitOfWork;
+        _schoolContactService = schoolContactService;
+        _mediator = mediator;
+    }
 
-        public async Task GetSchoolPrincipals()
+    public async Task GetSchoolPrincipals()
+    {
+        // Get csv file from https://datacollections.det.nsw.edu.au/listofschools/csv/listofschool_all.csv
+        // Read entries into a collection of objects
+        var csvSchools = await GetSchoolList();
+
+        // Filter out all closed/proposed schools
+        var openSchools = csvSchools.Where(school => school.Status == "Open" && !string.IsNullOrWhiteSpace(school.PrincipalEmail)).ToList();
+
+        // Match entries with database
+        var dbSchools = await _unitOfWork.Schools.ForBulkUpdate();
+        var dbContacts = await _unitOfWork.SchoolContacts.ForBulkUpdate();
+
+        foreach (var csvSchool in openSchools)
         {
-            // Get csv file from https://datacollections.det.nsw.edu.au/listofschools/csv/listofschool_all.csv
-            // Read entries into a collection of objects
-            var csvSchools = await GetSchoolList();
+            Console.WriteLine($"Processing School {csvSchool.Name} ({csvSchool.SchoolCode})");
+            var dbSchool = dbSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
 
-            // Filter out all closed/proposed schools
-            var openSchools = csvSchools.Where(school => school.Status == "Open" && !string.IsNullOrWhiteSpace(school.PrincipalEmail)).ToList();
+            if (dbSchool == null)
+                continue;
 
-            // Match entries with database
-            var dbSchools = await _unitOfWork.Schools.ForBulkUpdate();
-            var dbContacts = await _unitOfWork.SchoolContacts.ForBulkUpdate();
+            var principal = dbSchool.StaffAssignments.FirstOrDefault(role => role.Role == SchoolContactRole.Principal && !role.IsDeleted);
 
-            foreach (var csvSchool in openSchools)
+            if (string.IsNullOrWhiteSpace(csvSchool.PrincipalEmail))
             {
-                Console.WriteLine($"Processing School {csvSchool.Name} ({csvSchool.SchoolCode})");
-                var dbSchool = dbSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
+                await _unitOfWork.CompleteAsync();
+                continue;
+            }
 
-                if (dbSchool == null)
-                    continue;
-
-                var principal = dbSchool.StaffAssignments.FirstOrDefault(role => role.Role == SchoolContactRole.Principal && !role.IsDeleted);
-
-                if (string.IsNullOrWhiteSpace(csvSchool.PrincipalEmail))
+            // Compare Principal in database to information in csv by email address
+            // If different, mark database entry as old/deleted and create a new entry
+            if (principal != null)
+            {
+                if (!dbSchool.Students.Any(student => !student.IsDeleted) || !dbSchool.Staff.Any(staff => !staff.IsDeleted))
                 {
+                    Console.WriteLine($" Removing old Principal: {principal.SchoolContact.DisplayName}");
+                    await _schoolContactService.RemoveRole(principal.Id);
+
                     await _unitOfWork.CompleteAsync();
                     continue;
                 }
-
-                // Compare Principal in database to information in csv by email address
-                // If different, mark database entry as old/deleted and create a new entry
-                if (principal != null)
+                else if (principal.SchoolContact.EmailAddress.ToLower() != csvSchool.PrincipalEmail.ToLower())
                 {
-                    if (!dbSchool.Students.Any(student => !student.IsDeleted) || !dbSchool.Staff.Any(staff => !staff.IsDeleted))
-                    {
-                        Console.WriteLine($" Removing old Principal: {principal.SchoolContact.DisplayName}");
-                        await _schoolContactService.RemoveRole(principal.Id);
-
-                        await _unitOfWork.CompleteAsync();
-                        continue;
-                    }
-                    else if (principal.SchoolContact.EmailAddress.ToLower() != csvSchool.PrincipalEmail.ToLower())
-                    {
-                        Console.WriteLine($" Removing old Principal: {principal.SchoolContact.DisplayName}");
-                        await _schoolContactService.RemoveRole(principal.Id);
-                        principal = null;
-                    }
+                    Console.WriteLine($" Removing old Principal: {principal.SchoolContact.DisplayName}");
+                    await _schoolContactService.RemoveRole(principal.Id);
+                    principal = null;
                 }
-
-                if (principal == null)
-                {
-                    // Does the email address appear in the SchoolContact list?
-                    Console.WriteLine($" Adding new Principal: {csvSchool.PrincipalEmail}");
-                    Console.WriteLine($" Linking Principal {csvSchool.PrincipalFirstName} {csvSchool.PrincipalLastName} with {csvSchool.Name}");
-                    await _mediator.Send(new CreateNewSchoolContactWithRoleCommand
-                    {
-                        FirstName = csvSchool.PrincipalFirstName,
-                        LastName = csvSchool.PrincipalLastName,
-                        EmailAddress = csvSchool.PrincipalEmail,
-                        SchoolCode = csvSchool.SchoolCode,
-                        Position = SchoolContactRole.Principal
-                    });
-                }
-
-                await _unitOfWork.CompleteAsync();
             }
-        }
 
-        public async Task<ICollection<CSVSchool>> GetSchoolList()
-        {
-            var response = await _client.GetAsync("https://datacollections.det.nsw.edu.au/listofschools/csv/listofschool_all.csv");
-            response.EnsureSuccessStatusCode();
-
-            var content = await response.Content.ReadAsStringAsync();
-            var entries = content.Split('\u000A').ToList();
-
-            var textInfo = new CultureInfo("en-AU", false).TextInfo;
-
-            var list = new List<CSVSchool>();
-            var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
-
-            foreach (var entry in entries)
+            if (principal == null)
             {
-                var splitString = CSVParser.Split(entry);
-                if (splitString[0].Length > 4 || splitString.Length == 1)
-                    continue;
-
-                try
+                // Does the email address appear in the SchoolContact list?
+                Console.WriteLine($" Adding new Principal: {csvSchool.PrincipalEmail}");
+                Console.WriteLine($" Linking Principal {csvSchool.PrincipalFirstName} {csvSchool.PrincipalLastName} with {csvSchool.Name}");
+                await _mediator.Send(new CreateNewSchoolContactWithRoleCommand
                 {
-                    var school = new CSVSchool
-                    {
-                        SchoolCode = splitString[0].Trim(),
-                        Name = splitString[1].Trim('"').Trim(),
-                        Address = splitString[6].Trim(),
-                        Town = textInfo.ToTitleCase(splitString[8].Trim()),
-                        PostCode = splitString[5].Trim(),
-                        Status = splitString[9].Trim(),
-                        Electorate = splitString[17].Trim(),
-                        PrincipalNetwork = splitString[25].Trim(),
-                        Division = splitString[22].Trim(), // School Performance Directorate
-                        PhoneNumber = Regex.Replace(splitString[45].Trim(), @"[^0-9]", ""),
-                        EmailAddress = splitString[48].Trim(),
-                        FaxNumber = Regex.Replace(splitString[49].Trim(), @"[^0-9]", ""),
-                        HeatSchool = splitString[51] == "Yes",
-                        PrincipalName = splitString[76].Trim(),
-                        PrincipalEmail = splitString[77].Trim()
-                    };
-
-                    if (school.PhoneNumber.Length == 8)
-                        school.PhoneNumber = $"02{school.PhoneNumber}";
-
-                    if (school.FaxNumber.Length == 8)
-                        school.FaxNumber = $"02{school.FaxNumber}";
-
-                    if (school.PrincipalName.IndexOf(',') > 0)
-                    {
-                        school.PrincipalName = school.PrincipalName.Trim('"').Trim();
-                        var principalName = school.PrincipalName.Split(',');
-                        school.PrincipalName = $"{principalName[1].Trim()} {principalName[0].Trim()}";
-                        school.PrincipalFirstName = principalName[1].Trim();
-                        school.PrincipalLastName = principalName[0].Trim();
-                    }
-
-                    list.Add(school);
-                }
-                catch (Exception)
-                {
-
-                    throw;
-                }
+                    FirstName = csvSchool.PrincipalFirstName,
+                    LastName = csvSchool.PrincipalLastName,
+                    EmailAddress = csvSchool.PrincipalEmail,
+                    SchoolCode = csvSchool.SchoolCode,
+                    Position = SchoolContactRole.Principal
+                });
             }
 
-            return list;
+            await _unitOfWork.CompleteAsync();
         }
+    }
+
+    public async Task<ICollection<CSVSchool>> GetSchoolList()
+    {
+        var response = await _client.GetAsync("https://datacollections.det.nsw.edu.au/listofschools/csv/listofschool_all.csv");
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        var entries = content.Split('\u000A').ToList();
+
+        var textInfo = new CultureInfo("en-AU", false).TextInfo;
+
+        var list = new List<CSVSchool>();
+        var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+
+        foreach (var entry in entries)
+        {
+            var splitString = CSVParser.Split(entry);
+            if (splitString[0].Length > 4 || splitString.Length == 1)
+                continue;
+
+            try
+            {
+                var school = new CSVSchool
+                {
+                    SchoolCode = splitString[0].Trim(),
+                    Name = splitString[1].Trim('"').Trim(),
+                    Address = splitString[6].Trim(),
+                    Town = textInfo.ToTitleCase(splitString[8].Trim()),
+                    PostCode = splitString[5].Trim(),
+                    Status = splitString[9].Trim(),
+                    Electorate = splitString[17].Trim(),
+                    PrincipalNetwork = splitString[25].Trim(),
+                    Division = splitString[22].Trim(), // School Performance Directorate
+                    PhoneNumber = Regex.Replace(splitString[45].Trim(), @"[^0-9]", ""),
+                    EmailAddress = splitString[48].Trim(),
+                    FaxNumber = Regex.Replace(splitString[49].Trim(), @"[^0-9]", ""),
+                    HeatSchool = splitString[51] == "Yes",
+                    PrincipalName = splitString[76].Trim(),
+                    PrincipalEmail = splitString[77].Trim()
+                };
+
+                if (school.PhoneNumber.Length == 8)
+                    school.PhoneNumber = $"02{school.PhoneNumber}";
+
+                if (school.FaxNumber.Length == 8)
+                    school.FaxNumber = $"02{school.FaxNumber}";
+
+                if (school.PrincipalName.IndexOf(',') > 0)
+                {
+                    school.PrincipalName = school.PrincipalName.Trim('"').Trim();
+                    var principalName = school.PrincipalName.Split(',');
+                    school.PrincipalName = $"{principalName[1].Trim()} {principalName[0].Trim()}";
+                    school.PrincipalFirstName = principalName[1].Trim();
+                    school.PrincipalLastName = principalName[0].Trim();
+                }
+
+                list.Add(school);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        return list;
     }
 }

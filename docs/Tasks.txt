@@ -10,7 +10,15 @@ CURRENT TASK
 		*Refactor existing code to use new model
 		Create unit tests for new domain model methods and events
 
-	ACTIONS:
+
+	MASTERFILECONSISTENCYCOORDINATOR:
+		Validate email addresses and report if invalid
+	
+~~~~~~~~~~~~~~~~~~~~~~~~
+FUTURE PLANS
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+ACTIONS:
 		Migrate to AccessRight concept
 		Tickets are created for access to resources, with defined start and end dates
 		Tickets are linked to the object that defines the right: e.g. cover, enrolment, session etc
@@ -21,10 +29,6 @@ CURRENT TASK
 			than originally intended. This would allow for historic access audits, i.e. being able to tell who should have had access
 			at a particular time.
 		Tickets should include audit functions (e.g. who created it and when) separate from the expiry dates of the ticket itself.
-
-~~~~~~~~~~~~~~~~~~~~~~~~
-FUTURE PLANS
-~~~~~~~~~~~~~~~~~~~~~~~~
 
 SCHOOL PORTAL:
 	Consolidate the server-side controllers that do not have much use (e.g. put the students and staff into the SCHOOL controller, etc.)

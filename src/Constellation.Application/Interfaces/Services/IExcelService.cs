@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.DTOs.CSV;
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Core.Models.MandatoryTraining;
@@ -20,5 +21,7 @@ namespace Constellation.Application.Interfaces.Services
         List<TrainingModule> ImportMandatoryTrainingDataFromFile(MemoryStream excelFile);
         Task<MemoryStream> CreateGroupTutorialAttendanceFile(TutorialDetailsDto data);
         Task<MemoryStream> CreateFamilyContactDetailsChangeReport(List<ParentContactChangeDto> changes, CancellationToken cancellationToken = default);
+        Task<List<MasterFileSchool>> GetSchoolsFromMasterFile(MemoryStream stream);
+        Task<List<MasterFileStudent>> GetStudentsFromMasterFile(MemoryStream stream);
     }
 }

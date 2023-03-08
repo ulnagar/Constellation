@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
 using Constellation.Application.DTOs;
+using Constellation.Application.DTOs.CSV;
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Services;
@@ -539,6 +540,75 @@ public class ExcelService : IExcelService, IScopedService
         memoryStream.Position = 0;
 
         return memoryStream;
+    }
+
+    public async Task<List<MasterFileSchool>> GetSchoolsFromMasterFile(MemoryStream stream)
+    {
+        List<MasterFileSchool> schoolsList = new();
+
+        using ExcelPackage package = new(stream);
+        ExcelWorksheet ws = package.Workbook.Worksheets.First(sheet => sheet.Name == "Partner_schools");
+        DataTable dataTable = ws.Cells[ws.Dimension.Address].ToDataTable();
+
+        foreach (DataRow row in dataTable.Rows)
+        {
+            string rawStatus = row["Sharing"].ToString();
+            SiteStatus siteStatus = rawStatus switch
+            {
+                "*INACTIVE*" => SiteStatus.Inactive,
+                "Student(s)" => SiteStatus.Students,
+                "Teacher(s)" => SiteStatus.Teachers,
+                "Student(s) and Teacher(s)" => SiteStatus.Both,
+                _ => SiteStatus.Unknown
+            };
+
+            schoolsList.Add(new MasterFileSchool(
+                dataTable.Rows.IndexOf(row) + 1,
+                row["School code(s)"].ToString(),
+                row["School"].ToString(),
+                siteStatus,
+                row["Principal"].ToString(),
+                row["Principal_Email"].ToString()));
+        }
+
+        return schoolsList;
+    }
+
+    public async Task<List<MasterFileStudent>> GetStudentsFromMasterFile(MemoryStream stream)
+    {
+        List<MasterFileStudent> studentList = new();
+
+        using ExcelPackage package = new(stream);
+        ExcelWorksheet ws = package.Workbook.Worksheets.First(sheet => sheet.Name == "Students_2023");
+        DataTable dataTable = ws.Cells[ws.Dimension.Address].ToDataTable();
+
+        foreach (DataRow row in dataTable.Rows)
+        {
+            string rawGrade = row["Grade"].ToString();
+            Grade grade = rawGrade switch
+            {
+                "5" => Grade.Y05,
+                "6" => Grade.Y06,
+                "6*" => Grade.Y06,
+                "7" => Grade.Y07,
+                "8" => Grade.Y08,
+                "9" => Grade.Y09,
+                "10" => Grade.Y10,
+                "11" => Grade.Y11,
+                "12" => Grade.Y12,
+                _ => Grade.SpecialProgram
+            };
+
+            studentList.Add(new MasterFileStudent(
+                row["Student No."].ToString(),
+                row["Student_First"].ToString(),
+                row["Student_Last"].ToString(),
+                grade,
+                row["Parent_Email"].ToString(),
+                row["Parent_EMail_2"].ToString()));
+        }
+
+        return studentList;
     }
 
     private class StudentRecord
