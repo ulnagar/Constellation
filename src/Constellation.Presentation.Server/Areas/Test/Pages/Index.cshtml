@@ -2,6 +2,31 @@
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
 
 
-<form asp-page-handler="SyncParents">
+<form asp-page-handler="CheckFile" enctype="multipart/form-data">
+    <input asp-for="FormFile" type="file" />
     <button type="submit">Sync Parents</button>
 </form>
+
+<table class="table table-striped data-table">
+    <thead>
+        <tr>
+            <th>File</th>
+            <th>Index</th>
+            <th>Column</th>
+            <th>Current Value</th>
+            <th>New Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.UpdateItems)
+        {
+            <tr>
+                <td>@item.Source</td>
+                <td>@item.Line</td>
+                <td>@item.Column</td>
+                <td>@item.CurrentValue</td>
+                <td>@item.NewValue</td>
+            </tr>
+        }
+    </tbody>
+</table>

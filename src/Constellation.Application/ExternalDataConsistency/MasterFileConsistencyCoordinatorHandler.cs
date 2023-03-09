@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Shared;
+using Constellation.Core.ValueObjects;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,16 +62,41 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
             {
                 _logger.Information("Detected difference in Principal Email for {school}! MasterFile: \"{fileEmail}\" Data Collections: \"{collectionsEmail}\"", fileSchool.Name, fileSchool.PrincipalEmail.ToLower(), collectionSchool.PrincipalEmail.ToLower());
 
+                var collectionEmailRequest = EmailAddress.Create(collectionSchool.PrincipalEmail);
+
+                if (collectionEmailRequest.IsFailure)
+                {
+                    updateItems.Add(new UpdateItem(
+                        "DataCollections",
+                        0,
+                        "Principal Email",
+                        collectionSchool.PrincipalEmail.ToLower(),
+                        "EMAIL IS INVALID!"));
+                }
+                else
+                {
+                    updateItems.Add(new UpdateItem(
+                    "MasterFile",
+                    fileSchool.Index,
+                    "Principal Email",
+                    fileSchool.PrincipalEmail.ToLower(),
+                    collectionEmailRequest.Value.Email.ToLower()));
+                }
+            }
+
+            // Check validation of Principal Email
+            var fileEmailRequest = EmailAddress.Create(fileSchool.PrincipalEmail);
+            if (fileEmailRequest.IsFailure)
+            {
                 updateItems.Add(new UpdateItem(
                     "MasterFile",
                     fileSchool.Index,
                     "Principal Email",
                     fileSchool.PrincipalEmail.ToLower(),
-                    collectionSchool.PrincipalEmail.ToLower()));
+                    "EMAIL IS INVALID!"));
             }
-
-            // Check validation of Principal Email
-
         }
+
+        return updateItems;
     }
 }

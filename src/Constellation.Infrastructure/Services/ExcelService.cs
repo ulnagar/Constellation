@@ -547,13 +547,28 @@ public class ExcelService : IExcelService, IScopedService
         List<MasterFileSchool> schoolsList = new();
 
         using ExcelPackage package = new(stream);
-        ExcelWorksheet ws = package.Workbook.Worksheets.First(sheet => sheet.Name == "Partner_schools");
-        DataTable dataTable = ws.Cells[ws.Dimension.Address].ToDataTable();
+        ExcelWorksheet worksheet = package.Workbook.Worksheets.First(sheet => sheet.Name == "Partner_schools");
+        int rows = worksheet.Dimension.Rows;
 
-        foreach (DataRow row in dataTable.Rows)
+        for (int i = 2; i <= rows; i++)
         {
-            string rawStatus = row["Sharing"].ToString();
-            SiteStatus siteStatus = rawStatus switch
+            var codeCell = worksheet.Cells[i, 9].Value;
+            if (codeCell is null)
+                continue;
+
+            var code = codeCell.ToString().Trim();
+
+            var nameCell = worksheet.Cells[i, 1].Value;
+            if (nameCell is null)
+                continue;
+
+            var name = ((string)nameCell).Trim();
+
+            var statusCell = worksheet.Cells[i, 2].Value;
+            if (statusCell is null)
+                continue;
+
+            SiteStatus siteStatus = statusCell.ToString() switch
             {
                 "*INACTIVE*" => SiteStatus.Inactive,
                 "Student(s)" => SiteStatus.Students,
@@ -562,13 +577,19 @@ public class ExcelService : IExcelService, IScopedService
                 _ => SiteStatus.Unknown
             };
 
+            var principalCell = worksheet.Cells[i, 18].Value;
+            var principal = (principalCell is not null) ? ((string)principalCell).Trim() : string.Empty;
+
+            var principalEmailCell = worksheet.Cells[i, 20].Value;
+            var principalEmail = (principalEmailCell is not null) ? ((string)principalEmailCell).Trim() : string.Empty;
+
             schoolsList.Add(new MasterFileSchool(
-                dataTable.Rows.IndexOf(row) + 1,
-                row["School code(s)"].ToString(),
-                row["School"].ToString(),
+                i,
+                code,
+                name,
                 siteStatus,
-                row["Principal"].ToString(),
-                row["Principal_Email"].ToString()));
+                principal,
+                principalEmail));
         }
 
         return schoolsList;
