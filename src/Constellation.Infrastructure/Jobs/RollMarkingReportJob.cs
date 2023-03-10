@@ -63,7 +63,7 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
             if (!recipients.Any(recipient => recipient.Value == "scott.new@det.nsw.edu.au"))
                 recipients.Add("Scott New", "scott.new@det.nsw.edu.au");
 
-            await _emailService.SendNoRollMarkingReport(DateOnly.FromDateTime(date), recipients);
+            await _emailService.SendNoRollMarkingReport(date, recipients);
 
             return;
         }
