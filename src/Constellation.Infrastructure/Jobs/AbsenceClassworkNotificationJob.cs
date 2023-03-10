@@ -9,6 +9,7 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Covers;
 using Constellation.Infrastructure.DependencyInjection;
+using Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace Constellation.Infrastructure.Jobs
@@ -20,19 +21,22 @@ namespace Constellation.Infrastructure.Jobs
         private readonly ILogger<IAbsenceMonitorJob> _logger;
         private readonly IMediator _mediator;
         private readonly IClassCoverRepository _classCoverRepository;
+        private readonly IStaffRepository _staffRepository;
 
         public AbsenceClassworkNotificationJob(
             IUnitOfWork unitOfWork,
             IEmailService emailService,
             ILogger<IAbsenceMonitorJob> logger,
             IMediator mediator,
-            IClassCoverRepository classCoverRepository)
+            IClassCoverRepository classCoverRepository,
+            IStaffRepository staffRepository)
         {
             _unitOfWork = unitOfWork;
             _emailService = emailService;
             _logger = logger;
             _mediator = mediator;
             _classCoverRepository = classCoverRepository;
+            _staffRepository = staffRepository;
         }
 
         public async Task StartJob(Guid jobId, DateTime scanDate, CancellationToken token)
@@ -60,7 +64,7 @@ namespace Constellation.Infrastructure.Jobs
 
                 if (covers.Count > 0)
                 {
-                    teachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = offering.Course.FacultyId }, token);
+                    teachers = await _staffRepository.GetFacultyHeadTeachers(offering.Course.FacultyId, token);
                 }
 
                 // create notification object in database
@@ -81,8 +85,16 @@ namespace Constellation.Infrastructure.Jobs
                 var check = await _unitOfWork.ClassworkNotifications.GetForDuplicateCheck(offeringId, absenceDate, token);
                 if (check == null)
                 {
-                    _unitOfWork.Add(notification);
-                    await _unitOfWork.CompleteAsync(token);
+                    try
+                    {
+                        _unitOfWork.Add(notification);
+                        await _unitOfWork.CompleteAsync(token);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning("{id}: Failed to save notification with error {@error}: {@notification}", jobId, ex.Message, notification);
+                        continue;
+                    }
 
                     foreach (var teacher in teachers)
                     _logger.LogInformation("{id}: Sending email for {Offering} @ {AbsenceDate} to {teacher} ({EmailAddress})", jobId, notification.Offering.Name, notification.AbsenceDate.ToShortDateString(), teacher.DisplayName, teacher.EmailAddress);
