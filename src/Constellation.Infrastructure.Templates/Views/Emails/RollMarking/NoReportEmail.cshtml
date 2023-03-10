@@ -1,0 +1,14 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.RollMarking
+@model DailyReportEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+<h3>Hooray!</h3>
+<p>Sentral reports that there are no unsubmitted rolls for today.</p>
+<p>Relax, take it easy, and stress less :)</p>
