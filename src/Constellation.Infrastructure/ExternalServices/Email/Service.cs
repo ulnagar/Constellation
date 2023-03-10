@@ -1030,6 +1030,23 @@ public class Service : IEmailService, IScopedService
         await _emailSender.Send(recipients, null, viewModel.Title, body);
     }
 
+    public async Task SendNoRollMarkingReport(DateOnly reportDate, Dictionary<string, string> recipients)
+    {
+        var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
+
+        var viewModel = new DailyReportEmailViewModel
+        {
+            Preheader = "",
+            SenderName = absenceSettings.AbsenceCoordinatorName,
+            SenderTitle = absenceSettings.AbsenceCoordinatorTitle,
+            Title = $"[Aurora College] Roll Marking Report - {reportDate.ToLongDateString()}"
+        };
+
+        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/RollMarking/NoReportEmail.cshtml", viewModel);
+
+        await _emailSender.Send(recipients, null, viewModel.Title, body);
+    }
+
     public async Task SendMagicLinkLoginEmail(MagicLinkEmail notification)
     {
         var settings = await _unitOfWork.Settings.Get();

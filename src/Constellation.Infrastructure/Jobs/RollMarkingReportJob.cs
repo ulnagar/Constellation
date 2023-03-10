@@ -46,12 +46,24 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
         var entries = await _sentralService.GetRollMarkingReportAsync(date);
 
         var unsubmitted = entries.Where(entry => !entry.Submitted).ToList();
+        var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
+        var recipients = new Dictionary<string, string>();
 
         if (!unsubmitted.Any())
         {
             var infoString = $"{date.ToShortDateString()} - No Unsubmitted Rolls found!";
 
             _logger.LogInformation("{id}: {infoString}", jobId, infoString);
+
+
+            recipients = new();
+            if (!recipients.Any(recipient => recipient.Value == absenceSettings.ForwardingEmailAbsenceCoordinator))
+                recipients.Add(absenceSettings.AbsenceCoordinatorName, absenceSettings.ForwardingEmailAbsenceCoordinator);
+
+            if (!recipients.Any(recipient => recipient.Value == "scott.new@det.nsw.edu.au"))
+                recipients.Add("Scott New", "scott.new@det.nsw.edu.au");
+
+            await _emailService.SendNoRollMarkingReport(DateOnly.FromDateTime(date), recipients);
 
             return;
         }
@@ -135,8 +147,6 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
             emailList.Add(emailDto);
         }
 
-        var recipients = new Dictionary<string, string>(); 
-
         // Send emails to teachers
         // get flattened list of teachers
         var teachers = emailList.SelectMany(list => list.Teachers).Distinct().ToList();
@@ -179,8 +189,6 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
         if (token.IsCancellationRequested)
             return;
         
-        var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
-
         recipients = new();
         if (!recipients.Any(recipient => recipient.Value == absenceSettings.ForwardingEmailAbsenceCoordinator))
             recipients.Add(absenceSettings.AbsenceCoordinatorName, absenceSettings.ForwardingEmailAbsenceCoordinator);

@@ -39,6 +39,7 @@ namespace Constellation.Application.Interfaces.Services
 
         // RollMarking Emails
         Task SendDailyRollMarkingReport(List<RollMarkingEmailDto> entries, DateOnly reportDate, Dictionary<string, string> recipients);
+        Task SendNoRollMarkingReport(DateOnly reportDate, Dictionary<string, string> recipients);
 
 
         // Cover Emails
