@@ -906,7 +906,7 @@ public class Service : IEmailService, IScopedService
             Preheader = "",
             SenderName = absenceSettings.AbsenceCoordinatorName,
             SenderTitle = absenceSettings.AbsenceCoordinatorTitle,
-            Title = "[Aurora College] Missed Classwork Notifications",
+            Title = $"[Aurora College] Missed Classwork Notification - {notification.OfferingName}",
             OfferingName = notification.OfferingName,
             AbsenceDate = notification.AbsenceDate,
             StudentList = notification.Students,
