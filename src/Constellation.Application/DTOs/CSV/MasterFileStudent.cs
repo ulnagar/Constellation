@@ -3,6 +3,7 @@
 using Constellation.Core.Enums;
 
 public sealed record MasterFileStudent(
+    int Index,
     string SRN,
     string FirstName,
     string LastName,

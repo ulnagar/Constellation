@@ -50,6 +50,14 @@ public class StudentRepository : IStudentRepository
             .Where(student => !student.IsDeleted)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Student>> GetCurrentStudentsWithFamily(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Include(student => student.Family)
+            .Where(student => !student.IsDeleted)
+            .ToListAsync(cancellationToken);
+
     public async Task<Student> ForDetailDisplayAsync(string id)
     {
         return await _context.Students

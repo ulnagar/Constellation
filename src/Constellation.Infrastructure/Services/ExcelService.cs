@@ -600,13 +600,34 @@ public class ExcelService : IExcelService, IScopedService
         List<MasterFileStudent> studentList = new();
 
         using ExcelPackage package = new(stream);
-        ExcelWorksheet ws = package.Workbook.Worksheets.First(sheet => sheet.Name == "Students_2023");
-        DataTable dataTable = ws.Cells[ws.Dimension.Address].ToDataTable();
+        ExcelWorksheet worksheet = package.Workbook.Worksheets.First(sheet => sheet.Name == "Students_2023");
+        int rows = worksheet.Dimension.Rows;
 
-        foreach (DataRow row in dataTable.Rows)
+        for (int i = 2; i <= rows; i++)
         {
-            string rawGrade = row["Grade"].ToString();
-            Grade grade = rawGrade switch
+            var srnCell = worksheet.Cells[i, 1].Value;
+            if (srnCell is null)
+                continue;
+
+            var srn = srnCell.ToString().Trim();
+
+            var fNameCell = worksheet.Cells[i, 3].Value;
+            if (fNameCell is null)
+                continue;
+
+            var fName = ((string)fNameCell).Trim();
+
+            var sNameCell = worksheet.Cells[i, 4].Value;
+            if (sNameCell is null)
+                continue;
+
+            var sName = ((string)sNameCell).Trim();
+
+            var gradeCell = worksheet.Cells[i, 6].Value;
+            if (gradeCell is null)
+                continue;
+
+            Grade grade = gradeCell.ToString().Trim() switch
             {
                 "5" => Grade.Y05,
                 "6" => Grade.Y06,
@@ -620,13 +641,24 @@ public class ExcelService : IExcelService, IScopedService
                 _ => Grade.SpecialProgram
             };
 
+            var parent1Cell = worksheet.Cells[i, 42].Value as string;
+            string parent1 = string.Empty;
+            if (parent1Cell is not null && !string.IsNullOrWhiteSpace(parent1Cell))
+                parent1 = parent1Cell.Trim();
+
+            var parent2Cell = worksheet.Cells[i, 43].Value as string;
+            string parent2 = string.Empty;
+            if (parent2Cell is not null && !string.IsNullOrWhiteSpace(parent2Cell))
+                parent2 = parent2Cell.Trim();
+
             studentList.Add(new MasterFileStudent(
-                row["Student No."].ToString(),
-                row["Student_First"].ToString(),
-                row["Student_Last"].ToString(),
+                i,
+                srn,
+                fName,
+                sName,
                 grade,
-                row["Parent_Email"].ToString(),
-                row["Parent_EMail_2"].ToString()));
+                parent1,
+                parent2));
         }
 
         return studentList;
