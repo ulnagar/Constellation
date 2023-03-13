@@ -10,9 +10,6 @@ CURRENT TASK
 		*Refactor existing code to use new model
 		Create unit tests for new domain model methods and events
 
-
-	MASTERFILECONSISTENCYCOORDINATOR:
-		Validate email addresses and report if invalid
 	
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS

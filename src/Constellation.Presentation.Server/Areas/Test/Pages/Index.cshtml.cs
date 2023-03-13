@@ -22,6 +22,9 @@ public class IndexModel : BasePageModel
 
     [BindProperty]
     public IFormFile FormFile { get; set; }
+    [BindProperty]
+    public bool EmailReport { get; set; }
+
     public List<UpdateItem> UpdateItems { get; set; } = new();
 
     public async Task OnGetAsync()
@@ -35,10 +38,19 @@ public class IndexModel : BasePageModel
         {
             try
             {
+                string emailAddress = string.Empty;
+                if (EmailReport)
+                {
+                    emailAddress = User.Identity?.Name;
+
+                    if (emailAddress is null)
+                        EmailReport = false;
+                }
+
                 await using var target = new MemoryStream();
                 await FormFile.CopyToAsync(target);
 
-                var outputRequest = await _mediator.Send(new MasterFileConsistencyCoordinator(target));
+                var outputRequest = await _mediator.Send(new MasterFileConsistencyCoordinator(target, EmailReport, emailAddress));
 
                 if (outputRequest.IsFailure)
                 {

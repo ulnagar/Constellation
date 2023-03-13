@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.CSV;
+using Constellation.Application.ExternalDataConsistency;
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Core.Models.MandatoryTraining;
@@ -23,5 +24,6 @@ namespace Constellation.Application.Interfaces.Services
         Task<MemoryStream> CreateFamilyContactDetailsChangeReport(List<ParentContactChangeDto> changes, CancellationToken cancellationToken = default);
         Task<List<MasterFileSchool>> GetSchoolsFromMasterFile(MemoryStream stream);
         Task<List<MasterFileStudent>> GetStudentsFromMasterFile(MemoryStream stream);
+        Task<MemoryStream> CreateMasterFileConsistencyReport(List<UpdateItem> updateItems, CancellationToken cancellationToken = default);
     }
 }

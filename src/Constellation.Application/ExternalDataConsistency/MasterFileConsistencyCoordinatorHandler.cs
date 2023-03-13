@@ -19,17 +19,20 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
     private readonly IExcelService _excelService;
     private readonly ISchoolRegisterGateway _schoolRegisterGateway;
     private readonly IStudentRepository _studentRepository;
+    private readonly IEmailService _emailService;
 
     public MasterFileConsistencyCoordinatorHandler(
         Serilog.ILogger logger,
         IExcelService excelService,
         ISchoolRegisterGateway schoolRegisterGateway,
-        IStudentRepository studentRepository)
+        IStudentRepository studentRepository,
+        IEmailService emailService)
     {
         _logger = logger.ForContext<MasterFileConsistencyCoordinator>();
         _excelService = excelService;
         _schoolRegisterGateway = schoolRegisterGateway;
         _studentRepository = studentRepository;
+        _emailService = emailService;
     }
 
     public async Task<Result<List<UpdateItem>>> Handle(MasterFileConsistencyCoordinator request, CancellationToken cancellationToken)
@@ -58,6 +61,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                 updateItems.Add(new UpdateItem(
                     "MasterFile Schools",
                     fileSchool.Index,
+                    fileSchool.Name,
                     "Principal Name",
                     fileSchool.PrincipalName.ToLower(),
                     collectionSchool.PrincipalName.ToLower()));
@@ -74,6 +78,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "DataCollections",
                         0,
+                        string.Empty,
                         "Principal Email",
                         collectionSchool.PrincipalEmail.ToLower(),
                         "EMAIL IS INVALID!"));
@@ -83,6 +88,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                     "MasterFile Schools",
                     fileSchool.Index,
+                    fileSchool.Name,
                     "Principal Email",
                     fileSchool.PrincipalEmail.ToLower(),
                     collectionEmailRequest.Value.Email.ToLower()));
@@ -96,6 +102,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                 updateItems.Add(new UpdateItem(
                     "MasterFile Schools",
                     fileSchool.Index,
+                    fileSchool.Name,
                     "Principal Email",
                     fileSchool.PrincipalEmail.ToLower(),
                     "EMAIL IS INVALID!"));
@@ -129,6 +136,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 2 Email",
                         string.Empty,
                         dbStudent.Family.Parent1.EmailAddress.ToLower()));
@@ -137,6 +145,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 2 Email",
                         string.Empty,
                         "NO EMAIL FOUND!"));
@@ -147,6 +156,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 1 Email",
                         string.Empty,
                         dbStudent.Family.Parent2.EmailAddress.ToLower()));
@@ -156,6 +166,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 1 Email",
                         string.Empty,
                         "NO EMAIL FOUND!"));
@@ -170,6 +181,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 1 Email",
                         fileStudent.Parent1Email.ToLower(),
                         "EMAIL IS INVALID!"));
@@ -181,6 +193,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 1 Email",
                         fileStudent.Parent1Email,
                         dbStudent.Family.Parent2.EmailAddress.ToLower()));
@@ -191,6 +204,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 2 Email",
                         string.Empty,
                         dbStudent.Family.Parent2.EmailAddress.ToLower()));
@@ -201,6 +215,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 2 Email",
                         string.Empty,
                         dbStudent.Family.Parent1.EmailAddress.ToLower()));
@@ -215,6 +230,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 2 Email",
                         fileStudent.Parent2Email.ToLower(),
                         "EMAIL IS INVALID!"));
@@ -226,6 +242,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 2 Email",
                         fileStudent.Parent2Email,
                         dbStudent.Family.Parent2.EmailAddress.ToLower()));
@@ -236,6 +253,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 1 Email",
                         string.Empty,
                         dbStudent.Family.Parent2.EmailAddress.ToLower()));
@@ -246,6 +264,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 1 Email",
                         string.Empty,
                         dbStudent.Family.Parent1.EmailAddress.ToLower()));
@@ -260,6 +279,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 1 Email",
                         fileStudent.Parent1Email.ToLower(),
                         "EMAIL IS INVALID!"));
@@ -271,6 +291,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 2 Email",
                         fileStudent.Parent2Email.ToLower(),
                         "EMAIL IS INVALID!"));
@@ -287,6 +308,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 1 Email",
                         fileStudent.Parent1Email.ToLower(),
                         dbStudent.Family.Parent2.EmailAddress.ToLower()));
@@ -294,6 +316,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
+                        dbStudent.DisplayName,
                         "Parent 2 Email",
                         fileStudent.Parent2Email.ToLower(),
                         dbStudent.Family.Parent1.EmailAddress.ToLower()));
@@ -306,6 +329,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         updateItems.Add(new UpdateItem(
                             "MasterFile Students",
                             fileStudent.Index,
+                            dbStudent.DisplayName,
                             "Parent 2 Email",
                             fileStudent.Parent2Email.ToLower(),
                             dbStudent.Family.Parent2.EmailAddress.ToLower()));
@@ -316,6 +340,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         updateItems.Add(new UpdateItem(
                             "MasterFile Students",
                             fileStudent.Index,
+                            dbStudent.DisplayName,
                             "Parent 2 Email",
                             fileStudent.Parent2Email.ToLower(),
                             dbStudent.Family.Parent1.EmailAddress.ToLower()));
@@ -329,6 +354,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         updateItems.Add(new UpdateItem(
                             "MasterFile Students",
                             fileStudent.Index,
+                            dbStudent.DisplayName,
                             "Parent 1 Email",
                             fileStudent.Parent1Email.ToLower(),
                             dbStudent.Family.Parent2.EmailAddress.ToLower()));
@@ -339,6 +365,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         updateItems.Add(new UpdateItem(
                             "MasterFile Students",
                             fileStudent.Index,
+                            dbStudent.DisplayName,
                             "Parent 1 Email",
                             fileStudent.Parent1Email.ToLower(),
                             dbStudent.Family.Parent1.EmailAddress.ToLower()));
@@ -347,6 +374,16 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
             }
         }
 
-        return updateItems.Distinct().ToList();
+        updateItems = updateItems.Distinct().ToList();
+
+        if (request.EmailReport)
+        {
+            // Send the updateItems to the report generator and email to the requested address
+            var stream = await _excelService.CreateMasterFileConsistencyReport(updateItems, cancellationToken);
+
+            await _emailService.SendMasterFileConsistencyReportEmail(stream, request.EmailAddress, cancellationToken);
+        }
+
+        return updateItems;
     }
 }

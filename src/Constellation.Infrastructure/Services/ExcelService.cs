@@ -2,6 +2,7 @@
 
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.CSV;
+using Constellation.Application.ExternalDataConsistency;
 using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Services;
@@ -13,6 +14,7 @@ using OfficeOpenXml;
 using System.Data;
 using System.Drawing;
 using System.Reflection;
+using System.Threading.Channels;
 
 public class ExcelService : IExcelService, IScopedService
 {
@@ -662,6 +664,29 @@ public class ExcelService : IExcelService, IScopedService
         }
 
         return studentList;
+    }
+
+    public async Task<MemoryStream> CreateMasterFileConsistencyReport(List<UpdateItem> updateItems, CancellationToken cancellationToken = default)
+    {
+        var excel = new ExcelPackage();
+        var workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
+
+        var nameDetail = workSheet.Cells[1, 1].RichText.Add("MasterFile Consistency Report");
+        nameDetail.Bold = true;
+        nameDetail.Size = 16;
+
+        workSheet.Cells[3, 1].LoadFromCollection(updateItems, true);
+
+        workSheet.View.FreezePanes(4, 1);
+        workSheet.Cells[3, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFilter = true;
+        workSheet.Cells[4, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
+
+        var memoryStream = new MemoryStream();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+
+        memoryStream.Position = 0;
+
+        return memoryStream;
     }
 
     private class StudentRecord

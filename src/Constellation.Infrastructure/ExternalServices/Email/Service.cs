@@ -1136,4 +1136,23 @@ public class Service : IEmailService, IScopedService
 
         await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
     }
+
+    public async Task SendMasterFileConsistencyReportEmail(MemoryStream report, string emailAddress, CancellationToken cancellationToken = default)
+    {
+        var viewModel = $"<p>MasterFile Consistency Report generated {DateTime.Today.ToLongDateString()} is attached.</p>";
+
+        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+
+        var toRecipients = new Dictionary<string, string>
+        {
+            { "", emailAddress }
+        };
+
+        var attachments = new List<Attachment>
+        {
+            new Attachment(report, "Consistency Report.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        };
+
+        await _emailSender.Send(toRecipients, null, $"[Aurora College] MasterFile Consistency Report - {DateTime.Today.ToLongDateString()}", body, attachments);
+    }
 }

@@ -4,7 +4,8 @@
 
 <form asp-page-handler="CheckFile" enctype="multipart/form-data">
     <input asp-for="FormFile" type="file" />
-    <button type="submit">Sync Parents</button>
+    <input asp-for="EmailReport" />
+    <button type="submit">Check Consistency</button>
 </form>
 
 <table class="table table-striped data-table">

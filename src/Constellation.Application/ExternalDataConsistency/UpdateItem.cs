@@ -2,6 +2,7 @@
 public sealed record UpdateItem(
     string Source,
     int Line,
+    string LineDescription,
     string Column,
     string CurrentValue,
     string NewValue);

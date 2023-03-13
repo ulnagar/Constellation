@@ -57,6 +57,7 @@ namespace Constellation.Application.Interfaces.Services
         Task SendAdminAbsenceSentralAlert(string studentName);
         Task SendAdminLowCreditAlert(double credit);
         Task SendAdminClassworkNotificationContactAlert(Student student, Staff teacher, ClassworkNotification notification);
+        Task SendMasterFileConsistencyReportEmail(MemoryStream report, string emailAddress, CancellationToken cancellationToken = default);
 
         // Auth Emails
         Task SendMagicLinkLoginEmail(MagicLinkEmail notification);
