@@ -16,10 +16,14 @@ using System.ComponentModel.DataAnnotations;
 public class UpsertModel : BasePageModel
 {
     private readonly IMediator _mediator;
+    private readonly LinkGenerator _linkGenerator;
 
-    public UpsertModel(IMediator mediator)
+    public UpsertModel(
+        IMediator mediator,
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
+        _linkGenerator = linkGenerator;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -27,25 +31,25 @@ public class UpsertModel : BasePageModel
     
     [BindProperty]
     [Required]
-    public string FirstName { get; set; }
-    
+    public string FirstName { get; set; } = string.Empty;
+
     [BindProperty]
     [Required]
-    public string LastName { get; set; }
-    
+    public string LastName { get; set; } = string.Empty;
+
     [BindProperty]
     [Required]
     [DataType(DataType.EmailAddress)]
-    public string EmailAddress { get; set; }
+    public string EmailAddress { get; set; } = string.Empty;
 
     [BindProperty]
     [Required]
-    public string SchoolCode { get; set; }
+    public string SchoolCode { get; set; } = string.Empty;
 
     [BindProperty]
-    public string AdobeConnectId { get; set; }
+    public string AdobeConnectId { get; set; } = string.Empty;
 
-    public List<SchoolSelectionListResponse> Schools { get; set; }
+    public List<SchoolSelectionListResponse> Schools { get; set; } = new();
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
     {
@@ -57,7 +61,13 @@ public class UpsertModel : BasePageModel
 
             if (casualResponse.IsFailure)
             {
-                return RedirectToAction("Index");
+                Error = new ErrorDisplay
+                {
+                    Error = casualResponse.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/Casuals/Index", values: new { area = "ShortTerm" })
+                };
+
+                return Page();
             }
 
             FirstName = casualResponse.Value.FirstName;
@@ -71,7 +81,13 @@ public class UpsertModel : BasePageModel
 
         if (schoolsResponse.IsFailure)
         {
-            return RedirectToAction("Index");
+            Error = new ErrorDisplay
+            {
+                Error = schoolsResponse.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Casuals/Index", values: new { area = "ShortTerm" })
+            };
+
+            return Page();
         }
 
         Schools = schoolsResponse.Value;
@@ -97,7 +113,13 @@ public class UpsertModel : BasePageModel
 
                 if (result.IsSuccess)
                 {
-                    return RedirectToPage("Index");
+                    Error = new ErrorDisplay
+                    {
+                        Error = result.Error,
+                        RedirectPath = _linkGenerator.GetPathByPage("/Casuals/Index", values: new { area = "ShortTerm" })
+                    };
+
+                    return Page();
                 }
 
                 ModelState.AddModelError("", result.Error.Message);
@@ -115,7 +137,13 @@ public class UpsertModel : BasePageModel
 
                 if (result.IsSuccess)
                 {
-                    return RedirectToPage("Index");
+                    Error = new ErrorDisplay
+                    {
+                        Error = result.Error,
+                        RedirectPath = _linkGenerator.GetPathByPage("/Casuals/Index", values: new { area = "ShortTerm" })
+                    };
+
+                    return Page();
                 }
 
                 ModelState.AddModelError("", result.Error.Message);
@@ -126,7 +154,13 @@ public class UpsertModel : BasePageModel
 
         if (schoolsResponse.IsFailure)
         {
-            return RedirectToAction("Index");
+            Error = new ErrorDisplay
+            {
+                Error = schoolsResponse.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Casuals/Index", values: new { area = "ShortTerm" })
+            };
+
+            return Page();
         }
 
         Schools = schoolsResponse.Value;

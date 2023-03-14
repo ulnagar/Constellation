@@ -13,10 +13,14 @@ using System.Threading;
 public class UpdateModel : BasePageModel
 {
     private readonly IMediator _mediator;
+    private readonly LinkGenerator _linkGenerator;
 
-    public UpdateModel(IMediator mediator)
+    public UpdateModel(
+        IMediator mediator,
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
+        _linkGenerator = linkGenerator;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -31,12 +35,7 @@ public class UpdateModel : BasePageModel
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
     {
-        var pageReady = await PreparePage(cancellationToken);
-
-        if (!pageReady)
-        {
-            return RedirectToPage("Index");
-        }
+        await PreparePage(cancellationToken);
 
         return Page();
     }
@@ -47,12 +46,7 @@ public class UpdateModel : BasePageModel
 
         if (result.IsFailure)
         {
-            var pageReady = await PreparePage(cancellationToken);
-
-            if (!pageReady)
-            {
-                return RedirectToPage("Index");
-            }
+            await PreparePage(cancellationToken);
 
             ModelState.AddModelError("", result.Error.Message);
 
@@ -70,6 +64,12 @@ public class UpdateModel : BasePageModel
 
         if (coverResult.IsFailure)
         {
+            Error = new ErrorDisplay
+            {
+                Error = coverResult.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Covers/Index", values: new { area = "ShortTerm" })
+            };
+
             return false;
         }
 

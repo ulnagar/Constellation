@@ -9,7 +9,7 @@ CURRENT TASK
 		*Migrate to domain events
 		*Refactor existing code to use new model
 		*Create unit tests for new domain model methods and events
-		Add error return for page events
+		*Add error return for page events
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS

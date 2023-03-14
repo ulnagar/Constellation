@@ -18,10 +18,14 @@ using System.Threading;
 public class CreateModel : BasePageModel
 {
     private readonly IMediator _mediator;
+    private readonly LinkGenerator _linkGenerator;
 
-    public CreateModel(IMediator mediator)
+    public CreateModel(
+        IMediator mediator,
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
+        _linkGenerator = linkGenerator;
     }
 
     [BindProperty]
@@ -41,12 +45,7 @@ public class CreateModel : BasePageModel
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
     {
-        var pageReady = await PreparePage(cancellationToken);
-
-        if (!pageReady)
-        {
-            return RedirectToPage("Index");
-        }
+        await PreparePage(cancellationToken);
 
         return Page();
     }
@@ -54,6 +53,11 @@ public class CreateModel : BasePageModel
     public async Task<IActionResult> OnPostCreate(CancellationToken cancellationToken)
     {
         var pageReady = await PreparePage(cancellationToken);
+
+        if (!pageReady)
+        {
+            return Page();
+        }
 
         var teacher = CoveringTeacherSelectionList.First(entry => entry.Id == CoveringTeacherId);
 
@@ -75,11 +79,6 @@ public class CreateModel : BasePageModel
 
         if (result.IsFailure)
         {
-            if (!pageReady)
-            {
-                return RedirectToPage("Index");
-            }
-
             ModelState.AddModelError("", result.Error.Message);
 
             return Page();
@@ -96,7 +95,15 @@ public class CreateModel : BasePageModel
         var casualResponse = await _mediator.Send(new GetCasualsForSelectionListQuery(), cancellationToken);
 
         if (teacherResponse.IsFailure || casualResponse.IsFailure)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = teacherResponse.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Covers/Index", values: new { area = "ShortTerm" })
+            };
+
             return false;
+        }
 
         CoveringTeacherSelectionList.AddRange(teacherResponse
             .Value
@@ -128,7 +135,15 @@ public class CreateModel : BasePageModel
         var classesResponse = await _mediator.Send(new GetOfferingsForSelectionListQuery(), cancellationToken);
 
         if (classesResponse.IsFailure)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = classesResponse.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Covers/Index", values: new { area = "ShortTerm" })
+            };
+
             return false;
+        }
 
         foreach (var course in classesResponse.Value)
         {
