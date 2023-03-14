@@ -1,0 +1,53 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.Reports.Pages.MasterFileModel
+
+<h2>MasterFile Consistency Check</h2>
+
+<hr />
+
+<form method="post" enctype="multipart/form-data">
+    <div class="form-row">
+        <div class="col-6 my-auto">
+            <label asp-for="FormFile">File</label>
+            <input asp-for="FormFile" type="file" />
+        </div>
+        <div class="col-3 d-flex">
+            <label asp-for="EmailReport" class="my-auto">Send via Email?</label>
+            <input type="checkbox" asp-for="EmailReport" class="checkbox-toggle" style="margin-top: 2px; margin-left: 10px;" />
+        </div>
+        <div class="col-3">
+            <button type="submit" class="btn btn-primary">Upload and Process</button>
+        </div>
+    </div>
+</form>
+
+<hr />
+
+@if (Model.UpdateItems.Any())
+{
+    <table class="table table-striped table-hover data-table">
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Index</th>
+                <th>Name</th>
+                <th>Column</th>
+                <th>Current Value</th>
+                <th>New Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.UpdateItems)
+            {
+                <tr>
+                    <td>@item.Source</td>
+                    <td>@item.Line</td>
+                    <td>@item.LineDescription</td>
+                    <td>@item.Column</td>
+                    <td>@item.CurrentValue</td>
+                    <td>@item.NewValue</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -314,5 +314,5 @@ input.checkbox-toggle:checked:before {
 /* Prevent page footer from covering content */
 
 main {
-    min-height: 100vh;
+    /* min-height: 100vh; */
 }
