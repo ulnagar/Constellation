@@ -1,203 +1,175 @@
-﻿using Constellation.Application.Features.Auth.Queries;
-using Constellation.Application.Interfaces.Repositories;
+﻿namespace Constellation.Presentation.Server.Areas.Admin.Pages;
+
+using Constellation.Application.Features.Auth.Queries;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
-using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
 using System.DirectoryServices.AccountManagement;
-using System.Linq;
 using System.Threading.Tasks;
 
-namespace Constellation.Presentation.Server.Areas.Admin.Pages
+
+[AllowAnonymous]
+public class LoginModel : PageModel
 {
-    [AllowAnonymous]
-    public class LoginModel : BasePageModel
+    private readonly UserManager<AppUser> _userManager;
+    private readonly Serilog.ILogger _logger;
+    private readonly IMediator _mediator;
+    private readonly SignInManager<AppUser> _signInManager;
+    
+    public LoginModel(
+        SignInManager<AppUser> signInManager,
+        UserManager<AppUser> userManager,
+        Serilog.ILogger logger,
+        IMediator mediator)
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly UserManager<AppUser> _userManager;
-        private readonly ILogger<IAuthService> _logger;
-        private readonly IMediator _mediator;
-        private readonly SignInManager<AppUser> _signInManager;
-        
-        public LoginModel(SignInManager<AppUser> signInManager, IUnitOfWork unitOfWork,
-            UserManager<AppUser> userManager, ILogger<IAuthService> logger,
-            IMediator mediator)
-            : base()
+        _userManager = userManager;
+        _logger = logger.ForContext<IAuthService>();
+        _mediator = mediator;
+        _signInManager = signInManager;
+    }
+
+    [BindProperty]
+    public InputModel Input { get; set; }
+
+    public string ReturnUrl { get; set; }
+
+    public class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        [RegularExpression(@"^(?:~+.*$)|\w+(?:[-+.']\w+)*@det.nsw.edu.au$", ErrorMessage = "Invalid Email.")]
+        public string Email { get; set; }
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; }
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
+    }
+
+    private class LoginResult
+    {
+        public bool Succeeded { get; set; }
+        public bool RequiresTwoFactor { get; set; }
+        public bool IsLockedOut { get; set; }
+    }
+
+    public async Task OnGetAsync(string returnUrl = null)
+    {
+        returnUrl ??= Url.Content("~/");
+
+        // Clear the existing external cookie to ensure a clean login process
+        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+        ReturnUrl = returnUrl;
+    }
+
+    public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+    {
+        returnUrl ??= Url.Content("~/");
+
+        if (ModelState.IsValid)
         {
-            _unitOfWork = unitOfWork;
-            _userManager = userManager;
-            _logger = logger;
-            _mediator = mediator;
-            _signInManager = signInManager;
-        }
+            // Allow bypass of authentication when debugging
+            var localAuth = Input.Email.Contains("~");
+            Input.Email = Input.Email.Replace("~", "");
 
-        [BindProperty]
-        public InputModel Input { get; set; }
+            _logger.Information("Starting Login Attempt by {Email}", Input.Email);
 
-        public IList<AuthenticationScheme> ExternalLogins { get; set; }
+            var user = await _userManager.FindByEmailAsync(Input.Email);
 
-        public string ReturnUrl { get; set; }
-
-        [TempData]
-        public string ErrorMessage { get; set; }
-
-        public class InputModel
-        {
-            [Required]
-            [EmailAddress]
-            [RegularExpression(@"^(?:~+.*$)|\w+(?:[-+.']\w+)*@det.nsw.edu.au$", ErrorMessage = "Invalid Email.")]
-            public string Email { get; set; }
-
-            [Required]
-            [DataType(DataType.Password)]
-            public string Password { get; set; }
-
-            [Display(Name = "Remember me?")]
-            public bool RememberMe { get; set; }
-        }
-
-        private class LoginResult
-        {
-            public bool Succeeded { get; set; }
-            public bool RequiresTwoFactor { get; set; }
-            public bool IsLockedOut { get; set; }
-        }
-
-        public async Task OnGetAsync(string returnUrl = null)
-        {
-            if (!string.IsNullOrEmpty(ErrorMessage))
+            if (user == null)
             {
-                ModelState.AddModelError(string.Empty, ErrorMessage);
+                _logger.Warning(" - No user found for email {Email}", Input.Email);
+
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                return Page();
+            } else
+            {
+                _logger.Information(" - Found user {user} for email {email}", user.Id, Input.Email);
             }
 
-            await GetClasses(_unitOfWork);
-
-            returnUrl ??= Url.Content("~/");
-
-            // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-
-            ReturnUrl = returnUrl;
-        }
-
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
-        {
-            returnUrl ??= Url.Content("~/");
-
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-
-            if (ModelState.IsValid)
+            // If user is admin, bypass Staff Member check
+            if (await _userManager.IsInRoleAsync(user, AuthRoles.Admin))
             {
-                var localAuth = Input.Email.Contains("~");
-                Input.Email = Input.Email.Replace("~", "");
+                // Bypass check
+            } else {
+                var isStaffMember = await _mediator.Send(new IsUserASchoolStaffMemberQuery { EmailAddress = Input.Email });
 
-                _logger.LogInformation("Starting Login Attempt by {Email}", Input.Email);
-
-                var user = await _userManager.FindByEmailAsync(Input.Email);
-
-                if (user == null)
+                // Check both the staff list for matching email, and the user object for correct flag
+                if (!isStaffMember && !user.IsStaffMember)
                 {
-                    _logger.LogWarning(" - No user found for email {Email}", Input.Email);
-
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return Page();
-                } else
-                {
-                    _logger.LogInformation(" - Found user {user} for email {email}", user.Id, Input.Email);
+                    _logger.Information(" - User is not a staff member - redirecting to Schools Portal");
+                    return RedirectToPage("PortalRedirect");
                 }
+            }
 
-                // If user is admin, bypass Staff Member check
-                if (await _userManager.IsInRoleAsync(user, AuthRoles.Admin))
-                {
-                    // Bypass check
-                } else {
-                    //var isStaffMember = await _mediator.Send(new IsUserASchoolStaffMemberQuery { EmailAddress = Input.Email });
-                    var isStaffMember = user.IsStaffMember;
+            var result = new LoginResult();
 
-                    if (!isStaffMember)
-                    {
-                        _logger.LogInformation(" - User is not a staff member - redirecting to Schools Portal");
-                        return RedirectToPage("PortalRedirect");
-                    }
-                }
-
-                var result = new LoginResult();
-
-                if (!localAuth)
-                {
-                    _logger.LogInformation(" - Attempting domain login by {Email}", Input.Email);
+            if (!localAuth)
+            {
+                _logger.Information(" - Attempting domain login by {Email}", Input.Email);
 
 #pragma warning disable CA1416 // Validate platform compatibility
-                    var context = new PrincipalContext(ContextType.Domain, "DETNSW.WIN");
-                    var success = context.ValidateCredentials(Input.Email, Input.Password);
+                var context = new PrincipalContext(ContextType.Domain, "DETNSW.WIN");
+                var success = context.ValidateCredentials(Input.Email, Input.Password);
 #pragma warning restore CA1416 // Validate platform compatibility
 
-                    if (!success)
-                    {
-                        _logger.LogWarning(" - Domain login failed for {Email}", Input.Email);
-
-                        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                        return Page();
-                    } else
-                    {
-                        _logger.LogInformation(" - Domain login succeeded for {Email}", Input.Email);
-                    }
-
-                    await _signInManager.SignInAsync(user, false);
-                    result.Succeeded = true;
-                } else
+                if (!success)
                 {
-                    _logger.LogInformation(" - Attempting local login by {Email}", Input.Email);
-#if DEBUG
-                    _logger.LogInformation(" - DEBUG code found. Bypass login check.");
-                    await _signInManager.SignInAsync(user, false);
-                    result.Succeeded = true;
-#else
-                    var passwordResult = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-                    
-                    if (!passwordResult.Succeeded)
-                    {
-                        _logger.LogWarning(" - Local login failed for {Email}", Input.Email);
-                    }
-                    else
-                    {
-                        result.Succeeded = passwordResult.Succeeded;
-                        _logger.LogInformation(" - Local login suceeded for {Email}", Input.Email);
-                    }
-#endif
-                }
+                    _logger.Warning(" - Domain login failed for {Email}", Input.Email);
 
-                if (result.Succeeded)
-                {
-                    return LocalRedirect(returnUrl);
-                }
-                //if (result.RequiresTwoFactor)
-                //{
-                //    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, Input.RememberMe });
-                //}
-                //if (result.IsLockedOut)
-                //{
-                //    return RedirectToPage("./Lockout");
-                //}
-                else
-                {
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
+                } else
+                {
+                    _logger.Information(" - Domain login succeeded for {Email}", Input.Email);
                 }
+
+                await _signInManager.SignInAsync(user, false);
+                result.Succeeded = true;
+            } else
+            {
+                _logger.Information(" - Attempting local login by {Email}", Input.Email);
+#if DEBUG
+                _logger.Information(" - DEBUG code found. Bypass login check.");
+                await _signInManager.SignInAsync(user, false);
+                result.Succeeded = true;
+#else
+                var passwordResult = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                
+                if (!passwordResult.Succeeded)
+                {
+                    _logger.Warning(" - Local login failed for {Email}", Input.Email);
+                }
+                else
+                {
+                    result.Succeeded = passwordResult.Succeeded;
+                    _logger.Information(" - Local login suceeded for {Email}", Input.Email);
+                }
+#endif
             }
 
-            // If we got this far, something failed, redisplay form
-            return Page();
+            if (result.Succeeded)
+            {
+                return LocalRedirect(returnUrl);
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                return Page();
+            }
         }
+
+        // If we got this far, something failed, redisplay form
+        return Page();
     }
 }
