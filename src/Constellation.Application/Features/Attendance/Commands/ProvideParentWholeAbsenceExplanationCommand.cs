@@ -2,6 +2,7 @@
 
 using Constellation.Application.Features.Attendance.Notifications;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -24,28 +25,36 @@ public class ProvideParentWholeAbsenceExplanationCommandHandler : IRequestHandle
 {
     private readonly IAppDbContext _context;
     private readonly IMediator _mediator;
+    private readonly IStudentFamilyRepository _studentFamilyRepository;
 
-    public ProvideParentWholeAbsenceExplanationCommandHandler(IAppDbContext context, IMediator mediator)
+    public ProvideParentWholeAbsenceExplanationCommandHandler(
+        IAppDbContext context,
+        IMediator mediator,
+        IStudentFamilyRepository studentFamilyRepository)
     {
         _context = context;
         _mediator = mediator;
+        _studentFamilyRepository = studentFamilyRepository;
     }
 
     public async Task<Unit> Handle(ProvideParentWholeAbsenceExplanationCommand request, CancellationToken cancellationToken)
     {
-        var authorised = await _context.Students
+        var studentId = await _context
+            .Students
             .Where(student =>
-                student.Family.EmailAddress == request.ParentEmail ||
-                student.Family.Parent1.EmailAddress == request.ParentEmail ||
-                student.Family.Parent2.EmailAddress == request.ParentEmail)
-            .Where(student =>
-                student.Absences.Any(absence => absence.Id == request.AbsenceId))
-            .AnyAsync(cancellationToken);
+                student.Absences.Any(absence =>
+                    absence.Id == request.AbsenceId))
+            .Select(student => student.StudentId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var studentIds = await _studentFamilyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
+
+        var authorised = studentIds.Contains(studentId);
 
         if (!authorised)
             return Unit.Value;
         
-        var absence = await _context.Absences.FindAsync(request.AbsenceId);
+        var absence = await _context.Absences.FindAsync(new object[] { request.AbsenceId }, cancellationToken: cancellationToken);
 
         if (absence == null)
             return Unit.Value;
@@ -61,7 +70,7 @@ public class ProvideParentWholeAbsenceExplanationCommandHandler : IRequestHandle
         absence.Responses.Add(response);
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _mediator.Publish(new AbsenceExplanationReceivedNotification { AbsenceResponseId = response.Id });
+        await _mediator.Publish(new AbsenceExplanationReceivedNotification { AbsenceResponseId = response.Id }, cancellationToken);
 
         return Unit.Value;
     }

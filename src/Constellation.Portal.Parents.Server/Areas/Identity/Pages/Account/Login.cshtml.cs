@@ -4,6 +4,7 @@ using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Features.Auth.Queries;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
+using Constellation.Core.Abstractions;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +18,7 @@ public class LoginModel : PageModel
     private readonly UserManager<AppUser> _userManager;
     private readonly IEmailService _emailService;
     private readonly IMediator _mediator;
+    private readonly IStudentFamilyRepository _familyRepository;
     private readonly ILogger<IAuthService> _logger;
 
     internal enum LoginStatus
@@ -27,13 +29,19 @@ public class LoginModel : PageModel
         TokenInvalid
     }
 
-    public LoginModel(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager,
-        IEmailService emailService, IMediator mediator, ILogger<IAuthService> logger)
+    public LoginModel(
+        SignInManager<AppUser> signInManager,
+        UserManager<AppUser> userManager,
+        IEmailService emailService,
+        IMediator mediator,
+        IStudentFamilyRepository familyRepository,
+        ILogger<IAuthService> logger)
     {
         _signInManager = signInManager;
         _userManager = userManager;
         _emailService = emailService;
         _mediator = mediator;
+        _familyRepository = familyRepository;
         _logger = logger;
     }
 
@@ -84,7 +92,7 @@ public class LoginModel : PageModel
             }
 
             // Confirm user is a parent
-            var isValid = await _mediator.Send(new IsUserAParentQuery { EmailAddress = Input.Email });
+            var isValid = await _familyRepository.DoesEmailBelongToParentOrFamily(Input.Email);
             if (!isValid)
             {
                 _logger.LogWarning(" - User {user} has not corresponding parent record", Input.Email);

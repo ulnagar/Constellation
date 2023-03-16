@@ -102,7 +102,8 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         string firstName,
         string lastName,
         string mobileNumber,
-        string emailAddress)
+        string emailAddress,
+        Parent.SentralReference sentralLink)
     {
         var parentEmail = EmailAddress.Create(emailAddress);
 
@@ -121,7 +122,8 @@ public sealed class Family : AggregateRoot, IAuditableEntity
                 firstName,
                 lastName,
                 mobileNumber,
-                parentEmail.Value);
+                parentEmail.Value,
+                sentralLink);
 
             RaiseDomainEvent(new ParentAddedToFamilyDomainEvent(Guid.NewGuid(), Id, parent.Id));
 
@@ -135,7 +137,8 @@ public sealed class Family : AggregateRoot, IAuditableEntity
             firstName,
             lastName,
             mobileNumber,
-            parentEmail.Value);
+            parentEmail.Value,
+            sentralLink);
 
         return existingParent;        
     }

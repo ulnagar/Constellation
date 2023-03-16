@@ -4,6 +4,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Constellation.Application.Common.Mapping;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -89,24 +90,25 @@ public class GetAbsencesForFamilyQueryHandler : IRequestHandler<GetAbsencesForFa
 {
     private readonly IAppDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IStudentFamilyRepository _familyRepository;
 
-    public GetAbsencesForFamilyQueryHandler(IAppDbContext context, IMapper mapper)
+    public GetAbsencesForFamilyQueryHandler(
+        IAppDbContext context,
+        IMapper mapper,
+        IStudentFamilyRepository familyRepository)
     {
         _context = context;
         _mapper = mapper;
+        _familyRepository = familyRepository;
     }
 
     public async Task<IList<AbsenceDto>> Handle(GetAbsencesForFamilyQuery request, CancellationToken cancellationToken)
     {
-        var students = await _context.StudentFamilies
-            .Where(family => family.Parent1.EmailAddress == request.ParentEmail || family.Parent2.EmailAddress == request.ParentEmail)
-            .SelectMany(family => family.Students)
-            .Select(student => student.StudentId)
-            .ToListAsync(cancellationToken);
+        var studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
 
         return await _context.Absences
-            .Where(absence => students.Contains(absence.StudentId) && absence.Date.Year == DateTime.Today.Year)
-            .ProjectTo<AbsenceDto>(_mapper.ConfigurationProvider)
+            .Where(absence => studentIds.Contains(absence.StudentId) && absence.Date.Year == DateTime.Today.Year)
+            .ProjectTo<AbsenceDto>(_mapper.ConfigurationProvider, cancellationToken)
             .ToListAsync(cancellationToken);
     }
 }

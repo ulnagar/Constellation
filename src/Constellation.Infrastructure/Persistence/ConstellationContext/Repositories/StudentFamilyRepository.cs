@@ -13,6 +13,24 @@ internal sealed class StudentFamilyRepository : IStudentFamilyRepository
         _context = context;
     }
 
+    public async Task<Family?> GetFamilyBySentralId(
+        string SentralId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Family>()
+            .Include(family => family.Parents)
+            .Include(family => family.Students)
+            .FirstOrDefaultAsync(family => family.SentralId == SentralId, cancellationToken);
+
+    public async Task<Family?> GetFamilyById(
+        Guid Id,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Family>()
+            .Include(family => family.Parents)
+            .Include(family => family.Students)
+            .FirstOrDefaultAsync(family => family.Id == Id, cancellationToken);
+
     public async Task<bool> DoesEmailBelongToParentOrFamily(
         string email,
         CancellationToken cancellationToken = default) =>

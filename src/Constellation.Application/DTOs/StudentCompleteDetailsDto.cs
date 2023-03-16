@@ -24,7 +24,7 @@ namespace Constellation.Application.DTOs
         {
             profile.CreateMap<Student, StudentCompleteDetailsDto>()
                 .ForMember(dest => dest.Student, opt => opt.MapFrom(src => src))
-                .ForMember(dest => dest.Family, opt => opt.MapFrom(src => src.Family))
+                .ForMember(dest => dest.Family, opt => opt.Ignore())
                 .ForMember(dest => dest.Enrolments, opt => opt.MapFrom(src => src.Enrolments.Select(enrolment => enrolment.Offering)))
                 .ForMember(dest => dest.Sessions, opt => opt.MapFrom(src => src.Enrolments.SelectMany(enrolment => enrolment.Offering.Sessions)))
                 .ForMember(dest => dest.Equipment, opt => opt.MapFrom(src => src.Devices))

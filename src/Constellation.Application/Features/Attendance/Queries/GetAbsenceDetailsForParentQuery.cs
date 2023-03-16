@@ -4,6 +4,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Constellation.Application.Common.Mapping;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -69,23 +70,31 @@ public class GetAbsenceDetailsForParentQueryHandler : IRequestHandler<GetAbsence
 {
     private readonly IAppDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IStudentFamilyRepository _familyRepository;
 
-    public GetAbsenceDetailsForParentQueryHandler(IAppDbContext context, IMapper mapper)
+    public GetAbsenceDetailsForParentQueryHandler(
+        IAppDbContext context,
+        IMapper mapper,
+        IStudentFamilyRepository familyRepository)
     {
         _context = context;
         _mapper = mapper;
+        _familyRepository = familyRepository;
     }
 
     public async Task<AbsenceDetailDto> Handle(GetAbsenceDetailsForParentQuery request, CancellationToken cancellationToken)
     {
-        var authorised = await _context.Students
+        var studentId = await _context
+            .Students
             .Where(student =>
-                student.Family.EmailAddress == request.ParentEmail ||
-                student.Family.Parent1.EmailAddress == request.ParentEmail ||
-                student.Family.Parent2.EmailAddress == request.ParentEmail)
-            .Where(student =>
-                student.Absences.Any(absence => absence.Id == request.AbsenceId))
-            .AnyAsync(cancellationToken);
+                student.Absences.Any(absence =>
+                    absence.Id == request.AbsenceId))
+            .Select(student => student.StudentId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
+
+        var authorised = studentIds.Contains(studentId);
 
         if (!authorised)
         {

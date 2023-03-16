@@ -3,6 +3,8 @@ using AutoMapper.QueryableExtensions;
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Partners.Students.Queries;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Models.Families;
+using Constellation.Infrastructure.Persistence.ConstellationContext;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -14,10 +16,10 @@ namespace Constellation.Infrastructure.Features.Partners.Students.Queries
 {
     public class GetStudentCompleteDetailsQueryHandler : IRequestHandler<GetStudentCompleteDetailsQuery, StudentCompleteDetailsDto>
     {
-        private readonly IAppDbContext _context;
+        private readonly AppDbContext _context;
         private readonly IMapper _mapper;
 
-        public GetStudentCompleteDetailsQueryHandler(IAppDbContext context, IMapper mapper)
+        public GetStudentCompleteDetailsQueryHandler(AppDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -48,7 +50,7 @@ namespace Constellation.Infrastructure.Features.Partners.Students.Queries
                 .ProjectTo<StudentCompleteDetailsDto.Allocation>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
 
-            viewModel.Family = await _context.StudentFamilies
+            viewModel.Family = await _context.Set<Family>()
                 .FirstOrDefaultAsync(family => family.Students.Any(student => student.StudentId == request.StudentId), cancellationToken);
 
             viewModel.Sessions = await _context.Enrolments

@@ -1,15 +1,13 @@
 ﻿namespace Constellation.Application.Features.Partners.Students.Queries;
 
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Constellation.Application.Common.Mapping;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,20 +33,27 @@ public class StudentOfParent : IMapFrom<Student>
 
 public class GetStudentsOfParentQueryHandler : IRequestHandler<GetStudentsOfParentQuery, ICollection<StudentOfParent>>
 {
-    private readonly IAppDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IStudentFamilyRepository _familyRepository;
+    private readonly IStudentRepository _studentRepository;
 
-    public GetStudentsOfParentQueryHandler(IAppDbContext context, IMapper mapper)
+    public GetStudentsOfParentQueryHandler(
+        IMapper mapper,
+        IStudentFamilyRepository familyRepository,
+        IStudentRepository studentRepository)
     {
-        _context = context;
         _mapper = mapper;
+        _familyRepository = familyRepository;
+        _studentRepository = studentRepository;
     }
 
     public async Task<ICollection<StudentOfParent>> Handle(GetStudentsOfParentQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Students
-            .Where(student => student.Family.Parent1.EmailAddress == request.ParentEmail || student.Family.Parent2.EmailAddress == request.ParentEmail)
-            .ProjectTo<StudentOfParent>(_mapper.ConfigurationProvider)
-            .ToListAsync(cancellationToken);
+        var studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
+
+        var students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
+
+        return _mapper
+            .Map<List<StudentOfParent>>(students);
     }
 }

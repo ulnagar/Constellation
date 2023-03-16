@@ -13,7 +13,8 @@ public sealed class Parent : Entity
         string firstName,
         string lastName,
         string mobileNumber,
-        string emailAddress)
+        string emailAddress,
+        SentralReference sentralLink)
         : base(id)
     {
         Title = title;
@@ -21,6 +22,7 @@ public sealed class Parent : Entity
         LastName = lastName;
         MobileNumber = mobileNumber;
         EmailAddress = emailAddress;
+        SentralLink = sentralLink;
     }
 
     public Guid FamilyId { get; set; }
@@ -29,6 +31,15 @@ public sealed class Parent : Entity
     public string LastName { get; private set; } = string.Empty;
     public string MobileNumber { get; private set; } = string.Empty;
     public string EmailAddress { get; private set; } = string.Empty;
+    public SentralReference SentralLink { get; private set; }
+
+    public enum SentralReference
+    {
+        None,
+        Mother,
+        Father,
+        Other
+    }
 
     internal static Parent Create(
         Guid id,
@@ -36,7 +47,8 @@ public sealed class Parent : Entity
         string firstName,
         string lastName,
         string mobileNumber,
-        EmailAddress emailAddress)
+        EmailAddress emailAddress,
+        SentralReference sentralLink = SentralReference.None)
     {
         return new Parent(
             id,
@@ -44,7 +56,8 @@ public sealed class Parent : Entity
             firstName,
             lastName,
             mobileNumber,
-            emailAddress.Email);
+            emailAddress.Email,
+            sentralLink);
     }
 
     internal void Update(
@@ -52,12 +65,14 @@ public sealed class Parent : Entity
         string firstName,
         string lastName,
         string mobileNumber,
-        EmailAddress emailAddress)
+        EmailAddress emailAddress,
+        SentralReference sentralLink = SentralReference.None)
     {
         Title = title;
         FirstName = firstName;
         LastName = lastName;
         MobileNumber = mobileNumber;
         EmailAddress = emailAddress.Email;
+        SentralLink = sentralLink;
     }
 }

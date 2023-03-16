@@ -4,9 +4,12 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Abstractions;
+using Constellation.Core.Models.Families;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -20,19 +23,22 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
     private readonly ISchoolRegisterGateway _schoolRegisterGateway;
     private readonly IStudentRepository _studentRepository;
     private readonly IEmailService _emailService;
+    private readonly IStudentFamilyRepository _familyRepository;
 
     public MasterFileConsistencyCoordinatorHandler(
         Serilog.ILogger logger,
         IExcelService excelService,
         ISchoolRegisterGateway schoolRegisterGateway,
         IStudentRepository studentRepository,
-        IEmailService emailService)
+        IEmailService emailService,
+        IStudentFamilyRepository familyRepository)
     {
         _logger = logger.ForContext<MasterFileConsistencyCoordinator>();
         _excelService = excelService;
         _schoolRegisterGateway = schoolRegisterGateway;
         _studentRepository = studentRepository;
         _emailService = emailService;
+        _familyRepository = familyRepository;
     }
 
     public async Task<Result<List<UpdateItem>>> Handle(MasterFileConsistencyCoordinator request, CancellationToken cancellationToken)
@@ -126,40 +132,102 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
 
             var fsp1 = !string.IsNullOrWhiteSpace(fileStudent.Parent1Email);
             var fsp2 = !string.IsNullOrWhiteSpace(fileStudent.Parent2Email);
-            var dbp1 = !string.IsNullOrWhiteSpace(dbStudent.Family?.Parent1?.EmailAddress);
-            var dbp2 = !string.IsNullOrWhiteSpace(dbStudent.Family?.Parent2?.EmailAddress);
 
-            if (!fsp1 && !fsp2)
+            List<Family> studentFamilies = new();
+
+            foreach (var membership in dbStudent.FamilyMemberships)
             {
-                if (dbp1)
-                {
-                    updateItems.Add(new UpdateItem(
-                        "MasterFile Students",
-                        fileStudent.Index,
-                        dbStudent.DisplayName,
-                        "Parent 2 Email",
-                        string.Empty,
-                        dbStudent.Family.Parent1.EmailAddress.ToLower()));
-                } else
-                {
-                    updateItems.Add(new UpdateItem(
-                        "MasterFile Students",
-                        fileStudent.Index,
-                        dbStudent.DisplayName,
-                        "Parent 2 Email",
-                        string.Empty,
-                        "NO EMAIL FOUND!"));
-                }
+                studentFamilies.Add(await _familyRepository.GetFamilyById(membership.FamilyId, cancellationToken));
+            }
 
-                if (dbp2)
+            // Get the residential family
+            var residentialFamily = studentFamilies
+                .FirstOrDefault(family =>
+                    family.Students.Any(student =>
+                        student.StudentId == dbStudent.StudentId &&
+                        student.IsResidentialFamily));
+
+            var parents = studentFamilies
+                    .SelectMany(family => family.Parents)
+                    .ToList();
+
+            if (fsp1)
+            {
+                // The masterfile only contains an entry for Parent 1
+                var fsp1Request = EmailAddress.Create(fileStudent.Parent1Email);
+                if (fsp1Request.IsFailure)
                 {
                     updateItems.Add(new UpdateItem(
                         "MasterFile Students",
                         fileStudent.Index,
                         dbStudent.DisplayName,
                         "Parent 1 Email",
+                        fileStudent.Parent1Email.ToLower(),
+                        "EMAIL IS INVALID!"));
+                }
+
+                var matchedParent = parents.FirstOrDefault(parent => parent.EmailAddress.ToLower() == fileStudent.Parent1Email.ToLower());
+
+                if (matchedParent is null)
+                {
+                    updateItems.Add(new UpdateItem(
+                        "MasterFile Students",
+                        fileStudent.Index,
+                        dbStudent.DisplayName,
+                        "Parent 1 Email",
+                        fileStudent.Parent1Email.ToLower(),
+                        string.Empty));
+                }
+                else
+                {
+                    parents.Remove(matchedParent);
+                }
+            }
+
+            if (fsp2)
+            {
+                // The masterfile only contains an entry for Parent 2
+                var fsp2Request = EmailAddress.Create(fileStudent.Parent2Email);
+                if (fsp2Request.IsFailure)
+                {
+                    updateItems.Add(new UpdateItem(
+                        "MasterFile Students",
+                        fileStudent.Index,
+                        dbStudent.DisplayName,
+                        "Parent 2 Email",
+                        fileStudent.Parent1Email.ToLower(),
+                        "EMAIL IS INVALID!"));
+                }
+
+                var matchedParent = parents.FirstOrDefault(parent => parent.EmailAddress.ToLower() == fileStudent.Parent2Email.ToLower());
+
+                if (matchedParent is null)
+                {
+                    updateItems.Add(new UpdateItem(
+                        "MasterFile Students",
+                        fileStudent.Index,
+                        dbStudent.DisplayName,
+                        "Parent 2 Email",
+                        fileStudent.Parent2Email.ToLower(),
+                        string.Empty));
+                }
+                else
+                {
+                    parents.Remove(matchedParent);
+                }
+            }
+
+            foreach (var parent in parents)
+            {
+                if (residentialFamily is not null && residentialFamily.Parents.Contains(parent))
+                {
+                    updateItems.Add(new UpdateItem(
+                        "MasterFile Students",
+                        fileStudent.Index,
+                        dbStudent.DisplayName,
+                        "Parent Email",
                         string.Empty,
-                        dbStudent.Family.Parent2.EmailAddress.ToLower()));
+                        parent.EmailAddress.ToLower()));
                 }
                 else
                 {
@@ -167,209 +235,9 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         "MasterFile Students",
                         fileStudent.Index,
                         dbStudent.DisplayName,
-                        "Parent 1 Email",
+                        "Other Parent Email",
                         string.Empty,
-                        "NO EMAIL FOUND!"));
-                }
-            }
-
-            if (fsp1 && !fsp2)
-            {
-                var fsp1Request = EmailAddress.Create(fileStudent.Parent1Email);
-                if (fsp1Request.IsFailure)
-                {
-                    updateItems.Add(new UpdateItem(
-                        "MasterFile Students",
-                        fileStudent.Index,
-                        dbStudent.DisplayName,
-                        "Parent 1 Email",
-                        fileStudent.Parent1Email.ToLower(),
-                        "EMAIL IS INVALID!"));
-                }
-                
-                if (fileStudent.Parent1Email.ToLower() != dbStudent.Family.Parent1.EmailAddress?.ToLower() &&
-                    fileStudent.Parent1Email.ToLower() != dbStudent.Family.Parent2.EmailAddress?.ToLower())
-                {
-                    updateItems.Add(new UpdateItem(
-                        "MasterFile Students",
-                        fileStudent.Index,
-                        dbStudent.DisplayName,
-                        "Parent 1 Email",
-                        fileStudent.Parent1Email,
-                        dbStudent.Family.Parent2.EmailAddress.ToLower()));
-                }
-
-                if (fileStudent.Parent1Email.ToLower() == dbStudent.Family.Parent1.EmailAddress?.ToLower() && dbp2)
-                {
-                    updateItems.Add(new UpdateItem(
-                        "MasterFile Students",
-                        fileStudent.Index,
-                        dbStudent.DisplayName,
-                        "Parent 2 Email",
-                        string.Empty,
-                        dbStudent.Family.Parent2.EmailAddress.ToLower()));
-                }
-
-                if (fileStudent.Parent1Email.ToLower() == dbStudent.Family.Parent2.EmailAddress?.ToLower() && dbp1)
-                {
-                    updateItems.Add(new UpdateItem(
-                        "MasterFile Students",
-                        fileStudent.Index,
-                        dbStudent.DisplayName,
-                        "Parent 2 Email",
-                        string.Empty,
-                        dbStudent.Family.Parent1.EmailAddress.ToLower()));
-                }
-            }
-
-            if (!fsp1 && fsp2)
-            {
-                var fsp2Request = EmailAddress.Create(fileStudent.Parent2Email);
-                if (fsp2Request.IsFailure)
-                {
-                    updateItems.Add(new UpdateItem(
-                        "MasterFile Students",
-                        fileStudent.Index,
-                        dbStudent.DisplayName,
-                        "Parent 2 Email",
-                        fileStudent.Parent2Email.ToLower(),
-                        "EMAIL IS INVALID!"));
-                }
-
-                if (fileStudent.Parent2Email.ToLower() != dbStudent.Family.Parent1.EmailAddress?.ToLower() &&
-                    fileStudent.Parent2Email.ToLower() != dbStudent.Family.Parent2.EmailAddress?.ToLower())
-                {
-                    updateItems.Add(new UpdateItem(
-                        "MasterFile Students",
-                        fileStudent.Index,
-                        dbStudent.DisplayName,
-                        "Parent 2 Email",
-                        fileStudent.Parent2Email,
-                        dbStudent.Family.Parent2.EmailAddress.ToLower()));
-                }
-
-                if (fileStudent.Parent2Email.ToLower() == dbStudent.Family.Parent1.EmailAddress?.ToLower() && dbp2)
-                {
-                    updateItems.Add(new UpdateItem(
-                        "MasterFile Students",
-                        fileStudent.Index,
-                        dbStudent.DisplayName,
-                        "Parent 1 Email",
-                        string.Empty,
-                        dbStudent.Family.Parent2.EmailAddress.ToLower()));
-                }
-
-                if (fileStudent.Parent2Email.ToLower() == dbStudent.Family.Parent2.EmailAddress?.ToLower() && dbp1)
-                {
-                    updateItems.Add(new UpdateItem(
-                        "MasterFile Students",
-                        fileStudent.Index,
-                        dbStudent.DisplayName,
-                        "Parent 1 Email",
-                        string.Empty,
-                        dbStudent.Family.Parent1.EmailAddress.ToLower()));
-                }
-            }
-
-            if (fsp1 && fsp2)
-            {
-                var fsp1Request = EmailAddress.Create(fileStudent.Parent1Email);
-                if (fsp1Request.IsFailure)
-                {
-                    updateItems.Add(new UpdateItem(
-                        "MasterFile Students",
-                        fileStudent.Index,
-                        dbStudent.DisplayName,
-                        "Parent 1 Email",
-                        fileStudent.Parent1Email.ToLower(),
-                        "EMAIL IS INVALID!"));
-                }
-
-                var fsp2Request = EmailAddress.Create(fileStudent.Parent2Email);
-                if (fsp2Request.IsFailure)
-                {
-                    updateItems.Add(new UpdateItem(
-                        "MasterFile Students",
-                        fileStudent.Index,
-                        dbStudent.DisplayName,
-                        "Parent 2 Email",
-                        fileStudent.Parent2Email.ToLower(),
-                        "EMAIL IS INVALID!"));
-                }
-
-                var fsp1Match = (fileStudent.Parent1Email.ToLower() == dbStudent.Family.Parent1.EmailAddress?.ToLower() || 
-                    fileStudent.Parent1Email.ToLower() == dbStudent.Family.Parent2.EmailAddress?.ToLower());
-
-                var fsp2Match = (fileStudent.Parent2Email.ToLower() == dbStudent.Family.Parent1.EmailAddress?.ToLower() ||
-                    fileStudent.Parent2Email.ToLower() == dbStudent.Family.Parent2.EmailAddress?.ToLower());
-
-                if (!fsp1Match && !fsp2Match)
-                {
-                    updateItems.Add(new UpdateItem(
-                        "MasterFile Students",
-                        fileStudent.Index,
-                        dbStudent.DisplayName,
-                        "Parent 1 Email",
-                        fileStudent.Parent1Email.ToLower(),
-                        dbStudent.Family.Parent2.EmailAddress.ToLower()));
-
-                    updateItems.Add(new UpdateItem(
-                        "MasterFile Students",
-                        fileStudent.Index,
-                        dbStudent.DisplayName,
-                        "Parent 2 Email",
-                        fileStudent.Parent2Email.ToLower(),
-                        dbStudent.Family.Parent1.EmailAddress.ToLower()));
-                }
-
-                if (fsp1Match && !fsp2Match)
-                {
-                    if (fileStudent.Parent1Email.ToLower() == dbStudent.Family.Parent1.EmailAddress?.ToLower() && dbp2)
-                    {
-                        updateItems.Add(new UpdateItem(
-                            "MasterFile Students",
-                            fileStudent.Index,
-                            dbStudent.DisplayName,
-                            "Parent 2 Email",
-                            fileStudent.Parent2Email.ToLower(),
-                            dbStudent.Family.Parent2.EmailAddress.ToLower()));
-                    }
-
-                    if (fileStudent.Parent1Email.ToLower() == dbStudent.Family.Parent2.EmailAddress?.ToLower() && dbp1)
-                    {
-                        updateItems.Add(new UpdateItem(
-                            "MasterFile Students",
-                            fileStudent.Index,
-                            dbStudent.DisplayName,
-                            "Parent 2 Email",
-                            fileStudent.Parent2Email.ToLower(),
-                            dbStudent.Family.Parent1.EmailAddress.ToLower()));
-                    }
-                }
-
-                if (!fsp1Match && fsp2Match)
-                {
-                    if (fileStudent.Parent2Email.ToLower() == dbStudent.Family.Parent1.EmailAddress?.ToLower() && dbp2)
-                    {
-                        updateItems.Add(new UpdateItem(
-                            "MasterFile Students",
-                            fileStudent.Index,
-                            dbStudent.DisplayName,
-                            "Parent 1 Email",
-                            fileStudent.Parent1Email.ToLower(),
-                            dbStudent.Family.Parent2.EmailAddress.ToLower()));
-                    }
-
-                    if (fileStudent.Parent2Email.ToLower() == dbStudent.Family.Parent2.EmailAddress?.ToLower() && dbp1)
-                    {
-                        updateItems.Add(new UpdateItem(
-                            "MasterFile Students",
-                            fileStudent.Index,
-                            dbStudent.DisplayName,
-                            "Parent 1 Email",
-                            fileStudent.Parent1Email.ToLower(),
-                            dbStudent.Family.Parent1.EmailAddress.ToLower()));
-                    }
+                        parent.EmailAddress.ToLower()));
                 }
             }
         }
