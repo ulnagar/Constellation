@@ -3,6 +3,7 @@ using Constellation.Application.Common.Mapping;
 using Constellation.Application.Helpers;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Families;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -13,7 +14,7 @@ namespace Constellation.Application.DTOs
     public class StudentCompleteDetailsDto : IMapFrom<Student>
     {
         public StudentDetails Student { get; set; }
-        public StudentFamily Family { get; set; }
+        public Family Family { get; set; }
         public List<Offering> Enrolments { get; set; }
         public List<Session> Sessions { get; set; }
         public List<Allocation> Equipment { get; set; }

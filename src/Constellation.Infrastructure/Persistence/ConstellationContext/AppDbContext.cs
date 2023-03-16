@@ -2,6 +2,7 @@
 using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Families;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Models.Stocktake;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ContextExtensions;
@@ -31,7 +32,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public DbSet<SchoolContact> SchoolContacts { get; set; }
         public DbSet<SchoolContactRole> SchoolContactRoles { get; set; }
         public DbSet<Student> Students { get; set; }
-        public DbSet<StudentFamily> StudentFamilies { get; set; }
         public DbSet<Staff> Staff { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<CourseOffering> Offerings { get; set; }

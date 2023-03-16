@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Core.Abstractions;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Families;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class StudentFamilyRepository : IStudentFamilyRepository
@@ -13,22 +13,25 @@ internal sealed class StudentFamilyRepository : IStudentFamilyRepository
         _context = context;
     }
 
-    public async Task<List<StudentFamily>> GetFamilyWithEmail(string email, CancellationToken cancellationToken = default) =>
+    public async Task<bool> DoesEmailBelongToParentOrFamily(
+        string email,
+        CancellationToken cancellationToken = default) =>
         await _context
-            .Set<StudentFamily>()
-            .Where(family => family.Parent1.EmailAddress == email || family.Parent2.EmailAddress == email)
-            .ToListAsync(cancellationToken);
+            .Set<Family>()
+            .AnyAsync(family => family.Parents.Any(parent => parent.EmailAddress.ToLower() == email.ToLower()), cancellationToken);
 
     public async Task<List<string>> GetStudentIdsFromFamilyWithEmail(
         string email,
         CancellationToken cancellation = default) =>
         await _context
-            .Set<StudentFamily>()
+            .Set<Family>()
             .Where(family => 
-                family.EmailAddress == email ||
-                family.Parent1.EmailAddress == email ||
-                family.Parent2.EmailAddress == email)
+                family.FamilyEmail.ToLower() == email.ToLower() ||
+                family.Parents.Any(parent => parent.EmailAddress.ToLower() == email.ToLower()))
             .SelectMany(family => family.Students)
             .Select(student => student.StudentId)
             .ToListAsync(cancellation);
+
+    public void Insert(Family family) =>
+        _context.Set<Family>().Add(family);
 }

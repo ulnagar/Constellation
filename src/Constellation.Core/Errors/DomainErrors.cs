@@ -40,6 +40,16 @@ public static class DomainErrors
         }
     }
 
+    public static class Family
+    {
+        public static class Address
+        {
+            public static readonly Error InvalidAddress = new(
+                "Family.Address.InvalidAddress",
+                "The Address supplied is incomplete or invalid");
+        }
+    }
+
     public static class GroupTutorials
     {
         public static class GroupTutorial
@@ -106,6 +116,13 @@ public static class DomainErrors
 
     public static class LinkedSystems
     {
+        public static class Sentral
+        {
+            public static readonly Func<string, Error> FamilyIdNotValid = id => new Error(
+                "LinkedSystems.Sentral.FamilyIdNotValid",
+                $"The value {id} is not a valid Sentral Family Id.");
+        }
+
         public static class Teams
         {
             public static readonly Error TeamNotFoundInDatabase = new(

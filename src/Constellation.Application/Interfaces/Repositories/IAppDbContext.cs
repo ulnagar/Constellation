@@ -1,6 +1,7 @@
 ﻿using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Stocktake;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -40,7 +41,6 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<Staff> Staff { get; set; }
         DbSet<Student> Students { get; set; }
         DbSet<StudentReport> StudentReports { get; set; }
-        DbSet<StudentFamily> StudentFamilies { get; set; }
         DbSet<StudentWholeAbsence> WholeAbsences { get; set; }
         DbSet<StoredFile> StoredFiles { get; set; }
         DbSet<CanvasAssignment> CanvasAssignments { get; set; }

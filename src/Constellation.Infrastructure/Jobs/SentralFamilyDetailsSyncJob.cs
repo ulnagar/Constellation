@@ -6,7 +6,7 @@ using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Students.SendFamilyContactChangesReport;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Families;
 using Constellation.Infrastructure.DependencyInjection;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -69,7 +69,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                 entry = new StudentFamily
                 {
                     Id = family.FamilyId,
-                    Parent1 = new StudentFamily.Parent
+                    Parent1 = new Family.Parent
                     {
                         Title = family.FatherTitle,
                         FirstName = family.FatherFirstName,
@@ -77,7 +77,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                         MobileNumber = family.FatherMobile,
                         EmailAddress = family.FatherEmail
                     },
-                    Parent2 = new StudentFamily.Parent
+                    Parent2 = new Family.Parent
                     {
                         Title = family.MotherTitle,
                         FirstName = family.MotherFirstName,
@@ -85,7 +85,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                         MobileNumber = family.MotherMobile,
                         EmailAddress = family.MotherEmail
                     },
-                    Address = new StudentFamily.MailingAddress
+                    Address = new Family.MailingAddress
                     {
                         Title = family.AddressName,
                         Line1 = family.AddressLine1,

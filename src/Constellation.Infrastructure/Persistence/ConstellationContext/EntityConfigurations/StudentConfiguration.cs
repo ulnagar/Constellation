@@ -18,7 +18,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
 
             builder.HasMany(s => s.AdobeConnectOperations);
 
-            builder.HasOne(s => s.Family).WithMany(s => s.Students);
+            builder
+                .HasMany(s => s.FamilyMemberships)
+                .WithOne()
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

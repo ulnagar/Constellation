@@ -1,4 +1,5 @@
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Families;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -47,7 +48,7 @@ namespace Constellation.Core.Models
         public string EmailAddress => PortalUsername + "@education.nsw.gov.au";
         public byte[] Photo { get; set; }
 
-        public StudentFamily Family { get; set; }
+        public List<StudentFamilyMembership> FamilyMemberships { get; set; } = new();
         public ICollection<Enrolment> Enrolments { get; set; }
         public ICollection<DeviceAllocation> Devices { get; set; }
         public ICollection<StudentAdobeConnectOperation> AdobeConnectOperations { get; set; }

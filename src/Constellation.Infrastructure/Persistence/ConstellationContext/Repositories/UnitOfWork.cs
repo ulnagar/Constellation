@@ -2,7 +2,6 @@
 
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
-using Constellation.Core.Models.Covers;
 using Microsoft.AspNetCore.Identity;
 
 public class UnitOfWork : IUnitOfWork

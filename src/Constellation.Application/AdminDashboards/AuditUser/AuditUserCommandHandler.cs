@@ -65,16 +65,9 @@ internal sealed class AuditUserCommandHandler
             user.SchoolContactId = contact.Id;
         }
 
-        var family = await _studentFamilyRepository.GetFamilyWithEmail(user.Email);
+        var family = await _studentFamilyRepository.DoesEmailBelongToParentOrFamily(user.Email, cancellationToken);
 
-        if (family is null || family.Count == 0)
-        {
-            user.IsParent = false;
-        }
-        else
-        {
-            user.IsParent = true;
-        }
+        user.IsParent = family;
 
         await _userManager.UpdateAsync(user);
 
