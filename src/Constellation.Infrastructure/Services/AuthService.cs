@@ -6,6 +6,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
@@ -17,16 +18,19 @@ using System.Threading.Tasks;
 public class AuthService : IAuthService, IScopedService
 {
     private readonly IMediator _mediator;
+    private readonly IParentRepository _parentRepository;
     private readonly IAppDbContext _context;
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
 
     public AuthService(
+        IParentRepository parentRepository,
         IAppDbContext context,
         IMediator mediator,
         UserManager<AppUser> userManager,
         RoleManager<AppRole> roleManager)
     {
+        _parentRepository = parentRepository;
         _context = context;
         _mediator = mediator;
         _userManager = userManager;
@@ -349,33 +353,20 @@ public class AuthService : IAuthService, IScopedService
         }
     }
 
-    public async Task AuditParentUsers()
+    public async Task AuditParentUsers(CancellationToken cancellationToken = default)
     {
         // Get list of Parents
-        var families = await _context.StudentFamilies
-            .Include(family => family.Parent1)
-            .Include(family => family.Parent2)
-            .Where(family => family.Students.All(student => !student.IsDeleted))
-            .ToListAsync();
+        var parents = await _parentRepository.GetAllParentsOfActiveStudents(cancellationToken);
 
         // Find each Parent in AppUsers
-        foreach (var family in families)
+        foreach (var parent in parents)
         {
-            if (!string.IsNullOrEmpty(family.Parent1.EmailAddress))
-                await _mediator.Send(new RegisterParentContactAsUserCommand
-                {
-                    FirstName = family.Parent1.FirstName,
-                    LastName = family.Parent1.LastName,
-                    EmailAddress = family.Parent1.EmailAddress
-                });
-
-            if (!string.IsNullOrEmpty(family.Parent2.EmailAddress))
-                await _mediator.Send(new RegisterParentContactAsUserCommand
-                {
-                    FirstName = family.Parent2.FirstName,
-                    LastName = family.Parent2.LastName,
-                    EmailAddress = family.Parent2.EmailAddress
-                });
+            await _mediator.Send(new RegisterParentContactAsUserCommand
+            {
+                FirstName = parent.FirstName,
+                LastName = parent.LastName,
+                EmailAddress = parent.EmailAddress
+            }, cancellationToken);
         }
     }
 

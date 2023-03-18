@@ -1,4 +1,6 @@
-using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
+namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences;
+
+using Constellation.Application.Families.GetResidentialFamilyEmailAddresses;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -14,111 +16,108 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
+[Roles(AuthRoles.Admin, AuthRoles.StaffMember)]
+public class TeacherUpdateModel : BasePageModel
 {
-    [Roles(AuthRoles.Admin, AuthRoles.StaffMember)]
-    public class TeacherUpdateModel : BasePageModel
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ISentralGateway _sentralService;
+    private readonly IEmailService _emailService;
+    private readonly IMediator _mediator;
+
+    public TeacherUpdateModel(IUnitOfWork unitOfWork, ISentralGateway sentralService, IEmailService emailService, IMediator mediator)
+        : base()
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly ISentralGateway _sentralService;
-        private readonly IEmailService _emailService;
-        private readonly IMediator _mediator;
+        _unitOfWork = unitOfWork;
+        _sentralService = sentralService;
+        _emailService = emailService;
+        _mediator = mediator;
+    }
 
-        public TeacherUpdateModel(IUnitOfWork unitOfWork, ISentralGateway sentralService, IEmailService emailService, IMediator mediator)
-            : base()
+    [BindProperty(SupportsGet = true)]
+    public Guid Id { get; set; }
+    public NotificationDto Notification { get; set; }
+    [BindProperty]
+    [Required]
+    public string Description { get; set; }
+
+    public async Task<IActionResult> OnGet()
+    {
+        var entry = await _unitOfWork.ClassworkNotifications.Get(Id);
+
+        Notification = NotificationDto.ConvertFromNotification(entry);
+
+        await GetClasses(_unitOfWork);
+
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPost(CancellationToken cancellationToken)
+    {
+        var entry = await _unitOfWork.ClassworkNotifications.Get(Id);
+
+        if (!ModelState.IsValid)
         {
-            _unitOfWork = unitOfWork;
-            _sentralService = sentralService;
-            _emailService = emailService;
-            _mediator = mediator;
-        }
-
-        [BindProperty(SupportsGet = true)]
-        public Guid Id { get; set; }
-        public NotificationDto Notification { get; set; }
-        [BindProperty]
-        [Required]
-        public string Description { get; set; }
-
-        public async Task<IActionResult> OnGet()
-        {
-            var entry = await _unitOfWork.ClassworkNotifications.Get(Id);
-
             Notification = NotificationDto.ConvertFromNotification(entry);
-
-            await GetClasses(_unitOfWork);
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPost()
+        var user = User.Identity.Name;
+        var teacher = await _unitOfWork.Staff.FromEmailForExistCheck(user);
+
+        entry.CompletedAt = DateTime.Now;
+        entry.CompletedBy = teacher;
+        entry.StaffId = teacher.StaffId;
+        entry.Description = Description;
+
+        await _unitOfWork.CompleteAsync();
+
+        foreach (var absence in entry.Absences)
         {
-            var entry = await _unitOfWork.ClassworkNotifications.Get(Id);
+            // Email student and parents with information
+            var parentEmails = await _mediator.Send(new GetResidentialFamilyEmailAddressesQuery(absence.Student.StudentId), cancellationToken);
 
-            if (!ModelState.IsValid)
-            {
-                Notification = NotificationDto.ConvertFromNotification(entry);
+            if (parentEmails.IsFailure || !parentEmails.Value.Any())
+                await _emailService.SendAdminClassworkNotificationContactAlert(absence.Student, teacher, entry);
 
-                return Page();
-            }
-
-            var user = User.Identity.Name;
-            var teacher = await _unitOfWork.Staff.FromEmailForExistCheck(user);
-
-            entry.CompletedAt = DateTime.Now;
-            entry.CompletedBy = teacher;
-            entry.StaffId = teacher.StaffId;
-            entry.Description = Description;
-
-            await _unitOfWork.CompleteAsync();
-
-            foreach (var absence in entry.Absences)
-            {
-                // Email student and parents with information
-                var parentEmails = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = absence.Student.StudentId });
-
-                if (parentEmails == null)
-                    await _emailService.SendAdminClassworkNotificationContactAlert(absence.Student, teacher, entry);
-
-                await _emailService.SendStudentClassworkNotification(absence, entry, parentEmails.ToList());
-            }
-
-            await _emailService.SendTeacherClassworkNotificationCopy(entry.Absences.First(), entry, teacher);
-
-            return RedirectToPage("Teachers", new { area = "Portal"});
+            await _emailService.SendStudentClassworkNotification(absence, entry, parentEmails.Value);
         }
 
-        public class NotificationDto
+        await _emailService.SendTeacherClassworkNotificationCopy(entry.Absences.First(), entry, teacher);
+
+        return RedirectToPage("Teachers", new { area = "Portal"});
+    }
+
+    public class NotificationDto
+    {
+        public Guid Id { get; set; }
+        public string Description { get; set; }
+        public Staff CompletedBy { get; set; }
+        public string StaffId { get; set; }
+        public DateTime? CompletedAt { get; set; }
+        public DateTime GeneratedAt { get; set; }
+        public ICollection<Student> Students { get; set; }
+        public ICollection<Staff> Teachers { get; set; }
+        public string OfferingName { get; set; }
+        public DateTime AbsenceDate { get; set; }
+
+        public static NotificationDto ConvertFromNotification(ClassworkNotification entry)
         {
-            public Guid Id { get; set; }
-            public string Description { get; set; }
-            public Staff CompletedBy { get; set; }
-            public string StaffId { get; set; }
-            public DateTime? CompletedAt { get; set; }
-            public DateTime GeneratedAt { get; set; }
-            public ICollection<Student> Students { get; set; }
-            public ICollection<Staff> Teachers { get; set; }
-            public string OfferingName { get; set; }
-            public DateTime AbsenceDate { get; set; }
-
-            public static NotificationDto ConvertFromNotification(ClassworkNotification entry)
+            var viewModel = new NotificationDto
             {
-                var viewModel = new NotificationDto
-                {
-                    Id = entry.Id,
-                    Description = entry.Description,
-                    CompletedBy = entry.CompletedBy,
-                    CompletedAt = entry.CompletedAt,
-                    StaffId = entry.StaffId,
-                    GeneratedAt = entry.GeneratedAt,
-                    Teachers = entry.Teachers,
-                    AbsenceDate = entry.AbsenceDate,
-                    OfferingName = entry.Offering.Name,
-                    Students = entry.Absences.Select(absence => absence.Student).ToList()
-                };
+                Id = entry.Id,
+                Description = entry.Description,
+                CompletedBy = entry.CompletedBy,
+                CompletedAt = entry.CompletedAt,
+                StaffId = entry.StaffId,
+                GeneratedAt = entry.GeneratedAt,
+                Teachers = entry.Teachers,
+                AbsenceDate = entry.AbsenceDate,
+                OfferingName = entry.Offering.Name,
+                Students = entry.Absences.Select(absence => absence.Student).ToList()
+            };
 
-                return viewModel;
-            }
+            return viewModel;
         }
     }
 }

@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 internal sealed class GetParentWithStudentIdsQueryHandler
     : IQueryHandler<GetParentWithStudentIdsQuery, List<string>>
 {
-    private readonly IStudentFamilyRepository _studentFamilyRepository;
+    private readonly IFamilyRepository _studentFamilyRepository;
     private readonly Serilog.ILogger _logger;
 
     public GetParentWithStudentIdsQueryHandler(
-        IStudentFamilyRepository studentFamilyRepository,
+        IFamilyRepository studentFamilyRepository,
         Serilog.ILogger logger)
     {
         _studentFamilyRepository = studentFamilyRepository;

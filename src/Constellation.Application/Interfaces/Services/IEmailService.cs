@@ -22,8 +22,8 @@ namespace Constellation.Application.Interfaces.Services
         Task SendAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail);
         Task<EmailDtos.SentEmail> SendCoordinatorPartialAbsenceVerificationRequest(EmailDtos.AbsenceResponseEmail emailDto);
         Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(List<Absence> absences);
-        Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(List<Absence> absences, List<string> emailAddresses);
-        Task<EmailDtos.SentEmail> SendParentWholeAbsenceDigest(List<Absence> absences, List<string> emailAddresses);
+        Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(List<Absence> absences, List<EmailRecipient> emailAddresses);
+        Task<EmailDtos.SentEmail> SendParentWholeAbsenceDigest(List<Absence> absences, List<EmailRecipient> emailAddresses);
         Task<EmailDtos.SentEmail> SendStudentPartialAbsenceExplanationRequest(List<Absence> absences, List<string> emailAddresses);
 
 
@@ -33,7 +33,7 @@ namespace Constellation.Application.Interfaces.Services
 
         // ClassworkNotification Emails
         Task SendTeacherClassworkNotificationRequest(ClassworkNotificationTeacherEmail notification);
-        Task SendStudentClassworkNotification(Absence absence, ClassworkNotification notification, List<string> parentEmails);
+        Task SendStudentClassworkNotification(Absence absence, ClassworkNotification notification, List<EmailRecipient> parentEmails);
         Task SendTeacherClassworkNotificationCopy(Absence absence, ClassworkNotification notification, Staff teacher);
 
 

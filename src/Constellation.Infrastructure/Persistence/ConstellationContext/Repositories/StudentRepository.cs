@@ -17,6 +17,15 @@ public class StudentRepository : IStudentRepository
         _context = context;
     }
 
+    public async Task<Student?> GetWithSchoolById(
+        string studentId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Include(student => student.School)
+            .Where(student => student.StudentId == studentId)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public async Task<List<Student>> GetListFromIds(
         List<string> studentIds,
         CancellationToken cancellationToken = default) =>
@@ -50,11 +59,11 @@ public class StudentRepository : IStudentRepository
             .Where(student => !student.IsDeleted)
             .ToListAsync(cancellationToken);
 
-    public async Task<List<Student>> GetCurrentStudentsWithFamily(
+    public async Task<List<Student>> GetCurrentStudentsWithFamilyMemberships(
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
-            .Include(student => student.Family)
+            .Include(student => student.FamilyMemberships)
             .Where(student => !student.IsDeleted)
             .ToListAsync(cancellationToken);
 
@@ -85,7 +94,7 @@ public class StudentRepository : IStudentRepository
             .ThenInclude(enrol => enrol.Offering)
             .ThenInclude(offering => offering.Sessions)
             .ThenInclude(session => session.Room)
-            .Include(student => student.Family)
+            .Include(student => student.FamilyMemberships)
             .SingleOrDefaultAsync(student => student.StudentId == id);
     }
 
@@ -107,7 +116,7 @@ public class StudentRepository : IStudentRepository
     {
         return await _context.Students
             .Include(student => student.School)
-            .Include(student => student.Family)
+            .Include(student => student.FamilyMemberships)
             .OrderBy(s => s.CurrentGrade)
             .ThenBy(s => s.LastName)
             .Where(s => !s.IsDeleted)
@@ -216,23 +225,15 @@ public class StudentRepository : IStudentRepository
             .SingleOrDefaultAsync(student => student.StudentId == studentId);
     }
 
-    public async Task<ICollection<Student>> ForInterviewsExportAsync(InterviewExportSelectionDto filter)
-    {
-        return await _context.Students
+    public async Task<List<Student>> ForInterviewsExportAsync(
+        InterviewExportSelectionDto filter,
+        CancellationToken cancellationToken = default) =>
+        await _context.Students
             .Include(student => student.Enrolments)
-                .ThenInclude(enrol => enrol.Offering)
-                    .ThenInclude(offering => offering.Course)
-            .Include(student => student.Enrolments)
-                .ThenInclude(enrol => enrol.Offering)
-                    .ThenInclude(offering => offering.Sessions)
-                        .ThenInclude(session => session.Teacher)
-            .Include(student => student.Family)
-            .OrderBy(student => student.CurrentGrade)
-            .ThenBy(student => student.LastName)
+            .Include(student => student.FamilyMemberships)
             .Where(student => !student.IsDeleted)
             .Where(FilterStudent(filter))
-            .ToListAsync();
-    }
+            .ToListAsync(cancellationToken);
 
     public async Task<bool> AnyWithId(string id)
     {

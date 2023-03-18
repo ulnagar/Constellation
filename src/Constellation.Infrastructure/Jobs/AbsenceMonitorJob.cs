@@ -1,10 +1,13 @@
-﻿using Constellation.Application.Features.Jobs.AbsenceMonitor.Commands;
+﻿using Constellation.Application.Families.GetResidentialFamilyEmailAddresses;
+using Constellation.Application.Families.GetResidentialFamilyMobileNumbers;
+using Constellation.Application.Features.Jobs.AbsenceMonitor.Commands;
 using Constellation.Application.Features.Jobs.AbsenceMonitor.Models;
 using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Jobs.AbsenceClassworkNotificationJob;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
@@ -22,9 +25,14 @@ namespace Constellation.Infrastructure.Jobs
         private readonly ILogger<IAbsenceMonitorJob> _logger;
         private readonly IMediator _mediator;
 
-        public AbsenceMonitorJob(IUnitOfWork unitOfWork, IAbsenceProcessingJob absenceProcessor, 
-            IEmailService emailService, ISMSService smsService, IAbsenceClassworkNotificationJob classworkNotifier,
-            ILogger<IAbsenceMonitorJob> logger, IMediator mediator)
+        public AbsenceMonitorJob(
+            IUnitOfWork unitOfWork,
+            IAbsenceProcessingJob absenceProcessor,
+            IEmailService emailService,
+            ISMSService smsService,
+            IAbsenceClassworkNotificationJob classworkNotifier,
+            ILogger<IAbsenceMonitorJob> logger,
+            IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _absenceProcessor = absenceProcessor;
@@ -73,7 +81,7 @@ namespace Constellation.Infrastructure.Jobs
                             return;
 
                         await SendStudentNotifications(jobId, student);
-                        await SendParentNotifications(jobId, student);
+                        await SendParentNotifications(jobId, student, token);
                     }
 
                     if (DateTime.Now.DayOfWeek == DayOfWeek.Monday)
@@ -81,7 +89,7 @@ namespace Constellation.Infrastructure.Jobs
                         if (token.IsCancellationRequested)
                             return;
 
-                        await SendParentDigests(jobId, student);
+                        await SendParentDigests(jobId, student, token);
                         await SendCoordinatorDigests(jobId, student);
                     }
 
@@ -122,17 +130,17 @@ namespace Constellation.Infrastructure.Jobs
             }
         }
 
-        private async Task SendParentDigests(Guid jobId, StudentForAbsenceScan student)
+        private async Task SendParentDigests(Guid jobId, StudentForAbsenceScan student, CancellationToken cancellationToken = default)
         {
-            var parentDigestAbsences = await _mediator.Send(new GetUnexplainedAbsencesForDigestQuery { StudentId = student.StudentId, Type = Absence.Whole, AgeInWeeks = 1 });
+            var parentDigestAbsences = await _mediator.Send(new GetUnexplainedAbsencesForDigestQuery { StudentId = student.StudentId, Type = Absence.Whole, AgeInWeeks = 1 }, cancellationToken);
 
             if (parentDigestAbsences.Any())
             {
-                var emailAddresses = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = student.StudentId });
+                var emailAddresses = await _mediator.Send(new GetResidentialFamilyEmailAddressesQuery(student.StudentId), cancellationToken);
 
-                if (emailAddresses.Any())
+                if (emailAddresses.IsSuccess)
                 {
-                    var sentmessage = await _emailService.SendParentWholeAbsenceDigest(parentDigestAbsences.ToList(), emailAddresses.ToList());
+                    var sentmessage = await _emailService.SendParentWholeAbsenceDigest(parentDigestAbsences.ToList(), emailAddresses.Value);
 
                     if (sentmessage == null)
                         return;
@@ -145,11 +153,11 @@ namespace Constellation.Infrastructure.Jobs
                             MessageBody = sentmessage.message,
                             Recipients = new List<string> { "School Contacts" },
                             MessageId = sentmessage.id
-                        });
+                        }, cancellationToken);
 
-                    foreach (var address in emailAddresses)
+                    foreach (var address in emailAddresses.Value)
                     {
-                        _logger.LogInformation("{id}: Parent digest sent to {address} for {student}", jobId, address, student.DisplayName);
+                        _logger.LogInformation("{id}: Parent digest sent to {address} for {student}", jobId, address.Email, student.DisplayName);
                     }
                 }
                 else
@@ -161,12 +169,12 @@ namespace Constellation.Infrastructure.Jobs
             }
         }
 
-        private async Task SendParentNotifications(Guid jobId, StudentForAbsenceScan student)
+        private async Task SendParentNotifications(Guid jobId, StudentForAbsenceScan student, CancellationToken cancellationToken = default)
         {
-            var phoneNumbers = await _mediator.Send(new GetStudentFamilyMobileNumbersQuery { StudentId = student.StudentId });
-            var emailAddresses = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = student.StudentId });
+            var phoneNumbers = await _mediator.Send(new GetResidentialFamilyMobileNumbersQuery(student.StudentId), cancellationToken);
+            var emailAddresses = await _mediator.Send(new GetResidentialFamilyEmailAddressesQuery(student.StudentId), cancellationToken);
 
-            var recentWholeAbsences = await _mediator.Send(new GetRecentAbsencesForStudentQuery { StudentId = student.StudentId, AbsenceType = Absence.Whole });
+            var recentWholeAbsences = await _mediator.Send(new GetRecentAbsencesForStudentQuery { StudentId = student.StudentId, AbsenceType = Absence.Whole }, cancellationToken);
 
             // Send SMS or emails to parents
             if (recentWholeAbsences.Any())
@@ -175,31 +183,31 @@ namespace Constellation.Infrastructure.Jobs
 
                 foreach (var group in groupedAbsences)
                 {
-                    if (phoneNumbers.Any() && group.Key.Date == DateTime.Today.AddDays(-1).Date)
+                    if (phoneNumbers.IsSuccess && phoneNumbers.Value.Any() && group.Key.Date == DateTime.Today.AddDays(-1).Date)
                     {
-                        var sentMessages = await _smsService.SendAbsenceNotificationAsync(group.ToList(), phoneNumbers.ToList());
+                        var sentMessages = await _smsService.SendAbsenceNotificationAsync(group.ToList(), phoneNumbers.Value);
 
                         if (sentMessages == null)
                         {
                             // SMS Gateway failed. Send via email instead.
                             _logger.LogWarning("{id}: SMS Sending Failed! Fallback to Email notifications.", jobId);
 
-                            if (emailAddresses.Any())
+                            if (emailAddresses.IsSuccess && emailAddresses.Value.Any())
                             {
-                                var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses.ToList());
+                                var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses.Value);
 
                                 foreach (var absence in group)
-                                    await _mediator.Send(new AddNewAbsenceNotificationCommand 
-                                    { 
-                                        AbsenceId = absence.Id, 
-                                        Type = AbsenceNotification.Email, 
-                                        MessageBody = message.message, 
-                                        MessageId = message.id, 
-                                        Recipients = emailAddresses 
-                                    });
+                                    await _mediator.Send(new AddNewAbsenceNotificationCommand
+                                    {
+                                        AbsenceId = absence.Id,
+                                        Type = AbsenceNotification.Email,
+                                        MessageBody = message.message,
+                                        MessageId = message.id,
+                                        Recipients = emailAddresses.Value.Select(entry => entry.Email).ToList()
+                                    }, cancellationToken);
 
-                                foreach (var email in emailAddresses)
-                                    _logger.LogInformation("{id}: Message sent via Email to {email} for Whole Absence on {Date}", jobId, email, group.Key.Date.ToShortDateString());
+                                foreach (var email in emailAddresses.Value)
+                                    _logger.LogInformation("{id}: Message sent via Email to {email} for Whole Absence on {Date}", jobId, email.Email, group.Key.Date.ToShortDateString());
                             }
                             else
                             {
@@ -217,16 +225,16 @@ namespace Constellation.Infrastructure.Jobs
                                     Type = AbsenceNotification.SMS,
                                     MessageBody = sentMessages.Messages.First().MessageBody,
                                     MessageId = sentMessages.Messages.First().OutgoingId,
-                                    Recipients = phoneNumbers
-                                });
+                                    Recipients = phoneNumbers.Value.Select(entry => entry.ToString(Core.ValueObjects.PhoneNumber.Format.None)).ToList()
+                                }, cancellationToken);
 
-                            foreach (var number in phoneNumbers)
-                                _logger.LogInformation("{id}: Message sent via SMS to {number} for Whole Absence on {Date}", jobId, number, group.Key.Date.ToShortDateString());
+                            foreach (var number in phoneNumbers.Value)
+                                _logger.LogInformation("{id}: Message sent via SMS to {number} for Whole Absence on {Date}", jobId, number.ToString(Core.ValueObjects.PhoneNumber.Format.Mobile), group.Key.Date.ToShortDateString());
                         }
                     }
-                    else if (emailAddresses.Any())
+                    else if (emailAddresses.IsSuccess && emailAddresses.Value.Any())
                     {
-                        var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses.ToList());
+                        var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses.Value);
 
                         foreach (var absence in group)
                             await _mediator.Send(new AddNewAbsenceNotificationCommand
@@ -235,11 +243,11 @@ namespace Constellation.Infrastructure.Jobs
                                 Type = AbsenceNotification.Email,
                                 MessageBody = message.message,
                                 MessageId = message.id,
-                                Recipients = emailAddresses
-                            });
+                                Recipients = emailAddresses.Value.Select(entry => entry.Email).ToList()
+                            }, cancellationToken);
 
-                        foreach (var email in emailAddresses)
-                            _logger.LogInformation("{id}: Message sent via Email to {email} for Whole Absence on {Date}", jobId, email, group.Key.Date.ToShortDateString());
+                        foreach (var email in emailAddresses.Value)
+                            _logger.LogInformation("{id}: Message sent via Email to {email} for Whole Absence on {Date}", jobId, email.Email, group.Key.Date.ToShortDateString());
                     }
                     else
                     {

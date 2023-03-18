@@ -19,7 +19,7 @@ using Constellation.Infrastructure.Templates.Views.Emails.RollMarking;
 using System.Net.Mail;
 using System.Net.Mime;
 
-public class Service : IEmailService, IScopedService
+public class Service : IEmailService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEmailGateway _emailSender;
@@ -115,7 +115,7 @@ public class Service : IEmailService, IScopedService
             return false;
     }
 
-    public async Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(List<Absence> absences, List<string> emailAddresses)
+    public async Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(List<Absence> absences, List<EmailRecipient> emailAddresses)
     {
         var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
@@ -133,8 +133,8 @@ public class Service : IEmailService, IScopedService
 
         var toRecipients = new Dictionary<string, string>();
         foreach (var entry in emailAddresses)
-            if (!toRecipients.Any(recipient => recipient.Value == entry))
-                toRecipients.Add(entry, entry);
+            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                toRecipients.Add(entry.Name, entry.Email);
 
         var message = await _emailSender.Send(toRecipients, null, viewModel.Title, body);
 
@@ -155,7 +155,7 @@ public class Service : IEmailService, IScopedService
             return null;
     }
 
-    public async Task<EmailDtos.SentEmail> SendParentWholeAbsenceDigest(List<Absence> absences, List<string> emailAddresses)
+    public async Task<EmailDtos.SentEmail> SendParentWholeAbsenceDigest(List<Absence> absences, List<EmailRecipient> emailAddresses)
     {
         var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
 
@@ -173,8 +173,8 @@ public class Service : IEmailService, IScopedService
 
         var toRecipients = new Dictionary<string, string>();
         foreach (var entry in emailAddresses)
-            if (!toRecipients.Any(recipient => recipient.Value == entry))
-                toRecipients.Add(entry, entry);
+            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                toRecipients.Add(entry.Name, entry.Email);
 
         var message = await _emailSender.Send(toRecipients, null, viewModel.Title, body);
 
@@ -761,7 +761,7 @@ public class Service : IEmailService, IScopedService
             SenderName = settings.LessonsCoordinatorName,
             SenderTitle = settings.LessonsCoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
-            Link = "https://web1.auroracoll-h.schools.nsw.edu.au/Portal/School",
+            Link = "https://acos.aurora.nsw.edu.au/schools",
             SchoolName = notification.SchoolName,
             Lessons = notification.Lessons.Select(FirstWarningEmailViewModel.LessonEntry.ConvertFromLessonItem).ToList()
         };
@@ -786,7 +786,7 @@ public class Service : IEmailService, IScopedService
             SenderName = settings.LessonsCoordinatorName,
             SenderTitle = settings.LessonsCoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
-            Link = "https://web1.auroracoll-h.schools.nsw.edu.au/Portal/School",
+            Link = "https://acos.aurora.nsw.edu.au/schools",
             SchoolName = notification.SchoolName,
             Lessons = notification.Lessons.Select(SecondWarningEmailViewModel.LessonEntry.ConvertFromLessonItem).ToList()
         };
@@ -811,7 +811,7 @@ public class Service : IEmailService, IScopedService
             SenderName = settings.LessonsCoordinatorName,
             SenderTitle = settings.LessonsCoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
-            Link = "https://web1.auroracoll-h.schools.nsw.edu.au/Portal/School",
+            Link = "https://acos.aurora.nsw.edu.au/schools",
             SchoolName = notification.SchoolName,
             Lessons = notification.Lessons.Select(SecondWarningEmailViewModel.LessonEntry.ConvertFromLessonItem).ToList()
         };
@@ -836,7 +836,7 @@ public class Service : IEmailService, IScopedService
             SenderName = settings.LessonsCoordinatorName,
             SenderTitle = settings.LessonsCoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
-            Link = "https://web1.auroracoll-h.schools.nsw.edu.au/Portal/School",
+            Link = "https://acos.aurora.nsw.edu.au/schools",
             SchoolName = notification.SchoolName,
             Lessons = notification.Lessons.Select(FinalWarningEmailViewModel.LessonEntry.ConvertFromLessonItem).ToList()
         };
@@ -949,7 +949,7 @@ public class Service : IEmailService, IScopedService
         await _emailSender.Send(toRecipients, notification.CompletedBy.EmailAddress, viewModel.Title, body);
     }
 
-    public async Task SendStudentClassworkNotification(Absence absence, ClassworkNotification notification, List<string> parentEmails)
+    public async Task SendStudentClassworkNotification(Absence absence, ClassworkNotification notification, List<EmailRecipient> parentEmails)
     {
         var viewModel = new StudentMissedWorkNotificationEmailViewModel
         {
@@ -975,7 +975,7 @@ public class Service : IEmailService, IScopedService
             else
             {
                 foreach (var entry in parentEmails)
-                    toRecipients.Add(entry, entry);
+                    toRecipients.Add(entry.Name, entry.Email);
             }
         }
 
@@ -986,7 +986,7 @@ public class Service : IEmailService, IScopedService
         await _emailSender.Send(toRecipients, notification.CompletedBy.EmailAddress, viewModel.Title, body);
     }
 
-    private async Task SendParentClassworkNotification(Absence absence, ClassworkNotification notification, List<string> parentEmails)
+    private async Task SendParentClassworkNotification(Absence absence, ClassworkNotification notification, List<EmailRecipient> parentEmails)
     {
         var viewModel = new ParentMissedWorkNotificationEmailViewModel
         {
@@ -999,15 +999,15 @@ public class Service : IEmailService, IScopedService
             CourseName = notification.Offering.Course.Name,
             StudentName = absence.Student.FirstName,
             WorkDescription = notification.Description,
-            Link = $"https://acos.aurora.nsw.edu.au/Portal/Absences/Parents/{absence.StudentId}"
+            Link = $"https://acos.aurora.nsw.edu.au/parents"
         };
 
         var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MissedWork/ParentMissedWorkNotificationEmail.cshtml", viewModel);
 
         var toRecipients = new Dictionary<string, string>();
         foreach (var entry in parentEmails)
-            if (!toRecipients.Any(recipient => recipient.Value == entry))
-                toRecipients.Add(entry, entry);
+            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                toRecipients.Add(entry.Name, entry.Email);
 
         await _emailSender.Send(toRecipients, notification.CompletedBy.EmailAddress, viewModel.Title, body);
     }

@@ -11,6 +11,20 @@ CURRENT TASK
 		*Create unit tests for new domain model methods and events
 		*Add error return for page events
 
+	PARENTS:
+		Complete new student details page
+		Create domain event handlers to add/remove/update user accounts
+		Create CRUD pages for non-residential parents
+		Create master contact list with per student entry for parents, ACCs, and SPTs
+		Create migration and test
+		
+	DDD:
+		Create strongly typed ID objects
+		Update EntityTypeConfigurations
+			change to internal class
+			create conversion for strongly typed ids
+			create custom indexes
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~

@@ -11,11 +11,12 @@ namespace Constellation.Application.Interfaces.Repositories
 {
     public interface IStudentRepository
     {
+        Task<Student?> GetWithSchoolById(string studentId, CancellationToken cancellationToken = default);
         Task<List<Student>> GetCurrentStudentsWithSchool(CancellationToken cancellationToken = default);
         Task<List<Student>> GetListFromIds(List<string> studentIds, CancellationToken cancellationToken = default);
         Task<List<Student>> GetCurrentEnrolmentsForOffering(int offeringId, CancellationToken cancellationToken = default);
         Task<List<Student>> GetCurrentEnrolmentsForOfferingWithSchool(int offeringId, CancellationToken cancellationToken = default);
-        Task<List<Student>> GetCurrentStudentsWithFamily(CancellationToken cancellationToken = default);
+        Task<List<Student>> GetCurrentStudentsWithFamilyMemberships(CancellationToken cancellationToken = default);
         Task <Student> GetForExistCheck(string id);
         Task<ICollection<Student>> AllWithAbsenceScanSettings();
         Task<ICollection<Student>> AllActiveAsync();
@@ -29,7 +30,7 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<Student> ForBulkUnenrolAsync(string studentId);
         Task<ICollection<Student>> ForSelectionListAsync();
         Task<Student> ForAttendanceQueryReport(string studentId);
-        Task<ICollection<Student>> ForInterviewsExportAsync(InterviewExportSelectionDto filter);
+        Task<List<Student>> ForInterviewsExportAsync(InterviewExportSelectionDto filter, CancellationToken cancellationToken = default);
         Task<bool> AnyWithId(string id);
         Task<Student> ForDeletion(string id);
         Task<ICollection<Student>> ForAttendanceReports();

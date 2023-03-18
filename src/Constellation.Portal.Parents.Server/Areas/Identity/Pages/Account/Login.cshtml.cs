@@ -18,7 +18,7 @@ public class LoginModel : PageModel
     private readonly UserManager<AppUser> _userManager;
     private readonly IEmailService _emailService;
     private readonly IMediator _mediator;
-    private readonly IStudentFamilyRepository _familyRepository;
+    private readonly IFamilyRepository _familyRepository;
     private readonly ILogger<IAuthService> _logger;
 
     internal enum LoginStatus
@@ -34,7 +34,7 @@ public class LoginModel : PageModel
         UserManager<AppUser> userManager,
         IEmailService emailService,
         IMediator mediator,
-        IStudentFamilyRepository familyRepository,
+        IFamilyRepository familyRepository,
         ILogger<IAuthService> logger)
     {
         _signInManager = signInManager;

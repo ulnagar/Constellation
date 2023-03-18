@@ -16,13 +16,13 @@ internal sealed class AuditUserCommandHandler
     private readonly UserManager<AppUser> _userManager;
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolContactRepository _schoolContactRepository;
-    private readonly IStudentFamilyRepository _studentFamilyRepository;
+    private readonly IFamilyRepository _studentFamilyRepository;
 
     public AuditUserCommandHandler(
         UserManager<AppUser> userManager,
         IStaffRepository staffRepository,
         ISchoolContactRepository schoolContactRepository,
-        IStudentFamilyRepository studentFamilyRepository)
+        IFamilyRepository studentFamilyRepository)
     {
         _userManager = userManager;
         _staffRepository = staffRepository;

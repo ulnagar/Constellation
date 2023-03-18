@@ -70,12 +70,12 @@ public class GetAbsenceDetailsForParentQueryHandler : IRequestHandler<GetAbsence
 {
     private readonly IAppDbContext _context;
     private readonly IMapper _mapper;
-    private readonly IStudentFamilyRepository _familyRepository;
+    private readonly IFamilyRepository _familyRepository;
 
     public GetAbsenceDetailsForParentQueryHandler(
         IAppDbContext context,
         IMapper mapper,
-        IStudentFamilyRepository familyRepository)
+        IFamilyRepository familyRepository)
     {
         _context = context;
         _mapper = mapper;

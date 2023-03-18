@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs.EmailRequests;
+using Constellation.Application.Families.GetResidentialFamilyEmailAddresses;
 using Constellation.Application.Features.Faculties.Queries;
 using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
 using Constellation.Application.Interfaces.Jobs;
@@ -8,6 +9,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Covers;
+using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 using Microsoft.Extensions.Logging;
@@ -139,8 +141,20 @@ namespace Constellation.Infrastructure.Jobs
                         {
                             check.Absences.Add(absence);
 
-                            var parentEmails = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = absence.StudentId }, token);
-                            await _emailService.SendStudentClassworkNotification(absence, check, parentEmails.ToList());
+                            var parentEmailRequest = await _mediator.Send(new GetResidentialFamilyEmailAddressesQuery(absence.StudentId), token);
+
+                            List<EmailRecipient> parentEmails = new();
+
+                            if (parentEmailRequest.IsFailure)
+                            {
+                                // Cannot send email to parents as no valid email was found
+                            } 
+                            else
+                            {
+                                parentEmails = parentEmailRequest.Value;
+                            }
+
+                            await _emailService.SendStudentClassworkNotification(absence, check, parentEmails);
                         }
                     }
                     else

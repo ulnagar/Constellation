@@ -56,6 +56,23 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Where(teacher => teacher.CourseSessions.Any(session => session.OfferingId == offeringId && !session.IsDeleted))
                 .ToListAsync(cancellationToken);
 
+        public async Task<List<Staff>> GetPrimaryTeachersForOffering(
+            int offeringId,
+            CancellationToken cancellationToken = default)
+        {
+            var groupedTeachers = await _context
+                .Set<Staff>()
+                .Where(teacher => teacher.CourseSessions.Any(session => session.OfferingId == offeringId && !session.IsDeleted))
+                .Select(teacher => new { Teacher = teacher, Frequency = teacher.CourseSessions.Count(session => session.OfferingId == offeringId && !session.IsDeleted) })
+                .GroupBy(entry => entry.Frequency)
+                .OrderByDescending(entry => entry.Key)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return groupedTeachers
+                .Select(group => group.Teacher)
+                .ToList();
+        }
+
         public async Task<List<Staff>> GetFacultyHeadTeachers(
             Guid facultyId,
             CancellationToken cancellationToken = default) =>

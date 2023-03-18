@@ -89,5 +89,24 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             return await _context.Enrolments
                 .AnyAsync(enrolment => !enrolment.IsDeleted && enrolment.StudentId == studentId && enrolment.OfferingId == offeringId);
         }
+
+        public async Task<List<Enrolment>> GetCurrentByStudentId(
+            string studentId,
+            CancellationToken cancellationToken = default)
+        {
+            var today = DateTime.Today;
+
+            return await _context
+                .Set<Enrolment>()
+                .Include(enrol => enrol.Offering)
+                .ThenInclude(offering => offering.Course)
+                .Where(enrol =>
+                    enrol.StudentId == studentId &&
+                    !enrol.IsDeleted &&
+                    enrol.Offering.EndDate >= today &&
+                    enrol.Offering.StartDate <= today)
+                .ToListAsync(cancellationToken);
+        }
+            
     }
 }

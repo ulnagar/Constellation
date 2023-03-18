@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Extensions;
+using Constellation.Application.Families.GetResidentialFamilyEmailAddresses;
 using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
@@ -141,9 +142,9 @@ namespace Constellation.Infrastructure.Jobs
         private async Task SendParentEmail(MemoryStream pdfStream, string filename, Student student, DateTime dateToReport, CancellationToken token)
         {
             // Email the file to the parents
-            var emailAddresses = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = student.StudentId }, token);
+            var emailAddresses = await _mediator.Send(new GetResidentialFamilyEmailAddressesQuery(student.StudentId), token);
 
-            if (emailAddresses == null || emailAddresses.Count == 0)
+            if (emailAddresses.IsFailure || !emailAddresses.Value.Any())
             {
                 _logger.LogWarning("{id}: Could not identify parent email address for {DisplayName} ({CurrentGrade})", JobId, student.DisplayName, student.CurrentGrade);
                 await _emailService.SendAdminAbsenceContactAlert(student.DisplayName);
@@ -155,7 +156,7 @@ namespace Constellation.Infrastructure.Jobs
                 StudentName = student.DisplayName,
                 StartDate = dateToReport,
                 EndDate = dateToReport.AddDays(12),
-                Recipients = emailAddresses.Select(contact => new EmailBaseClass.Recipient { Name = contact, Email = contact }).ToList(),
+                Recipients = emailAddresses.Value.Select(contact => new EmailBaseClass.Recipient { Name = contact.Name, Email = contact.Email }).ToList(),
                 NotificationType = AttendanceReportEmail.NotificationSequence.Student
             };
 
@@ -165,13 +166,13 @@ namespace Constellation.Infrastructure.Jobs
 
             if (success)
             {
-                foreach (var email in emailAddresses)
-                    _logger.LogInformation("{id}: Message sent via Email to {email} with attachment: {filename}", JobId, email, filename);
+                foreach (var email in emailAddresses.Value)
+                    _logger.LogInformation("{id}: Message sent via Email to {email} with attachment: {filename}", JobId, email.Email, filename);
             }
             else
             {
-                foreach (var email in emailAddresses)
-                    _logger.LogInformation("{id}: FAILED to send email to {email} with attachment: {filename}", JobId, email, filename);
+                foreach (var email in emailAddresses.Value)
+                    _logger.LogInformation("{id}: FAILED to send email to {email} with attachment: {filename}", JobId, email.Email, filename);
             }
         }
 

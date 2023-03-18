@@ -1,4 +1,6 @@
 ﻿using Constellation.Application.Extensions;
+using Constellation.Application.Families.GetResidentialFamilyEmailAddresses;
+using Constellation.Application.Families.GetResidentialFamilyMobileNumbers;
 using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
@@ -17,6 +19,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Reports.Controllers
@@ -99,7 +102,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.AbsencesEditor)]
-        public async Task<IActionResult> SendNotification(string id, string method)
+        public async Task<IActionResult> SendNotification(string id, string method, CancellationToken cancellationToken = default)
         {
             var absence = await _unitOfWork.Absences.ForSendingNotificationAsync(id);
             var absences = new List<Absence> { absence };
@@ -116,8 +119,11 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
                 {
                     case AbsenceNotification.SMS:
                         {
-                            var phoneNumbers = await _mediator.Send(new GetStudentFamilyMobileNumbersQuery { StudentId = absence.Student.SentralStudentId });
-                            var sentMessage = await _smsService.SendAbsenceNotificationAsync(absences, phoneNumbers.ToList());
+                            var phoneNumbers = await _mediator.Send(new GetResidentialFamilyMobileNumbersQuery(absence.StudentId), cancellationToken);
+                            if (phoneNumbers.IsFailure || !phoneNumbers.Value.Any())
+                                break;
+
+                            var sentMessage = await _smsService.SendAbsenceNotificationAsync(absences, phoneNumbers.Value);
 
                             if (sentMessage.Messages.Count > 0)
                             {
@@ -126,7 +132,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
                                     Type = AbsenceNotification.SMS,
                                     SentAt = DateTime.Now,
                                     Message = sentMessage.Messages.First().MessageBody,
-                                    Recipients = phoneNumbers.Collapse('|'),
+                                    Recipients = phoneNumbers.Value.Select(entry => entry.ToString(Core.ValueObjects.PhoneNumber.Format.None)).ToList().Collapse('|'),
                                     OutgoingId = sentMessage.Messages.First().OutgoingId
                                 });
                             }
@@ -136,15 +142,18 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
 
                     case AbsenceNotification.Email:
                         {
-                            var emailAddresses = await _mediator.Send(new GetStudentFamilyEmailAddressesQuery { StudentId = absence.Student.StudentId });
-                            var sentMessage = await _emailService.SendParentWholeAbsenceAlert(absences, emailAddresses.ToList());
+                            var emailAddresses = await _mediator.Send(new GetResidentialFamilyEmailAddressesQuery(absence.StudentId), cancellationToken);
+                            if (emailAddresses.IsFailure || !emailAddresses.Value.Any())
+                                break;
+
+                            var sentMessage = await _emailService.SendParentWholeAbsenceAlert(absences, emailAddresses.Value);
 
                             absence.Notifications.Add(new AbsenceNotification
                             {
                                 Type = AbsenceNotification.Email,
                                 SentAt = DateTime.Now,
                                 Message = sentMessage.message,
-                                Recipients = emailAddresses.Collapse('|'),
+                                Recipients = emailAddresses.Value.Select(entry => entry.Email).ToList().Collapse('|'),
                                 OutgoingId = sentMessage.id
                             });
 
@@ -168,7 +177,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
                 });
             }
 
-            await _unitOfWork.CompleteAsync();
+            await _unitOfWork.CompleteAsync(cancellationToken);
 
             return RedirectToAction("FilterSelection");
         }

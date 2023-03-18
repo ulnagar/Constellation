@@ -34,12 +34,12 @@ public class StudentOfParent : IMapFrom<Student>
 public class GetStudentsOfParentQueryHandler : IRequestHandler<GetStudentsOfParentQuery, ICollection<StudentOfParent>>
 {
     private readonly IMapper _mapper;
-    private readonly IStudentFamilyRepository _familyRepository;
+    private readonly IFamilyRepository _familyRepository;
     private readonly IStudentRepository _studentRepository;
 
     public GetStudentsOfParentQueryHandler(
         IMapper mapper,
-        IStudentFamilyRepository familyRepository,
+        IFamilyRepository familyRepository,
         IStudentRepository studentRepository)
     {
         _mapper = mapper;

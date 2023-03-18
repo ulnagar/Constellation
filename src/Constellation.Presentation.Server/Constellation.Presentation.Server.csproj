@@ -41,6 +41,10 @@
     <ProjectReference Include="..\Constellation.Infrastructure\Constellation.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\private\" />
+  </ItemGroup>
+
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 
 </Project>

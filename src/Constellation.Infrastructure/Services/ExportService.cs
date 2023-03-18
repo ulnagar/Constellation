@@ -1,148 +1,138 @@
-﻿using Constellation.Application.DTOs;
+﻿namespace Constellation.Infrastructure.Services;
+
+using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
-using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
-using Constellation.Infrastructure.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Constellation.Infrastructure.Services
+public class ExportService : IExportService
 {
-    // Reviewed for ASYNC Operations
-    public class ExportService : IExportService, IScopedService
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IStaffRepository _staffRepository;
+    private readonly IFamilyRepository _familyRepository;
+
+    public ExportService(
+        IUnitOfWork unitOfWork,
+        IEnrolmentRepository enrolmentRepository,
+        IStaffRepository staffRepository,
+        IFamilyRepository familyRepository)
     {
-        private readonly IUnitOfWork _unitOfWork;
+        _unitOfWork = unitOfWork;
+        _enrolmentRepository = enrolmentRepository;
+        _staffRepository = staffRepository;
+        _familyRepository = familyRepository;
+    }
 
-        public ExportService(IUnitOfWork unitOfWork)
+    public async Task<List<InterviewExportDto>> CreatePTOExport(
+        List<Student> students,
+        bool perFamily,
+        bool residentialFamilyOnly,
+        CancellationToken cancellationToken = default)
+    {
+        var result = new List<InterviewExportDto>();
+
+        foreach (var student in students)
         {
-            _unitOfWork = unitOfWork;
-        }
+            var families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
 
-        public List<InterviewExportDto> CreatePTOExport(ICollection<Student> students, bool perFamily)
-        {
-            var result = new List<InterviewExportDto>();
+            if (residentialFamilyOnly)
+                families = families
+                    .Where(entry =>
+                        entry.Students.Any(member =>
+                            member.StudentId == student.StudentId &&
+                            member.IsResidentialFamily))
+                    .ToList();
 
-            foreach (var student in students)
+            var validEnrolments = await _enrolmentRepository.GetCurrentByStudentId(student.StudentId, cancellationToken);
+
+            foreach (var family in families)
             {
-                var validEnrolments = student.Enrolments.Where(enrol => !enrol.IsDeleted && enrol.Offering.IsCurrent()).ToList();
-                 
                 foreach (var enrolment in validEnrolments)
                 {
                     var course = enrolment.Offering.Course;
 
-                    var sessions = enrolment.Offering.Sessions.Where(session => !session.IsDeleted).ToList();
-                    var teachers = sessions.GroupBy(session => session.StaffId).OrderByDescending(group => group.Count());
+                    var teachers = await _staffRepository.GetPrimaryTeachersForOffering(enrolment.OfferingId, cancellationToken);
 
-                    var teacher = teachers.First().First().Teacher;
-
-                    var dto = new InterviewExportDto
+                    foreach (var teacher in teachers)
                     {
-                        StudentId = student.StudentId,
-                        StudentFirstName = student.FirstName,
-                        StudentLastName = student.LastName,
-                        ClassCode = enrolment.Offering.Name,
-                        ClassGrade = course.Grade.AsNumber(),
-                        ClassName = course.Name,
-                        TeacherCode = teacher.StaffId,
-                        TeacherTitle = "",
-                        TeacherFirstName = teacher.FirstName,
-                        TeacherLastName = teacher.LastName,
-                        TeacherEmailAddress = teacher.EmailAddress
-                    };
-
-                    if (perFamily)
-                    {
-                        var lastName = student.Family.Address.Title.Split(' ').Last();
-                        var firstName = student.Family.Address.Title.Substring(0, student.Family.Address.Title.Length - lastName.Length).Trim();
-                        var email = student.Family.Parent1.EmailAddress ?? student.Family.Parent2.EmailAddress;
-
-                        var entry = new InterviewExportDto.Parent
+                        var dto = new InterviewExportDto
                         {
-                            ParentCode = email,
-                            ParentFirstName = firstName,
-                            ParentLastName = lastName,
-                            ParentEmailAddress = email
+                            StudentId = student.StudentId,
+                            StudentFirstName = student.FirstName,
+                            StudentLastName = student.LastName,
+                            ClassCode = enrolment.Offering.Name,
+                            ClassGrade = course.Grade.AsNumber(),
+                            ClassName = course.Name,
+                            TeacherCode = teacher.StaffId,
+                            TeacherTitle = "",
+                            TeacherFirstName = teacher.FirstName,
+                            TeacherLastName = teacher.LastName,
+                            TeacherEmailAddress = teacher.EmailAddress
                         };
 
-                        dto.Parents.Add(entry);
+                        if (perFamily)
+                        {
+                            var lastName = family.FamilyTitle.Split(' ').Last();
+                            var firstName = family.FamilyTitle[..^lastName.Length].Trim();
+                            var email = family.FamilyEmail;
+
+                            var entry = new InterviewExportDto.Parent
+                            {
+                                ParentCode = email,
+                                ParentFirstName = firstName,
+                                ParentLastName = lastName,
+                                ParentEmailAddress = email
+                            };
+
+                            dto.Parents.Add(entry);
+
+                            result.Add(dto);
+                            continue;
+                        }
+
+                        foreach (var parent in family.Parents)
+                        {
+                            var entry = new InterviewExportDto.Parent
+                            {
+                                ParentCode = parent.EmailAddress,
+                                ParentFirstName = parent.FirstName,
+                                ParentLastName = parent.LastName,
+                                ParentEmailAddress = parent.EmailAddress
+                            };
+
+                            dto.Parents.Add(entry);
+                        }
 
                         result.Add(dto);
-                        continue;
                     }
-
-                    if (!string.IsNullOrWhiteSpace(student.Family.Parent1.FirstName) && !string.IsNullOrWhiteSpace(student.Family.Parent2.FirstName) && student.Family.Parent1.EmailAddress == student.Family.Parent2.EmailAddress)
-                    {
-                        // Create single family login
-
-                        var lastName = student.Family.Address.Title.Split(' ').Last();
-                        var firstName = student.Family.Address.Title.Substring(0, student.Family.Address.Title.Length - lastName.Length).Trim();
-
-                        var entry = new InterviewExportDto.Parent
-                        {
-                            ParentCode = student.Family.Parent1.EmailAddress,
-                            ParentFirstName = firstName,
-                            ParentLastName = lastName,
-                            ParentEmailAddress = student.Family.Parent1.EmailAddress
-                        };
-
-                        dto.Parents.Add(entry);
-
-                        result.Add(dto);
-                        continue;
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(student.Family.Parent1.FirstName))
-                    {
-                        var entry = new InterviewExportDto.Parent
-                        {
-                            ParentCode = student.Family.Parent1.EmailAddress,
-                            ParentFirstName = student.Family.Parent1.FirstName,
-                            ParentLastName = student.Family.Parent1.LastName,
-                            ParentEmailAddress = student.Family.Parent1.EmailAddress
-                        };
-
-                        dto.Parents.Add(entry);
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(student.Family.Parent2.FirstName))
-                    {
-                        var entry = new InterviewExportDto.Parent
-                        {
-                            ParentCode = student.Family.Parent2.EmailAddress,
-                            ParentFirstName = student.Family.Parent2.FirstName,
-                            ParentLastName = student.Family.Parent2.LastName,
-                            ParentEmailAddress = student.Family.Parent2.EmailAddress
-                        };
-
-                        dto.Parents.Add(entry);
-                    }
-
-                    result.Add(dto);
                 }
             }
-
-            return result;
         }
 
-        public async Task<List<AbsenceExportDto>> CreateAbsenceExport(AbsenceFilterDto filter)
-        {
-            var absences = await _unitOfWork.Absences.ForReportAsync(filter);
+        return result;
+    }
 
-            absences = absences.OrderBy(a => a.Date.Date)
-                .ThenBy(a => a.PeriodTimeframe)
-                .ThenBy(a => a.Student.School.Name)
-                .ThenBy(a => a.Student.CurrentGrade)
-                .ToList()
-                .Where(a => a.Date.Year == DateTime.Now.Year)
-                .ToList();
+    public async Task<List<AbsenceExportDto>> CreateAbsenceExport(AbsenceFilterDto filter)
+    {
+        var absences = await _unitOfWork.Absences.ForReportAsync(filter);
 
-            var data = absences.Select(AbsenceExportDto.ConvertFromAbsence).ToList();
+        absences = absences.OrderBy(a => a.Date.Date)
+            .ThenBy(a => a.PeriodTimeframe)
+            .ThenBy(a => a.Student.School.Name)
+            .ThenBy(a => a.Student.CurrentGrade)
+            .ToList()
+            .Where(a => a.Date.Year == DateTime.Now.Year)
+            .ToList();
 
-            return data;
-        }
+        var data = absences.Select(AbsenceExportDto.ConvertFromAbsence).ToList();
+
+        return data;
     }
 }

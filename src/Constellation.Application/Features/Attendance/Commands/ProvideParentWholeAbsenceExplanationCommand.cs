@@ -25,16 +25,16 @@ public class ProvideParentWholeAbsenceExplanationCommandHandler : IRequestHandle
 {
     private readonly IAppDbContext _context;
     private readonly IMediator _mediator;
-    private readonly IStudentFamilyRepository _studentFamilyRepository;
+    private readonly IFamilyRepository _familyRepository;
 
     public ProvideParentWholeAbsenceExplanationCommandHandler(
         IAppDbContext context,
         IMediator mediator,
-        IStudentFamilyRepository studentFamilyRepository)
+        IFamilyRepository familyRepository)
     {
         _context = context;
         _mediator = mediator;
-        _studentFamilyRepository = studentFamilyRepository;
+        _familyRepository = familyRepository;
     }
 
     public async Task<Unit> Handle(ProvideParentWholeAbsenceExplanationCommand request, CancellationToken cancellationToken)
@@ -47,7 +47,7 @@ public class ProvideParentWholeAbsenceExplanationCommandHandler : IRequestHandle
             .Select(student => student.StudentId)
             .FirstOrDefaultAsync(cancellationToken);
 
-        var studentIds = await _studentFamilyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
+        var studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
 
         var authorised = studentIds.Contains(studentId);
 

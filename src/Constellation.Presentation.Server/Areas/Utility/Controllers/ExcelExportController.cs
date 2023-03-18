@@ -42,11 +42,11 @@ namespace Constellation.Presentation.Server.Areas.Utility.Controllers
             return fs;
         }
 
-        public async Task<IActionResult> ExportInterviews(InterviewExportSelectionDto filter)
+        public async Task<IActionResult> ExportInterviews(InterviewExportSelectionDto filter, CancellationToken cancellationToken)
         {
-            var data = await _unitOfWork.Students.ForInterviewsExportAsync(filter);
+            var data = await _unitOfWork.Students.ForInterviewsExportAsync(filter, cancellationToken);
 
-            var exportDto = _exportService.CreatePTOExport(data, filter.PerFamily);
+            var exportDto = await _exportService.CreatePTOExport(data, filter.PerFamily, filter.ResidentialFamilyOnly, cancellationToken);
 
             var stream = await _excelService.CreatePTOFile(exportDto);
 

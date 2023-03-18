@@ -2,6 +2,7 @@ using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
@@ -17,5 +18,6 @@ namespace Constellation.Application.Interfaces.Repositories
         ICollection<Enrolment> AllForStudent(string id);
         Task<Enrolment> ForEditing(int id);
         Task<bool> AnyForStudentAndOffering(string studentId, int offeringId);
+        Task<List<Enrolment>> GetCurrentByStudentId(string studentId, CancellationToken cancellationToken = default);
     }
 }

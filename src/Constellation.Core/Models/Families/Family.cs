@@ -112,6 +112,13 @@ public sealed class Family : AggregateRoot, IAuditableEntity
             return Result.Failure<Parent>(parentEmail.Error);
         }
 
+        var parentMobile = PhoneNumber.Create(mobileNumber);
+
+        if (parentMobile.IsFailure)
+        {
+            return Result.Failure<Parent>(parentMobile.Error);
+        }
+
         var existingParent = _parents.FirstOrDefault(parent => parent.EmailAddress == parentEmail.Value.Email);
 
         if (existingParent is null)
@@ -121,7 +128,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
                 title,
                 firstName,
                 lastName,
-                mobileNumber,
+                parentMobile.Value,
                 parentEmail.Value,
                 sentralLink);
 
@@ -136,7 +143,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
             title,
             firstName,
             lastName,
-            mobileNumber,
+            parentMobile.Value,
             parentEmail.Value,
             sentralLink);
 

@@ -90,12 +90,12 @@ public class GetAbsencesForFamilyQueryHandler : IRequestHandler<GetAbsencesForFa
 {
     private readonly IAppDbContext _context;
     private readonly IMapper _mapper;
-    private readonly IStudentFamilyRepository _familyRepository;
+    private readonly IFamilyRepository _familyRepository;
 
     public GetAbsencesForFamilyQueryHandler(
         IAppDbContext context,
         IMapper mapper,
-        IStudentFamilyRepository familyRepository)
+        IFamilyRepository familyRepository)
     {
         _context = context;
         _mapper = mapper;

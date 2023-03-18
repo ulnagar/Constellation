@@ -4,7 +4,7 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.Models.Families;
 using Microsoft.EntityFrameworkCore;
 
-internal sealed class StudentFamilyRepository : IStudentFamilyRepository
+internal sealed class StudentFamilyRepository : IFamilyRepository
 {
     private readonly AppDbContext _context;
 
@@ -30,6 +30,16 @@ internal sealed class StudentFamilyRepository : IStudentFamilyRepository
             .Include(family => family.Parents)
             .Include(family => family.Students)
             .FirstOrDefaultAsync(family => family.Id == Id, cancellationToken);
+
+    public async Task<List<Family>> GetFamiliesByStudentId(
+        string studentId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Family>()
+            .Include(family => family.Parents)
+            .Include(family => family.Students)
+            .Where(family => family.Students.Any(student => student.StudentId == studentId))
+            .ToListAsync(cancellationToken);
 
     public async Task<bool> DoesEmailBelongToParentOrFamily(
         string email,

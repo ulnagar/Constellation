@@ -40,6 +40,16 @@ public static class DomainErrors
         }
     }
 
+    public static class Enrolments
+    {
+        public static class Enrolment
+        {
+            public static readonly Func<string, Error> NotFoundForStudent = id => new Error(
+                "Enrolments.Enrolment.NotFoundForStudent",
+                $"No enrolments could be found for student with Id {id}");
+        }
+    }
+
     public static class Family
     {
         public static class Address
@@ -47,6 +57,17 @@ public static class DomainErrors
             public static readonly Error InvalidAddress = new(
                 "Family.Address.InvalidAddress",
                 "The Address supplied is incomplete or invalid");
+        }
+
+        public static class Students
+        {
+            public static readonly Error NoLinkedFamilies = new(
+                "Family.Students.NoLinkedFamilies",
+                "The student does not have any linked families in the database");
+
+            public static readonly Error NoResidentialFamily = new(
+                "Family.Students.NoResidentialFamily",
+                "The student does not have any linked family marked as the residential family");
         }
     }
 
@@ -173,7 +194,7 @@ public static class DomainErrors
         {
             public static readonly Error EmailEmpty = new Error(
                 "ValueObjects.EmailAddress.EmailEmpty",
-                "Email Address must no tbe empty.");
+                "Email Address must not be empty.");
 
             public static readonly Error EmailInvalid = new Error(
                 "ValueObjects.EmailAddress.EmailInvalid",
@@ -196,6 +217,17 @@ public static class DomainErrors
             public static readonly Error LastNameEmpty = new Error(
                 "ValueObjects.Name.LastNameEmpty",
                 "Last Name must not be empty.");
+        }
+
+        public static class PhoneNumber
+        {
+            public static readonly Error NumberEmpty = new(
+                "ValueObjects.PhoneNumber.NumberEmpty",
+                "Phone Number must not be empty");
+
+            public static readonly Error NumberInvalid = new(
+                "ValueObjects.PhoneNumber.NumberInvalid",
+                "Phone NUmber is not valid");
         }
     }
 }

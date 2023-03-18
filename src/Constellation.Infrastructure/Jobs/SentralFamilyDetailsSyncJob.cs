@@ -20,7 +20,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISentralGateway _gateway;
     private readonly IMediator _mediator;
-    private readonly IStudentFamilyRepository _familyRepository;
+    private readonly IFamilyRepository _familyRepository;
     private readonly IStudentRepository _studentRepository;
 
     public SentralFamilyDetailsSyncJob(
@@ -28,7 +28,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
         ILogger logger,
         ISentralGateway gateway,
         IMediator mediator,
-        IStudentFamilyRepository familyRepository,
+        IFamilyRepository familyRepository,
         IStudentRepository studentRepository)
     {
         _logger = logger.ForContext<ISentralFamilyDetailsSyncJob>();

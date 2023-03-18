@@ -46,7 +46,7 @@ public sealed class Parent : Entity
         string title,
         string firstName,
         string lastName,
-        string mobileNumber,
+        PhoneNumber mobileNumber,
         EmailAddress emailAddress,
         SentralReference sentralLink = SentralReference.None)
     {
@@ -55,7 +55,7 @@ public sealed class Parent : Entity
             title,
             firstName,
             lastName,
-            mobileNumber,
+            mobileNumber.ToString(PhoneNumber.Format.None),
             emailAddress.Email,
             sentralLink);
     }
@@ -64,14 +64,14 @@ public sealed class Parent : Entity
         string title,
         string firstName,
         string lastName,
-        string mobileNumber,
+        PhoneNumber mobileNumber,
         EmailAddress emailAddress,
         SentralReference sentralLink = SentralReference.None)
     {
         Title = title;
         FirstName = firstName;
         LastName = lastName;
-        MobileNumber = mobileNumber;
+        MobileNumber = mobileNumber.ToString(PhoneNumber.Format.None);
         EmailAddress = emailAddress.Email;
         SentralLink = sentralLink;
     }

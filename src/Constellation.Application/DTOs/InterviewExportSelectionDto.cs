@@ -13,5 +13,6 @@ namespace Constellation.Application.DTOs
         public ICollection<int> Grades { get; set; }
         public ICollection<int> ClassList { get; set; }        
         public bool PerFamily { get; set; }
+        public bool ResidentialFamilyOnly { get; set; }
     }
 }
