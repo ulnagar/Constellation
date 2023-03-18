@@ -280,13 +280,13 @@
                     @foreach (var item in Model.Equipment)
                     {
                         <tr>
-                            <td>@Html.DisplayFor(model => item.DeviceMake)</td>
-                            <td>@Html.DisplayFor(model => item.DeviceSerial)</td>
-                            <td>@Html.DisplayFor(model => item.DeviceStatus)</td>
-                            <td>@Html.DisplayFor(model => item.Allocated, "ShortDate")</td>
-                            <td>@Html.DisplayFor(model => item.Deleted, "ShortDate")</td>
+                            <td>@item.Make</td>
+                            <td>@item.SerialNumber</td>
+                            <td>@item.Status</td>
+                            <td>@item.DateAllocated.ToShortDateString()</td>
+                            <td>@item.DateReturned.ToShortDateString()</td>
                             <td>
-                                @Html.ActionLink("More Info...", "Details", "Devices", new { area = "Equipment", id = item.DeviceSerial }, new { @class = "btn btn-sm btn-info btn-show-hover" })
+                                @Html.ActionLink("More Info...", "Details", "Devices", new { area = "Equipment", id = item.SerialNumber }, new { @class = "btn btn-sm btn-info btn-show-hover" })
                             </td>
                         </tr>
                     }
@@ -305,31 +305,27 @@
                         <th>Date</th>
                         <th>Period</th>
                         <th>Class</th>
-                        <th># Notifications</th>
-                        <th># Responses</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Absences.OrderBy(a => a.Date).ThenBy(a => a.PeriodTimeframe))
+                    @foreach (var item in Model.Absences.OrderBy(a => a.AbsenceDate).ThenBy(a => a.Timeframe))
                     {
                         <tr>
                             <td>
-                                @if (item.Explained)
+                                @if (item.IsExplained)
                                 {
-                                    <span class="glyphicon glyphicon-ok glyph-color-green" />
+                                    <i class="fal fa-comment-check" />
                                 }
                                 else
                                 {
-                                    <span class="glyphicon glyphicon-remove glyph-color-red" />
+                                    <i class="fal fa-comment-times" />
                                 }
                             </td>
-                            <td>@Html.DisplayFor(model => item.Type)</td>
-                            <td>@Html.DisplayFor(model => item.Date, "ShortDate")</td>
-                            <td>@Html.DisplayFor(model => item.Timeframe) (@Html.DisplayFor(model => item.PeriodName))</td>
-                            <td>@Html.DisplayFor(model => item.OfferingName)</td>
-                            <td>@Html.DisplayFor(model => item.NotificationCount)</td>
-                            <td>@Html.DisplayFor(model => item.ResponsesCount)</td>
+                            <td>@item.AbsenceType</td>
+                            <td>@item.AbsenceDate.ToShortDateTime()</td>
+                            <td>@item.Timeframe (@item.PeriodName)</td>
+                            <td>@item.OfferingName</td>
                             <td>
                                 @Html.ActionLink("More Info...", "AbsenceDetails", "Students", new { area = "Partner", id = item.Id}, new {@class = "btn btn-sm btn-info btn-show-hover"})
                             </td>

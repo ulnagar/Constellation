@@ -9,4 +9,4 @@ public sealed record StudentResponse(
     string EmailAddress,
     string School,
     string SchoolCode,
-    bool IsDeleted)
+    bool IsDeleted);

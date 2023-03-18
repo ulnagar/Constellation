@@ -12,7 +12,8 @@ CURRENT TASK
 		*Add error return for page events
 
 	PARENTS:
-		Complete new student details page
+		*Complete new student details page
+			Update the bulk enrol and migrate the bulk unenrol code to the page
 		Create domain event handlers to add/remove/update user accounts
 		Create CRUD pages for non-residential parents
 		Create master contact list with per student entry for parents, ACCs, and SPTs

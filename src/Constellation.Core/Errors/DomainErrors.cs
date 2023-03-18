@@ -40,6 +40,16 @@ public static class DomainErrors
         }
     }
 
+    public static class Assets
+    {
+        public static class Allocations
+        {
+            public static readonly Func<string, Error> NotFoundForStudent = id => new Error(
+                "Assets.Allocations.NotFoundForStudent",
+                $"Could not find any asset allocations for student {id}");
+        }
+    }
+
     public static class Enrolments
     {
         public static class Enrolment

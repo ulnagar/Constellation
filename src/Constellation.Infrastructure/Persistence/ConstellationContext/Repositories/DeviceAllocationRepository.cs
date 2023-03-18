@@ -18,6 +18,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             _context = context;
         }
 
+        public async Task<List<DeviceAllocation>> GetHistoryForStudent(
+            string StudentId,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<DeviceAllocation>()
+                .Where(allocation => 
+                    allocation.StudentId == StudentId)
+                .ToListAsync(cancellationToken);
+
         private IQueryable<DeviceAllocation> Collection()
         {
             return _context.DeviceAllocations

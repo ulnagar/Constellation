@@ -22,6 +22,22 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             _context = context;
         }
 
+        public async Task<List<Absence>> GetForStudentFromCurrentYear(
+            string StudentId,
+            CancellationToken cancellationToken = default)
+        {
+            var startOfYear = new DateTime(DateTime.Today.Year, 1, 1);
+            var endOfYear = new DateTime(DateTime.Today.Year, 12, 31);
+
+            return await _context
+                .Set<Absence>()
+                .Where(absence =>
+                    absence.StudentId == StudentId &&
+                    absence.Date > startOfYear &&
+                    absence.Date < endOfYear)
+                .ToListAsync(cancellationToken);
+        }
+
         private IQueryable<Absence> Collection()
         {
             return _context.Absences

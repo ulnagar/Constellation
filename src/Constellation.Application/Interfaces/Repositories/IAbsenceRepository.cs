@@ -3,12 +3,14 @@ using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
 {
     public interface IAbsenceRepository
     {
+        Task<List<Absence>> GetForStudentFromCurrentYear(string StudentId, CancellationToken cancellationToken = default);
         Task<ICollection<Absence>> All();
         Task<ICollection<Absence>> AllWithFilter(Expression<Func<Absence, bool>> predicate);
         Task<Absence> WithDetails(string id);
