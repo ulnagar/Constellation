@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.ClassCovers.GetCoverWithDetails;
 
 using Constellation.Application.Abstractions.Messaging;
-using System;
+using Constellation.Core.Models.Identifiers;
 
 public sealed record GetCoverWithDetailsQuery(
-    Guid Id)
+    ClassCoverId Id)
     : IQuery<CoverWithDetailsResponse>;

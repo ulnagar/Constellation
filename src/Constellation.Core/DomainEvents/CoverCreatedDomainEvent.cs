@@ -1,8 +1,9 @@
 ﻿namespace Constellation.Core.DomainEvents;
 
+using Constellation.Core.Models.Identifiers;
 using System;
 
 public sealed record CoverCreatedDomainEvent(
-    Guid Id,
-    Guid CoverId)
+    DomainEventId Id,
+    ClassCoverId CoverId)
     : DomainEvent(Id);

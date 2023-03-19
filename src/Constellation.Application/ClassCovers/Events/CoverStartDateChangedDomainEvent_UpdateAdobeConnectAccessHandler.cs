@@ -123,7 +123,7 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateAdobeConnectAccessH
                         CasualId = Guid.Parse(cover.TeacherId),
                         Action = AdobeConnectOperationAction.Add,
                         DateScheduled = newActionDate,
-                        CoverId = cover.Id
+                        CoverId = cover.Id.Value
                     };
 
                     _operationsRepository.Insert(addTimelyOperation);
@@ -136,7 +136,7 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateAdobeConnectAccessH
                         StaffId = cover.TeacherId,
                         Action = AdobeConnectOperationAction.Add,
                         DateScheduled = newActionDate,
-                        CoverId = cover.Id
+                        CoverId = cover.Id.Value
                     };
 
                     _operationsRepository.Insert(addTimelyOperation);

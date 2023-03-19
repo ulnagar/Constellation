@@ -49,7 +49,7 @@ internal sealed class CoverCreatedDomainEvent_CreateMicrosoftTeamsAccessHandler
             {
                 OfferingId = cover.OfferingId,
                 CasualId = Guid.Parse(cover.TeacherId),
-                CoverId = cover.Id,
+                CoverId = cover.Id.Value,
                 Action = MSTeamOperationAction.Add,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                 DateScheduled = cover.StartDate.ToDateTime(TimeOnly.MinValue).AddDays(-1)
@@ -61,7 +61,7 @@ internal sealed class CoverCreatedDomainEvent_CreateMicrosoftTeamsAccessHandler
             {
                 OfferingId = cover.OfferingId,
                 CasualId = Guid.Parse(cover.TeacherId),
-                CoverId = cover.Id,
+                CoverId = cover.Id.Value,
                 Action = MSTeamOperationAction.Remove,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                 DateScheduled = cover.EndDate.ToDateTime(TimeOnly.MinValue).AddDays(1)
@@ -75,7 +75,7 @@ internal sealed class CoverCreatedDomainEvent_CreateMicrosoftTeamsAccessHandler
             {
                 OfferingId = cover.OfferingId,
                 StaffId = cover.TeacherId,
-                CoverId = cover.Id,
+                CoverId = cover.Id.Value,
                 Action = MSTeamOperationAction.Add,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                 DateScheduled = cover.StartDate.ToDateTime(TimeOnly.MinValue).AddDays(-1)
@@ -87,7 +87,7 @@ internal sealed class CoverCreatedDomainEvent_CreateMicrosoftTeamsAccessHandler
             {
                 OfferingId = cover.OfferingId,
                 StaffId = cover.TeacherId,
-                CoverId = cover.Id,
+                CoverId = cover.Id.Value,
                 Action = MSTeamOperationAction.Remove,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                 DateScheduled = cover.EndDate.ToDateTime(TimeOnly.MinValue).AddDays(1)
@@ -104,7 +104,7 @@ internal sealed class CoverCreatedDomainEvent_CreateMicrosoftTeamsAccessHandler
             Action = MSTeamOperationAction.Add,
             PermissionLevel = MSTeamOperationPermissionLevel.Owner,
             DateScheduled = cover.StartDate.ToDateTime(TimeOnly.MinValue).AddDays(-1),
-            CoverId = cover.Id
+            CoverId = cover.Id.Value
         };
 
         _operationsRepository.Insert(cathyAddOperation);
@@ -116,7 +116,7 @@ internal sealed class CoverCreatedDomainEvent_CreateMicrosoftTeamsAccessHandler
             Action = MSTeamOperationAction.Remove,
             PermissionLevel = MSTeamOperationPermissionLevel.Owner,
             DateScheduled = cover.EndDate.ToDateTime(TimeOnly.MinValue).AddDays(1),
-            CoverId = cover.Id
+            CoverId = cover.Id.Value
         };
 
         _operationsRepository.Insert(cathyRemoveOperation);
@@ -128,7 +128,7 @@ internal sealed class CoverCreatedDomainEvent_CreateMicrosoftTeamsAccessHandler
             Action = MSTeamOperationAction.Add,
             PermissionLevel = MSTeamOperationPermissionLevel.Owner,
             DateScheduled = cover.StartDate.ToDateTime(TimeOnly.MinValue).AddDays(-1),
-            CoverId = cover.Id
+            CoverId = cover.Id.Value
         };
 
         _operationsRepository.Insert(karenAddOperation);
@@ -140,7 +140,7 @@ internal sealed class CoverCreatedDomainEvent_CreateMicrosoftTeamsAccessHandler
             Action = MSTeamOperationAction.Remove,
             PermissionLevel = MSTeamOperationPermissionLevel.Owner,
             DateScheduled = cover.EndDate.ToDateTime(TimeOnly.MinValue).AddDays(1),
-            CoverId = cover.Id
+            CoverId = cover.Id.Value
         };
 
         _operationsRepository.Insert(karenRemoveOperation);

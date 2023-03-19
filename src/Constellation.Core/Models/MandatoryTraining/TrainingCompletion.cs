@@ -1,28 +1,29 @@
 ﻿namespace Constellation.Core.Models.MandatoryTraining;
 
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
 using System;
 
-public class TrainingCompletion : Entity, IAuditableEntity
+public class TrainingCompletion : IAuditableEntity
 {
-    public TrainingCompletion(Guid Id)
-        : base(Id)
+    public TrainingCompletion(
+        TrainingCompletionId id)
     {
+        Id = id;
     }
 
-    public string StaffId { get; set; }
-    public virtual Staff Staff { get; set; }
+    public TrainingCompletionId Id { get; private set; }
+    public string StaffId { get; private set; }
     public DateTime? CompletedDate { get; private set; }
     public bool NotRequired { get; private set; }
-    public Guid TrainingModuleId { get; set; }
-    public virtual TrainingModule Module { get; set; }
-    public int? StoredFileId { get; set; }
-    public virtual StoredFile StoredFile { get; set; }
+    public TrainingModuleId TrainingModuleId { get; private set; }
+    public TrainingModule Module { get; set; }
+    public int? StoredFileId { get; private set; }
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public string ModifiedBy { get; set; }
     public DateTime ModifiedAt { get; set; }
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get; private set; }
     public string DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
 

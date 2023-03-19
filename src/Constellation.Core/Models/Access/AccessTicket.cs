@@ -6,10 +6,10 @@ using System;
 public sealed class AccessTicket : AggregateRoot, IAuditableEntity
 {
 	public AccessTicket(Guid Id)
-		: base(Id)
 	{
 	}
 
+	public Guid Id { get; set; }
 	public string AuthoriserType { get; set; } // Convert to Enumeration
 	public string AuthoriserId { get; set; } // Convert to GUID once all other objects have been converted to GUID ID
 	public string SystemType { get; set; } // Convert to Enumeration

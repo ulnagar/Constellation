@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models.Casuals;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using System;
@@ -41,7 +42,7 @@ internal sealed class CreateCasualCommandHandler
         }
 
         var casual = Casual.Create(
-            Guid.NewGuid(),
+            new CasualId(Guid.NewGuid()),
             nameResult.Value,
             emailResult.Value,
             request.AdobeConnectId,

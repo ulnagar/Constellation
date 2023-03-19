@@ -4,6 +4,7 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Casuals;
 using Constellation.Core.Models.Covers;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
@@ -56,7 +57,7 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
     }
 
     public async Task<ClassCover?> GetById(
-        Guid CoverId,
+        ClassCoverId CoverId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<ClassCover>()
@@ -82,7 +83,7 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
             {
                 returnData.AddRange(await _context
                     .Set<Casual>()
-                    .Where(casual => casual.Id == Guid.Parse(cover.TeacherId))
+                    .Where(casual => casual.Id == new CasualId(Guid.Parse(cover.TeacherId)))
                     .Select(casual => casual.EmailAddress)
                     .ToListAsync(cancellationToken));
             }
@@ -100,13 +101,13 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
     }
 
     public async Task<List<ClassCover>> GetAllWithCasualId(
-        int casualId, 
+        CasualId casualId, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<ClassCover>()
             .Where(cover => 
                 cover.TeacherType == CoverTeacherType.Casual &&
-                cover.TeacherId == casualId.ToString())
+                cover.TeacherId == casualId.Value.ToString())
             .ToListAsync(cancellationToken);
 
     public async Task<List<ClassCover>> GetAllForDateAndOfferingId(

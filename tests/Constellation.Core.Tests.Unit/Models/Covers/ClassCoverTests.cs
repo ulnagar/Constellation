@@ -1,5 +1,6 @@
 ﻿using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Covers;
+using Constellation.Core.Models.Identifiers;
 
 namespace Constellation.Core.Tests.Unit.Models.Covers;
 
@@ -10,7 +11,7 @@ public class ClassCoverTests
     {
         // Arrange
         var sut = ClassCover.Create(
-            Guid.NewGuid(),
+            new ClassCoverId(Guid.NewGuid()),
             1,
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)),
@@ -35,7 +36,7 @@ public class ClassCoverTests
     {        
         // Arrange
         var sut = ClassCover.Create(
-            Guid.NewGuid(),
+            new ClassCoverId(Guid.NewGuid()),
             1,
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)),
@@ -60,7 +61,7 @@ public class ClassCoverTests
     {
         // Arrange
         var sut = ClassCover.Create(
-            Guid.NewGuid(),
+            new ClassCoverId(Guid.NewGuid()),
             1,
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)),

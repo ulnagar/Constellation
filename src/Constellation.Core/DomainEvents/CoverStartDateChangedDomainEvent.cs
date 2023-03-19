@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Core.DomainEvents;
 
+using Constellation.Core.Models.Identifiers;
 using System;
 
 public sealed record CoverStartDateChangedDomainEvent(
-    Guid Id,
-    Guid CoverId,
+    DomainEventId Id,
+    ClassCoverId CoverId,
     DateOnly PreviousStartDate,
     DateOnly NewStartDate)
     : DomainEvent(Id);

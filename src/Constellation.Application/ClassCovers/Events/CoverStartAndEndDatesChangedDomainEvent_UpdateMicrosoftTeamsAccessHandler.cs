@@ -142,7 +142,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateMicrosoftTea
                     {
                         OfferingId = cover.OfferingId,
                         CasualId = Guid.Parse(cover.TeacherId),
-                        CoverId = cover.Id,
+                        CoverId = cover.Id.Value,
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                         DateScheduled = newActionDate
@@ -168,7 +168,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateMicrosoftTea
                     {
                         OfferingId = cover.OfferingId,
                         StaffId = cover.TeacherId,
-                        CoverId = cover.Id,
+                        CoverId = cover.Id.Value,
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                         DateScheduled = newActionDate
@@ -208,7 +208,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateMicrosoftTea
                     Action = MSTeamOperationAction.Add,
                     PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                     DateScheduled = newActionDate,
-                    CoverId = cover.Id
+                    CoverId = cover.Id.Value
                 };
 
                 _operationsRepository.Insert(cathyAddOperation);
@@ -243,7 +243,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateMicrosoftTea
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                         DateScheduled = newActionDate,
-                        CoverId = cover.Id
+                        CoverId = cover.Id.Value
                     };
 
                     _operationsRepository.Insert(karenAddOperation);
@@ -380,7 +380,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateMicrosoftTea
                     Action = MSTeamOperationAction.Remove,
                     PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                     DateScheduled = newActionDate,
-                    CoverId = cover.Id
+                    CoverId = cover.Id.Value
                 };
 
                 _operationsRepository.Insert(cathyRemoveOperation);
@@ -416,7 +416,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateMicrosoftTea
                     Action = MSTeamOperationAction.Remove,
                     PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                     DateScheduled = newActionDate,
-                    CoverId = cover.Id
+                    CoverId = cover.Id.Value
                 };
 
                 _operationsRepository.Insert(karenRemoveOperation);

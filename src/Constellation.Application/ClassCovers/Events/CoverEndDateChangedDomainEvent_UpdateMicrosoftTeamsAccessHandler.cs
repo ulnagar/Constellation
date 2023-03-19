@@ -203,7 +203,7 @@ internal sealed class CoverEndDateChangedDomainEvent_UpdateMicrosoftTeamsAccessH
                     Action = MSTeamOperationAction.Remove,
                     PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                     DateScheduled = newActionDate,
-                    CoverId = cover.Id
+                    CoverId = cover.Id.Value
                 };
 
                 _operationsRepository.Insert(cathyRemoveOperation);
@@ -239,7 +239,7 @@ internal sealed class CoverEndDateChangedDomainEvent_UpdateMicrosoftTeamsAccessH
                     Action = MSTeamOperationAction.Remove,
                     PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                     DateScheduled = newActionDate,
-                    CoverId = cover.Id
+                    CoverId = cover.Id.Value
                 };
 
                 _operationsRepository.Insert(karenRemoveOperation);

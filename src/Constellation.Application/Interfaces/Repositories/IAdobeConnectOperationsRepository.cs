@@ -1,5 +1,6 @@
 using Constellation.Application.DTOs;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -20,7 +21,7 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<ICollection<AdobeConnectOperation>> AllRecentAsync();
         Task<AdobeConnectOperation> ForProcessingAsync(int id);
 
-        Task<List<AdobeConnectOperation>> GetByCoverId(Guid coverId, CancellationToken cancellationToken = default);
+        Task<List<AdobeConnectOperation>> GetByCoverId(ClassCoverId coverId, CancellationToken cancellationToken = default);
         void Insert(AdobeConnectOperation adobeConnectOperation);
     }
 }

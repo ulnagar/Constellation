@@ -3,6 +3,7 @@
 using Constellation.Core.Common;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ using System.Linq;
 
 public class CompletionRecordExtendedDetailsDto
 {
-    public Guid ModuleId { get; set; }
+    public TrainingModuleId ModuleId { get; set; }
     public string ModuleName { get; set; }
     public TrainingModuleExpiryFrequency ModuleFrequency { get; set; }
 
@@ -21,7 +22,7 @@ public class CompletionRecordExtendedDetailsDto
     public List<FacultyContactDto> StaffHeadTeachers { get; set; } = new();
     public List<FacultyContactDto> PrincipalContacts { get; set; } = new(); 
 
-    public Guid RecordId { get; set; }
+    public TrainingCompletionId RecordId { get; set; }
     public bool RecordNotRequired { get; set; }
     public DateTime? RecordEffectiveDate { get; set; }
 
@@ -123,7 +124,7 @@ public class CompletionRecordExtendedDetailsDto
 
     public void CalculateExpiry()
     {
-        if (ModuleId == Guid.Empty || RecordId == Guid.Empty)
+        if (ModuleId.Value == Guid.Empty || RecordId.Value == Guid.Empty)
         {
             DueDate = DateTime.Today;
             TimeToExpiry = -9999;

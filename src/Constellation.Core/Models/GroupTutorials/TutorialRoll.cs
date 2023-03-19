@@ -1,37 +1,39 @@
 ﻿namespace Constellation.Core.Models.GroupTutorials;
 
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public sealed class TutorialRoll : Entity, IAuditableEntity
+public sealed class TutorialRoll : IAuditableEntity
 {
     private readonly List<TutorialRollStudent> _students = new();
 
     private TutorialRoll() { }
 
     public TutorialRoll(
-        Guid Id,
+        TutorialRollId id,
         GroupTutorial tutorial,
         DateOnly sessionDate)
-        : base(Id)
     {
+        Id = id;
         TutorialId = tutorial.Id;
         SessionDate = sessionDate;
     }
 
-    public Guid TutorialId { get; set; }
-    public DateOnly SessionDate { get; set; }
-    public string StaffId { get; set; }
+    public TutorialRollId Id { get; private set; }
+    public GroupTutorialId TutorialId { get; private set; }
+    public DateOnly SessionDate { get; private set; }
+    public string StaffId { get; private set; }
     public TutorialRollStatus Status => GetStatus();
     public IReadOnlyCollection<TutorialRollStudent> Students => _students;
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public string ModifiedBy { get; set; }
     public DateTime ModifiedAt { get; set; }
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get; private set; }
     public string DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
 

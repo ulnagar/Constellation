@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models;
 
 using Constellation.Core.DomainEvents;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
 using System;
 using System.Web;
@@ -11,11 +12,12 @@ public class Team : AggregateRoot
         Guid id,
         string name,
         string description)
-        : base(id)
     {
+        Id = id;
         UpdateTeamDetails(name, description);
     }
 
+    public Guid Id { get; private set; }
     public string Name { get; private set; }
     public string Description { get; private set; }
     public string Link { get; private set; }
@@ -27,7 +29,7 @@ public class Team : AggregateRoot
 
         team.CreateLinkFromPart(generalChannelId);
 
-        team.RaiseDomainEvent(new MicrosoftTeamRegisteredDomainEvent(Guid.NewGuid(), team.Id));
+        team.RaiseDomainEvent(new MicrosoftTeamRegisteredDomainEvent(new DomainEventId(Guid.NewGuid()), team.Id));
 
         return team;
     }
@@ -56,6 +58,6 @@ public class Team : AggregateRoot
     {
         IsArchived = true;
 
-        RaiseDomainEvent(new MicrosoftTeamArchivedDomainEvent(Guid.NewGuid(), Id));
+        RaiseDomainEvent(new MicrosoftTeamArchivedDomainEvent(new DomainEventId(Guid.NewGuid()), Id));
     }
 }

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Covers;
 
 using Constellation.Core.DomainEvents;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.ValueObjects;
 using System;
@@ -8,14 +9,14 @@ using System;
 public sealed class ClassCover : AggregateRoot, IAuditableEntity
 {
     private ClassCover(
-        Guid id,
+        ClassCoverId id,
         int offeringId,
         DateOnly startDate,
         DateOnly endDate,
         CoverTeacherType teacherType,
         string teacherId)
-        : base(id)
     {
+        Id = id;
         OfferingId = offeringId;
         StartDate = startDate;
         EndDate = endDate;
@@ -23,6 +24,7 @@ public sealed class ClassCover : AggregateRoot, IAuditableEntity
         TeacherId = teacherId;
     }
 
+    public ClassCoverId Id { get; private set; }
     public int OfferingId { get; private set; }
     public DateOnly StartDate { get; private set; }
     public DateOnly EndDate { get; private set; }
@@ -32,12 +34,12 @@ public sealed class ClassCover : AggregateRoot, IAuditableEntity
     public DateTime CreatedAt { get; set; }
     public string ModifiedBy { get; set; }
     public DateTime ModifiedAt { get; set; }
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get; private set; }
     public string DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
 
     public static ClassCover Create(
-        Guid id,
+        ClassCoverId id,
         int offeringId,
         DateOnly startDate,
         DateOnly endDate,
@@ -46,7 +48,7 @@ public sealed class ClassCover : AggregateRoot, IAuditableEntity
     {
         var cover = new ClassCover(id, offeringId, startDate, endDate, teacherType, teacherId);
 
-        cover.RaiseDomainEvent(new CoverCreatedDomainEvent(Guid.NewGuid(), cover.Id));
+        cover.RaiseDomainEvent(new CoverCreatedDomainEvent(new DomainEventId(Guid.NewGuid()), cover.Id));
 
         return cover;
     }
@@ -61,21 +63,21 @@ public sealed class ClassCover : AggregateRoot, IAuditableEntity
 
         if (oldStartDate != StartDate && oldEndDate != EndDate)
         {
-            RaiseDomainEvent(new CoverStartAndEndDatesChangedDomainEvent(Guid.NewGuid(), Id, oldStartDate, oldEndDate, StartDate, EndDate));
+            RaiseDomainEvent(new CoverStartAndEndDatesChangedDomainEvent(new DomainEventId(Guid.NewGuid()), Id, oldStartDate, oldEndDate, StartDate, EndDate));
 
             return;
         } 
 
         if (oldStartDate != StartDate)
         {
-            RaiseDomainEvent(new CoverStartDateChangedDomainEvent(Guid.NewGuid(), Id, oldStartDate, StartDate));
+            RaiseDomainEvent(new CoverStartDateChangedDomainEvent(new DomainEventId(Guid.NewGuid()), Id, oldStartDate, StartDate));
 
             return;
         } 
 
         if (oldEndDate != EndDate)
         {
-            RaiseDomainEvent(new CoverEndDateChangedDomainEvent(Guid.NewGuid(), Id, oldEndDate, EndDate));
+            RaiseDomainEvent(new CoverEndDateChangedDomainEvent(new DomainEventId(Guid.NewGuid()), Id, oldEndDate, EndDate));
 
             return;
         }
@@ -85,6 +87,6 @@ public sealed class ClassCover : AggregateRoot, IAuditableEntity
     {
         IsDeleted = true;
 
-        RaiseDomainEvent(new CoverCancelledDomainEvent(Guid.NewGuid(), Id));
+        RaiseDomainEvent(new CoverCancelledDomainEvent(new DomainEventId(Guid.NewGuid()), Id));
     }
 }

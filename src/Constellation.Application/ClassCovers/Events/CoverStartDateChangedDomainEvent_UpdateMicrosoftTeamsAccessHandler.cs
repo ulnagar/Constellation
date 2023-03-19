@@ -137,7 +137,7 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateMicrosoftTeamsAcces
                     {
                         OfferingId = cover.OfferingId,
                         CasualId = Guid.Parse(cover.TeacherId),
-                        CoverId = cover.Id,
+                        CoverId = cover.Id.Value,
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                         DateScheduled = newActionDate
@@ -163,7 +163,7 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateMicrosoftTeamsAcces
                     {
                         OfferingId = cover.OfferingId,
                         StaffId = cover.TeacherId,
-                        CoverId = cover.Id,
+                        CoverId = cover.Id.Value,
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                         DateScheduled = newActionDate
@@ -203,7 +203,7 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateMicrosoftTeamsAcces
                     Action = MSTeamOperationAction.Add,
                     PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                     DateScheduled = newActionDate,
-                    CoverId = cover.Id
+                    CoverId = cover.Id.Value
                 };
 
                 _operationsRepository.Insert(cathyAddOperation);
@@ -238,7 +238,7 @@ internal sealed class CoverStartDateChangedDomainEvent_UpdateMicrosoftTeamsAcces
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                         DateScheduled = newActionDate,
-                        CoverId = cover.Id
+                        CoverId = cover.Id.Value
                     };
 
                     _operationsRepository.Insert(karenAddOperation);

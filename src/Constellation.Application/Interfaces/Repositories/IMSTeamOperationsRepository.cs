@@ -1,5 +1,6 @@
 using Constellation.Application.DTOs;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -19,7 +20,7 @@ namespace Constellation.Application.Interfaces.Repositories
         MSTeamOperationsList Recent();
         Task<MSTeamOperation> ForMarkingCompleteOrCancelled(int id);
 
-        Task<List<MSTeamOperation>> GetByCoverId(Guid coverId, CancellationToken cancellationToken = default);
+        Task<List<MSTeamOperation>> GetByCoverId(ClassCoverId coverId, CancellationToken cancellationToken = default);
         void Insert(MSTeamOperation operation);
     }
 }

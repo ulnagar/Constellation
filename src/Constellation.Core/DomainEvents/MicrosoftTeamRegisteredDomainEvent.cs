@@ -1,8 +1,9 @@
 ﻿namespace Constellation.Core.DomainEvents;
 
+using Constellation.Core.Models.Identifiers;
 using System;
 
 public sealed record MicrosoftTeamRegisteredDomainEvent(
-    Guid Id,
+    DomainEventId Id,
     Guid TeamId)
     : DomainEvent(Id);

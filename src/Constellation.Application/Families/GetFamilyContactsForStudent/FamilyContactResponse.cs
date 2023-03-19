@@ -2,8 +2,8 @@
 namespace Constellation.Application.Families.GetFamilyContactsForStudent;
 
 using Constellation.Core.Models.Families;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.ValueObjects;
-using System;
 
 public sealed record FamilyContactResponse(
     bool IsResidentialContact,
@@ -11,5 +11,5 @@ public sealed record FamilyContactResponse(
     string Name,
     EmailAddress? EmailAddress,
     PhoneNumber? MobileNumber,
-    Guid? ParentId,
-    Guid? FamilyId);
+    ParentId? ParentId,
+    FamilyId? FamilyId);

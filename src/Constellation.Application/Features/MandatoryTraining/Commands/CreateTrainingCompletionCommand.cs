@@ -4,17 +4,17 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 public record CreateTrainingCompletionCommand(
     string StaffId,
-    Guid TrainingModuleId,
+    TrainingModuleId TrainingModuleId,
     DateTime CompletedDate,
     bool NotRequired,
     FileDto File

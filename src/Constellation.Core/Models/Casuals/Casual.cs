@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Casuals;
 
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.ValueObjects;
 using System;
@@ -7,15 +8,15 @@ using System;
 public sealed class Casual : AggregateRoot, IAuditableEntity
 {
     private Casual(
-        Guid id,
+        CasualId id,
         string firstName,
         string lastName,
         string displayName,
         string emailAddress,
         string adobeConnectId,
         string schoolCode)
-        : base(id)
     {
+        Id = id;
         FirstName = firstName;
         LastName = lastName;
         DisplayName = displayName;
@@ -24,6 +25,7 @@ public sealed class Casual : AggregateRoot, IAuditableEntity
         SchoolCode = schoolCode;
     }
 
+    public CasualId Id { get; private set; }
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
     public string DisplayName { get; private set; }
@@ -40,7 +42,7 @@ public sealed class Casual : AggregateRoot, IAuditableEntity
     public DateTime DeletedAt { get; set; }
 
     public static Casual Create(
-        Guid id,
+        CasualId id,
         Name name,
         EmailAddress email,
         string adobeConnectId,

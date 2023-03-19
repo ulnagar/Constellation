@@ -78,7 +78,7 @@ internal sealed class CoverCancelledDomainEvent_RemoveMicrosoftTeamsAccessHandle
                     {
                         OfferingId = cover.OfferingId,
                         CasualId = Guid.Parse(cover.TeacherId),
-                        CoverId = cover.Id,
+                        CoverId = cover.Id.Value,
                         Action = MSTeamOperationAction.Remove,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                         DateScheduled = DateTime.Now
@@ -92,7 +92,7 @@ internal sealed class CoverCancelledDomainEvent_RemoveMicrosoftTeamsAccessHandle
                     {
                         OfferingId = cover.OfferingId,
                         StaffId = cover.TeacherId,
-                        CoverId = cover.Id,
+                        CoverId = cover.Id.Value,
                         Action = MSTeamOperationAction.Remove,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                         DateScheduled = DateTime.Now

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Identifiers;
 
 public sealed class Family : AggregateRoot, IAuditableEntity
 {
@@ -16,13 +17,14 @@ public sealed class Family : AggregateRoot, IAuditableEntity
     private readonly List<Parent> _parents = new();
 
     private Family(
-        Guid id,
+        FamilyId id,
         string familyTitle)
-        : base(id)
     {
+        Id = id;
         FamilyTitle = familyTitle;
     }
 
+    public FamilyId Id { get; private set; }
     public string SentralId { get; private set; } = string.Empty;
     public IReadOnlyCollection<StudentFamilyMembership> Students => _studentMemberships;
     public IReadOnlyCollection<Parent> Parents => _parents;
@@ -41,7 +43,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
     public string DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; }
 
-    public static Family Create(Guid id, string familyTitle)
+    public static Family Create(FamilyId id, string familyTitle)
     {
         Family family = new(id, familyTitle);
 
@@ -90,7 +92,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
             return Result.Failure(familyEmail.Error);
         }
 
-        RaiseDomainEvent(new FamilyEmailAddressChangedDomainEvent(Guid.NewGuid(), Id, FamilyEmail, familyEmail.Value.Email));
+        RaiseDomainEvent(new FamilyEmailAddressChangedDomainEvent(new DomainEventId(Guid.NewGuid()), Id, FamilyEmail, familyEmail.Value.Email));
 
         FamilyEmail = familyEmail.Value.Email;
 
@@ -124,7 +126,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         if (existingParent is null)
         {
             var parent = Parent.Create(
-                Guid.NewGuid(),
+                new ParentId(Guid.NewGuid()),
                 title,
                 firstName,
                 lastName,
@@ -132,7 +134,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
                 parentEmail.Value,
                 sentralLink);
 
-            RaiseDomainEvent(new ParentAddedToFamilyDomainEvent(Guid.NewGuid(), Id, parent.Id));
+            RaiseDomainEvent(new ParentAddedToFamilyDomainEvent(new DomainEventId(Guid.NewGuid()), Id, parent.Id));
 
             _parents.Add(parent);
 
@@ -156,7 +158,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         {
             _parents.Remove(parent);
 
-            RaiseDomainEvent(new ParentRemovedFromFamilyDomainEvent(Guid.NewGuid(), Id, parent.Id));
+            RaiseDomainEvent(new ParentRemovedFromFamilyDomainEvent(new DomainEventId(Guid.NewGuid()), Id, parent.Id));
         }
     }
 
@@ -170,7 +172,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         {
             var membership = StudentFamilyMembership.Create(studentId, Id, isResidential);
 
-            RaiseDomainEvent(new StudentAddedToFamilyDomainEvent(Guid.NewGuid(), membership));
+            RaiseDomainEvent(new StudentAddedToFamilyDomainEvent(new DomainEventId(Guid.NewGuid()), membership));
 
             _studentMemberships.Add(membership);
 
@@ -183,7 +185,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
 
             if (isResidential)
             {
-                RaiseDomainEvent(new StudentResidentialFamilyChangedDomainEvent(Guid.NewGuid(), existingMembership));
+                RaiseDomainEvent(new StudentResidentialFamilyChangedDomainEvent(new DomainEventId(Guid.NewGuid()), existingMembership));
             }
         }
 
@@ -202,7 +204,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
 
         _studentMemberships.Remove(existingMembership);
 
-        RaiseDomainEvent(new StudentRemovedFromFamilyDomainEvent(Guid.NewGuid(), existingMembership));
+        RaiseDomainEvent(new StudentRemovedFromFamilyDomainEvent(new DomainEventId(Guid.NewGuid()), existingMembership));
 
         return Result.Success();
     }

@@ -128,7 +128,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateAdobeConnect
                         CasualId = Guid.Parse(cover.TeacherId),
                         Action = AdobeConnectOperationAction.Add,
                         DateScheduled = newActionDate,
-                        CoverId = cover.Id
+                        CoverId = cover.Id.Value
                     };
 
                     _operationsRepository.Insert(addTimelyOperation);
@@ -141,7 +141,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateAdobeConnect
                         StaffId = cover.TeacherId,
                         Action = AdobeConnectOperationAction.Add,
                         DateScheduled = newActionDate,
-                        CoverId = cover.Id
+                        CoverId = cover.Id.Value
                     };
 
                     _operationsRepository.Insert(addTimelyOperation);
@@ -204,7 +204,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateAdobeConnect
                         CasualId = Guid.Parse(cover.TeacherId),
                         Action = AdobeConnectOperationAction.Remove,
                         DateScheduled = newActionDate,
-                        CoverId = cover.Id
+                        CoverId = cover.Id.Value
                     };
 
                     _operationsRepository.Insert(removeTimelyOperation);
@@ -217,7 +217,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_UpdateAdobeConnect
                         StaffId = cover.TeacherId,
                         Action = AdobeConnectOperationAction.Remove,
                         DateScheduled = newActionDate,
-                        CoverId = cover.Id
+                        CoverId = cover.Id.Value
                     };
 
                     _operationsRepository.Insert(removeTimelyOperation);

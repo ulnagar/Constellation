@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Casuals.GetCasualsForSelectionList;
 
-using System;
+using Constellation.Core.Models.Identifiers;
 
 public sealed record CasualsSelectionListResponse(
-    Guid Id,
+    CasualId Id,
     string FirstName,
     string LastName);

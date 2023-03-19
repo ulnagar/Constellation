@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Core.DomainEvents;
 
+using Constellation.Core.Models.Identifiers;
 using System;
 
 public sealed record StudentAddedToGroupTutorialDomainEvent(
-    Guid Id,
-    Guid TutorialId,
-    Guid EnrolmentId)
+    DomainEventId Id,
+    GroupTutorialId TutorialId,
+    TutorialEnrolmentId EnrolmentId)
     : DomainEvent(Id);

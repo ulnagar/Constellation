@@ -58,7 +58,7 @@ internal sealed class CoverCreatedDomainEvent_CreateAdobeConnectAccessHandler
                     CasualId = Guid.Parse(cover.TeacherId),
                     Action = AdobeConnectOperationAction.Add,
                     DateScheduled = cover.StartDate.ToDateTime(TimeOnly.MinValue).AddDays(-1),
-                    CoverId = cover.Id
+                    CoverId = cover.Id.Value
                 };
 
                 _operationsRepository.Insert(addOperation);
@@ -69,7 +69,7 @@ internal sealed class CoverCreatedDomainEvent_CreateAdobeConnectAccessHandler
                     CasualId = Guid.Parse(cover.TeacherId),
                     Action = AdobeConnectOperationAction.Remove,
                     DateScheduled = cover.EndDate.ToDateTime(TimeOnly.MinValue).AddDays(1),
-                    CoverId = cover.Id
+                    CoverId = cover.Id.Value
                 };
 
                 _operationsRepository.Insert(removeOperation);
@@ -82,7 +82,7 @@ internal sealed class CoverCreatedDomainEvent_CreateAdobeConnectAccessHandler
                     StaffId = cover.TeacherId,
                     Action = AdobeConnectOperationAction.Add,
                     DateScheduled = cover.StartDate.ToDateTime(TimeOnly.MinValue).AddDays(-1),
-                    CoverId = cover.Id
+                    CoverId = cover.Id.Value
                 };
 
                 _operationsRepository.Insert(addOperation);
@@ -93,7 +93,7 @@ internal sealed class CoverCreatedDomainEvent_CreateAdobeConnectAccessHandler
                     StaffId = cover.TeacherId,
                     Action = AdobeConnectOperationAction.Remove,
                     DateScheduled = cover.EndDate.ToDateTime(TimeOnly.MinValue).AddDays(1),
-                    CoverId = cover.Id
+                    CoverId = cover.Id.Value
                 };
 
                 _operationsRepository.Insert(removeOperation);

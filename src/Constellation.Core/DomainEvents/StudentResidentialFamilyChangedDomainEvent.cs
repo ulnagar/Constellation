@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Core.DomainEvents;
 
 using Constellation.Core.Models.Families;
-using System;
+using Constellation.Core.Models.Identifiers;
 
 public sealed record StudentResidentialFamilyChangedDomainEvent(
-    Guid Id,
+    DomainEventId Id,
     StudentFamilyMembership Membership)
     : DomainEvent(Id);

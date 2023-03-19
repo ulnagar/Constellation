@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.Casuals.GetCasualById;
 
-using System;
+using Constellation.Core.Models.Identifiers;
 
 public sealed record CasualResponse(
-    Guid Id,
+    CasualId Id,
     string FirstName,
     string LastName,
     string EmailAddress,

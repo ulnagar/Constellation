@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Covers;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Serilog;
 using System;
@@ -27,7 +28,7 @@ public class CreateCoverCommandHandler : ICommandHandler<CreateCoverCommand, Cla
     public async Task<Result<ClassCover>> Handle(CreateCoverCommand request, CancellationToken cancellationToken)
     {
         Result<ClassCover> coverResult = ClassCover.Create(
-            Guid.NewGuid(),
+            new ClassCoverId(Guid.NewGuid()),
             request.OfferingId,
             request.StartDate,
             request.EndDate,

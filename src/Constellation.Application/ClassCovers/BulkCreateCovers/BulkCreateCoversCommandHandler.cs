@@ -6,6 +6,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Covers;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Serilog;
 using System;
@@ -35,7 +36,7 @@ public class BulkCreateCoversCommandHandler : ICommandHandler<BulkCreateCoversCo
         foreach (var offeringId in request.OfferingId)
         {
             Result<ClassCover> coverResult = ClassCover.Create(
-                Guid.NewGuid(),
+                new ClassCoverId(Guid.NewGuid()),
                 offeringId,
                 request.StartDate,
                 request.EndDate,

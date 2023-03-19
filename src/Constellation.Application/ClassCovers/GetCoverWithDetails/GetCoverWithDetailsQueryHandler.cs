@@ -39,7 +39,7 @@ internal sealed class GetCoverWithDetailsQueryHandler
 
         if (cover is null)
         {
-            return Result.Failure<CoverWithDetailsResponse>(DomainErrors.ClassCovers.Cover.NotFound(request.Id));
+            return Result.Failure<CoverWithDetailsResponse>(DomainErrors.ClassCovers.Cover.NotFound(request.Id.Value));
         }
 
         var offering = await _offeringRepository

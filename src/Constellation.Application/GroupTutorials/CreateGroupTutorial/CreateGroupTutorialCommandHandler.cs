@@ -5,12 +5,13 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class CreateGroupTutorialCommandHandler : ICommandHandler<CreateGroupTutorialCommand, Guid>
+internal sealed class CreateGroupTutorialCommandHandler : ICommandHandler<CreateGroupTutorialCommand, GroupTutorialId>
 {
     private readonly IGroupTutorialRepository _tutorialRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -22,14 +23,18 @@ internal sealed class CreateGroupTutorialCommandHandler : ICommandHandler<Create
         _tutorialRepository = tutorialRepository;
     }
 
-    public async Task<Result<Guid>> Handle(CreateGroupTutorialCommand request, CancellationToken cancellationToken)
+    public async Task<Result<GroupTutorialId>> Handle(CreateGroupTutorialCommand request, CancellationToken cancellationToken)
     {
-        Result<GroupTutorial> tutorialResult = GroupTutorial.Create(Guid.NewGuid(), request.Name, request.StartDate, request.EndDate);
+        Result<GroupTutorial> tutorialResult = GroupTutorial.Create(
+            new GroupTutorialId(Guid.NewGuid()),
+            request.Name,
+            request.StartDate,
+            request.EndDate);
 
         if (tutorialResult.IsFailure)
         {
             //TODO: Log error
-            return Result.Failure<Guid>(DomainErrors.GroupTutorials.GroupTutorial.CouldNotCreateTutorial);
+            return Result.Failure<GroupTutorialId>(DomainErrors.GroupTutorials.GroupTutorial.CouldNotCreateTutorial);
         }
 
         _tutorialRepository.Insert(tutorialResult.Value);

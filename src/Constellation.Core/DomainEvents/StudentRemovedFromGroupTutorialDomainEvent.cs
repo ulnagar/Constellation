@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Core.DomainEvents;
 
-using System;
+using Constellation.Core.Models.Identifiers;
 
 public sealed record StudentRemovedFromGroupTutorialDomainEvent(
-    Guid Id,
-    Guid TutorialId,
-    Guid EnrolmentId)
+    DomainEventId Id,
+    GroupTutorialId TutorialId,
+    TutorialEnrolmentId EnrolmentId)
     : DomainEvent(Id);

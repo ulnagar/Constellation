@@ -1,22 +1,22 @@
 ﻿#nullable enable
 namespace Constellation.Core.Models.Families;
 
-using Constellation.Core.Primitives;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.ValueObjects;
 using System;
 
-public sealed class Parent : Entity
+public sealed class Parent
 {
     private Parent(
-        Guid id,
+        ParentId id,
         string title,
         string firstName,
         string lastName,
         string mobileNumber,
         string emailAddress,
         SentralReference sentralLink)
-        : base(id)
     {
+        Id = id;
         Title = title;
         FirstName = firstName;
         LastName = lastName;
@@ -25,6 +25,7 @@ public sealed class Parent : Entity
         SentralLink = sentralLink;
     }
 
+    public ParentId Id { get; private set; }
     public Guid FamilyId { get; set; }
     public string Title { get; private set; } = string.Empty;
     public string FirstName { get; private set; } = string.Empty;
@@ -42,7 +43,7 @@ public sealed class Parent : Entity
     }
 
     internal static Parent Create(
-        Guid id,
+        ParentId id,
         string title,
         string firstName,
         string lastName,

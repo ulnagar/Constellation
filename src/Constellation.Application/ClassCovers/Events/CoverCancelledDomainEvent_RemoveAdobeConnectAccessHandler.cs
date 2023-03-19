@@ -89,7 +89,7 @@ internal sealed class CoverCancelledDomainEvent_RemoveAdobeConnectAccessHandler
                             CasualId = Guid.Parse(cover.TeacherId),
                             Action = AdobeConnectOperationAction.Remove,
                             DateScheduled = DateTime.Now,
-                            CoverId = cover.Id
+                            CoverId = cover.Id.Value
                         };
 
                         _operationsRepository.Insert(removeOperation);
@@ -102,7 +102,7 @@ internal sealed class CoverCancelledDomainEvent_RemoveAdobeConnectAccessHandler
                             StaffId = cover.TeacherId,
                             Action = AdobeConnectOperationAction.Remove,
                             DateScheduled = DateTime.Now,
-                            CoverId = cover.Id
+                            CoverId = cover.Id.Value
                         };
 
                         _operationsRepository.Insert(removeOperation);

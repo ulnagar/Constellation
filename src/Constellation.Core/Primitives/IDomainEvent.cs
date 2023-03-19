@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Core.Primitives;
 
+using Constellation.Core.Models.Identifiers;
 using MediatR;
-using System;
 
 public interface IDomainEvent : INotification
 {
-    public Guid Id { get; init; }
+    public DomainEventId Id { get; init; }
 }

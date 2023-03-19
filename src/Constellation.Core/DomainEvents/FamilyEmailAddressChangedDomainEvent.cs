@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Core.DomainEvents;
 
-using System;
+using Constellation.Core.Models.Identifiers;
 
 public sealed record FamilyEmailAddressChangedDomainEvent(
-    Guid Id,
-    Guid FamilyId,
+    DomainEventId Id,
+    FamilyId FamilyId,
     string OldEmail,
     string NewEmail)
     : DomainEvent(Id);

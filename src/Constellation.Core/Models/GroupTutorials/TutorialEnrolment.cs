@@ -1,21 +1,26 @@
 ﻿namespace Constellation.Core.Models.GroupTutorials;
 
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
 using System;
 
-public sealed class TutorialEnrolment : Entity, IAuditableEntity
+public sealed class TutorialEnrolment : IAuditableEntity
 {
     private TutorialEnrolment() { }
 
-    public TutorialEnrolment(Guid id, Student student, DateOnly? effectiveTo)
-        : base(id)
+    public TutorialEnrolment(
+        TutorialEnrolmentId id,
+        Student student,
+        DateOnly? effectiveTo)
     {
+        Id = id;
         StudentId = student.StudentId;
         EffectiveFrom = DateOnly.FromDateTime(DateTime.Today);
         EffectiveTo = effectiveTo;
     }
 
-    public string StudentId { get; set; }
+    public TutorialEnrolmentId Id { get; private set; }
+    public string StudentId { get; private set; }
     public Guid TutorialId { get; set; }
     public DateOnly EffectiveFrom { get; set; }
     public DateOnly? EffectiveTo { get; set; }
