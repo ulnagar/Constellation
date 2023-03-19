@@ -1,28 +1,30 @@
 ﻿@page "{id}"
 @model Constellation.Presentation.Server.Areas.Partner.Pages.Students.DetailsModel
 
+@inject IAuthorizationService authorizationService;
+
 @using Constellation.Application.Extensions;
 @using Constellation.Core.Models.Families;
 @using Constellation.Core.ValueObjects;
 
 @{
-    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin));
+    var authorised = await authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 }
 
 <h2>Student Details</h2>
 
 <div class="page-menu">
-    @if (authorised)
+    @if (authorised.Succeeded)
     {
         <a asp-action="Update" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Edit</a>
 
         @if (Model.Student.IsDeleted)
         {
-            <a asp-action="Reinstate" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-danger">Re-enrol</a>
+            <a asp-page-handler="Reinstate" class="btn btn-danger">Re-enrol</a>
         }
         else
         {
-            <a asp-action="Withdraw" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-danger">Withdraw</a>
+            <a asp-page-handler="Withdraw" class="btn btn-danger">Withdraw</a>
         }
     }
     else
@@ -186,7 +188,7 @@
         <div id="studentClasses" class="tab-pane active">
             <h3>Active enrolments</h3>
 
-            @if (authorised)
+            @if (authorised.Succeeded)
             {
                 <a asp-action="BulkEnrol" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Bulk Enrol</a>
                 <a asp-action="UnenrolAll" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Bulk Unenrol</a>
@@ -214,7 +216,7 @@
                                 }
                             </td>
                             <td>
-                                @if (authorised)
+                                @if (authorised.Succeeded)
                                 {
                                     @Html.ActionLink("Remove", "Unenrol", "Students", new {area = "Partner", id = Model.Student.StudentId, classId = item.OfferingId}, new {@class = "btn btn-sm btn-danger btn-show-hover"})
                                 }
@@ -284,7 +286,12 @@
                             <td>@item.SerialNumber</td>
                             <td>@item.Status</td>
                             <td>@item.DateAllocated.ToShortDateString()</td>
-                            <td>@item.DateReturned.ToShortDateString()</td>
+                            <td>
+                                @if (item.DateReturned.HasValue)
+                                {
+                                    item.DateReturned.Value.ToShortDateString();
+                                }
+                            </td>
                             <td>
                                 @Html.ActionLink("More Info...", "Details", "Devices", new { area = "Equipment", id = item.SerialNumber }, new { @class = "btn btn-sm btn-info btn-show-hover" })
                             </td>
@@ -323,11 +330,11 @@
                                 }
                             </td>
                             <td>@item.AbsenceType</td>
-                            <td>@item.AbsenceDate.ToShortDateTime()</td>
+                            <td>@item.AbsenceDate.ToShortDateString()</td>
                             <td>@item.Timeframe (@item.PeriodName)</td>
                             <td>@item.OfferingName</td>
                             <td>
-                                @Html.ActionLink("More Info...", "AbsenceDetails", "Students", new { area = "Partner", id = item.Id}, new {@class = "btn btn-sm btn-info btn-show-hover"})
+                                @Html.ActionLink("More Info...", "AbsenceDetails", "Students", new { area = "Partner", id = item.AbsenceId}, new {@class = "btn btn-sm btn-info btn-show-hover"})
                             </td>
                         </tr>
                     }

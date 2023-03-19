@@ -52,6 +52,9 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanEditCasuals, policy =>
             policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.ShortTermCasualsEdit));
 
+        options.AddPolicy(AuthPolicies.CanEditStudents, policy =>
+            policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.PartnerEdit));
+
         return options;
     }
 }

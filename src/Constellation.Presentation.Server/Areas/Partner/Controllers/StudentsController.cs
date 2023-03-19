@@ -1,6 +1,4 @@
 ﻿using Constellation.Application.DTOs;
-using Constellation.Application.Features.Partners.Students.Notifications;
-using Constellation.Application.Features.Partners.Students.Queries;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -13,10 +11,6 @@ using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 {
@@ -204,29 +198,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             return View("Update", viewModel);
         }
 
-        public async Task<IActionResult> Details(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return RedirectToAction("Index");
-            }
-
-            var viewModel = await CreateViewModel<Student_DetailsViewModel>();
-            viewModel.Student = await _mediator.Send(new GetStudentCompleteDetailsQuery { StudentId = id });
-            var allOfferings = await _unitOfWork.CourseOfferings.ForSelectionAsync();
-
-            // Build the master form view model
-            viewModel.OfferingList = new SelectList(allOfferings.OrderBy(offering => offering.Name), "Id", "Name", null);
-
-            foreach (var session in viewModel.Student.Sessions)
-            {
-                viewModel.MinPerFn += session.Period.EndTime.Subtract(session.Period.StartTime).Minutes;
-                viewModel.MinPerFn += session.Period.EndTime.Subtract(session.Period.StartTime).Hours * 60;
-            }
-
-            return View(viewModel);
-        }
-
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
         public async Task<IActionResult> UnenrolAll(string id)
         {
@@ -318,45 +289,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             {
                 await _studentService.EnrolStudentInClass(student.StudentId, offering.Id);
             }
-
-            return RedirectToAction("Details", new { id });
-        }
-
-        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Withdraw(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-                return RedirectToAction("Index");
-
-            await _mediator.Publish(new StudentWithdrawnNotification { StudentId = id });
-
-            return RedirectToAction("Details", new { id });
-        }
-
-        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Reinstate(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return RedirectToAction("Index");
-            }
-
-            var student = await _unitOfWork.Students.ForEditAsync(id);
-
-            if (student == null)
-            {
-                return RedirectToAction("Index");
-            }
-
-            if (!student.IsDeleted)
-            {
-                return RedirectToAction("Index");
-            }
-
-            await _studentService.ReinstateStudent(student.StudentId);
-            await _operationService.CreateStudentEnrolmentMSTeamAccess(student.StudentId);
-            await _operationService.CreateCanvasUserFromStudent(student);
-            await _unitOfWork.CompleteAsync();
 
             return RedirectToAction("Details", new { id });
         }

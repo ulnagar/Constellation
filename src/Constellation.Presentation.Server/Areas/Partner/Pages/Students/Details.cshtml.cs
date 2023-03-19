@@ -7,24 +7,31 @@ using Constellation.Application.Families.GetFamilyContactsForStudent;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetSessionDetailsForStudent;
 using Constellation.Application.Students.GetStudentById;
+using Constellation.Application.Students.ReinstateStudent;
+using Constellation.Application.Students.WithdrawStudent;
+using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly IAuthorizationService _authorizationService;
 
     public DetailsModel(
         IMediator mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        IAuthorizationService authorizationService)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _authorizationService = authorizationService;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -53,22 +60,27 @@ public class DetailsModel : BasePageModel
             return;
         }
 
+        await PreparePage(cancellationToken);
+    }
+
+    private async Task<bool> PreparePage(CancellationToken cancellationToken)
+    {
         var studentRequest = await _mediator.Send(new GetStudentByIdQuery(Id), cancellationToken);
 
         if (studentRequest.IsFailure)
         {
             GenerateError(studentRequest.Error);
-            return;
+            return false;
         }
 
         Student = studentRequest.Value;
-     
+
         var familyRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(Id), cancellationToken);
 
         if (familyRequest.IsFailure)
         {
             GenerateError(familyRequest.Error);
-            return;
+            return false;
         }
 
         FamilyContacts = familyRequest.Value;
@@ -78,7 +90,7 @@ public class DetailsModel : BasePageModel
         if (enrolmentRequest.IsFailure)
         {
             GenerateError(enrolmentRequest.Error);
-            return;
+            return false;
         }
 
         Enrolments = enrolmentRequest.Value;
@@ -88,7 +100,7 @@ public class DetailsModel : BasePageModel
         if (sessionRequest.IsFailure)
         {
             GenerateError(sessionRequest.Error);
-            return;
+            return false;
         }
 
         Sessions = sessionRequest.Value;
@@ -98,7 +110,7 @@ public class DetailsModel : BasePageModel
         if (equipmentRequest.IsFailure)
         {
             GenerateError(equipmentRequest.Error);
-            return;
+            return false;
         }
 
         Equipment = equipmentRequest.Value;
@@ -108,10 +120,44 @@ public class DetailsModel : BasePageModel
         if (absencesRequest.IsFailure)
         {
             GenerateError(absencesRequest.Error);
-            return;
+            return false;
         }
 
         Absences = absencesRequest.Value;
+
+        return true;
+    }
+
+    public async Task OnGetWithdraw(CancellationToken cancellationToken)
+    {
+        var authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+
+        if (authorised.Succeeded)
+        {
+            await _mediator.Send(new WithdrawStudentCommand(Id), cancellationToken);
+        }
+        else
+        {
+            GenerateError(DomainErrors.Permissions.Unauthorised);
+        }
+
+        await PreparePage(cancellationToken);
+    }
+
+    public async Task OnGetReinstate(CancellationToken cancellationToken)
+    {
+        var authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+
+        if (authorised.Succeeded)
+        {
+            await _mediator.Send(new ReinstateStudentCommand(Id), cancellationToken);
+        }
+        else
+        {
+            GenerateError(DomainErrors.Permissions.Unauthorised);
+        }
+
+        await PreparePage(cancellationToken);
     }
 
     private void GenerateError(Error error)

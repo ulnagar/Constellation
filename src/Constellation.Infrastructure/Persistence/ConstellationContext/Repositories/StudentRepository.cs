@@ -17,6 +17,14 @@ public class StudentRepository : IStudentRepository
         _context = context;
     }
 
+    public async Task<Student?> GetById(
+        string StudentId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student => student.StudentId == StudentId)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public async Task<Student?> GetWithSchoolById(
         string studentId,
         CancellationToken cancellationToken = default) =>
