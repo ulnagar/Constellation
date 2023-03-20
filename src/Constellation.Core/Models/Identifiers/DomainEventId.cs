@@ -2,4 +2,8 @@
 
 using System;
 
-public sealed record DomainEventId(Guid Value);
+public sealed record DomainEventId(Guid Value)
+{
+    public DomainEventId()
+        : this(Guid.NewGuid()) { }
+}

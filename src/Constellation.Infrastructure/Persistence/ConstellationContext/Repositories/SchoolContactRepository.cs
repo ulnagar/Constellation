@@ -1,13 +1,8 @@
 ﻿using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
-using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
 {
@@ -19,6 +14,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         {
             _context = context;
         }
+
+        public async Task<List<SchoolContact>> GetPrincipalsForSchool(
+            string schoolCode,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<SchoolContact>()
+                .Where(contact =>
+                    contact.Assignments.Any(role =>
+                        !role.IsDeleted &&
+                        role.Role == SchoolContactRole.Principal &&
+                        role.SchoolCode == schoolCode))
+                .ToListAsync(cancellationToken);
 
         private IQueryable<SchoolContact> Collection()
         {

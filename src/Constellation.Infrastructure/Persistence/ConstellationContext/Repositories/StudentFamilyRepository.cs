@@ -2,6 +2,7 @@
 
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models.Families;
+using Constellation.Core.Models.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class StudentFamilyRepository : IFamilyRepository
@@ -23,7 +24,7 @@ internal sealed class StudentFamilyRepository : IFamilyRepository
             .FirstOrDefaultAsync(family => family.SentralId == SentralId, cancellationToken);
 
     public async Task<Family?> GetFamilyById(
-        Guid Id,
+        FamilyId Id,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Family>()

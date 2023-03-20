@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Features.MandatoryTraining.Models;
 
+using AutoMapper.Execution;
 using Constellation.Core.Common;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
@@ -75,44 +76,27 @@ public class CompletionRecordExtendedDetailsDto
         StaffId = staff.StaffId;
         StaffName = staff.DisplayName;
         StaffEmail = staff.EmailAddress;
+    }
 
-        foreach (var faculty in staff.Faculties.Where(member => !member.IsDeleted && member.Role != FacultyMembershipRole.Manager).Select(member => member.Faculty))
+    public void AddHeadTeacherDetails(Faculty faculty, Staff headTeacher)
+    {
+        StaffHeadTeachers.Add(new FacultyContactDto
         {
-            foreach (var member in faculty.Members.Where(entry => !entry.IsDeleted && entry.Role == FacultyMembershipRole.Manager))
-            {
-                StaffHeadTeachers.Add(new FacultyContactDto
-                {
-                    FacultyId = faculty.Id,
-                    FacultyName = faculty.Name,
-                    FacultyHeadTeacherName = member.Staff.DisplayName,
-                    FacultyHeadTeacherEmail = member.Staff.EmailAddress
-                });
-            }
-        }
+            FacultyId = faculty.Id,
+            FacultyName = faculty.Name,
+            FacultyHeadTeacherName = headTeacher.DisplayName,
+            FacultyHeadTeacherEmail = headTeacher.EmailAddress
+        });
+    }
 
-        if (staff.IsShared)
+    public void AddPrincipalDetails(SchoolContact principal, School school) 
+    {
+        PrincipalContacts.Add(new FacultyContactDto
         {
-            var principals = staff.School.StaffAssignments.Where(role => role.Role == SchoolContactRole.Principal && !role.IsDeleted).ToList();
-
-            foreach (var principal in principals)
-            {
-                PrincipalContacts.Add(new FacultyContactDto
-                {
-                    FacultyName = staff.School.Name,
-                    FacultyHeadTeacherName = principal.SchoolContact.DisplayName,
-                    FacultyHeadTeacherEmail = principal.SchoolContact.EmailAddress
-                });
-            }
-        }
-        else
-        {
-            PrincipalContacts.Add(new FacultyContactDto
-            {
-                FacultyName = "Aurora College",
-                FacultyHeadTeacherName = "Chris Robertson",
-                FacultyHeadTeacherEmail = "christopher.robertson@det.nsw.edu.au"
-            });
-        }
+            FacultyName = school.Name,
+            FacultyHeadTeacherName = principal.DisplayName,
+            FacultyHeadTeacherEmail = principal.EmailAddress
+        });
     }
 
     public void AddRecordDetails(TrainingCompletion record)

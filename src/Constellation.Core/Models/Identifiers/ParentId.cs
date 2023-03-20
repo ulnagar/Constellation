@@ -2,4 +2,8 @@
 
 using System;
 
-public sealed record ParentId(Guid Value);
+public sealed record ParentId(Guid Value)
+{
+    public ParentId()
+        : this(Guid.NewGuid()) { }
+}

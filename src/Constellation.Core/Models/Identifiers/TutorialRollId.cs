@@ -2,4 +2,8 @@
 
 using System;
 
-public sealed record TutorialRollId(Guid Value);
+public sealed record TutorialRollId(Guid Value)
+{
+    public TutorialRollId()
+        : this(Guid.NewGuid()) { }
+}

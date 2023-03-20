@@ -2,4 +2,8 @@
 
 using System;
 
-public sealed record CasualId(Guid Value);
+public sealed record CasualId(Guid Value)
+{
+    public CasualId()
+        : this(Guid.NewGuid()) { }
+}

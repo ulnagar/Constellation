@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using System;
 using System.Threading;
@@ -31,7 +32,7 @@ internal sealed class AddStudentToTutorialCommandHandler
 
     public async Task<Result> Handle(AddStudentToTutorialCommand request, CancellationToken cancellationToken)
     {
-        var tutorial = await _groupTutorialRepository.GetWithStudentsById(request.TutorialId, cancellationToken);
+        var tutorial = await _groupTutorialRepository.GetWithStudentsById(new GroupTutorialId(request.TutorialId), cancellationToken);
 
         if (tutorial is null)
         {

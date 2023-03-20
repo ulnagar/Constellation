@@ -10,9 +10,18 @@ public class TrainingModule : IAuditableEntity
 {
     private readonly List<TrainingCompletion> _completions = new();
 
-    public TrainingModule(TrainingModuleId id)
+    private TrainingModule(
+        TrainingModuleId id,
+        string name,
+        TrainingModuleExpiryFrequency expiry,
+        string url,
+        bool canMarkNotRequired)
     {
         Id = id;
+        Name = name;
+        Expiry = expiry;
+        Url = url;
+        CanMarkNotRequired = canMarkNotRequired;
     }
 
     public TrainingModuleId Id { get; private set; }
@@ -28,4 +37,53 @@ public class TrainingModule : IAuditableEntity
     public bool IsDeleted { get; private set; }
     public string DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
+
+    public static TrainingModule Create(
+        TrainingModuleId id,
+        string name,
+        TrainingModuleExpiryFrequency expiry,
+        string url,
+        bool canMarkNotRequired)
+    {
+        return new(
+            id,
+            name,
+            expiry,
+            url,
+            canMarkNotRequired);
+    }
+
+    public void Update(
+        string name,
+        TrainingModuleExpiryFrequency expiry,
+        string url,
+        bool canMarkNotRequired)
+    {
+        Name = name;
+        Expiry = expiry;
+        Url = url;
+        CanMarkNotRequired = canMarkNotRequired;
+    }
+
+    public void AddCompletion(TrainingCompletion completion)
+    {
+        _completions.Add(completion);
+    }
+
+    public void RemoveCompletion(TrainingCompletion completion)
+    {
+        _completions.Remove(completion);
+    }
+
+    public void Delete()
+    {
+        IsDeleted = true;
+    }
+
+    public void Reinstate()
+    {
+        IsDeleted = false;
+        DeletedBy = null;
+        DeletedAt = DateTime.MinValue;
+    }
 }

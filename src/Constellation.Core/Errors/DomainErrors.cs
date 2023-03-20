@@ -1,10 +1,21 @@
 ﻿namespace Constellation.Core.Errors;
 
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using System;
 
 public static class DomainErrors
 {
+    public static class Assets
+    {
+        public static class Allocations
+        {
+            public static readonly Func<string, Error> NotFoundForStudent = id => new Error(
+                "Assets.Allocations.NotFoundForStudent",
+                $"Could not find any asset allocations for student {id}");
+        }
+    }
+
     public static class Auth
     {
         public static readonly Error UserNotFound = new Error(
@@ -24,9 +35,9 @@ public static class DomainErrors
     {
         public static class Casual
         {
-            public static readonly Func<Guid, Error> NotFound = id => new Error(
+            public static readonly Func<CasualId, Error> NotFound = id => new Error(
                 "Casuals.Casual.NotFound",
-                $"A Casual with the Id {id} could not be found");
+                $"A Casual with the Id {id.Value} could not be found");
         }
     }
 
@@ -34,19 +45,9 @@ public static class DomainErrors
     {
         public static class Cover
         {
-            public static readonly Func<Guid, Error> NotFound = id => new Error(
+            public static readonly Func<ClassCoverId, Error> NotFound = id => new Error(
                 "ClassCovers.Cover.NotFound",
-                $"A Class Cover with the Id {id} could not be found");
-        }
-    }
-
-    public static class Assets
-    {
-        public static class Allocations
-        {
-            public static readonly Func<string, Error> NotFoundForStudent = id => new Error(
-                "Assets.Allocations.NotFoundForStudent",
-                $"Could not find any asset allocations for student {id}");
+                $"A Class Cover with the Id {id.Value} could not be found");
         }
     }
 
@@ -89,9 +90,9 @@ public static class DomainErrors
                 "GroupTutorials.GroupTutorial.TutorialHasExpired",
                 "The Tutorial has already ended or has been deleted");
 
-            public static readonly Func<Guid, Error> NotFound = id => new Error(
+            public static readonly Func<GroupTutorialId, Error> NotFound = id => new Error(
                 "GroupTutorials.GroupTutorial.NotFound",
-                $"A tutorial with the Id {id} could not be found");
+                $"A tutorial with the Id {id.Value} could not be found");
 
             public static readonly Error CouldNotCreateTutorial = new(
                 "GroupTutorials.GroupTutorial.CouldNotCreate",
@@ -126,9 +127,9 @@ public static class DomainErrors
                 "GroupTutorials.TutorialRoll.RollDateInvalid",
                 $"Cannot create a roll for {rollDate.ToShortDateString()} as this is not a valid date for this tutorial");
 
-            public static readonly Func<Guid, Error> NotFound = id => new Error(
+            public static readonly Func<TutorialRollId, Error> NotFound = id => new Error(
                 "GroupTutorials.TutorialRoll.NotFound",
-                $"A roll with the Id {id} could not be found");
+                $"A roll with the Id {id.Value} could not be found");
 
             public static readonly Error SubmitInvalidStatus = new Error(
                 "GroupTutorials.TutorialRoll.SubmitInvalidStatus",
@@ -163,6 +164,34 @@ public static class DomainErrors
             public static readonly Func<Guid, Error> AlreadyExists = id => new Error(
                 "LinkedSystems.Teams.AlreadyExists",
                 $"The Team with Id {id} could not be created because it already exists in the database");
+        }
+    }
+
+    public static class MandatoryTraining
+    {
+        public static class Completion
+        {
+            public static readonly Error AlreadyExists = new(
+                "MandatoryTraining.Completion.AlreadyExists",
+                "A completion record with these details already exists");
+
+            public static readonly Func<TrainingCompletionId, Error> NotFound = id => new(
+                "MandatoryTraining.Completion.NotFound",
+                $"A training completion record with the Id {id.Value} could not be found");
+        }
+
+        public static class Import
+        {
+            public static readonly Error NoDataFound = new(
+                "MandatoryTraining.Import.NoDataFound",
+                "Could not find any data in the import file");
+        }
+
+        public static class Module
+        {
+            public static readonly Func<TrainingModuleId, Error> NotFound = id => new Error(
+                "MandatoryTraining.Module.NotFound",
+                $"A training module with the Id {id.Value} could not be found");
         }
     }
 

@@ -3,12 +3,14 @@ using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
 {
     public interface ISchoolContactRepository
     {
+        Task<List<SchoolContact>> GetPrincipalsForSchool(string schoolCode, CancellationToken cancellationToken = default);
         SchoolContact WithDetails(int id);
         SchoolContact WithFilter(Expression<Func<SchoolContact, bool>> predicate);
         SchoolContact GetForExistCheck(int id);
