@@ -1,8 +1,8 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.CSV;
 using Constellation.Application.ExternalDataConsistency;
-using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
+using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Infrastructure.Jobs;
 using System.Collections.Generic;

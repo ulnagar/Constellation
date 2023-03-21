@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.MandatoryTraining.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

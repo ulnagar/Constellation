@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.MandatoryTraining.GetModuleDetails;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Shared;
 using System.Linq;

@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Features.MandatoryTraining.Models;
+﻿namespace Constellation.Application.MandatoryTraining.GetUploadedTrainingCertificationMetadata;
 
 using Constellation.Application.Common.Mapping;
 using Constellation.Core.Models;

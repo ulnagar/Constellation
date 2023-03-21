@@ -7,6 +7,6 @@ namespace Constellation.Application.Interfaces.Gateways
     public interface ISMSGateway
     {
         Task<double> GetCreditBalanceAsync();
-        Task<SMSMessageCollectionDto> SendSmsAsync(Object payload);
+        Task<SMSMessageCollectionDto> SendSmsAsync(object payload);
     }
 }

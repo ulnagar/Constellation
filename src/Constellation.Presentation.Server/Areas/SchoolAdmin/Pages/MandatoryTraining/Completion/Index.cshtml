@@ -1,6 +1,6 @@
 ﻿@page
 @model IndexModel
-@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion
+@    using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion
 @inject IAuthorizationService AuthorizationService
 
 @{
@@ -80,7 +80,7 @@
         <tr>
             <td>
                 @{
-                    if (item.Status == Constellation.Application.Features.MandatoryTraining.Models.CompletionRecordDto.ExpiryStatus.Active)
+                    if (item.Status == CompletionRecordDto.ExpiryStatus.Active)
                     {
                         if (item.ExpiryCountdown > 31)
                         {

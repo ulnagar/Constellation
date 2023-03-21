@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
 
 using Constellation.Application.Features.MandatoryTraining.Commands;
-using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Features.MandatoryTraining.Queries;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Providers;
+using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;

@@ -1,9 +1,9 @@
-﻿using Constellation.Core.Abstractions;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
+
+using Constellation.Core.Abstractions;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
 using Microsoft.EntityFrameworkCore;
-
-namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 internal class TrainingCompletionRepository : ITrainingCompletionRepository
 {
@@ -13,6 +13,13 @@ internal class TrainingCompletionRepository : ITrainingCompletionRepository
     {
         _context = context;
     }
+
+    public async Task<List<TrainingCompletion>> GetAllCurrent(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<TrainingCompletion>()
+            .Where(record => !record.IsDeleted)
+            .ToListAsync(cancellationToken);
 
     public async Task<List<TrainingCompletion>> GetCurrentForStaffMember(
         string staffId,

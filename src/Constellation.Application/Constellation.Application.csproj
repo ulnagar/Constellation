@@ -6,12 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Features\MandatoryTraining\Notifications\**" />
-    <EmbeddedResource Remove="Features\MandatoryTraining\Notifications\**" />
-    <None Remove="Features\MandatoryTraining\Notifications\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Constellation.Core\Constellation.Core.csproj" />
   </ItemGroup>
 

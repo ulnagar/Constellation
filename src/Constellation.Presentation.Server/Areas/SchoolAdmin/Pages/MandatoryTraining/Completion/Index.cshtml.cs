@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
 
 using Constellation.Application.Features.MandatoryTraining.Commands;
-using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Features.MandatoryTraining.Queries;
+using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.StaffTrainingReport;

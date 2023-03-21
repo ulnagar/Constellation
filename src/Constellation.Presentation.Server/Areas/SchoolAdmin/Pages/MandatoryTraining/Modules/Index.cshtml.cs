@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
 
-using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Features.MandatoryTraining.Queries;
+using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;

@@ -1,20 +1,18 @@
 ﻿namespace Constellation.Application.MandatoryTraining.GenerateStaffReport;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Abstractions;
-using Constellation.Core.Models;
 using Constellation.Core.Shared;
-using Microsoft.EntityFrameworkCore;
-using System.IO.Compression;
+using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 internal sealed class GenerateStaffReportCommandHandler 
     : ICommandHandler<GenerateStaffReportCommand, ReportDto>

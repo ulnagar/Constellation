@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Features.MandatoryTraining.Models;
+﻿namespace Constellation.Application.MandatoryTraining.Models;
 
 public class ReportDto
 {

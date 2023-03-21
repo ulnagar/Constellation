@@ -1,8 +1,10 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
 
 using Constellation.Application.Features.MandatoryTraining.Commands;
-using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Application.Features.MandatoryTraining.Queries;
+using Constellation.Application.Interfaces.GetUploadedTrainingCertificateFileById;
+using Constellation.Application.MandatoryTraining.GetUploadedTrainingCertificateFileById;
+using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;

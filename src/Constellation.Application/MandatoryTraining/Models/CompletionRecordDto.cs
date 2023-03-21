@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Features.MandatoryTraining.Models;
+﻿namespace Constellation.Application.MandatoryTraining.Models;
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;

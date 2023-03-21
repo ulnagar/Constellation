@@ -1,7 +1,6 @@
-﻿namespace Constellation.Application.Features.MandatoryTraining.Models;
+﻿namespace Constellation.Application.MandatoryTraining.Models;
 
 using Constellation.Core.Models.Identifiers;
-using System;
 using System.Collections.Generic;
 
 public class ModuleDetailsDto

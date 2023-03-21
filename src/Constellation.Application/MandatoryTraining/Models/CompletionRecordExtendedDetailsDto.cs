@@ -1,7 +1,5 @@
-﻿namespace Constellation.Application.Features.MandatoryTraining.Models;
+﻿namespace Constellation.Application.MandatoryTraining.Models;
 
-using AutoMapper.Execution;
-using Constellation.Core.Common;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
@@ -9,7 +7,6 @@ using Constellation.Core.Models.MandatoryTraining;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 public class CompletionRecordExtendedDetailsDto
 {
@@ -21,7 +18,7 @@ public class CompletionRecordExtendedDetailsDto
     public string StaffName { get; set; }
     public string StaffEmail { get; set; }
     public List<FacultyContactDto> StaffHeadTeachers { get; set; } = new();
-    public List<FacultyContactDto> PrincipalContacts { get; set; } = new(); 
+    public List<FacultyContactDto> PrincipalContacts { get; set; } = new();
 
     public TrainingCompletionId RecordId { get; set; }
     public bool RecordNotRequired { get; set; }
@@ -42,9 +39,9 @@ public class CompletionRecordExtendedDetailsDto
         {
             public bool Equals(FacultyContactDto x, FacultyContactDto y)
             {
-                if (Object.ReferenceEquals(x, y)) return true;
+                if (ReferenceEquals(x, y)) return true;
 
-                if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null)) return false;
+                if (ReferenceEquals(x, null) || ReferenceEquals(y, null)) return false;
 
                 if (x.FacultyHeadTeacherEmail == y.FacultyHeadTeacherEmail)
                     return true;
@@ -89,7 +86,7 @@ public class CompletionRecordExtendedDetailsDto
         });
     }
 
-    public void AddPrincipalDetails(SchoolContact principal, School school) 
+    public void AddPrincipalDetails(SchoolContact principal, School school)
     {
         PrincipalContacts.Add(new FacultyContactDto
         {
@@ -103,7 +100,7 @@ public class CompletionRecordExtendedDetailsDto
     {
         RecordId = record.Id;
         RecordNotRequired = record.NotRequired;
-        RecordEffectiveDate = (record.NotRequired) ? record.CreatedAt : record.CompletedDate.Value;
+        RecordEffectiveDate = record.NotRequired ? record.CreatedAt : record.CompletedDate.Value;
     }
 
     public void CalculateExpiry()
@@ -115,7 +112,7 @@ public class CompletionRecordExtendedDetailsDto
             return;
         }
 
-        if (RecordNotRequired || (ModuleFrequency == TrainingModuleExpiryFrequency.OnceOff && RecordEffectiveDate.HasValue))
+        if (RecordNotRequired || ModuleFrequency == TrainingModuleExpiryFrequency.OnceOff && RecordEffectiveDate.HasValue)
         {
             DueDate = null;
             TimeToExpiry = 9999;
