@@ -2,6 +2,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models.Casuals;
+using Constellation.Core.Models.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 public class CasualRepository : ICasualRepository
@@ -14,7 +15,7 @@ public class CasualRepository : ICasualRepository
     }
 
     public async Task<Casual?> GetById(
-        Guid id, 
+        CasualId id, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Casual>()

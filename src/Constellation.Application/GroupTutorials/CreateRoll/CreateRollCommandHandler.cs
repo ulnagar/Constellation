@@ -31,7 +31,7 @@ internal sealed class CreateRollCommandHandler : ICommandHandler<CreateRollComma
         var tutorial = await _tutorialRepository.GetWholeAggregate(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
-            return Result.Failure<TutorialRollId>(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId.Value));
+            return Result.Failure<TutorialRollId>(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
 
         Result<TutorialRoll> rollResult = tutorial.CreateRoll(request.RollDate);
 

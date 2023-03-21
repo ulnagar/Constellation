@@ -18,6 +18,7 @@ using Constellation.Application.Models.Identity;
 using Serilog;
 using System.Linq;
 using Constellation.Application.Extensions;
+using Constellation.Core.Models.Identifiers;
 
 internal sealed class CoverStartAndEndDatesChangedDomainEvent_SendCoverUpdatedEmailHandler
     : IDomainEventHandler<CoverStartAndEndDatesChangedDomainEvent>
@@ -114,7 +115,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_SendCoverUpdatedEm
 
         if (cover.TeacherType == CoverTeacherType.Casual)
         {
-            var teacher = await _casualRepository.GetById(Guid.Parse(cover.TeacherId), cancellationToken);
+            var teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
 
             if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
             {

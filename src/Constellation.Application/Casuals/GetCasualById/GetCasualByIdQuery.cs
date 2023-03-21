@@ -1,11 +1,8 @@
-﻿using Constellation.Application.Abstractions.Messaging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Constellation.Application.Casuals.GetCasualById;
 
-namespace Constellation.Application.Casuals.GetCasualById;
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Core.Models.Identifiers;
+
 public sealed record GetCasualByIdQuery(
-    Guid CasualId)
+    CasualId CasualId)
     : IQuery<CasualResponse>;

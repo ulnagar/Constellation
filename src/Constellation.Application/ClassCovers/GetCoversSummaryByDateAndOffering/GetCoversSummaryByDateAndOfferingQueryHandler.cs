@@ -3,6 +3,7 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using System;
@@ -48,7 +49,7 @@ internal sealed class GetCoversSummaryByDateAndOfferingQueryHandler
 
             if (cover.TeacherType == CoverTeacherType.Casual)
             {
-                var casual = await _casualRepository.GetById(Guid.Parse(cover.TeacherId), cancellationToken);
+                var casual = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
 
                 if (casual is not null)
                 {

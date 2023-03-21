@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Casuals.RestoreCasual;
 
 using Constellation.Application.Abstractions.Messaging;
-using System;
+using Constellation.Core.Models.Identifiers;
 
 public sealed record RestoreCasualCommand(
-    Guid CasualId)
+    CasualId CasualId)
     : ICommand;

@@ -9,6 +9,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
@@ -118,7 +119,7 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
 
         if (cover.TeacherType == CoverTeacherType.Casual)
         {
-            var teacher = await _casualRepository.GetById(Guid.Parse(cover.TeacherId), cancellationToken);
+            var teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
 
             if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
             {

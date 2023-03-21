@@ -11,6 +11,7 @@ public interface ITrainingCompletionRepository
 {
     Task<List<TrainingCompletion>> GetCurrentForStaffMember(string staffId, CancellationToken cancellationToken = default);
     Task<TrainingCompletion?> GetById(TrainingCompletionId id, CancellationToken cancellationToken = default);
+    Task<List<TrainingCompletion>> GetForModule(TrainingModuleId moduleId, CancellationToken cancellationToken = default);
     Task<bool> AnyExistingRecordForTeacherAndDate(string staffId, TrainingModuleId moduleId, DateTime completedDate, bool notRequired, CancellationToken cancellationToken = default);
     void Insert(TrainingCompletion record);
 }

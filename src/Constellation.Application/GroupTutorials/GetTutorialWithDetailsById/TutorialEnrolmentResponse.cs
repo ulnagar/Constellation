@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.GroupTutorials.GetTutorialWithDetailsById;
 
+using Constellation.Core.Models.Identifiers;
 using System;
 
 public sealed record TutorialEnrolmentResponse(
-    Guid Id,
+    TutorialEnrolmentId Id,
     string Name,
     string Grade,
     DateOnly? Until);

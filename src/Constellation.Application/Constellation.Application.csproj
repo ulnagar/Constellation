@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Features\MandatoryTraining\Notifications\**" />
+    <EmbeddedResource Remove="Features\MandatoryTraining\Notifications\**" />
+    <None Remove="Features\MandatoryTraining\Notifications\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Constellation.Core\Constellation.Core.csproj" />
   </ItemGroup>
 
@@ -23,7 +29,6 @@
 
   <ItemGroup>
     <Folder Include="Families\Events\" />
-    <Folder Include="Features\MandatoryTraining\Notifications\" />
     <Folder Include="Features\Portal\School\Timetables\Models\" />
     <Folder Include="Features\StaffMembers\Queries\" />
   </ItemGroup>

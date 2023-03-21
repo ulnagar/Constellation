@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Application.GroupTutorials.GetTutorialById;
 
 using Constellation.Application.Abstractions.Messaging;
-using System;
+using Constellation.Core.Models.Identifiers;
 
-public sealed record GetTutorialByIdQuery(Guid TutorialId) : IQuery<GroupTutorialResponse>;
+public sealed record GetTutorialByIdQuery(
+    GroupTutorialId TutorialId) 
+    : IQuery<GroupTutorialResponse>;

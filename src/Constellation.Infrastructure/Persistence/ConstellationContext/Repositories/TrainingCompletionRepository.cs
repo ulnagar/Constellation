@@ -36,6 +36,14 @@ internal class TrainingCompletionRepository : ITrainingCompletionRepository
                 (record.CompletedDate == completedDate || (record.NotRequired && notRequired)),
             cancellationToken);
 
+    public async Task<List<TrainingCompletion>> GetForModule(
+        TrainingModuleId moduleId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<TrainingCompletion>()
+            .Where(record => record.TrainingModuleId == moduleId)
+            .ToListAsync(cancellationToken);
+
     public async Task<TrainingCompletion> GetById(
         TrainingCompletionId id,
         CancellationToken cancellationToken = default) =>

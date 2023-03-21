@@ -1,27 +1,15 @@
-﻿using AutoMapper;
-using Constellation.Application.Common.Mapping;
-using Constellation.Application.Helpers;
-using Constellation.Core.Models.MandatoryTraining;
+﻿namespace Constellation.Application.Features.MandatoryTraining.Models;
+
+using Constellation.Core.Models.Identifiers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace Constellation.Application.Features.MandatoryTraining.Models;
-
-public class ModuleDetailsDto : IMapFrom<TrainingModule>
+public class ModuleDetailsDto
 {
-    public Guid Id { get; set; }
+    public TrainingModuleId Id { get; set; }
     public string Name { get; set; }
     public string Expiry { get; set; }
     public string Url { get; set; }
     public List<CompletionRecordDto> Completions { get; set; } = new();
     public bool IsActive { get; set; }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<TrainingModule, ModuleDetailsDto>()
-            .ForMember(dest => dest.Completions, opt => opt.MapFrom(src => src.Completions.Where(record => !record.IsDeleted)))
-            .ForMember(dest => dest.Expiry, opt => opt.MapFrom(src => src.Expiry.GetDisplayName()))
-            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => !src.IsDeleted));
-    }
 }

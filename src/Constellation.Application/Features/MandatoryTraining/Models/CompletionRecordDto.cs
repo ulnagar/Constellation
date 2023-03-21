@@ -1,16 +1,13 @@
 ﻿namespace Constellation.Application.Features.MandatoryTraining.Models;
 
-using AutoMapper;
-using Constellation.Application.Common.Mapping;
 using Constellation.Core.Enums;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Identifiers;
 using System;
-using System.Linq;
 
-public class CompletionRecordDto : IMapFrom<TrainingCompletion>
+public class CompletionRecordDto
 {
-    public Guid Id { get; set; }
-    public Guid ModuleId { get; set; }
+    public TrainingCompletionId Id { get; set; }
+    public TrainingModuleId ModuleId { get; set; }
     public string ModuleName { get; set; }
     public TrainingModuleExpiryFrequency ModuleExpiry { get; set; }
     public string StaffId { get; set; }
@@ -22,12 +19,6 @@ public class CompletionRecordDto : IMapFrom<TrainingCompletion>
     public int ExpiryCountdown { get; set; }
     public ExpiryStatus Status { get; set; } = ExpiryStatus.Unknown;
     public DateTime CreatedAt { get; set; }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<TrainingCompletion, CompletionRecordDto>()
-            .ForMember(dest => dest.StaffFaculty, opt => opt.MapFrom(src => String.Join(",", src.Staff.Faculties.Where(member => !member.IsDeleted).Select(member => member.Faculty.Name))));
-    }
 
     public int CalculateExpiry()
     {

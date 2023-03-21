@@ -2,7 +2,8 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.DTOs;
-using System;
+using Constellation.Core.Models.Identifiers;
 
 public sealed record GenerateTutorialAttendanceReportQuery(
-    Guid TutorialId) : IQuery<FileDto>;
+    GroupTutorialId TutorialId) 
+    : IQuery<FileDto>;

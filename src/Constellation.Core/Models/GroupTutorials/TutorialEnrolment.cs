@@ -21,7 +21,7 @@ public sealed class TutorialEnrolment : IAuditableEntity
 
     public TutorialEnrolmentId Id { get; private set; }
     public string StudentId { get; private set; }
-    public Guid TutorialId { get; set; }
+    public GroupTutorialId TutorialId { get; set; }
     public DateOnly EffectiveFrom { get; set; }
     public DateOnly? EffectiveTo { get; set; }
     public string CreatedBy { get; set; }

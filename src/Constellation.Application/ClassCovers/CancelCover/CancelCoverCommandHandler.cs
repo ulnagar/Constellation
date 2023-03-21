@@ -26,7 +26,7 @@ public class CancelCoverCommandHandler : ICommandHandler<CancelCoverCommand>
 
         if (cover is null)
         {
-            return Result.Failure(DomainErrors.ClassCovers.Cover.NotFound(request.CoverId.Value));
+            return Result.Failure(DomainErrors.ClassCovers.Cover.NotFound(request.CoverId));
         }
 
         cover.Delete();

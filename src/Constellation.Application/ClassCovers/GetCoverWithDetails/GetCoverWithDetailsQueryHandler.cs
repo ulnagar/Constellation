@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using System;
@@ -39,7 +40,7 @@ internal sealed class GetCoverWithDetailsQueryHandler
 
         if (cover is null)
         {
-            return Result.Failure<CoverWithDetailsResponse>(DomainErrors.ClassCovers.Cover.NotFound(request.Id.Value));
+            return Result.Failure<CoverWithDetailsResponse>(DomainErrors.ClassCovers.Cover.NotFound(request.Id));
         }
 
         var offering = await _offeringRepository
@@ -52,7 +53,7 @@ internal sealed class GetCoverWithDetailsQueryHandler
 
         if (cover.TeacherType == CoverTeacherType.Casual)
         {
-            var teacher = await _casualRepository.GetById(Guid.Parse(cover.TeacherId), cancellationToken);
+            var teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
 
             if (teacher is not null)
             {

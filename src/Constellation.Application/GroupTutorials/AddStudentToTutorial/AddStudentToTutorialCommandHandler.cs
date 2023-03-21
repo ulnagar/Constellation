@@ -32,7 +32,7 @@ internal sealed class AddStudentToTutorialCommandHandler
 
     public async Task<Result> Handle(AddStudentToTutorialCommand request, CancellationToken cancellationToken)
     {
-        var tutorial = await _groupTutorialRepository.GetWithStudentsById(new GroupTutorialId(request.TutorialId), cancellationToken);
+        var tutorial = await _groupTutorialRepository.GetWithStudentsById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
         {

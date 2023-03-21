@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 public interface IStaffRepository
 {
     Task<Staff?> GetById(string staffId, CancellationToken cancellationToken = default);
+    Task<Staff?> GetByIdWithFacultyMemberships(string staffId, CancellationToken cancellationToken = default);
     Task<List<Staff>> GetListFromIds(List<string> staffIds, CancellationToken cancellationToken = default);
     Task<List<Staff>> GetCurrentTeachersForOffering(int offeringId, CancellationToken cancellationToken = default);
     Task<List<Staff>> GetPrimaryTeachersForOffering(int offeringId, CancellationToken cancellationToken = default);

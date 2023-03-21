@@ -2,6 +2,7 @@
 
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Core.Models.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
@@ -15,20 +16,22 @@ internal sealed class TutorialTeacherRepository : ITutorialTeacherRepository
     }
 
     public async Task<List<TutorialTeacher>> GetActiveForTutorial(
-        Guid tutorialId,
+        GroupTutorialId tutorialId,
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<TutorialTeacher>()
             .Where(teacher => !teacher.IsDeleted && teacher.TutorialId == tutorialId)
             .ToListAsync(cancellationToken);
 
-    public async Task<TutorialTeacher> GetById(Guid Id, CancellationToken cancellationToken = default) =>
+    public async Task<TutorialTeacher> GetById(
+        TutorialTeacherId Id, 
+        CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<TutorialTeacher>()
             .FirstOrDefaultAsync(teacher => teacher.Id == Id, cancellationToken);
 
     public async Task<int?> GetCountForTutorial(
-        Guid tutorialId,
+        GroupTutorialId tutorialId,
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<TutorialTeacher>()

@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 
+using Constellation.Core.Models.Identifiers;
 using System;
 using System.Collections.Generic;
 
 public sealed record TutorialRollDetailsDto(
-    Guid Id,
+    TutorialRollId Id,
     DateOnly SessionDate,
     string StaffId,
     string StaffName,

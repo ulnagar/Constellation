@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.ClassCovers.Models;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using System;
@@ -58,7 +59,7 @@ internal sealed class GetAllCoversForCalendarYearQueryHandler
 
             if (cover.TeacherType == CoverTeacherType.Casual)
             {
-                var teacher = await _casualRepository.GetById(Guid.Parse(cover.TeacherId), cancellationToken);
+                var teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
 
                 if (teacher is null)
                 {

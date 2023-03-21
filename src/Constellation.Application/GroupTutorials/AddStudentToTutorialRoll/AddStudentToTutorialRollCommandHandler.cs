@@ -33,14 +33,14 @@ internal sealed class AddStudentToTutorialRollCommandHandler
 
         if (tutorial is null)
         {
-            return Result.Failure(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId.Value));
+            return Result.Failure(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
         }
 
         var roll = tutorial.Rolls.FirstOrDefault(roll => roll.Id == request.RollId);
 
         if (roll is null)
         {
-            return Result.Failure(DomainErrors.GroupTutorials.TutorialRoll.NotFound(request.RollId.Value));
+            return Result.Failure(DomainErrors.GroupTutorials.TutorialRoll.NotFound(request.RollId));
         }
 
         var student = await _studentRepository.GetForExistCheck(request.StudentId);

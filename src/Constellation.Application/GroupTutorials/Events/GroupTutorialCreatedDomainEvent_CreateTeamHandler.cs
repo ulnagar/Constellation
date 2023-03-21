@@ -37,7 +37,7 @@ internal sealed class GroupTutorialCreatedDomainEvent_CreateTeamHandler
             DateScheduled = DateTime.Now,
             TeamName = MicrosoftTeamsHelper.FormatTeamName(tutorial.Name),
             Action = MSTeamOperationAction.Add,
-            TutorialId = notification.TutorialId
+            TutorialId = notification.TutorialId.Value
         };
 
         _unitOfWork.Add(operation);

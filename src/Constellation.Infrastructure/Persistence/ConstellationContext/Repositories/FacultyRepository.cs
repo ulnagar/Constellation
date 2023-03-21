@@ -1,4 +1,4 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
+﻿namespace Constellation .Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
@@ -44,6 +44,13 @@ internal sealed class FacultyRepository : IFacultyRepository
             .FirstOrDefaultAsync(cancellationToken);
     }
         
+    public async Task<List<Faculty>> GetListFromIds(
+        List<Guid> facultyIds,
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<Faculty>()
+            .Where(faculty => facultyIds.Contains(faculty.Id))
+            .ToListAsync(cancellationToken);
 
     public async Task<bool> ExistsWithName(string name, CancellationToken cancellationToken = default) =>
         await _dbContext

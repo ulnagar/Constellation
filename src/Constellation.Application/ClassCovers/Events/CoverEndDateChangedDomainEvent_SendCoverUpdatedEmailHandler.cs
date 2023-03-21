@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Constellation.Application.Models.Identity;
 using Constellation.Application.Extensions;
+using Constellation.Core.Models.Identifiers;
 
 namespace Constellation.Application.ClassCovers.Events;
 
@@ -116,7 +117,7 @@ internal sealed class CoverEndDateChangedDomainEvent_SendCoverUpdatedEmailHandle
 
         if (cover.TeacherType == CoverTeacherType.Casual)
         {
-            var teacher = await _casualRepository.GetById(Guid.Parse(cover.TeacherId), cancellationToken);
+            var teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
 
             if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
             {

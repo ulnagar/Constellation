@@ -3,6 +3,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Core.Models.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class TutorialEnrolmentRepository : ITutorialEnrolmentRepository
@@ -15,14 +16,14 @@ internal sealed class TutorialEnrolmentRepository : ITutorialEnrolmentRepository
     }
 
     public async Task<TutorialEnrolment?> GetById(
-        Guid id,
+        TutorialEnrolmentId id,
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<TutorialEnrolment>()
             .FirstOrDefaultAsync(enrolment => enrolment.Id == id, cancellationToken);
 
     public async Task<List<TutorialEnrolment>> GetActiveForTutorial(
-        Guid tutorialId,
+        GroupTutorialId tutorialId,
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<TutorialEnrolment>()
@@ -30,7 +31,7 @@ internal sealed class TutorialEnrolmentRepository : ITutorialEnrolmentRepository
             .ToListAsync(cancellationToken);
 
     public async Task<int?> GetCountForTutorial(
-        Guid tutorialId,
+        GroupTutorialId tutorialId,
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<TutorialEnrolment>()

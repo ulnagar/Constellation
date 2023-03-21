@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Application.GroupTutorials.GetTutorialWithDetailsById;
 
+using Constellation.Core.Models.Identifiers;
 using System;
 using System.Collections.Generic;
 
 public sealed record GroupTutorialDetailResponse(
-    Guid Id,
+    GroupTutorialId Id,
     string Name,
     DateOnly StartDate,
     DateOnly EndDate,
