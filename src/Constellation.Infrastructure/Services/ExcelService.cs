@@ -7,6 +7,7 @@ using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Jobs;
@@ -388,13 +389,12 @@ public class ExcelService : IExcelService, IScopedService
 
         for (int row = 2; row <= numModules; row++)
         {
-            var entry = new TrainingModule(Guid.NewGuid())
-            {
-                Name = workSheet.Cells[row, 1].GetCellValue<string>(),
-                Expiry = (TrainingModuleExpiryFrequency)workSheet.Cells[row, 2].GetCellValue<int>(),
-                Url = workSheet.Cells[row, 3].GetCellValue<string>(),
-                CanMarkNotRequired = workSheet.Cells[row, 4].GetCellValue<bool>()
-            };
+            var entry = TrainingModule.Create(
+                new TrainingModuleId(),
+                workSheet.Cells[row, 1].GetCellValue<string>(),
+                (TrainingModuleExpiryFrequency)workSheet.Cells[row, 2].GetCellValue<int>(),
+                workSheet.Cells[row, 3].GetCellValue<string>(),
+                workSheet.Cells[row, 4].GetCellValue<bool>());
 
             modules.Add(entry);
         }
@@ -416,15 +416,14 @@ public class ExcelService : IExcelService, IScopedService
                 if (module is null)
                     continue;
 
-                var entry = new TrainingCompletion(Guid.NewGuid())
-                {
-                    Module = module,
-                    StaffId = workSheet.Cells[1, column].GetCellValue<string>()
-                };
+                var entry = TrainingCompletion.Create(
+                    new TrainingCompletionId(),
+                    workSheet.Cells[1, column].GetCellValue<string>(),
+                    module.Id);
 
                 entry.SetCompletedDate(dateCompleted);
 
-                module.Completions.Add(entry);
+                module.AddCompletion(entry);
             }
         }
 

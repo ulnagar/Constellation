@@ -1,12 +1,9 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using AutoMapper.QueryableExtensions;
-using Constellation.Application.Features.MandatoryTraining.Models;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System.Threading;
 
 internal sealed class TrainingModuleRepository

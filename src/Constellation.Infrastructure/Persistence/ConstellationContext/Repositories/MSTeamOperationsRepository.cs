@@ -1,13 +1,9 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
-using Constellation.Infrastructure.Persistence.ConstellationContext;
+using Constellation.Core.Models.Identifiers;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
 {
@@ -158,11 +154,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         }
 
         public async Task<List<MSTeamOperation>> GetByCoverId(
-            Guid coverId, 
+            ClassCoverId coverId, 
             CancellationToken cancellationToken = default) =>
             await _context
                 .Set<MSTeamOperation>()
-                .Where(operation => operation.CoverId == coverId)
+                .Where(operation => operation.CoverId == coverId.Value)
                 .ToListAsync(cancellationToken);
 
         public void Insert(MSTeamOperation operation) =>

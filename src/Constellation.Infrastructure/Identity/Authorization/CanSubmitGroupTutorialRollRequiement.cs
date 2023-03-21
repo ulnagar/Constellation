@@ -2,6 +2,7 @@
 
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -28,9 +29,11 @@ public sealed class IsCurrentTeacherAddedToTutorial : AuthorizationHandler<CanSu
             return;
         }
 
+        var tutorialId = GroupTutorialId.FromValue(resource);
+
         var teachers = await _context
             .Set<GroupTutorial>()
-            .Where(tutorial => tutorial.Id == resource)
+            .Where(tutorial => tutorial.Id == tutorialId)
             .SelectMany(tutorial => tutorial.Teachers.Where(teacher => !teacher.IsDeleted))
             .ToListAsync();
 

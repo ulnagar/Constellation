@@ -3,6 +3,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Core.Models.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class GroupTutorialRepository : IGroupTutorialRepository
@@ -44,7 +45,7 @@ internal sealed class GroupTutorialRepository : IGroupTutorialRepository
     }
 
     public async Task<GroupTutorial?> GetWholeAggregate(
-        Guid id, 
+        GroupTutorialId id, 
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<GroupTutorial>()
@@ -57,14 +58,14 @@ internal sealed class GroupTutorialRepository : IGroupTutorialRepository
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<GroupTutorial?> GetById(
-        Guid id,
+        GroupTutorialId id,
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<GroupTutorial>()
             .FirstOrDefaultAsync(tutorial => tutorial.Id == id, cancellationToken);
 
     public async Task<GroupTutorial?> GetWithTeachersById(
-        Guid id,
+        GroupTutorialId id,
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<GroupTutorial>()
@@ -72,15 +73,15 @@ internal sealed class GroupTutorialRepository : IGroupTutorialRepository
             .FirstOrDefaultAsync(tutorial => tutorial.Id == id, cancellationToken);
 
     public async Task<GroupTutorial?> GetWithStudentsById(
-    Guid id,
-    CancellationToken cancellationToken = default) =>
-    await _dbContext
-        .Set<GroupTutorial>()
-        .Include(tutorial => tutorial.Enrolments)
-        .FirstOrDefaultAsync(tutorial => tutorial.Id == id, cancellationToken);
+        GroupTutorialId id,
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<GroupTutorial>()
+            .Include(tutorial => tutorial.Enrolments)
+            .FirstOrDefaultAsync(tutorial => tutorial.Id == id, cancellationToken);
 
     public async Task<GroupTutorial?> GetWithRollsById(
-        Guid id,
+        GroupTutorialId id,
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<GroupTutorial>()

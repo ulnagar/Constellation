@@ -2,6 +2,7 @@
 
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Models.Identifiers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -44,7 +45,7 @@ public class OwnsTrainingCompletionRecordByRoute : AuthorizationHandler<CanViewT
         if (recordId is not null && userStaffId is not null)
         {
             var userOwns = await _context.MandatoryTraining.CompletionRecords
-                .AnyAsync(record => record.Id == Guid.Parse(recordId) && record.StaffId == userStaffId);
+                .AnyAsync(record => record.Id == TrainingCompletionId.FromValue(Guid.Parse(recordId)) && record.StaffId == userStaffId);
 
             if (userOwns)
                 context.Succeed(requirement);
@@ -70,7 +71,7 @@ public class OwnsTrainingCompletionRecordByResource : AuthorizationHandler<CanVi
         if (userStaffId is not null)
         {
             var userOwns = await _context.MandatoryTraining.CompletionRecords
-                .AnyAsync(record => record.Id == resource && record.StaffId == userStaffId);
+                .AnyAsync(record => record.Id == TrainingCompletionId.FromValue(resource) && record.StaffId == userStaffId);
 
             if (userOwns)
                 context.Succeed(requirement);
