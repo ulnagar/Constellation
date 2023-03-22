@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -12,26 +13,33 @@ internal sealed class TutorialTeacherConfiguration : IEntityTypeConfiguration<Tu
     {
         builder.ToTable("GroupTutorials_Teachers");
 
-        builder.HasKey(t => t.Id);
+        builder
+            .HasKey(teacher => teacher.Id);
+
+        builder
+            .Property(teacher => teacher.Id)
+            .HasConversion(
+                teacherId => teacherId.Value,
+                value => TutorialTeacherId.FromValue(value));
 
         builder
             .HasOne<Staff>()
             .WithMany()
-            .HasForeignKey(t => t.StaffId)
+            .HasForeignKey(teacher => teacher.StaffId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasOne<GroupTutorial>()
-            .WithMany(g => g.Teachers)
-            .HasForeignKey(t => t.TutorialId)
+            .WithMany(tutorial => tutorial.Teachers)
+            .HasForeignKey(teacher => teacher.TutorialId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .Property(e => e.EffectiveFrom)
+            .Property(teacher => teacher.EffectiveFrom)
             .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
-            .Property(e => e.EffectiveTo)
+            .Property(teacher => teacher.EffectiveTo)
             .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }

@@ -3,12 +3,12 @@ namespace Constellation.Core.Models.Families;
 
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.ValueObjects;
-using System;
 
 public sealed class Parent
 {
     private Parent(
         ParentId id,
+        FamilyId familyId,
         string title,
         string firstName,
         string lastName,
@@ -17,6 +17,7 @@ public sealed class Parent
         SentralReference sentralLink)
     {
         Id = id;
+        FamilyId = familyId;
         Title = title;
         FirstName = firstName;
         LastName = lastName;
@@ -26,7 +27,7 @@ public sealed class Parent
     }
 
     public ParentId Id { get; private set; }
-    public Guid FamilyId { get; set; }
+    public FamilyId FamilyId { get; private set; }
     public string Title { get; private set; } = string.Empty;
     public string FirstName { get; private set; } = string.Empty;
     public string LastName { get; private set; } = string.Empty;
@@ -44,6 +45,7 @@ public sealed class Parent
 
     internal static Parent Create(
         ParentId id,
+        FamilyId familyId,
         string title,
         string firstName,
         string lastName,
@@ -53,6 +55,7 @@ public sealed class Parent
     {
         return new Parent(
             id,
+            familyId,
             title,
             firstName,
             lastName,

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.GroupTutorials;
 
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -12,35 +13,41 @@ internal sealed class GroupTutorialConfiguration : IEntityTypeConfiguration<Grou
         builder.ToTable("GroupTutorials_Tutorial");
 
         builder
-            .HasKey(t => t.Id);
+            .HasKey(tutorial => tutorial.Id);
 
         builder
-            .HasMany(t => t.Teachers)
+            .Property(tutorial => tutorial.Id)
+            .HasConversion(
+                tutorialId => tutorialId.Value,
+                value => GroupTutorialId.FromValue(value));
+
+        builder
+            .HasMany(tutorial => tutorial.Teachers)
             .WithOne()
-            .HasForeignKey(t => t.StaffId)
+            .HasForeignKey(tutorial => tutorial.StaffId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .HasMany(t => t.Rolls)
+            .HasMany(tutorial => tutorial.Rolls)
             .WithOne()
-            .HasForeignKey(r => r.TutorialId)
+            .HasForeignKey(roll => roll.TutorialId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .HasMany(t => t.Enrolments)
+            .HasMany(tutorial => tutorial.Enrolments)
             .WithOne()
             .HasForeignKey(e => e.TutorialId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .Property(t => t.StartDate)
+            .Property(tutorial => tutorial.StartDate)
             .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
-            .Property(t => t.EndDate)
+            .Property(tutorial => tutorial.EndDate)
             .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
-            .Ignore(t => t.CurrentEnrolments);
+            .Ignore(tutorial => tutorial.CurrentEnrolments);
     }
 }

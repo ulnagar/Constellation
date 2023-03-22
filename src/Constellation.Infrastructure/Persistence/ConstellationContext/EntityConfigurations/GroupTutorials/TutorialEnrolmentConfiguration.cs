@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -12,14 +13,23 @@ internal sealed class TutorialEnrolmentConfiguration : IEntityTypeConfiguration<
     {
         builder.ToTable("GroupTutorials_Enrolment");
 
-        builder.HasKey(e => e.Id);
+        builder
+            .HasKey(e => e.Id);
 
-        builder.HasOne<Student>()
+        builder
+            .Property(enrol => enrol.Id)
+            .HasConversion(
+                enrolId => enrolId.Value,
+                value => TutorialEnrolmentId.FromValue(value));
+
+        builder
+            .HasOne<Student>()
             .WithMany()
-            .HasForeignKey(e => e.StudentId)
+            .HasForeignKey(enrol => enrol.StudentId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne<GroupTutorial>()
+        builder
+            .HasOne<GroupTutorial>()
             .WithMany(t => t.Enrolments)
             .HasForeignKey(e => e.TutorialId)
             .OnDelete(DeleteBehavior.Restrict);

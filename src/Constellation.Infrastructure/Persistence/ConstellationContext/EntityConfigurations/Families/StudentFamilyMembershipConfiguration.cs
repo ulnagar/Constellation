@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Families;
 
+using Constellation.Core.Models;
 using Constellation.Core.Models.Families;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class StudentFamilyMembershipConfiguration : IEntityTypeConfiguration<StudentFamilyMembership>
+internal sealed class StudentFamilyMembershipConfiguration : IEntityTypeConfiguration<StudentFamilyMembership>
 {
     public void Configure(EntityTypeBuilder<StudentFamilyMembership> builder)
     {
@@ -12,5 +13,17 @@ public class StudentFamilyMembershipConfiguration : IEntityTypeConfiguration<Stu
 
         builder
             .HasKey(s => new { s.FamilyId, s.StudentId });
+
+        builder
+            .HasOne<Student>()
+            .WithMany(student => student.FamilyMemberships)
+            .HasForeignKey(member => member.StudentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne<Family>()
+            .WithMany(family => family.Students)
+            .HasForeignKey(member => member.FamilyId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -12,22 +12,22 @@ internal sealed class TutorialRollStudentConfiguration : IEntityTypeConfiguratio
         builder.ToTable("GroupTutorials_RollStudent");
 
         builder
-            .HasKey(x => new
+            .HasKey(rollStudent => new
             {
-                x.TutorialRollId,
-                x.StudentId
+                rollStudent.TutorialRollId,
+                rollStudent.StudentId
             });
 
         builder
             .HasOne<Student>()
             .WithMany()
-            .HasForeignKey(x => x.StudentId)
+            .HasForeignKey(rollStudent => rollStudent.StudentId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasOne<TutorialRoll>()
-            .WithMany(r => r.Students)
-            .HasForeignKey(x => x.TutorialRollId)
+            .WithMany(roll => roll.Students)
+            .HasForeignKey(rollStudent => rollStudent.TutorialRollId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

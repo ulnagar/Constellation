@@ -30,7 +30,7 @@ public sealed class IdempotentDomainEventHandler<TDomainEvent> : IDomainEventHan
         if (await _dbContext.Set<OutboxMessageConsumer>()
                 .AnyAsync(
                     outboxMessageConsumer =>
-                        outboxMessageConsumer.Id == notification.Id &&
+                        outboxMessageConsumer.Id == notification.Id.Value &&
                         outboxMessageConsumer.Name == consumer,
                     cancellationToken))
         {
@@ -48,7 +48,7 @@ public sealed class IdempotentDomainEventHandler<TDomainEvent> : IDomainEventHan
         _dbContext.Set<OutboxMessageConsumer>()
             .Add(new OutboxMessageConsumer
             {
-                Id = notification.Id,
+                Id = notification.Id.Value,
                 Name = consumer
             });
 

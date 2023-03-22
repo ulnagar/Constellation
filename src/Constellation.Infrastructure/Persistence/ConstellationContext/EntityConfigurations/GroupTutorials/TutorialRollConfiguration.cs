@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -16,22 +17,28 @@ internal sealed class TutorialRollConfiguration : IEntityTypeConfiguration<Tutor
             .HasKey(e => e.Id);
 
         builder
+            .Property(roll => roll.Id)
+            .HasConversion(
+                rollId => rollId.Value,
+                value => TutorialRollId.FromValue(value));
+
+        builder
             .HasOne<GroupTutorial>()
-            .WithMany(t => t.Rolls)
-            .HasForeignKey(e => e.TutorialId)
+            .WithMany(tutorial => tutorial.Rolls)
+            .HasForeignKey(roll => roll.TutorialId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasOne<Staff>()
             .WithMany()
-            .HasForeignKey(e => e.StaffId)
+            .HasForeignKey(roll => roll.StaffId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .HasMany(e => e.Students);
+            .HasMany(roll => roll.Students);
 
         builder
-            .Property(e => e.SessionDate)
+            .Property(roll => roll.SessionDate)
             .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }

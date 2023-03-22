@@ -10,17 +10,21 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
         {
             builder.ToTable("Staff");
 
-            builder.HasKey(s => s.StaffId);
+            builder
+                .HasKey(s => s.StaffId);
 
-            builder.HasOne(s => s.School)
+            builder
+                .HasOne(s => s.School)
                 .WithMany(s => s.Staff);
 
-            builder.HasMany(staff => staff.TrainingCompletionRecords)
-                .WithOne(completion => completion.Staff)
-                .HasPrincipalKey(completion => completion.StaffId)
-                .OnDelete(DeleteBehavior.Cascade);
+            builder
+                .HasMany(staff => staff.TrainingCompletionRecords)
+                .WithOne()
+                .HasForeignKey(record => record.StaffId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasMany(staff => staff.Faculties)
+            builder
+                .HasMany(staff => staff.Faculties)
                 .WithOne(member => member.Staff)
                 .OnDelete(DeleteBehavior.NoAction);
         }

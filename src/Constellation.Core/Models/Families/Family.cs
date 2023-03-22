@@ -127,6 +127,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         {
             var parent = Parent.Create(
                 new ParentId(Guid.NewGuid()),
+                Id,
                 title,
                 firstName,
                 lastName,

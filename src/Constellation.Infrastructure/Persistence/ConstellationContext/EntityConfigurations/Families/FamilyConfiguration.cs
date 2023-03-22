@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Families;
 
 using Constellation.Core.Models.Families;
+using Constellation.Core.Models.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,18 +12,24 @@ public class FamilyConfiguration : IEntityTypeConfiguration<Family>
         builder.ToTable("Families_Family");
 
         builder
-            .HasKey(s => s.Id);
+            .HasKey(family => family.Id);
 
         builder
-            .HasMany(s => s.Parents)
+            .Property(family => family.Id)
+            .HasConversion(
+                familyId => familyId.Value,
+                value => FamilyId.FromValue(value));
+
+        builder
+            .HasMany(family => family.Parents)
             .WithOne()
-            .HasForeignKey(p => p.FamilyId)
+            .HasForeignKey(parent => parent.FamilyId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .HasMany(s => s.Students)
+            .HasMany(family => family.Students)
             .WithOne()
-            .HasForeignKey(m => m.FamilyId)
+            .HasForeignKey(family => family.FamilyId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

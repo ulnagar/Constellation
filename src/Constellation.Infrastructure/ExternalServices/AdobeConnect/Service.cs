@@ -7,6 +7,7 @@ using Constellation.Application.Models;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Infrastructure.DependencyInjection;
 
 namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
@@ -84,7 +85,7 @@ namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
 
             if (indexLocation > 0)
             {
-                username = username.Substring(0,indexLocation);
+                username = username[..indexLocation];
             }
 
             return _adobeConnect.GetUserPrincipalId(username);
@@ -249,7 +250,7 @@ namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
                 case "CasualAdobeConnectOperation":
                     var cOperation = operation as CasualAdobeConnectOperation;
 
-                    var casual = await _casualRepository.GetById(cOperation.CasualId);
+                    var casual = await _casualRepository.GetById(CasualId.FromValue(cOperation.CasualId));
 
                     principalId = string.IsNullOrWhiteSpace(cOperation.PrincipalId) ? casual.AdobeConnectId : cOperation.PrincipalId;
                     result.Errors.Add($"  Attempting to {operation.Action} casual teacher {casual.DisplayName} in room {cOperation.Room.Name}");

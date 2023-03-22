@@ -7,6 +7,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Students.SendFamilyContactChangesReport;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models.Families;
+using Constellation.Core.Models.Identifiers;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -69,7 +70,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
             {
                 _logger.Information("{id}: No existing entry for {name} ({code}). Creating new family.", jobId, family.AddressName, family.FamilyId);
                 // New Family... Add to database
-                entry = Family.Create(Guid.NewGuid(), family.AddressName);
+                entry = Family.Create(new FamilyId(), family.AddressName);
                 entry.LinkFamilyToSentralDetails(family.FamilyId);
                 entry.UpdateFamilyAddress(
                     family.AddressLine1,

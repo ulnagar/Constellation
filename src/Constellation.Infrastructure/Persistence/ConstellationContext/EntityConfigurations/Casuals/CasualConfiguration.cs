@@ -1,10 +1,12 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Casuals;
 
+using Constellation.Core.Models;
 using Constellation.Core.Models.Casuals;
+using Constellation.Core.Models.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class CasualConfiguration : IEntityTypeConfiguration<Casual>
+internal sealed class CasualConfiguration : IEntityTypeConfiguration<Casual>
 {
     public void Configure(EntityTypeBuilder<Casual> builder)
     {
@@ -12,5 +14,21 @@ public class CasualConfiguration : IEntityTypeConfiguration<Casual>
 
         builder
             .HasKey(casual => casual.Id);
+
+        builder
+            .Property(casual => casual.Id)
+            .HasConversion(
+                casualId => casualId.Value,
+                value => CasualId.FromValue(value));
+
+        builder
+            .HasOne<School>()
+            .WithMany()
+            .HasForeignKey(casual => casual.SchoolCode)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasIndex(casual => casual.EmailAddress)
+            .IsUnique();
     }
 }
