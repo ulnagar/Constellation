@@ -49,7 +49,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
     {
         var tutorial = new GroupTutorial(id, name, startDate, endDate);
 
-        tutorial.RaiseDomainEvent(new GroupTutorialCreatedDomainEvent(new DomainEventId(Guid.NewGuid()), tutorial.Id));
+        tutorial.RaiseDomainEvent(new GroupTutorialCreatedDomainEvent(new DomainEventId(), tutorial.Id));
 
         return tutorial;
     }
@@ -87,9 +87,9 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
             return existingEntry;
         }
 
-        var entry = new TutorialTeacher(new TutorialTeacherId(Guid.NewGuid()), teacher, effectiveTo);
+        var entry = new TutorialTeacher(new TutorialTeacherId(), teacher.StaffId, effectiveTo);
 
-        RaiseDomainEvent(new TeacherAddedToGroupTutorialDomainEvent(new DomainEventId(Guid.NewGuid()), Id, entry.Id));
+        RaiseDomainEvent(new TeacherAddedToGroupTutorialDomainEvent(new DomainEventId(), Id, entry.Id));
 
         _teachers.Add(entry);
 
@@ -115,7 +115,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
             {
                 tutorialTeacher.IsDeleted = true;
 
-                RaiseDomainEvent(new TeacherRemovedFromGroupTutorialDomainEvent(new DomainEventId(Guid.NewGuid()), Id, tutorialTeacher.Id));
+                RaiseDomainEvent(new TeacherRemovedFromGroupTutorialDomainEvent(new DomainEventId(), Id, tutorialTeacher.Id));
             }
         }
 
@@ -140,9 +140,9 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
             return existingEntry;
         }
 
-        var enrolment = new TutorialEnrolment(new TutorialEnrolmentId(Guid.NewGuid()), student, effectiveTo);
+        var enrolment = new TutorialEnrolment(new TutorialEnrolmentId(), student, effectiveTo);
 
-        RaiseDomainEvent(new StudentAddedToGroupTutorialDomainEvent(new DomainEventId(Guid.NewGuid()), Id, enrolment.Id));
+        RaiseDomainEvent(new StudentAddedToGroupTutorialDomainEvent(new DomainEventId(), Id, enrolment.Id));
 
         _enrolments.Add(enrolment);
 
@@ -168,7 +168,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
             {
                 enrolment.IsDeleted = true;
 
-                RaiseDomainEvent(new StudentRemovedFromGroupTutorialDomainEvent(new DomainEventId(Guid.NewGuid()), Id, enrolment.Id));
+                RaiseDomainEvent(new StudentRemovedFromGroupTutorialDomainEvent(new DomainEventId(), Id, enrolment.Id));
             }
         }
 
@@ -187,7 +187,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
             return Result.Failure<TutorialRoll>(DomainErrors.GroupTutorials.TutorialRoll.RollDateInvalid(rollDate));
         }
 
-        var roll = new TutorialRoll(new TutorialRollId(Guid.NewGuid()), this, rollDate);
+        var roll = new TutorialRoll(new TutorialRollId(), this, rollDate);
 
         var students = GetActiveEnrolmentsForDate(rollDate).Select(member => member.StudentId);
 
@@ -210,7 +210,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
 
         roll.Submit(staffMember.StaffId, studentPresence);
 
-        RaiseDomainEvent(new TutorialRollSubmittedDomainEvent(new DomainEventId(Guid.NewGuid()), Id, roll.Id));
+        RaiseDomainEvent(new TutorialRollSubmittedDomainEvent(new DomainEventId(), Id, roll.Id));
 
         return Result.Success();
     }

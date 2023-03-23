@@ -5,11 +5,11 @@ using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
-internal sealed class StudentFamilyRepository : IFamilyRepository
+internal sealed class FamilyRepository : IFamilyRepository
 {
     private readonly AppDbContext _context;
 
-    public StudentFamilyRepository(AppDbContext context)
+    public FamilyRepository(AppDbContext context)
     {
         _context = context;
     }

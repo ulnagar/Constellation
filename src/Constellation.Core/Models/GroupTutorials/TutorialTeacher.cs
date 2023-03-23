@@ -6,13 +6,16 @@ using System;
 
 public sealed class TutorialTeacher : IAuditableEntity
 {
+    // Private ctor needed to allow EFCore to create entity
+    //private TutorialTeacher() { }
+
     public TutorialTeacher(
         TutorialTeacherId id,
-        Staff staff,
+        string staffId,
         DateOnly? effectiveTo)
     {
         Id = id;
-        StaffId = staff.StaffId;
+        StaffId = staffId;
         EffectiveFrom = DateOnly.FromDateTime(DateTime.Today);
         EffectiveTo = effectiveTo;
     }

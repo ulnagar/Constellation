@@ -1,6 +1,7 @@
 ﻿using Constellation.Core.Enums;
 using Constellation.Core.Models.Casuals;
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Core.Models.Identifiers;
 using System;
 
 namespace Constellation.Core.Models
@@ -81,7 +82,7 @@ namespace Constellation.Core.Models
 
     public class GroupTutorialCreatedMSTeamOperation : EventMSTeamOperation
     {
-        public Guid TutorialId { get; set; }
+        public GroupTutorialId TutorialId { get; set; }
         public GroupTutorial GroupTutorial { get; set; }
     }
 }

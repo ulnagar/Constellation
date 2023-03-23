@@ -9,11 +9,11 @@ public class TrainingCompletion : IAuditableEntity
     public TrainingCompletion(
         TrainingCompletionId id,
         string staffId,
-        TrainingModuleId moduleId)
+        TrainingModuleId trainingModuleId)
     {
         Id = id;
         StaffId = staffId;
-        TrainingModuleId = moduleId;
+        TrainingModuleId = trainingModuleId;
     }
 
     public TrainingCompletionId Id { get; private set; }

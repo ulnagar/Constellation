@@ -6,6 +6,7 @@ using System;
 
 public sealed class TutorialEnrolment : IAuditableEntity
 {
+    // Private ctor needed to allow EFCore to create entity
     private TutorialEnrolment() { }
 
     public TutorialEnrolment(

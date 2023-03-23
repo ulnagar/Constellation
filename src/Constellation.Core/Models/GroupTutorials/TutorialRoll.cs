@@ -11,6 +11,7 @@ public sealed class TutorialRoll : IAuditableEntity
 {
     private readonly List<TutorialRollStudent> _students = new();
 
+    // Private ctor needed to allow EFCore to create entity
     private TutorialRoll() { }
 
     public TutorialRoll(

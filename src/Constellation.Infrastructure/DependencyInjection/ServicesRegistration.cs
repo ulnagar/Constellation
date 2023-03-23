@@ -149,7 +149,7 @@ public static class ServicesRegistration
         services.AddScoped<ITutorialRollRepository, TutorialRollRepository>();
         services.AddScoped<ITutorialTeacherRepository, TutorialTeacherRepository>();
         services.AddScoped<ISchoolContactRepository, SchoolContactRepository>();
-        services.AddScoped<IFamilyRepository, StudentFamilyRepository>();
+        services.AddScoped<IFamilyRepository, FamilyRepository>();
         services.AddScoped<IFacultyRepository, FacultyRepository>();
 
         services.AddSingleton(Log.Logger);

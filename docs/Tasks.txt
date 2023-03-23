@@ -20,10 +20,10 @@ CURRENT TASK
 		Create migration and test
 		
 	DDD:
-		Create strongly typed ID objects
-		Update EntityTypeConfigurations
-			change to internal class
-			create conversion for strongly typed ids
+		*Create strongly typed ID objects
+		*Update EntityTypeConfigurations
+			*change to internal class
+			*create conversion for strongly typed ids
 			create custom indexes
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
