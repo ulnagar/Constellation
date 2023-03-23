@@ -112,7 +112,7 @@ public class UpsertModel : BasePageModel
                         AdobeConnectId),
                     cancellationToken);
 
-                if (result.IsSuccess)
+                if (result.IsFailure)
                 {
                     Error = new ErrorDisplay
                     {
@@ -122,8 +122,6 @@ public class UpsertModel : BasePageModel
 
                     return Page();
                 }
-
-                ModelState.AddModelError("", result.Error.Message);
             } 
             else
             {
@@ -136,7 +134,7 @@ public class UpsertModel : BasePageModel
                         AdobeConnectId),
                     cancellationToken);
 
-                if (result.IsSuccess)
+                if (result.IsFailure)
                 {
                     Error = new ErrorDisplay
                     {
@@ -146,9 +144,9 @@ public class UpsertModel : BasePageModel
 
                     return Page();
                 }
-
-                ModelState.AddModelError("", result.Error.Message);
             }
+
+            return RedirectToPage("/Casuals/Index", new { area = "ShortTerm" });
         }
 
         var schoolsResponse = await _mediator.Send(new GetSchoolsForSelectionListQuery(), cancellationToken);
