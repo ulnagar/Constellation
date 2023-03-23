@@ -7,6 +7,7 @@ using Constellation.Application.Casuals.GetInactiveCasuals;
 using Constellation.Application.Casuals.Models;
 using Constellation.Application.Casuals.RestoreCasual;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -54,7 +55,7 @@ public class IndexModel : BasePageModel
 
         if (authorised.Succeeded)
         {
-            await _mediator.Send(new DeleteCasualCommand(Id), cancellationToken);
+            await _mediator.Send(new DeleteCasualCommand(CasualId.FromValue(Id)), cancellationToken);
         }
 
         return RedirectToPage("Index");
@@ -66,7 +67,7 @@ public class IndexModel : BasePageModel
 
         if (authorised.Succeeded)
         {
-            await _mediator.Send(new RestoreCasualCommand(Id), cancellationToken);
+            await _mediator.Send(new RestoreCasualCommand(CasualId.FromValue(Id)), cancellationToken);
         }
 
         return RedirectToPage("Index");

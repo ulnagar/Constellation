@@ -7,6 +7,7 @@ using Constellation.Application.GroupTutorials.SubmitRoll;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.TutorialRollAddStudent;
@@ -83,8 +84,8 @@ public class RollModel : BasePageModel
         var username = _currentUserService.UserName;
 
         var result = await _mediator.Send(new SubmitRollCommand(
-            TutorialId,
-            RollId,
+            GroupTutorialId.FromValue(TutorialId),
+            TutorialRollId.FromValue(RollId),
             username,
             Students.ToDictionary(k => k.StudentId, k => k.Present)));
 
@@ -111,7 +112,7 @@ public class RollModel : BasePageModel
             return Page();
         }
 
-        var result = await _mediator.Send(new AddStudentToTutorialRollCommand(TutorialId, RollId, AddStudentSelection.StudentId));
+        var result = await _mediator.Send(new AddStudentToTutorialRollCommand(GroupTutorialId.FromValue(TutorialId), TutorialRollId.FromValue(RollId), AddStudentSelection.StudentId));
 
         if (result.IsFailure)
         {
@@ -132,7 +133,7 @@ public class RollModel : BasePageModel
             return ShowError(DomainErrors.Permissions.Unauthorised);
         }
 
-        var result = await _mediator.Send(new RemoveStudentFromTutorialRollCommand(TutorialId, RollId, studentId));
+        var result = await _mediator.Send(new RemoveStudentFromTutorialRollCommand(GroupTutorialId.FromValue(TutorialId), TutorialRollId.FromValue(RollId), studentId));
 
         if (result.IsFailure)
         {
@@ -144,7 +145,7 @@ public class RollModel : BasePageModel
 
     private async Task GetPageInformation()
     {
-        var rollResult = await _mediator.Send(new GetTutorialRollWithDetailsByIdQuery(TutorialId, RollId));
+        var rollResult = await _mediator.Send(new GetTutorialRollWithDetailsByIdQuery(GroupTutorialId.FromValue(TutorialId), TutorialRollId.FromValue(RollId)));
 
         if (rollResult.IsFailure)
         {
@@ -155,8 +156,8 @@ public class RollModel : BasePageModel
             };
 
             Roll = new(
-                RollId,
-                TutorialId,
+                TutorialRollId.FromValue(RollId),
+                GroupTutorialId.FromValue(TutorialId),
                 string.Empty,
                 DateOnly.MinValue,
                 string.Empty,
@@ -180,8 +181,8 @@ public class RollModel : BasePageModel
         };
 
         Roll = new(
-            RollId,
-            TutorialId,
+            TutorialRollId.FromValue(RollId),
+            GroupTutorialId.FromValue(TutorialId),
             string.Empty,
             DateOnly.MinValue,
             string.Empty,

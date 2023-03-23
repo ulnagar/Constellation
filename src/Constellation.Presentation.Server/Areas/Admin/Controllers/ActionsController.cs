@@ -2,6 +2,7 @@
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.Areas.Admin.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Mvc;
@@ -76,7 +77,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
 
                         break;
                     case CasualAdobeConnectOperation cOperation:
-                        var casual = await _casualRepository.GetById(cOperation.CasualId);
+                        var casual = await _casualRepository.GetById(CasualId.FromValue(cOperation.CasualId));
                         var cdto = new Actions_OperationDTO
                         {
                             Id = operation.Id,

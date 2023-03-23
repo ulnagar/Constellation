@@ -6,6 +6,7 @@ using Constellation.Application.ClassCovers.GetAllCurrentAndFutureCovers;
 using Constellation.Application.ClassCovers.GetFutureCovers;
 using Constellation.Application.ClassCovers.Models;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -53,7 +54,7 @@ public class IndexModel : BasePageModel
 
         if (authorised.Succeeded)
         {
-            await _mediator.Send(new CancelCoverCommand(Id), cancellationToken);
+            await _mediator.Send(new CancelCoverCommand(ClassCoverId.FromValue(Id)), cancellationToken);
         }
 
         return RedirectToPage("Index");

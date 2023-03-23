@@ -9,6 +9,7 @@ using Constellation.Application.GroupTutorials.RemoveStudentFromTutorial;
 using Constellation.Application.GroupTutorials.RemoveTeacherFromTutorial;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Areas.Subject.Models;
 using Constellation.Presentation.Server.BaseModels;
@@ -82,7 +83,7 @@ public class DetailsModel : BasePageModel
 
         DateOnly? effectiveDate = (StudentEnrolment.LimitedTime) ? DateOnly.FromDateTime(StudentEnrolment.EffectiveTo) : null;
 
-        var result = await _mediator.Send(new AddStudentToTutorialCommand(Id, StudentEnrolment.StudentId, effectiveDate));
+        var result = await _mediator.Send(new AddStudentToTutorialCommand(GroupTutorialId.FromValue(Id), StudentEnrolment.StudentId, effectiveDate));
 
         if (result.IsFailure)
         {
@@ -111,7 +112,7 @@ public class DetailsModel : BasePageModel
 
         DateOnly? effectiveDate = (TeacherAssignment.LimitedTime) ? DateOnly.FromDateTime(TeacherAssignment.EffectiveTo) : null;
 
-        var result = await _mediator.Send(new AddTeacherToTutorialCommand(Id, TeacherAssignment.StaffId, effectiveDate));
+        var result = await _mediator.Send(new AddTeacherToTutorialCommand(GroupTutorialId.FromValue(Id), TeacherAssignment.StaffId, effectiveDate));
 
         if (result.IsFailure)
         {
@@ -134,7 +135,9 @@ public class DetailsModel : BasePageModel
 
         await GetPageInformation();
 
-        var teacherRecord = Tutorial.Teachers.FirstOrDefault(teacher => teacher.Id == teacherId);
+        var teacherIdObject = TutorialTeacherId.FromValue(teacherId);
+
+        var teacherRecord = Tutorial.Teachers.FirstOrDefault(teacher => teacher.Id == teacherIdObject);
 
         if (teacherRecord == null)
         {
@@ -161,7 +164,7 @@ public class DetailsModel : BasePageModel
 
         DateOnly? effectiveDate = (!TeacherRemoval.Immediate) ? DateOnly.FromDateTime(TeacherRemoval.EffectiveOn) : null;
 
-        var result = await _mediator.Send(new RemoveTeacherFromTutorialCommand(Id, TeacherRemoval.Id, effectiveDate));
+        var result = await _mediator.Send(new RemoveTeacherFromTutorialCommand(GroupTutorialId.FromValue(Id), TutorialTeacherId.FromValue(TeacherRemoval.Id), effectiveDate));
 
         TeacherRemoval = null;
 
@@ -184,7 +187,9 @@ public class DetailsModel : BasePageModel
 
         await GetPageInformation();
 
-        var enrolmentRecord = Tutorial.Students.FirstOrDefault(enrolment => enrolment.Id == enrolmentId);
+        var enrolmentIdObject = TutorialEnrolmentId.FromValue(enrolmentId);
+
+        var enrolmentRecord = Tutorial.Students.FirstOrDefault(enrolment => enrolment.Id == enrolmentIdObject);
 
         if (enrolmentRecord == null)
         {
@@ -211,7 +216,7 @@ public class DetailsModel : BasePageModel
 
         DateOnly? effectiveDate = (!StudentRemoval.Immediate) ? DateOnly.FromDateTime(StudentRemoval.EffectiveOn) : null;
 
-        var result = await _mediator.Send(new RemoveStudentFromTutorialCommand(Id, StudentRemoval.Id, effectiveDate));
+        var result = await _mediator.Send(new RemoveStudentFromTutorialCommand(GroupTutorialId.FromValue(Id), TutorialEnrolmentId.FromValue(StudentRemoval.Id), effectiveDate));
 
         StudentRemoval = null;
 
@@ -232,7 +237,7 @@ public class DetailsModel : BasePageModel
             return ShowError(DomainErrors.Permissions.Unauthorised);
         }
 
-        var result = await _mediator.Send(new CreateRollCommand(Id, DateOnly.FromDateTime(RollCreate.RollDate)));
+        var result = await _mediator.Send(new CreateRollCommand(GroupTutorialId.FromValue(Id), DateOnly.FromDateTime(RollCreate.RollDate)));
 
         if (result.IsFailure)
         {
@@ -248,7 +253,7 @@ public class DetailsModel : BasePageModel
     {
         await GetClasses(_mediator);
 
-        var result = await _mediator.Send(new GetTutorialWithDetailsByIdQuery(Id), cancellationToken);
+        var result = await _mediator.Send(new GetTutorialWithDetailsByIdQuery(GroupTutorialId.FromValue(Id)), cancellationToken);
 
         if (result.IsFailure)
         {
@@ -259,7 +264,7 @@ public class DetailsModel : BasePageModel
             };
 
             Tutorial = new(
-                Id,
+                GroupTutorialId.FromValue(Id),
                 null,
                 DateOnly.MinValue,
                 DateOnly.MinValue,
@@ -282,7 +287,7 @@ public class DetailsModel : BasePageModel
         };
 
         Tutorial = new(
-            Id,
+            GroupTutorialId.FromValue(Id),
             null,
             DateOnly.MinValue,
             DateOnly.MinValue,
@@ -298,11 +303,11 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetDownloadReport()
     {
-        var fileDto = await _mediator.Send(new GenerateTutorialAttendanceReportQuery(Id));
+        var fileDto = await _mediator.Send(new GenerateTutorialAttendanceReportQuery(GroupTutorialId.FromValue(Id)));
 
-        if (!fileDto.IsSuccess)
+        if (fileDto.IsFailure)
         {
-            return Page();
+            ShowError(fileDto.Error);
         }
 
         return File(fileDto.Value.FileData, fileDto.Value.FileType, fileDto.Value.FileName);

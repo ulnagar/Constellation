@@ -1,5 +1,7 @@
 ﻿using Constellation.Core.Enums;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
+using System;
 
 namespace Constellation.Core.Tests.Unit.Models.MandatoryTraining;
 
@@ -9,25 +11,22 @@ public class TrainingCompletionTests
     public void MarkNotRequired_DoesNothing_WhenModuleDoesNotAllowNotRequiredEntries()
     {
         // Arrange
-        var module = new TrainingModule(Guid.NewGuid())
-        {
-            Name = "Test Module",
-            Expiry = TrainingModuleExpiryFrequency.OnceOff,
-            Url = string.Empty,
-            CanMarkNotRequired = false
-        };
+        var module = TrainingModule.Create(
+            new TrainingModuleId(),
+            "Test Module",
+            TrainingModuleExpiryFrequency.OnceOff,
+            string.Empty,
+            false);
 
-        var sut = new TrainingCompletion(Guid.NewGuid())
-        {
-            StaffId = "1",
-            TrainingModuleId = module.Id,
-            Module = module
-        };
+        var sut = TrainingCompletion.Create(
+            new TrainingCompletionId(),
+            "1",
+            module.Id);
 
         sut.SetCompletedDate(DateTime.Today);
 
         // Act
-        sut.MarkNotRequired();
+        sut.MarkNotRequired(module);
 
         // Assert
         sut.NotRequired.Should().Be(false);
@@ -38,25 +37,24 @@ public class TrainingCompletionTests
     public void MarkNotRequired_ShouldUpdateEntity_WhenModuleAllowsNotRequiredEntries()
     {
         // Arrange
-        var module = new TrainingModule(Guid.NewGuid())
-        {
-            Name = "Test Module",
-            Expiry = TrainingModuleExpiryFrequency.OnceOff,
-            Url = string.Empty,
-            CanMarkNotRequired = true
-        };
+        var module = TrainingModule.Create(
+            new TrainingModuleId(),
+            "Test Module",
+            TrainingModuleExpiryFrequency.OnceOff,
+            string.Empty,
+            true);
 
-        var sut = new TrainingCompletion(Guid.NewGuid())
-        {
-            StaffId = "1",
-            TrainingModuleId = module.Id,
-            Module = module
-        };
+        var sut = TrainingCompletion.Create(
+            new TrainingCompletionId(),
+            "1",
+            module.Id);
+
+        sut.SetCompletedDate(DateTime.Today);
 
         sut.SetCompletedDate(DateTime.Today);
 
         // Act
-        sut.MarkNotRequired();
+        sut.MarkNotRequired(module);
 
         // Assert
         sut.NotRequired.Should().Be(true);
@@ -67,22 +65,21 @@ public class TrainingCompletionTests
     public void SetCompletedDate_ShouldUpdateNotRequiredField_WhenSettingANewCompletionDate()
     {
         // Arrange
-        var module = new TrainingModule(Guid.NewGuid())
-        {
-            Name = "Test Module",
-            Expiry = TrainingModuleExpiryFrequency.OnceOff,
-            Url = string.Empty,
-            CanMarkNotRequired = true
-        };
+        var module = TrainingModule.Create(
+            new TrainingModuleId(),
+            "Test Module",
+            TrainingModuleExpiryFrequency.OnceOff,
+            string.Empty,
+            true);
 
-        var sut = new TrainingCompletion(Guid.NewGuid())
-        {
-            StaffId = "1",
-            TrainingModuleId = module.Id,
-            Module = module
-        };
+        var sut = TrainingCompletion.Create(
+            new TrainingCompletionId(),
+            "1",
+            module.Id);
 
-        sut.MarkNotRequired();
+        sut.SetCompletedDate(DateTime.Today);
+
+        sut.MarkNotRequired(module);
 
         // Act
         sut.SetCompletedDate(DateTime.Today);

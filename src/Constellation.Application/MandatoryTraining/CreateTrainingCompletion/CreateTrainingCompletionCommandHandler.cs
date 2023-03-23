@@ -60,7 +60,7 @@ internal sealed class CreateTrainingCompletionCommandHandler
             request.TrainingModuleId);
 
         if (request.NotRequired)
-            recordEntity.MarkNotRequired();
+            recordEntity.MarkNotRequired(module);
         else
             recordEntity.SetCompletedDate(request.CompletedDate);
 

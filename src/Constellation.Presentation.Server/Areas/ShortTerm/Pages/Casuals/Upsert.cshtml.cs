@@ -6,6 +6,7 @@ using Constellation.Application.Casuals.UpdateCasual;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Schools.GetSchoolsForSelectionList;
 using Constellation.Application.Schools.Models;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -57,7 +58,7 @@ public class UpsertModel : BasePageModel
 
         if (Id.HasValue)
         {
-            var casualResponse = await _mediator.Send(new GetCasualByIdQuery(Id.Value), cancellationToken);
+            var casualResponse = await _mediator.Send(new GetCasualByIdQuery(CasualId.FromValue(Id.Value)), cancellationToken);
 
             if (casualResponse.IsFailure)
             {
@@ -103,7 +104,7 @@ public class UpsertModel : BasePageModel
             {
                 var result = await _mediator.Send(
                     new UpdateCasualCommand(
-                        Id.Value,
+                        CasualId.FromValue(Id.Value),
                         FirstName,
                         LastName,
                         EmailAddress,

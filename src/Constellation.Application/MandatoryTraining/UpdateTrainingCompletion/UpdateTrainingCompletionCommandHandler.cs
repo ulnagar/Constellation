@@ -14,17 +14,20 @@ internal sealed class UpdateTrainingCompletionCommandHandler
     : ICommandHandler<UpdateTrainingCompletionCommand>
 {
     private readonly ITrainingCompletionRepository _trainingCompletionRepository;
+    private readonly ITrainingModuleRepository _trainingModuleRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IStoredFileRepository _storedFileRepository;
     private readonly IDateTimeProvider _dateTimeProvider;
 
     public UpdateTrainingCompletionCommandHandler(
         ITrainingCompletionRepository trainingCompletionRepository,
+        ITrainingModuleRepository trainingModuleRepository,
         IUnitOfWork unitOfWork,
         IStoredFileRepository storedFileRepository,
         IDateTimeProvider dateTimeProvider)
     {
         _trainingCompletionRepository = trainingCompletionRepository;
+        _trainingModuleRepository = trainingModuleRepository;
         _unitOfWork = unitOfWork;
         _storedFileRepository = storedFileRepository;
         _dateTimeProvider = dateTimeProvider;
@@ -39,6 +42,8 @@ internal sealed class UpdateTrainingCompletionCommandHandler
             return Result.Failure(DomainErrors.MandatoryTraining.Completion.NotFound(request.Id));
         }
 
+        var module = await _trainingModuleRepository.GetById(entity.TrainingModuleId, cancellationToken);
+
         if (!string.IsNullOrWhiteSpace(request.StaffId))
             entity.UpdateStaffMember(request.StaffId);
 
@@ -46,7 +51,7 @@ internal sealed class UpdateTrainingCompletionCommandHandler
             entity.UpdateTrainingModule(request.TrainingModuleId);
 
         if (request.NotRequired)
-            entity.MarkNotRequired();
+            entity.MarkNotRequired(module);
         else
             entity.SetCompletedDate(request.CompletedDate);
 

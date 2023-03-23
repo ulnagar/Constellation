@@ -1,14 +1,17 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
 
-using Constellation.Application.Features.MandatoryTraining.Commands;
-using Constellation.Application.Features.MandatoryTraining.Queries;
-using Constellation.Application.Interfaces.Providers;
+using Constellation.Application.MandatoryTraining.CreateTrainingModule;
+using Constellation.Application.MandatoryTraining.GetTrainingModuleEditContext;
+using Constellation.Application.MandatoryTraining.UpdateTrainingModule;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
+using Constellation.Core.Errors;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using System;
 using System.Threading.Tasks;
 
@@ -16,10 +19,14 @@ using System.Threading.Tasks;
 public class UpsertModel : BasePageModel
 {
     private readonly IMediator _mediator;
+    private readonly LinkGenerator _linkGenerator;
 
-    public UpsertModel(IMediator mediator)
+    public UpsertModel(
+        IMediator mediator,
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
+        _linkGenerator = linkGenerator;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -40,11 +47,20 @@ public class UpsertModel : BasePageModel
         if (Id.HasValue)
         {
             // Get existing entry from database and populate fields
+            var entityRequest = await _mediator.Send(new GetTrainingModuleEditContextQuery(TrainingModuleId.FromValue(Id.Value)));
 
-            var entity = await _mediator.Send(new GetTrainingModuleEditContextQuery { Id = Id.Value });
+            if (entityRequest.IsFailure)
+            {
+                Error = new ErrorDisplay
+                {
+                    Error = DomainErrors.Permissions.Unauthorised,
+                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Index", values: new { area = "SchoolAdmin" })
+                };
 
-            //TODO: Check that the return value is not null
-            // If it is, redirect and show error message?
+                return;
+            }
+
+            var entity = entityRequest.Value;
 
             Name = entity.Name;
             Expiry = entity.Expiry;
@@ -58,27 +74,47 @@ public class UpsertModel : BasePageModel
         if (Id.HasValue)
         {
             // Update existing entry
-
             var command = new UpdateTrainingModuleCommand(
-                Id.Value,
+                TrainingModuleId.FromValue(Id.Value),
                 Name,
                 Expiry,
                 ModelUrl,
                 CanMarkNotRequired);
 
-            await _mediator.Send(command);
+            var result = await _mediator.Send(command);
+
+            if (result.IsFailure)
+            {
+                Error = new ErrorDisplay
+                {
+                    Error = result.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Index", values: new { area = "SchoolAdmin" })
+                };
+
+                return Page();
+            }
         }
         else
         {
             // Create new entry
-
             var command = new CreateTrainingModuleCommand(
                 Name,
                 Expiry,
                 ModelUrl,
                 CanMarkNotRequired);
 
-            await _mediator.Send(command);
+            var result = await _mediator.Send(command);
+
+            if (result.IsFailure)
+            {
+                Error = new ErrorDisplay
+                {
+                    Error = result.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Index", values: new { area = "SchoolAdmin" })
+                };
+
+                return Page();
+            }
         }
 
         return RedirectToPage("Index");

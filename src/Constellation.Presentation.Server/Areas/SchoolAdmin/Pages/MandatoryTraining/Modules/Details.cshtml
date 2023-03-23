@@ -1,9 +1,10 @@
 ﻿@page "{Id:Guid}"
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules.DetailsModel
+
 @inject IAuthorizationService AuthorizationService
-@    using Constellation.Application.Features.MandatoryTraining.Models
-@    using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
-    using Constellation.Application.MandatoryTraining.Models;
+
+@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
+@using Constellation.Application.MandatoryTraining.Models;
 
 @{
     var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);

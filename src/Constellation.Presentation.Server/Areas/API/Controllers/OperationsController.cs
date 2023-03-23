@@ -4,6 +4,7 @@ using Constellation.Application.Features.API.Operations.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.Areas.API.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -132,7 +133,7 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
 
             foreach (var operation in operations.CasualOperations)
             {
-                var casual = await _casualRepository.GetById(operation.CasualId);
+                var casual = await _casualRepository.GetById(CasualId.FromValue(operation.CasualId));
 
                 var teamOperation = new TeamsOperation
                 {

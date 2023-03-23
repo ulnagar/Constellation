@@ -1,12 +1,13 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
 
-using Constellation.Application.Features.MandatoryTraining.Queries;
+using Constellation.Application.MandatoryTraining.GetListOfModuleSummary;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -14,10 +15,14 @@ using System.Threading.Tasks;
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
+    private readonly LinkGenerator _linkGenerator;
 
-    public IndexModel(IMediator mediator)
+    public IndexModel(
+        IMediator mediator,
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
+        _linkGenerator = linkGenerator;
     }
 
     public List<ModuleSummaryDto> Modules { get; set; } = new();
@@ -28,7 +33,20 @@ public class IndexModel : BasePageModel
     {
         await GetClasses(_mediator);
 
-        Modules = await _mediator.Send(new GetListOfModuleSummaryQuery());
+        var moduleRequest = await _mediator.Send(new GetListOfModuleSummaryQuery());
+
+        if (moduleRequest.IsFailure)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = moduleRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
+            };
+
+            return;
+        }
+
+        Modules = moduleRequest.Value;
 
         Modules = Filter switch
         {

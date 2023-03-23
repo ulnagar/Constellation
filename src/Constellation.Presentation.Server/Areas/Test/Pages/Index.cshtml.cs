@@ -1,11 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Constellation.Application.ExternalDataConsistency;
-using Constellation.Application.Features.Common.Queries;
-using Constellation.Application.Features.MandatoryTraining.Queries;
-using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

@@ -4,6 +4,7 @@ using Constellation.Core.DomainEvents;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Core.Models.Identifiers;
 
 public class GroupTutorialTests
 {
@@ -12,7 +13,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddDays(-1)));
@@ -35,12 +36,12 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        sut.IsDeleted = true;
+        sut.Delete();
 
         var teacher = new Staff
         {
@@ -60,7 +61,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -72,7 +73,7 @@ public class GroupTutorialTests
 
         var initialResult = sut.AddTeacher(teacher);
 
-        Guid existingRecord = initialResult.IsSuccess ? initialResult.Value.Id : Guid.NewGuid();
+        TutorialTeacherId? existingRecord = initialResult.IsSuccess ? initialResult.Value.Id : null;
 
         // Act
         var result = sut.AddTeacher(teacher);
@@ -88,7 +89,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -100,7 +101,7 @@ public class GroupTutorialTests
 
         var initialResult = sut.AddTeacher(teacher);
 
-        Guid existingRecord = initialResult.IsSuccess ? initialResult.Value.Id : Guid.NewGuid();
+        TutorialTeacherId? existingRecord = initialResult.IsSuccess ? initialResult.Value.Id : null;
 
         sut.RemoveTeacher(teacher);
 
@@ -108,6 +109,7 @@ public class GroupTutorialTests
         var result = sut.AddTeacher(teacher);
 
         // Assert
+        existingRecord.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value.Id.Should().NotBe(existingRecord);
@@ -122,7 +124,7 @@ public class GroupTutorialTests
         DateOnly? effectiveTo = string.IsNullOrWhiteSpace(effectiveToDate) ? null : DateOnly.Parse(effectiveToDate);
 
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -150,7 +152,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -174,7 +176,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -200,7 +202,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -227,7 +229,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -257,7 +259,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -283,7 +285,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -311,7 +313,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -340,7 +342,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -372,7 +374,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddDays(-1)));
@@ -395,12 +397,12 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        sut.IsDeleted = true;
+        sut.Delete();
 
         var student = new Student
         {
@@ -420,7 +422,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -432,7 +434,7 @@ public class GroupTutorialTests
 
         var initialResult = sut.EnrolStudent(student);
 
-        Guid existingRecord = initialResult.IsSuccess ? initialResult.Value.Id : Guid.NewGuid();
+        TutorialEnrolmentId? existingRecord = initialResult.IsSuccess ? initialResult.Value.Id : null;
 
         // Act
         var result = sut.EnrolStudent(student);
@@ -448,7 +450,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -460,7 +462,7 @@ public class GroupTutorialTests
 
         var initialResult = sut.EnrolStudent(student);
 
-        Guid existingRecord = initialResult.IsSuccess ? initialResult.Value.Id : Guid.NewGuid();
+        TutorialEnrolmentId? existingRecord = initialResult.IsSuccess ? initialResult.Value.Id : null;
 
         sut.UnenrolStudent(student);
 
@@ -482,7 +484,7 @@ public class GroupTutorialTests
         DateOnly? effectiveTo = string.IsNullOrWhiteSpace(effectiveToDate) ? null : DateOnly.Parse(effectiveToDate);
 
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -510,7 +512,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -534,7 +536,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -560,7 +562,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -587,7 +589,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -617,7 +619,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -643,7 +645,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -671,7 +673,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
@@ -700,7 +702,7 @@ public class GroupTutorialTests
     {
         // Arrange
         var sut = GroupTutorial.Create(
-            Guid.NewGuid(),
+            new GroupTutorialId(),
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));

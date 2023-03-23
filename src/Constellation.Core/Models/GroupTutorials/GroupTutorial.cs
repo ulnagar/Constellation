@@ -214,4 +214,9 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
 
         return Result.Success();
     }
+
+    public void Delete()
+    {
+        IsDeleted = true;
+    }
 }

@@ -1,17 +1,19 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
 
-using Constellation.Application.Features.MandatoryTraining.Commands;
-using Constellation.Application.Features.MandatoryTraining.Queries;
-using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Providers;
+using Constellation.Application.MandatoryTraining.GenerateModuleReport;
+using Constellation.Application.MandatoryTraining.GetModuleDetails;
 using Constellation.Application.MandatoryTraining.Models;
+using Constellation.Application.MandatoryTraining.ReinstateTrainingModule;
+using Constellation.Application.MandatoryTraining.RetireTrainingModule;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Errors;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Net.Mime;
 using System.Threading.Tasks;
 
 [Authorize(Policy = AuthPolicies.CanViewTrainingModuleContentDetails)]
@@ -20,13 +22,17 @@ public class DetailsModel : BasePageModel
     private readonly IMediator _mediator;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IAuthorizationService _authorizationService;
+    private readonly LinkGenerator _linkGenerator;
 
-    public DetailsModel(IMediator mediator, IDateTimeProvider dateTimeProvider,
-        IAuthorizationService authorizationService)
+    public DetailsModel(IMediator mediator,
+        IDateTimeProvider dateTimeProvider,
+        IAuthorizationService authorizationService,
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
         _dateTimeProvider = dateTimeProvider;
         _authorizationService = authorizationService;
+        _linkGenerator = linkGenerator;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -38,7 +44,20 @@ public class DetailsModel : BasePageModel
     {
         await GetClasses(_mediator);
 
-        Module = await _mediator.Send(new GetModuleDetailsQuery { Id = Id });
+        var moduleRequest = await _mediator.Send(new GetModuleDetailsQuery(TrainingModuleId.FromValue(Id)));
+
+        if (moduleRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = moduleRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Index", values: new { area = "SchoolAdmin" })
+            };
+
+            return;
+        }
+
+        Module = moduleRequest.Value;
 
         foreach (var record in Module.Completions)
         {
@@ -61,50 +80,86 @@ public class DetailsModel : BasePageModel
             .OrderByDescending(record => record.CompletedDate)
             .ThenBy(record => record.StaffLastName)
             .ToList();
-
-        //TODO: Check if return value is null, redirect and display error
     }
 
     public async Task<IActionResult> OnGetDownloadReport()
     {
         var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
 
-        //TODO: Show error explaining why this did not work!
         if (!isAuthorised.Succeeded)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = DomainErrors.Permissions.Unauthorised,
+                RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Index", values: new { area = "SchoolAdmin" })
+            };
+
             return Page();
+        }
 
-        var report = await _mediator.Send(new GenerateModuleReportCommand { Id = Id });
+        var reportRequest = await _mediator.Send(new GenerateModuleReportCommand(TrainingModuleId.FromValue(Id), false));
 
-        return File(report.FileData, report.FileType, report.FileName);
+        if (reportRequest.IsFailure)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = reportRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Index", values: new { area = "SchoolAdmin" })
+            };
+
+            return Page();
+        }
+
+        return File(reportRequest.Value.FileData, reportRequest.Value.FileType, reportRequest.Value.FileName);
     }
 
     public async Task<IActionResult> OnGetDownloadReportWithCertificates()
     {
         var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
 
-        //TODO: Show error explaining why this did not work!
         if (!isAuthorised.Succeeded)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = DomainErrors.Permissions.Unauthorised,
+                RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Index", values: new { area = "SchoolAdmin" })
+            };
+
             return Page();
+        }
 
-        var report = await _mediator.Send(new GenerateModuleReportWithCertificatesCommand { Id = Id });
+        var reportRequest = await _mediator.Send(new GenerateModuleReportCommand(TrainingModuleId.FromValue(Id), true));
 
-        return File(report.FileData, report.FileType, report.FileName);
+        if (reportRequest.IsFailure)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = reportRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Index", values: new { area = "SchoolAdmin" })
+            };
+
+            return Page();
+        }
+
+        return File(reportRequest.Value.FileData, reportRequest.Value.FileType, reportRequest.Value.FileName);
     }
 
     public async Task<IActionResult> OnGetRetireModule()
     {
         var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
 
-        //TODO: Show error explaining why this did not work!
         if (!isAuthorised.Succeeded)
-            return Page();
-
-        var command = new RetireTrainingModuleCommand
         {
-            Id = Id,
-            DeletedBy = Request.HttpContext.User.Identity?.Name,
-            DeletedAt = _dateTimeProvider.Now
-        };
+            Error = new ErrorDisplay
+            {
+                Error = DomainErrors.Permissions.Unauthorised,
+                RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Index", values: new { area = "SchoolAdmin" })
+            };
+
+            return Page();
+        }
+
+        var command = new RetireTrainingModuleCommand(TrainingModuleId.FromValue(Id));
 
         await _mediator.Send(command);
 
@@ -115,14 +170,18 @@ public class DetailsModel : BasePageModel
     {
         var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
 
-        //TODO: Show error explaining why this did not work!
         if (!isAuthorised.Succeeded)
-            return Page();
-
-        var command = new ReinstateTrainingModuleCommand
         {
-            Id = Id
-        };
+            Error = new ErrorDisplay
+            {
+                Error = DomainErrors.Permissions.Unauthorised,
+                RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Index", values: new { area = "SchoolAdmin" })
+            };
+
+            return Page();
+        }
+
+        var command = new ReinstateTrainingModuleCommand(TrainingModuleId.FromValue(Id));
 
         await _mediator.Send(command);
 

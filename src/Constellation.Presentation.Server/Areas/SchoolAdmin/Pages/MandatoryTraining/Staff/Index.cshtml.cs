@@ -1,18 +1,23 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Staff;
 
-using Constellation.Application.Features.MandatoryTraining.Queries;
+using Constellation.Application.MandatoryTraining.GetListOfCertificatesForStaffMemberWithNotCompletedModules;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
+    private readonly LinkGenerator _linkGenerator;
 
-    public IndexModel(IMediator mediator)
+    public IndexModel(
+        IMediator mediator,
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
+        _linkGenerator = linkGenerator;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -24,6 +29,19 @@ public class IndexModel : BasePageModel
     {
         await GetClasses(_mediator);
 
-        CompletionList = await _mediator.Send(new GetListOfCertificatesForStaffMemberWithNotCompletedModulesQuery(StaffId));
+        var completionRequest = await _mediator.Send(new GetListOfCertificatesForStaffMemberWithNotCompletedModulesQuery(StaffId));
+
+        if (completionRequest.IsFailure)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = completionRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
+            };
+
+            return;
+        }
+
+        CompletionList = completionRequest.Value;
     }
 }

@@ -4,6 +4,7 @@ using Constellation.Application.GroupTutorials.CreateGroupTutorial;
 using Constellation.Application.GroupTutorials.EditGroupTutorial;
 using Constellation.Application.GroupTutorials.GetTutorialById;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
@@ -42,7 +43,7 @@ public class UpsertModel : BasePageModel
         // otherwise this is an edit and we need to populate the current values
         if (Id.HasValue)
         {
-            var entry = await _mediator.Send(new GetTutorialByIdQuery(Id.Value));
+            var entry = await _mediator.Send(new GetTutorialByIdQuery(GroupTutorialId.FromValue(Id.Value)));
 
             if (entry.IsFailure)
             {
@@ -70,7 +71,7 @@ public class UpsertModel : BasePageModel
             // Update existing entry
 
             var command = new EditGroupTutorialCommand(
-                Id.Value,
+                GroupTutorialId.FromValue(Id.Value),
                 Name,
                 DateOnly.FromDateTime(StartDate),
                 DateOnly.FromDateTime(EndDate));
@@ -89,7 +90,6 @@ public class UpsertModel : BasePageModel
         else
         {
             // Create new entry
-
             var command = new CreateGroupTutorialCommand(
                 Name,
                 DateOnly.FromDateTime(StartDate),
@@ -97,9 +97,9 @@ public class UpsertModel : BasePageModel
 
             var result = await _mediator.Send(command, cancellationToken);
 
-            if (result.IsFailure && result.GetType() == typeof(ValidationResult<Guid>))
+            if (result.IsFailure && result.GetType() == typeof(ValidationResult<GroupTutorialId>))
             {
-                foreach (var error in ((ValidationResult<Guid>)result).Errors)
+                foreach (var error in ((ValidationResult<GroupTutorialId>)result).Errors)
                 {
                     ModelState.AddModelError(error.Code, error.Message);
                 }

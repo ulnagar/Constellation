@@ -58,12 +58,13 @@ public class TrainingCompletion : IAuditableEntity
         IsDeleted = true;
     }
 
-    public void MarkNotRequired()
+    public void MarkNotRequired(TrainingModule module)
     {
         // Check that this is valid on the Module
-        var canMarkNotRequired = Module.CanMarkNotRequired;
+        var canMarkNotRequired = module.CanMarkNotRequired;
+        var sameModule = module.Id == TrainingModuleId;
 
-        if (canMarkNotRequired)
+        if (canMarkNotRequired && sameModule)
         {
             NotRequired = true;
             CompletedDate = null;

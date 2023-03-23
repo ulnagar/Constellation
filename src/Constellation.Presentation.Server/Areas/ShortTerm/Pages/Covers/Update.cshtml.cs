@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Server.Areas.ShortTerm.Pages.Covers;
 using Constellation.Application.ClassCovers.GetCoverWithDetails;
 using Constellation.Application.ClassCovers.UpdateCover;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -42,7 +43,7 @@ public class UpdateModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdate(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new UpdateCoverCommand(Id, StartDate, EndDate), cancellationToken);
+        var result = await _mediator.Send(new UpdateCoverCommand(ClassCoverId.FromValue(Id), StartDate, EndDate), cancellationToken);
 
         if (result.IsFailure)
         {
@@ -60,7 +61,7 @@ public class UpdateModel : BasePageModel
     {
         await GetClasses(_mediator);
 
-        var coverResult = await _mediator.Send(new GetCoverWithDetailsQuery(Id), cancellationToken);
+        var coverResult = await _mediator.Send(new GetCoverWithDetailsQuery(ClassCoverId.FromValue(Id)), cancellationToken);
 
         if (coverResult.IsFailure)
         {
