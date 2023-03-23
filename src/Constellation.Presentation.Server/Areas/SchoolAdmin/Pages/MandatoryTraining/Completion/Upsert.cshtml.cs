@@ -2,13 +2,17 @@ namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTra
 
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Common.Queries;
-using Constellation.Application.Features.MandatoryTraining.Commands;
-using Constellation.Application.Features.MandatoryTraining.Queries;
-using Constellation.Application.Interfaces.GetUploadedTrainingCertificationMetadata;
-using Constellation.Application.Interfaces.Providers;
+using Constellation.Application.MandatoryTraining.CreateTrainingCompletion;
+using Constellation.Application.MandatoryTraining.DoesModuleAllowNotRequiredResponse;
+using Constellation.Application.MandatoryTraining.GetCompletionRecordEditContext;
+using Constellation.Application.MandatoryTraining.GetTrainingModuleEditContext;
 using Constellation.Application.MandatoryTraining.GetUploadedTrainingCertificationMetadata;
+using Constellation.Application.MandatoryTraining.UpdateTrainingCompletion;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Errors;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Validation;
 using MediatR;
@@ -25,11 +29,16 @@ public class UpsertModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly IAuthorizationService _authorizationService;
+    private readonly LinkGenerator _linkGenerator;
 
-    public UpsertModel(IMediator mediator, IAuthorizationService authorizationService)
+    public UpsertModel(
+        IMediator mediator, 
+        IAuthorizationService authorizationService,
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
         _authorizationService = authorizationService;
+        _linkGenerator = linkGenerator;
     }
 
     // Allow mode switching for:
@@ -40,6 +49,8 @@ public class UpsertModel : BasePageModel
     public ModeOptions Mode { get; set; }
 
     [BindProperty(SupportsGet = true)]
+    [Required(ErrorMessage = "You must select a training module")]
+    // Must be nullable to have the default value be null, and therefore trigger required validation rule
     public Guid? ModuleId { get; set; }
 
     [BindProperty(SupportsGet = true)]
@@ -55,11 +66,6 @@ public class UpsertModel : BasePageModel
 
     [BindProperty]
     public bool NotRequired { get; set; }
-
-    [BindProperty]
-    [Required(ErrorMessage = "You must select a training module")]
-    // Must be nullable to have the default value be null, and therefore trigger required validation rule
-    public Guid? TrainingModuleId { get; set; }
 
     [AllowExtensions(FileExtensions: "pdf", ErrorMessage = "You can only upload PDF files")]
     [BindProperty]
@@ -86,34 +92,66 @@ public class UpsertModel : BasePageModel
         if (Mode == ModeOptions.FULL && !CanEditRecords)
         {
             // Editor mode selected without edit access
-            return RedirectToPage("Index");
-        } else if (Mode == ModeOptions.SOLOMODULE && !CanEditRecords)
+            Error = new ErrorDisplay
+            {
+                Error = DomainErrors.Permissions.Unauthorised,
+                RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Index", values: new { area = "SchoolAdmin" })
+            };
+
+            return Page();
+        } 
+        else if (Mode == ModeOptions.SOLOMODULE && !CanEditRecords)
         {
             // Editor insert mode selected without edit access
-            return RedirectToPage("/MandatoryTraining/Modules/Details", new { Id = ModuleId.Value });
+            Error = new ErrorDisplay
+            {
+                Error = DomainErrors.Permissions.Unauthorised,
+                RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Details", values: new { area = "SchoolAdmin", Id = ModuleId.Value })
+            };
+
+            return Page();
         }
 
         if (Id.HasValue)
         {
             // Get existing entry from database and populate fields
+            var entityRequest = await _mediator.Send(new GetCompletionRecordEditContextQuery(TrainingCompletionId.FromValue(Id.Value)));
+            
+            if (entityRequest.IsFailure)
+            {
+                Error = new ErrorDisplay
+                {
+                    Error = entityRequest.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Details", values: new { area = "SchoolAdmin", Id = ModuleId.Value })
+                };
 
-            var entity = await _mediator.Send(new GetCompletionRecordEditContextQuery { Id = Id.Value });
+                return Page();
+            }
 
-            //TODO: Check that the return value is not null
-            // If it is, redirect and show error message?
+            var entity = entityRequest.Value;
 
             StaffId = entity.StaffId;
             CompletedDate = entity.CompletedDate;
-            TrainingModuleId = entity.TrainingModuleId;
+            ModuleId = entity.TrainingModuleId.Value;
             NotRequired = entity.NotRequired;
 
-            UploadedCertificate = await _mediator.Send(new GetUploadedTrainingCertificateMetadataQuery { LinkType = StoredFile.TrainingCertificate, LinkId = Id.Value.ToString() });
+            var certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateMetadataQuery(StoredFile.TrainingCertificate, Id.Value.ToString()));
 
+            if (certificateRequest.IsSuccess)
+            {
+                UploadedCertificate = certificateRequest.Value;
+            }
 
             if (!CanEditRecords && StaffId != staffIdClaim)
             {
                 // User is not the staff member listed on the record and does not have permission to edit records
-                return RedirectToPage("Index");
+                Error = new ErrorDisplay
+                {
+                    Error = DomainErrors.Permissions.Unauthorised,
+                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Index", values: new { area = "SchoolAdmin" })
+                };
+
+                return Page();
             }
         }
 
@@ -146,14 +184,14 @@ public class UpsertModel : BasePageModel
         if (Mode == ModeOptions.SOLOMODULE)
         {
             SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == ModuleId.Value);
-            TrainingModuleId = SoloModule.Key;
+            ModuleId = SoloModule.Key;
         }
 
         // Edit only mode allowing staff to upload certificate for existing records
         if (Mode == ModeOptions.CERTUPLOAD)
         {
             SoloStaffMember = StaffOptions.FirstOrDefault(member => member.Key == StaffId);
-            SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == TrainingModuleId.Value);
+            SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == ModuleId.Value);
         }
     }
 
@@ -162,7 +200,15 @@ public class UpsertModel : BasePageModel
         if (FormFile is not null)
         {
             var staffMember = await _mediator.Send(new GetStaffMemberNameByIdQuery { StaffId = StaffId });
-            var trainingModule = await _mediator.Send(new GetTrainingModuleEditContextQuery { Id = TrainingModuleId.Value });
+
+            var moduleRequest = await _mediator.Send(new GetTrainingModuleEditContextQuery(TrainingModuleId.FromValue(ModuleId.Value)));
+            
+            if (moduleRequest.IsFailure)
+            {
+                return null;
+            }
+
+            var trainingModule = moduleRequest.Value;
 
             var file = new FileDto
             {
@@ -178,7 +224,7 @@ public class UpsertModel : BasePageModel
             }
             catch (Exception ex)
             {
-                // Error uploading file
+                return null;
             }
 
             return file;
@@ -190,11 +236,11 @@ public class UpsertModel : BasePageModel
     public async Task<IActionResult> OnPostUpdate()
     {
         // Check if the Module allows not required if the not required has been selected.
-        if (TrainingModuleId is not null && NotRequired)
+        if (ModuleId is not null && NotRequired)
         {
-            var canSetNotRequired = await _mediator.Send(new DoesModuleAllowNotRequiredResponseQuery(TrainingModuleId.Value));
+            var notRequiredRequest = await _mediator.Send(new DoesModuleAllowNotRequiredResponseQuery(TrainingModuleId.FromValue(ModuleId.Value)));
 
-            if (!canSetNotRequired)
+            if (notRequiredRequest.IsFailure || notRequiredRequest.Value == false)
             {
                 ModelState.AddModelError("NotRequired", "This Training Module does not allow Not Required responses.");
             }
@@ -212,9 +258,9 @@ public class UpsertModel : BasePageModel
             // Update existing entry
 
             var command = new UpdateTrainingCompletionCommand(
-                Id.Value,
+                TrainingCompletionId.FromValue(Id.Value),
                 StaffId,
-                TrainingModuleId.Value,
+                TrainingModuleId.FromValue(ModuleId.Value),
                 CompletedDate,
                 NotRequired,
                 await GetUploadedFile());
@@ -227,7 +273,7 @@ public class UpsertModel : BasePageModel
 
             var command = new CreateTrainingCompletionCommand(
                 StaffId,
-                TrainingModuleId.Value,
+                TrainingModuleId.FromValue(ModuleId.Value),
                 CompletedDate,
                 NotRequired,
                 await GetUploadedFile());

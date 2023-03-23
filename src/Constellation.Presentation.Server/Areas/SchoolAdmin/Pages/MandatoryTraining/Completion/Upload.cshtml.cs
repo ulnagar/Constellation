@@ -1,22 +1,27 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
 
-using Constellation.Application.Features.MandatoryTraining.Commands;
+using Constellation.Application.MandatoryTraining.ProcessTrainingImportFile;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Validation;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 [Authorize(Policy = AuthPolicies.CanEditTrainingModuleContent)]
 [RequestSizeLimit(10485760)]
 public class UploadModel : BasePageModel
 {
     private readonly IMediator _mediator;
+    private readonly LinkGenerator _linkGenerator;
 
-    public UploadModel(IMediator mediator)
+    public UploadModel(
+        IMediator mediator,
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
+        _linkGenerator = linkGenerator;
     }
 
     [BindProperty]
@@ -37,12 +42,28 @@ public class UploadModel : BasePageModel
                 await using var target = new MemoryStream();
                 await UploadFile.CopyToAsync(target);
 
-                await _mediator.Send(new ProcessTrainingImportFileCommand(target));   
+                var request = await _mediator.Send(new ProcessTrainingImportFileCommand(target));
+
+                if (request.IsFailure)
+                {
+                    Error = new ErrorDisplay
+                    {
+                        Error = request.Error,
+                        RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Upload", values: new { area = "SchoolAdmin" })
+                    };
+
+                    return Page();
+                }
             }
             catch (Exception ex)
             {
-                // Error uploading file
-                throw;
+                Error = new ErrorDisplay
+                {
+                    Error = new(ex.Source, ex.Message),
+                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Upload", values: new { area = "SchoolAdmin" })
+                };
+
+                return Page();
             }
         }
 

@@ -1,14 +1,10 @@
-﻿using Constellation.Application.Features.MandatoryTraining.Queries;
-using Constellation.Application.Interfaces.Repositories;
+﻿using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.MandatoryTraining.GetCountOfExpiringCertificatesForStaffMember;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Home.Pages
 {
@@ -63,7 +59,17 @@ namespace Constellation.Presentation.Server.Areas.Home.Pages
 
             if (teacher == null) return Page();
 
-            ExpiringTraining = await _mediator.Send(new GetCountOfExpiringCertificatesForStaffMemberQuery(teacher.StaffId));
+            var trainingExpiringSoonRequest = await _mediator.Send(new GetCountOfExpiringCertificatesForStaffMemberQuery(teacher.StaffId));
+
+            if (trainingExpiringSoonRequest.IsSuccess)
+            {
+                ExpiringTraining = trainingExpiringSoonRequest.Value;
+            } 
+            else
+            {
+                ExpiringTraining = 0;
+            }
+
             StaffId = teacher.StaffId;
 
             UserName = teacher.DisplayName;

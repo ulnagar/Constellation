@@ -40,18 +40,18 @@
         </div>
 
         <div class="form-group row">
-            <label asp-for="TrainingModuleId" class="col-md-2">Training Module</label>
+            <label asp-for="ModuleId" class="col-md-2">Training Module</label>
             <div class="col-md-8">
                 @if (Model.Mode == UpsertModel.ModeOptions.SOLOMODULE || Model.Mode == UpsertModel.ModeOptions.CERTUPLOAD)
                 {
-                    <input type="hidden" asp-for="TrainingModuleId" />
+                    <input type="hidden" asp-for="ModuleId" />
                     <input type="text" class="form-control" readonly="readonly" value="@Model.SoloModule.Value" />
                 } else
                 {
-                    <select asp-for="TrainingModuleId" asp-items="@(new SelectList(Model.ModuleOptions, "Key", "Value"))" class="form-control combo custom-select">
+                    <select asp-for="ModuleId" asp-items="@(new SelectList(Model.ModuleOptions, "Key", "Value"))" class="form-control combo custom-select">
                         <option selected="selected" value=""> -- Please Select -- </option>
                     </select>
-                    <span asp-validation-for="TrainingModuleId" class="text-danger"></span>
+                    <span asp-validation-for="ModuleId" class="text-danger"></span>
                 }
             </div>
         </div>

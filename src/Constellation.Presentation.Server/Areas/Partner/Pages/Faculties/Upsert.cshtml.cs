@@ -1,19 +1,13 @@
 namespace Constellation.Presentation.Server.Areas.Partner.Pages.Faculties;
 
+using Constellation.Application.Features.Faculties.Commands;
 using Constellation.Application.Features.Faculties.Queries;
-using Constellation.Application.Features.MandatoryTraining.Commands;
-using Constellation.Application.Features.MandatoryTraining.Queries;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Models.MandatoryTraining;
-using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using static Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion.UpsertModel;
-using System.Reflection;
-using Constellation.Application.Features.Faculties.Commands;
 
 [Authorize(Policy = AuthPolicies.CanEditFaculties)]
 public class UpsertModel : BasePageModel

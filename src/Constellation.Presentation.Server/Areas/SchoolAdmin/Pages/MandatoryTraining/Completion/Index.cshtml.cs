@@ -1,9 +1,10 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
 
-using Constellation.Application.Features.MandatoryTraining.Commands;
-using Constellation.Application.Features.MandatoryTraining.Queries;
+using Constellation.Application.MandatoryTraining.GenerateStaffReport;
+using Constellation.Application.MandatoryTraining.GetListOfCompletionRecords;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Errors;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.StaffTrainingReport;
 using MediatR;
@@ -17,11 +18,16 @@ public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly IAuthorizationService _authorizationService;
+    private readonly LinkGenerator _linkGenerator;
 
-    public IndexModel(IMediator mediator, IAuthorizationService authorizationService)
+    public IndexModel(
+        IMediator mediator, 
+        IAuthorizationService authorizationService,
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
         _authorizationService = authorizationService;
+        _linkGenerator = linkGenerator;
     }
 
     public List<CompletionRecordDto> CompletionRecords { get; set; } = new();
@@ -39,7 +45,20 @@ public class IndexModel : BasePageModel
         // If user does not have details view permissions, only show their own records
         if (User.HasClaim(claim => claim.Type == AuthClaimType.Permission && claim.Value == AuthPermissions.MandatoryTrainingDetailsView))
         {
-            CompletionRecords = await _mediator.Send(new GetListOfCompletionRecordsQuery());
+            var recordsRequest = await _mediator.Send(new GetListOfCompletionRecordsQuery(null));
+
+            if (recordsRequest.IsFailure)
+            {
+                Error = new ErrorDisplay
+                {
+                    Error = recordsRequest.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
+                };
+
+                return Page();
+            }
+
+            CompletionRecords = recordsRequest.Value;
         }
         else
         {
@@ -75,27 +94,42 @@ public class IndexModel : BasePageModel
     {
         var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
 
-        //TODO: Show error explaining why this did not work!
         if (!isAuthorised.Succeeded)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = DomainErrors.Permissions.Unauthorised,
+                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
+            };
+
             return Page();
+        }
 
         if (string.IsNullOrWhiteSpace(Report.StaffId))
         {
+            Error = new ErrorDisplay
+            {
+                Error = DomainErrors.Partners.Student.NotFound(""),
+                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
+            };
+
             return Page();
         }
 
-        ReportDto report;
+        var reportRequest = await _mediator.Send(new GenerateStaffReportCommand(Report.StaffId, Report.IncludeCertificates));
 
-        if (Report.IncludeCertificates)
+        if (reportRequest.IsFailure)
         {
-            report = await _mediator.Send(new GenerateStaffReportWithCertificatesCommand(Report.StaffId));
-        } 
-        else
-        {
-            report = await _mediator.Send(new GenerateStaffReportCommand(Report.StaffId));
+            Error = new ErrorDisplay
+            {
+                Error = reportRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
+            };
+
+            return Page();
         }
 
-        return File(report.FileData, report.FileType, report.FileName);
+        return File(reportRequest.Value.FileData, reportRequest.Value.FileType, reportRequest.Value.FileName);
     }
 
     public enum FilterDto

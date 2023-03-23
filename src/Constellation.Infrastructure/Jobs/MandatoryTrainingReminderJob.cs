@@ -5,7 +5,7 @@ using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.Models;
-using Microsoft.EntityFrameworkCore;
+using Constellation.Core.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +14,29 @@ using System.Threading.Tasks;
 
 public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
 {
-    private readonly IAppDbContext _context;
+    private readonly ITrainingModuleRepository _trainingModuleRepository;
+    private readonly IStaffRepository _staffRepository;
+    private readonly IFacultyRepository _facultyRepository;
+    private readonly ISchoolRepository _schoolRepository;
+    private readonly ISchoolContactRepository _schoolContactRepository;
+    private readonly ITrainingCompletionRepository _trainingCompletionRepository;
     private readonly IEmailService _emailService;
 
-    public MandatoryTrainingReminderJob(IAppDbContext context, IEmailService emailService)
+    public MandatoryTrainingReminderJob(
+        ITrainingModuleRepository trainingModuleRepository,
+        IStaffRepository staffRepository,
+        IFacultyRepository facultyRepository,
+        ISchoolRepository schoolRepository,
+        ISchoolContactRepository schoolContactRepository,
+        ITrainingCompletionRepository trainingCompletionRepository,
+        IEmailService emailService)
     {
-        _context = context;
+        _trainingModuleRepository = trainingModuleRepository;
+        _staffRepository = staffRepository;
+        _facultyRepository = facultyRepository;
+        _schoolRepository = schoolRepository;
+        _schoolContactRepository = schoolContactRepository;
+        _trainingCompletionRepository = trainingCompletionRepository;
         _emailService = emailService;
     }
 
@@ -30,28 +47,13 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
         // Get the list of overdue completions
 
         // - Get all modules
-        var modules = await _context.MandatoryTraining.Modules
-            .Where(module => !module.IsDeleted)
-            //.AsNoTracking()
-            .ToListAsync(token);
+        var modules = await _trainingModuleRepository.GetCurrentModules(token);
 
         // - Get all staff
-        var staff = await _context.Staff
-            .Include(staff => staff.Faculties)
-            .ThenInclude(member => member.Faculty)
-            .ThenInclude(faculty => faculty.Members)
-            .Include(staff => staff.School)
-            .ThenInclude(school => school.StaffAssignments)
-            .ThenInclude(role => role.SchoolContact)
-            .Where(staff => !staff.IsDeleted)
-            //.AsNoTracking()
-            .ToListAsync(token);
+        var staff = await _staffRepository.GetAllActive(token);
 
         // - Get all completions
-        var records = await _context.MandatoryTraining.CompletionRecords
-            .Where(record => !record.IsDeleted)
-            //.AsNoTracking()
-            .ToListAsync(token);
+        var records = await _trainingCompletionRepository.GetAllCurrent(token);
 
         // - Build a collection of completions by each staff member for each module
         foreach (var record in records)
@@ -59,9 +61,43 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
             var entry = new CompletionRecordExtendedDetailsDto();
             entry.AddRecordDetails(record);
 
-            entry.AddModuleDetails(record.Module);
+            var module = modules.FirstOrDefault(module => module.Id == record.TrainingModuleId);
 
-            entry.AddStaffDetails(record.Staff);
+            if (module is not null)
+                entry.AddModuleDetails(module);
+
+            var staffMember = staff.FirstOrDefault(staffMember => staffMember.StaffId == record.StaffId);
+
+            if (staffMember is not null)
+            {
+                entry.AddStaffDetails(staffMember);
+
+                var faculties = await _facultyRepository.GetCurrentForStaffMember(staffMember.StaffId, token);
+
+                foreach (var faculty in faculties)
+                {
+                    var headTeachers = faculty
+                        .Members
+                        .Where(member =>
+                            !member.IsDeleted &&
+                            member.Role == Core.Enums.FacultyMembershipRole.Manager)
+                        .Select(member => member.Staff)
+                        .ToList();
+
+                    foreach (var headTeacher in headTeachers)
+                    {
+                        entry.AddHeadTeacherDetails(faculty, headTeacher);
+                    }
+                }
+
+                var school = await _schoolRepository.GetById(staffMember.SchoolCode, token);
+                var principals = await _schoolContactRepository.GetPrincipalsForSchool(staffMember.SchoolCode, token);
+
+                foreach (var principal in principals)
+                {
+                    entry.AddPrincipalDetails(principal, school);
+                }
+            }
 
             detailedRecords.Add(entry);
         }
@@ -82,6 +118,32 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
                 var staffMember = staff.First(member => member.StaffId == staffId);
                 entry.AddStaffDetails(staffMember);
 
+                var faculties = await _facultyRepository.GetCurrentForStaffMember(staffMember.StaffId, token);
+
+                foreach (var faculty in faculties)
+                {
+                    var headTeachers = faculty
+                        .Members
+                        .Where(member =>
+                            !member.IsDeleted &&
+                            member.Role == Core.Enums.FacultyMembershipRole.Manager)
+                        .Select(member => member.Staff)
+                        .ToList();
+
+                    foreach (var headTeacher in headTeachers)
+                    {
+                        entry.AddHeadTeacherDetails(faculty, headTeacher);
+                    }
+                }
+
+                var school = await _schoolRepository.GetById(staffMember.SchoolCode, token);
+                var principals = await _schoolContactRepository.GetPrincipalsForSchool(staffMember.SchoolCode, token);
+
+                foreach (var principal in principals)
+                {
+                    entry.AddPrincipalDetails(principal, school);
+                }
+
                 entry.RecordEffectiveDate = DateTime.MinValue;
                 entry.RecordNotRequired = false;
 
@@ -89,7 +151,7 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
             }
         }
 
-        // - Remove all superceded entries
+        // - Find only most recent entries
         foreach (var record in detailedRecords)
         {
             var duplicates = detailedRecords.Where(entry =>
