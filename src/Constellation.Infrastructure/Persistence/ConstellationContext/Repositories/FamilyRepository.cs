@@ -14,6 +14,15 @@ internal sealed class FamilyRepository : IFamilyRepository
         _context = context;
     }
 
+    public async Task<List<Family>> GetAllCurrent(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Family>()
+            .Include(family => family.Parents)
+            .Include(family => family.Students)
+            .Where(family => !family.IsDeleted)
+            .ToListAsync(cancellationToken);
+
     public async Task<Family?> GetFamilyBySentralId(
         string SentralId,
         CancellationToken cancellationToken = default) =>

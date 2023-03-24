@@ -53,13 +53,15 @@ public sealed class Parent
         EmailAddress emailAddress,
         SentralReference sentralLink = SentralReference.None)
     {
+        var number = (mobileNumber is not null ? mobileNumber.ToString(PhoneNumber.Format.None) : string.Empty);
+
         return new Parent(
             id,
             familyId,
             title,
             firstName,
             lastName,
-            mobileNumber.ToString(PhoneNumber.Format.None),
+            number,
             emailAddress.Email,
             sentralLink);
     }
@@ -75,7 +77,12 @@ public sealed class Parent
         Title = title;
         FirstName = firstName;
         LastName = lastName;
-        MobileNumber = mobileNumber.ToString(PhoneNumber.Format.None);
+
+        if (mobileNumber is not null)
+            MobileNumber = mobileNumber.ToString(PhoneNumber.Format.None);
+        else
+            MobileNumber = string.Empty;
+
         EmailAddress = emailAddress.Email;
         SentralLink = sentralLink;
     }

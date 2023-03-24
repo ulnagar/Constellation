@@ -1,0 +1,70 @@
+﻿@page
+@using Constellation.Core.Models.Families;
+@model Constellation.Presentation.Server.Areas.Partner.Pages.Families.IndexModel
+
+<h2>Family Contacts</h2>
+
+<hr />
+
+<table class="table table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th></th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Students</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.Contacts)
+        {
+            <tr>
+                <td>
+                    @if (entry.IsResidentialContact)
+                    {
+                        <i class="fal fa-house" />
+                    }
+                </td>
+                <td>
+                    @if (entry.ContactType == Parent.SentralReference.Father)
+                    {
+                        <i class="fal fa-male" />
+                    }
+
+                    @if (entry.ContactType == Parent.SentralReference.Mother)
+                    {
+                        <i class="fal fa-female" />
+                    }
+
+                    @if (entry.ContactType == Parent.SentralReference.Other)
+                    {
+                        <i class="fal fa-house-leave" />
+                    }
+                </td>
+                <td>@entry.Name</td>
+                <td>@entry.EmailAddress?.Email</td>
+                <td><span class="no-break">@entry.MobileNumber?.ToString()</span></td>
+                <td>
+                    <ul>
+                        @foreach (var student in entry.Students)
+                        {
+                            <li>@student</li>
+                        }
+                    </ul>
+                </td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                        <div class="dropdown-menu">
+                            <a href="#" class="dropdown-item">Edit</a>
+                            <a href="#" class="dropdown-item">Cancel</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

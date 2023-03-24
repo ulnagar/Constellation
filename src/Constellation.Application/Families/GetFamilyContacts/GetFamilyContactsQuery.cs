@@ -4,6 +4,5 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Families.Models;
 using System.Collections.Generic;
 
-public sealed record GetFamilyContactsForStudentQuery(
-    string StudentId)
+public sealed record GetFamilyContactsQuery()
     : IQuery<List<FamilyContactResponse>>;

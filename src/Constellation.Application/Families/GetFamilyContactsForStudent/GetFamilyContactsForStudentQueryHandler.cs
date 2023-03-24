@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Families.GetFamilyContactsForStudent;
 
 using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Families.Models;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Families;
@@ -43,10 +44,11 @@ internal sealed class GetFamilyContactsForStudentQueryHandler
                 isResidentialFamily,
                 Parent.SentralReference.Other,
                 family.FamilyTitle,
-                familyEmail.Value,
+                familyEmail.IsSuccess ? familyEmail.Value : null,
                 null,
                 null,
-                family.Id));
+                family.Id,
+                new()));
 
             foreach (var parent in family.Parents)
             {
@@ -60,7 +62,8 @@ internal sealed class GetFamilyContactsForStudentQueryHandler
                     parentEmail.Value,
                     parentMobile.Value,
                     parent.Id,
-                    family.Id));
+                    family.Id,
+                    new()));
             }
         }
 

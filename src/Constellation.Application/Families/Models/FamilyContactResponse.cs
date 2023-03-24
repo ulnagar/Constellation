@@ -1,9 +1,10 @@
 ﻿#nullable enable
-namespace Constellation.Application.Families.GetFamilyContactsForStudent;
+namespace Constellation.Application.Families.Models;
 
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.ValueObjects;
+using System.Collections.Generic;
 
 public sealed record FamilyContactResponse(
     bool IsResidentialContact,
@@ -12,4 +13,5 @@ public sealed record FamilyContactResponse(
     EmailAddress? EmailAddress,
     PhoneNumber? MobileNumber,
     ParentId? ParentId,
-    FamilyId? FamilyId);
+    FamilyId? FamilyId,
+    List<string> Students);

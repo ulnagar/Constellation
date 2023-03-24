@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 public interface IFamilyRepository
 {
+    Task<List<Family>> GetAllCurrent(CancellationToken cancellationToken = default);
     Task<Family?> GetFamilyBySentralId(string SentralId, CancellationToken cancellationToken = default);
     Task<Family?> GetFamilyById(FamilyId Id, CancellationToken cancellationToken = default);
     Task<List<Family>> GetFamiliesByStudentId(string studentId, CancellationToken cancellationToken = default);

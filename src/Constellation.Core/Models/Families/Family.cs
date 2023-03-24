@@ -114,14 +114,23 @@ public sealed class Family : AggregateRoot, IAuditableEntity
             return Result.Failure<Parent>(parentEmail.Error);
         }
 
+        var emptyMobile = string.IsNullOrWhiteSpace(mobileNumber);
         var parentMobile = PhoneNumber.Create(mobileNumber);
 
         if (parentMobile.IsFailure)
         {
-            return Result.Failure<Parent>(parentMobile.Error);
+            emptyMobile = true;
         }
 
-        var existingParent = _parents.FirstOrDefault(parent => parent.EmailAddress == parentEmail.Value.Email);
+        // If the new parent definition includes a SentralLink value that is not NONE (i.e. not non-residential)
+        // use that to determine if there is an existing entry.
+        // Otherwise, use the email address
+        var existingParent = sentralLink switch
+        {
+            Parent.SentralReference.Mother => _parents.FirstOrDefault(parent => parent.SentralLink == sentralLink),
+            Parent.SentralReference.Father => _parents.FirstOrDefault(parent => parent.SentralLink == sentralLink),
+            _ => _parents.FirstOrDefault(parent => parent.EmailAddress == parentEmail.Value.Email)
+        };
 
         if (existingParent is null)
         {
@@ -131,7 +140,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
                 title,
                 firstName,
                 lastName,
-                parentMobile.Value,
+                emptyMobile ? null : parentMobile.Value,
                 parentEmail.Value,
                 sentralLink);
 
@@ -146,7 +155,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
             title,
             firstName,
             lastName,
-            parentMobile.Value,
+            emptyMobile ? null : parentMobile.Value,
             parentEmail.Value,
             sentralLink);
 
