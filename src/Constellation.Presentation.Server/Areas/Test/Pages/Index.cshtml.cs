@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Constellation.Application.ExternalDataConsistency;
+using Constellation.Application.Interfaces.Jobs;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -8,11 +9,14 @@ using Microsoft.AspNetCore.Mvc;
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
+    private readonly ISentralFamilyDetailsSyncJob _familySyncJob;
 
     public IndexModel(
-        IMediator mediator)
+        IMediator mediator,
+        ISentralFamilyDetailsSyncJob familySyncJob)
     {
         _mediator = mediator;
+        _familySyncJob = familySyncJob;
     }
 
     [BindProperty]
@@ -25,6 +29,11 @@ public class IndexModel : BasePageModel
     public async Task OnGetAsync()
     {
         await GetClasses(_mediator);
+    }
+
+    public async Task OnGetFamilyUpdate(CancellationToken cancellationToken = default)
+    {
+        await _familySyncJob.StartJob(Guid.NewGuid(), cancellationToken);
     }
 
     public async Task<IActionResult> OnPostCheckFile()

@@ -63,12 +63,12 @@ public sealed class PhoneNumber : ValueObject
     {
         if (format == Format.Mobile)
         {
-            return $"{Number[..4]} {Number[5..7]} {Number[8..10]}";
+            return $"{Number[..4]} {Number[4..7]} {Number[7..10]}";
         }
 
         if (format == Format.LandLine)
         {
-            return $"({Number[..2]}) {Number[3..6]} {Number[7..10]}";
+            return $"({Number[..2]}) {Number[2..6]} {Number[6..10]}";
         }
 
         return Number;

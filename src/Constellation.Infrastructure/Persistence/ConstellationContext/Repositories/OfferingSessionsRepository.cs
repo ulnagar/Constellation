@@ -39,6 +39,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             CancellationToken cancellationToken = default) =>
             await _context
                 .Set<OfferingSession>()
+                .Include(session => session.Period)
                 .Where(session => 
                     session.OfferingId == offeringId && 
                     !session.IsDeleted)

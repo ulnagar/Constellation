@@ -68,16 +68,21 @@ public class StaffRepository : IStaffRepository
         int offeringId,
         CancellationToken cancellationToken = default)
     {
-        var groupedTeachers = await _context
-            .Set<Staff>()
-            .Where(teacher => teacher.CourseSessions.Any(session => session.OfferingId == offeringId && !session.IsDeleted))
-            .Select(teacher => new { Teacher = teacher, Frequency = teacher.CourseSessions.Count(session => session.OfferingId == offeringId && !session.IsDeleted) })
-            .GroupBy(entry => entry.Frequency)
-            .OrderByDescending(entry => entry.Key)
-            .FirstOrDefaultAsync(cancellationToken);
+        var teachers = await _context
+            .Set<OfferingSession>()
+            .Where(session => session.OfferingId == offeringId && !session.IsDeleted)
+            .Select(session => session.Teacher)
+            .ToListAsync(cancellationToken);
+
+        var groupedTeachers = teachers
+            .GroupBy(teacher => teachers.Count(entry => entry == teacher))
+            .OrderByDescending(entry => entry.Key);
+
+        var maxSessions = groupedTeachers.First().Key;
 
         return groupedTeachers
-            .Select(group => group.Teacher)
+            .Where(entry => entry.Key == maxSessions)
+            .Select(entry => entry.First())
             .ToList();
     }
 
