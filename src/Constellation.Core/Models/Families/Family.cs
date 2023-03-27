@@ -39,7 +39,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
     public DateTime CreatedAt { get; set; }
     public string ModifiedBy { get; set; } = string.Empty;
     public DateTime ModifiedAt { get; set; }
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get; private set; }
     public string DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; }
 
@@ -63,15 +63,18 @@ public sealed class Family : AggregateRoot, IAuditableEntity
     }
 
     public Result UpdateFamilyAddress(
+        string title,
         string line1,
         string line2,
         string town,
         string postcode)
     {
-        if (!string.IsNullOrWhiteSpace(line1) &&
+        if (!string.IsNullOrWhiteSpace(title) &&
+            !string.IsNullOrWhiteSpace(line1) &&
             !string.IsNullOrWhiteSpace(town) &&
             !string.IsNullOrWhiteSpace(postcode))
         {
+            FamilyTitle = title;
             AddressLine1 = line1;
             AddressLine2 = line2;
             AddressTown = town;
@@ -80,7 +83,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
             return Result.Success();
         }
 
-        return Result.Failure(DomainErrors.Family.Address.InvalidAddress);
+        return Result.Failure(DomainErrors.Families.Family.InvalidAddress);
     }
 
     public Result UpdateFamilyEmail(string email)
@@ -114,23 +117,14 @@ public sealed class Family : AggregateRoot, IAuditableEntity
             return Result.Failure<Parent>(parentEmail.Error);
         }
 
-        var emptyMobile = string.IsNullOrWhiteSpace(mobileNumber);
         var parentMobile = PhoneNumber.Create(mobileNumber);
 
         if (parentMobile.IsFailure)
         {
-            emptyMobile = true;
+            return Result.Failure<Parent>(parentMobile.Error);
         }
 
-        // If the new parent definition includes a SentralLink value that is not NONE (i.e. not non-residential)
-        // use that to determine if there is an existing entry.
-        // Otherwise, use the email address
-        var existingParent = sentralLink switch
-        {
-            Parent.SentralReference.Mother => _parents.FirstOrDefault(parent => parent.SentralLink == sentralLink),
-            Parent.SentralReference.Father => _parents.FirstOrDefault(parent => parent.SentralLink == sentralLink),
-            _ => _parents.FirstOrDefault(parent => parent.EmailAddress == parentEmail.Value.Email)
-        };
+        var existingParent = _parents.FirstOrDefault(parent => parent.EmailAddress == parentEmail.Value.Email);
 
         if (existingParent is null)
         {
@@ -140,7 +134,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
                 title,
                 firstName,
                 lastName,
-                emptyMobile ? null : parentMobile.Value,
+                parentMobile.Value,
                 parentEmail.Value,
                 sentralLink);
 
@@ -155,7 +149,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
             title,
             firstName,
             lastName,
-            emptyMobile ? null : parentMobile.Value,
+            parentMobile.Value,
             parentEmail.Value,
             sentralLink);
 
@@ -217,5 +211,20 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         RaiseDomainEvent(new StudentRemovedFromFamilyDomainEvent(new DomainEventId(Guid.NewGuid()), existingMembership));
 
         return Result.Success();
+    }
+
+    public void Delete()
+    {
+        IsDeleted = true;
+
+        foreach (var parent in Parents)
+        {
+            RemoveParent(parent);
+        }
+
+        foreach (var student in Students)
+        {
+            RemoveStudent(student.StudentId);
+        }
     }
 }

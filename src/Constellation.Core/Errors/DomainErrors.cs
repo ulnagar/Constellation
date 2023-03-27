@@ -61,23 +61,34 @@ public static class DomainErrors
         }
     }
 
-    public static class Family
+    public static class Families
     {
-        public static class Address
+        public static class Family
         {
+            public static readonly Func<FamilyId, Error> NotFound = id => new(
+                "Families.Family.NotFound",
+                $"Could not find a family with Id {id}");
+
             public static readonly Error InvalidAddress = new(
-                "Family.Address.InvalidAddress",
+                "Families.Address.InvalidAddress",
                 "The Address supplied is incomplete or invalid");
+        }
+
+        public static class Parents
+        {
+            public static readonly Func<ParentId, FamilyId, Error> NotFoundInFamily = (parentId, familyId) => new(
+                "Families.Parent.NotFoundInFamily",
+                $"Could not find a parent with Id {parentId} in the family with Id {familyId}");
         }
 
         public static class Students
         {
             public static readonly Error NoLinkedFamilies = new(
-                "Family.Students.NoLinkedFamilies",
+                "Families.Students.NoLinkedFamilies",
                 "The student does not have any linked families in the database");
 
             public static readonly Error NoResidentialFamily = new(
-                "Family.Students.NoResidentialFamily",
+                "Families.Students.NoResidentialFamily",
                 "The student does not have any linked family marked as the residential family");
         }
     }

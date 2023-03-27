@@ -2,6 +2,12 @@
 @using Constellation.Core.Models.Families;
 @model Constellation.Presentation.Server.Areas.Partner.Pages.Families.IndexModel
 
+@inject IAuthorizationService authorizationService
+
+@{
+    var canEditStudents = await authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+}
+
 <h2>Family Contacts</h2>
 
 <hr />
@@ -56,15 +62,65 @@
                     </ul>
                 </td>
                 <td>
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
-                        <div class="dropdown-menu">
-                            <a href="#" class="dropdown-item">Edit</a>
-                            <a href="#" class="dropdown-item">Cancel</a>
+                    @if (canEditStudents.Succeeded) //&& !entry.IsResidentialContact)
+                    {
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                            <div class="dropdown-menu">
+                                @if(entry.ContactType == Parent.SentralReference.Other)
+                                {
+                                    <a asp-page="/Families/EditFamily" asp-route-Id="@entry.FamilyId.Value.ToString()" class="dropdown-item">Edit</a>
+                                    <a href="#" data-family-id="@entry.FamilyId.Value.ToString()" class="dropdown-item delete-family-menu">Delete</a>
+                                }
+                                else
+                                {
+                                    <a href="#" data-family-id="@entry.FamilyId.Value.ToString()" data-parent-id="@entry.ParentId?.Value.ToString()" class="dropdown-item delete-parent-menu">Delete</a>
+                                }
+                            </div>
                         </div>
-                    </div>
+                    }
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $('.delete-parent-menu').click(function(event) {
+            event.preventDefault();
+
+            var familyId = $(this).data("familyId");
+            var parentId = $(this).data("parentId");
+
+            $('#modal-content').load("@Url.Action("GetFamilyDeleteContent", "Families", new { area = "Partner"})", {
+                familyId: familyId,
+                parentId: parentId
+            });
+
+            $('#page-modal').modal('show');
+        });
+
+        $('.delete-family-menu').click(function (event) {
+            event.preventDefault();
+
+            var familyId = $(this).data("familyId");
+
+            $('#modal-content').load("@Url.Action("GetFamilyDeleteConfirmation", "Families", new { area = "Partner"})", {
+                familyId: familyId
+            });
+
+            $('#page-modal').modal('show');
+        });
+    </script>
+
+}

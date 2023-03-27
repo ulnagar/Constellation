@@ -31,7 +31,7 @@ internal sealed class GetFamilyContactsForStudentQueryHandler
 
         if (families is null || !families.Any())
         {
-            return Result.Failure<List<FamilyContactResponse>>(DomainErrors.Family.Students.NoLinkedFamilies);
+            return Result.Failure<List<FamilyContactResponse>>(DomainErrors.Families.Students.NoLinkedFamilies);
         }
 
         foreach (var family in families)
@@ -44,11 +44,11 @@ internal sealed class GetFamilyContactsForStudentQueryHandler
                 isResidentialFamily,
                 Parent.SentralReference.Other,
                 family.FamilyTitle,
-                familyEmail.IsSuccess ? familyEmail.Value : null,
+                familyEmail.Value,
                 null,
                 null,
                 family.Id,
-                new()));
+                null));
 
             foreach (var parent in family.Parents)
             {
@@ -63,7 +63,7 @@ internal sealed class GetFamilyContactsForStudentQueryHandler
                     parentMobile.Value,
                     parent.Id,
                     family.Id,
-                    new()));
+                    null));
             }
         }
 

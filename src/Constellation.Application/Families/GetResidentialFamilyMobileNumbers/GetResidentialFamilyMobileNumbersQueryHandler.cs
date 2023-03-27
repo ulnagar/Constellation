@@ -39,7 +39,7 @@ public class GetResidentialFamilyMobileNumbersQueryHandler
         {
             _logger.Warning("Could not find any families associated with student id {id}.", request.StudentId);
 
-            return Result.Failure<List<PhoneNumber>>(DomainErrors.Family.Students.NoLinkedFamilies);
+            return Result.Failure<List<PhoneNumber>>(DomainErrors.Families.Students.NoLinkedFamilies);
         }
 
         var residentialFamily = studentFamilies.FirstOrDefault(family =>
@@ -51,7 +51,7 @@ public class GetResidentialFamilyMobileNumbersQueryHandler
         {
             _logger.Warning("Could not find a residential family associated with student id {id}.", request.StudentId);
 
-            return Result.Failure<List<PhoneNumber>>(DomainErrors.Family.Students.NoResidentialFamily);
+            return Result.Failure<List<PhoneNumber>>(DomainErrors.Families.Students.NoResidentialFamily);
         }
 
         var mother = residentialFamily

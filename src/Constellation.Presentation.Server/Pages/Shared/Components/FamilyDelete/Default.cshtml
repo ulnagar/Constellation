@@ -1,0 +1,42 @@
+﻿@model FamilyDeleteSelection
+
+<div class="modal fade" tabindex="-1" id="familyDelete">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Family</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group col">
+                        <span class="control-label">Do you want to delete the entire family, or just this parent?</span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-6">
+                        <span class="control-label">Family Includes:</span>
+                        <ul>
+                            <li>@Model.ParentName</li>
+                            @foreach (var parent in Model.OtherParentNames)
+                            {
+                                <li>@parent</li>
+                            }
+                        </ul>
+                        <a asp-page-handler="DeleteFamily" asp-route-Id="@Model.FamilyId" class="btn btn-block btn-danger">Delete Family</a>
+                    </div>
+                    <div class="form-group col-6">
+                        <span class="control-label">Single Parent:</span>
+                        <ul>
+                            <li>@Model.ParentName</li>
+                        </ul>
+                        <a asp-page-handler="DeleteParent" asp-route-Id="@Model.ParentId" class="btn btn-block btn-danger">Delete Parent</a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

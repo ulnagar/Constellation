@@ -79,6 +79,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                 entry = Family.Create(new FamilyId(), family.AddressName);
                 entry.LinkFamilyToSentralDetails(family.FamilyId);
                 entry.UpdateFamilyAddress(
+                    family.AddressName,
                     family.AddressLine1,
                     family.AddressLine2,
                     family.AddressTown,
@@ -177,6 +178,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
                 _logger.Information("{id}: Found existing entry for {family} ({code}). Updating details.", jobId, family.AddressName, family.FamilyId);
 
                 entry.UpdateFamilyAddress(
+                    family.AddressName,
                     family.AddressLine1,
                     family.AddressLine2,
                     family.AddressTown,
