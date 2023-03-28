@@ -30,4 +30,9 @@ internal sealed class ParentRepository : IParentRepository
             .Where(parent => familyIds.Contains(parent.FamilyId))
             .ToListAsync(cancellationToken);
     }
+
+    public void Remove(Parent parent)
+    {
+        _dbContext.Remove(parent);
+    }
 }

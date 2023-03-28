@@ -3,6 +3,7 @@
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class FamilyRepository : IFamilyRepository
@@ -13,6 +14,13 @@ internal sealed class FamilyRepository : IFamilyRepository
     {
         _context = context;
     }
+
+    public async Task<bool> GetFamilyByEmail(
+        EmailAddress email,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Family>()
+            .AnyAsync(family => family.FamilyEmail == email.Email, cancellationToken);
 
     public async Task<List<Family>> GetAllCurrent(
         CancellationToken cancellationToken = default) =>

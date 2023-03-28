@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Families.GetFamilyContacts;
 
 using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Extensions;
 using Constellation.Application.Families.GetFamilyContactsForStudent;
 using Constellation.Application.Families.Models;
 using Constellation.Application.Interfaces.Repositories;
@@ -43,7 +44,7 @@ internal sealed class GetFamilyContactsQueryHandler
 
             var students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
 
-            var studentNames = students.Select(student => student.DisplayName).ToList();
+            var studentNames = students.OrderBy(student => student.CurrentGrade).Select(student => $"{student.DisplayName} (Y{student.CurrentGrade.AsNumber()})").ToList();
 
             contacts.Add(new(
                 isResidentialFamily,

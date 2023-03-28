@@ -3,8 +3,8 @@
 using Constellation.Application.Families.GetFamilyById;
 using Constellation.Application.Families.Models;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Presentation.Server.Areas.Partner.Models.Families;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Pages.Shared.Components.FamilyDelete;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,42 +12,19 @@ using Microsoft.AspNetCore.Mvc;
 public class FamiliesController : BaseController
 {
     private readonly IMediator _mediator;
+    private readonly LinkGenerator _linkGenerator;
 
-    public FamiliesController(IMediator mediator) 
+    public FamiliesController(
+        IMediator mediator,
+        LinkGenerator linkGenerator) 
         : base(mediator)
     {
         _mediator = mediator;
-    }
-
-    [HttpPost("DeleteFamily")]
-    public async Task<IActionResult> GetFamilyDeleteViewComponent(Guid familyId, Guid parentId)
-    {
-        var familyIdent = FamilyId.FromValue(familyId);
-        var parentIdent = ParentId.FromValue(parentId);
-
-        var family = await _mediator.Send(new GetFamilyByIdQuery(familyIdent));
-
-        if (family.IsFailure)
-        {
-            return ViewComponent("FamilyDelete", new FamilyDeleteSelection());
-        }
-
-        var parent = family.Value.Parents.FirstOrDefault(parent => parent.ParentId == parentIdent);
-
-        var viewModel = new FamilyDeleteSelection
-        {
-            FamilyId = familyIdent,
-            FamilyName = family.Value.FamilyName,
-            ParentId = parentIdent,
-            ParentName = parent?.ParentName,
-            OtherParentNames = family.Value.Parents.Except(new List<ParentResponse> { parent }).Select(parent => parent.ParentName).ToList()
-        };
-
-        return ViewComponent("FamilyDelete", viewModel);
+        _linkGenerator = linkGenerator;
     }
 
     [HttpPost]
-    public async Task<IActionResult> GetFamilyDeleteContent(Guid familyId, Guid parentId)
+    public async Task<IActionResult> GetFamilyDeleteSelection(Guid familyId, Guid parentId)
     {
         var familyIdent = FamilyId.FromValue(familyId);
         var parentIdent = ParentId.FromValue(parentId);
@@ -93,5 +70,33 @@ public class FamiliesController : BaseController
         };
 
         return PartialView("FamilyDeleteConfirmation", viewModel);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> GetStudentDeleteConfirmation(string studentName, string studentId, string familyName, Guid familyId)
+    {
+        var link = _linkGenerator.GetPathByPage("/Families/Details", "RemoveStudent", new { area = "Partner", Id = familyId, StudentId = studentId });
+
+        var viewModel = new DeleteConfirmation(
+            "Remove Student from Family",
+            studentName,
+            familyName,
+            link);
+
+        return PartialView("DeleteConfirmation", viewModel);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> GetParentDeleteConfirmation(string parentName, Guid parentId, string familyName, Guid familyId)
+    {
+        var link = _linkGenerator.GetPathByPage("/Families/Details", "RemoveParent", new { area = "Partner", Id = familyId, ParentId = parentId });
+
+        var viewModel = new DeleteConfirmation(
+            "Remove Parent from Family",
+            parentName,
+            familyName,
+            link);
+
+        return PartialView("DeleteConfirmation", viewModel);
     }
 }

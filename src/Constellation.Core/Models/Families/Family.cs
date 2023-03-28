@@ -95,7 +95,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
             return Result.Failure(familyEmail.Error);
         }
 
-        RaiseDomainEvent(new FamilyEmailAddressChangedDomainEvent(new DomainEventId(Guid.NewGuid()), Id, FamilyEmail, familyEmail.Value.Email));
+        RaiseDomainEvent(new FamilyEmailAddressChangedDomainEvent(new DomainEventId(), Id, FamilyEmail, familyEmail.Value.Email));
 
         FamilyEmail = familyEmail.Value.Email;
 
@@ -138,7 +138,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
                 parentEmail.Value,
                 sentralLink);
 
-            RaiseDomainEvent(new ParentAddedToFamilyDomainEvent(new DomainEventId(Guid.NewGuid()), Id, parent.Id));
+            RaiseDomainEvent(new ParentAddedToFamilyDomainEvent(new DomainEventId(), Id, parent.Id));
 
             _parents.Add(parent);
 
@@ -156,14 +156,18 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         return existingParent;        
     }
 
-    public void RemoveParent(Parent parent)
+    public Result RemoveParent(Parent parent)
     {
-        if (_parents.Any(entry => entry.Id == parent.Id))
+        if (_parents.All(entry => entry.Id != parent.Id))
         {
-            _parents.Remove(parent);
-
-            RaiseDomainEvent(new ParentRemovedFromFamilyDomainEvent(new DomainEventId(Guid.NewGuid()), Id, parent.Id));
+            return Result.Failure(DomainErrors.Families.Parents.NotFoundInFamily(parent.Id, Id));
         }
+
+        _parents.Remove(parent);
+
+        RaiseDomainEvent(new ParentRemovedFromFamilyDomainEvent(new DomainEventId(), Id, parent.Id));
+
+        return Result.Success();
     }
 
     public Result<StudentFamilyMembership> AddStudent(
@@ -176,7 +180,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         {
             var membership = StudentFamilyMembership.Create(studentId, Id, isResidential);
 
-            RaiseDomainEvent(new StudentAddedToFamilyDomainEvent(new DomainEventId(Guid.NewGuid()), membership));
+            RaiseDomainEvent(new StudentAddedToFamilyDomainEvent(new DomainEventId(), membership));
 
             _studentMemberships.Add(membership);
 
@@ -189,7 +193,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
 
             if (isResidential)
             {
-                RaiseDomainEvent(new StudentResidentialFamilyChangedDomainEvent(new DomainEventId(Guid.NewGuid()), existingMembership));
+                RaiseDomainEvent(new StudentResidentialFamilyChangedDomainEvent(new DomainEventId(), existingMembership));
             }
         }
 
@@ -208,7 +212,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
 
         _studentMemberships.Remove(existingMembership);
 
-        RaiseDomainEvent(new StudentRemovedFromFamilyDomainEvent(new DomainEventId(Guid.NewGuid()), existingMembership));
+        RaiseDomainEvent(new StudentRemovedFromFamilyDomainEvent(new DomainEventId(), existingMembership));
 
         return Result.Success();
     }

@@ -65,6 +65,10 @@ public static class DomainErrors
     {
         public static class Family
         {
+            public static readonly Error EmailAlreadyInUse = new(
+                "Families.Family.EmailAlreadyInUse",
+                "Email address is already linked to another family");
+
             public static readonly Func<FamilyId, Error> NotFound = id => new(
                 "Families.Family.NotFound",
                 $"Could not find a family with Id {id}");
@@ -225,6 +229,10 @@ public static class DomainErrors
 
         public static class Student
         {
+            public static readonly Error InvalidId = new(
+                "Partners.Student.InvalidId",
+                "The provided student id is not valid");
+
             public static readonly Func<string, Error> NotFound = id => new Error(
                 "Partners.Student.NotFound",
                 $"A student with the Id {id} could not be found");

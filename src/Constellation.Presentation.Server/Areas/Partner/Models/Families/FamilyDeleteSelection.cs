@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Server.Pages.Shared.Components.FamilyDelete;
+﻿namespace Constellation.Presentation.Server.Areas.Partner.Models.Families;
 
 using Constellation.Core.Models.Identifiers;
 

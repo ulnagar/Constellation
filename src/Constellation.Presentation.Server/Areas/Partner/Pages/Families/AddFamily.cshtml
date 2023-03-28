@@ -1,7 +1,7 @@
-﻿@page "/Partner/Families/{id:Guid}/Edit"
-@model Constellation.Presentation.Server.Areas.Partner.Pages.Families.EditFamilyModel
+﻿@page
+@model Constellation.Presentation.Server.Areas.Partner.Pages.Families.AddFamilyModel
 
-<h2>Edit Family</h2>
+<h2>Add Family</h2>
 
 <div class="page-menu">
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -9,47 +9,15 @@
 
 <hr />
 
-<form asp-page-handler="Update">
+<form asp-page-handler="Add">
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.HiddenFor(model => model.Id)
 
         <div class="form-group row">
             <label asp-for="FamilyTitle" class="col-md-2"></label>
             <div class="col-md-8">
                 <input asp-for="FamilyTitle" class="form-control" />
                 <span asp-validation-for="FamilyTitle" class="text-danger"></span>
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <div class="col-md-8 offset-2">
-                <div class="card-deck">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Parents</h5>
-                            <p class="card-text">The following parents are linked to this family.</p>
-                            <ul>
-                                @foreach (var parent in Model.Parents)
-                                {
-                                    <li>@parent</li>
-                                }
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Students</h5>
-                            <p class="card-text">The following students are linked to this family.</p>
-                            <ul>
-                                @foreach (var student in Model.Students)
-                                {
-                                    <li>@student</li>
-                                }
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
