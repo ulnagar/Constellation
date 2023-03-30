@@ -119,41 +119,61 @@ public sealed class Family : AggregateRoot, IAuditableEntity
 
         var parentMobile = PhoneNumber.Create(mobileNumber);
 
-        if (parentMobile.IsFailure)
-        {
-            return Result.Failure<Parent>(parentMobile.Error);
-        }
+        var existingParent = _parents.FirstOrDefault(parent => parent.EmailAddress == parentEmail.Value.Email && parent.SentralLink == sentralLink);
 
-        var existingParent = _parents.FirstOrDefault(parent => parent.EmailAddress == parentEmail.Value.Email);
+        if (existingParent is not null)
+            return Result.Failure<Parent>(DomainErrors.Families.Parents.AlreadyExists);
+
+        var parent = Parent.Create(
+            new ParentId(),
+            Id,
+            title,
+            firstName,
+            lastName,
+            (parentMobile.IsSuccess ? parentMobile.Value : null),
+            parentEmail.Value,
+            sentralLink);
+
+        RaiseDomainEvent(new ParentAddedToFamilyDomainEvent(new DomainEventId(), Id, parent.Id));
+
+        _parents.Add(parent);
+
+        return parent;
+    }
+
+    public Result<Parent> UpdateParent(
+        ParentId parentId,
+        string title,
+        string firstName,
+        string lastName,
+        string mobileNumber,
+        string emailAddress,
+        Parent.SentralReference sentralLink)
+    {
+        var parentEmail = EmailAddress.Create(emailAddress);
+
+        if (parentEmail.IsFailure)
+            return Result.Failure<Parent>(parentEmail.Error);
+
+        var parentMobile = PhoneNumber.Create(mobileNumber);
+
+        var existingParent = _parents.FirstOrDefault(parent => parent.Id == parentId);
 
         if (existingParent is null)
-        {
-            var parent = Parent.Create(
-                new ParentId(Guid.NewGuid()),
-                Id,
-                title,
-                firstName,
-                lastName,
-                parentMobile.Value,
-                parentEmail.Value,
-                sentralLink);
+            return Result.Failure<Parent>(DomainErrors.Families.Parents.NotFoundInFamily(parentId, Id));
 
-            RaiseDomainEvent(new ParentAddedToFamilyDomainEvent(new DomainEventId(), Id, parent.Id));
-
-            _parents.Add(parent);
-
-            return parent;
-        }
+        if (parentEmail.Value.Email != existingParent.EmailAddress)
+            RaiseDomainEvent(new ParentEmailAddressChangedDomainEvent(new DomainEventId(), Id, existingParent.Id, existingParent.EmailAddress, parentEmail.Value.Email));
 
         existingParent.Update(
             title,
             firstName,
             lastName,
-            parentMobile.Value,
+            (parentMobile.IsSuccess ? parentMobile.Value : null),
             parentEmail.Value,
             sentralLink);
 
-        return existingParent;        
+        return existingParent;
     }
 
     public Result RemoveParent(Parent parent)

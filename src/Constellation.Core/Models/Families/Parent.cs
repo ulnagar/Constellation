@@ -49,7 +49,7 @@ public sealed class Parent
         string title,
         string firstName,
         string lastName,
-        PhoneNumber mobileNumber,
+        PhoneNumber? mobileNumber,
         EmailAddress emailAddress,
         SentralReference sentralLink = SentralReference.None)
     {
@@ -70,7 +70,7 @@ public sealed class Parent
         string title,
         string firstName,
         string lastName,
-        PhoneNumber mobileNumber,
+        PhoneNumber? mobileNumber,
         EmailAddress emailAddress,
         SentralReference sentralLink = SentralReference.None)
     {

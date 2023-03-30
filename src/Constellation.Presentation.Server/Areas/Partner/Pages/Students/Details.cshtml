@@ -175,7 +175,7 @@
                             <td>@entry.EmailAddress?.Email</td>
                             <td>@entry.MobileNumber?.ToString()</td>
                             <td>
-                                Actions List
+                                <a asp-page="/Families/Details" asp-area="Partner" asp-route-id="@entry.FamilyId.Value" class="btn btn-sm btn-warning btn-show-hover">Details</a>
                             </td>
                         </tr>
                     }

@@ -1,0 +1,30 @@
+﻿.fal {
+    border-radius: 0.2rem;
+    padding: 0.3rem;
+    font-size: 2rem;
+    width: 2.5rem;
+}
+
+.fa-male {
+    background-color: lightblue;
+}
+
+    .fa-male:before {
+        margin-left: 25%;
+    }
+
+.fa-female {
+    background-color: pink;
+}
+
+    .fa-female:before {
+        margin-left: 25%;
+    }
+
+.fa-house-leave {
+    background-color: lightyellow;
+}
+
+td:has(i) {
+    max-width: 1px;
+}

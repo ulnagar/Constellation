@@ -83,6 +83,10 @@ public static class DomainErrors
             public static readonly Func<ParentId, FamilyId, Error> NotFoundInFamily = (parentId, familyId) => new(
                 "Families.Parent.NotFoundInFamily",
                 $"Could not find a parent with Id {parentId} in the family with Id {familyId}");
+
+            public static readonly Error AlreadyExists = new(
+                "Families.Parent.AlreadyExists",
+                "Cannot create a new parent as another parent already exists with these details");
         }
 
         public static class Students

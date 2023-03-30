@@ -60,7 +60,7 @@ internal sealed class GetFamilyContactsForStudentQueryHandler
                     parent.SentralLink,
                     $"{parent.FirstName} {parent.LastName}",
                     parentEmail.Value,
-                    parentMobile.Value,
+                    (parentMobile.IsSuccess ? parentMobile.Value : null),
                     parent.Id,
                     family.Id,
                     null));

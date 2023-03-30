@@ -14,9 +14,20 @@ CURRENT TASK
 	PARENTS:
 		*Complete new student details page
 			Update the bulk enrol and migrate the bulk unenrol code to the page
-		Create domain event handlers to add/remove/update user accounts
-		Create CRUD pages for non-residential parents
-			Remaining are Add Parent and Edit Parent
+		Create domain event handlers to add/remove/update user accounts.
+			FamilyEmailAddressChangedDomainEvent
+			ParentAddedToFamilyDomainEvent
+				- If no other parent uses the same email address, create a new user for this parent
+				- If another parent uses the same email address, do nothing
+			ParentEmailAddressChangedDomainEvent
+				- If no other parent uses the same (old) email address, update the user account to the new email address
+				- If another parent uses the same (old) email address, update the user account to the other parents name and create a new user account for this parent
+			ParentRemovedFromFamilyDomainEvent
+				- If no other parent uses the same email address, remove the user account
+				- If another parent uses the same email address, update the user account to the other parents name
+			StudentAddedToFamilyDomainEvent
+			StudentRemovedFromFamilyDomainEvent
+		*Create CRUD pages for non-residential parents
 		Create master contact list with per student entry for parents, ACCs, and SPTs
 		*Create migration and test
 

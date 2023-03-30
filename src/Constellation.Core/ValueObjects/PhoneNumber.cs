@@ -17,6 +17,11 @@ public sealed class PhoneNumber : ValueObject
 
     public static Result<PhoneNumber> Create(string number)
     {
+        if (string.IsNullOrWhiteSpace(number))
+        {
+            return Result.Failure<PhoneNumber>(DomainErrors.ValueObjects.PhoneNumber.NumberEmpty);
+        }
+
         var trimmedNumber = Regex.Replace(number, "[^0-9]", "");
 
         if (trimmedNumber.Length == 8)
@@ -27,11 +32,6 @@ public sealed class PhoneNumber : ValueObject
         if (trimmedNumber.Length != 10)
         {
             return Result.Failure<PhoneNumber>(DomainErrors.ValueObjects.PhoneNumber.NumberInvalid);
-        }
-
-        if (string.IsNullOrWhiteSpace(trimmedNumber))
-        {
-            return Result.Failure<PhoneNumber>(DomainErrors.ValueObjects.PhoneNumber.NumberEmpty);
         }
 
         if (!Regex.IsMatch(trimmedNumber, _regExFormat))

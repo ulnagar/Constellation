@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.Partner.Pages.Families;
 
 using Constellation.Application.Families.GetParentEditContext;
+using Constellation.Application.Families.UpdateParent;
 using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
@@ -30,24 +31,24 @@ public class EditParentModel : BasePageModel
     public Guid FamilyIdentifier { get; set; }
 
     [BindProperty]
-    public string Title { get; private set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
     [BindProperty]
     [Required]
     [Display(Name = DisplayNameDefaults.FirstName)]
-    public string FirstName { get; private set; } = string.Empty;
+    public string FirstName { get; set; } = string.Empty;
     [BindProperty]
     [Required]
     [Display(Name = DisplayNameDefaults.LastName)]
-    public string LastName { get; private set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
     [BindProperty]
     [Phone]
     [Display(Name = DisplayNameDefaults.MobileNumber)]
-    public string MobileNumber { get; private set; } = string.Empty;
+    public string MobileNumber { get; set; } = string.Empty;
     [BindProperty]
     [EmailAddress]
     [Required]
     [Display(Name = DisplayNameDefaults.EmailAddress)]
-    public string EmailAddress { get; private set; } = string.Empty;
+    public string EmailAddress { get; set; } = string.Empty;
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
     {
@@ -80,8 +81,34 @@ public class EditParentModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdate(CancellationToken cancellationToken)
     {
+        if (!ModelState.IsValid)
+        {
+            return Page();
+        }
 
+        var parentId = ParentId.FromValue(ParentIdentifier);
+        var familyId = FamilyId.FromValue(FamilyIdentifier);
 
-        return RedirectToPage("/Families/Index", new { area = "Partner" });
+        var command = new UpdateParentCommand(
+            parentId,
+            familyId,
+            Title,
+            FirstName,
+            LastName,
+            MobileNumber,
+            EmailAddress);
+
+        var result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsSuccess)
+            return RedirectToPage("/Families/Index", new { area = "Partner" });
+
+        Error = new()
+        {
+            Error = result.Error,
+            RedirectPath = _linkGenerator.GetPathByPage("/Families/Index", values: new { area = "Partner" })
+        };
+
+        return Page();
     }
 }

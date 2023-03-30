@@ -17,7 +17,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IHangfireJob
+public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IHangfireJob
 {
     private readonly ILogger _logger;
     private readonly IUnitOfWork _unitOfWork;
@@ -387,7 +387,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
 
         if (result.IsFailure)
         {
-            _logger.Warning("{id}: Parent update failed due to error {@errro}", _jobId, result.Error);
+            _logger.Warning("{id}: Parent update failed due to error {@error}", _jobId, result.Error);
 
             return null;
         }
@@ -468,7 +468,8 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
         var emailChanged = existingParent.EmailAddress == email.Value.Email;
         var oldEmail = existingParent.EmailAddress;
 
-        var result = entry.AddParent(
+        var result = entry.UpdateParent(
+            existingParent.Id,
             title,
             firstName,
             lastName,
@@ -478,7 +479,7 @@ public partial class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob,
 
         if (result.IsFailure)
         {
-            _logger.Warning("{id}: Parent update failed due to error {@errro}", _jobId, result.Error);
+            _logger.Warning("{id}: Parent update failed due to error {@error}", _jobId, result.Error);
             
             return null;
         }
