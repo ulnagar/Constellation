@@ -71,6 +71,7 @@
         #endregion
 
         #region M
+        public const string MobileNumber = "Mobile Number";
         #endregion
 
         #region N

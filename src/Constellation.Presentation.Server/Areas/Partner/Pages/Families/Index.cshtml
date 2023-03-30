@@ -82,6 +82,7 @@
                                 }
                                 else
                                 {
+                                    <a asp-page="/Families/EditParent" asp-route-familyidentifier="@entry.FamilyId.Value.ToString()" asp-route-parentIdentifier="@entry.ParentId?.Value.ToString()" class="dropdown-item">Edit</a>
                                     <a href="#" data-family-id="@entry.FamilyId.Value.ToString()" data-parent-id="@entry.ParentId?.Value.ToString()" class="dropdown-item delete-parent-menu">Delete</a>
                                 }
                             }
