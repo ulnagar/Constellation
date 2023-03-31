@@ -1,39 +1,41 @@
 ﻿using Constellation.Application.Common.ValidationRules;
 using Constellation.Application.Features.Subject.Assignments.Commands;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
-using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
+using Constellation.Core.Abstractions;
+using Constellation.Core.Models.Assignments;
+using Constellation.Core.Models.Identifiers;
 
-namespace Constellation.Infrastructure.Features.Subjects.Assignments.Commands
+namespace Constellation.Infrastructure.Features.Subjects.Assignments.Commands;
+
+public class CreateCanvasAssignmentCommandHandler : IRequestHandler<CreateCanvasAssignmentCommand, ValidateableResponse>
 {
-    public class CreateCanvasAssignmentCommandHandler : IRequestHandler<CreateCanvasAssignmentCommand, ValidateableResponse>
+    private readonly IAssignmentRepository _assignmentRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public CreateCanvasAssignmentCommandHandler(
+        IAssignmentRepository assignmentRepository,
+        IUnitOfWork unitOfWork)
     {
-        private readonly IAppDbContext _context;
+        _assignmentRepository = assignmentRepository;
+        _unitOfWork = unitOfWork;
+    }
 
-        public CreateCanvasAssignmentCommandHandler(IAppDbContext context)
-        {
-            _context = context;
-        }
+    public async Task<ValidateableResponse> Handle(CreateCanvasAssignmentCommand request, CancellationToken cancellationToken)
+    {
+        var record = CanvasAssignment.Create(
+            new AssignmentId(),
+            request.CourseId,
+            request.Name,
+            request.CanvasId,
+            request.DueDate,
+            request.LockDate,
+            request.UnlockDate,
+            request.AllowedAttempts);
 
-        public async Task<ValidateableResponse> Handle(CreateCanvasAssignmentCommand request, CancellationToken cancellationToken)
-        {
-            var record = new CanvasAssignment
-            {
-                CanvasId = request.CanvasId,
-                Name = request.Name,
-                CourseId = request.CourseId,
-                DueDate = request.DueDate,
-                LockDate = request.LockDate,
-                UnlockDate = request.UnlockDate,
-                AllowedAttempts = request.AllowedAttempts
-            };
+        _assignmentRepository.Insert(record);
 
-            _context.CanvasAssignments.Add(record);
-            await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.CompleteAsync(cancellationToken);
 
-            return new ValidateableResponse();
-        }
+        return new ValidateableResponse();
     }
 }

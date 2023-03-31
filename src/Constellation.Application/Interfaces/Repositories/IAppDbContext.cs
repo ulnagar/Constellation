@@ -1,7 +1,6 @@
 ﻿using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Stocktake;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -43,8 +42,6 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<StudentReport> StudentReports { get; set; }
         DbSet<StudentWholeAbsence> WholeAbsences { get; set; }
         DbSet<StoredFile> StoredFiles { get; set; }
-        DbSet<CanvasAssignment> CanvasAssignments { get; set; }
-        DbSet<CanvasAssignmentSubmission> CanvasAssignmentsSubmissions { get; set; }
         DbSet<StocktakeEvent> StocktakeEvents { get; set; }
         DbSet<StocktakeSighting> StocktakeSightings { get; set; }
         DbSet<StudentAward> StudentAward { get; set; }
@@ -56,9 +53,6 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         DatabaseFacade Database { get; }
         EntityEntry Add(object entity);
-        EntityEntry Attach(object entity);
         EntityEntry Remove(object entity);
-
-        void ClearTrackerDb();
     }
 }

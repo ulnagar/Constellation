@@ -2,6 +2,7 @@
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Covers;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -58,6 +59,7 @@ namespace Constellation.Application.Interfaces.Services
         Task SendAdminLowCreditAlert(double credit);
         Task SendAdminClassworkNotificationContactAlert(Student student, Staff teacher, ClassworkNotification notification);
         Task SendMasterFileConsistencyReportEmail(MemoryStream report, string emailAddress, CancellationToken cancellationToken = default);
+        Task SendAssignmentUploadFailedNotification(string assignmentName, AssignmentId assignmentId, string studentName, AssignmentSubmissionId submissionId, CancellationToken cancellationToken = default);
 
         // Auth Emails
         Task SendMagicLinkLoginEmail(MagicLinkEmail notification);

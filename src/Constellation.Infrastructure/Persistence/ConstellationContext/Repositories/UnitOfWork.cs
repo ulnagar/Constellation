@@ -87,9 +87,4 @@ public class UnitOfWork : IUnitOfWork
     {
         await _context.SaveChangesAsync();
     }
-
-    public void ClearTrackerDb()
-    {
-        _context.ClearTrackerDb();
-    }
 }

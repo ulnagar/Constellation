@@ -160,6 +160,9 @@ public class LoginModel : PageModel
 
             if (result.Succeeded)
             {
+                user.LastLoggedIn = DateTime.UtcNow;
+                await _userManager.UpdateAsync(user);
+
                 return LocalRedirect(returnUrl);
             }
             else

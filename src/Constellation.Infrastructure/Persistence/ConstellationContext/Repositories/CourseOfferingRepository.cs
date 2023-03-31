@@ -59,6 +59,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                     offering.Sessions.Any(session => !session.IsDeleted))
                 .ToListAsync(cancellationToken);
 
+        public async Task<List<CourseOffering>> GetByCourseId(
+            int courseId,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<CourseOffering>()
+                .Where(offering => offering.CourseId == courseId)
+                .ToListAsync(cancellationToken);
+
         public CourseOffering WithDetails(int id)
         {
             return Collection()

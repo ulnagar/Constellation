@@ -1,0 +1,108 @@
+﻿@page "{Id:Guid}"
+@model Constellation.Presentation.Server.Areas.Subject.Pages.Assignments.DetailsModel
+
+<h2>Canvas Assignment</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+@if (Model.Assignment is not null)
+{
+    <div>
+        <dl class="row">
+            <dt class="col-md-2">
+                <label asp-for="Assignment.CourseName">Course Name</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Assignment.CourseName</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Assignment.AssignmentName">Assignment Name</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Assignment.AssignmentName</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Assignment.DueDate">Due Date</label>
+            </dt>
+            <dd class="col-md-5">
+                <span>@Model.Assignment.DueDate.ToShortDateString()</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Assignment.UnlockDate">Unlock Date</label>
+            </dt>
+            <dd class="col-md-5">
+                <span>
+                    @if (Model.Assignment.UnlockDate.HasValue)
+                    {
+                        @:@Model.Assignment.UnlockDate.Value.ToShortDateString();
+                    }
+                </span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Assignment.LockDate">Lock Date</label>
+            </dt>
+            <dd class="col-md-5">
+                <span>
+                    @if (Model.Assignment.LockDate.HasValue)
+                    {
+                        @:@Model.Assignment.LockDate.Value.ToShortDateString();
+                    }
+                </span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Assignment.AllowedAttempts">Allowed Attempts</label>
+            </dt>
+            <dd class="col-md-5">
+                <span>
+                    @if (Model.Assignment.AllowedAttempts <= 0)
+                    {
+                        @:Unlimited
+                    } 
+                    else
+                    {
+                        @:@Model.Assignment.AllowedAttempts;
+                    }
+                </span>
+            </dd>
+        </dl>
+    </div>
+
+    <h3>Submissions</h3>
+
+    <button class="btn btn-success" data-toggle="modal" data-target="#uploadAssignmentModal">Upload Assignment</button>
+        
+    <table class="table-striped table-hover data-table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Submitted At</th>
+                <th>Attempt #</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Assignment.Submissions)
+            {
+                <tr>
+                    <td>@item.StudentName</td>
+                    <td>@item.SubmittedDate.ToShortDateString()</td>
+                    <td>@item.AttemptNumber</td>
+                    <td>
+                        <a asp-page-handler="Resubmit" asp-route-submission="@item.SubmissionId.ToString()" class="btn btn-sm btn-warning btn-show-hover">Resubmit to Canvas</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <vc:upload-assignment-submission course-id="@Model.Assignment.CourseId"></vc:upload-assignment-submission>
+}

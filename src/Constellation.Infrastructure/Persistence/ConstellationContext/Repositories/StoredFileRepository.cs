@@ -32,4 +32,17 @@ internal class StoredFileRepository : IStoredFileRepository
                 file.LinkType == StoredFile.TrainingCertificate &&
                 file.LinkId == linkId)
             .FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<StoredFile?> GetAssignmentSubmissionByLinkId(
+        string linkId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<StoredFile>()
+            .Where(file =>
+                file.LinkType == StoredFile.CanvasAssignmentSubmission &&
+                file.LinkId == linkId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+    public void Insert(StoredFile file) =>
+        _context.Set<StoredFile>().Add(file);
 }

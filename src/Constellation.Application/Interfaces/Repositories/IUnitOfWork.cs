@@ -36,6 +36,5 @@ namespace Constellation.Application.Interfaces.Repositories
         void Add<TEntity>(TEntity entity) where TEntity : class;
         Task CompleteAsync(CancellationToken token = new CancellationToken());
         Task CompleteAsync();
-        void ClearTrackerDb();
     }
 }

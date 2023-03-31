@@ -162,6 +162,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<bool>("IsStaffMember")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("LastLoggedIn")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 

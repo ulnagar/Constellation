@@ -75,6 +75,13 @@ public class StudentRepository : IStudentRepository
             .Where(student => !student.IsDeleted)
             .ToListAsync(cancellationToken);
 
+    public async Task<bool> IsValidStudentId(
+        string studentId, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .AnyAsync(student => student.StudentId == studentId && !student.IsDeleted, cancellationToken);
+
     public async Task<Student> ForDetailDisplayAsync(string id)
     {
         return await _context.Students

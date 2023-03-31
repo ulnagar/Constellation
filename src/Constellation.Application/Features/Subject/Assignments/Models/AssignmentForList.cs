@@ -1,5 +1,5 @@
 ﻿using Constellation.Application.Common.Mapping;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Assignments;
 using System;
 
 namespace Constellation.Application.Features.Subject.Assignments.Models

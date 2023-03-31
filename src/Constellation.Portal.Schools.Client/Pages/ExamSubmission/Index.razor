@@ -1,8 +1,11 @@
 ﻿@page "/Exams/"
 
+@using Constellation.Application.Assignments.GetAssignmentsByCourse;
 @using Constellation.Application.Features.Portal.School.Assignments.Commands;
 @using Constellation.Application.Features.Portal.School.Assignments.Models;
 @using Constellation.Application.Features.Portal.School.Home.Models;
+@using Constellation.Application.Assignments.UploadAssignmentSubmission;
+@using Constellation.Core.Models.Identifiers;
 
 @attribute [Authorize]
 
@@ -73,7 +76,7 @@
                             }
                             @foreach (var assignment in Assignments)
                             {
-                                <option value="@assignment.Id" selected=@(SelectedAssignment?.Id == assignment.Id)>@assignment.Name (Due: @assignment.DueDate.ToShortDateString())</option>
+                                <option value="@assignment.AssignmentId" selected=@(SelectedAssignment?.AssignmentId == assignment.AssignmentId)>@assignment.Name (Due: @assignment.DueDate.ToShortDateString())</option>
                             }
                         </select>
                     }
@@ -110,21 +113,23 @@
 
     private bool IsLoading { get; set; } = false;
 
-    public ICollection<StudentFromSchoolForDropdownSelection> Students { get; set; } = new List<StudentFromSchoolForDropdownSelection>();
+    public List<StudentFromSchoolForDropdownSelection> Students { get; set; } = new();
 
     public StudentFromSchoolForDropdownSelection SelectedStudent { get; set; }
 
-    public ICollection<StudentCourseForDropdownSelection> Courses { get; set; } = new List<StudentCourseForDropdownSelection>();
+    public List<StudentCourseForDropdownSelection> Courses { get; set; } = new();
 
     public StudentCourseForDropdownSelection SelectedCourse { get; set; }
 
-    public ICollection<StudentAssignmentForCourse> Assignments { get; set; } = new List<StudentAssignmentForCourse>();
+    public List<CourseAssignmentResponse> Assignments { get; set; } = new();
 
-    public StudentAssignmentForCourse SelectedAssignment { get; set; }
+    public CourseAssignmentResponse SelectedAssignment { get; set; }
 
-    public UploadStudentAssignmentSubmissionCommand Command { get; set; } = new UploadStudentAssignmentSubmissionCommand();
+    public UploadAssignmentSubmissionCommand Command { get; set; }
 
     public IBrowserFile File { get; set; }
+
+    public FileDto SelectedFile { get; set; } = new();
 
     public bool OkToSubmit = false;
 
@@ -160,7 +165,7 @@
 
         if (SelectedStudent != null)
         {
-            var courses = await Http.GetFromJsonAsync<List<StudentCourseForDropdownSelection>>($"api/Exams/Courses/{SelectedStudent.StudentId}");
+            var courses = await Http.GetFromJsonAsync<List<StudentCourseForDropdownSelection>>($"api/Exams/{SelectedStudent.StudentId}/Courses");
             Courses = courses.OrderBy(course => course.Name).ToList();
         } 
         else
@@ -175,11 +180,11 @@
     {
         if (SelectedCourse != null)
         {
-            var assignments = await Http.GetFromJsonAsync<List<StudentAssignmentForCourse>>($"api/Exams/Assignments/{SelectedCourse.Id}");
+            var assignments = await Http.GetFromJsonAsync<List<CourseAssignmentResponse>>($"api/Exams/{SelectedStudent.StudentId}/{SelectedCourse.Id}/Assignments/");
             Assignments = assignments.OrderBy(assignment => assignment.DueDate).ToList();
         } else
         {
-            Assignments = new List<StudentAssignmentForCourse>();
+            Assignments = new List<CourseAssignmentResponse>();
         }
     }
 
@@ -212,9 +217,9 @@
 
     private void SelectNewAssignment(ChangeEventArgs e)
     {
-        var assignmentId = new Guid(e.Value.ToString());
+        var assignmentId = AssignmentId.FromValue(new Guid(e.Value.ToString()));
 
-        SelectedAssignment = Assignments.First(assignment => assignment.Id == assignmentId);
+        SelectedAssignment = Assignments.First(assignment => assignment.AssignmentId == assignmentId);
 
         // Show the upload box!
     }
@@ -229,7 +234,7 @@
             File = file;
         }
 
-        Command.File = new FileDto
+        SelectedFile = new FileDto
         {
             FileName = File.Name,
             FileType = File.ContentType
@@ -254,10 +259,12 @@
 
     private async Task SubmitForm()
     {
-        Command.StudentId = SelectedStudent.StudentId;
-        Command.AssignmentId = SelectedAssignment.Id;
+        Command = new(
+            SelectedAssignment.AssignmentId,
+            SelectedStudent.StudentId,
+            SelectedFile);
 
-        await Http.PostAsJsonAsync<UploadStudentAssignmentSubmissionCommand>($"api/Exams/Upload", Command);
+        await Http.PostAsJsonAsync<UploadAssignmentSubmissionCommand>($"api/Exams/Upload", Command);
 
         navManager.NavigateTo("");
     }

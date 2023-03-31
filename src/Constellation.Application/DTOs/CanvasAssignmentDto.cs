@@ -1,4 +1,4 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Core.Models.Assignments;
 using System;
 
 namespace Constellation.Application.DTOs
@@ -18,7 +18,7 @@ namespace Constellation.Application.DTOs
         {
             var viewModel = new CanvasAssignmentDto
             {
-                Id = assignment.Id,
+                Id = assignment.Id.Value,
                 CourseId = assignment.CourseId,
                 Name = assignment.Name,
                 DueDate = assignment.DueDate,

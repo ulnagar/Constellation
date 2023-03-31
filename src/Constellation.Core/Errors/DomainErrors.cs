@@ -16,6 +16,27 @@ public static class DomainErrors
         }
     }
 
+    public static class Assignments
+    {
+        public static class Assignment
+        {
+            public static readonly Func<AssignmentId, Error> NotFound = id => new(
+                "Assignments.Assignment.NotFound",
+                $"Could not find an assignment with the Id {id}");
+
+            public static readonly Func<int, Error> NotFoundByCourse = id => new(
+                "Assignments.Assignment.NotFoundByCourse",
+                $"Could not find any assignments linked to the course with id {id}");
+        }
+
+        public static class Submission
+        {
+            public static readonly Func<AssignmentSubmissionId, Error> NotFound = id => new(
+                "Assignments.Submission.NotFound",
+                $"Could not find any submission with the id {id}");
+        }
+    }
+
     public static class Auth
     {
         public static readonly Error UserNotFound = new Error(
@@ -241,6 +262,21 @@ public static class DomainErrors
                 "Partners.Student.NotFound",
                 $"A student with the Id {id} could not be found");
         }
+    }
+
+    public static class Subjects
+    {
+        public static class Course
+        {
+            public static readonly Func<int, Error> NoOfferings = id => new(
+                "Subjects.Course.NoOfferings",
+                $"Could not find any offerings related to course with id {id}");
+
+            public static readonly Func<int, Error> NotFound = id => new(
+                "Subjects.Course.NotFound",
+                $"Could not find a course with the id {id}");
+        }
+
     }
 
     public static class Permissions

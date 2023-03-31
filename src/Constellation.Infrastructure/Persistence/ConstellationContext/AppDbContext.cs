@@ -2,6 +2,7 @@
 using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Assignments;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Models.Stocktake;
@@ -53,8 +54,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public DbSet<ClassworkNotification> ClassworkNotifications { get; set; }
         public DbSet<JobActivation> JobActivations { get; set; }
         public DbSet<StoredFile> StoredFiles { get; set; }
-        public DbSet<CanvasAssignment> CanvasAssignments { get; set; }
-        public DbSet<CanvasAssignmentSubmission> CanvasAssignmentsSubmissions { get; set; }
         public DbSet<StudentReport> StudentReports { get; set; }
         public DbSet<StocktakeEvent> StocktakeEvents { get; set; }
         public DbSet<StocktakeSighting> StocktakeSightings { get; set; }
@@ -79,22 +78,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public override EntityEntry Remove(object entity)
         {
             return base.Remove(entity);
-        }
-
-        public override EntityEntry Attach(object entity)
-        {
-            return base.Attach(entity);
-        }
-
-        public void ClearTrackerDb()
-        {
-            var changedEntriesCopy = base.ChangeTracker.Entries()
-                .Where(e => e.State == EntityState.Added ||
-                    e.State == EntityState.Modified ||
-                    e.State == EntityState.Deleted)
-                .ToList();
-
-            base.ChangeTracker.Clear();
         }
     }
 }

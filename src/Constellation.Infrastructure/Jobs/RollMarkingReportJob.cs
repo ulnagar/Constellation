@@ -78,6 +78,7 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
             var emailDto = new RollMarkingEmailDto();
 
             var offeringName = entry.ClassName.StartsWith("5") || entry.ClassName.StartsWith("6") ? entry.ClassName.PadLeft(7, '0') : entry.ClassName.PadLeft(6, '0');
+            offeringName = offeringName.StartsWith("5") || offeringName.StartsWith("6") ? offeringName.PadLeft(8, '0') : offeringName;
             entry.ClassName = offeringName;
 
             var offering = await _unitOfWork.CourseOfferings.GetFromYearAndName(date.Year, offeringName);

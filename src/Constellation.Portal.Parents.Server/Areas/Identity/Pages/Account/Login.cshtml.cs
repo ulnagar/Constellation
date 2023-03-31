@@ -167,6 +167,9 @@ public class LoginModel : PageModel
 
         _logger.LogInformation(" - Login succeeded for {user}", user.Email);
 
+        user.LastLoggedIn = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+
         // Redirect to home page
         return LocalRedirect(Url.Content("~/"));
     }

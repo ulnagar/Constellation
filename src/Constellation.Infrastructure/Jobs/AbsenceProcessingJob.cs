@@ -10,13 +10,7 @@ using Constellation.Application.Models;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
-using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Jobs
 {
@@ -48,8 +42,7 @@ namespace Constellation.Infrastructure.Jobs
             JobId = jobId;
 
             _student = student;
-            if (_appSettings == null)
-                _appSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
+            _appSettings ??= await _unitOfWork.Settings.GetAbsenceAppSettings();
 
             _logger.LogInformation("{id}: Scanning student {student} ({grade})", JobId, student.DisplayName, student.CurrentGrade.AsName());
 

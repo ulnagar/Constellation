@@ -7,6 +7,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Covers;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Templates.Views.Emails.Absences;
@@ -400,7 +401,7 @@ public class Service : IEmailService
             new Attachment(report, "Change Report.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         };
 
-        await _emailSender.Send(toRecipients, null, $"[Aurora College] Parent Contact Change Report - {DateTime.Today.ToLongDateString()}", body, attachments);
+        await _emailSender.Send(toRecipients, null, $"[Aurora College] Parent Contact Change Report - {DateTime.Today.ToLongDateString()}", body, attachments, cancellationToken);
     }
 
     public async Task SendAdminLowCreditAlert(double credit)
@@ -416,6 +417,36 @@ public class Service : IEmailService
         };
 
         await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "[Aurora College] SMS Gateway Low Balance Alert", body);
+    }
+
+    public async Task SendAssignmentUploadFailedNotification(
+        string assignmentName,
+        AssignmentId assignmentId,
+        string studentName,
+        AssignmentSubmissionId submissionId,
+        CancellationToken cancellationToken = default)
+    {
+        var viewModel = $@"<p>Failed to upload an assignment submission to Canvas:</p>
+            <dl>
+                <dt>Assignment:</dt>
+                <dd>{assignmentName} ({assignmentId.Value})</dd>
+                <dt>Submission:</dt>
+                <dd>From {studentName} ({submissionId.Value})</dd>
+            </dl>";
+
+        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+
+        var toRecipients = new Dictionary<string, string>
+        {
+            { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
+        };
+
+        await _emailSender.Send(
+            toRecipients,
+            "noreply@aurora.nsw.edu.au",
+            "[Aurora College] Canvas Assignment Upload Failure",
+            body,
+            cancellationToken);
     }
 
 
@@ -1153,6 +1184,6 @@ public class Service : IEmailService
             new Attachment(report, "Consistency Report.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         };
 
-        await _emailSender.Send(toRecipients, null, $"[Aurora College] MasterFile Consistency Report - {DateTime.Today.ToLongDateString()}", body, attachments);
+        await _emailSender.Send(toRecipients, null, $"[Aurora College] MasterFile Consistency Report - {DateTime.Today.ToLongDateString()}", body, attachments, cancellationToken);
     }
 }

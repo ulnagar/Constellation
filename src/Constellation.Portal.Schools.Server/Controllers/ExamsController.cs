@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
-using Constellation.Application.Features.Portal.School.Assignments.Commands;
+using Constellation.Application.Assignments.GetAssignmentsByCourse;
+using Constellation.Application.Assignments.UploadAssignmentSubmission;
 using Constellation.Application.Features.Portal.School.Assignments.Models;
 using Constellation.Application.Features.Portal.School.Assignments.Queries;
 using MediatR;
@@ -18,7 +19,7 @@ public class ExamsController : BaseAPIController
         _logger = logger.ForContext<ExamsController>();
     }
 
-    [HttpGet("Courses/{studentId}")]
+    [HttpGet("{studentId}/Courses")]
     public async Task<List<StudentCourseForDropdownSelection>> GetStudentCourses([FromRoute] string studentId)
     {
         var user = await GetCurrentUser();
@@ -30,20 +31,25 @@ public class ExamsController : BaseAPIController
         return courses.ToList();
     }
 
-    [HttpGet("Assignments/{courseId}")]
-    public async Task<List<StudentAssignmentForCourse>> GetCourseAssignments([FromRoute] int courseId)
+    [HttpGet("{studentId}/{courseId}/Assignments")]
+    public async Task<List<CourseAssignmentResponse>> GetCourseAssignments([FromRoute] string studentId, [FromRoute] int courseId)
     {
         var user = await GetCurrentUser();
 
         _logger.Information("Requested to get assignments for course {courseId} to upload exam by user {user}", courseId, user.DisplayName);
 
-        var assignments = await _mediator.Send(new GetAssignmentsForCourseQuery { CourseId = courseId });
+        var assignments = await _mediator.Send(new GetAssignmentsByCourseQuery(courseId, studentId));
 
-        return assignments.ToList();
+        if (assignments.IsFailure)
+        {
+            return new List<CourseAssignmentResponse>();
+        }
+
+        return assignments.Value;
     }
 
     [HttpPost("Upload")]
-    public async Task UploadAssignment([FromBody] UploadStudentAssignmentSubmissionCommand command)
+    public async Task UploadAssignment([FromBody] UploadAssignmentSubmissionCommand command)
     {
         var user = await GetCurrentUser();
 
