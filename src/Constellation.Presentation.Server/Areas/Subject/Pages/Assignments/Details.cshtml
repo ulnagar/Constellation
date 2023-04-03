@@ -30,18 +30,18 @@
             <dt class="col-md-2">
                 <label asp-for="Assignment.DueDate">Due Date</label>
             </dt>
-            <dd class="col-md-5">
+            <dd class="col-md-10">
                 <span>@Model.Assignment.DueDate.ToShortDateString()</span>
             </dd>
 
             <dt class="col-md-2">
                 <label asp-for="Assignment.UnlockDate">Unlock Date</label>
             </dt>
-            <dd class="col-md-5">
+            <dd class="col-md-10">
                 <span>
                     @if (Model.Assignment.UnlockDate.HasValue)
                     {
-                        @:@Model.Assignment.UnlockDate.Value.ToShortDateString();
+                        @:@Model.Assignment.UnlockDate.Value.ToShortDateString()
                     }
                 </span>
             </dd>
@@ -49,11 +49,11 @@
             <dt class="col-md-2">
                 <label asp-for="Assignment.LockDate">Lock Date</label>
             </dt>
-            <dd class="col-md-5">
+            <dd class="col-md-10">
                 <span>
                     @if (Model.Assignment.LockDate.HasValue)
                     {
-                        @:@Model.Assignment.LockDate.Value.ToShortDateString();
+                        @:@Model.Assignment.LockDate.Value.ToShortDateString()
                     }
                 </span>
             </dd>
@@ -87,6 +87,7 @@
                 <th>Submitted At</th>
                 <th>Attempt #</th>
                 <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -96,6 +97,9 @@
                     <td>@item.StudentName</td>
                     <td>@item.SubmittedDate.ToShortDateString()</td>
                     <td>@item.AttemptNumber</td>
+                    <td>
+                        <a asp-page-handler="Download" asp-route-submission="@item.SubmissionId.ToString()" class="btn btn-sm btn-success btn-show-hover">Download</a>
+                    </td>
                     <td>
                         <a asp-page-handler="Resubmit" asp-route-submission="@item.SubmissionId.ToString()" class="btn btn-sm btn-warning btn-show-hover">Resubmit to Canvas</a>
                     </td>

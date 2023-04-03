@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.Assignments;
 
 using Constellation.Application.Assignments.GetAssignmentById;
+using Constellation.Application.Assignments.GetAssignmentSubmissionFile;
 using Constellation.Application.Assignments.ResendAssignmentSubmissionToCanvas;
 using Constellation.Application.Assignments.UploadAssignmentSubmission;
 using Constellation.Application.DTOs;
@@ -65,6 +66,27 @@ public class DetailsModel : BasePageModel
         return RedirectToPage("/Assignments/Details", new { area = "Subject", Id });
     }
 
+    public async Task<IActionResult> OnGetDownload(Guid submission, CancellationToken cancellationToken)
+    {
+        var assignmentId = AssignmentId.FromValue(Id);
+        var submissionId = AssignmentSubmissionId.FromValue(submission);
+
+        var fileRequest = await _mediator.Send(new GetAssignmentSubmissionFileQuery(assignmentId, submissionId), cancellationToken);
+
+        if (fileRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = fileRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Assignments/Index", values: new { area = "Subject" })
+            };
+
+            return Page();
+        }
+
+        return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
+    }
+
     public async Task<IActionResult> OnPostUpload(AssignmentStudentSelection viewModel, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(viewModel.StudentId))
@@ -91,7 +113,7 @@ public class DetailsModel : BasePageModel
 
         var file = new FileDto
         {
-            FileName = viewModel.File.Name,
+            FileName = viewModel.File.FileName,
             FileType = viewModel.File.ContentType
         };
 

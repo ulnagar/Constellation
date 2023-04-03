@@ -72,6 +72,16 @@ public static class DomainErrors
         }
     }
 
+    public static class Documents
+    {
+        public static class AssignmentSubmission
+        {
+            public static readonly Func<string, Error> NotFound = id => new(
+                "Documents.AssignmentSubmission.NotFound",
+                $"Could not find a document with the link id {id}");
+        }
+    }
+
     public static class Enrolments
     {
         public static class Enrolment

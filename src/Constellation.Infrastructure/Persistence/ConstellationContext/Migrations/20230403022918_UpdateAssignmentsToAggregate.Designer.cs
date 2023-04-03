@@ -4,6 +4,7 @@ using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230403022918_UpdateAssignmentsToAggregate")]
+    partial class UpdateAssignmentsToAggregate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -492,7 +495,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("Assignments_Assignments", (string)null);
+                    b.ToTable("CanvasAssignments", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Assignments.CanvasAssignmentSubmission", b =>
@@ -519,7 +522,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Assignments_Submissions", (string)null);
+                    b.ToTable("CanvasAssignmentsSubmissions", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.CanvasOperation", b =>
