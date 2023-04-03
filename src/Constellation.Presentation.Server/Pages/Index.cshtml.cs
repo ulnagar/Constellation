@@ -1,12 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using System;
+﻿namespace Constellation.Presentation.Server.Pages;
 
-namespace Constellation.Presentation.Server.Pages
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+public class IndexModel : PageModel
 {
-    public class IndexModel : PageModel
+    public void OnGet()
     {
-        public void OnGet()
-        {
-        }
     }
 }

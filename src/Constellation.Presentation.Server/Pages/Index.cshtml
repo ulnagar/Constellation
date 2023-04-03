@@ -1,45 +1,96 @@
 ﻿@page
 @model IndexModel
 
-<div class="text-center mb-3">
-    <h1 class="display-4">Constellation</h1>
-    <p>Constellation is an online system for Aurora College to help manage and monitor operations. Access is restricted to authorised users only.</p>
-</div>
+@{
+    Layout = null;
+}
 
-<div class="row justify-content-around card-deck">
-    <div class="card" style="width: 18rem;">
-        <div class="card-body">
-            <h3>For Staff</h3>
-            <p class="card-text">
-                Constellation provides Aurora College staff with information on Students, Classes, Schools, and Devices...
-            </p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg" href="~/logo.svg" />
+    <title>Constellation</title>
+    <link rel="stylesheet" href="~/css/home.css" />
+</head>
+<body style="padding: 0; margin: 0;">
+    <section>
+        <div class="title-box">
+            <div class="title-container">
+                <div class="logo">
+                    <img src="~/logo.svg" class="hero-logo" />
+                </div>
+                <div class="title">
+                    <h1>Constellation</h1>
+                </div>
+            </div>
         </div>
-        <div class="card-footer">
-            <a asp-page="Dashboard" asp-area="Home" class="btn btn-sm btn-primary">Log In</a>
+        <div class="content-box">
+            <div class="option-box">
+                <div class="form-value">
+                    <div class="header">
+                        <h2>Aurora College Staff</h2>
+                    </div>
+                    <div class="text">
+                        <p>Constellation Staff Portal provides access to information on</p>
+                        <ul>
+                            <li>Schools, Staff, and Students</li>
+                            <li>Absences, Tutorials, and Lesson Rolls</li>
+                            <li>Classes, Assignments, and Timetables</li>
+                            <li>Casual Teachers and Class Covers</li>
+                            <li>Assets and Equipment allocations</li>
+                            <li>Custom reports</li>
+                        </ul>
+                        <p>Access is restricted to current Aurora College Staff only.</p>
+                    </div>
+                    <div class="cta-button">
+                        <a asp-page="/Dashboard" asp-area="Home" class="button">Log in</a>
+                    </div>
+                </div>
+            </div>
+            <div class="option-box">
+                <div class="form-value">
+                    <div class="header">
+                        <h2>Partner School Staff</h2>
+                    </div>
+                    <div class="text">
+                        <p>Constellation Schools Portal provides access to information on</p>
+                        <ul>
+                            <li>Students, and School Contacts</li>
+                            <li>Absences, Timetables, and Awards</li>
+                            <li>Science Lesson Rolls</li>
+                            <li>Academic Reports and Exam Uploads</li>
+                            <li>Assets Stocktake</li>
+                        </ul>
+                        <p>Access is available for identified staff at Partner Schools only.</p>
+                    </div>
+                    <div class="cta-button">
+                        <a href="https://acos.aurora.nsw.edu.au/schools/" class="button">Log in</a>
+                    </div>
+                </div>
+            </div>
+            <div class="option-box">
+                <div class="form-value">
+                    <div class="header">
+                        <h2>Parents</h2>
+                    </div>
+                    <div class="text">
+                        <p>Constellation Parents Portal provides access to information on</p>
+                        <ul>
+                            <li>Students, and Absences</li>
+                            <li>School contact information</li>
+                            <li>Timetables and Awards</li>
+                            <li>Academic Reports</li>
+                        </ul>
+                        <p>Parents of current Aurora College students can log in with their registered email address.</p>
+                    </div>
+                    <div class="cta-button">
+                        <a href="https://acos.aurora.nsw.edu.au/parents/" class="button">Log in</a>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-
-    <div class="card" style="width: 18rem;">
-        <div class="card-body">
-            <h3>For Schools</h3>
-            <p class="card-text">
-                Constellation provides Aurora College partner schools with information on our shared Students including attendance and Science lesson rolls...
-            </p>
-        </div>
-        <div class="card-footer">
-            <a class="card-link btn btn-sm btn-primary" href="/schools/">Log In</a>
-        </div>
-    </div>
-
-    <div class="card" style="width: 18rem;">
-        <div class="card-body">
-            <h3>For Parents</h3>
-            <p class="card-text">
-                Constellation provides Aurora College families with information on their Students including attendance and reports...
-            </p>
-        </div>
-        <div class="card-footer">
-            <a class="card-link btn btn-sm btn-primary" href="/parents">Log In</a>
-        </div>
-    </div>
-</div>
+    </section>
+</body>
+</html>
