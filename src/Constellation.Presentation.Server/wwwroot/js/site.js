@@ -18,4 +18,15 @@ $(document).ready(function () {
 
     // Activate any datatables
     $('.data-table').DataTable({ "order": [] });
+
+    $('.grouped-data-table')
+        .DataTable({
+            "order": [],
+            "rowGroup": {
+                "dataSrc": 0
+            },
+            "columnDefs": [
+                { "visible": false, "targets": 0 }
+            ]
+        });
 });

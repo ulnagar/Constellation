@@ -82,6 +82,42 @@ public class StudentRepository : IStudentRepository
             .Set<Student>()
             .AnyAsync(student => student.StudentId == studentId && !student.IsDeleted, cancellationToken);
 
+    public async Task<List<Student>> GetFilteredStudents(
+        List<int> OfferingIds,
+        List<Grade> Grades,
+        List<string> SchoolCodes,
+        CancellationToken cancellationToken = default)
+    {
+        var students = _context
+            .Set<Student>()
+            .Include(student => student.School)
+            .Where(student => !student.IsDeleted);
+
+        if (OfferingIds.Count > 0)
+        {
+            students = students
+                .Where(student => student.Enrolments.Any(enrol => 
+                    !enrol.IsDeleted && 
+                    OfferingIds.Contains(enrol.OfferingId)));
+        }
+
+        if (Grades.Count > 0)
+        {
+            students = students
+                .Where(student => Grades.Contains(student.CurrentGrade));
+        }
+
+        if (SchoolCodes.Count > 0)
+        {
+            students = students
+                .Where(student => SchoolCodes.Contains(student.SchoolCode));
+        }
+
+        return await students.ToListAsync(cancellationToken);
+    }
+        
+
+
     public async Task<Student> ForDetailDisplayAsync(string id)
     {
         return await _context.Students
