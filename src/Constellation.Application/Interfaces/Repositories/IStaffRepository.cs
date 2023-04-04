@@ -18,6 +18,7 @@ public interface IStaffRepository
     Task<List<Staff>> GetFacultyHeadTeachersForOffering(int offeringId, CancellationToken cancellationToken = default);
     Task<List<Staff>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<string>> GetAllActiveStaffIds(CancellationToken cancellationToken = default);
+    Task<Staff?> GetByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
     Staff WithDetails(string id);
     Staff WithFilter(Expression<Func<Staff, bool>> predicate);
     Task<Staff> GetForExistCheck(string id);

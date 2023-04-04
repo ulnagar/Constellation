@@ -138,6 +138,16 @@ public class StaffRepository : IStaffRepository
             .Select(staff => staff.StaffId)
             .ToListAsync(cancellationToken);
 
+    public async Task<Staff?> GetByEmailAddress(
+        string emailAddress,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Staff>()
+            .Where(staff => 
+                staff.EmailAddress == emailAddress && 
+                !staff.IsDeleted)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public Staff WithDetails(string id)
     {
         return Collection()

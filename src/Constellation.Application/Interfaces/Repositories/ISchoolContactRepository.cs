@@ -11,6 +11,7 @@ namespace Constellation.Application.Interfaces.Repositories
     public interface ISchoolContactRepository
     {
         Task<List<SchoolContact>> GetPrincipalsForSchool(string schoolCode, CancellationToken cancellationToken = default);
+        Task<SchoolContact?> GetWithRolesByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
         SchoolContact WithDetails(int id);
         SchoolContact WithFilter(Expression<Func<SchoolContact, bool>> predicate);
         SchoolContact GetForExistCheck(int id);

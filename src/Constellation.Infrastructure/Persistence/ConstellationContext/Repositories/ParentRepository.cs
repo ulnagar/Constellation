@@ -31,6 +31,14 @@ internal sealed class ParentRepository : IParentRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Parent>> GetParentsByEmail(
+        string oldEmail,
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<Parent>()
+            .Where(parent => parent.EmailAddress == oldEmail)
+            .ToListAsync(cancellationToken);
+
     public void Remove(Parent parent)
     {
         _dbContext.Remove(parent);

@@ -27,6 +27,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                         role.SchoolCode == schoolCode))
                 .ToListAsync(cancellationToken);
 
+        public async Task<SchoolContact?> GetWithRolesByEmailAddress(
+            string emailAddress,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<SchoolContact>()
+                .Include(contact => contact.Assignments.Where(role => !role.IsDeleted))
+                .Where(contact => contact.EmailAddress == emailAddress)
+                .FirstOrDefaultAsync(cancellationToken);
+
         private IQueryable<SchoolContact> Collection()
         {
             return _context.SchoolContacts

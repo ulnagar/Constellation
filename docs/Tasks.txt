@@ -14,7 +14,7 @@ CURRENT TASK
 	PARENTS:
 		*Complete new student details page
 			Update the bulk enrol and migrate the bulk unenrol code to the page
-		Create domain event handlers to add/remove/update user accounts.
+		*Create domain event handlers to add/remove/update user accounts.
 			FamilyEmailAddressChangedDomainEvent
 			ParentAddedToFamilyDomainEvent
 				- If no other parent uses the same email address, create a new user for this parent
@@ -32,7 +32,7 @@ CURRENT TASK
 		*Create migration and test
 
 	SCHOOLS PORTAL:
-		Fix assignment submission failures
+		*Fix assignment submission failures
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
