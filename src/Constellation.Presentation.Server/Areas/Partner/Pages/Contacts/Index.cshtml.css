@@ -9,3 +9,7 @@
 .row.nested-row {
     min-height: 110px;
 }
+
+div.hidden {
+    display: none;
+}

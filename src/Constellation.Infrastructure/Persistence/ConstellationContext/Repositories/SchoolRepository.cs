@@ -42,6 +42,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Set<School>()
                 .ToListAsync(cancellationToken);
 
+        public async Task<List<School>> GetWithCurrentStudents(
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<School>()
+                .Where(school => school.Students.Any(student => !student.IsDeleted))
+                .ToListAsync(cancellationToken);
+
         public School WithDetails(string id)
         {
             return Collection()

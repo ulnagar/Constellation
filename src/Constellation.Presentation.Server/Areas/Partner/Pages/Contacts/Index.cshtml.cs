@@ -4,6 +4,9 @@ using Constellation.Application.Contacts.GetContactList;
 using Constellation.Application.Features.Awards.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetOfferingsForSelectionList;
+using Constellation.Application.Schools.GetCurrentPartnerSchoolsWithStudentsList;
+using Constellation.Application.Schools.GetSchoolsForSelectionList;
+using Constellation.Application.Schools.Models;
 using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
 using Constellation.Core.Enums;
 using Constellation.Presentation.Server.BaseModels;
@@ -33,6 +36,7 @@ public class IndexModel : BasePageModel
 
     public List<ClassRecord> ClassSelectionList { get; set; } = new();
 
+    public List<SchoolSelectionListResponse> SchoolsList { get; set; } = new();
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
     {
@@ -80,6 +84,21 @@ public class IndexModel : BasePageModel
                 $"{primaryTeacher.FirstName[..1]} {primaryTeacher.LastName}",
                 $"Year {course.Name[..2]}"));
         }
+
+        var schoolsRequest = await _mediator.Send(new GetCurrentPartnerSchoolsWithStudentsListQuery(), cancellationToken);
+
+        if (schoolsRequest.IsFailure)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = schoolsRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Covers/Index", values: new { area = "ShortTerm" })
+            };
+
+            return Page();
+        }
+
+        SchoolsList = schoolsRequest.Value;
 
         List<ContactCategory> filterCategories = new();
 

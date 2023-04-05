@@ -42,7 +42,7 @@
             </div>
             <div class="col-md-2">
                 <button id="ShowGradeSelectList" type="button" class="btn btn-primary btn-block">Add Grades</button>
-                <button type="button" class="btn btn-primary btn-block">Add Schools</button>
+                <button id="ShowSchoolSelectList" type="button" class="btn btn-primary btn-block">Add Schools</button>
                 <button id="ShowClassSelectList" type="button" class="btn btn-primary btn-block">Add Classes</button>
                 <button id="ShowCategorySelectList" type="button" class="btn btn-primary btn-block">Add Categories</button>
 
@@ -134,7 +134,37 @@
     </div>
 </div>
 
-
+<div class="modal" id="SchoolListModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select Schools for Filter</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">School</span>
+                            <select asp-items="@(new SelectList(Model.SchoolsList, "Code", "Name"))" id="custom-combo" style="width:100%">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <h5 class="col-md-12">Selected Schools:</h5>
+                        <div class="col-md-12" id="ModalSelectedSchoolsList"> </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="modal" id="ClassListModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
@@ -232,6 +262,14 @@
     </div>
 </div>
 
+<div class="hidden">
+    @foreach (var school in Model.SchoolsList)
+    {
+        <button id="schoolSelect-@school.Code" type="button" class="btn btn-outline-info select-button" onClick="toggleSchool('@school.Code')">@school.Name</button>
+    }
+</div>
+
+
 @section scripts {
     <script>
         $('#ShowGradeSelectList').on('click', function () {
@@ -244,6 +282,22 @@
 
         $('#ShowClassSelectList').on('click', function () {
             $('#ClassListModal').modal('show');
+        });
+
+        $('#ShowSchoolSelectList').on('click', function () {
+            $('#SchoolListModal').modal('show');
+        });
+
+        var $schoolOption = $("#custom-combo").select2({ theme: 'bootstrap' });
+
+        $schoolOption.on('select2:select', function(e) {
+            var code = e.params.data.id;
+            toggleSchool(code);
+        });
+
+        $schoolOption.on('select2:unselect', function(e) {
+            var code = e.params.data.id;
+            toggleSchool(code);
         });
 
         function toggleGrade(grade) {
@@ -276,7 +330,35 @@
             }
         }
 
+        function toggleSchool(code) {
+            var selectDiv = $('#schoolSelect-' + code);
+            if (selectDiv.hasClass('btn-info')) {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
 
+                $('#pd-schoolSelect-' + code).remove();
+                $('#md-schoolSelect-' + code).remove();
+                $('#i-schoolSelect-' + code).remove();
+            }
+            else {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info')
+
+                var pageDisplayDiv = $('#schoolSelect-' + code).clone().prop('id', 'pd-schoolSelect-' + code);
+                pageDisplayDiv.appendTo('#SelectedSchoolsList');
+                var modalDisplayDiv = $('#schoolSelect-' + code).clone().prop('id', 'md-schoolSelect-' + code);
+                modalDisplayDiv.appendTo('#ModalSelectedSchoolsList');
+
+                var input = $('<input>').attr('id', 'i-schoolSelect-' + code)
+                    .attr('name', 'Filter.Schools')
+                    .attr('type', "hidden");
+                input.val(code);
+                var classInputDiv = $('#SelectedSchoolsList');
+                classInputDiv.append(input);
+            }
+        }
 
         function toggleClass(offeringId) {
             var selectDiv = $('#offeringSelect-' + offeringId);
@@ -352,6 +434,11 @@
             @foreach (var offering in Model.Filter.Offerings)
             {
                 @:toggleClass(@offering);
+            }
+
+            @foreach (var school in Model.Filter.Schools)
+            {
+                @:toggleSchool(@school);
             }
         });
     </script>
