@@ -49,12 +49,23 @@ internal sealed class GetContactListQueryHandler
                 // Dunno what to do here!
             }
 
+            var studentEmail = EmailAddress.Create(student.EmailAddress);
+
             var schoolEmail = EmailAddress.Create(student.School.EmailAddress);
 
             if (schoolEmail.IsFailure)
             {
                 // Dunno what to do here either!
             }
+
+            result.Add(new ContactResponse(
+                student.StudentId,
+                studentName.Value,
+                student.CurrentGrade,
+                ContactCategory.Student,
+                studentName.Value.DisplayName,
+                studentEmail.Value,
+                null));
 
             var schoolPhone = PhoneNumber.Create(student.School.PhoneNumber);
 

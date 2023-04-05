@@ -4,6 +4,8 @@ using Constellation.Core.Common;
 
 public class ContactCategory : StringEnumeration<ContactCategory>
 {
+    public static readonly ContactCategory Student = new("Student", "Student");
+
     public static readonly ContactCategory ResidentialMother = new("Family.Residential.Mother", "Residential Mother");
     public static readonly ContactCategory ResidentialFather = new("Family.Residential.Father", "Residential Father");
     public static readonly ContactCategory ResidentialFamily = new("Family.Residential.Family", "Residential Family");
