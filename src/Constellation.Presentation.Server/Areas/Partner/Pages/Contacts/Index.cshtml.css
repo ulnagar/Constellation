@@ -13,3 +13,58 @@
 div.hidden {
     display: none;
 }
+
+.fal {
+    border-radius: 0.2rem;
+    padding: 0.3rem;
+    font-size: 2rem;
+    width: 3rem;
+}
+
+.fa-male {
+    background-color: lightblue;
+}
+
+    .fa-male:before {
+        margin-left: 30%;
+    }
+
+.fa-female {
+    background-color: pink;
+}
+
+    .fa-female:before {
+        margin-left: 30%;
+    }
+
+.fa-house-leave {
+    background-color: lightyellow;
+}
+
+.fa-house {
+    background-color: lightgreen;
+}
+
+.fa-school {
+    background-color: lightblue;
+}
+
+.fa-restroom {
+    background-color: khaki;
+}
+
+.fa-child {
+    background-color: lightgoldenrodyellow;
+}
+
+.fa-child:before {
+    margin-left: 15%
+}
+
+.fa-chalkboard-teacher {
+    background-color: lightsteelblue;
+}
+
+.fa-house-damage {
+    background-color: gainsboro;
+}
