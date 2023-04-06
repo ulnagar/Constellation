@@ -39,7 +39,7 @@ CURRENT TASK
 		*Fix assignment submission failures
 
 	ASSIGNMENTS:
-		Style the upload field for staff
+		*Style the upload field for staff
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
