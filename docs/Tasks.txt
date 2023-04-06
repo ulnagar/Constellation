@@ -28,15 +28,18 @@ CURRENT TASK
 			StudentAddedToFamilyDomainEvent
 			StudentRemovedFromFamilyDomainEvent
 		*Create CRUD pages for non-residential parents
-		Create master contact list with per student entry for parents, ACCs, and SPTs
+		*Create master contact list with per student entry for parents, ACCs, and SPTs
 		*Create migration and test
 
 	CONTACTS:
-		Start email with contacts in BCC
-		Export current list to excel
+		*Start email with contacts in BCC
+		*Export current list to excel
 
 	SCHOOLS PORTAL:
 		*Fix assignment submission failures
+
+	ASSIGNMENTS:
+		Style the upload field for staff
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS

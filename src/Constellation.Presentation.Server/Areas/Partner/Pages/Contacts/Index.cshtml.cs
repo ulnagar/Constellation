@@ -1,11 +1,10 @@
 namespace Constellation.Presentation.Server.Areas.Partner.Pages.Contacts;
 
+using Constellation.Application.Contacts.ExportContactList;
 using Constellation.Application.Contacts.GetContactList;
-using Constellation.Application.Features.Awards.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetOfferingsForSelectionList;
 using Constellation.Application.Schools.GetCurrentPartnerSchoolsWithStudentsList;
-using Constellation.Application.Schools.GetSchoolsForSelectionList;
 using Constellation.Application.Schools.Models;
 using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
 using Constellation.Core.Enums;
@@ -29,7 +28,7 @@ public class IndexModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [BindProperty(SupportsGet = true)]
+    [BindProperty]
     public FilterDefinition Filter { get; set; } = new();
 
     public List<ContactResponse> Contacts { get; set; } = new();
@@ -45,7 +44,41 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostFilter(CancellationToken cancellationToken)
     {
+        if (Filter.Action == FilterDefinition.FilterAction.Filter)
+            return await PreparePage(cancellationToken);
+
+        if (Filter.Action == FilterDefinition.FilterAction.Export)
+            return await OnPostExport(cancellationToken);
+
         return await PreparePage(cancellationToken);
+    }
+
+    public async Task<IActionResult> OnPostExport(CancellationToken cancellationToken)
+    {
+        List<ContactCategory> filterCategories = new();
+
+        foreach (var entry in Filter.Categories)
+            filterCategories.Add(ContactCategory.FromValue(entry));
+
+        var file = await _mediator.Send(new ExportContactListCommand(
+                Filter.Offerings,
+                Filter.Grades,
+                Filter.Schools,
+                filterCategories),
+            cancellationToken);
+
+        if (file.IsFailure)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = file.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" })
+            };
+
+            return Page();
+        }
+
+        return File(file.Value.FileData, file.Value.FileType, file.Value.FileName);
     }
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken)
@@ -59,7 +92,7 @@ public class IndexModel : BasePageModel
             Error = new ErrorDisplay
             {
                 Error = classesResponse.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Covers/Index", values: new { area = "ShortTerm" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" })
             };
 
             return Page();
@@ -92,7 +125,7 @@ public class IndexModel : BasePageModel
             Error = new ErrorDisplay
             {
                 Error = schoolsRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Covers/Index", values: new { area = "ShortTerm" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" })
             };
 
             return Page();
@@ -115,7 +148,13 @@ public class IndexModel : BasePageModel
 
         if (contactRequest.IsFailure)
         {
-            // uh oh!
+            Error = new ErrorDisplay
+            {
+                Error = contactRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" })
+            };
+
+            return Page();
         }
 
         Contacts = contactRequest.Value;
@@ -135,5 +174,14 @@ public class IndexModel : BasePageModel
         public List<Grade> Grades { get; set; } = new();
         public List<string> Schools { get; set; } = new();
         public List<string> Categories { get; set; } = new();
+
+        public FilterAction Action { get; set; } = FilterAction.Filter;
+
+        public enum FilterAction
+        {
+            Filter,
+            Export,
+            Email
+        }
     }
 }

@@ -34,4 +34,9 @@ public sealed class EmailAddress : ValueObject
     {
         yield return Email;
     }
+
+    public override string ToString()
+    {
+        return Email;
+    }
 }

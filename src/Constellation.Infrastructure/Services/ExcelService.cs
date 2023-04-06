@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
+using Constellation.Application.Contacts.GetContactList;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.CSV;
 using Constellation.Application.ExternalDataConsistency;
@@ -17,7 +18,7 @@ using System.Drawing;
 using System.Reflection;
 using System.Threading.Channels;
 
-public class ExcelService : IExcelService, IScopedService
+public class ExcelService : IExcelService
 {
     public async Task<MemoryStream> CreatePTOFile(ICollection<InterviewExportDto> exportLines)
     {
@@ -679,6 +680,25 @@ public class ExcelService : IExcelService, IScopedService
         workSheet.View.FreezePanes(4, 1);
         workSheet.Cells[3, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFilter = true;
         workSheet.Cells[4, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
+
+        var memoryStream = new MemoryStream();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+
+        memoryStream.Position = 0;
+
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateContactExportFile(List<ContactResponse> contacts, CancellationToken cancellationToken = default)
+    {
+        var excel = new ExcelPackage();
+        var workSheet = excel.Workbook.Worksheets.Add("Contacts");
+
+        workSheet.Cells[1, 1].LoadFromCollection(contacts, true);
+
+        workSheet.View.FreezePanes(2, 1);
+        workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFilter = true;
+        workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
         var memoryStream = new MemoryStream();
         await excel.SaveAsAsync(memoryStream, cancellationToken);

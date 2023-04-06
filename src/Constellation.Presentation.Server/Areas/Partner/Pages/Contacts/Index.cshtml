@@ -9,12 +9,15 @@
 
 <div class="page-menu">
     <button type="button" class="btn btn-warning" data-toggle="collapse" data-target="#filterDefinition" aria-expanded="false" aria-controls="filterDefinition">Show Filter</button>
+    <button id="SubmitFormAsExport" class="btn btn-warning">Export Current Filter</button>
+    <button id="SendEmail" class="btn btn-warning">Send Email</button>
 </div>
 
 <hr />
 
 <div id="filterDefinition" class="collapse">
-    <form asp-page-handler="Filter" method="post">
+    <form asp-page-handler="Filter" method="post" id="filterForm">
+        <input type="hidden" name="Filter.Action" id="filterAction" />
         <div class="row">
             <div class="col-md-10">
                 <div class="row nested-row">
@@ -46,7 +49,7 @@
                 <button id="ShowClassSelectList" type="button" class="btn btn-primary btn-block">Add Classes</button>
                 <button id="ShowCategorySelectList" type="button" class="btn btn-primary btn-block">Add Categories</button>
 
-                <button type="submit" class="btn btn-success btn-block mt-3">Filter</button>
+                <button id="SubmitFormAsFilter" type="button" class="btn btn-success btn-block mt-3">Filter</button>
             </div>
         </div>
     </form>
@@ -54,7 +57,7 @@
 
 <hr />
 
-<table class="table table-striped table-hover grouped-data-table">
+<table class="table table-striped table-hover custom-data-table">
     <thead>
         <tr>
             <th>Student Name</th>
@@ -297,6 +300,16 @@
             $('#SchoolListModal').modal('show');
         });
 
+        $('#SubmitFormAsFilter').on('click', function() {
+            $('#filterAction').val(0);
+            $('#filterForm').submit();
+        });
+
+        $('#SubmitFormAsExport').on('click', function () {
+            $('#filterAction').val(1);
+            $('#filterForm').submit();
+        });
+
         var $schoolOption = $("#custom-combo").select2({ theme: 'bootstrap' });
 
         $schoolOption.on('select2:select', function(e) {
@@ -450,5 +463,67 @@
                 @:toggleSchool(@school);
             }
         });
+
+        var table = $('.custom-data-table')
+            .DataTable({
+                "order": [],
+                "rowGroup": {
+                    "dataSrc": 0
+                },
+                "columnDefs": [
+                    { "visible": false, "targets": 0 }
+                ]
+            });
+
+        $('#SendEmail').on('click', function() {
+            var email = '';
+
+            table.column(3, { search: 'applied' }).data().each(function (value, index) {
+                email += value.replace(/<.*?>/ig, '') + ';';
+            });
+
+            var arr = email.split(';');
+            arr = arr.filter((item, index) => arr.indexOf(item) === index);
+            email = arr.join(";");
+
+            if (email.length > 2048)
+            {
+                console.log("This string is too long!");
+
+                var dummy = document.createElement("textarea");
+                document.body.appendChild(dummy);
+                dummy.textContent = email;
+                dummy.select();
+                document.execCommand("copy");
+                document.body.removeChild(dummy);
+
+                var dummyModal = $(makeModal('<p>The email addresses of all contacts in the table displayed below have been copied to your clipboard.</p><p>Please paste (with Ctrl+V) into your email client <strong>BCC field</strong> now.</p>'));
+                dummyModal.modal('show');
+            }
+            else
+            {
+                window.location = 'mailto:?bcc=' + email;
+            }
+        });
+
+        function makeModal(message) {
+            return `
+                    <div class="modal fade" id="dummyModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Alert!</h5>
+                                </div>
+                                <div class="modal-body">
+                                    ${message}
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+        }
+
     </script>
 }

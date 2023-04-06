@@ -48,4 +48,9 @@ public sealed class Name : ValueObject
         yield return PreferredName;
         yield return LastName;
     }
+
+    public override string ToString()
+    {
+        return DisplayName;
+    }
 }
