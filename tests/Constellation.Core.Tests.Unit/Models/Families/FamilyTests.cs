@@ -1,20 +1,35 @@
 ﻿namespace Constellation.Core.Tests.Unit.Models.Families;
 
+using Constellation.Core.DomainEvents;
+using Constellation.Core.Errors;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Identifiers;
 
 public class FamilyTests
 {
+    private const string FamilyName = "Mr L Higgins";
+    private const string SentralId = "100";
+    private const string FamilyAddressLine1 = "123 Fake Street";
+    private const string FamilyAddressLine2 = "Unit 3";
+    private const string FamilyAddressTown = "Nowhere";
+    private const string FamilyAddressPostCode = "1234";
+    private const string InvalidEmail = "not.valid@";
+    private const string ValidEmail = "test@here.com";
+    private const string ParentTitle = "Mr";
+    private const string ParentFirstName = "Leslie";
+    private const string ParentLastName = "Higgins";
+    private const string ParentMobile = "0400111222";
+
     [Fact]
     public void LinkFamilyToSentralDetails_ShouldReturnFailure_WhenEmptySentralIdProvided()
     {
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            "Mr B Hillsley");
+            FamilyName);
 
         // Act
-        var result = sut.LinkFamilyToSentralDetails(null);
+        var result = sut.LinkFamilyToSentralDetails(string.Empty);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -27,14 +42,14 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            "Mr B Hillsley");
+            FamilyName);
 
         // Act
-        var result = sut.LinkFamilyToSentralDetails("100");
+        var result = sut.LinkFamilyToSentralDetails(SentralId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        sut.SentralId.Should().Be("100");
+        sut.SentralId.Should().Be(SentralId);
     }
 
     [Fact]
@@ -43,15 +58,15 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            "Mr B Hillsley");
+            FamilyName);
 
         // Act
         var result = sut.UpdateFamilyAddress(
-            null,
-            "123 Fake Street",
-            "Unit 1",
-            "Nowhere",
-            "1234");
+            string.Empty,
+            FamilyAddressLine1,
+            FamilyAddressLine2,
+            FamilyAddressTown,
+            FamilyAddressPostCode);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -64,15 +79,15 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            "Mr B Hillsley");
+            FamilyName);
 
         // Act
         var result = sut.UpdateFamilyAddress(
-            "Mr B Hillsley",
-            null,
-            "Unit 1",
-            "Nowhere",
-            "1234");
+            FamilyName,
+            string.Empty,
+            FamilyAddressLine2,
+            FamilyAddressTown,
+            FamilyAddressPostCode);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -85,15 +100,15 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            "Mr B Hillsley");
+            FamilyName);
 
         // Act
         var result = sut.UpdateFamilyAddress(
-            "Mr B Hillsley",
-            "123 Fake Street",
-            "Unit 1",
-            null,
-            "1234");
+            FamilyName,
+            FamilyAddressLine1,
+            FamilyAddressLine2,
+            string.Empty,
+            FamilyAddressPostCode);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -106,15 +121,15 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            "Mr B Hillsley");
+            FamilyName);
 
         // Act
         var result = sut.UpdateFamilyAddress(
-            "Mr B Hillsley",
-            "123 Fake Street",
-            "Unit 1",
-            "Nowhere",
-            null);
+            FamilyName,
+            FamilyAddressLine1,
+            FamilyAddressLine2,
+            FamilyAddressTown,
+            string.Empty);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -127,22 +142,155 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            "Mr B Hillsley");
+            FamilyName);
 
         // Act
         var result = sut.UpdateFamilyAddress(
-            "Mr B Hillsley",
-            "123 Fake Street",
-            null,
-            "Nowhere",
-            "1234");
+            FamilyName,
+            FamilyAddressLine1,
+            string.Empty,
+            FamilyAddressTown,
+            FamilyAddressPostCode);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        sut.FamilyTitle.Should().Be("Mr B Hillsley");
-        sut.AddressLine1.Should().Be("123 Fake Street");
-        sut.AddressTown.Should().Be("Nowhere");
-        sut.AddressPostCode.Should().Be("1234");
-        sut.AddressLine2.Should().Be(null);
+        sut.FamilyTitle.Should().Be(FamilyName);
+        sut.AddressLine1.Should().Be(FamilyAddressLine1);
+        sut.AddressTown.Should().Be(FamilyAddressTown);
+        sut.AddressPostCode.Should().Be(FamilyAddressPostCode);
+        sut.AddressLine2.Should().Be(string.Empty);
+    }
+
+    [Fact]
+    public void UpdateFamilyAddress_ShouldReturnReplaceLine2_WhenLine2IsNotProvided()
+    {
+        // Arrange
+        var sut = Family.Create(
+            new FamilyId(),
+            FamilyName);
+
+        sut.UpdateFamilyAddress(
+            FamilyName,
+            FamilyAddressLine1,
+            FamilyAddressLine2,
+            FamilyAddressTown,
+            FamilyAddressPostCode);
+
+        // Act
+        var result = sut.UpdateFamilyAddress(
+            "Another Name",
+            "Another Address Line 1",
+            string.Empty,
+            "Another Town",
+            "PostCode");
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        sut.FamilyTitle.Should().Be("Another Name");
+        sut.AddressLine1.Should().Be("Another Address Line 1");
+        sut.AddressTown.Should().Be("Another Town");
+        sut.AddressPostCode.Should().Be("PostCode");
+        sut.AddressLine2.Should().Be(string.Empty);
+    }
+
+    [Fact]
+    public void UpdateFamilyEmail_ShouldReturnFailure_WhenInvalidEmailIsProvided()
+    {
+        // Arrange
+        var sut = Family.Create(
+            new FamilyId(),
+            FamilyName);
+
+        // Act
+        var result = sut.UpdateFamilyEmail(InvalidEmail);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+    }
+
+    [Fact]
+    public void UpdateFamilyEmail_ShouldReturnFailure_WhenProvidedEmailIsBlank()
+    {
+        // Arrange
+        var sut = Family.Create(
+            new FamilyId(),
+            FamilyName);
+
+        // Act
+        var result = sut.UpdateFamilyEmail(string.Empty);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+    }
+
+    [Fact]
+    public void UpdateFamilyEmail_ShouldRaiseDomainEvent_WhenEmailIsChanged()
+    {
+        // Arrange
+        var sut = Family.Create(
+            new FamilyId(),
+            FamilyName);
+
+        // Act
+        var result = sut.UpdateFamilyEmail(ValidEmail);
+        var events = sut.GetDomainEvents();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        events.Should().HaveCount(1);
+        events.First().Should().BeOfType<FamilyEmailAddressChangedDomainEvent>();
+    }
+
+    [Fact]
+    public void AddParent_ShouldReturnFailure_WhenInvalidEmailIsProvided()
+    {
+        // Arrange
+        var sut = Family.Create(
+            new FamilyId(),
+            FamilyName);
+
+        // Act
+        var result = sut.AddParent(
+            ParentTitle,
+            ParentFirstName,
+            ParentLastName,
+            ParentMobile,
+            InvalidEmail,
+            Parent.SentralReference.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void AddParent_ShouldReturnFailure_WhenParentAlreadyExists()
+    {
+        // Arrange
+        var sut = Family.Create(
+            new FamilyId(),
+            FamilyName);
+
+        sut.AddParent(
+            ParentTitle,
+            ParentFirstName,
+            ParentLastName,
+            ParentMobile,
+            ValidEmail,
+            Parent.SentralReference.None);
+
+        // Act
+        var result = sut.AddParent(
+            ParentTitle,
+            ParentFirstName,
+            ParentLastName,
+            ParentMobile,
+            ValidEmail,
+            Parent.SentralReference.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().NotBeNull();
+        result.Error.Should().BeEquivalentTo(DomainErrors.Families.Parents.AlreadyExists);
     }
 }
