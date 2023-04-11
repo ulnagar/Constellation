@@ -11,7 +11,7 @@ using System.Linq;
 
 public class CanvasAssignment : AggregateRoot
 {
-    private readonly List<CanvasAssignmentSubmission> _submissions;
+    private readonly List<CanvasAssignmentSubmission> _submissions = new();
 
     private CanvasAssignment(
         AssignmentId id, 
@@ -70,7 +70,13 @@ public class CanvasAssignment : AggregateRoot
         AssignmentSubmissionId submissionId,
         string studentId)
     {
-        var attempt = Submissions.Where(entry => entry.StudentId == studentId).Max(entry => entry.Attempt) + 1;
+        var existing = Submissions.Any(entry => entry.StudentId == studentId);
+
+        var attempt = existing switch
+        {
+            true => Submissions.Where(entry => entry.StudentId == studentId).Max(entry => entry.Attempt) + 1,
+            false => 1
+        };
 
         var entry = CanvasAssignmentSubmission.Create(
             submissionId,
