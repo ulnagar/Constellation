@@ -15,6 +15,6 @@ public interface IFamilyRepository
     Task<Family?> GetFamilyById(FamilyId Id, CancellationToken cancellationToken = default);
     Task<List<Family>> GetFamiliesByStudentId(string studentId, CancellationToken cancellationToken = default);
     Task<bool> DoesEmailBelongToParentOrFamily(string email, CancellationToken cancellationToken = default);
-    Task<List<string>> GetStudentIdsFromFamilyWithEmail(string email, CancellationToken cancellation = default);
+    Task<Dictionary<string, bool>> GetStudentIdsFromFamilyWithEmail(string email, CancellationToken cancellation = default);
     void Insert(Family family);
 }

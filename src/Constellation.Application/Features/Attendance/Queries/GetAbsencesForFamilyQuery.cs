@@ -22,6 +22,7 @@ public class GetAbsencesForFamilyQuery : IRequest<IList<AbsenceDto>>
 public class AbsenceDto : IMapFrom<Absence>
 {
     public Guid Id { get; set; }
+    public string StudentId { get; set; }
     public string StudentName => $"{StudentFirstName} {StudentLastName}";
     public string StudentFirstName { get; set; }
     public string StudentLastName { get; set; }
@@ -37,6 +38,7 @@ public class AbsenceDto : IMapFrom<Absence>
     public string Explanation { get; set; }
     public AbsenceStatus Status => GetAbsenceStatus();
     public bool Explained { get; set; }
+    public bool CanParentExplainAbsence { get; set; }
 
     public void Mapping(Profile profile)
     {
@@ -54,7 +56,8 @@ public class AbsenceDto : IMapFrom<Absence>
                     src.Responses.Any(response => response.Type == AbsenceResponse.System) ||
                     src.Responses.Any(response => response.Type == AbsenceResponse.Coordinator) ||
                     src.Responses.Any(response => response.Type == AbsenceResponse.Student && response.VerificationStatus == AbsenceResponse.Verified));
-            });
+            })
+            .ForMember(dest => dest.CanParentExplainAbsence, opt => opt.Ignore());
     }
 
     public AbsenceStatus GetAbsenceStatus()
@@ -106,9 +109,18 @@ public class GetAbsencesForFamilyQueryHandler : IRequestHandler<GetAbsencesForFa
     {
         var studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
 
-        return await _context.Absences
-            .Where(absence => studentIds.Contains(absence.StudentId) && absence.Date.Year == DateTime.Today.Year)
+        var absences = await _context.Absences
+            .Where(absence => studentIds.Keys.Contains(absence.StudentId) && absence.Date.Year == DateTime.Today.Year)
             .ProjectTo<AbsenceDto>(_mapper.ConfigurationProvider, cancellationToken)
             .ToListAsync(cancellationToken);
+
+        foreach (var absence in absences)
+        {
+            var record = studentIds.First(entry => entry.Key == absence.StudentId);
+
+            absence.CanParentExplainAbsence = record.Value;
+        }
+
+        return absences;
     }
 }

@@ -37,6 +37,7 @@ public class AbsenceDetailDto : IMapFrom<Absence>
     public string Validation { get; set; }
     public string ValidatedBy { get; set; }
     public bool Explained { get; set; }
+    public bool CanBeExplainedByParent { get; set; }
 
     public void Mapping(Profile profile)
     {
@@ -62,7 +63,8 @@ public class AbsenceDetailDto : IMapFrom<Absence>
                     src.Responses.Any(response => response.Type == AbsenceResponse.System) ||
                     src.Responses.Any(response => response.Type == AbsenceResponse.Coordinator) ||
                     src.Responses.Any(response => response.Type == AbsenceResponse.Student && response.VerificationStatus == AbsenceResponse.Verified));
-            });
+            })
+            .ForMember(dest => dest.CanBeExplainedByParent, opt => opt.Ignore());
     }
 }
 
@@ -94,15 +96,17 @@ public class GetAbsenceDetailsForParentQueryHandler : IRequestHandler<GetAbsence
 
         var studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
 
-        var authorised = studentIds.Contains(studentId);
+        var record = studentIds.FirstOrDefault(entry => entry.Key == studentId);
 
-        if (!authorised)
-        {
+        if (record.Key is null)
             return new AbsenceDetailDto();
-        }
 
-        return await _context.Absences
+        var absence = await _context.Absences
             .ProjectTo<AbsenceDetailDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(src => src.Id == request.AbsenceId, cancellationToken);
+
+        absence.CanBeExplainedByParent = record.Value;
+
+        return absence;
     }
 }

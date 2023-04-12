@@ -66,17 +66,16 @@ internal sealed class FamilyRepository : IFamilyRepository
             .Set<Family>()
             .AnyAsync(family => family.Parents.Any(parent => parent.EmailAddress.ToLower() == email.ToLower()), cancellationToken);
 
-    public async Task<List<string>> GetStudentIdsFromFamilyWithEmail(
+    public async Task<Dictionary<string, bool>> GetStudentIdsFromFamilyWithEmail(
         string email,
         CancellationToken cancellation = default) =>
         await _context
             .Set<Family>()
-            .Where(family => 
+            .Where(family =>
                 family.FamilyEmail.ToLower() == email.ToLower() ||
                 family.Parents.Any(parent => parent.EmailAddress.ToLower() == email.ToLower()))
             .SelectMany(family => family.Students)
-            .Select(student => student.StudentId)
-            .ToListAsync(cancellation);
+            .ToDictionaryAsync(member => member.StudentId, member => member.IsResidentialFamily, cancellation);
 
     public void Insert(Family family) =>
         _context.Set<Family>().Add(family);

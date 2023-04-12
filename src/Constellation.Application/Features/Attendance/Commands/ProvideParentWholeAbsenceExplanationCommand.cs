@@ -49,9 +49,9 @@ public class ProvideParentWholeAbsenceExplanationCommandHandler : IRequestHandle
 
         var studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
 
-        var authorised = studentIds.Contains(studentId);
+        var record = studentIds.FirstOrDefault(entry => entry.Key == studentId);
 
-        if (!authorised)
+        if (record.Key is null || record.Value == false)
             return Unit.Value;
         
         var absence = await _context.Absences.FindAsync(new object[] { request.AbsenceId }, cancellationToken: cancellationToken);

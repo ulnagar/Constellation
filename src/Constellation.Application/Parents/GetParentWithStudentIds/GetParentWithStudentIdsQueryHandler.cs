@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,13 +26,13 @@ internal sealed class GetParentWithStudentIdsQueryHandler
     {
         var studentIds = await _studentFamilyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
 
-        if (studentIds is null)
+        if (!studentIds.Any())
         {
             _logger.Information("");
 
             return Result.Failure<List<string>>(new Error("Partner.Students.Family.NotFound", "Family could not be found"));
         }
 
-        return studentIds;
+        return studentIds.Keys.ToList();
     }
 }

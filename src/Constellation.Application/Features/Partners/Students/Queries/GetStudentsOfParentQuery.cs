@@ -8,6 +8,7 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using MediatR;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -51,7 +52,7 @@ public class GetStudentsOfParentQueryHandler : IRequestHandler<GetStudentsOfPare
     {
         var studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
 
-        var students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
+        var students = await _studentRepository.GetListFromIds(studentIds.Keys.ToList(), cancellationToken);
 
         return _mapper
             .Map<List<StudentOfParent>>(students);

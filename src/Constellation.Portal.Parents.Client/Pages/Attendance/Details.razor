@@ -95,7 +95,7 @@
             <div class="mb-2 col-md-10">
                 @if (Absence.Type == Constellation.Core.Models.Absence.Whole)
                 {
-                    @if (Absence.Explained)
+                    @if (Absence.Explained || !Absence.CanBeExplainedByParent)
                     {
                         <span>"@Absence.Reason"</span>
                     } else
@@ -131,7 +131,7 @@
             </div>
         </div>
 
-        @if (Absence.Type == Constellation.Core.Models.Absence.Whole && !Absence.Explained)
+        @if (Absence.Type == Constellation.Core.Models.Absence.Whole && !Absence.Explained && Absence.CanBeExplainedByParent)
         {
             <div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mt-1">
                 <button class="btn btn-success btn-lg" type="submit">Submit</button>
@@ -171,7 +171,8 @@
     {
         Command.AbsenceId = Id;
 
-        await Http.PostAsJsonAsync<ProvideParentWholeAbsenceExplanationCommand>($"Attendance/ParentExplanation", Command);
+        if (Absence.CanBeExplainedByParent)
+            await Http.PostAsJsonAsync<ProvideParentWholeAbsenceExplanationCommand>($"Attendance/ParentExplanation", Command);
 
         navManager.NavigateTo("Attendance/Absences");
     }
