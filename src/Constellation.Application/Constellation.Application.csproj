@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Configurations>Debug;Release;Test</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,5 +25,11 @@
     <Folder Include="Features\Portal\School\Timetables\Models\" />
     <Folder Include="Features\StaffMembers\Queries\" />
   </ItemGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+			<_Parameter1>Constellation.Application.Tests.Unit</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
 
 </Project>
