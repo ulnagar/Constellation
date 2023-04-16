@@ -9,16 +9,15 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.ValueObjects;
-using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Templates.Views.Emails.Absences;
 using Constellation.Infrastructure.Templates.Views.Emails.Auth;
 using Constellation.Infrastructure.Templates.Views.Emails.Covers;
 using Constellation.Infrastructure.Templates.Views.Emails.Lessons;
 using Constellation.Infrastructure.Templates.Views.Emails.MandatoryTraining;
 using Constellation.Infrastructure.Templates.Views.Emails.MissedWork;
+using Constellation.Infrastructure.Templates.Views.Emails.Reports;
 using Constellation.Infrastructure.Templates.Views.Emails.RollMarking;
 using System.Net.Mail;
-using System.Net.Mime;
 
 public class Service : IEmailService
 {
@@ -37,6 +36,43 @@ public class Service : IEmailService
         _emailSender = emailSender;
         _calendarService = calendarService;
         _razorService = razorService;
+    }
+
+    public async Task SendAcademicReportToNonResidentialParent(
+        List<EmailRecipient> recipients, 
+        Name studentName, 
+        string ReportingPeriod, 
+        string Year, 
+        FileDto file,
+        CancellationToken cancellationToken = default)
+    {
+        List<Attachment> attachments = new();
+        var stream = new MemoryStream(file.FileData);
+        attachments.Add(new Attachment(stream, file.FileType, file.FileName));
+
+        foreach (var parent in recipients)
+        {
+            var viewModel = new AcademicReportEmailViewModel
+            {
+                Preheader = "",
+                SenderName = "Chris Robertson",
+                SenderTitle = "Principal",
+                Title = $"[Aurora College] Academic Report Published",
+                ParentName = parent.Name,
+                StudentName = studentName,
+                ReportingPeriod = ReportingPeriod,
+                Year = Year
+            };
+
+            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Reports/AcademicReportEmail.cshtml", viewModel);
+
+            var toRecipients = new Dictionary<string, string>();
+            foreach (var entry in recipients)
+                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                    toRecipients.Add(entry.Name, entry.Email);
+
+            await _emailSender.Send(toRecipients, null, viewModel.Title, body, attachments, cancellationToken);
+        }
     }
 
     public async Task<bool> SendAttendanceReport(AttendanceReportEmail notification)

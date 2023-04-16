@@ -43,6 +43,16 @@ internal class StoredFileRepository : IStoredFileRepository
                 file.LinkId == linkId)
             .FirstOrDefaultAsync(cancellationToken);
 
+    public async Task<StoredFile?> GetAcademicReportByLinkId(
+        string linkId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<StoredFile>()
+            .Where(file =>
+                file.LinkType == StoredFile.StudentReport &&
+                file.LinkId == linkId)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public void Insert(StoredFile file) =>
         _context.Set<StoredFile>().Add(file);
 }

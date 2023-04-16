@@ -2,6 +2,7 @@
 
 @using Constellation.Application.Features.Documents.Queries
 @using Constellation.Application.Features.Partners.Students.Queries
+@using Constellation.Application.Reports.GetAcademicReportList;
 
 @inject HttpClient Http
 @inject IJSRuntime JS
@@ -87,7 +88,7 @@
 @code {
     public List<StudentOfParent> Students { get; set; } = new();
     public StudentOfParent SelectedStudent { get; set; } = new();
-    public List<StudentReportForList> Reports { get; set; } = new();
+    public List<AcademicReportResponse> Reports { get; set; } = new();
 
     public bool ShowLoader = false;
     public bool SelectingStudent = false;
@@ -120,7 +121,7 @@
     {
         try
         {
-            Reports = await Http.GetFromJsonAsync<List<StudentReportForList>>($"Reports/Student/{SelectedStudent.StudentId}");
+            Reports = await Http.GetFromJsonAsync<List<AcademicReportResponse>>($"Reports/Student/{SelectedStudent.StudentId}");
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -147,7 +148,7 @@
         StateHasChanged();
     }
 
-    async Task DownloadReport(StudentReportForList reportEntry)
+    async Task DownloadReport(AcademicReportResponse reportEntry)
     {
         try
         {

@@ -1,0 +1,24 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Reports;
+@model AcademicReportEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Dear @Model.ParentName</p>
+
+<p>Aurora College has published an Academic Report for @Model.StudentName for the period of @Model.ReportingPeriod @Model.Year. A copy of this report has been attached to this email.</p>
+
+<p>You are also able to download a copy of this and any other reports published for @Model.StudentName by Aurora College at our Parent Portal: <a href="https://acos.aurora.nsw.edu.au/parents">https://acos.aurora.nsw.edu.au/parents</a></p>
+
+<p>If you have any questions, or need any assistance in accessing the Parent Portal, please feel free to contact our staff below:
+    <ul>
+        <li>Technology Support Team, 1300 610 733 or <a href="mailto:support@aurora.nsw.edu.au">support@aurora.nsw.edu.au</a></li>
+        <li>Office Administration Team, 1300 287 629 or <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a></li>
+    </ul>
+</p>

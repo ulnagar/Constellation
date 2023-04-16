@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Portal.Parents.Server.Controllers;
 
 using Constellation.Application.Features.Documents.Queries;
-using Constellation.Application.Features.Portal.School.Reports.Queries;
+using Constellation.Application.Reports.GetAcademicReportList;
 using Constellation.Core.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -19,20 +19,27 @@ public class ReportsController : BaseAPIController
 	}
 
 	[HttpGet("Student/{studentId}")]
-	public async Task<ICollection<StudentReportForList>> GetReportsList([FromRoute] string studentId)
+	public async Task<List<AcademicReportResponse>> GetReportsList([FromRoute] string studentId)
 	{
 		var authorised = await HasAuthorizedAccessToStudent(_mediator, studentId);
 
 		if (!authorised)
 		{
-			return new List<StudentReportForList>();
+			return new List<AcademicReportResponse>();
 		}
 
 		var user = await GetCurrentUser();
 
 		_logger.LogInformation("Requested to retrieve contacts for student {studentId} by user {user}", studentId, user.UserName);
 
-		return await _mediator.Send(new GetStudentReportListQuery { StudentId = studentId });
+		var result = await _mediator.Send(new GetAcademicReportListQuery(studentId));
+
+		if (result.IsSuccess)
+		{
+			return result.Value;
+		}
+
+		return new List<AcademicReportResponse>();
 	}
 
     [HttpPost("Student/{studentId}/Download/{entryId}")]

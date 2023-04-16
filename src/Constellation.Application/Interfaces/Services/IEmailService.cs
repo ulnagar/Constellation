@@ -68,5 +68,8 @@ namespace Constellation.Application.Interfaces.Services
         Task SendTrainingExpiryWarningEmail(Dictionary<string, string> courses, Dictionary<string, string> recipients);
         Task SendTrainingExpiryAlertEmail(Dictionary<string, string> courses, Dictionary<string, string> recipients);
         Task SendTrainingExpiredEmail(Dictionary<string, string> courses, Dictionary<string, string> recipients);
+
+        // Report Emails
+        Task SendAcademicReportToNonResidentialParent(List<EmailRecipient> recipients, Name studentName, string ReportingPeriod, string Year, FileDto file, CancellationToken cancellationToken = default);
     }
 }

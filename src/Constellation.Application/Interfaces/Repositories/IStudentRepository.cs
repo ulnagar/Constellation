@@ -3,7 +3,6 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +20,7 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<List<Student>> GetCurrentStudentsWithFamilyMemberships(CancellationToken cancellationToken = default);
         Task<bool> IsValidStudentId(string studentId, CancellationToken cancellationToken = default);
         Task<List<Student>> GetFilteredStudents(List<int> OfferingIds, List<Grade> Grades, List<string> SchoolCodes, CancellationToken cancellationToken = default);
+        Task<List<Student>> GetCurrentStudentsFromSchool(string SchoolCode, CancellationToken cancellationToken = default);
 
         Task <Student> GetForExistCheck(string id);
         Task<ICollection<Student>> AllWithAbsenceScanSettings();

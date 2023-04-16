@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Features.Portal.School.Reports.Queries;
+﻿namespace Constellation.Application.Features.Documents.Queries;
 
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;

@@ -80,6 +80,13 @@ public static class DomainErrors
                 "Documents.AssignmentSubmission.NotFound",
                 $"Could not find a document with the link id {id}");
         }
+
+        public static class AcademicReport
+        {
+            public static readonly Func<string, Error> NotFound = id => new(
+                "Documents.AcademicReport.NotFound",
+                $"Could not find a document with the link id {id}");
+        }
     }
 
     public static class Enrolments
@@ -271,6 +278,16 @@ public static class DomainErrors
             public static readonly Func<string, Error> NotFound = id => new Error(
                 "Partners.Student.NotFound",
                 $"A student with the Id {id} could not be found");
+        }
+    }
+
+    public static class Reports
+    {
+        public static class AcademicReport
+        {
+            public static readonly Func<string, Error> NotFoundByPublishId = id => new(
+                "Reports.AcademicReport.NotFoundByPublishId",
+                $"An academic report with the publish Id of {id} could not be found");
         }
     }
 

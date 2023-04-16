@@ -116,7 +116,13 @@ public class StudentRepository : IStudentRepository
         return await students.ToListAsync(cancellationToken);
     }
         
-
+    public async Task<List<Student>> GetCurrentStudentsFromSchool(
+        string SchoolCode,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student => student.SchoolCode == SchoolCode)
+            .ToListAsync(cancellationToken);
 
     public async Task<Student> ForDetailDisplayAsync(string id)
     {

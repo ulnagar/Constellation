@@ -1,5 +1,7 @@
 ﻿@page "/Reports/"
-@using Constellation.Application.Features.Portal.School.Reports.Models;
+
+@using Constellation.Application.Extensions;
+@using Constellation.Application.Reports.GetStudentReportsForSchool;
 
 @attribute [Authorize]
 
@@ -12,19 +14,19 @@
 
     <div>
         <div class="mt-3">
-            <GroupedDataTable Items="Reports.GroupBy(report => report.StudentName).ToList()" TItem="StudentReportForDownload" TKey="string">
+            <GroupedDataTable Items="Reports.GroupBy(report => report.Name.DisplayName).ToList()" TItem="SchoolStudentReportResponse" TKey="string">
                 <TableHeader>
                     <th>Year</th>
                     <th>Report</th>
                     <th>Action</th>
                 </TableHeader>
                 <GroupRowTemplate Context="entry">
-                    <td colspan="6">@entry.StudentName @entry.StudentCurrentGrade</td>
+                    <td colspan="6">@entry.Name.DisplayName @entry.Grade.AsName()</td>
                 </GroupRowTemplate>
                 <RowTemplate Context="entry">
                     <td>@entry.Year</td>
                     <td>@entry.ReportingPeriod</td>
-                    <td><button class="btn btn-info btn-show-hover" @onclick="() => DownloadReport(entry.Id)">Download</button></td>
+                    <td><button class="btn btn-info btn-show-hover" @onclick="() => DownloadReport(entry.ReportId.Value)">Download</button></td>
                 </RowTemplate>
             </GroupedDataTable>
         </div>
@@ -38,7 +40,7 @@
 
     private bool IsLoading { get; set; } = false;
 
-    public ICollection<StudentReportForDownload> Reports { get; set; } = new List<StudentReportForDownload>();
+    public List<SchoolStudentReportResponse> Reports { get; set; } = new();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -48,9 +50,13 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            Reports = await Http.GetFromJsonAsync<List<StudentReportForDownload>>($"api/Reports/ForSchool/{SelectedSchool.Code}");
+            Reports = await Http.GetFromJsonAsync<List<SchoolStudentReportResponse>>($"api/Reports/ForSchool/{SelectedSchool.Code}");
 
-            Reports = Reports.OrderBy(absence => absence.StudentCurrentGrade).ThenBy(absence => absence.StudentLastName).ThenBy(absence => absence.StudentFirstName).ToList();
+            Reports = Reports
+                .OrderBy(report => report.Grade)
+                .ThenBy(report => report.Name.LastName)
+                .ThenBy(report => report.Name.FirstName)
+                .ToList();
         }
 
         IsLoading = false;
@@ -71,9 +77,9 @@
             var fileStream = response.Content.ReadAsStream();
             string fileName = string.Empty;
 
-            var report = Reports.First(report => report.Id == ReportId);
+            var report = Reports.First(report => report.ReportId.Value == ReportId);
 
-            fileName = $"{report.StudentLastName}, {report.StudentFirstName} - {report.ReportingPeriod}.pdf";
+            fileName = $"{report.Name.LastName}, {report.Name.FirstName} - {report.ReportingPeriod}.pdf";
 
             using var streamRef = new DotNetStreamReference(stream: fileStream);
 

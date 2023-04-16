@@ -13,5 +13,7 @@ public interface IStoredFileRepository
 
     Task<StoredFile?> GetAssignmentSubmissionByLinkId(string linkId, CancellationToken cancellationToken = default);
 
+    Task<StoredFile?> GetAcademicReportByLinkId(string linkId, CancellationToken cancellationToken = default);
+
     void Insert(StoredFile file);
 }

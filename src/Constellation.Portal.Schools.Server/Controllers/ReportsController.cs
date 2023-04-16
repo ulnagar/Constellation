@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
-using Constellation.Application.Features.Portal.School.Reports.Models;
-using Constellation.Application.Features.Portal.School.Reports.Queries;
+using Constellation.Application.Features.Documents.Queries;
+using Constellation.Application.Reports.GetStudentReportsForSchool;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,15 +18,20 @@ public class ReportsController : BaseAPIController
     }
 
     [HttpGet("ForSchool/{code}")]
-    public async Task<List<StudentReportForDownload>> GetForSchool([FromRoute] string code)
+    public async Task<List<SchoolStudentReportResponse>> GetForSchool([FromRoute] string code)
     {
         var user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve Student Reports for school {code} by user {user}", code, user.DisplayName);
 
-        var reports = await _mediator.Send(new GetStudentReportListForSchoolQuery { SchoolCode = code });
+        var reports = await _mediator.Send(new GetStudentReportsForSchoolQuery(code));
 
-        return reports.ToList();
+        if (reports.IsFailure)
+        {
+            return new List<SchoolStudentReportResponse>();
+        }
+
+        return reports.Value;
     }
 
     [HttpPost("Download")]

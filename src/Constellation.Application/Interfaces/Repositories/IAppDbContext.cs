@@ -39,7 +39,6 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<OfferingSession> Sessions { get; set; }
         DbSet<Staff> Staff { get; set; }
         DbSet<Student> Students { get; set; }
-        DbSet<StudentReport> StudentReports { get; set; }
         DbSet<StudentWholeAbsence> WholeAbsences { get; set; }
         DbSet<StoredFile> StoredFiles { get; set; }
         DbSet<StocktakeEvent> StocktakeEvents { get; set; }

@@ -54,7 +54,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public DbSet<ClassworkNotification> ClassworkNotifications { get; set; }
         public DbSet<JobActivation> JobActivations { get; set; }
         public DbSet<StoredFile> StoredFiles { get; set; }
-        public DbSet<StudentReport> StudentReports { get; set; }
         public DbSet<StocktakeEvent> StocktakeEvents { get; set; }
         public DbSet<StocktakeSighting> StocktakeSightings { get; set; }
         public DbSet<StudentAward> StudentAward { get; set; }
