@@ -42,8 +42,8 @@ CURRENT TASK
 		*Style the upload field for staff
 
 	ACADEMIC REPORTS:
-		Convert to aggregate
-		Create domain event for report creation, which includes sending of reports to non-residential parents when first published, but not when re-published.
+		*Convert to aggregate
+		*Create domain event for report creation, which includes sending of reports to non-residential parents when first published, but not when re-published.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
