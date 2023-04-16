@@ -3,11 +3,9 @@
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
 
 public sealed class AcademicReport : AggregateRoot
 {
-
     private AcademicReport(
         AcademicReportId id, 
         string studentId, 
