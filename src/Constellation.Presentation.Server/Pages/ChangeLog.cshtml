@@ -37,6 +37,7 @@
                 <li>Partners Section
                     <ul>
                         <li>Add Absence Settings Audit report to student view to check whether absence scanning is enabled for students</li>
+                        <li>Refactor student reports to use aggregate design pattern</li>
                     </ul>
                 </li>
                 <li>ShortTerm section
@@ -62,6 +63,9 @@
         </li>
         <li>Schools Portal
             <ul>
+                <li>Absences section
+                    <ul>Registered non-residential parents are able to view but not modify absences</ul>
+                </li>
                 <li>Contacts section
                     <ul>
                         <li>Add notification email to school administration when new contact is registered</li>
@@ -71,6 +75,11 @@
                 <li>Exam Uploads section
                     <ul>
                         <li>Refactor submission to Canvas to outbox processor to ensure that file is sent through even if the gateway is unavailable</li>
+                    </ul>
+                </li>
+                <li>Reports section
+                    <ul>
+                        <li>New reports are automatically emailed to registered non-residential parents</li>
                     </ul>
                 </li>
             </ul>
@@ -89,6 +98,7 @@
                 <li>Jobs (Recurring scheduled tasks)
                     <ul>
                         <li>Update the Sentral Family Sync Job to send report of any detected changes to the school administration</li>
+                        <li>Update the Sentral Report Sync Job to use new aggregate design model</li>
                     </ul>
                 </li>
             </ul>
@@ -96,7 +106,7 @@
     </ul>
 </div>
 
-<h3>Current version: Release V1.8 (Build 2302.24)</h3>
+<h3>Previous version: Release V1.8 (Build 2303.11)</h3>
 
 <div class="changelog">
     <ul>
@@ -143,7 +153,7 @@
     </ul>
 </div>
 
-<h3>Current version: Release V1.7 (Build 2301.17)</h3>
+<h3>Previous version: Release V1.7 (Build 2301.17)</h3>
 
 <div class="changelog">
     <ul>
