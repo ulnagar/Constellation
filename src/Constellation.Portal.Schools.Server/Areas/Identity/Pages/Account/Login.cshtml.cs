@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Portal.Schools.Server.Areas.Identity.Pages.Account;
 
-using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Exceptions;
 using Constellation.Application.Features.Auth.Command;
 using Constellation.Application.Features.Auth.Queries;
@@ -8,7 +7,6 @@ using Constellation.Application.Features.Portal.School.Home.Queries;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
-using Constellation.Infrastructure.Features.Auth.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -152,7 +150,8 @@ public class LoginModel : PageModel
                 }
 
                 _logger.LogInformation($" - Admin access granted. Logging in with system wide access.");
-                await _signInManager.SignInWithClaimsAsync(user, false, claimList);
+                //await _signInManager.SignInWithClaimsAsync(user, false, claimList);
+                await _signInManager.SignInAsync(user, false);
 
                 _logger.LogInformation(" - Login succeeded for {user}", Input.Email);
 

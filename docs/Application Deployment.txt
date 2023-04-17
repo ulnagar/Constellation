@@ -1,0 +1,15 @@
+IIS Setup:
+ - Each portal (Schools and Parents) must have their own AppPool
+ - AppPools must be set to "No Managed Code"
+ - To enable auto-start and never shutdown/recycle the app pool automatically:
+	- Advanced AppPool settings:
+		- (General)/Start Mode: AlwaysRunning
+		- Process Model/Idle Time-out(minutes): 0
+		- Recycling/Regular Time Interval (minutes): 0
+ - To enable certificate to be loaded by Identity Server to sign requests:
+	- Advanced AppPool settings:
+		- Process Model/Load User Profile: True
+
+Certificate Setup:
+ - Import the acos.aurora.nsw.edu.au code signing certificate
+ - Manage Private Keys: Add IIS_IUSR group with full permissions
