@@ -59,22 +59,22 @@ public class DetailsModel : BasePageModel
 
         Module = moduleRequest.Value;
 
-        foreach (var record in Module.Completions)
-        {
-            record.ExpiryCountdown = record.CalculateExpiry();
-            record.Status = CompletionRecordDto.ExpiryStatus.Active;
+        //foreach (var record in Module.Completions)
+        //{
+        //    record.ExpiryCountdown = record.CalculateExpiry();
+        //    record.Status = CompletionRecordDto.ExpiryStatus.Active;
 
-            if (Module.Completions.Any(other =>
-                other.Id != record.Id &&
-                other.ModuleId == record.ModuleId && // true
-                other.StaffId == record.StaffId && // true
-                ((other.NotRequired && other.CreatedAt > record.CompletedDate.Value) || // false
-                (!other.NotRequired && !record.NotRequired && other.CompletedDate.Value > record.CompletedDate.Value) || // false
-                (record.NotRequired && record.CreatedAt < other.CompletedDate.Value))))
-            {
-                record.Status = CompletionRecordDto.ExpiryStatus.Superceded;
-            }
-        }
+        //    if (Module.Completions.Any(other =>
+        //        other.Id != record.Id &&
+        //        other.ModuleId == record.ModuleId && // true
+        //        other.StaffId == record.StaffId && // true
+        //        ((other.NotRequired && other.CreatedAt > record.CompletedDate.Value) || // false
+        //        (!other.NotRequired && !record.NotRequired && other.CompletedDate.Value > record.CompletedDate.Value) || // false
+        //        (record.NotRequired && record.CreatedAt < other.CompletedDate.Value))))
+        //    {
+        //        record.Status = CompletionRecordDto.ExpiryStatus.Superceded;
+        //    }
+        //}
 
         Module.Completions = Module.Completions
             .OrderByDescending(record => record.CompletedDate)

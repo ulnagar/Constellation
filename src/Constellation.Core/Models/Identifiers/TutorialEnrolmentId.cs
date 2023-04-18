@@ -9,4 +9,7 @@ public sealed record TutorialEnrolmentId(Guid Value)
 
     public TutorialEnrolmentId()
         : this(Guid.NewGuid()) { }
+
+    public override string ToString() =>
+        Value.ToString();
 }

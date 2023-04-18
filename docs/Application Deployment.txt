@@ -1,3 +1,5 @@
+Install the ASP.NET Hosting Bundle
+
 IIS Setup:
  - Each portal (Schools and Parents) must have their own AppPool
  - AppPools must be set to "No Managed Code"
@@ -13,3 +15,4 @@ IIS Setup:
 Certificate Setup:
  - Import the acos.aurora.nsw.edu.au code signing certificate
  - Manage Private Keys: Add IIS_IUSR group with full permissions
+

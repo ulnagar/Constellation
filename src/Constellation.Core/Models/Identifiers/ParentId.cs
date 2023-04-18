@@ -9,4 +9,7 @@ public sealed record ParentId(Guid Value)
 
     public ParentId()
         : this(Guid.NewGuid()) { }
+
+    public override string ToString() =>
+        Value.ToString();
 }

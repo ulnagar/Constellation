@@ -9,4 +9,7 @@ public sealed record GroupTutorialId(Guid Value)
 
     public static GroupTutorialId FromValue(Guid value) =>
         new(value);
+
+    public override string ToString() =>
+        Value.ToString();
 }

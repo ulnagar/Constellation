@@ -13,7 +13,7 @@
     {
         <form asp-page-handler="DeleteRecord" asp-route-id="@Model.Id" method="post">
             <div class="page-menu">
-                <a asp-page="Upsert" asp-route-id="@Model.Record.Id" asp-route-mode="@UpsertModel.ModeOptions.FULL" class="btn btn-warning">Edit</a>
+                <a asp-page="Upsert" asp-route-id="@Model.Record.Id.Value" asp-route-mode="@UpsertModel.ModeOptions.FULL" class="btn btn-warning">Edit</a>
             
                 <button type="submit" class="btn btn-danger">Delete Entry</button>
 
@@ -22,7 +22,7 @@
         </form>
     } else {
         <div>
-            <a asp-page="Upsert" asp-route-id="@Model.Record.Id" asp-route-mode="@UpsertModel.ModeOptions.CERTUPLOAD" class="btn btn-warning">Upload Certificate</a>
+            <a asp-page="Upsert" asp-route-id="@Model.Record.Id.Value" asp-route-mode="@UpsertModel.ModeOptions.CERTUPLOAD" class="btn btn-warning">Upload Certificate</a>
             <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
         </div>
     }
@@ -36,7 +36,7 @@
             <label asp-for="Record.Id"></label>
         </dt>
         <dd class="col-md-10">
-            <span>@Model.Record.Id</span>
+            <span>@Model.Record.Id.Value</span>
         </dd>
 
         <dt class="col-md-2">

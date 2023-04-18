@@ -9,4 +9,7 @@ public sealed record TrainingCompletionId(Guid Value)
 
     public TrainingCompletionId()
         : this(Guid.NewGuid()) { }
+
+    public override string ToString() =>
+        Value.ToString();
 }

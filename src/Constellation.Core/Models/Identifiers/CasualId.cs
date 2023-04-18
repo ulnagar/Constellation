@@ -9,4 +9,7 @@ public sealed record CasualId(Guid Value)
 
     public CasualId()
         : this(Guid.NewGuid()) { }
+
+    public override string ToString() =>
+        Value.ToString();
 }

@@ -58,17 +58,9 @@ public class DetailsModel : BasePageModel
         var certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateFileByIdQuery(StoredFile.TrainingCertificate, Record.Id.ToString()));
 
         if (certificateRequest.IsFailure)
-        {
-            Error = new ErrorDisplay
-            {
-                Error = certificateRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Index", values: new { area = "SchoolAdmin" })
-            };
-
-            return;
-        }
-
-        UploadedCertificate = certificateRequest.Value;
+            UploadedCertificate = null;
+        else
+            UploadedCertificate = certificateRequest.Value;
     }
 
     public async Task<IActionResult> OnGetDownloadCertificate()

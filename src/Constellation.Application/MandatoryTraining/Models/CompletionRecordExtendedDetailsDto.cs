@@ -105,7 +105,7 @@ public class CompletionRecordExtendedDetailsDto
 
     public void CalculateExpiry()
     {
-        if (ModuleId.Value == Guid.Empty || RecordId.Value == Guid.Empty)
+        if (ModuleId is null || ModuleId.Value == Guid.Empty || RecordId is null || RecordId.Value == Guid.Empty)
         {
             DueDate = DateTime.Today;
             TimeToExpiry = -9999;

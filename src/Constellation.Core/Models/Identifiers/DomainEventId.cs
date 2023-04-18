@@ -9,4 +9,7 @@ public sealed record DomainEventId(Guid Value)
 
     public DomainEventId()
         : this(Guid.NewGuid()) { }
+
+    public override string ToString() =>
+        Value.ToString();
 }

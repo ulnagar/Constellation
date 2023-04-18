@@ -9,4 +9,7 @@ public sealed record ClassCoverId(Guid Value)
 
     public ClassCoverId()
         : this(Guid.NewGuid()) { }
+
+    public override string ToString() =>
+        Value.ToString();
 }

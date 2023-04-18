@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Features.StaffMembers.Commands;
 
+using Constellation.Application.Features.StaffMembers.Notifications;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
@@ -20,10 +21,12 @@ public record CreateFacultyMembershipForStaffMemberCommand : IRequest
 public class CreateFacultyMembershipForStaffMemberCommandHandler : IRequestHandler<CreateFacultyMembershipForStaffMemberCommand>
 {
     private readonly IAppDbContext _context;
+    private readonly IMediator _mediator;
 
-    public CreateFacultyMembershipForStaffMemberCommandHandler(IAppDbContext context)
+    public CreateFacultyMembershipForStaffMemberCommandHandler(IAppDbContext context, IMediator mediator)
     {
         _context = context;
+        _mediator = mediator;
     }
 
     public async Task<Unit> Handle(CreateFacultyMembershipForStaffMemberCommand request, CancellationToken cancellationToken)
@@ -65,6 +68,8 @@ public class CreateFacultyMembershipForStaffMemberCommandHandler : IRequestHandl
         _context.Add(record);
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        await _mediator.Publish(new StaffFacultyMembershipAddedNotification { Membership = record }, cancellationToken);
 
         return Unit.Value;
     }

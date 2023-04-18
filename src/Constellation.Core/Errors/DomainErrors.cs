@@ -87,6 +87,13 @@ public static class DomainErrors
                 "Documents.AcademicReport.NotFound",
                 $"Could not find a document with the link id {id}");
         }
+
+        public static class TrainingCertificate
+        {
+            public static readonly Error NotFound = new(
+                "Documents.TrainingCertificate.NotFound",
+                "Could not find certificate in the database");
+        }
     }
 
     public static class Enrolments

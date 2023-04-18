@@ -25,6 +25,15 @@
     background-color: lightyellow;
 }
 
+.fa-comment-check {
+    background-color: lightgreen;
+}
+
+.fa-comment-times {
+    background-color: lightsalmon;
+    color: red;
+}
+
 td:has(i) {
     max-width: 1px;
 }

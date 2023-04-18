@@ -48,7 +48,7 @@ public class RemoveFacultyMembershipFromStaffMemberCommandHandler : IRequestHand
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _mediator.Publish(new StaffFacultyMembershipRemovedNotification { Membership = record });
+        await _mediator.Publish(new StaffFacultyMembershipRemovedNotification { Membership = record }, cancellationToken);
 
         return Unit.Value;
     }

@@ -111,6 +111,7 @@ public class AdobeConnectOperationsRepository : IAdobeConnectOperationsRepositor
             .Include(operation => operation.Room)
             .Include(operation => ((StudentAdobeConnectOperation)operation).Student)
             .Include(operation => ((TeacherAdobeConnectOperation)operation).Teacher)
+            .Include(operation => ((TeacherAdobeConnectGroupOperation)operation).Teacher)
             .Where(operation => (operation.DateScheduled > searchDate || operation.IsCompleted == false) && operation.IsDeleted == false)
             .ToListAsync();
 

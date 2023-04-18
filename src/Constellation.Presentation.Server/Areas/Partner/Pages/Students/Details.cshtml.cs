@@ -78,13 +78,14 @@ public class DetailsModel : BasePageModel
 
         var familyRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(Id), cancellationToken);
 
-        if (familyRequest.IsFailure)
-        {
-            GenerateError(familyRequest.Error);
-            return false;
-        }
+        // Only error state is that there are no families
+        //if (familyRequest.IsFailure)
+        //{
+        //    GenerateError(familyRequest.Error);
+        //    return false;
+        //}
 
-        FamilyContacts = familyRequest.Value;
+        FamilyContacts = familyRequest.IsSuccess ? familyRequest.Value : new();
 
         var enrolmentRequest = await _mediator.Send(new GetStudentEnrolmentsWithDetailsQuery(Id), cancellationToken);
 

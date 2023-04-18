@@ -47,15 +47,9 @@ internal sealed class GetModuleDetailsQueryHandler
 
         foreach (var completion in completions.Where(record => !record.IsDeleted))
         {
-            var staffMember = await _staffRepository.GetByIdWithFacultyMemberships(completion.StaffId, cancellationToken);
+            var staffMember = await _staffRepository.GetById(completion.StaffId, cancellationToken);
 
-            var facultyIds = staffMember
-                .Faculties
-                .Where(member => !member.IsDeleted)
-                .Select(member => member.FacultyId)
-                .ToList();
-
-            var faculties = await _facultyRepository.GetListFromIds(facultyIds, cancellationToken);
+            var faculties = await _facultyRepository.GetCurrentForStaffMember(staffMember.StaffId, cancellationToken);
 
             var entry = new CompletionRecordDto
             {
@@ -66,7 +60,7 @@ internal sealed class GetModuleDetailsQueryHandler
                 StaffId = completion.StaffId,
                 StaffFirstName = staffMember.FirstName,
                 StaffLastName = staffMember.LastName,
-                StaffFaculty = string.Join(",", faculties.Select(faculty => faculty.Name)),
+                StaffFaculty = string.Join(", ", faculties.Select(faculty => faculty.Name)),
                 CompletedDate = completion.CompletedDate,
                 NotRequired = completion.NotRequired,
                 CreatedAt = completion.CreatedAt
@@ -84,9 +78,9 @@ internal sealed class GetModuleDetailsQueryHandler
                 other.Id != record.Id &&
                 other.ModuleId == record.ModuleId && // true
                 other.StaffId == record.StaffId && // true
-                (other.NotRequired && other.CreatedAt > record.CompletedDate || // false
-                !other.NotRequired && !record.NotRequired && other.CompletedDate > record.CompletedDate || // false
-                record.NotRequired && record.CreatedAt < other.CompletedDate))) // false
+                ((other.NotRequired && other.CreatedAt > record.CompletedDate.Value) || // false
+                (!other.NotRequired && !record.NotRequired && other.CompletedDate.Value > record.CompletedDate.Value) || // false
+                (record.NotRequired && record.CreatedAt < other.CompletedDate.Value))))
             {
                 record.Status = CompletionRecordDto.ExpiryStatus.Superceded;
             }
@@ -106,20 +100,14 @@ internal sealed class GetModuleDetailsQueryHandler
             if (data.Completions.Any(record => record.StaffId == staff.StaffId))
                 continue;
 
-            var facultyIds = staff
-                .Faculties
-                .Where(member => !member.IsDeleted)
-                .Select(member => member.FacultyId)
-                .ToList();
-
-            var faculties = await _facultyRepository.GetListFromIds(facultyIds, cancellationToken);
+            var faculties = await _facultyRepository.GetCurrentForStaffMember(staff.StaffId, cancellationToken);
 
             var record = new CompletionRecordDto
             {
                 StaffId = staff.StaffId,
                 StaffFirstName = staff.FirstName,
                 StaffLastName = staff.LastName,
-                StaffFaculty = string.Join(",", faculties.Select(faculty => faculty.Name)),
+                StaffFaculty = string.Join(", ", faculties.Select(faculty => faculty.Name)),
                 CompletedDate = null,
                 ExpiryCountdown = -9999
             };

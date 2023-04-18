@@ -2,6 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions;
+using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using System;
 using System.Threading;
@@ -21,6 +22,9 @@ internal sealed class GetUploadedTrainingCertificateFileByIdQueryHandler
     public async Task<Result<CompletionRecordCertificateDetailsDto>> Handle(GetUploadedTrainingCertificateFileByIdQuery request, CancellationToken cancellationToken)
     {
         var file = await _storedFileRepository.GetTrainingCertificateByLinkId(request.LinkId, cancellationToken);
+
+        if (file is null)
+            return Result.Failure<CompletionRecordCertificateDetailsDto>(DomainErrors.Documents.TrainingCertificate.NotFound);
 
         return new CompletionRecordCertificateDetailsDto
         {
