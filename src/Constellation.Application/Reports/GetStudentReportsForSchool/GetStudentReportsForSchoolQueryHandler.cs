@@ -50,7 +50,9 @@ internal sealed class GetStudentReportsForSchoolQueryHandler
             {
                 results.Add(new(
                     student.StudentId,
-                    studentNameRequest.Value,
+                    studentNameRequest.Value.FirstName,
+                    studentNameRequest.Value.LastName,
+                    studentNameRequest.Value.DisplayName,
                     student.CurrentGrade,
                     report.Id,
                     report.PublishId,

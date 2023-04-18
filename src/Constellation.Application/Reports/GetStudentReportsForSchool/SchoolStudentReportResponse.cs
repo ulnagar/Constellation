@@ -2,11 +2,12 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.ValueObjects;
 
 public sealed record SchoolStudentReportResponse(
         string StudentId,
-        Name Name,
+        string FirstName,
+        string LastName,
+        string DisplayName,
         Grade Grade,
         AcademicReportId ReportId,
         string PublishId,

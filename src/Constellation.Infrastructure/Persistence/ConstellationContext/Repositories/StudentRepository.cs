@@ -121,7 +121,9 @@ public class StudentRepository : IStudentRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
-            .Where(student => student.SchoolCode == SchoolCode)
+            .Where(student => 
+                student.SchoolCode == SchoolCode &&
+                student.IsDeleted == false)
             .ToListAsync(cancellationToken);
 
     public async Task<Student> ForDetailDisplayAsync(string id)
