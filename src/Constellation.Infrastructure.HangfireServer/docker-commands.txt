@@ -1,8 +1,0 @@
-To Build:
-
-dotnet publish -c Release
-docker build --no-cache -t hangfireserver -f Dockerfile .
-
-To Use:
-
-docker compose up -d
