@@ -5,7 +5,8 @@ Install SQL Server
 	- Enable Mixed Mode authentication
 		- Create new SA account and password
 		- Store password in 1Password archive
-	- Add domain group "Aurora College - School.TSO" as SQL Server Administrators
+	- Add domain group "Aurora College - School.TSO" as SQL Server Administrators 
+		** May not work, so also include personal account **
 	- Change default data directories to point to Q drive
 
 Modify Windows Firewall to allow remote access to the database engine:
