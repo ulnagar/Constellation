@@ -39,6 +39,7 @@ public class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob, IHangfireJob
                     message.Content,
                     new JsonSerializerSettings
                     {
+                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
                         TypeNameHandling = TypeNameHandling.All
                     });
 

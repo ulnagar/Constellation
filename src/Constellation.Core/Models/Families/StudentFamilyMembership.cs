@@ -3,9 +3,13 @@ namespace Constellation.Core.Models.Families;
 
 using Constellation.Core.Models.Identifiers;
 using System;
+using Newtonsoft.Json;
 
 public sealed class StudentFamilyMembership
 {
+    //private StudentFamilyMembership() { }
+
+    [JsonConstructor]
     private StudentFamilyMembership(
         string studentId,
         FamilyId familyId,

@@ -1,3 +1,22 @@
+Install SQL Server
+	- Include the following roles:
+		- Database Engine Services
+		- Full-Text and Semantic Extractions for Search
+	- Enable Mixed Mode authentication
+		- Create new SA account and password
+		- Store password in 1Password archive
+	- Add domain group "Aurora College - School.TSO" as SQL Server Administrators
+	- Change default data directories to point to Q drive
+
+Modify Windows Firewall to allow remote access to the database engine:
+	- Details at https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/configure-a-windows-firewall-for-database-engine-access?view=sql-server-ver15
+
+Install the IIS Server Role
+	- All of the Web Server features
+	- Management Tools\IIS Management Console
+	- Management Tools\IIS Management Scripts and Tools
+	- Management Tools\Management Service
+
 Install the ASP.NET Hosting Bundle
 
 IIS Setup:
