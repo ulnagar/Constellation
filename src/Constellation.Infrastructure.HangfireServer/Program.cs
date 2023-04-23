@@ -18,6 +18,8 @@ LoggingConfiguration.SetupLogging(builder.Configuration, Serilog.Events.LogEvent
 builder.Services.RegisterServices(builder.Configuration);
 builder.Services.AddHostedService<Worker>();
 
+SelectPdf.GlobalProperties.HtmlEngineFullPath = @"q:\inetpub\wwwroot\hangfire\Select.Html.dep";
+
 builder.Host.UseWindowsService();
 
 var app = builder.Build();
