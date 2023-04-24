@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.DTOs.Awards;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
@@ -7,6 +8,7 @@ using HtmlAgilityPack;
 using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 using System.Web;
 
@@ -1010,10 +1012,114 @@ namespace Constellation.Infrastructure.ExternalServices.Sentral
                 // Index 7 = First Name
                 // Index 8 = Last Name
 
-                data.Add(AwardDetailDto.ConvertFromFileLine(split));
+                var dto = AwardDetailDto.ConvertFromFileLine(split);
+
+                if (dto.AwardCategory != "Astra Award")
+                    data.Add(dto);
             }
 
             return data;
+        }
+
+        public async Task<List<AwardIncidentDto>> GetAwardsListing(string sentralStudentId, string calYear)
+        {
+            List<AwardIncidentDto> data = new();
+
+            var page = await GetPageAsync($"{_settings.Server}/wellbeing/students/incidents?id={sentralStudentId}&category=1&year={calYear}");
+
+            var awardsList = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "WellbeingStudentAwardsList").Value);
+
+            if (awardsList is not null)
+            {
+                var rows = awardsList.Descendants("tr");
+
+                foreach (var row in rows)
+                {
+                    var cellNumber = 0;
+
+                    AwardIncidentDto entry = new();
+
+                    foreach (var cell in row.Descendants("td"))
+                    {
+                        cellNumber++;
+
+                        switch (cellNumber)
+                        {
+                            case 1:
+                                // Date Issued Column includes date and name of day
+                                var dateText = cell.InnerHtml.Split("<br>")[0];
+
+                                var success = DateOnly.TryParse(cell.InnerText, out var issueDate);
+
+                                if (!success)
+                                    continue;
+
+                                entry.DateIssued = issueDate;
+
+                                break;
+                            case 2:
+                                // Incident link and type
+                                var href = cell.ChildNodes.FindFirst("a").GetAttributeValue("href", "");
+
+                                if (!string.IsNullOrWhiteSpace(href))
+                                {
+                                    entry.IncidentId = href.Split('=')[1].Split('&')[0];
+                                }
+
+                                break;
+                            case 3:
+                                // Incident Type
+                                if (cell.InnerText.Trim() != "Astra Award")
+                                    continue;
+
+                                break;
+                            case 4:
+                                // issuing teacher name
+                                var name = cell.InnerText.Split(',');
+
+                                entry.TeacherName = $"{name[1].Trim()} {name[0].Trim()}";
+
+                                break;
+                            case 6:
+                                // Issuing reason
+                                entry.IssueReason = cell.InnerText.Trim();
+
+                                break;
+                        }
+                    }
+
+                    data.Add(entry);
+                }
+            }
+
+            return data;
+        }
+
+        public async Task<byte[]> GetAwardDocument(string sentralStudentId, string incidentId)
+        {
+            await Login();
+
+            var formData = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("selected_issues[]", "73333"),
+                new KeyValuePair<string, string>("letter_template_id", "31"),
+                new KeyValuePair<string, string>("letter_type", "incident"),
+                new KeyValuePair<string, string>("id[]", incidentId),
+                new KeyValuePair<string, string>("do_action", "print"),
+                new KeyValuePair<string, string>("issue_id", "")
+            };
+
+            var formDataEncoded = new FormUrlEncodedContent(formData);
+
+            var response = await _client.PostAsync($"{_settings.Server}/wellbeing/letters/print", formDataEncoded);
+
+            var code = await response.Content.ReadAsStringAsync();
+
+            // Try download file immediately?
+
+            var document = await _client.GetAsync($"{_settings.Server}/jasperreports/createReport?format=pdf&key={code}");
+
+            return await document.Content.ReadAsByteArrayAsync();
         }
     }
 }

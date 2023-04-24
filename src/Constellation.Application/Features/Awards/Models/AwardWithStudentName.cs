@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Constellation.Application.Common.Mapping;
 using Constellation.Application.Extensions;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Awards;
 using System;
 
 namespace Constellation.Application.Features.Awards.Models
