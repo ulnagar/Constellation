@@ -465,7 +465,7 @@ public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IHangfi
             _logger.Information("{id}: Parent mobile number has changed from {oldEntry} to {newEntry}", _jobId, existingParent.MobileNumber, mobileNumber);
         }
 
-        var emailChanged = existingParent.EmailAddress == email.Value.Email;
+        var emailChanged = existingParent.EmailAddress != email.Value.Email;
         var oldEmail = existingParent.EmailAddress;
 
         var result = entry.UpdateParent(

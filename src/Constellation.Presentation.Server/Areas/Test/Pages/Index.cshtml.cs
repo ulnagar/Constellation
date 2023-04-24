@@ -9,11 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
-    private readonly IProcessOutboxMessagesJob _familySyncJob;
+    private readonly ISentralFamilyDetailsSyncJob _familySyncJob;
 
     public IndexModel(
         IMediator mediator,
-        IProcessOutboxMessagesJob familySyncJob)
+        ISentralFamilyDetailsSyncJob familySyncJob)
     {
         _mediator = mediator;
         _familySyncJob = familySyncJob;
