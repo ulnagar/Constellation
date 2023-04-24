@@ -32,7 +32,9 @@ namespace Constellation.Infrastructure.ExternalServices.Sentral
                 { "StudentTable", "//*[@id='layout-2col-content']/div/div[1]/div/div[2]/table/tbody" },
                 { "PartialAbsenceTable", "//*[@id='student-absences-list']/table/tbody" },
                 { "CalendarTable", "//*[@id='layout-2col-content']/div/div/div[2]/div/table[1]" },
-                { "TermCalendarTable", "//*[@id='layout-2col-content']/div/div/div[2]/div/div/table" }
+                { "TermCalendarTable", "//*[@id='layout-2col-content']/div/div/div[2]/div/div/table" },
+                //{ "WellbeingStudentAwardsList", "/html/body/div[7]/div/div/div[2]/div/div/div/div[2]/table/tbody" },
+                { "WellbeingStudentAwardsList", "//*[@id='layout-2col-content']/div/div/div[2]/table/tbody" }
             };
         }
 
