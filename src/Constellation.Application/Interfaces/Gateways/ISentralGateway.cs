@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.DTOs.Awards;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -21,5 +22,7 @@ namespace Constellation.Application.Interfaces.Gateways
         Task<ICollection<SentralReportDto>> GetStudentReportList(string sentralStudentId);
         Task<byte[]> GetStudentReport(string sentralStudentId, string reportId);
         Task<ICollection<AwardDetailDto>> GetAwardsReport();
+        Task<List<AwardIncidentDto>> GetAwardsListing(string sentralStudentId, string calYear);
+        Task<byte[]> GetAwardDocument(string sentralStudentId, string incidentId);
     }
 }

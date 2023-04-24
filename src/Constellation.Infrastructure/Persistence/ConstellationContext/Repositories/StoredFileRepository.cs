@@ -13,6 +13,16 @@ internal class StoredFileRepository : IStoredFileRepository
         _context = context;
     }
 
+    public async Task<List<StoredFile>> GetAwardCertificatesFromList(
+        List<string> linkIds,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<StoredFile>()
+            .Where(file => 
+                file.LinkType == StoredFile.AwardCertificate &&
+                linkIds.Contains(file.LinkId))
+            .ToListAsync(cancellationToken);
+
     public async Task<List<StoredFile>> GetTrainingCertificatesFromList(
         List<string> recordIds,
         CancellationToken cancellationToken = default) =>

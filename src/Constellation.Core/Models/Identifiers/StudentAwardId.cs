@@ -2,12 +2,12 @@
 
 using System;
 
-public sealed record AcademicReportId(Guid Value)
+public sealed record StudentAwardId(Guid Value)
 {
-    public static AcademicReportId FromValue(Guid Value) =>
+    public static StudentAwardId FromValue(Guid Value) =>
         new(Value);
 
-    public AcademicReportId()
+    public StudentAwardId()
         : this(Guid.NewGuid()) { }
 
     public override string ToString() =>
