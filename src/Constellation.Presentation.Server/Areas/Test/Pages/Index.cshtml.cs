@@ -1,10 +1,12 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Constellation.Application.ExternalDataConsistency;
+using Constellation.Application.Features.Partners.Students.Notifications;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 
 public class IndexModel : BasePageModel
 {
@@ -68,6 +70,12 @@ public class IndexModel : BasePageModel
                 // Error uploading file
             }
         }
+        return Page();
+    }
+
+    public async Task<IActionResult> OnGetPublish(CancellationToken cancellationToken)
+    {
+        await _mediator.Publish(new StudentWithdrawnNotification { StudentId = "441063261" }, cancellationToken);
 
         return Page();
     }

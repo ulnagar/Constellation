@@ -47,7 +47,7 @@ internal sealed class WithdrawStudentCommandHandler
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 
-        await _mediator.Send(new StudentWithdrawnNotification { StudentId = request.StudentId }, cancellationToken);
+        await _mediator.Publish(new StudentWithdrawnNotification { StudentId = request.StudentId }, cancellationToken);
 
         return Result.Success();
     }
