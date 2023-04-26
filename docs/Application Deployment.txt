@@ -36,3 +36,5 @@ Certificate Setup:
  - Import the acos.aurora.nsw.edu.au code signing certificate
  - Manage Private Keys: Add IIS_IUSR group with full permissions
 
+Install Constellation.Infrastructure.Hangfire as service:
+ - Follow this page: https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/windows-service?view=aspnetcore-6.0&tabs=visual-studio
