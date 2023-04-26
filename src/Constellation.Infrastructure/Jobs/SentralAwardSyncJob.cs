@@ -2,14 +2,13 @@
 
 using Constellation.Application.Extensions;
 using Constellation.Application.Features.Awards.Commands;
-using Constellation.Application.Features.Awards.Queries;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
-using OfficeOpenXml.ConditionalFormatting;
-using Serilog;
+using Constellation.Core.Models.Awards;
+using Constellation.Core.Models.Identifiers;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,22 +44,25 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
 
         var details = await _gateway.GetAwardsReport();
 
-        // Process individual students
-        // Tally awards
-        // Calculate expected award levels
-        // Highlight discrepancies
+        var students = await _studentRepository.GetCurrentStudentsWithSchool(token);
 
-        foreach (var group in details.GroupBy(detail => detail.StudentId))
+        _logger.Information("{id}: Found {count} students to process.", jobId, students.Count);
+
+        foreach (var student in students)
         {
-            var student = await _mediator.Send(new GetStudentWithAwardQuery { StudentId = group.Key }, token);
+            _logger.Information("{id}: Processing Student {name} ({grade})", jobId, student.DisplayName, student.CurrentGrade.AsName());
 
-            _logger.LogInformation("{id}: Scanning {studentName} ({studentGrade})", jobId, student.DisplayName, student.CurrentGrade.AsName());
+            _logger.Information("{id}: Checking awards listing");
 
-            foreach (var item in group)
+            var reportAwards = details.Where(entry => entry.StudentId == student.StudentId).ToList();
+
+            foreach (var item in reportAwards)
             {
+                // Does this entry already exist in the database? If so, skip.
+
                 if (!student.Awards.Any(award => award.Type == item.AwardType && award.AwardedOn == item.AwardCreated))
                 {
-                    _logger.LogInformation("{id}: Found new {type} on {date}", jobId, item.AwardType, item.AwardCreated.ToShortDateString());
+                    _logger.Information("{id}: Found new {type} on {date}", jobId, item.AwardType, item.AwardCreated.ToShortDateString());
 
                     await _mediator.Send(new CreateStudentAwardCommand
                     {
@@ -71,17 +73,6 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
                     }, token);
                 }
             }
-        }
-
-        var students = await _studentRepository.GetCurrentStudentsWithSchool(token);
-
-        //students = students.Where(student => student.LastName == "Beesley").ToList();
-
-        _logger.Information("{id}: Found {count} students to process.", jobId, students.Count);
-
-        foreach (var student in students)
-        {
-            _logger.Information("{id}: Processing Student {name} ({grade})", jobId, student.DisplayName, student.CurrentGrade.AsName());
 
             var awards = await _gateway.GetAwardsListing(student.SentralStudentId, DateTime.Today.Year.ToString());
 
@@ -92,17 +83,17 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
 
             foreach (var award in missingAwards)
             {
+                var teacherId = "";
+
+
                 // Save to database
-                var entry = new StudentAward
-                {
-                    Id = Guid.NewGuid(),
-                    StudentId = student.StudentId,
-                    AwardedOn = award.DateIssued.ToDateTime(TimeOnly.MinValue),
-                    IncidentId = award.IncidentId,
-                    Reason = award.IssueReason,
-                    Category = "Astra Award",
-                    Type = "Astra Award"
-                };
+                var entry = StudentAward.Create(
+                    new StudentAwardId(),
+                    award.DateIssued,
+                    award.IncidentId,
+                    teacherId,
+                    award.IssueReason,
+                    student.StudentId);
 
                 _awardRepository.Insert(entry);
 

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Awards;
 
+using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
 using System;
@@ -43,6 +44,8 @@ public class StudentAward : AggregateRoot
             type,
             DateOnly.FromDateTime(awardedOn));
 
+        award.RaiseDomainEvent(new AwardCreatedDomainEvent(new DomainEventId(), id));
+
         return award;
     }
 
@@ -65,6 +68,8 @@ public class StudentAward : AggregateRoot
             TeacherId = teacherId,
             Reason = reason
         };
+
+        award.RaiseDomainEvent(new AwardCreatedDomainEvent(new DomainEventId(), id));
 
         return award;
     }
