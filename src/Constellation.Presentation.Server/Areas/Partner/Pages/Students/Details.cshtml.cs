@@ -78,54 +78,23 @@ public class DetailsModel : BasePageModel
 
         var familyRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(Id), cancellationToken);
 
-        // Only error state is that there are no families
-        //if (familyRequest.IsFailure)
-        //{
-        //    GenerateError(familyRequest.Error);
-        //    return false;
-        //}
-
         FamilyContacts = familyRequest.IsSuccess ? familyRequest.Value : new();
 
         var enrolmentRequest = await _mediator.Send(new GetStudentEnrolmentsWithDetailsQuery(Id), cancellationToken);
 
-        if (enrolmentRequest.IsFailure)
-        {
-            GenerateError(enrolmentRequest.Error);
-            return false;
-        }
-
-        Enrolments = enrolmentRequest.Value;
+        Enrolments = enrolmentRequest.IsSuccess ? enrolmentRequest.Value : new();
 
         var sessionRequest = await _mediator.Send(new GetSessionDetailsForStudentQuery(Id), cancellationToken);
 
-        if (sessionRequest.IsFailure)
-        {
-            GenerateError(sessionRequest.Error);
-            return false;
-        }
-
-        Sessions = sessionRequest.Value;
+        Sessions = sessionRequest.IsSuccess ? sessionRequest.Value : new();
 
         var equipmentRequest = await _mediator.Send(new GetDevicesAllocatedToStudentQuery(Id), cancellationToken);
 
-        if (equipmentRequest.IsFailure)
-        {
-            GenerateError(equipmentRequest.Error);
-            return false;
-        }
-
-        Equipment = equipmentRequest.Value;
+        Equipment = equipmentRequest.IsSuccess ? equipmentRequest.Value : new();
 
         var absencesRequest = await _mediator.Send(new GetAbsenceSummaryForStudentQuery(Id), cancellationToken);
 
-        if (absencesRequest.IsFailure)
-        {
-            GenerateError(absencesRequest.Error);
-            return false;
-        }
-
-        Absences = absencesRequest.Value;
+        Absences = absencesRequest.IsSuccess ? absencesRequest.Value : new();
 
         return true;
     }
