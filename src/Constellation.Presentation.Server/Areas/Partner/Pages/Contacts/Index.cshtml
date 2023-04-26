@@ -556,7 +556,7 @@
         $('#SendEmail').on('click', function() {
             var email = '';
 
-            table.column(3, { search: 'applied' }).data().each(function (value, index) {
+            table.column(4, { search: 'applied' }).data().each(function (value, index) {
                 email += value.replace(/<.*?>/ig, '') + ';';
             });
 
