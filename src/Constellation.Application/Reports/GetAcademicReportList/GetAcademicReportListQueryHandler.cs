@@ -22,7 +22,7 @@ internal sealed class GetAcademicReportListQueryHandler
     {
         List<AcademicReportResponse> results = new();
         
-        var reports = await _reportRepository.GetAll(cancellationToken);
+        var reports = await _reportRepository.GetForStudent(request.StudentId, cancellationToken);
 
         foreach (var report in reports)
         {
