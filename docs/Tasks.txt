@@ -2,6 +2,10 @@
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+AWARDS:
+	Create event handler that sends attachment of award certficate to registered parents on creation
+	Add download link to awards pages for Schools Portal and Parents Portal
+	Find a way to match Astras in the download page against the report so that the report can be used as the primary collection, and the certificates get added after the fact
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
