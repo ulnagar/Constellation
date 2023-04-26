@@ -3,6 +3,7 @@
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
+using Constellation.Core.Shared;
 using System;
 
 public class StudentAward : AggregateRoot
@@ -12,7 +13,7 @@ public class StudentAward : AggregateRoot
         string studentId,
         string category,
         string type,
-        DateOnly awardedOn)
+        DateTime awardedOn)
     {
         Id = id;
         StudentId = studentId;
@@ -24,7 +25,7 @@ public class StudentAward : AggregateRoot
     public StudentAwardId Id { get; private set; }
     public string StudentId { get; private set; }
     public string TeacherId { get; private set; }
-    public DateOnly AwardedOn { get; private set; }
+    public DateTime AwardedOn { get; private set; }
     public string Category { get; private set; }
     public string Type { get; private set; }
     public string IncidentId { get; private set; }
@@ -42,7 +43,7 @@ public class StudentAward : AggregateRoot
             studentId,
             category,
             type,
-            DateOnly.FromDateTime(awardedOn));
+            awardedOn);
 
         award.RaiseDomainEvent(new AwardCreatedDomainEvent(new DomainEventId(), id));
 
@@ -51,7 +52,7 @@ public class StudentAward : AggregateRoot
 
     public static StudentAward Create(
         StudentAwardId id,
-        DateOnly awardedOn,
+        DateTime awardedOn,
         string incidentId,
         string teacherId,
         string reason,
@@ -72,5 +73,15 @@ public class StudentAward : AggregateRoot
         award.RaiseDomainEvent(new AwardCreatedDomainEvent(new DomainEventId(), id));
 
         return award;
+    }
+
+    public void Update(
+        string incidentId,
+        string teacherId,
+        string reason)
+    {
+        IncidentId = incidentId;
+        TeacherId = teacherId;
+        Reason = reason;
     }
 }

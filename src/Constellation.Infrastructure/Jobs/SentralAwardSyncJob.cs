@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Constellation.Application.DTOs.Awards;
 using Constellation.Application.Extensions;
 using Constellation.Application.Features.Awards.Commands;
 using Constellation.Application.Interfaces.Gateways;
@@ -20,6 +21,7 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
     private readonly IStudentRepository _studentRepository;
     private readonly IStudentAwardRepository _awardRepository;
     private readonly IStoredFileRepository _storedFileRepository;
+    private readonly IStaffRepository _staffRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public SentralAwardSyncJob(
@@ -28,6 +30,7 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
         IStudentRepository studentRepository,
         IStudentAwardRepository awardRepository,
         IStoredFileRepository storedFileRepository,
+        IStaffRepository staffRepository,
         IUnitOfWork unitOfWork)
     {
         _logger = logger.ForContext<ISentralAwardSyncJob>();
@@ -35,6 +38,7 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
         _studentRepository = studentRepository;
         _awardRepository = awardRepository;
         _storedFileRepository = storedFileRepository;
+        _staffRepository = staffRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -55,47 +59,62 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
             _logger.Information("{id}: Checking awards listing");
 
             var reportAwards = details.Where(entry => entry.StudentId == student.StudentId).ToList();
+            var existingAwards = await _awardRepository.GetByStudentId(student.StudentId, token);
 
             foreach (var item in reportAwards)
             {
-                // Does this entry already exist in the database? If so, skip.
-
-                if (!student.Awards.Any(award => award.Type == item.AwardType && award.AwardedOn == item.AwardCreated))
+                if (!existingAwards.Any(award => award.Type == item.AwardType && award.AwardedOn == item.AwardCreated))
                 {
                     _logger.Information("{id}: Found new {type} on {date}", jobId, item.AwardType, item.AwardCreated.ToShortDateString());
 
-                    await _mediator.Send(new CreateStudentAwardCommand
-                    {
-                        StudentId = student.StudentId,
-                        Category = item.AwardCategory,
-                        Type = item.AwardType,
-                        AwardedOn = item.AwardCreated
-                    }, token);
+                    var entry = StudentAward.Create(
+                        new StudentAwardId(),
+                        student.StudentId,
+                        item.AwardCategory,
+                        item.AwardType,
+                        item.AwardCreated);
+
+                    _awardRepository.Insert(entry);
                 }
             }
 
-            var awards = await _gateway.GetAwardsListing(student.SentralStudentId, DateTime.Today.Year.ToString());
+            await _unitOfWork.CompleteAsync(token);
 
-            _logger.Information("{id}: Found {count} awards for student {name} ({grade})", jobId, awards.Count, student.DisplayName, student.CurrentGrade.AsName());
+            existingAwards = await _awardRepository.GetByStudentId(student.StudentId, token);
 
-            var existingAwards = await _awardRepository.GetByStudentId(student.StudentId, token);
-            var missingAwards = awards.Where(award => existingAwards.All(existing => existing.IncidentId != award.IncidentId)).ToList();
+            var checkAwards = await _gateway.GetAwardsListing(student.SentralStudentId, DateTime.Today.Year.ToString());
+
+            _logger.Information("{id}: Found {count} awards for student {name} ({grade})", jobId, checkAwards.Count, student.DisplayName, student.CurrentGrade.AsName());
+
+            var missingAwards = checkAwards.Where(award => existingAwards.All(existing => existing.IncidentId != award.IncidentId)).ToList();
+
+            List<AwardIncidentDto> unmatchedAwards = new();
 
             foreach (var award in missingAwards)
             {
-                var teacherId = "";
+                var matchingAward = existingAwards
+                    .FirstOrDefault(entry =>
+                        entry.Category == "Astra Award" &&
+                        entry.Type == "Astra Award" &&
+                        DateOnly.FromDateTime(entry.AwardedOn) == award.DateIssued &&
+                        string.IsNullOrEmpty(entry.IncidentId));
 
+                if (matchingAward is null)
+                {
+                    unmatchedAwards.Add(award);
+                    continue;
+                }
 
-                // Save to database
-                var entry = StudentAward.Create(
-                    new StudentAwardId(),
-                    award.DateIssued,
+                var teacher = await _staffRepository.GetFromName(award.TeacherName);
+
+                if (teacher is null)
+                    continue;
+
+                // Update existing entry with the new details
+                matchingAward.Update(
                     award.IncidentId,
-                    teacherId,
-                    award.IssueReason,
-                    student.StudentId);
-
-                _awardRepository.Insert(entry);
+                    teacher.StaffId,
+                    award.IssueReason);
 
                 var awardDocument = await _gateway.GetAwardDocument(student.SentralStudentId, award.IncidentId);
 
@@ -103,9 +122,45 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
                 {
                     FileData = awardDocument,
                     FileType = "application/pdf",
-                    Name = $"{student.DisplayName} - Astra Award - {award.DateIssued.ToString("dd-MM-yyyy")} - {award.IncidentId}.pdf",
+                    Name = $"{student.DisplayName} - Astra Award - {award.DateIssued:dd-MM-yyyy} - {award.IncidentId}.pdf",
                     CreatedAt = DateTime.Now,
-                    LinkId = entry.Id.ToString(),
+                    LinkId = matchingAward.Id.ToString(),
+                    LinkType = StoredFile.AwardCertificate
+                };
+
+                _storedFileRepository.Insert(file);
+            }
+
+            foreach (var award in unmatchedAwards)
+            {
+                var matchingAward = existingAwards
+                    .FirstOrDefault(entry =>
+                        entry.Category == "Astra Award" &&
+                        entry.Type == "Astra Award" &&
+                        (DateOnly.FromDateTime(entry.AwardedOn) <= award.DateIssued.AddDays(3) ||
+                        DateOnly.FromDateTime(entry.AwardedOn) >= award.DateIssued.AddDays(-3)) &&
+                        string.IsNullOrEmpty(entry.IncidentId));
+
+                var teacher = await _staffRepository.GetFromName(award.TeacherName);
+
+                if (teacher is null)
+                    continue;
+
+                // Update existing entry with the new details
+                matchingAward.Update(
+                    award.IncidentId,
+                    teacher.StaffId,
+                    award.IssueReason);
+
+                var awardDocument = await _gateway.GetAwardDocument(student.SentralStudentId, award.IncidentId);
+
+                var file = new StoredFile
+                {
+                    FileData = awardDocument,
+                    FileType = "application/pdf",
+                    Name = $"{student.DisplayName} - Astra Award - {award.DateIssued:dd-MM-yyyy} - {award.IncidentId}.pdf",
+                    CreatedAt = DateTime.Now,
+                    LinkId = matchingAward.Id.ToString(),
                     LinkType = StoredFile.AwardCertificate
                 };
 
