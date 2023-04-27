@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 public interface IStudentAwardRepository
 {
     Task<List<StudentAward>> GetByStudentId(string studentId, CancellationToken cancellationToken = default);
+    Task<List<StudentAward>> GetFromYear(int Year, CancellationToken cancellationToken = default);
+    Task<List<StudentAward>> GetFromRecentMonths(int Months, CancellationToken cancellationToken = default);
+    Task<List<StudentAward>> GetToRecentCount(int Count, CancellationToken cancellationToken = default);
 
     void Insert(StudentAward studentAward);
 }

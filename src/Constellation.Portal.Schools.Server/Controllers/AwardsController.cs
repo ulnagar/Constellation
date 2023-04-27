@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
-using Constellation.Application.Features.Awards.Queries;
+using Constellation.Application.Awards.GetSummaryForStudent;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,14 +17,14 @@ public class AwardsController : BaseAPIController
     }
 
     [HttpGet("ForStudent/{studentId}")]
-    public async Task<StudentAwardSummary> GetForSchool(string studentId)
+    public async Task<StudentAwardSummaryResponse> GetForSchool(string studentId)
     {
         var user = await GetCurrentUser();
 
         _logger.Information("Requested to get awards for student {studentId} by user {user}", studentId, user.DisplayName);
 
-        var awards = await _mediator.Send(new GetAwardSummaryForStudentQuery { StudentId = studentId });
+        var awards = await _mediator.Send(new GetSummaryForStudentQuery(studentId));
 
-        return awards;
+        return awards.Value;
     }
 }

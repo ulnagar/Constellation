@@ -1,5 +1,4 @@
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Families;
 using System;
 using System.Collections.Generic;
@@ -57,7 +56,6 @@ namespace Constellation.Core.Models
         public ICollection<StudentPartialAbsence> PartialAbsences { get; set; }
         public ICollection<StudentWholeAbsence> WholeAbsences { get; set; }
         public ICollection<LessonRoll.LessonRollStudentAttendance> LessonsAttended { get; set; }
-        public ICollection<StudentAward> Awards { get; set; }
 
         public Task EnableAbsenceNotifications(DateTime startDate)
         {

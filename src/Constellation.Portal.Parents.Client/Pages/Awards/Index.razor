@@ -1,8 +1,6 @@
 ﻿@page "/Awards/"
 
-@using Constellation.Application.DTOs
-@using Constellation.Application.Features.Awards.Models
-@using Constellation.Application.Features.Awards.Queries
+@using Constellation.Application.Awards.GetSummaryForStudent;
 @using Constellation.Application.Features.Partners.Students.Queries
 
 @inject HttpClient Http
@@ -110,7 +108,17 @@
                     <span class="row d-flex align-items-center">
                         <div class="col">
                             <div class="h4">@award.Type</div>
-                            <span class="fst-italic">Issued on @award.AwardedOn.ToShortDateString()</span>
+                            @if (!string.IsNullOrEmpty(award.AwardedBy))
+                            {
+                                <span class="fst-italic">Awarded By @award.AwardedBy</span>
+                            }
+
+                            @if (!string.IsNullOrEmpty(award.AwardedFor))
+                            {
+                                <span class="fst-italic">For @award.AwardedFor</span>
+                            }
+
+                            <span class="fst-italic">On @award.AwardedOn.ToShortDateString()</span>
                         </div>
                     </span>
                 </div>
@@ -122,7 +130,7 @@
 @code {
     public List<StudentOfParent> Students { get; set; } = new();
     public StudentOfParent SelectedStudent { get; set; } = new();
-    public StudentAwardSummary AwardSummary { get; set; } = new();
+    public StudentAwardSummaryResponse AwardSummary { get; set; } = new(0, 0, 0, 0, new());
 
     public bool ShowLoader = false;
     public bool SelectingStudent = false;
@@ -139,7 +147,7 @@
             if (Students.Count == 1)
             {
                 SelectedStudent = Students.First();
-                AwardSummary = await Http.GetFromJsonAsync<StudentAwardSummary>($"Awards/Student/{SelectedStudent.StudentId}");
+                AwardSummary = await Http.GetFromJsonAsync<StudentAwardSummaryResponse>($"Awards/Student/{SelectedStudent.StudentId}");
             }
 
             if (Students.Count > 1)
@@ -169,7 +177,7 @@
 
         try
         {
-            AwardSummary = await Http.GetFromJsonAsync<StudentAwardSummary>($"Awards/Student/{SelectedStudent.StudentId}");
+            AwardSummary = await Http.GetFromJsonAsync<StudentAwardSummaryResponse>($"Awards/Student/{SelectedStudent.StudentId}");
         }
         catch (AccessTokenNotAvailableException exception)
         {

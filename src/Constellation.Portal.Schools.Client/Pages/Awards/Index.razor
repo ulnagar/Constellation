@@ -1,7 +1,7 @@
 ﻿@page "/Awards/"
-@using Constellation.Application.Features.Awards.Models;
-@using Constellation.Application.Features.Awards.Queries;
+
 @using Constellation.Application.Features.Portal.School.Home.Models;
+@using Constellation.Application.Awards.GetSummaryForStudent;
 
 @attribute [Authorize]
 
@@ -92,7 +92,17 @@
                         <span class="row d-flex align-items-center">
                             <div class="col">
                                 <div class="h4">@award.Type</div>
-                                <span class="fst-italic">Issued on @award.AwardedOn.ToShortDateString()</span>
+                                @if (!string.IsNullOrEmpty(award.AwardedBy))
+                                {
+                                    <span class="fst-italic">Awarded By @award.AwardedBy</span>
+                                }
+
+                                @if (!string.IsNullOrEmpty(award.AwardedFor))
+                                {
+                                    <span class="fst-italic">For @award.AwardedFor</span>
+                                }
+
+                                <span class="fst-italic">On @award.AwardedOn.ToShortDateString()</span>
                             </div>
                         </span>
                     </div>
@@ -113,7 +123,7 @@
     public ICollection<StudentFromSchoolForDropdownSelection> Students { get; set; } = new List<StudentFromSchoolForDropdownSelection>();
     public StudentFromSchoolForDropdownSelection SelectedStudent { get; set; }
 
-    public StudentAwardSummary AwardSummary { get; set; } = new();
+    public StudentAwardSummaryResponse AwardSummary { get; set; } = new(0, 0, 0, 0, new());
 
     protected override async Task OnParametersSetAsync()
     {
@@ -155,7 +165,7 @@
 
         if (SelectedStudent != null)
         {
-            AwardSummary = await Http.GetFromJsonAsync<StudentAwardSummary>($"api/Awards/ForStudent/{SelectedStudent.StudentId}");
+            AwardSummary = await Http.GetFromJsonAsync<StudentAwardSummaryResponse>($"api/Awards/ForStudent/{SelectedStudent.StudentId}");
         }
 
         IsLoading = false;
