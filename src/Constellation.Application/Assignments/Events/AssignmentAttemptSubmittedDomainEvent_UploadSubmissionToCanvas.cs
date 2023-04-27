@@ -1,12 +1,14 @@
 ﻿namespace Constellation.Application.Assignments.Events;
 
 using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
 using Serilog;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -57,7 +59,15 @@ internal sealed class AssignmentAttemptSubmittedDomainEvent_UploadSubmissionToCa
             return;
         }
 
-        var offering = await _courseOfferingRepository.GetById(assignment.CourseId, cancellationToken);
+        var offerings = await _courseOfferingRepository.GetByCourseId(assignment.CourseId, cancellationToken);
+
+        if (offerings is null)
+        {
+            _logger.Error("Could not find matching offering for submission {@submission}", submission);
+            return;
+        }
+
+        var offering = offerings.FirstOrDefault(offering => offering.IsCurrent());
 
         if (offering is null)
         {
@@ -66,6 +76,8 @@ internal sealed class AssignmentAttemptSubmittedDomainEvent_UploadSubmissionToCa
         }
 
         var canvasCourseId = $"{offering.EndDate.Year}-{offering.Name[..^1]}";
+
+        _logger.Information("Canvas Course Id identified as {id}", canvasCourseId);
 
         var file = await _storedFileRepository.GetAssignmentSubmissionByLinkId(submission.Id.Value.ToString(), cancellationToken);
 
