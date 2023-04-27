@@ -33,16 +33,18 @@ internal sealed class GetAssignmentsByCourseQueryHandler
         // Only process assignments that the student hasn't already submitted the maximum number of attempts
         var validAssignments = assignments
             .Where(entry =>
-                entry.AllowedAttempts <= 0 ||
-                entry.Submissions.Count(submission => submission.StudentId == request.StudentId) < entry.AllowedAttempts)
+                (entry.AllowedAttempts <= 0 ||
+                entry.Submissions.Count(submission => submission.StudentId == request.StudentId) < entry.AllowedAttempts) &&
+                ((entry.LockDate.HasValue && entry.LockDate.Value >= DateTime.Now) || 
+                (!entry.LockDate.HasValue && entry.DueDate >= DateTime.Now)))
             .ToList();
 
-        foreach (var assignment in assignments)
+        foreach (var assignment in validAssignments)
         {
             var entry = new CourseAssignmentResponse(
                 assignment.Id,
                 assignment.Name,
-                DateOnly.FromDateTime(assignment.DueDate));
+                assignment.DueDate);
 
             result.Add(entry);
         }

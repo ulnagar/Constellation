@@ -11,11 +11,11 @@ using System.Threading;
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
-    private readonly ISentralFamilyDetailsSyncJob _familySyncJob;
+    private readonly IProcessOutboxMessagesJob _familySyncJob;
 
     public IndexModel(
         IMediator mediator,
-        ISentralFamilyDetailsSyncJob familySyncJob)
+        IProcessOutboxMessagesJob familySyncJob)
     {
         _mediator = mediator;
         _familySyncJob = familySyncJob;
