@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Portal.Parents.Server.Controllers;
 
-using Constellation.Application.Features.Awards.Queries;
+using Constellation.Application.Awards.GetSummaryForStudent;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,21 +17,19 @@ public class AwardsController : BaseAPIController
     }
 
     [HttpGet("Student/{id}")]
-    public async Task<StudentAwardSummary> GetDetails([FromRoute] string Id)
+    public async Task<StudentAwardSummaryResponse> GetDetails([FromRoute] string Id)
     {
         var authorised = await HasAuthorizedAccessToStudent(_mediator, Id);
 
         if (!authorised)
-        {
-            return new StudentAwardSummary();
-        }
+            return new StudentAwardSummaryResponse(0, 0, 0, 0, new());
 
         var user = await GetCurrentUser();
 
         _logger.LogInformation("Requested to retrieve award details for student {id} by parent {name}", Id, user.UserName);
 
-        var summary = await _mediator.Send(new GetAwardSummaryForStudentQuery { StudentId = Id });
+        var summary = await _mediator.Send(new GetSummaryForStudentQuery(Id));
 
-        return summary;
+        return summary.Value;
     }
 }

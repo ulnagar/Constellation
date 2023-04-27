@@ -2,7 +2,6 @@
 
 using Constellation.Application.DTOs.Awards;
 using Constellation.Application.Extensions;
-using Constellation.Application.Features.Awards.Commands;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
