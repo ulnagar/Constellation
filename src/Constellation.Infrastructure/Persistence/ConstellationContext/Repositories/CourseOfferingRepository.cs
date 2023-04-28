@@ -64,6 +64,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             CancellationToken cancellationToken = default) =>
             await _context
                 .Set<CourseOffering>()
+                .Include(offering => offering.Sessions)
                 .Where(offering => offering.CourseId == courseId)
                 .ToListAsync(cancellationToken);
 

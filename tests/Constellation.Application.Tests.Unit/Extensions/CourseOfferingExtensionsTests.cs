@@ -7,6 +7,23 @@ public class CourseOfferingExtensionsTests
 {
 
     [Fact]
+    public void IsCurrent_ShouldReturnFalse_IfSessionsIsNull()
+    {
+        // Arrange
+        var sut = new CourseOffering
+        {
+            StartDate = DateTime.Today.AddDays(-1),
+            EndDate = DateTime.Today.AddDays(1)
+        };
+
+        // Act
+        var result = sut.IsCurrent();
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact]
     public void IsCurrent_ShouldReturnFalse_IfAllSessionsAreDeleted()
     {
         // Arrange

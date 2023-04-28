@@ -63,7 +63,7 @@ internal sealed class AssignmentAttemptSubmittedDomainEvent_UploadSubmissionToCa
 
         if (offerings is null)
         {
-            _logger.Error("Could not find matching offering for submission {@submission}", submission);
+            _logger.Error("Could not find matching offering for submission {@submission} using Course Id {id}", submission, assignment.CourseId);
             return;
         }
 
@@ -71,7 +71,7 @@ internal sealed class AssignmentAttemptSubmittedDomainEvent_UploadSubmissionToCa
 
         if (offering is null)
         {
-            _logger.Error("Could not find matching offering for submission {@submission}", submission);
+            _logger.Error("Could not find matching offering for submission {@submission} from list {@list}", submission, offerings);
             return;
         }
 

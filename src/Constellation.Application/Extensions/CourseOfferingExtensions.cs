@@ -6,6 +6,11 @@ namespace Constellation.Application.Extensions
 {
     public static class CourseOfferingExtensions
     {
+        /// <summary>
+        /// Must have the Sessions collection loaded to get accurate information
+        /// </summary>
+        /// <param name="offering"></param>
+        /// <returns>bool</returns>
         public static bool IsCurrent(this CourseOffering offering)
         {
             if (offering.Sessions.All(s => s.IsDeleted))
