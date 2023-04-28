@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Constellation.Application.ExternalDataConsistency;
+using Constellation.Application.Families.GetResidentialFamilyMobileNumbers;
 using Constellation.Application.Features.Partners.Students.Notifications;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Presentation.Server.BaseModels;
@@ -35,7 +36,9 @@ public class IndexModel : BasePageModel
 
     public async Task OnGetFamilyUpdate(CancellationToken cancellationToken = default)
     {
-        await _familySyncJob.StartJob(Guid.NewGuid(), cancellationToken);
+        await _mediator.Send(new GetResidentialFamilyMobileNumbersQuery("450888711"), cancellationToken);
+
+        //await _familySyncJob.StartJob(Guid.NewGuid(), cancellationToken);
     }
 
     public async Task<IActionResult> OnPostCheckFile()

@@ -59,11 +59,20 @@ public class GetResidentialFamilyEmailAddressesQueryHandler
             .FirstOrDefault(parent =>
                 parent.SentralLink == Core.Models.Families.Parent.SentralReference.Mother);
 
-        var motherEmailRequest = EmailRecipient.Create($"{mother.FirstName} {mother.LastName}", mother.EmailAddress);
+        Result<EmailRecipient> motherEmail;
 
-        if (motherEmailRequest.IsFailure)
+        if (mother is null)
         {
-            _logger.Warning("Parent contact email is invalid: {@parent}", mother);
+            motherEmail = Result.Failure<EmailRecipient>(Error.NullValue);
+        }
+        else
+        {
+            motherEmail = EmailRecipient.Create($"{mother.FirstName} {mother.LastName}", mother.EmailAddress);
+
+            if (motherEmail.IsFailure)
+            {
+                _logger.Warning("Parent contact email is invalid: {@parent}", mother);
+            }
         }
 
         var father = residentialFamily
@@ -71,38 +80,47 @@ public class GetResidentialFamilyEmailAddressesQueryHandler
             .FirstOrDefault(parent =>
                 parent.SentralLink == Core.Models.Families.Parent.SentralReference.Father);
 
-        var fatherEmailRequest = EmailRecipient.Create($"{father.FirstName} {father.LastName}", father.EmailAddress);
-        
-        if (fatherEmailRequest.IsFailure)
+        Result<EmailRecipient> fatherEmail;
+
+        if (father is null)
         {
-            _logger.Warning("Parent contact email is invalid: {@parent}", father);
+            fatherEmail = Result.Failure<EmailRecipient>(Error.NullValue);
+        }
+        else
+        {
+            fatherEmail = EmailRecipient.Create($"{father.FirstName} {father.LastName}", father.EmailAddress);
+
+            if (fatherEmail.IsFailure)
+            {
+                _logger.Warning("Parent contact email is invalid: {@parent}", father);
+            }
         }
 
         switch (_settings?.ContactPreference)
         {
             case ISentralGatewayConfiguration.ContactPreferenceOptions.MotherFirstThenFather:
-                if (motherEmailRequest.IsSuccess)
-                    emailAddresses.Add(motherEmailRequest.Value);
+                if (motherEmail.IsSuccess)
+                    emailAddresses.Add(motherEmail.Value);
                 else
-                    if (fatherEmailRequest.IsSuccess)
-                    emailAddresses.Add(fatherEmailRequest.Value);
+                    if (fatherEmail.IsSuccess)
+                    emailAddresses.Add(fatherEmail.Value);
 
                 break;
             case ISentralGatewayConfiguration.ContactPreferenceOptions.FatherFirstThenMother:
-                if (fatherEmailRequest.IsSuccess)
-                    emailAddresses.Add(fatherEmailRequest.Value);
+                if (fatherEmail.IsSuccess)
+                    emailAddresses.Add(fatherEmail.Value);
                 else
-                    if (motherEmailRequest.IsSuccess)
-                        emailAddresses.Add(motherEmailRequest.Value);
+                    if (motherEmail.IsSuccess)
+                        emailAddresses.Add(motherEmail.Value);
 
                 break;
             case ISentralGatewayConfiguration.ContactPreferenceOptions.BothParentsIfPresent:
             default:
-                if (motherEmailRequest.IsSuccess)
-                    emailAddresses.Add(motherEmailRequest.Value);
+                if (motherEmail.IsSuccess)
+                    emailAddresses.Add(motherEmail.Value);
                 
-                if (fatherEmailRequest.IsSuccess)
-                    emailAddresses.Add(fatherEmailRequest.Value);
+                if (fatherEmail.IsSuccess)
+                    emailAddresses.Add(fatherEmail.Value);
 
                 break;
         }
