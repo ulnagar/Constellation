@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -11,36 +10,58 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "StudentAward");
+            migrationBuilder.DropIndex(
+                name: "IX_StudentAward_StudentId",
+                table: "StudentAward");
+            
+            migrationBuilder.DropForeignKey(
+                name: "FK_StudentAward_Students_StudentId",
+                table: "StudentAward");
 
-            migrationBuilder.CreateTable(
-                name: "Awards_StudentAwards",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    StudentId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    TeacherId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    AwardedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IncidentId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Awards_StudentAwards", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Awards_StudentAwards_Staff_TeacherId",
-                        column: x => x.TeacherId,
-                        principalTable: "Staff",
-                        principalColumn: "StaffId");
-                    table.ForeignKey(
-                        name: "FK_Awards_StudentAwards_Students_StudentId",
-                        column: x => x.StudentId,
-                        principalTable: "Students",
-                        principalColumn: "StudentId");
-                });
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_StudentAward",
+                table: "StudentAward");
+
+            migrationBuilder.RenameTable(
+                name: "StudentAward",
+                newName: "Awards_StudentAwards");
+
+            migrationBuilder.AddColumn<string>(
+                name: "TeacherId",
+                table: "Awards_StudentAwards",
+                type: "nvarchar(450)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "IncidentId",
+                table: "Awards_StudentAwards",
+                type: "nvarchar(450)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "Reason",
+                table: "Awards_StudentAwards",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Awards_StudentAwards",
+                table: "Awards_StudentAwards",
+                column: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Awards_StudentAwards_Staff_TeacherId",
+                table: "Awards_StudentAwards",
+                column: "TeacherId",
+                principalTable: "Staff",
+                principalColumn: "StaffId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Awards_StudentAwards_Students_StudentId",
+                table: "Awards_StudentAwards",
+                column: "StudentId",
+                principalTable: "Students",
+                principalColumn: "StudentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Awards_StudentAwards_IncidentId",
@@ -61,28 +82,57 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Awards_StudentAwards");
+            migrationBuilder.DropIndex(
+                name: "IX_Awards_StudentAwards_TeacherId",
+                table: "Awards_StudentAwards");
 
-            migrationBuilder.CreateTable(
-                name: "StudentAward",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    StudentId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    AwardedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_StudentAward", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_StudentAward_Students_StudentId",
-                        column: x => x.StudentId,
-                        principalTable: "Students",
-                        principalColumn: "StudentId");
-                });
+            migrationBuilder.DropIndex(
+                name: "IX_Awards_StudentAwards_StudentId",
+                table: "Awards_StudentAwards");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Awards_StudentAwards_IncidentId",
+                table: "Awards_StudentAwards");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Awards_StudentAwards_Students_StudentId",
+                table: "Awards_StudentAwards");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Awards_StudentAwards_Staff_TeacherId",
+                table: "Awards_StudentAwards");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_Awards_StudentAwards",
+                table: "Awards_StudentAwards");
+
+            migrationBuilder.RenameTable(
+                name: "Awards_StudentAwards",
+                newName: "StudentAward");
+
+            migrationBuilder.DropColumn(
+                name: "TeacherId",
+                table: "StudentAward");
+
+            migrationBuilder.DropColumn(
+                name: "IncidentId",
+                table: "StudentAward");
+
+            migrationBuilder.DropColumn(
+                name: "Reason",
+                table: "StudentAward");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_StudentAward",
+                table: "StudentAward",
+                column: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_StudentAward_Students_StudentId",
+                table: "StudentAward",
+                column: "StudentId",
+                principalTable: "Students",
+                principalColumn: "StudentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StudentAward_StudentId",

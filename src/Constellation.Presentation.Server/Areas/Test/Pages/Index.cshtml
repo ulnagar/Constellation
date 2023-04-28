@@ -1,34 +1,32 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
 
-<a asp-page-handler="FamilyUpdate">Update Families</a>
-<a asp-page-handler="Publish">Publish Student Withdrawal</a>
-
-<form asp-page-handler="CheckFile" enctype="multipart/form-data">
-    <input asp-for="FormFile" type="file" />
-    <input asp-for="EmailReport" />
-    <button type="submit">Check Consistency</button>
-</form>
+<a asp-page-handler="CheckAwards" class="btn btn-success">Sync Awards</a>
 
 <table class="table table-striped data-table">
     <thead>
         <tr>
-            <th>File</th>
-            <th>Index</th>
-            <th>Column</th>
-            <th>Current Value</th>
-            <th>New Value</th>
+            <th>Student</th>
+            <th>Type</th>
+            <th>Teacher</th>
+            <th>Date</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.UpdateItems)
+        @foreach (var item in Model.Awards)
         {
             <tr>
-                <td>@item.Source</td>
-                <td>@item.Line</td>
-                <td>@item.Column</td>
-                <td>@item.CurrentValue</td>
-                <td>@item.NewValue</td>
+                <td>@item.StudentName</td>
+                <td>@item.Type</td>
+                <td>@item.TeacherName</td>
+                <td>@item.AwardedOn.ToShortDateString()</td>
+                <td>
+                    @if (item.HasCertificate)
+                    {
+                        <a asp-page-handler="AttemptDownload" asp-route-id="@item.Id.ToString()" class="btn btn-sm btn-warning btn-show-hover">Download</a>
+                    }
+                </td>
             </tr>
         }
     </tbody>

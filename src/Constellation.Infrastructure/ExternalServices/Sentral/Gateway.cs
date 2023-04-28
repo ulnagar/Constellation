@@ -1014,7 +1014,7 @@ namespace Constellation.Infrastructure.ExternalServices.Sentral
 
                 var dto = AwardDetailDto.ConvertFromFileLine(split);
 
-                if (dto.AwardCategory != "Astra Award")
+                //if (dto.AwardCategory != "Astra Award")
                     data.Add(dto);
             }
 
@@ -1099,9 +1099,25 @@ namespace Constellation.Infrastructure.ExternalServices.Sentral
         {
             await Login();
 
+            // Get the Issue Id first
+            // https://admin.aurora.dec.nsw.gov.au/wellbeing/letters/print?letter_type=incident&id=30133&student_id=1868
+
+            var previewPage = await GetPageAsync($"{_settings.Server}/wellbeing/letters/print?letter_type=incident&id={incidentId}&student_id={sentralStudentId}");
+
+            var inputs = previewPage.DocumentNode.SelectNodes("//input[@name='selected_issues[]']");
+
+            string issue = string.Empty;
+
+            foreach (var input in inputs)
+            {
+                issue = input.Attributes["value"].Value;
+            }
+
+            // Use the Issue Id to generate the certificate
+
             var formData = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("selected_issues[]", "73333"),
+                new KeyValuePair<string, string>("selected_issues[]", issue),
                 new KeyValuePair<string, string>("letter_template_id", "31"),
                 new KeyValuePair<string, string>("letter_type", "incident"),
                 new KeyValuePair<string, string>("id[]", incidentId),
@@ -1113,11 +1129,21 @@ namespace Constellation.Infrastructure.ExternalServices.Sentral
 
             var response = await _client.PostAsync($"{_settings.Server}/wellbeing/letters/print", formDataEncoded);
 
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                _logger.Warning("Did not successfully generate the certificate: {@formData}", formData);
+                return Array.Empty<byte>();
+            }
+
             var code = await response.Content.ReadAsStringAsync();
 
-            // Try download file immediately?
-
             var document = await _client.GetAsync($"{_settings.Server}/jasperreports/createReport?format=pdf&key={code}");
+
+            if (document.StatusCode != HttpStatusCode.OK)
+            {
+                _logger.Warning("Did not successfully download certificate: {@formData} ({code})", formData, code);
+                return Array.Empty<byte>();
+            }
 
             return await document.Content.ReadAsByteArrayAsync();
         }

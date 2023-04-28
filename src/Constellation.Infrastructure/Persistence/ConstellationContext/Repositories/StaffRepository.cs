@@ -262,18 +262,19 @@ public class StaffRepository : IStaffRepository
 
     public async Task<Staff> GetFromName(string name)
     {
-        var expandedName = name.ToLowerInvariant().Trim().Split(' ');
-        var fixedName = "";
+        var splitName = name.ToLowerInvariant().Trim().Split(' ');
 
-        foreach (var item in expandedName)
-        {
-            fixedName += item;
-            if (expandedName.Last() != item)
-                fixedName += ".";
-        }
+        var straightMatch = await _context
+            .Set<Staff>()
+            .FirstOrDefaultAsync(staff => staff.FirstName.Contains(splitName[0]) && staff.LastName.Contains(splitName[1]));
+
+        if (straightMatch is not null)
+            return straightMatch;
+
+        var username = name.ToLowerInvariant().Trim().Replace(' ', '.');
 
         return await _context.Staff
-            .SingleOrDefaultAsync(member => member.PortalUsername.Contains(fixedName));
+            .SingleOrDefaultAsync(member => member.PortalUsername.Contains(username));
     }
 
     public async Task<Staff> FromIdForExistCheck(string id)

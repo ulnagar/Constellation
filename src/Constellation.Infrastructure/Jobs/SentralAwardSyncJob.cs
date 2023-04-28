@@ -49,16 +49,23 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
 
         var students = await _studentRepository.GetCurrentStudentsWithSchool(token);
 
+        students = students
+            .Where(student => student.CurrentGrade > Core.Enums.Grade.Y06)
+            .OrderBy(student => student.CurrentGrade)
+            .ThenBy(student => student.LastName)
+            .ThenBy(student => student.FirstName)
+            .ToList();
+
         _logger.Information("{id}: Found {count} students to process.", jobId, students.Count);
 
         foreach (var student in students)
         {
             _logger.Information("{id}: Processing Student {name} ({grade})", jobId, student.DisplayName, student.CurrentGrade.AsName());
 
-            _logger.Information("{id}: Checking awards listing");
-
             var reportAwards = details.Where(entry => entry.StudentId == student.StudentId).ToList();
             var existingAwards = await _awardRepository.GetByStudentId(student.StudentId, token);
+
+            _logger.Information("{id}: Found {count} total awards for student {name} ({grade})", jobId, reportAwards.Count, student.DisplayName, student.CurrentGrade.AsName());
 
             foreach (var item in reportAwards)
             {
@@ -83,7 +90,7 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
 
             var checkAwards = await _gateway.GetAwardsListing(student.SentralStudentId, DateTime.Today.Year.ToString());
 
-            _logger.Information("{id}: Found {count} awards for student {name} ({grade})", jobId, checkAwards.Count, student.DisplayName, student.CurrentGrade.AsName());
+            _logger.Information("{id}: Found {count} award certificates for student {name} ({grade})", jobId, checkAwards.Count, student.DisplayName, student.CurrentGrade.AsName());
 
             var missingAwards = checkAwards.Where(award => existingAwards.All(existing => existing.IncidentId != award.IncidentId)).ToList();
 
@@ -104,30 +111,9 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
                     continue;
                 }
 
-                var teacher = await _staffRepository.GetFromName(award.TeacherName);
+                _logger.Information("{id}: Matched new award certificate with Incident Id {inc} for student {name} ({grade})", jobId, award.IncidentId, student.DisplayName, student.CurrentGrade.AsName());
 
-                if (teacher is null)
-                    continue;
-
-                // Update existing entry with the new details
-                matchingAward.Update(
-                    award.IncidentId,
-                    teacher.StaffId,
-                    award.IssueReason);
-
-                var awardDocument = await _gateway.GetAwardDocument(student.SentralStudentId, award.IncidentId);
-
-                var file = new StoredFile
-                {
-                    FileData = awardDocument,
-                    FileType = "application/pdf",
-                    Name = $"{student.DisplayName} - Astra Award - {award.DateIssued:dd-MM-yyyy} - {award.IncidentId}.pdf",
-                    CreatedAt = DateTime.Now,
-                    LinkId = matchingAward.Id.ToString(),
-                    LinkType = StoredFile.AwardCertificate
-                };
-
-                _storedFileRepository.Insert(file);
+                await ProcessAward(award, matchingAward, student);
             }
 
             foreach (var award in unmatchedAwards)
@@ -140,35 +126,48 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
                         DateOnly.FromDateTime(entry.AwardedOn) >= award.DateIssued.AddDays(-3)) &&
                         string.IsNullOrEmpty(entry.IncidentId));
 
-                var teacher = await _staffRepository.GetFromName(award.TeacherName);
-
-                if (teacher is null)
-                    continue;
-
-                // Update existing entry with the new details
-                matchingAward.Update(
-                    award.IncidentId,
-                    teacher.StaffId,
-                    award.IssueReason);
-
-                var awardDocument = await _gateway.GetAwardDocument(student.SentralStudentId, award.IncidentId);
-
-                var file = new StoredFile
+                if (matchingAward is not null)
                 {
-                    FileData = awardDocument,
-                    FileType = "application/pdf",
-                    Name = $"{student.DisplayName} - Astra Award - {award.DateIssued:dd-MM-yyyy} - {award.IncidentId}.pdf",
-                    CreatedAt = DateTime.Now,
-                    LinkId = matchingAward.Id.ToString(),
-                    LinkType = StoredFile.AwardCertificate
-                };
-
-                _storedFileRepository.Insert(file);
+                    _logger.Information("{id}: Matched new award certificate with Incident Id {inc} for student {name} ({grade})", jobId, award.IncidentId, student.DisplayName, student.CurrentGrade.AsName());
+                    
+                    await ProcessAward(award, matchingAward, student);
+                }
             }
 
             await _unitOfWork.CompleteAsync(token);
         }
 
         return;
+    }
+
+    private async Task ProcessAward(AwardIncidentDto award, StudentAward matchingAward, Student student)
+    {
+        var teacher = await _staffRepository.GetFromName(award.TeacherName);
+
+        if (teacher is null)
+            return;
+
+        // Update existing entry with the new details
+        matchingAward.Update(
+            award.IncidentId,
+            teacher.StaffId,
+            award.IssueReason);
+
+        var awardDocument = await _gateway.GetAwardDocument(student.SentralStudentId, award.IncidentId);
+
+        if (awardDocument.Length == 0)
+            return;
+
+        var file = new StoredFile
+        {
+            FileData = awardDocument,
+            FileType = "application/pdf",
+            Name = $"{student.DisplayName} - Astra Award - {award.DateIssued:dd-MM-yyyy} - {award.IncidentId}.pdf",
+            CreatedAt = DateTime.Now,
+            LinkId = matchingAward.Id.ToString(),
+            LinkType = StoredFile.AwardCertificate
+        };
+
+        _storedFileRepository.Insert(file);
     }
 }

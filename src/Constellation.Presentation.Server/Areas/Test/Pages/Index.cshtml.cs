@@ -1,85 +1,100 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
-using Constellation.Application.ExternalDataConsistency;
-using Constellation.Application.Families.GetResidentialFamilyMobileNumbers;
-using Constellation.Application.Features.Partners.Students.Notifications;
+using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Jobs;
+using Constellation.Core.Models;
+using Constellation.Core.Models.Awards;
+using Constellation.Core.Models.Identifiers;
+using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Threading;
 
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
-    private readonly ISentralAwardSyncJob _familySyncJob;
+    private readonly ISentralAwardSyncJob _awardSyncJob;
+    private readonly AppDbContext _context;
 
     public IndexModel(
         IMediator mediator,
-        ISentralAwardSyncJob familySyncJob)
+        ISentralAwardSyncJob awardSyncJob,
+        AppDbContext context)
     {
         _mediator = mediator;
-        _familySyncJob = familySyncJob;
+        _awardSyncJob = awardSyncJob;
+        _context = context;
     }
 
-    [BindProperty]
-    public IFormFile FormFile { get; set; }
-    [BindProperty]
-    public bool EmailReport { get; set; }
+    public List<Award> Awards { get; set; } = new();
 
-    public List<UpdateItem> UpdateItems { get; set; } = new();
+    public class Award 
+    {
+        public StudentAwardId Id { get; set; }
+        public string StudentName { get; set; }
+        public string TeacherName { get; set; }
+        public DateTime AwardedOn { get; set; }
+        public string Category { get; set; }
+        public string Type { get; set; }
+        public bool HasCertificate { get; set; }
+    }
 
     public async Task OnGetAsync()
     {
         await GetClasses(_mediator);
-    }
 
-    public async Task OnGetFamilyUpdate(CancellationToken cancellationToken = default)
-    {
-        await _mediator.Send(new GetResidentialFamilyMobileNumbersQuery("450888711"), cancellationToken);
+        var yearStart = new DateTime(2023, 1, 1);
 
-        //await _familySyncJob.StartJob(Guid.NewGuid(), cancellationToken);
-    }
+        var teachers = await _context
+            .Set<Staff>()
+            .ToListAsync();
 
-    public async Task<IActionResult> OnPostCheckFile()
-    {
-        if (FormFile is not null)
+        var awards = await _context
+            .Set<StudentAward>()
+            .Where(award =>
+                award.AwardedOn > yearStart)
+            .ToListAsync();
+
+        var groupedAwards = awards.GroupBy(entry => entry.StudentId);
+
+        foreach (var awardGroup in groupedAwards)
         {
-            try
+            var student = await _context.Set<Student>().FirstOrDefaultAsync(entry => entry.StudentId == awardGroup.Key);
+
+            foreach (var award in awardGroup)
             {
-                string emailAddress = string.Empty;
-                if (EmailReport)
+                var teacher = teachers.FirstOrDefault(entry => entry.StaffId == award.TeacherId);
+
+                var certificate = await _context.Set<StoredFile>().AnyAsync(entry => entry.LinkId == award.Id.ToString() && entry.LinkType == StoredFile.AwardCertificate);
+
+                Awards.Add(new()
                 {
-                    emailAddress = User.Identity?.Name;
-
-                    if (emailAddress is null)
-                        EmailReport = false;
-                }
-
-                await using var target = new MemoryStream();
-                await FormFile.CopyToAsync(target);
-
-                var outputRequest = await _mediator.Send(new MasterFileConsistencyCoordinator(target, EmailReport, emailAddress));
-
-                if (outputRequest.IsFailure)
-                {
-                    return NotFound();
-                }
-
-                UpdateItems = outputRequest.Value;
-            }
-            catch (Exception ex)
-            {
-                // Error uploading file
+                    Id = award.Id,
+                    StudentName = student.DisplayName,
+                    TeacherName = teacher?.DisplayName,
+                    Type = award.Type,
+                    Category = award.Category,
+                    AwardedOn = award.AwardedOn,
+                    HasCertificate = certificate
+                });
             }
         }
-        return Page();
     }
 
-    public async Task<IActionResult> OnGetPublish(CancellationToken cancellationToken)
+    public async Task OnGetCheckAwards(CancellationToken cancellationToken = default)
     {
-        await _mediator.Publish(new StudentWithdrawnNotification { StudentId = "441063261" }, cancellationToken);
+        await _awardSyncJob.StartJob(Guid.NewGuid(), cancellationToken);
+    }
 
-        return Page();
+    public async Task<IActionResult> OnGetAttemptDownload(string id)
+    {
+        var file = await _context.Set<StoredFile>().FirstOrDefaultAsync(entry => entry.LinkId == id && entry.LinkType == StoredFile.AwardCertificate);
+
+        if (file is null)
+            return Page();
+
+        return File(file.FileData, file.FileType, file.Name);
     }
 }
