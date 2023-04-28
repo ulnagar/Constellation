@@ -245,11 +245,12 @@
             long maxFileSize = 10485760;
             await using var target = new MemoryStream();
             await File.OpenReadStream(maxFileSize).CopyToAsync(target);
-            Command.File.FileData = target.ToArray();
+            SelectedFile.FileData = target.ToArray();
         }
         catch (Exception ex)
         {
             //Whats going on here?
+            Console.WriteLine($"Exception thrown: {ex.Message}");
             Message = "An error has occurred uploading this file. Please check and try again!";
             return;
         }
