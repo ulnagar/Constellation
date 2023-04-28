@@ -59,11 +59,22 @@ public class GetResidentialFamilyMobileNumbersQueryHandler
             .FirstOrDefault(parent =>
                 parent.SentralLink == Core.Models.Families.Parent.SentralReference.Mother);
 
-        var motherMobileRequest = PhoneNumber.Create(mother.MobileNumber);
+        Result<PhoneNumber> motherMobile;
 
-        if (motherMobileRequest.IsFailure)
+        if (mother is null) 
         {
-            _logger.Warning("Parent contact mobile is invalid: {@parent}", mother);
+            motherMobile = Result.Failure<PhoneNumber>(Error.NullValue);
+        }
+        else
+        {
+            var motherMobileRequest = PhoneNumber.Create(mother.MobileNumber);
+
+            if (motherMobileRequest.IsFailure)
+            {
+                _logger.Warning("Parent contact mobile is invalid: {@parent}", mother);
+            }
+                
+            motherMobile = motherMobileRequest;
         }
 
         var father = residentialFamily
@@ -71,38 +82,49 @@ public class GetResidentialFamilyMobileNumbersQueryHandler
             .FirstOrDefault(parent =>
                 parent.SentralLink == Core.Models.Families.Parent.SentralReference.Father);
 
-        var fatherMobileRequest = PhoneNumber.Create(father.MobileNumber);
+        Result<PhoneNumber> fatherMobile;
 
-        if (fatherMobileRequest.IsFailure)
+        if (father is null)
         {
-            _logger.Warning("Parent contact mobile is invalid: {@parent}", father);
+            fatherMobile = Result.Failure<PhoneNumber>(Error.NullValue);
+        }
+        else
+        {
+            var fatherMobileRequest = PhoneNumber.Create(father.MobileNumber);
+
+            if (fatherMobileRequest.IsFailure)
+            {
+                _logger.Warning("Parent contact mobile is invalid: {@parent}", father);
+            }
+ 
+            fatherMobile = fatherMobileRequest;
         }
 
         switch (_settings?.ContactPreference)
         {
             case ISentralGatewayConfiguration.ContactPreferenceOptions.MotherFirstThenFather:
-                if (motherMobileRequest.IsSuccess)
-                    phoneNumbers.Add(motherMobileRequest.Value);
+                if (motherMobile.IsSuccess)
+                    phoneNumbers.Add(motherMobile.Value);
                 else
-                    if (fatherMobileRequest.IsSuccess)
-                        phoneNumbers.Add(fatherMobileRequest.Value);
+                    if (fatherMobile.IsSuccess)
+                        phoneNumbers.Add(fatherMobile.Value);
 
                 break;
             case ISentralGatewayConfiguration.ContactPreferenceOptions.FatherFirstThenMother:
-                if (fatherMobileRequest.IsSuccess)
-                    phoneNumbers.Add(fatherMobileRequest.Value);
+                if (fatherMobile.IsSuccess)
+                    phoneNumbers.Add(fatherMobile.Value);
                 else
-                    if (motherMobileRequest.IsSuccess)
-                        phoneNumbers.Add(motherMobileRequest.Value);
+                    if (motherMobile.IsSuccess)
+                        phoneNumbers.Add(motherMobile.Value);
 
                 break;
             case ISentralGatewayConfiguration.ContactPreferenceOptions.BothParentsIfPresent:
             default:
-                if (motherMobileRequest.IsSuccess)
-                    phoneNumbers.Add(motherMobileRequest.Value);
+                if (motherMobile.IsSuccess)
+                    phoneNumbers.Add(motherMobile.Value);
 
-                if (fatherMobileRequest.IsSuccess)
-                    phoneNumbers.Add(fatherMobileRequest.Value);
+                if (fatherMobile.IsSuccess)
+                    phoneNumbers.Add(fatherMobile.Value);
 
                 break;
         }
