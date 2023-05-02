@@ -15,7 +15,9 @@ public interface IStoredFileRepository
 
     Task<StoredFile?> GetAcademicReportByLinkId(string linkId, CancellationToken cancellationToken = default);
 
+    Task<StoredFile?> GetAwardCertificateByLinkId(string linkId, CancellationToken cancellationToken = default);
     Task<List<StoredFile>> GetAwardCertificatesFromList(List<string> linkIds, CancellationToken cancellationToken = default);
+    Task<bool> DoesAwardCertificateExistInDatabase(string linkId, CancellationToken cancellationToken = default);
 
     void Insert(StoredFile file);
 }

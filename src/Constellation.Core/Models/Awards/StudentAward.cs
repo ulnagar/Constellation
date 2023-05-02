@@ -5,9 +5,15 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System;
+using System.Data;
 
 public class StudentAward : AggregateRoot
 {
+    public const string Astra = "Astra Award";
+    public const string Stellar = "Stellar Award";
+    public const string Galaxy = "Galaxy Medal";
+    public const string Universal = "Aurora Universal Achiever";
+
     private StudentAward(
         StudentAwardId id,
         string studentId,

@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Awards.GetRecentAwards;
+﻿namespace Constellation.Application.Awards.GetAllAwards;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Awards.Models;
@@ -7,13 +7,14 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class GetRecentAwardsQueryHandler
-    : IQueryHandler<GetRecentAwardsQuery, List<AwardResponse>>
+internal sealed class GetAllAwardsQueryHandler
+    : IQueryHandler<GetAllAwardsQuery, List<AwardResponse>>
 {
     private readonly IStudentAwardRepository _awardRepository;
     private readonly IStudentRepository _studentRepository;
@@ -21,7 +22,7 @@ internal sealed class GetRecentAwardsQueryHandler
     private readonly IStoredFileRepository _fileRepository;
     private readonly ILogger _logger;
 
-    public GetRecentAwardsQueryHandler(
+    public GetAllAwardsQueryHandler(
         IStudentAwardRepository awardRepository,
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
@@ -32,20 +33,31 @@ internal sealed class GetRecentAwardsQueryHandler
         _studentRepository = studentRepository;
         _staffRepository = staffRepository;
         _fileRepository = fileRepository;
-        _logger = logger.ForContext<GetRecentAwardsQuery>();
+        _logger = logger.ForContext<GetAllAwardsQuery>();
     }
 
-    public async Task<Result<List<AwardResponse>>> Handle(GetRecentAwardsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<AwardResponse>>> Handle(GetAllAwardsQuery request, CancellationToken cancellationToken)
     {
         List<AwardResponse> result = new();
-        
-        var awards = await _awardRepository.GetToRecentCount(request.Count, cancellationToken);
+
+        var awards = request.CurrentYearOnly switch
+        {
+            true => await _awardRepository.GetFromYear(DateTime.Today.Year, cancellationToken),
+            false => await _awardRepository.GetAll(cancellationToken)
+        };
 
         var students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
 
+        var currentStudentAwards = awards
+            .Where(award =>
+                students
+                    .Select(student => student.StudentId)
+                    .Contains(award.StudentId))
+            .ToList();
+
         var staff = await _staffRepository.GetAll(cancellationToken);
 
-        foreach (var award in awards)
+        foreach (var award in currentStudentAwards)
         {
             var student = students.FirstOrDefault(student => student.StudentId == award.StudentId);
 
@@ -55,41 +67,50 @@ internal sealed class GetRecentAwardsQueryHandler
                 continue;
             }
 
+            Name studentName = null;
+
+            if (student is not null)
+            {
+                var studentNameRequest = Name.Create(student.FirstName, string.Empty, student.LastName);
+
+                if (studentNameRequest.IsSuccess)
+                    studentName = studentNameRequest.Value;
+                else
+                    _logger.Warning("Could not create Name object from student {student} with error {@error}", student.DisplayName, studentNameRequest.Error);
+            }
+
             var teacher = staff.FirstOrDefault(teacher => teacher.StaffId == award.TeacherId);
 
-            var studentName = Name.Create(student.FirstName, string.Empty, student.LastName);
-            var teacherName = Name.Create(teacher.FirstName, string.Empty, teacher.LastName);
+            Name teacherName = null;
 
-            if (studentName.IsFailure || teacherName.IsFailure)
+            if (teacher is not null)
             {
-                if (studentName.IsFailure)
-                {
-                    _logger.Warning("Could not create Name object from student {student} with error {@error}", student.DisplayName, studentName.Error);
-                }
+                var teacherNameRequest = Name.Create(teacher.FirstName, string.Empty, teacher.LastName);
 
-                if (teacherName.IsFailure)
-                {
-                    _logger.Warning("Could not create Name object from teacher {teacher} with error {@error}", teacher.DisplayName, teacherName.Error);
-                }
-
-                continue;
+                if (teacherNameRequest.IsSuccess)
+                    teacherName = teacherNameRequest.Value;
+                else
+                    _logger.Warning("Could not create Name object from teacher {teacher} with error {@error}", teacher.DisplayName, teacherNameRequest.Error);
             }
+
+            if (studentName is null)
+                continue;
 
             var hasCertificate = await _fileRepository.DoesAwardCertificateExistInDatabase(award.Id.ToString(), cancellationToken);
 
             var entry = new AwardResponse(
                 award.Id,
-                studentName.Value,
+                studentName,
                 student.CurrentGrade,
                 student.School.Name,
-                teacherName.Value,
+                teacherName,
                 award.AwardedOn,
                 award.Type,
                 hasCertificate);
 
             result.Add(entry);
         }
-        
+
         return result;
     }
 }

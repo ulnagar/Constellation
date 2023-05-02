@@ -74,6 +74,13 @@ public static class DomainErrors
 
     public static class Documents
     {
+        public static class AwardCertificate
+        {
+            public static readonly Func<StudentAwardId, Error> NotFound = id => new(
+                "Documents.AwardCertificate.NotFound",
+                $"Could not find a document with the link id {id.Value}");
+        }
+
         public static class AssignmentSubmission
         {
             public static readonly Func<string, Error> NotFound = id => new(

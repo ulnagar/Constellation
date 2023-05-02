@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
-using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Jobs;
+using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Identifiers;
@@ -34,6 +34,7 @@ public class IndexModel : BasePageModel
     {
         public StudentAwardId Id { get; set; }
         public string StudentName { get; set; }
+        public Grade StudentGrade { get; set; }
         public string TeacherName { get; set; }
         public DateTime AwardedOn { get; set; }
         public string Category { get; set; }
@@ -73,6 +74,7 @@ public class IndexModel : BasePageModel
                 {
                     Id = award.Id,
                     StudentName = student.DisplayName,
+                    StudentGrade = student.CurrentGrade,
                     TeacherName = teacher?.DisplayName,
                     Type = award.Type,
                     Category = award.Category,

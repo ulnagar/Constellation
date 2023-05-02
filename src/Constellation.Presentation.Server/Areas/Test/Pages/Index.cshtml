@@ -1,5 +1,6 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
+@using Constellation.Application.Extensions
 
 <a asp-page-handler="CheckAwards" class="btn btn-success">Sync Awards</a>
 
@@ -17,7 +18,7 @@
         @foreach (var item in Model.Awards)
         {
             <tr>
-                <td>@item.StudentName</td>
+                <td>@item.StudentName (@item.StudentGrade.AsName())</td>
                 <td>@item.Type</td>
                 <td>@item.TeacherName</td>
                 <td>@item.AwardedOn.ToShortDateString()</td>

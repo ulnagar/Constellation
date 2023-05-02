@@ -35,16 +35,6 @@ public class AwardsController : BaseController
         _jobManager = jobManager;
     }
 
-    public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
-    {
-        var request = await _mediator.Send(new GetRecentAwardsQuery(20), cancellationToken);
-
-        var viewModel = await CreateViewModel<RecentAwardsListViewModel>();
-        viewModel.Awards = request.Value;
-
-        return View(viewModel);
-    }
-
     public async Task<IActionResult> Dashboard()
     {
         var viewModel = await CreateViewModel<DashboardViewModel>();

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 public interface IStudentAwardRepository
 {
+    Task<List<StudentAward>> GetAll(CancellationToken cancellationToken = default);
     Task<List<StudentAward>> GetByStudentId(string studentId, CancellationToken cancellationToken = default);
     Task<List<StudentAward>> GetFromYear(int Year, CancellationToken cancellationToken = default);
     Task<List<StudentAward>> GetFromRecentMonths(int Months, CancellationToken cancellationToken = default);

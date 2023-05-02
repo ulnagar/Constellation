@@ -50,7 +50,6 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
         var students = await _studentRepository.GetCurrentStudentsWithSchool(token);
 
         students = students
-            .Where(student => student.CurrentGrade > Core.Enums.Grade.Y06)
             .OrderBy(student => student.CurrentGrade)
             .ThenBy(student => student.LastName)
             .ThenBy(student => student.FirstName)
@@ -145,7 +144,11 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
         var teacher = await _staffRepository.GetFromName(award.TeacherName);
 
         if (teacher is null)
+        {
+            _logger.Warning("Could not identify staff member from name {name} while processing award {@award}/{@dbAward}", award.TeacherName, award, matchingAward);
+
             return;
+        }
 
         // Update existing entry with the new details
         matchingAward.Update(
@@ -156,7 +159,11 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
         var awardDocument = await _gateway.GetAwardDocument(student.SentralStudentId, award.IncidentId);
 
         if (awardDocument.Length == 0)
+        {
+            _logger.Warning("Failed to retrieve the award certificate for award {@award}", matchingAward);
+
             return;
+        }
 
         var file = new StoredFile
         {

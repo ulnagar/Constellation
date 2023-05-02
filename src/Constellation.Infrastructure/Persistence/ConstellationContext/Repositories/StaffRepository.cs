@@ -33,6 +33,12 @@ public class StaffRepository : IStaffRepository
                 .ThenInclude(member => member.Faculty);
     }
 
+    public async Task<List<Staff>> GetAll(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Staff>()
+            .ToListAsync(cancellationToken);
+
     public async Task<Staff?> GetById(
         string staffId,
         CancellationToken cancellationToken = default) =>

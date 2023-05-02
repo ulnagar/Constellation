@@ -5,8 +5,8 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{380C8D8E-1770-4044-BF34-EB2BD3888599}"
 	ProjectSection(SolutionItems) = preProject
-		docs\Tasks.txt = docs\Tasks.txt
 		docs\Application Deployment.txt = docs\Application Deployment.txt
+		docs\Tasks.txt = docs\Tasks.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E9022EAD-24FF-4322-8D72-CCD160384F97}"

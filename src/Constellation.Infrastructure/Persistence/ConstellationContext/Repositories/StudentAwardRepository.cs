@@ -13,6 +13,12 @@ internal sealed class StudentAwardRepository : IStudentAwardRepository
         _context = context;
     }
 
+    public async Task<List<StudentAward>> GetAll(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<StudentAward>()
+            .ToListAsync(cancellationToken);
+
     public async Task<List<StudentAward>> GetByStudentId(
         string studentId,
         CancellationToken cancellationToken = default) =>

@@ -1,0 +1,30 @@
+﻿tr.first-place > i {
+
+}
+
+.fal {
+    border-radius: 0.2rem;
+    padding: 0.3rem;
+    font-size: 2rem;
+    width: 3rem;
+}
+
+tr.first-place i.fa-trophy-alt {
+    background-color: goldenrod;
+}
+
+.fa-trophy-alt:before {
+    margin-left: 5%;
+}
+
+tr.second-place i.fa-trophy-alt {
+    background-color: silver;
+}
+
+tr.third-place i.fa-trophy-alt {
+    background-color: #CD7F32;
+}
+
+.name-span {
+    display: block;
+}
