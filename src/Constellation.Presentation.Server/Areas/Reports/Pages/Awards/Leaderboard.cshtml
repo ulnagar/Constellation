@@ -16,101 +16,129 @@
 
 <div class="page-menu">
 
+    
 </div>
 
 <hr />
 
-@foreach (var group in groups)
-{
-    var positionedAwards = group
-        .GroupBy(award => award.AwardedAstras)
-        .OrderByDescending(award => award.Key);
+<div>
+    <ul class="nav nav-pills" data-tabs="tabs" role="tablist">
+        @{
+            var first = groups.First();
+        }
 
-    <h4>@group.Key.AsName()</h4>
+        <li class="nav-item">
+            <a class="nav-link active" href="#@first.Key" data-toggle="pill">
+                @first.Key.AsName()
+            </a>
+        </li>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th></th>
-                <th>Name</th>
-                <th>Astras</th>
-                <th>Stellars</th>
-                <th>Galaxies</th>
-                <th>Universals</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr class="first-place">
-                <td><i class="fal fa-trophy-alt" /></td>
-                <th>
-                    @foreach (var entry in positionedAwards.First())
-                    {
-                        <span class="name-span">@entry.Name.DisplayName</span>
-                    }
-                </th>
-                <td>@positionedAwards.First().First().AwardedAstras</td>
-                <td>@positionedAwards.First().First().CalculatedStellars</td>
-                <td>@positionedAwards.First().First().CalculatedGalaxies</td>
-                <td>@positionedAwards.First().First().CalculatedUniversals</td>
-            </tr>
+        @foreach (var group in groups.Skip(1))
+        {
+            <li class="nav-item">
+                <a class="nav-link" href="#@group.Key" data-toggle="pill">
+                    @group.Key.AsName()
+                </a>
+            </li>
+        }
+    </ul>
 
-            <tr class="second-place">
-                <td><i class="fal fa-trophy-alt" /></td>
-                <th>
-                    @foreach (var entry in positionedAwards.Skip(1).First())
-                    {
-                        <span class="name-span">@entry.Name.DisplayName</span>
-                    }
-                </th>
-                <td>@positionedAwards.Skip(1).First().First().AwardedAstras</td>
-                <td>@positionedAwards.Skip(1).First().First().CalculatedStellars</td>
-                <td>@positionedAwards.Skip(1).First().First().CalculatedGalaxies</td>
-                <td>@positionedAwards.Skip(1).First().First().CalculatedUniversals</td>
-            </tr>
+    <div class="tab-content mt-3">
+        @foreach (var group in groups)
+        {
+            var positionedAwards = group
+                .GroupBy(award => award.AwardedAstras)
+                .OrderByDescending(award => award.Key);
 
-            <tr class="third-place">
-                <td><i class="fal fa-trophy-alt" /></td>
-                <th>
-                    @foreach (var entry in positionedAwards.Skip(2).First())
-                    {
-                        <span class="name-span">@entry.Name.DisplayName</span>
-                    }
-                </th>
-                <td>@positionedAwards.Skip(2).First().First().AwardedAstras</td>
-                <td>@positionedAwards.Skip(2).First().First().CalculatedStellars</td>
-                <td>@positionedAwards.Skip(2).First().First().CalculatedGalaxies</td>
-                <td>@positionedAwards.Skip(2).First().First().CalculatedUniversals</td>
-            </tr>
+            var active = group.Key == groups.First().Key;
 
-            <tr class="fourth-place">
-                <td></td>
-                <th>
-                    @foreach (var entry in positionedAwards.Skip(3).First())
-                    {
-                        <span class="name-span">@entry.Name.DisplayName</span>
-                    }
-                </th>
-                <td>@positionedAwards.Skip(3).First().First().AwardedAstras</td>
-                <td>@positionedAwards.Skip(3).First().First().CalculatedStellars</td>
-                <td>@positionedAwards.Skip(3).First().First().CalculatedGalaxies</td>
-                <td>@positionedAwards.Skip(3).First().First().CalculatedUniversals</td>
-            </tr>
+            <div id="@group.Key" class="tab-pane @(active ? "active" : "")" role="tabpanel">
+                <h4>@group.Key.AsName()</h4>
 
-            <tr class="fifth-place">
-                <td></td>
-                <th>
-                    @foreach (var entry in positionedAwards.Last())
-                    {
-                        <span class="name-span">@entry.Name.DisplayName</span>
-                    }
-                </th>
-                <td>@positionedAwards.Last().First().AwardedAstras</td>
-                <td>@positionedAwards.Last().First().CalculatedStellars</td>
-                <td>@positionedAwards.Last().First().CalculatedGalaxies</td>
-                <td>@positionedAwards.Last().First().CalculatedUniversals</td>
-            </tr>
-        </tbody>
-    </table>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th>Astras</th>
+                            <th>Stellars</th>
+                            <th>Galaxies</th>
+                            <th>Universals</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="first-place">
+                            <td><i class="fal fa-trophy-alt" /></td>
+                            <th>
+                                    @foreach (var entry in positionedAwards.First())
+                                    {
+                                        <span class="name-span">@entry.Name.DisplayName</span>
+                                    }
+                            </th>
+                            <td>@positionedAwards.First().First().AwardedAstras</td>
+                            <td>@positionedAwards.First().First().CalculatedStellars</td>
+                            <td>@positionedAwards.First().First().CalculatedGalaxies</td>
+                            <td>@positionedAwards.First().First().CalculatedUniversals</td>
+                        </tr>
 
-    <hr class="spacer" />
-}
+                        <tr class="second-place">
+                            <td><i class="fal fa-trophy-alt" /></td>
+                            <th>
+                                    @foreach (var entry in positionedAwards.Skip(1).First())
+                                    {
+                                        <span class="name-span">@entry.Name.DisplayName</span>
+                                    }
+                            </th>
+                            <td>@positionedAwards.Skip(1).First().First().AwardedAstras</td>
+                            <td>@positionedAwards.Skip(1).First().First().CalculatedStellars</td>
+                            <td>@positionedAwards.Skip(1).First().First().CalculatedGalaxies</td>
+                            <td>@positionedAwards.Skip(1).First().First().CalculatedUniversals</td>
+                        </tr>
+
+                        <tr class="third-place">
+                            <td><i class="fal fa-trophy-alt" /></td>
+                            <th>
+                                    @foreach (var entry in positionedAwards.Skip(2).First())
+                                    {
+                                        <span class="name-span">@entry.Name.DisplayName</span>
+                                    }
+                            </th>
+                            <td>@positionedAwards.Skip(2).First().First().AwardedAstras</td>
+                            <td>@positionedAwards.Skip(2).First().First().CalculatedStellars</td>
+                            <td>@positionedAwards.Skip(2).First().First().CalculatedGalaxies</td>
+                            <td>@positionedAwards.Skip(2).First().First().CalculatedUniversals</td>
+                        </tr>
+
+                        <tr class="fourth-place">
+                            <td></td>
+                            <th>
+                                    @foreach (var entry in positionedAwards.Skip(3).First())
+                                    {
+                                        <span class="name-span">@entry.Name.DisplayName</span>
+                                    }
+                            </th>
+                            <td>@positionedAwards.Skip(3).First().First().AwardedAstras</td>
+                            <td>@positionedAwards.Skip(3).First().First().CalculatedStellars</td>
+                            <td>@positionedAwards.Skip(3).First().First().CalculatedGalaxies</td>
+                            <td>@positionedAwards.Skip(3).First().First().CalculatedUniversals</td>
+                        </tr>
+
+                        <tr class="fifth-place">
+                            <td></td>
+                            <th>
+                                    @foreach (var entry in positionedAwards.Last())
+                                    {
+                                        <span class="name-span">@entry.Name.DisplayName</span>
+                                    }
+                            </th>
+                            <td>@positionedAwards.Last().First().AwardedAstras</td>
+                            <td>@positionedAwards.Last().First().CalculatedStellars</td>
+                            <td>@positionedAwards.Last().First().CalculatedGalaxies</td>
+                            <td>@positionedAwards.Last().First().CalculatedUniversals</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
