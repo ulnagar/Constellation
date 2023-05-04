@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Server.Areas.Reports.Pages.Awards;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards;
 
 using Constellation.Application.Awards.GetAllAwards;
 using Constellation.Application.Awards.GetAwardCertificate;

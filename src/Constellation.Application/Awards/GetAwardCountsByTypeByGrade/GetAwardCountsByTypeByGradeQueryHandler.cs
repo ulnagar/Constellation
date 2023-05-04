@@ -5,6 +5,7 @@ using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Awards;
 using Constellation.Core.Shared;
 using System;
 using System.Collections.Generic;
@@ -34,32 +35,43 @@ internal sealed class GetAwardCountsByTypeByGradeQueryHandler
 
         var awards = await _awardRepository.GetFromYear(request.Year, cancellationToken);
 
+        List<AwardWithGrade> awardsWithGrade = new();
+
+        foreach (var award in awards)
+        {
+            var student = students.FirstOrDefault(student => student.StudentId == award.StudentId);
+
+            if (student is not null)
+            {
+                awardsWithGrade.Add(new()
+                {
+                    Type = award.Type,
+                    Grade = student.CurrentGrade,
+                    Month = award.AwardedOn.Month
+                });
+            }
+
+            // If Student is null, they have likely withdrawn and therefore is not included in the "Current Students" retrieved above
+        }
+
         foreach (Grade grade in Enum.GetValues(typeof(Grade)))
         {
             for (int j = 0; j <= 3; j++)
             {
                 var awardType = j switch
                 {
-                    0 => "Astra Award",
-                    1 => "Stellar Award",
-                    2 => "Galaxy Medal",
-                    3 => "Aurora Universal Achiever",
-                    _ => ""
+                    0 => StudentAward.Astra,
+                    1 => StudentAward.Stellar,
+                    2 => StudentAward.Galaxy,
+                    3 => StudentAward.Universal,
+                    _ => string.Empty
                 };
 
                 var entry = new AwardCountByTypeByGradeResponse(
                     "YTD",
                     grade.AsName(),
                     awardType,
-                    awards
-                        .Select(award => new { 
-                            Type = award.Type, 
-                            Grade = students
-                                .First(student => student.StudentId == award.StudentId)
-                                .CurrentGrade })
-                        .Count(award => 
-                            award.Type == awardType && 
-                            award.Grade == grade));
+                    awardsWithGrade.Count(award => award.Grade == grade && award.Type == awardType));
 
                 result.Add(entry);
             }
@@ -71,33 +83,30 @@ internal sealed class GetAwardCountsByTypeByGradeQueryHandler
             {
                 var awardType = j switch
                 {
-                    0 => "Astra Award",
-                    1 => "Stellar Award",
-                    2 => "Galaxy Medal",
-                    3 => "Aurora Universal Achiever",
-                    _ => ""
+                    0 => StudentAward.Astra,
+                    1 => StudentAward.Stellar,
+                    2 => StudentAward.Galaxy,
+                    3 => StudentAward.Universal,
+                    _ => string.Empty
                 };
 
                 var entry = new AwardCountByTypeByGradeResponse(
                     "This Month",
                     grade.AsName(),
                     awardType,
-                    awards
-                        .Select(award => new { 
-                            Type = award.Type, 
-                            Grade = students
-                                .First(student => student.StudentId == award.StudentId)
-                                .CurrentGrade, 
-                            Month = award.AwardedOn.Month })
-                        .Count(award => 
-                            award.Type == awardType && 
-                            award.Grade == grade &&
-                            award.Month == DateTime.Today.Month));
+                    awardsWithGrade.Count(award => award.Grade == grade && award.Type == awardType && award.Month == DateTime.Today.Month));
 
                 result.Add(entry);
             }
         }
 
         return result;
+    }
+
+    private class AwardWithGrade
+    {
+        public string Type { get; set; }
+        public Grade Grade { get; set; }
+        public int Month { get; set; }
     }
 }

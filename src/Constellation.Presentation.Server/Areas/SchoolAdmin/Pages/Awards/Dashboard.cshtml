@@ -1,43 +1,12 @@
-﻿@using Constellation.Presentation.Server.Areas.Reports.Models.Awards
-@using Newtonsoft.Json
-@model DashboardViewModel
+﻿@page
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards.DashboardModel
 
-<style>
-    .graph-grid {
-        display: grid;
-        grid-template-columns: auto auto auto;
-        border: 1px solid black;
-    }
+@Html.AntiForgeryToken()
 
-    .canvas-background {
-        width: 300px;
-        height: 300px;
-        padding-left: 0;
-        padding-right: 0;
-        margin-left: auto;
-        margin-right: auto;
-        display: block;
-    }
+<h2>Awards Dashboard</h2>
 
-    .title {
-        text-align: center;
-        font-weight: bold;
-        font-size: 2rem;
-    }
-
-    .row-title {
-        font-weight: bold;
-        font-size: 1.5rem;
-    }
-
-    .graph-grid div {
-        text-align: center;
-        border: 1px solid black;
-    }
-</style>
-
-<div class="row">
-    <a asp-action="Index" asp-controller="Awards" asp-area="Reports" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+<div class="page-menu">
+    <a asp-page="/Awards/Index" asp-area="SchoolAdmin" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />
@@ -68,23 +37,27 @@
         var MonthAstra, MonthStellar, MonthGalaxy, MonthUA;
         var YTDAstra, YTDStellar, YTDGalaxy, YTDUA;
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             var graphs = document.getElementsByClassName('canvas-background');
-            $.each(graphs, function(index, canvas) {
+            $.each(graphs, function (index, canvas) {
                 var ctx = canvas.getContext('2d');
                 canvasLoadingDisplay(ctx);
             })
 
             $.ajax({
-                type: "GET",
+                type: "POST",
                 dataType: "json",
-                url: '@Url.Action("GetDashboardData", "Awards", new { area = "Reports" })',
-                success: function(response) {
+                url: '?handler=getData',
+                headers: {
+                    RequestVerificationToken:
+                        $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
                     YTDData = response.filter(item => item.reportPeriod === "YTD");
                     MonthData = response.filter(item => item.reportPeriod === "This Month");
                     ShowCharts();
                 },
-                error: function(error) {
+                error: function (error) {
                     console.log(error);
                 }
             });
@@ -232,7 +205,7 @@
             }
 
             $.each(groupBy(dataSeries, 'awardType'),
-                function(index, point) {
+                function (index, point) {
                     if (point[0].awardType === awardType) {
                         data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 05").count);
                         data["data"]["datasets"][0]["data"].push(point.find(item => item.grade === "Year 06").count);
@@ -246,11 +219,11 @@
                 });
         }
 
-        var groupBy = function(xs, key) {
-          return xs.reduce(function(rv, x) {
-            (rv[x[key]] = rv[x[key]] || []).push(x);
-            return rv;
-          }, {});
+        var groupBy = function (xs, key) {
+            return xs.reduce(function (rv, x) {
+                (rv[x[key]] = rv[x[key]] || []).push(x);
+                return rv;
+            }, {});
         };
     </script>
 }

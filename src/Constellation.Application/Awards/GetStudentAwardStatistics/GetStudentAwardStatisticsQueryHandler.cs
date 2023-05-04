@@ -50,6 +50,20 @@ internal sealed class GetStudentAwardStatisticsQueryHandler
 
             var awards = await _awardRepository.GetByStudentId(student.StudentId, cancellationToken);
 
+            if (request.FromDate.HasValue)
+            {
+                var fromDate = request.FromDate.Value.ToDateTime(TimeOnly.MinValue);
+
+                awards = awards.Where(award => award.AwardedOn >= fromDate).ToList();
+            }
+
+            if (request.ToDate.HasValue)
+            {
+                var toDate = request.ToDate.Value.ToDateTime(TimeOnly.MaxValue);
+
+                awards = awards.Where(award => award.AwardedOn <= toDate).ToList();
+            }
+
             decimal astras = awards.Count(award => award.Type == StudentAward.Astra);
             decimal stellars = awards.Count(award => award.Type == StudentAward.Stellar);
             decimal galaxies = awards.Count(award => award.Type == StudentAward.Galaxy);

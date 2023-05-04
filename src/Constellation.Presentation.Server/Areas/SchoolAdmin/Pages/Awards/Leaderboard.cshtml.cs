@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Server.Areas.Reports.Pages.Awards;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards;
 
 using Constellation.Application.Awards.GetStudentAwardStatistics;
 using Constellation.Application.Models.Auth;
@@ -6,6 +6,7 @@ using Constellation.Core.Enums;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class LeaderboardModel : BasePageModel
@@ -18,7 +19,15 @@ public class LeaderboardModel : BasePageModel
         _mediator = mediator;
     }
 
+    [BindProperty]
+    public DateOnly FromDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+
+    [BindProperty]
+    public DateOnly ToDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+
     public List<StudentAwardStatisticsResponse> Leaders { get; set; } = new();
+
+    public bool IsFiltered { get; set; } = false;
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
@@ -43,5 +52,32 @@ public class LeaderboardModel : BasePageModel
 
             Leaders.AddRange(studentWinners);
         }
+    }
+
+    public async Task OnPostFilter(CancellationToken cancellationToken = default)
+    {
+        await GetClasses(_mediator);
+
+        var statisticsRequest = await _mediator.Send(new GetStudentAwardStatisticsQuery(FromDate, ToDate), cancellationToken);
+
+        if (statisticsRequest.IsFailure)
+        {
+            // Do something
+        }
+
+        foreach (Grade grade in Enum.GetValues(typeof(Grade)))
+        {
+            var studentWinners = statisticsRequest.Value
+                .Where(student => student.Grade == grade)
+                .GroupBy(student => student.AwardedAstras)
+                .OrderByDescending(group => group.Key)
+                .Take(5)
+                .SelectMany(group => group)
+                .ToList();
+
+            Leaders.AddRange(studentWinners);
+        }
+
+        IsFiltered = true;
     }
 }
