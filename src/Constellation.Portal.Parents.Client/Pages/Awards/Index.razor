@@ -2,8 +2,10 @@
 
 @using Constellation.Application.Awards.GetSummaryForStudent;
 @using Constellation.Application.Features.Partners.Students.Queries
+@using Constellation.Core.Models.Identifiers;
 
 @inject HttpClient Http
+@inject IJSRuntime JS
 
 @attribute [Authorize]
 
@@ -110,16 +112,24 @@
                             <div class="h4">@award.Type</div>
                             @if (!string.IsNullOrEmpty(award.AwardedBy))
                             {
-                                <span class="fst-italic">Awarded By @award.AwardedBy</span>
+                                <span class="fst-italic d-block">Awarded By @award.AwardedBy</span>
                             }
 
                             @if (!string.IsNullOrEmpty(award.AwardedFor))
                             {
-                                <span class="fst-italic">For @award.AwardedFor</span>
+                                <span class="fst-italic d-block">For @award.AwardedFor</span>
                             }
 
-                            <span class="fst-italic">On @award.AwardedOn.ToShortDateString()</span>
+                            <span class="fst-italic d-block">On @award.AwardedOn.ToShortDateString()</span>
                         </div>
+                        @if (award.HasCertificate)
+                        {
+                            <div class="fa-icon-sizing">
+                                <a @onclick="() => Download(award.AwardId)" href="javascript:void(0)" class="stretched-link">
+                                    <i class="fad fa-file-download fa-3x app-theme"></i>
+                                </a>
+                            </div>
+                        }
                     </span>
                 </div>
             }
@@ -187,5 +197,44 @@
         ShowLoader = false;
 
         StateHasChanged();
+    }
+
+    void Download()
+    {
+        Console.WriteLine("Tried to download!");
+    }
+
+    async Task Download(StudentAwardId awardId)
+    {
+        Console.WriteLine($"Tried to download {awardId}, {awardId.ToString()}");
+
+        try
+        {
+            ShowLoader = true;
+
+            var response = await Http.PostAsJsonAsync($"Awards/Student/{SelectedStudent.StudentId}/Download/{awardId.ToString()}", new { });
+            // This returns the file in the response variable.
+            // Need to push it to the browser as a file download, possibly using JS
+            // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0
+
+            if (response.IsSuccessStatusCode)
+            {
+                var fileStream = response.Content.ReadAsStream();
+                var award = AwardSummary.RecentAwards.First(award => award.AwardId == awardId);
+                var filename = $"{SelectedStudent.DisplayName} - Astra Award - {award.AwardedOn:dd-MM-yyyy} - {award.IncidentId}.pdf";
+
+                using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+                await JS.InvokeVoidAsync("downloadFileFromStream", filename, streamRef);
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        finally
+        {
+            ShowLoader = false;
+        }
     }
 }

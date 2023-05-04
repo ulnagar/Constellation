@@ -14,13 +14,16 @@ internal sealed class GetSummaryForStudentQueryHandler
 {
     private readonly IStudentAwardRepository _awardRepository;
     private readonly IStaffRepository _staffRepository;
+    private readonly IStoredFileRepository _fileRepository;
 
     public GetSummaryForStudentQueryHandler(
         IStudentAwardRepository awardRepository,
-        IStaffRepository staffRepository)
+        IStaffRepository staffRepository,
+        IStoredFileRepository fileRepository)
     {
         _awardRepository = awardRepository;
         _staffRepository = staffRepository;
+        _fileRepository = fileRepository;
     }
 
     public async Task<Result<StudentAwardSummaryResponse>> Handle(GetSummaryForStudentQuery request, CancellationToken cancellationToken)
@@ -45,12 +48,16 @@ internal sealed class GetSummaryForStudentQueryHandler
                     teacherName = teacher.DisplayName;
             }
 
+            var hasCertificate = await _fileRepository.DoesAwardCertificateExistInDatabase(entry.Id.ToString(), cancellationToken);
+
             recent.Add(new(
                 entry.Id,
                 entry.Type,
                 entry.AwardedOn,
                 teacherName,
-                entry.Reason));
+                entry.Reason,
+                entry.IncidentId,
+                hasCertificate));
         }
 
         var summary = new StudentAwardSummaryResponse(

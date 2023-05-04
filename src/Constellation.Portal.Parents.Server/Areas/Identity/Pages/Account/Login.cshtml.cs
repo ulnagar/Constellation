@@ -101,6 +101,18 @@ public class LoginModel : PageModel
                 return Page();
             }
 
+#if DEBUG
+            await _signInManager.SignInAsync(user, false);
+
+            _logger.LogInformation(" - Login succeeded for {user}", user.Email);
+
+            user.LastLoggedIn = DateTime.UtcNow;
+            await _userManager.UpdateAsync(user);
+
+            // Redirect to home page
+            return LocalRedirect(Url.Content("~/"));
+#endif
+
             // Get token from provider
             var token = await _userManager.GenerateUserTokenAsync(user, "PasswordlessLoginProvider", "passwordless-auth");
 

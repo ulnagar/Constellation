@@ -16,5 +16,7 @@ public sealed record StudentAwardSummaryResponse(
         string Type,
         DateTime AwardedOn,
         string AwardedBy,
-        string AwardedFor);
+        string AwardedFor,
+        string IncidentId,
+        bool HasCertificate);
 }
