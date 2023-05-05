@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
 using Constellation.Application.Awards.GetSummaryForStudent;
+using Constellation.Application.Features.Documents.Queries;
+using Constellation.Core.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,5 +28,18 @@ public class AwardsController : BaseAPIController
         var awards = await _mediator.Send(new GetSummaryForStudentQuery(studentId));
 
         return awards.Value;
+    }
+
+    [HttpPost("ForStudent/{studentId}/Download/{awardId}")]
+    public async Task<IActionResult> GetAwardCertificate([FromRoute] string studentId, [FromRoute] string awardId)
+    {
+        var user = await GetCurrentUser();
+
+        _logger.Information("Requested to retrieve award certificate for student {id} by parent {name}", studentId, user.UserName);
+
+        // Create file as stream
+        var fileEntry = await _mediator.Send(new GetFileFromDatabaseQuery { LinkType = StoredFile.AwardCertificate, LinkId = awardId });
+
+        return File(new MemoryStream(fileEntry.FileData), "application/pdf");
     }
 }

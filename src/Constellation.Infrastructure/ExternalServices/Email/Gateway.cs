@@ -2,6 +2,7 @@
 
 using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
+using Constellation.Core.ValueObjects;
 using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using MimeKit;
@@ -18,6 +19,129 @@ public class Gateway : IEmailGateway
     {
         _configuration = configuration;
         _logger = logger;
+    }
+
+    public Task<MimeMessage> Send(
+        List<EmailRecipient> toRecipients,
+        string fromAddress,
+        string subject,
+        string body,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAll(
+            toRecipients,
+            null,
+            null,
+            fromAddress,
+            subject,
+            body,
+            null,
+            null,
+            cancellationToken);
+    }
+
+    public Task<MimeMessage> Send(
+        List<EmailRecipient> toRecipients,
+        string fromAddress,
+        string subject,
+        string body,
+        ICollection<Attachment> attachments,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAll(
+            toRecipients,
+            null,
+            null,
+            fromAddress,
+            subject,
+            body,
+            attachments,
+            null,
+            cancellationToken);
+    }
+
+    public Task<MimeMessage> Send(
+        List<EmailRecipient> toRecipients,
+        List<EmailRecipient> ccRecipients,
+        string fromAddress,
+        string subject,
+        string body,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAll(
+            toRecipients,
+            ccRecipients,
+            null,
+            fromAddress,
+            subject,
+            body,
+            null,
+            null,
+            cancellationToken);
+    }
+
+    public Task<MimeMessage> Send(
+        List<EmailRecipient> toRecipients,
+        List<EmailRecipient> ccRecipients,
+        string fromAddress,
+        string subject,
+        string body,
+        ICollection<Attachment> attachments,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAll(
+            toRecipients,
+            ccRecipients,
+            null,
+            fromAddress,
+            subject,
+            body,
+            attachments,
+            null,
+            cancellationToken);
+    }
+
+    public Task<MimeMessage> Send(
+        List<EmailRecipient> toRecipients,
+        List<EmailRecipient> ccRecipients,
+        List<EmailRecipient> bccRecipients,
+        string fromAddress,
+        string subject,
+        string body,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAll(
+            toRecipients,
+            ccRecipients,
+            bccRecipients,
+            fromAddress,
+            subject,
+            body,
+            null,
+            null,
+            cancellationToken);
+    }
+
+    public Task<MimeMessage> Send(
+        List<EmailRecipient> toRecipients,
+        List<EmailRecipient> ccRecipients,
+        List<EmailRecipient> bccRecipients,
+        string fromAddress,
+        string subject,
+        string body,
+        ICollection<Attachment> attachments,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAll(
+            toRecipients,
+            ccRecipients,
+            bccRecipients,
+            fromAddress,
+            subject,
+            body,
+            attachments,
+            null,
+            cancellationToken);
     }
 
     public Task<MimeMessage> Send(
@@ -342,6 +466,112 @@ public class Gateway : IEmailGateway
         await Send(message, cancellationToken);
 
         return new MimeMessage();
+    }
+
+    private async Task<MimeMessage> SendAll(
+        List<EmailRecipient> toRecipients,
+        List<EmailRecipient> ccRecipients,
+        List<EmailRecipient> bccRecipients,
+        string fromAddress,
+        string subject,
+        string body,
+        ICollection<Attachment> attachments,
+        string calendarInfo,
+        CancellationToken cancellationToken = default)
+    {
+        var id = Guid.NewGuid();
+
+        _logger.LogInformation("Sending email {id}", id);
+
+        var message = new MimeMessage();
+
+        if (fromAddress == null)
+            message.From.Add(new MailboxAddress("Aurora College", "auroracoll-h.school@det.nsw.edu.au"));
+        else
+            message.From.Add(new MailboxAddress("Aurora College", fromAddress));
+
+        foreach (var recipient in toRecipients)
+        {
+            _logger.LogInformation("{id}: Adding {name} ({email}) to TO field.", id, recipient.Name, recipient.Email);
+            message.To.Add(new MailboxAddress(recipient.Name, recipient.Email));
+        }
+
+        if (ccRecipients != null)
+            foreach (var recipient in ccRecipients)
+            {
+                _logger.LogInformation("{id}: Adding {name} ({email}) to CC field.", id, recipient.Name, recipient.Email);
+                message.Cc.Add(new MailboxAddress(recipient.Name, recipient.Email));
+            }
+
+        if (bccRecipients != null)
+            foreach (var recipient in bccRecipients)
+            {
+                _logger.LogInformation("{id}: Adding {name} ({email}) to BCC field.", id, recipient.Name, recipient.Email);
+                message.Bcc.Add(new MailboxAddress(recipient.Name, recipient.Email));
+            }
+
+        _logger.LogInformation("{id}: Setting Subject to \"{subject}\"", id, subject);
+        message.Subject = subject;
+
+        var textPartBody = new TextPart(TextFormat.Html)
+        {
+            Text = body
+        };
+
+        if (attachments != null || calendarInfo != null)
+        {
+            var multipart = new Multipart("mixed")
+            {
+                textPartBody
+            };
+
+            if (attachments != null)
+            {
+                foreach (var item in attachments)
+                {
+                    var attachment = new MimePart
+                    {
+                        Content = new MimeContent(item.ContentStream, ContentEncoding.Default),
+                        ContentDisposition = new MimeKit.ContentDisposition(MimeKit.ContentDisposition.Attachment),
+                        ContentTransferEncoding = ContentEncoding.Base64,
+                        FileName = item.Name
+                    };
+
+                    _logger.LogInformation("{id}: Adding attachment {name}", id, item.Name);
+
+                    multipart.Add(attachment);
+                }
+            }
+
+            if (calendarInfo != null)
+            {
+                var ical = new TextPart("calendar")
+                {
+                    ContentTransferEncoding = ContentEncoding.Base64,
+                    Text = calendarInfo
+                };
+
+                ical.ContentType.Parameters.Add("method", "REQUEST");
+                ical.ContentType.Parameters.Add("name", "meeting.ics");
+
+                _logger.LogInformation("{id}: Adding calendar appointment info", id);
+
+                multipart.Add(ical);
+
+                message.Headers.Add("Content-class", "urn:content-classes:calendarmessage");
+            }
+
+            message.Body = multipart;
+        }
+        else
+        {
+            message.Body = textPartBody;
+        }
+
+        _logger.LogInformation("{id}: Sending...", id);
+        await PushToServer(message, cancellationToken);
+
+        return message;
     }
 
     private async Task<MimeMessage> SendAll(

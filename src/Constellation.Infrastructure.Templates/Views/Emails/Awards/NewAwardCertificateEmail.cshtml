@@ -1,0 +1,26 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Awards
+@model NewAwardCertificateEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Your student @Model.StudentName has been issued with the following award:</p>
+
+<dl>
+    <dt>Award Type</dt>
+    <dd>@Model.AwardType</dd>
+    <dt>Awarded By</dt>
+    <dd>@Model.TeacherName</dd>
+    <dt>Awarded For</dt>
+    <dd>@Model.AwardReason</dd>
+    <dt>Awarded On</dt>
+    <dd>@Model.AwardedOn</dd>
+</dl>
+
+<p>A copy of the certificate for this award is attached to this email.</p>
