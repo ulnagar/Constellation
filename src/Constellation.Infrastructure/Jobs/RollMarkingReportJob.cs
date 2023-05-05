@@ -122,9 +122,9 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
                 var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = offering.Course.FacultyId }, token);
                 emailDto.HeadTeachers = headTeachers.ToDictionary(member => member.EmailAddress, member => member.DisplayName);
 
-                var coversRequest = await _mediator.Send(new GetCoversSummaryByDateAndOfferingQuery(date, offering.Id));
+                var coversRequest = await _mediator.Send(new GetCoversSummaryByDateAndOfferingQuery(date, offering.Id), token);
 
-                if (coversRequest.IsSuccess)
+                if (coversRequest.IsSuccess && coversRequest.Value.Count > 0)
                 {
                     var cover = coversRequest.Value.OrderBy(cover => cover.CreatedAt).Last();
 
@@ -140,7 +140,7 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
             infoString += $" in Period {entry.Period}";
             if (Covered)
             {
-                infoString += $"covered by {CoveredBy} ({CoverType})";
+                infoString += $" covered by {CoveredBy} ({CoverType})";
             }
 
             _logger.LogInformation("{id}: {infoString}", jobId, infoString);

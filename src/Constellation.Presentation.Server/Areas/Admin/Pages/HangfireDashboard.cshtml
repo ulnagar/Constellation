@@ -51,6 +51,12 @@
                             <button class="btn btn-success" disabled="@(!isActive)">Trigger</button>
                         </form>                        
                     }
+
+                    <!-- Local Trigger button -->
+                    <form asp-page-handler="LocalTriggerJob" method="post">
+                        <input type="hidden" name="actionName" value="@item.Key" />
+                        <button class="btn btn-success ml-3">Trigger Locally</button>
+                    </form>
                 </td>
                 <td>
                     <!-- Remove button -->

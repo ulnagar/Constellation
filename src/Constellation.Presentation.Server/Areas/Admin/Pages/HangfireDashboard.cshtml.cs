@@ -1,4 +1,5 @@
 using Constellation.Application.Interfaces.Jobs;
+using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
 using Hangfire;
@@ -14,14 +15,18 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
     {
         private readonly IMediator _mediator;
         private readonly IRecurringJobManager _jobManager;
-        
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+
         public IDictionary<string, string> JobDefinitions { get; set; }
 
-        public HangfireDashboardModel(IMediator mediator, IRecurringJobManager jobManager)
+        public HangfireDashboardModel(
+            IMediator mediator,
+            IRecurringJobManager jobManager,
+            IServiceScopeFactory serviceScopeFactory)
         {
             _mediator = mediator;
             _jobManager = jobManager;
-
+            _serviceScopeFactory = serviceScopeFactory;
             JobDefinitions = new Dictionary<string, string>
             {
                 { nameof(IPermissionUpdateJob), "*/5 7-15 * * 1-5" },
@@ -69,6 +74,18 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
         public void OnPostTriggerJob(string actionName)
         {
             _jobManager.Trigger(actionName);
+        }
+
+        public async Task OnPostLocalTriggerJob(string actionName)
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var typeName = $"Constellation.Application.Interfaces.Jobs.{actionName}, Constellation.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
+
+            Type type = Type.GetType(typeName, false);
+
+            IHangfireJob job = scope.ServiceProvider.GetService(type) as IHangfireJob;
+
+            await job.StartJob(default, default);
         }
 
         public void OnPostRemoveJob(string actionName)
