@@ -55,24 +55,25 @@ internal sealed class GetRecentAwardsQueryHandler
                 continue;
             }
 
-            var teacher = staff.FirstOrDefault(teacher => teacher.StaffId == award.TeacherId);
-
             var studentName = Name.Create(student.FirstName, string.Empty, student.LastName);
-            var teacherName = Name.Create(teacher.FirstName, string.Empty, teacher.LastName);
 
-            if (studentName.IsFailure || teacherName.IsFailure)
+            if (studentName.IsFailure)
             {
-                if (studentName.IsFailure)
-                {
-                    _logger.Warning("Could not create Name object from student {student} with error {@error}", student.DisplayName, studentName.Error);
-                }
-
-                if (teacherName.IsFailure)
-                {
-                    _logger.Warning("Could not create Name object from teacher {teacher} with error {@error}", teacher.DisplayName, teacherName.Error);
-                }
-
+                _logger.Warning("Could not create Name object from student {student} with error {@error}", student.DisplayName, studentName.Error);
                 continue;
+            }
+
+            var teacher = staff.FirstOrDefault(teacher => teacher.StaffId == award.TeacherId);
+            Name teacherName = null;
+
+            if (teacher is not null)
+            {
+                var teacherNameRequest = Name.Create(teacher?.FirstName, string.Empty, teacher?.LastName);
+
+                if (teacherNameRequest.IsFailure)
+                    _logger.Warning("Could not create Name object from teacher {teacher} with error {@error}", teacher.DisplayName, teacherNameRequest.Error);
+                else
+                    teacherName = teacherNameRequest.Value;
             }
 
             var hasCertificate = await _fileRepository.DoesAwardCertificateExistInDatabase(award.Id.ToString(), cancellationToken);
@@ -82,7 +83,7 @@ internal sealed class GetRecentAwardsQueryHandler
                 studentName.Value,
                 student.CurrentGrade,
                 student.School.Name,
-                teacherName.Value,
+                teacherName,
                 award.AwardedOn,
                 award.Type,
                 hasCertificate);
