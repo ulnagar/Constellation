@@ -2,10 +2,6 @@
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-AWARDS:
-	*Create event handler that sends attachment of award certficate to registered parents on creation
-	*Add download link to awards pages for Schools Portal and Parents Portal
-	*Find a way to match Astras in the download page against the report so that the report can be used as the primary collection, and the certificates get added after the fact
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
@@ -51,9 +47,6 @@ APP PERMISSIONS:
 	 SchoolContact = Portal.School.User
 	 Parent = Portal.Parent.User
 
-SENTRAL:
-	** Parent Portal only access Sentral directly inside APPLICATION\FEATURES\ATTENDANCE\QUERIES\GETVALIDATTENDANCEREPORTDATESQUERY
-
 ADOBE CONNECT:
 	Remove direct link for Adobe Connect Room to Session, allowing a class to be created without a Connect Room.
 
@@ -76,11 +69,9 @@ TRACKITSYNC JOB:
 GRADES:
 	Migrate from ENUM to object
 
-
-
 HANGFIRE DASHBOARD:
 	Add TRIGGER NOW button for one-off job registration
-	Add TRIGGER OUTSIDE HANGFIRE button for interactive sessions
+	*Add TRIGGER OUTSIDE HANGFIRE button for interactive sessions
 	Manage once-per-day job continuation
 
 SCHOOLS PORTAL LOGIN:
