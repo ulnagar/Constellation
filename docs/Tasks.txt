@@ -11,6 +11,9 @@ AWARDS:
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+EMAIL:
+	Update all email actions to use BCC or separate emails to prevent data leaks of private email addresses
+
 ACTIONS:
 		Migrate to AccessRight concept
 		Tickets are created for access to resources, with defined start and end dates

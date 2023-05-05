@@ -7,6 +7,7 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.ValueObjects;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -48,6 +49,13 @@ internal sealed class AwardCreatedDomainEvent_SendAwardCertificateToFamily
         if (award is null)
         {
             _logger.Error("Could not retrieve award when attempting to send certificate to parents: {@notification}", notification);
+            return;
+        }
+
+        if (award.AwardedOn.Date < DateTime.Today.AddDays(-1))
+        {
+            _logger.Warning("Cancelling send of award certificate as the awarded date is too old: {@award}", award);
+
             return;
         }
 

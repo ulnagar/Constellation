@@ -1253,6 +1253,9 @@ public class Service : IEmailService
 
         var attachment = new Attachment(stream, certificate.Name, certificate.FileType);
 
-        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, new List<Attachment> { attachment }, cancellationToken);
+        foreach (var recipient in recipients)
+        {
+            await _emailSender.Send(new List<EmailRecipient> { recipient }, "noreply@aurora.nsw.edu.au", viewModel.Title, body, new List<Attachment> { attachment }, cancellationToken);
+        }
     }
 }
