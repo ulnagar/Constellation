@@ -16,15 +16,21 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
     private readonly ITrainingModuleRepository _trainingModuleRepository;
     private readonly ITrainingCompletionRepository _trainingCompletionRepository;
     private readonly IStaffRepository _staffRepository;
+    private readonly ISchoolRepository _schoolRepository;
+    private readonly IFacultyRepository _facultyRepository;
 
     public GetListOfCertificatesForStaffMemberWithNotCompletedModulesQueryHandler(
         ITrainingModuleRepository trainingModuleRepository,
         ITrainingCompletionRepository trainingCompletionRepository,
-        IStaffRepository staffRepository)
+        IStaffRepository staffRepository,
+        ISchoolRepository schoolRepository,
+        IFacultyRepository facultyRepository)
     {
         _trainingModuleRepository = trainingModuleRepository;
         _trainingCompletionRepository = trainingCompletionRepository;
         _staffRepository = staffRepository;
+        _schoolRepository = schoolRepository;
+        _facultyRepository = facultyRepository;
     }
 
     public async Task<Result<StaffCompletionListDto>> Handle(GetListOfCertificatesForStaffMemberWithNotCompletedModulesQuery request, CancellationToken cancellationToken)
@@ -36,15 +42,21 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
 
         // - Get staff member
         var staff = await _staffRepository.GetById(request.StaffId, cancellationToken);
-            
+
+        // - Get Staff school details
+        var school = await _schoolRepository.GetById(staff.SchoolCode, cancellationToken);
+
+        // - Get Staff Faculties
+        var faculties = await _facultyRepository.GetCurrentForStaffMember(staff.StaffId, cancellationToken);
+
         // - Get completions for staff member
         var records = await _trainingCompletionRepository.GetCurrentForStaffMember(request.StaffId, cancellationToken);
             
         data.StaffId = request.StaffId;
         data.Name = staff.DisplayName;
-        data.SchoolName = staff.School.Name;
+        data.SchoolName = school.Name;
         data.EmailAddress = staff.EmailAddress;
-        data.Faculties = staff.Faculties.Where(member => !member.IsDeleted).Select(member => member.Faculty.Name).ToList();
+        data.Faculties = faculties.Select(faculty => faculty.Name).ToList();
 
         // - Build a collection of completions by each staff member for each module
         foreach (var record in records)
