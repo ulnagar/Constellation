@@ -80,6 +80,9 @@ public class StaffRepository : IStaffRepository
             .Select(session => session.Teacher)
             .ToListAsync(cancellationToken);
 
+        if (teachers.Count == 0)
+            return new List<Staff>();
+
         var groupedTeachers = teachers
             .GroupBy(teacher => teachers.Count(entry => entry == teacher))
             .OrderByDescending(entry => entry.Key);
