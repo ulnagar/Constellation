@@ -70,10 +70,13 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
     {
         List<string> returnData = new();
 
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
         var covers = await _context
             .Set<ClassCover>()
             .Where(cover => 
                 cover.OfferingId == offeringId &&
+                cover.EndDate < today &&
                 !cover.IsDeleted)
             .ToListAsync(cancellationToken);
 
