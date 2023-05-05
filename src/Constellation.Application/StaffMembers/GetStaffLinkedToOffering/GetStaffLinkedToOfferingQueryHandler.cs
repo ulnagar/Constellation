@@ -22,12 +22,10 @@ internal sealed class GetStaffLinkedToOfferingQueryHandler
 
     public async Task<Result<List<StaffSelectionListResponse>>> Handle(GetStaffLinkedToOfferingQuery request, CancellationToken cancellationToken)
     {
-        var staffList = await _staffRepository.GetCurrentTeachersForOffering(request.OfferingId, cancellationToken);
+        var staffList = await _staffRepository.GetPrimaryTeachersForOffering(request.OfferingId, cancellationToken);
 
-        if (staffList is null)
-        {
-            return Result.Failure<List<StaffSelectionListResponse>>(DomainErrors.Partners.Staff.NotFoundLinkedToOffering(request.OfferingId));
-        }
+        if (staffList.Count == 0)
+            return new List<StaffSelectionListResponse>();
 
         return staffList
             .Select(member => 

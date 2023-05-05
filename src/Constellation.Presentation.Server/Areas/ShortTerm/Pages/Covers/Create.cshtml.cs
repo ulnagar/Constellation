@@ -149,19 +149,13 @@ public class CreateModel : BasePageModel
         {
             var teachers = await _mediator.Send(new GetStaffLinkedToOfferingQuery(course.Id), cancellationToken);
 
-            var frequency = teachers
-                .Value
-                .GroupBy(x => x.StaffId)
-                .Select(group => new { StaffId = group.Key, Count = group.Count() })
-                .OrderByDescending(x => x.Count)
-                .First();
-
-            var primaryTeacher = teachers.Value.First(teacher => teacher.StaffId == frequency.StaffId);
+            if (teachers.Value.Count == 0)
+                continue;
 
             ClassSelectionList.Add(new ClassRecord(
                 course.Id,
                 course.Name,
-                $"{primaryTeacher.FirstName[..1]} {primaryTeacher.LastName}",
+                $"{teachers.Value.First().FirstName[..1]} {teachers.Value.First().LastName}",
                 $"Year {course.Name[..2]}"));
         }
 
