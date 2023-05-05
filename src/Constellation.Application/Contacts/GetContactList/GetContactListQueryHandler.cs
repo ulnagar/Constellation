@@ -94,7 +94,7 @@ internal sealed class GetContactListQueryHandler
 
                 var contactPhone = PhoneNumber.Create(contact.PhoneNumber);
 
-                foreach (var role in contact.Assignments)
+                foreach (var role in contact.Assignments.Where(role => role.SchoolCode == student.SchoolCode))
                 {
                     var category = role.Role switch
                     {
