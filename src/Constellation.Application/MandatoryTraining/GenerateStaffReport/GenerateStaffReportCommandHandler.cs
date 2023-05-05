@@ -155,7 +155,8 @@ internal sealed class GenerateStaffReportCommandHandler
 
         var fileList = new Dictionary<string, byte[]>();
 
-        var certificates = await _storedFileRepository.GetTrainingCertificatesFromList(data.Modules.Select(record => record.RecordId.ToString()).ToList(), cancellationToken);
+        var recordIds = data.Modules.Where(record => record.RecordId is not null).Select(record => record.RecordId.ToString()).ToList();
+        var certificates = await _storedFileRepository.GetTrainingCertificatesFromList(recordIds, cancellationToken);
 
         foreach (var certificate in certificates)
         {
