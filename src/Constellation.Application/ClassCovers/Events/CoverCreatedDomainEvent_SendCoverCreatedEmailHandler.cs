@@ -78,6 +78,55 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
         var primaryRecipients = new List<EmailRecipient>(); // Casual, Classroom Teacher
         var secondaryRecipients = new List<EmailRecipient>(); // Head Teacher, Additional Recipients
 
+        EmailRecipient coveringTeacher = null;
+
+        if (cover.TeacherType == CoverTeacherType.Casual)
+        {
+            var teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
+
+            if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
+            {
+                var address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
+
+                if (address.IsFailure)
+                {
+                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(CoverCreatedDomainEvent_SendCoverCreatedEmailHandler), teacher.DisplayName, cover.Id);
+                }
+                else
+                {
+                    primaryRecipients.Add(address.Value);
+                    coveringTeacher = address.Value;
+                }
+            }
+        }
+
+        if (cover.TeacherType == CoverTeacherType.Staff)
+        {
+            var teacher = await _staffRepository.GetById(cover.TeacherId, cancellationToken);
+
+            if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
+            {
+                var address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
+
+                if (address.IsFailure)
+                {
+                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(CoverCreatedDomainEvent_SendCoverCreatedEmailHandler), teacher.DisplayName, cover.Id);
+                }
+                else
+                {
+                    primaryRecipients.Add(address.Value);
+                    coveringTeacher = address.Value;
+                }
+            }
+        }
+
+        if (coveringTeacher is null)
+        {
+            _logger.Error("{action}: Could not create valid email address for covering teacher during processing of cover {id}", nameof(CoverCreatedDomainEvent_SendCoverCreatedEmailHandler), cover.Id);
+
+            return;
+        }
+
         var teachers = await _staffRepository.GetCurrentTeachersForOffering(cover.OfferingId, cancellationToken);
 
         foreach (var teacher in teachers)
@@ -113,55 +162,6 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
 
                 secondaryRecipients.Add(address.Value);
             }
-        }
-
-        EmailRecipient coveringTeacher = null;
-
-        if (cover.TeacherType == CoverTeacherType.Casual)
-        {
-            var teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
-
-            if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
-            {
-                var address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
-
-                if (address.IsFailure)
-                {
-                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(CoverCreatedDomainEvent_SendCoverCreatedEmailHandler), teacher.DisplayName, cover.Id);
-                }
-                else
-                {
-                    primaryRecipients.Add(address.Value);
-                    coveringTeacher = address.Value;
-                }
-            }
-        }
-
-        if (cover.TeacherType == CoverTeacherType.Staff)
-        {
-            var teacher = await _staffRepository.GetById(cover.TeacherId, cancellationToken);
-
-            if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
-            {
-                var address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
-
-                if (address.IsFailure)
-                {
-                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(CoverCreatedDomainEvent_SendCoverCreatedEmailHandler), teacher.DisplayName, cover.Id);
-                }
-                else
-                {
-                    primaryRecipients.Add(address.Value);
-                    coveringTeacher = address.Value;
-                }
-            }
-        }
-
-        if (coveringTeacher is null)
-        {
-            _logger.Error("{action}: Could not create valid email address for covering teacher during processing of cover {id}", nameof(CoverCreatedDomainEvent_SendCoverCreatedEmailHandler), cover.Id);
-
-            return;
         }
 
         var additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
