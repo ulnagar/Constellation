@@ -76,7 +76,7 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
             .Set<ClassCover>()
             .Where(cover => 
                 cover.OfferingId == offeringId &&
-                cover.EndDate < today &&
+                cover.EndDate >= today &&
                 !cover.IsDeleted)
             .ToListAsync(cancellationToken);
 
