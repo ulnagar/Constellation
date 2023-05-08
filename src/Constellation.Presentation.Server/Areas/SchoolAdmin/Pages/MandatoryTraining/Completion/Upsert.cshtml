@@ -123,4 +123,10 @@
             $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
         });
     </script>
+
+    <script>
+        $("select").on("change", function() {
+            $(this).valid();
+        });
+    </script>
 }
