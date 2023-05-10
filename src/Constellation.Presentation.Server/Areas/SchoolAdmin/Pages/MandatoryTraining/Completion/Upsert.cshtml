@@ -19,7 +19,6 @@
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         @Html.HiddenFor(model => model.Id)
-        @Html.HiddenFor(model => model.ModuleId)
 
         <div class="form-group row">
             <label asp-for="StaffId" class="col-md-2">Staff Member</label>

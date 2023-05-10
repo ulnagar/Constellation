@@ -12,7 +12,6 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Validation;
 using MediatR;
