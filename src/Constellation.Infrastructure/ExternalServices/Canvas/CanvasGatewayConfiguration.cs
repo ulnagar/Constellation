@@ -2,8 +2,6 @@
 
 public sealed class CanvasGatewayConfiguration
 {
-    public const string Section = "Constellation:Gateways:Canvas";
-
     public string ApiEndpoint { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
 
