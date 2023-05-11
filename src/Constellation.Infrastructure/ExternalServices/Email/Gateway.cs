@@ -1,10 +1,9 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email;
 
-using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Core.ValueObjects;
 using MailKit.Security;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
 using System.Net.Mail;
@@ -12,13 +11,23 @@ using System.Net.Mime;
 
 public class Gateway : IEmailGateway
 {
-    private readonly IEmailGatewayConfiguration _configuration;
-    private readonly ILogger<IEmailGateway> _logger;
+    private readonly EmailGatewayConfiguration _configuration;
+    private readonly ILogger _logger;
 
-    public Gateway(IEmailGatewayConfiguration configuration, ILogger<IEmailGateway> logger)
+    private readonly bool _logOnly = true;
+
+    public Gateway(IOptions<EmailGatewayConfiguration> configuration, ILogger logger)
     {
-        _configuration = configuration;
-        _logger = logger;
+        _logger = logger.ForContext<IEmailGateway>();
+
+        _configuration = configuration.Value;
+
+        _logOnly = !_configuration.IsConfigured();
+
+        if (_logOnly)
+        {
+            _logger.Information("Gateway initalised in log only mode");
+        }
     }
 
     public Task<MimeMessage> Send(
@@ -398,7 +407,7 @@ public class Gateway : IEmailGateway
     {
         var id = Guid.NewGuid();
 
-        _logger.LogInformation("Sending email {id}", id);
+        _logger.Information("Sending email {id}", id);
 
         var message = new MailMessage();
 
@@ -409,25 +418,25 @@ public class Gateway : IEmailGateway
 
         foreach (var recipient in toAddresses)
         {
-            _logger.LogInformation("{id}: Adding {name} ({email}) to TO field.", id, recipient.Key, recipient.Value);
+            _logger.Information("{id}: Adding {name} ({email}) to TO field.", id, recipient.Key, recipient.Value);
             message.To.Add(new MailAddress(recipient.Value, recipient.Key));
         }
 
         if (ccAddresses != null)
             foreach (var recipient in ccAddresses)
             {
-                _logger.LogInformation("{id}: Adding {name} ({email}) to CC field.", id, recipient.Key, recipient.Value);
+                _logger.Information("{id}: Adding {name} ({email}) to CC field.", id, recipient.Key, recipient.Value);
                 message.CC.Add(new MailAddress(recipient.Value, recipient.Key));
             }
 
         if (bccAddresses != null)
             foreach (var recipient in bccAddresses)
             {
-                _logger.LogInformation("{id}: Adding {name} ({email}) to BCC field.", id, recipient.Key, recipient.Value);
+                _logger.Information("{id}: Adding {name} ({email}) to BCC field.", id, recipient.Key, recipient.Value);
                 message.Bcc.Add(new MailAddress(recipient.Value, recipient.Key));
             }
 
-        _logger.LogInformation("{id}: Setting Subject to \"{subject}\"", id, subject);
+        _logger.Information("{id}: Setting Subject to \"{subject}\"", id, subject);
         message.Subject = subject;
 
         // Body
@@ -461,10 +470,16 @@ public class Gateway : IEmailGateway
             }
         }
 
-        _logger.LogInformation("{id}: Sending...", id);
+        if (_logOnly)
+        {
+            _logger.Information("SendCalendarInvite: Log Only Mode");
+        } else
+        {
+            _logger.Information("{id}: Sending...", id);
 
-        await Send(message, cancellationToken);
-
+            await Send(message, cancellationToken);
+        }
+        
         return new MimeMessage();
     }
 
@@ -481,7 +496,7 @@ public class Gateway : IEmailGateway
     {
         var id = Guid.NewGuid();
 
-        _logger.LogInformation("Sending email {id}", id);
+        _logger.Information("Sending email {id}", id);
 
         var message = new MimeMessage();
 
@@ -492,25 +507,25 @@ public class Gateway : IEmailGateway
 
         foreach (var recipient in toRecipients)
         {
-            _logger.LogInformation("{id}: Adding {name} ({email}) to TO field.", id, recipient.Name, recipient.Email);
+            _logger.Information("{id}: Adding {name} ({email}) to TO field.", id, recipient.Name, recipient.Email);
             message.To.Add(new MailboxAddress(recipient.Name, recipient.Email));
         }
 
         if (ccRecipients != null)
             foreach (var recipient in ccRecipients)
             {
-                _logger.LogInformation("{id}: Adding {name} ({email}) to CC field.", id, recipient.Name, recipient.Email);
+                _logger.Information("{id}: Adding {name} ({email}) to CC field.", id, recipient.Name, recipient.Email);
                 message.Cc.Add(new MailboxAddress(recipient.Name, recipient.Email));
             }
 
         if (bccRecipients != null)
             foreach (var recipient in bccRecipients)
             {
-                _logger.LogInformation("{id}: Adding {name} ({email}) to BCC field.", id, recipient.Name, recipient.Email);
+                _logger.Information("{id}: Adding {name} ({email}) to BCC field.", id, recipient.Name, recipient.Email);
                 message.Bcc.Add(new MailboxAddress(recipient.Name, recipient.Email));
             }
 
-        _logger.LogInformation("{id}: Setting Subject to \"{subject}\"", id, subject);
+        _logger.Information("{id}: Setting Subject to \"{subject}\"", id, subject);
         message.Subject = subject;
 
         var textPartBody = new TextPart(TextFormat.Html)
@@ -537,7 +552,7 @@ public class Gateway : IEmailGateway
                         FileName = item.Name
                     };
 
-                    _logger.LogInformation("{id}: Adding attachment {name}", id, item.Name);
+                    _logger.Information("{id}: Adding attachment {name}", id, item.Name);
 
                     multipart.Add(attachment);
                 }
@@ -554,7 +569,7 @@ public class Gateway : IEmailGateway
                 ical.ContentType.Parameters.Add("method", "REQUEST");
                 ical.ContentType.Parameters.Add("name", "meeting.ics");
 
-                _logger.LogInformation("{id}: Adding calendar appointment info", id);
+                _logger.Information("{id}: Adding calendar appointment info", id);
 
                 multipart.Add(ical);
 
@@ -568,8 +583,15 @@ public class Gateway : IEmailGateway
             message.Body = textPartBody;
         }
 
-        _logger.LogInformation("{id}: Sending...", id);
-        await PushToServer(message, cancellationToken);
+        if (_logOnly)
+        {
+            _logger.Information("SendAll: Log Only Mode");
+        }
+        else
+        {
+            _logger.Information("{id}: Sending...", id);
+            await PushToServer(message, cancellationToken);
+        }
 
         return message;
     }
@@ -587,7 +609,7 @@ public class Gateway : IEmailGateway
     {
         var id = Guid.NewGuid();
 
-        _logger.LogInformation("Sending email {id}", id);
+        _logger.Information("Sending email {id}", id);
 
         var message = new MimeMessage();
 
@@ -598,25 +620,25 @@ public class Gateway : IEmailGateway
 
         foreach (var recipient in toAddresses)
         {
-            _logger.LogInformation("{id}: Adding {name} ({email}) to TO field.", id, recipient.Key, recipient.Value);
+            _logger.Information("{id}: Adding {name} ({email}) to TO field.", id, recipient.Key, recipient.Value);
             message.To.Add(new MailboxAddress(recipient.Key, recipient.Value));
         }
 
         if (ccAddresses != null)
             foreach (var recipient in ccAddresses)
             {
-                _logger.LogInformation("{id}: Adding {name} ({email}) to CC field.", id, recipient.Key, recipient.Value);
+                _logger.Information("{id}: Adding {name} ({email}) to CC field.", id, recipient.Key, recipient.Value);
                 message.Cc.Add(new MailboxAddress(recipient.Key, recipient.Value));
             }
 
         if (bccAddresses != null)
             foreach (var recipient in bccAddresses)
             {
-                _logger.LogInformation("{id}: Adding {name} ({email}) to BCC field.", id, recipient.Key, recipient.Value);
+                _logger.Information("{id}: Adding {name} ({email}) to BCC field.", id, recipient.Key, recipient.Value);
                 message.Bcc.Add(new MailboxAddress(recipient.Key, recipient.Value));
             }
 
-        _logger.LogInformation("{id}: Setting Subject to \"{subject}\"", id, subject);
+        _logger.Information("{id}: Setting Subject to \"{subject}\"", id, subject);
         message.Subject = subject;
 
         var textPartBody = new TextPart(TextFormat.Html)
@@ -643,7 +665,7 @@ public class Gateway : IEmailGateway
                         FileName = item.Name
                     };
 
-                    _logger.LogInformation("{id}: Adding attachment {name}", id, item.Name);
+                    _logger.Information("{id}: Adding attachment {name}", id, item.Name);
 
                     multipart.Add(attachment);
                 }
@@ -660,7 +682,7 @@ public class Gateway : IEmailGateway
                 ical.ContentType.Parameters.Add("method", "REQUEST");
                 ical.ContentType.Parameters.Add("name", "meeting.ics");
 
-                _logger.LogInformation("{id}: Adding calendar appointment info", id);
+                _logger.Information("{id}: Adding calendar appointment info", id);
 
                 multipart.Add(ical);
 
@@ -674,8 +696,15 @@ public class Gateway : IEmailGateway
             message.Body = textPartBody;
         }
 
-        _logger.LogInformation("{id}: Sending...", id);
-        await PushToServer(message, cancellationToken);
+        if (_logOnly)
+        {
+            _logger.Information("SendAll: Log Only Mode");
+        }
+        else
+        {
+            _logger.Information("{id}: Sending...", id);
+            await PushToServer(message, cancellationToken);
+        }
 
         return message;
     }
@@ -689,6 +718,9 @@ public class Gateway : IEmailGateway
 
     private async Task PushToServer(MimeMessage message, CancellationToken cancellationToken = default)
     {
+        if (_logOnly)
+            return;
+
         using var client = new MailKit.Net.Smtp.SmtpClient();
         client.ServerCertificateValidationCallback = (s, c, h, e) => true;
 

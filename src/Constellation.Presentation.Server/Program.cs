@@ -51,7 +51,7 @@ builder.Services.Replace(ServiceDescriptor.Singleton<IHtmlGenerator, CustomHtmlG
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsProduction())
 {
     app.UseDeveloperExceptionPage();
 }

@@ -45,6 +45,4 @@
     <Folder Include="wwwroot\private\" />
   </ItemGroup>
 
-  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
-
 </Project>

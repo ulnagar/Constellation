@@ -15,6 +15,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Scrutor;
@@ -112,7 +113,7 @@ builder.Services.Scan(selector =>
     .AsMatchingInterface()
     .WithScopedLifetime());
 
-builder.Services.AddEmailTemplateEngine();
+builder.Services.AddEmailTemplateEngine(builder.Configuration);
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddControllersWithViews();

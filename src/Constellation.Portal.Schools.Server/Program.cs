@@ -110,7 +110,7 @@ builder.Services.Scan(selector =>
     .AsMatchingInterface()
     .WithScopedLifetime());
 
-builder.Services.AddEmailTemplateEngine();
+builder.Services.AddEmailTemplateEngine(builder.Configuration);
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddControllersWithViews();
