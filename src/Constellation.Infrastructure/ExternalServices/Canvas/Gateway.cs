@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Canvas;
 
 using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Core.Models;
-using Constellation.Infrastructure.DependencyInjection;
+using Constellation.Infrastructure.ExternalServices.Canvas.Models;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Serilog;
 using System;
@@ -25,12 +25,25 @@ internal class Gateway : ICanvasGateway
     private readonly string _apiKey;
     private readonly ILogger _logger;
 
+    private readonly bool _logOnly = true;
+
     public Gateway(
-        ICanvasGatewayConfiguration configuration,
+        IOptions<CanvasGatewayConfiguration> configuration,
         Serilog.ILogger logger)
     {
-        _url = configuration.ApiEndpoint;
-        _apiKey = configuration.ApiKey;
+        _logger = logger.ForContext<ICanvasGateway>();
+
+        _logOnly = !configuration.Value.IsConfigured();
+
+        if (_logOnly)
+        {
+            _logger.Information("Gateway initalised in log only mode");
+
+            return;
+        }
+
+        _url = configuration.Value.ApiEndpoint;
+        _apiKey = configuration.Value.ApiKey;
 
         var config = new HttpClientHandler
         {
@@ -43,8 +56,6 @@ internal class Gateway : ICanvasGateway
 
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
         _client = new HttpClient(config);
-        
-        _logger = logger.ForContext<ICanvasGateway>();
     }
 
     private enum HttpVerb
@@ -78,6 +89,13 @@ internal class Gateway : ICanvasGateway
     {
         var path = $"users/sis_user_id:{UserId}/logins";
 
+        if (_logOnly)
+        {
+            _logger.Information("SearchForUserLogin: UserId={userId}, path={path}", UserId, path);
+
+            return 1;
+        }
+
         var response = await RequestAsync(path, HttpVerb.Get);
         if (!response.IsSuccessStatusCode)
             return null;
@@ -93,6 +111,13 @@ internal class Gateway : ICanvasGateway
     {
         var path = $"accounts/1/users?search_term={UserId}";
 
+        if (_logOnly)
+        {
+            _logger.Information("SearchForUser: UserId={userId}, path={path}", UserId, path);
+
+            return 1;
+        }
+
         var response = await RequestAsync(path, HttpVerb.Get);
         var responseText = await response.Content.ReadAsStringAsync();
 
@@ -104,6 +129,13 @@ internal class Gateway : ICanvasGateway
     private async Task<int?> SearchForCourseEnrolment(string UserId, string CourseId)
     {
         var path = $"courses/sis_course_id:{CourseId}/enrollments?sis_user_id={UserId}";
+
+        if (_logOnly)
+        {
+            _logger.Information("SearchForCourseEnrolment: UserId={userId}, CourseId={courseId}, path={path}", UserId, CourseId, path);
+
+            return 1;
+        }
 
         var response = await RequestAsync(path, HttpVerb.Get);
         if (!response.IsSuccessStatusCode)
@@ -119,6 +151,14 @@ internal class Gateway : ICanvasGateway
     private async Task<List<AssignmentResult>> SearchForCourseAssignment(string UserId, string CourseId)
     {
         var path = $"users/sis_user_id:{UserId}/courses/sis_course_id:{CourseId}/assignments";
+
+        if (_logOnly)
+        {
+            _logger.Information("SearchForCourseAssignment: UserId={userId}, CourseId={courseId}, path={path}", UserId, CourseId, path);
+
+            return new List<AssignmentResult>();
+        }
+
 
         var response = await RequestAsync(path, HttpVerb.Get);
         if (!response.IsSuccessStatusCode)
@@ -142,6 +182,13 @@ internal class Gateway : ICanvasGateway
             content_type = file.FileType,
             on_duplicate = "overwrite"
         };
+
+        if (_logOnly)
+        {
+            _logger.Information("UploadAssignmentSubmission: CourseId={courseId}, CanvasAssignmentId={canvasAssignmentId}, StudentId={studentId}, StoredFile={@file}, stepOnePath={stepOnePath}, stepOnePayload={@stepOnePayload}", CourseId, CanvasAssignmentId, StudentId, file, stepOnePath, stepOnePayload);
+
+            return true;
+        }
 
         var stepOneResponse = await RequestAsync(stepOnePath, HttpVerb.Post, stepOnePayload);
         if (!stepOneResponse.IsSuccessStatusCode)
@@ -213,6 +260,13 @@ internal class Gateway : ICanvasGateway
     {
         var path = $"courses/sis_course_id:{CourseId}/assignments";
 
+        if (_logOnly)
+        {
+            _logger.Information("GetAllCourseAssignments: CourseId={courseId}, path={path}", CourseId, path);
+
+            return new List<CanvasAssignmentDto>();
+        }
+
         var response = await RequestAsync(path, HttpVerb.Get);
         if (!response.IsSuccessStatusCode)
             return null;
@@ -243,6 +297,13 @@ internal class Gateway : ICanvasGateway
     {
         var CanvasUserId = await SearchForUser(UserId);
 
+        if (_logOnly)
+        {
+            // The SearchForUser function will always return 1,
+            // but we here want to return null instead to cover the create code.
+            CanvasUserId = null;
+        }
+
         if (CanvasUserId != null)
             return await ReactivateUser(UserId);
 
@@ -269,6 +330,13 @@ internal class Gateway : ICanvasGateway
                 skip_confirmation = true
             }
         };
+
+        if (_logOnly)
+        {
+            _logger.Information("CreateUser: args={@args}, payload={@payload}, path={path}", new { UserId, FirstName, LastName, LoginEmail, UserEmail }, payload, path);
+
+            return true;
+        }
 
         var response = await RequestAsync(path, HttpVerb.Post, payload);
 
@@ -297,6 +365,13 @@ internal class Gateway : ICanvasGateway
             }
         };
 
+        if (_logOnly)
+        {
+            _logger.Information("EnrolUser: UserId={userId}, CourseId={courseId}, PermissionLevel={permissionLevel}, path={path}, payload={@payload}", UserId, CourseId, PermissionLevel, path, payload);
+
+            return true;
+        }
+
         var response = await RequestAsync(path, HttpVerb.Post, payload);
 
         if (response.IsSuccessStatusCode)
@@ -313,6 +388,13 @@ internal class Gateway : ICanvasGateway
             return false;
 
         var path = $"courses/sis_course_id:{CourseId}/enrollments/{CanvasEnrolmentId}?task=deactivate";
+
+        if (_logOnly)
+        {
+            _logger.Information("UnenrolUser: UserId={userId}, CourseId={courseId}, path={path}", UserId, CourseId, path);
+
+            return true;
+        }
 
         var response = await RequestAsync(path, HttpVerb.Delete);
 
@@ -340,6 +422,13 @@ internal class Gateway : ICanvasGateway
             }
         };
 
+        if (_logOnly)
+        {
+            _logger.Information("ReactivateUser: UserId={userId}, path={path}, payload={@payload}", UserId, path, payload);
+
+            return true;
+        }
+
         var response = await RequestAsync(path, HttpVerb.Put, payload);
 
         if (response.IsSuccessStatusCode)
@@ -364,6 +453,13 @@ internal class Gateway : ICanvasGateway
                 workflow_state = "suspended"
             }
         };
+
+        if (_logOnly)
+        {
+            _logger.Information("DeactivateUser: UserId={userId}, path={path}, payload={@payload}", UserId, path, payload);
+
+            return true;
+        }
 
         var response = await RequestAsync(path, HttpVerb.Put, payload);
 
@@ -396,131 +492,38 @@ internal class Gateway : ICanvasGateway
             }
         };
 
-        var response = await RequestAsync(path, HttpVerb.Put, payload);
+        HttpResponseMessage response;
 
-        if (response.IsSuccessStatusCode)
+        if (_logOnly)
         {
-            path = $"accounts/1/users/{CanvasUserId}";
+            _logger.Information("DeleteUser: UserId={userId}, path={path}, payload={@payload}", UserId, path, payload);
 
-            response = await RequestAsync(path, HttpVerb.Delete);
-
-            if (response.IsSuccessStatusCode)
-                return true;
+            response = new HttpResponseMessage(HttpStatusCode.NoContent);
+        }
+        else
+        {
+            response = await RequestAsync(path, HttpVerb.Put, payload);
         }
 
+        if (!response.IsSuccessStatusCode)
+        {
+            return false;
+        }
+
+        path = $"accounts/1/users/{CanvasUserId}";
+
+        if (_logOnly)
+        {
+            _logger.Information("DeleteUser: UserId={userId}, path={path}", UserId, path);
+
+            return true;
+        }
+
+        response = await RequestAsync(path, HttpVerb.Delete);
+
+        if (response.IsSuccessStatusCode)
+            return true;
+
         return false;
-    }
-
-    private class UserResult
-    {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-
-        [JsonProperty("name")]
-        public string Name { get; set; }
-
-        [JsonProperty("created_at")]
-        public DateTime CreatedAt { get; set; }
-
-        [JsonProperty("sortable_name")]
-        public string SortableName { get; set; }
-
-        [JsonProperty("short_name")]
-        public string ShortName { get; set; }
-
-        [JsonProperty("sis_user_id")]
-        public string SISId { get; set; }
-
-        [JsonProperty("login_id")]
-        public string LoginUsername { get; set; }
-    }
-
-    private class UserLoginResult
-    {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-
-        [JsonProperty("user_id")]
-        public int UserId { get; set; }
-
-        [JsonProperty("workflow_state")]
-        public string State { get; set; }
-
-        [JsonProperty("unique_id")]
-        public string Username { get; set; }
-
-        [JsonProperty("created_at")]
-        public DateTime CreatedAt { get; set; }
-
-        [JsonProperty("sis_user_id")]
-        public string SISId { get; set; }
-    }
-
-    private class EnrolmentResult
-    {
-        [JsonProperty("course_id")]
-        public int CourseId { get; set; }
-
-        [JsonProperty("id")]
-        public int Id { get; set; }
-
-        [JsonProperty("user_id")]
-        public int UserId { get; set; }
-
-        [JsonProperty("type")]
-        public string EnrollmentType { get; set; }
-
-        [JsonProperty("created_at")]
-        public DateTime CreatedAt { get; set; }
-
-        [JsonProperty("enrollment_state")]
-        public string EnrollmentState { get; set; }
-
-        [JsonProperty("sis_course_id")]
-        public string SISCourseId { get; set; }
-
-        [JsonProperty("sis_user_id")]
-        public string SISId { get; set; }
-    }
-
-    private class AssignmentResult
-    {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-        [JsonProperty("name")]
-        public string Name { get; set; }
-        /// <summary>
-        /// The date the assignment is due.
-        /// </summary>
-        [JsonProperty("due_at")]
-        public DateTime? DueDate { get; set; }
-        /// <summary>
-        /// The date after which submissions are accepted.
-        /// </summary>
-        [JsonProperty("unlock_at")]
-        public DateTime? UnlockDate { get; set; }
-        /// <summary>
-        /// The date after which no more submission are accepted.
-        /// </summary>
-        [JsonProperty("lock_at")]
-        public DateTime? LockDate { get; set; }
-        [JsonProperty("allowed_attempts")]
-        public int AllowedAttempts { get; set; }
-        [JsonProperty("submission_types")]
-        public ICollection<string> SubmissionTypes { get; set; }
-        [JsonProperty("published")]
-        public bool IsPublished { get; set; }
-    }
-
-    private class FileUploadLocationResult
-    {
-        [JsonProperty("upload_url")]
-        public string UploadUrl { get; set; }
-    }
-
-    private class FileUploadConfirmationResult
-    {
-        [JsonProperty("id")]
-        public int Id { get; set; }
     }
 }

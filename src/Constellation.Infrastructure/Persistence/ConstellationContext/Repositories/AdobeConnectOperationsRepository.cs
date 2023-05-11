@@ -121,6 +121,7 @@ public class AdobeConnectOperationsRepository : IAdobeConnectOperationsRepositor
     public async Task<AdobeConnectOperation> ForProcessingAsync(int id)
     {
         return await _context.AdobeConnectOperations
+            .Include(operation => operation.Room)
             .SingleOrDefaultAsync(operation => operation.Id == id);
     }
 

@@ -1,15 +1,17 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection;
 
-using Constellation.Application.Interfaces.GatewayConfigurations;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Infrastructure.ExternalServices.Email;
+using Microsoft.Extensions.Configuration;
 
 public static class EmailServicesRegistration
 {
-    public static IServiceCollection AddEmailExternalService(this IServiceCollection services)
+    public static IServiceCollection AddEmailExternalService(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<IEmailGatewayConfiguration, Configuration>();
+        services.AddOptions<EmailGatewayConfiguration>();
+        services.Configure<EmailGatewayConfiguration>(configuration.GetSection("AppSettings:EmailServer"));
+
         services.AddScoped<IEmailGateway, Gateway>();
         services.AddScoped<IEmailService, Service>();
 
