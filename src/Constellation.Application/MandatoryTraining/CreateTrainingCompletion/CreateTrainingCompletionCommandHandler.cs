@@ -67,7 +67,11 @@ internal sealed class CreateTrainingCompletionCommandHandler
         _trainingCompletionRepository.Insert(recordEntity);
 
         if (request.File is null)
+        {
+            await _unitOfWork.CompleteAsync(cancellationToken);
+
             return Result.Success();
+        }
 
         var fileEntity = new StoredFile
         {

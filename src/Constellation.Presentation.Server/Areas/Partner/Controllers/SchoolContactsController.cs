@@ -171,10 +171,10 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             viewModel.Contact = new SchoolContactDto
             {
                 Id = id,
-                FirstName = contact.FirstName.Trim(' '),
-                LastName = contact.LastName.Trim(' '),
-                EmailAddress = contact.EmailAddress.Trim(' '),
-                PhoneNumber = contact.PhoneNumber.Trim(' '),
+                FirstName = contact.FirstName.Trim(),
+                LastName = contact.LastName.Trim(),
+                EmailAddress = contact.EmailAddress.Trim(),
+                PhoneNumber = (string.IsNullOrWhiteSpace(contact.PhoneNumber) ? string.Empty : contact.PhoneNumber.Trim()),
                 SelfRegistered = contact.SelfRegistered
             };
 

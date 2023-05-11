@@ -264,7 +264,18 @@ public class UpsertModel : BasePageModel
                 NotRequired,
                 await GetUploadedFile());
             
-            await _mediator.Send(command);
+            var result = await _mediator.Send(command);
+
+            if (result.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = result.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Index", values: new { area = "SchoolAdmin" })
+                };
+
+                return Page();
+            }
         }
         else
         {
@@ -277,7 +288,18 @@ public class UpsertModel : BasePageModel
                 NotRequired,
                 await GetUploadedFile());
 
-            await _mediator.Send(command);
+            var result = await _mediator.Send(command);
+
+            if (result.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = result.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Index", values: new { area = "SchoolAdmin" })
+                };
+
+                return Page();
+            }
         }
 
         if (Mode == ModeOptions.SOLOMODULE)
