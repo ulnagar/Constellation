@@ -1,8 +1,12 @@
-﻿using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.GatewayConfigurations;
+﻿namespace Constellation.Infrastructure.ExternalServices.AdobeConnect;
+
+using Constellation.Application.DTOs;
+using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Models;
-using Constellation.Infrastructure.DependencyInjection;
+using Constellation.Infrastructure.ExternalServices.AdobeConnect.Models;
+using Microsoft.Extensions.Options;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -13,517 +17,500 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
+internal class Gateway : IAdobeConnectGateway
 {
-    public class Gateway : IAdobeConnectGateway, IScopedService
+    private readonly HttpClient _client;
+    private readonly AdobeConnectGatewayConfiguration _settings;
+    private DateTime? _loginTime;
+    private bool _loginInProgress;
+
+    private readonly bool _logOnly = true;
+    private readonly ILogger _logger;
+
+    public Gateway(
+        IOptions<AdobeConnectGatewayConfiguration> settings,
+        Serilog.ILogger logger)
     {
-        private readonly HttpClient _client;
-        private readonly IAdobeConnectGatewayConfiguration _settings;
-        private DateTime? _loginTime;
-        private bool _loginInProgress;
+        _logger = logger.ForContext<IAdobeConnectGateway>();
 
-        public Gateway(IAdobeConnectGatewayConfiguration settings)
+        _settings = settings.Value;
+
+        _logOnly = !_settings.IsConfigured();
+
+        if (_logOnly)
         {
-            _settings = settings;
+            _logger.Information("Gateway initalised in log only mode");
 
-            _client = new HttpClient
-            {
-                BaseAddress = new Uri(settings.Url)
-            };
+            return;
         }
 
-        private async Task CheckLogin()
+        // Only configure the client if the _logOnly setting is false
+        _client = new HttpClient
         {
-            while (_loginInProgress)
-                await Task.Delay(1000);
+            BaseAddress = new Uri(_settings.ServerUrl)
+        };
+    }
 
-            if (!_loginTime.HasValue || _loginTime.Value.AddMinutes(25) <= DateTime.Now)
-            {
-                _loginInProgress = true;
-                await Login();
-                _loginInProgress = false;
-            }
+    private async Task CheckLogin()
+    {
+        while (_loginInProgress)
+            await Task.Delay(1000);
+
+        if (!_loginTime.HasValue || _loginTime.Value.AddMinutes(25) <= DateTime.Now)
+        {
+            _loginInProgress = true;
+            await Login();
+            _loginInProgress = false;
         }
+    }
 
-        private async Task Login()
+    private async Task Login()
+    {
+        var loginParams = new NameValueCollection
         {
-            var loginParams = new NameValueCollection
-            {
-                { "login", _settings.Username },
-                { "password", _settings.Password }
-            };
+            { "login", _settings.Username },
+            { "password", _settings.Password }
+        };
 
-            var loginQuery = BuildQuery("login", loginParams);
-            var loginResponse = await _client.GetAsync(loginQuery);
+        var loginQuery = BuildQuery("login", loginParams);
 
-            var cookie = loginResponse.Headers.GetValues("Set-Cookie").FirstOrDefault();
-            if (cookie == null)
-                throw new Exception("Could not log in to Adobe Connect");
-
-            var tokens = cookie.Split(';');
-            _client.DefaultRequestHeaders.Add("Cookie", tokens[0]);
+        if (_logOnly)
+        {
+            _logger.Information("Login: {@query}", loginQuery);
 
             _loginTime = DateTime.Now;
+
+            return;
         }
 
-        private static string BuildQuery(string action, NameValueCollection @params)
+        var loginResponse = await _client.GetAsync(loginQuery);
+
+        var cookie = loginResponse.Headers.GetValues("Set-Cookie").FirstOrDefault() ?? throw new Exception("Could not log in to Adobe Connect");
+        var tokens = cookie.Split(';');
+        _client.DefaultRequestHeaders.Add("Cookie", tokens[0]);
+
+        _loginTime = DateTime.Now;
+    }
+
+    private static string BuildQuery(string action, NameValueCollection @params)
+    {
+        var paramString = "";
+
+        foreach (var key in @params.AllKeys)
         {
-            var paramString = "";
+            var values = @params.GetValues(key);
 
-            foreach (var key in @params.AllKeys)
+            foreach (var value in values)
             {
-                var values = @params.GetValues(key);
-
-                foreach (var value in values)
+                if (key == "name")
                 {
-                    if (key == "name")
-                    {
-                        paramString += $"&{key}={WebUtility.UrlEncode(value)}";
-                    }
-                    else
-                    {
-                        paramString += $"&{key}={value}";
-                    }
+                    paramString += $"&{key}={WebUtility.UrlEncode(value)}";
+                }
+                else
+                {
+                    paramString += $"&{key}={value}";
                 }
             }
-
-            return $"/api/xml?action={action}{(paramString != "" ? paramString : "")}";
         }
 
-        private async Task<T> Request<T>(string action, NameValueCollection queryParams) where T : ResponseDto
+        return $"/api/xml?action={action}{(paramString != "" ? paramString : "")}";
+    }
+
+    private async Task<T> Request<T>(string action, NameValueCollection queryParams) where T : ResponseDto
+    {
+        await CheckLogin();
+
+        var queryUri = BuildQuery(action, queryParams);
+
+        if (_logOnly)
         {
-            await CheckLogin();
+            _logger.Information("Request<T>: {@query}", queryUri);
 
-            var queryUri = BuildQuery(action, queryParams);
-            var response = await _client.GetAsync(queryUri);
-            var resultStream = await response.Content.ReadAsStreamAsync();
-            var sr = new StreamReader(resultStream);
-
-            try
-            {
-                var serializer = new XmlSerializer(typeof(T), new XmlRootAttribute("results"));
-                return (T)serializer.Deserialize(sr);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            return new ResponseDto() as T;
         }
 
-        private bool IsResponseValid(ResponseDto response)
+        var response = await _client.GetAsync(queryUri);
+        var resultStream = await response.Content.ReadAsStreamAsync();
+        var sr = new StreamReader(resultStream);
+
+        try
         {
-            if (response == null || response.Status.Code != "ok")
-                return false;
+            var serializer = new XmlSerializer(typeof(T), new XmlRootAttribute("results"));
+            return (T)serializer.Deserialize(sr);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    private bool IsResponseValid(ResponseDto response)
+    {
+        if (_logOnly)
+            return true;
+
+        if (response == null || response.Status.Code != "ok")
+            return false;
+
+        return true;
+    }
+
+    private async Task<string> FindFolder(string year, string grade)
+    {
+        if (_logOnly)
+        {
+            _logger.Information("FindFolder: year={year}, grade={grade}", year, grade);
+
+            return "1";
+        }
+
+        var yearFolderParams = new NameValueCollection
+        {
+            {"sco-id", _settings.BaseFolder},
+            {"filter-type", "folder"},
+            {"filter-name", year}
+        };
+
+        var yearResponse = await Request<FolderLookup>("sco-contents", yearFolderParams);
+
+        if (yearResponse.Scos.Count == 1)
+        {
+            var gradeFolderParams = new NameValueCollection
+            {
+                {"sco-id", yearResponse.Scos.First().ScoId},
+                {"filter-type", "folder"},
+                {"filter-name", grade}
+            };
+
+            var gradeResponse = await Request<FolderLookup>("sco-contents", gradeFolderParams);
+
+            if (gradeResponse.Scos.Count == 1)
+            {
+                return gradeResponse.Scos.First().ScoId;
+            }
+
+            return await CreateFolder(yearResponse.Scos.First().ScoId, grade);
+        }
+
+        var folderId = await CreateFolder(_settings.BaseFolder, year);
+        return await CreateFolder(folderId, grade);
+    }
+
+    private async Task<string> CreateFolder(string sco, string name)
+    {
+        if (_logOnly)
+        {
+            _logger.Information("CreateFolder: sco={sco}, name={name}", sco, name);
+
+            return "1";
+        }
+
+        var actionParams = new NameValueCollection
+        {
+            {"type", "folder"},
+            {"name", name},
+            {"folder-id", sco}
+        };
+
+        var response = await Request<RoomCreation>("sco-update", actionParams);
+
+        return response.Sco.ScoId;
+    }
+
+    private async Task AddDefaultRoomPermissions(string scoId, string faculty)
+    {
+        if (_logOnly)
+        {
+            _logger.Information("AddDefaultRoomPermissions: scoId={scoId}, faculty={faculty}", scoId, faculty);
+
+            return;
+        }
+
+        var groupList = new List<string>();
+
+        _settings.Groups.TryGetValue("Administration", out string adminGroup);
+        if (!string.IsNullOrWhiteSpace(adminGroup))
+            groupList.Add(adminGroup);
+
+        _settings.Groups.TryGetValue("Executive", out string execGroup);
+        if (!string.IsNullOrWhiteSpace(execGroup))
+            groupList.Add(execGroup);
+
+        _settings.Groups.TryGetValue(faculty, out string facultyGroup);
+        if (!string.IsNullOrWhiteSpace(facultyGroup))
+            groupList.Add(facultyGroup);
+
+        foreach (var group in groupList)
+        {
+            var permissionParams = new NameValueCollection
+            {
+                {"acl-id", scoId},
+                {"principal-id", group},
+                {"permission-id", "host"}
+            };
+
+            await Request<ResponseDto>("permissions-update", permissionParams);
+        }
+    }
+
+    public async Task<string> GetUserPrincipalId(string username)
+    {
+        var userParams = new NameValueCollection
+        {
+            { "filter-login", username + "@DETNSW" },
+            { "filter-login", username + "@det.nsw.edu.au" }
+        };
+
+        if (_logOnly)
+        {
+            _logger.Information("GetUserPrincipalId: username={username}, userParams={@userParams}", username, userParams.ToDictionary());
+
+            return "1";
+        }
+
+        var response = await Request<UserLookup>("principal-list", userParams);
+
+        var principal = response.PrincipalList.FirstOrDefault();
+
+        return principal?.PrincipalId;
+    }
+
+    public async Task<bool> UserPermissionUpdate(string principalId, string scoId, string accessLevel)
+    {
+        var actionParams = new NameValueCollection
+        {
+            { "acl-id", scoId },
+            { "principal-id", principalId },
+            { "permission-id", accessLevel }
+        };
+
+        if (_logOnly)
+        {
+            _logger.Information("UserPermissionUpdate: principalId={principalId}, scoId={scoId}, accessLevel={accessLevel}, actionParams={@actionParams}", principalId, scoId, accessLevel, actionParams.ToDictionary());
 
             return true;
         }
 
-        private async Task<string> FindFolder(string year, string grade)
+        var response = await Request<ResponseDto>("permissions-update", actionParams);
+        var code = response.Status.Code;
+
+        return code == "ok";
+    }
+
+    public async Task<bool> GroupMembershipUpdate(string principalId, string groupId, string accessLevel)
+    {
+        var isMember = accessLevel == AdobeConnectAccessLevel.Remove ? "false" : "true";
+
+        var actionParams = new NameValueCollection
         {
-            var yearFolderParams = new NameValueCollection
-            {
-                {"sco-id", _settings.BaseFolder},
-                {"filter-type", "folder"},
-                {"filter-name", year}
-            };
+            {"group-id", groupId},
+            {"principal-id", principalId},
+            {"is-member", isMember}
+        };
 
-            var yearResponse = await Request<FolderLookup>("sco-contents", yearFolderParams);
+        if (_logOnly)
+        {
+            _logger.Information("GroupMembershipUpdate: principalId={principalId}, groupId={groupId}, accessLevel={accessLevel}, actionParams={@actionParams}", principalId, groupId, accessLevel, actionParams.ToDictionary());
 
-            if (yearResponse.Scos.Count == 1)
-            {
-                var gradeFolderParams = new NameValueCollection
-                {
-                    {"sco-id", yearResponse.Scos.First().ScoId},
-                    {"filter-type", "folder"},
-                    {"filter-name", grade}
-                };
-
-                var gradeResponse = await Request<FolderLookup>("sco-contents", gradeFolderParams);
-
-                if (gradeResponse.Scos.Count == 1)
-                {
-                    return gradeResponse.Scos.First().ScoId;
-                }
-
-                return await CreateFolder(yearResponse.Scos.First().ScoId, grade);
-            }
-
-            var folderId = await CreateFolder(_settings.BaseFolder, year);
-            return await CreateFolder(folderId, grade);
+            return true;
         }
 
-        private async Task<string> CreateFolder(string sco, string name)
+        var response = await Request<ResponseDto>("group-membership-update", actionParams);
+
+        var code = response.Status.Code;
+
+        return code == "ok";
+    }
+
+    public async Task<ICollection<string>> GetSessionsForDate(string scoId, DateTime sessionDate)
+    {
+        var dateOfSession = sessionDate.ToString("yyyy-MM-dd");
+        var dateAfterSession = sessionDate.AddDays(1).ToString("yyyy-MM-dd");
+
+        var sessionParams = new NameValueCollection
         {
-            var actionParams = new NameValueCollection
-            {
-                {"type", "folder"},
-                {"name", name},
-                {"folder-id", sco}
-            };
+            {"sco-id", scoId},
+            {"filter-gte-date-created", dateOfSession },
+            {"filter-lt-date-created", dateAfterSession }
+        };
 
-            var response = await Request<RoomCreation>("sco-update", actionParams);
+        if (_logOnly)
+        {
+            _logger.Information("GetSessionsForDate: scoId={scoId}, sessionDate={sessionDate}, sessionParams={@sessionParams}", scoId, sessionDate, sessionParams.ToDictionary());
 
-            return response.Sco.ScoId;
+            return new List<string>() { "1", "2", "3" };
         }
 
-        private async Task AddDefaultRoomPermissions(string scoId, string faculty)
+        var response = await Request<SessionLookup>("report-meeting-sessions", sessionParams);
+
+        return response?.Sessions.Select(s => s.AssetId).ToList();
+    }
+
+    public async Task<ICollection<string>> GetSessionUsers(string scoId, string assetId)
+    {
+        var userParams = new NameValueCollection
         {
-            var groupList = new List<string>();
+            {"sco-id", scoId},
+            {"filter-asset-id", assetId}
+        };
 
-            _settings.Groups.TryGetValue("Administration", out string adminGroup);
-            if (!string.IsNullOrWhiteSpace(adminGroup))
-                groupList.Add(adminGroup);
+        if (_logOnly)
+        {
+            _logger.Information("GetSessionUsers: scoId={scoId}, assetId={assetId}, userParams={@userParams}", scoId, assetId, userParams.ToDictionary());
 
-            _settings.Groups.TryGetValue("Executive", out string execGroup);
-            if (!string.IsNullOrWhiteSpace(execGroup))
-                groupList.Add(execGroup);
-
-            _settings.Groups.TryGetValue(faculty, out string facultyGroup);
-            if (!string.IsNullOrWhiteSpace(facultyGroup))
-                groupList.Add(facultyGroup);
-
-            foreach (var group in groupList)
-            {
-                var permissionParams = new NameValueCollection
-                {
-                    {"acl-id", scoId},
-                    {"principal-id", group},
-                    {"permission-id", "host"}
-                };
-
-                await Request<ResponseDto>("permissions-update", permissionParams);
-            }
+            return new List<string>() { "1", "2", "3" };
         }
 
-        public async Task<string> GetUserPrincipalId(string username)
+        var response = await Request<AttendanceLookup>("report-meeting-attendance", userParams);
+
+        return response.Users.Where(u => u.DateLeft == null).Select(u => u.PrincipalId).ToList();
+    }
+
+    public async Task<ICollection<AdobeConnectSessionUserDetailDto>> GetSessionUserDetails(string scoId, string assetId)
+    {
+        var userParams = new NameValueCollection
         {
-            var userParams = new NameValueCollection
-            {
-                { "filter-login", username + "@DETNSW" },
-                { "filter-login", username + "@det.nsw.edu.au" }
-            };
+            {"sco-id", scoId},
+            {"filter-asset-id", assetId}
+        };
 
-            var response = await Request<UserLookup>("principal-list", userParams);
+        if (_logOnly)
+        {
+            _logger.Information("GetSessionUserDetails: scoId={scoId}, assetId={assetId}, userParams={@userParams}", scoId, assetId, userParams.ToDictionary());
 
-            var principal = response.PrincipalList.FirstOrDefault();
-
-            return principal?.PrincipalId;
+            return new List<AdobeConnectSessionUserDetailDto>() { new() { Name = "Sample User", Login = "sample.user@detnsw", LoginTime = DateTime.Now, LogoutTime = null } };
         }
 
-        public async Task<bool> UserPermissionUpdate(string principalId, string scoId, string accessLevel)
+        var response = await Request<AttendanceLookup>("report-meeting-attendance", userParams);
+
+        var returnData = new List<AdobeConnectSessionUserDetailDto>();
+
+        foreach (var user in response.Users)
         {
-            var actionParams = new NameValueCollection
+            var userDetails = new AdobeConnectSessionUserDetailDto
             {
-                { "acl-id", scoId },
-                { "principal-id", principalId },
-                { "permission-id", accessLevel }
+                Name = user.Name,
+                Login = user.Login,
+                LoginTime = user.DateEntered,
+                LogoutTime = user.DateLeft
             };
 
-            var response = await Request<ResponseDto>("permissions-update", actionParams);
-            var code = response.Status.Code;
-
-            return code == "ok";
+            returnData.Add(userDetails);
         }
 
-        public async Task<bool> GroupMembershipUpdate(string principalId, string groupId, string accessLevel)
+        return returnData;
+    }
+
+    public async Task<AdobeConnectRoomDto> CreateRoom(string name, string dateStart, string dateEnd, string urlPath, bool detectParentFolder, string parentFolder, string year, string grade, bool useTemplate, string faculty)
+    {
+        var actionParams = new NameValueCollection
         {
-            var isMember = accessLevel == AdobeConnectAccessLevel.Remove ? "false" : "true";
+            {"type", "meeting"},
+            {"name", name},
+            {"date-begin", dateStart},
+            {"date-end", dateEnd},
+            {"url-path", urlPath}
+        };
 
-            var actionParams = new NameValueCollection
-            {
-                {"group-id", groupId},
-                {"principal-id", principalId},
-                {"is-member", isMember}
-            };
-
-            var response = await Request<ResponseDto>("group-membership-update", actionParams);
-
-            var code = response.Status.Code;
-
-            return code == "ok";
+        if (useTemplate)
+        {
+            actionParams.Add("source-sco-id", _settings.TemplateSco);
         }
 
-        public async Task<ICollection<string>> GetSessionsForDate(string scoId, DateTime sessionDate)
+        if (detectParentFolder)
         {
-            var dateOfSession = sessionDate.ToString("yyyy-MM-dd");
-            var dateAfterSession = sessionDate.AddDays(1).ToString("yyyy-MM-dd");
+            var folderId = await FindFolder(year, grade);
 
-            var sessionParams = new NameValueCollection
-            {
-                {"sco-id", scoId},
-                {"filter-gte-date-created", dateOfSession },
-                {"filter-lt-date-created", dateAfterSession }
-            };
-
-            var response = await Request<SessionLookup>("report-meeting-sessions", sessionParams);
-
-            return response?.Sessions.Select(s => s.AssetId).ToList();
+            actionParams.Add("folder-id", folderId);
+        }
+        else
+        {
+            actionParams.Add("folder-id", parentFolder);
         }
 
-        public async Task<ICollection<string>> GetSessionUsers(string scoId, string assetId)
+        RoomCreation response;
+
+        if (_logOnly)
         {
-            var userParams = new NameValueCollection
-            {
-                {"sco-id", scoId},
-                {"filter-asset-id", assetId}
-            };
+            _logger.Information("CreateRoom: args={@args}, actionParams={@actionParams}", new { name, dateStart, dateEnd, urlPath, detectParentFolder, parentFolder, year, grade, useTemplate, faculty}, actionParams.ToDictionary());
 
-            var response = await Request<AttendanceLookup>("report-meeting-attendance", userParams);
-
-            return response.Users.Where(u => u.DateLeft == null).Select(u => u.PrincipalId).ToList();
+            response = new() { Sco = new() { Name = name, ScoId = "1", UrlPath = urlPath }, Status = new() { Code = "ok" } };
         }
-
-        public async Task<ICollection<AdobeConnectSessionUserDetailDto>> GetSessionUserDetails(string scoId, string assetId)
+        else
         {
-            var userParams = new NameValueCollection
-            {
-                {"sco-id", scoId},
-                {"filter-asset-id", assetId}
-            };
-
-            var response = await Request<AttendanceLookup>("report-meeting-attendance", userParams);
-
-            var returnData = new List<AdobeConnectSessionUserDetailDto>();
-
-            foreach (var user in response.Users)
-            {
-                var userDetails = new AdobeConnectSessionUserDetailDto
-                {
-                    Name = user.Name,
-                    Login = user.Login,
-                    LoginTime = user.DateEntered,
-                    LogoutTime = user.DateLeft
-                };
-
-                returnData.Add(userDetails);
-            }
-
-            return returnData;
-        }
-
-        public async Task<AdobeConnectRoomDto> CreateRoom(string name, string dateStart, string dateEnd, string urlPath, bool detectParentFolder, string parentFolder, string year, string grade, bool useTemplate, string faculty)
-        {
-            var actionParams = new NameValueCollection
-            {
-                {"type", "meeting"},
-                {"name", name},
-                {"date-begin", dateStart},
-                {"date-end", dateEnd},
-                {"url-path", urlPath}
-            };
-
-            if (useTemplate)
-            {
-                actionParams.Add("source-sco-id", _settings.TemplateSco);
-            }
-
-            if (detectParentFolder)
-            {
-                var folderId = await FindFolder(year, grade);
-
-                actionParams.Add("folder-id", folderId);
-            }
-            else
-            {
-                actionParams.Add("folder-id", parentFolder);
-            }
-
-            var response = await Request<RoomCreation>("sco-update", actionParams);
+            response = await Request<RoomCreation>("sco-update", actionParams);
 
             if (response.Status.Code.ToLower() != "ok")
             {
                 return null;
             }
+        }
 
-            // TODO: Check for successful response here before continuing:
+        await AddDefaultRoomPermissions(response.Sco.ScoId, faculty);
 
-            //  TYPE: date
-            //  SUBCODE: range
-            //  FIELD: date-end (value: 2021-12-16)
+        var newRoom = new AdobeConnectRoomDto
+        {
+            ScoId = response.Sco.ScoId,
+            Name = response.Sco.Name,
+            UrlPath = _settings.ServerUrl + response.Sco.UrlPath
+        };
 
-            await AddDefaultRoomPermissions(response.Sco.ScoId, faculty);
+        return newRoom;
+    }
 
-            var newRoom = new AdobeConnectRoomDto
+    public async Task<ICollection<AdobeConnectRoomDto>> ListRooms(string folderSco)
+    {
+        var sessionParams = new NameValueCollection
+        {
+            {"sco-id", folderSco},
+            {"filter-type", "meeting"}
+        };
+
+        if (_logOnly)
+        {
+            _logger.Information("ListRooms: folderSco={folderSco}, sessionParams={@sessionParams}", folderSco, sessionParams.ToDictionary());
+
+            return new List<AdobeConnectRoomDto>() { new() { ScoId = "1", Name = "Test Room", UrlPath = "" } };
+        }
+
+        var response = await Request<MeetingLookup>("sco-expanded-contents", sessionParams);
+
+        var returnData = new List<AdobeConnectRoomDto>();
+
+        foreach (var room in response?.Rooms)
+        {
+            var roomResource = new AdobeConnectRoomDto
             {
-                ScoId = response.Sco.ScoId,
-                Name = response.Sco.Name,
-                UrlPath = _settings.Url + response.Sco.UrlPath
+                ScoId = room.ScoId,
+                Name = room.Name,
+                UrlPath = _settings.ServerUrl + room.UrlPath
             };
 
-            return newRoom;
+            returnData.Add(roomResource);
         }
 
-        public async Task<ICollection<AdobeConnectRoomDto>> ListRooms(string folderSco)
+        return returnData;
+    }
+
+    public async Task<string> GetCurrentSession(string scoId)
+    {
+        var sessionParams = new NameValueCollection
         {
-            var sessionParams = new NameValueCollection
-            {
-                {"sco-id", folderSco},
-                {"filter-type", "meeting"}
-            };
+            {"sco-id", scoId},
+            {"sort-version", "desc"},
+            {"filter-rows", "1"}
+        };
 
-            var response = await Request<MeetingLookup>("sco-expanded-contents", sessionParams);
-
-            var returnData = new List<AdobeConnectRoomDto>();
-
-            foreach (var room in response?.Rooms)
-            {
-                var roomResource = new AdobeConnectRoomDto
-                {
-                    ScoId = room.ScoId,
-                    Name = room.Name,
-                    UrlPath = _settings.Url + room.UrlPath
-                };
-
-                returnData.Add(roomResource);
-            }
-
-            return returnData;
-        }
-
-        public async Task<string> GetCurrentSession(string scoId)
+        if (_logOnly)
         {
-            var sessionParams = new NameValueCollection
-            {
-                {"sco-id", scoId},
-                {"sort-version", "desc"},
-                {"filter-rows", "1"}
-            };
+            _logger.Information("GetCurrentSession: scoId={scoId}, sessionParams={@sessionParams}", scoId, sessionParams.ToDictionary());
 
-            var response = await Request<SessionLookup>("report-meeting-sessions", sessionParams);
-
-            return response?.Sessions.FirstOrDefault(s => s.DateEnded == null)?.AssetId;
+            return "1";
         }
 
-        [XmlRoot("results")]
-        public class ResponseDto
-        {
-            [XmlElement("status")]
-            public Status Status { get; set; }
-        }
+        var response = await Request<SessionLookup>("report-meeting-sessions", sessionParams);
 
-        public class Status
-        {
-            [XmlAttribute("code")]
-            public string Code { get; set; }
-            [XmlElement("invalid")]
-            public StatusInvalid ErrorCode { get; set; }
-        }
-
-        public class StatusInvalid
-        {
-            [XmlAttribute("field")]
-            public string Field { get; set; }
-            [XmlAttribute("type")]
-            public string Type { get; set; }
-            [XmlAttribute("subcode")]
-            public string Subcode { get; set; }
-        }
-
-        public class UserLookup : ResponseDto
-        {
-            [XmlArray("principal-list"), XmlArrayItem("principal")]
-            public List<Principal> PrincipalList { get; set; }
-        }
-
-        public class Principal
-        {
-            [XmlAttribute("principal-id")]
-            public string PrincipalId { get; set; }
-            [XmlElement("name")]
-            public string Name { get; set; }
-            [XmlElement("login")]
-            public string Login { get; set; }
-            [XmlElement("email")]
-            public string Email { get; set; }
-        }
-
-        public class SessionLookup : ResponseDto
-        {
-            [XmlArray("report-meeting-sessions"), XmlArrayItem("row")]
-            public List<MeetingSession> Sessions { get; set; }
-        }
-
-        public class MeetingSession
-        {
-            [XmlAttribute("sco-id")]
-            public string ScoId { get; set; }
-            [XmlAttribute("asset-id")]
-            public string AssetId { get; set; }
-            [XmlAttribute("num-participants")]
-            public string ParticipantCount { get; set; }
-            [XmlElement("date-created")]
-            public DateTime? DateStarted { get; set; }
-            [XmlElement("date-end")]
-            public DateTime? DateEnded { get; set; }
-        }
-
-        public class AttendanceLookup : ResponseDto
-        {
-            [XmlArray("report-meeting-attendance"), XmlArrayItem("row")]
-            public List<UserAttendance> Users { get; set; }
-        }
-
-        public class UserAttendance
-        {
-            [XmlAttribute("principal-id")]
-            public string PrincipalId { get; set; }
-            [XmlElement("login")]
-            public string Login { get; set; }
-            [XmlElement("session-name")]
-            public string Name { get; set; }
-            [XmlElement("date-created")]
-            public DateTime? DateEntered { get; set; }
-            [XmlElement("date-end")]
-            public DateTime? DateLeft { get; set; }
-        }
-
-        public class FolderLookup : ResponseDto
-        {
-            [XmlArray("scos"), XmlArrayItem("sco")]
-            public List<Folder> Scos { get; set; }
-        }
-
-        public class Folder
-        {
-            [XmlAttribute("sco-id")]
-            public string ScoId { get; set; }
-            [XmlElement("name")]
-            public string Name { get; set; }
-            [XmlElement("url-path")]
-            public string UrlPath { get; set; }
-        }
-
-        public class RoomCreation : ResponseDto
-        {
-            [XmlElement("sco")]
-            public RoomSco Sco { get; set; }
-        }
-
-        public class RoomSco
-        {
-            [XmlAttribute("sco-id")]
-            public string ScoId { get; set; }
-            [XmlElement("name")]
-            public string Name { get; set; }
-            [XmlElement("url-path")]
-            public string UrlPath { get; set; }
-        }
-
-        public class MeetingLookup : ResponseDto
-        {
-            [XmlArray("expanded-scos"), XmlArrayItem("sco")]
-            public List<MeetingRoom> Rooms { get; set; }
-        }
-
-        public class MeetingRoom
-        {
-            [XmlAttribute("sco-id")]
-            public string ScoId { get; set; }
-            [XmlElement("name")]
-            public string Name { get; set; }
-            [XmlElement("url-path")]
-            public string UrlPath { get; set; }
-        }
+        return response?.Sessions.FirstOrDefault(s => s.DateEnded == null)?.AssetId;
     }
 }

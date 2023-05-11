@@ -129,7 +129,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
         {
             var viewModel = await CreateViewModel<Actions_ProcessViewModel>();
 
-            var operation = await _unitOfWork.AdobeConnectOperations.ForProcessingAsync(operationId) as StudentAdobeConnectOperation;
+            var operation = await _unitOfWork.AdobeConnectOperations.ForProcessingAsync(operationId);
             if (operation != null)
             {
                 var result = await _adobeConnectService.ProcessOperation(operation);

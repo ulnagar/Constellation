@@ -1,23 +1,12 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection;
 
 using Constellation.Application;
-using Constellation.Application.Interfaces.GatewayConfigurations;
-using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Jobs.AbsenceClassworkNotificationJob;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions;
-using Constellation.Infrastructure.ExternalServices.AdobeConnect;
-using Constellation.Infrastructure.ExternalServices.Canvas;
-using Constellation.Infrastructure.ExternalServices.CESE;
-using Constellation.Infrastructure.ExternalServices.Email;
-using Constellation.Infrastructure.ExternalServices.LinkShortener;
-using Constellation.Infrastructure.ExternalServices.NetworkStatistics;
-using Constellation.Infrastructure.ExternalServices.SchoolRegister;
-using Constellation.Infrastructure.ExternalServices.Sentral;
-using Constellation.Infrastructure.ExternalServices.SMS;
 using Constellation.Infrastructure.Idempotence;
 using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
@@ -52,8 +41,8 @@ public static class ServicesRegistration
 
         services.AddStaffPortalAuthentication(configuration);
 
-        services.AddExternalServiceGateways()
-            .AddEmailTemplateEngine()
+        services.AddExternalServiceGateways(configuration)
+            .AddEmailTemplateEngine(configuration)
             .AddHangfireJobs();
 
         services.AddSingleton(Log.Logger);
@@ -91,8 +80,8 @@ public static class ServicesRegistration
         services.AddConstellationContext(configuration)
             .AddTrackItContext(configuration);
 
-        services.AddExternalServiceGateways()
-            .AddEmailTemplateEngine()
+        services.AddExternalServiceGateways(configuration)
+            .AddEmailTemplateEngine(configuration)
             .AddHangfireJobs();
 
         services.AddSingleton(Log.Logger);
@@ -137,8 +126,8 @@ public static class ServicesRegistration
     public static IServiceCollection AddSchoolPortalInfrastructureComponents(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddConstellationContext(configuration)
-            .AddExternalServiceGateways()
-            .AddEmailTemplateEngine();
+            .AddExternalServiceGateways(configuration)
+            .AddEmailTemplateEngine(configuration);
         
         services.AddSchoolPortalAuthentication();
 
@@ -198,8 +187,8 @@ public static class ServicesRegistration
     public static IServiceCollection AddParentPortalInfrastructureComponents(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddConstellationContext(configuration)
-            .AddExternalServiceGateways()
-            .AddEmailTemplateEngine();
+            .AddExternalServiceGateways(configuration)
+            .AddEmailTemplateEngine(configuration);
 
         services.AddParentPortalAuthentication();
 
@@ -239,13 +228,13 @@ public static class ServicesRegistration
         return services;
     }
 
-    internal static IServiceCollection AddExternalServiceGateways(this IServiceCollection services)
+    internal static IServiceCollection AddExternalServiceGateways(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddAdobeConnectExternalService();
-        services.AddCanvasExternalService();
-        services.AddCeseExternalService();
-        services.AddLinkShortenerExternalService();
-        services.AddNetworkStatisticsExternalService();
+        services.AddAdobeConnectExternalService(configuration);
+        services.AddCanvasExternalService(configuration);
+        services.AddCeseExternalService(configuration);
+        services.AddLinkShortenerExternalService(configuration);
+        services.AddNetworkStatisticsExternalService(configuration);
         services.AddSchoolRegisterExternalService();
         services.AddSentralExternalService();
         services.AddSMSExternalService();
@@ -308,9 +297,9 @@ public static class ServicesRegistration
     // But would need to figure out how to separately deal with attachments.
     // Or, pull back and include the type and the reference, so the processor would compile the entire email itself
     // e.g. EmailType = "StudentAbsenceNotification", Data = "{ studentId: 432109876, absenceId: xxxxx }"
-    public static IServiceCollection AddEmailTemplateEngine(this IServiceCollection services)
+    public static IServiceCollection AddEmailTemplateEngine(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddEmailExternalService();
+        services.AddEmailExternalService(configuration);
 
         services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
 
