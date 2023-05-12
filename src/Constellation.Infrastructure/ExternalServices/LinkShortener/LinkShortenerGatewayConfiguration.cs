@@ -2,6 +2,8 @@
 
 public class LinkShortenerGatewayConfiguration
 {
+    public const string Section = "Constellation:Gateways:LinkShortener";
+
     public string ApiEndpoint { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
 

@@ -6,9 +6,6 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.Areas.Admin.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Admin.Controllers
 {
@@ -20,8 +17,10 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
         private readonly IOperationService _operationService;
         private readonly ICasualRepository _casualRepository;
 
-        public ActionsController(IUnitOfWork unitOfWork, IConfiguration configuration,
-            IAdobeConnectService adobeConnectService, IOperationService operationService,
+        public ActionsController(
+            IUnitOfWork unitOfWork,
+            IAdobeConnectService adobeConnectService,
+            IOperationService operationService,
             ICasualRepository casualRepository)
             : base(unitOfWork)
         {

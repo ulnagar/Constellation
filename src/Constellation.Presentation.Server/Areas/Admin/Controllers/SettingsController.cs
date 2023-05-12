@@ -1,16 +1,12 @@
 ﻿using Constellation.Application.Extensions;
-using Constellation.Application.Interfaces.GatewayConfigurations;
+using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.Areas.Admin.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Admin.Controllers
 {
@@ -41,9 +37,9 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
             viewModel.SentralContactPreferenceList = new SelectList(
                 new List<SelectListItem>()
                 {
-                    new SelectListItem {Text = "Mother first, then Father", Value = ISentralGatewayConfiguration.ContactPreferenceOptions.MotherFirstThenFather},
-                    new SelectListItem {Text = "Father first, then Mother", Value = ISentralGatewayConfiguration.ContactPreferenceOptions.FatherFirstThenMother},
-                    new SelectListItem {Text = "Both Parents", Value = ISentralGatewayConfiguration.ContactPreferenceOptions.BothParentsIfPresent}
+                    new SelectListItem {Text = "Mother first, then Father", Value = SentralGatewayConfiguration.ContactPreferenceOptions.MotherThenFather.ToString()},
+                    new SelectListItem {Text = "Father first, then Mother", Value = SentralGatewayConfiguration.ContactPreferenceOptions.FatherThenMother.ToString()},
+                    new SelectListItem {Text = "Both Parents", Value = SentralGatewayConfiguration.ContactPreferenceOptions.Both.ToString()}
                 },
                 "Value",
                 "Text",

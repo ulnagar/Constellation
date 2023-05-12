@@ -20,7 +20,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
 {
     private readonly ILogger _logger;
     private readonly IExcelService _excelService;
-    private readonly ISchoolRegisterGateway _schoolRegisterGateway;
+    private readonly IDoEDataSourcesGateway _doeGateway;
     private readonly IStudentRepository _studentRepository;
     private readonly IEmailService _emailService;
     private readonly IFamilyRepository _familyRepository;
@@ -28,14 +28,14 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
     public MasterFileConsistencyCoordinatorHandler(
         Serilog.ILogger logger,
         IExcelService excelService,
-        ISchoolRegisterGateway schoolRegisterGateway,
+        IDoEDataSourcesGateway doeGateway,
         IStudentRepository studentRepository,
         IEmailService emailService,
         IFamilyRepository familyRepository)
     {
         _logger = logger.ForContext<MasterFileConsistencyCoordinator>();
         _excelService = excelService;
-        _schoolRegisterGateway = schoolRegisterGateway;
+        _doeGateway = doeGateway;
         _studentRepository = studentRepository;
         _emailService = emailService;
         _familyRepository = familyRepository;
@@ -47,7 +47,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
 
         var masterFileSchools = await _excelService.GetSchoolsFromMasterFile(request.MasterFileStream);
 
-        var dataCollectionsSchools = await _schoolRegisterGateway.GetSchoolList();
+        var dataCollectionsSchools = await _doeGateway.GetSchoolsFromDataCollections();
 
         foreach (var fileSchool in masterFileSchools)
         {

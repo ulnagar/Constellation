@@ -39,6 +39,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                         .ThenInclude(enrolment => enrolment.Offering);
         }
 
+        public void Insert(School school) =>
+            _context.Set<School>().Add(school);
+
         public async Task<School?> GetById(
             string id,
             CancellationToken cancellationToken = default) =>

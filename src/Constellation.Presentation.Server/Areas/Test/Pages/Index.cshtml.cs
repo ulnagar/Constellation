@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
+using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
@@ -10,6 +11,7 @@ using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Threading;
 
 public class IndexModel : BasePageModel
@@ -17,15 +19,18 @@ public class IndexModel : BasePageModel
     private readonly IMediator _mediator;
     private readonly ISentralAwardSyncJob _awardSyncJob;
     private readonly AppDbContext _context;
+    private readonly AppConfiguration _configuration;
 
     public IndexModel(
         IMediator mediator,
         ISentralAwardSyncJob awardSyncJob,
-        AppDbContext context)
+        AppDbContext context,
+        IOptions<AppConfiguration> configuration)
     {
         _mediator = mediator;
         _awardSyncJob = awardSyncJob;
         _context = context;
+        _configuration = configuration.Value;
     }
 
     public List<Award> Awards { get; set; } = new();
