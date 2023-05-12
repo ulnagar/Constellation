@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Application.Families.GetResidentialFamilyMobileNumbers;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.GatewayConfigurations;
+using Constellation.Application.Interfaces.Configuration;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,16 +18,16 @@ public class GetResidentialFamilyMobileNumbersQueryHandler
 {
     private readonly IFamilyRepository _familyRepository;
     private readonly ILogger _logger;
-    private readonly ISentralGatewayConfiguration _settings;
+    private readonly SentralGatewayConfiguration _settings;
 
     public GetResidentialFamilyMobileNumbersQueryHandler(
         IFamilyRepository familyRepository,
         Serilog.ILogger logger,
-        ISentralGatewayConfiguration settings = null)
+        IOptions<SentralGatewayConfiguration> settings)
     {
         _familyRepository = familyRepository;
         _logger = logger.ForContext<GetResidentialFamilyMobileNumbersQuery>();
-        _settings = settings;
+        _settings = settings.Value;
     }
 
     public async Task<Result<List<PhoneNumber>>> Handle(GetResidentialFamilyMobileNumbersQuery request, CancellationToken cancellationToken)
@@ -102,7 +103,7 @@ public class GetResidentialFamilyMobileNumbersQueryHandler
 
         switch (_settings?.ContactPreference)
         {
-            case ISentralGatewayConfiguration.ContactPreferenceOptions.MotherFirstThenFather:
+            case SentralGatewayConfiguration.ContactPreferenceOptions.MotherThenFather:
                 if (motherMobile.IsSuccess)
                     phoneNumbers.Add(motherMobile.Value);
                 else
@@ -110,7 +111,7 @@ public class GetResidentialFamilyMobileNumbersQueryHandler
                         phoneNumbers.Add(fatherMobile.Value);
 
                 break;
-            case ISentralGatewayConfiguration.ContactPreferenceOptions.FatherFirstThenMother:
+            case SentralGatewayConfiguration.ContactPreferenceOptions.FatherThenMother:
                 if (fatherMobile.IsSuccess)
                     phoneNumbers.Add(fatherMobile.Value);
                 else
@@ -118,7 +119,7 @@ public class GetResidentialFamilyMobileNumbersQueryHandler
                         phoneNumbers.Add(motherMobile.Value);
 
                 break;
-            case ISentralGatewayConfiguration.ContactPreferenceOptions.BothParentsIfPresent:
+            case SentralGatewayConfiguration.ContactPreferenceOptions.Both:
             default:
                 if (motherMobile.IsSuccess)
                     phoneNumbers.Add(motherMobile.Value);

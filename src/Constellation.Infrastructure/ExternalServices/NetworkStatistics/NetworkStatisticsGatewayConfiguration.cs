@@ -2,6 +2,8 @@
 
 public class NetworkStatisticsGatewayConfiguration
 {
+    public const string Section = "Constellation:Gateways:NetworkStatistics";
+
     public string Url { get; set; } = string.Empty;
     public string Key { get; set; } = string.Empty;
 

@@ -1,6 +1,7 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection;
 
 using Constellation.Application;
+using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Jobs.AbsenceClassworkNotificationJob;
 using Constellation.Application.Interfaces.Repositories;
@@ -30,6 +31,7 @@ using Microsoft.Extensions.Configuration;
 using Scrutor;
 using Serilog;
 using System;
+using System.Configuration;
 using System.Reflection;
 
 public static class ServicesRegistration
@@ -232,12 +234,11 @@ public static class ServicesRegistration
     {
         services.AddAdobeConnectExternalService(configuration);
         services.AddCanvasExternalService(configuration);
-        services.AddCeseExternalService(configuration);
+        services.AddDoEDataServicesGateway(configuration);
         services.AddLinkShortenerExternalService(configuration);
         services.AddNetworkStatisticsExternalService(configuration);
-        services.AddSchoolRegisterExternalService();
-        services.AddSentralExternalService();
-        services.AddSMSExternalService();
+        services.AddSentralExternalService(configuration);
+        services.AddSMSExternalService(configuration);
 
         return services;
     }
@@ -278,7 +279,7 @@ public static class ServicesRegistration
         services.AddScoped<AppDbContext>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        services.AddApplicationServices();
+        services.AddApplicationServices(configuration);
 
         return services;
     }
@@ -306,8 +307,11 @@ public static class ServicesRegistration
         return services;
     }
 
-    internal static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    internal static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddOptions<AppConfiguration>();
+        services.Configure<AppConfiguration>(configuration.GetSection(AppConfiguration.Section));
+
         services.AddScoped<IAbsenceService, AbsenceService>();
         services.AddScoped<IActiveDirectoryActionsService, ActiveDirectoryActionsService>();
         services.AddScoped<IAdobeConnectRoomService, AdobeConnectRoomService>();

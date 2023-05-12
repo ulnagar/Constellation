@@ -2,6 +2,7 @@
 
 public class EmailGatewayConfiguration
 {
+    public const string Section = "Constellation:Gateways:EmailServer";
     public string Server { get; set; } = string.Empty;
     public int Port { get; set; } = 0;
     public string Username { get; set; } = string.Empty;
