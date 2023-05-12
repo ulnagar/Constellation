@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Application.Families.GetResidentialFamilyEmailAddresses;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.GatewayConfigurations;
+using Constellation.Application.Interfaces.Configuration;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,16 +18,16 @@ public class GetResidentialFamilyEmailAddressesQueryHandler
 {
     private readonly IFamilyRepository _studentFamilyRepository;
     private readonly ILogger _logger;
-    private readonly ISentralGatewayConfiguration _settings;
+    private readonly SentralGatewayConfiguration _settings;
 
     public GetResidentialFamilyEmailAddressesQueryHandler(
         IFamilyRepository studentFamilyRepository,
         Serilog.ILogger logger,
-        ISentralGatewayConfiguration settings = null)
+        IOptions<SentralGatewayConfiguration> settings)
     {
         _studentFamilyRepository = studentFamilyRepository;
         _logger = logger.ForContext<GetResidentialFamilyEmailAddressesQuery>();
-        _settings = settings;
+        _settings = settings.Value;
     }
 
     public async Task<Result<List<EmailRecipient>>> Handle(GetResidentialFamilyEmailAddressesQuery request, CancellationToken cancellationToken)
@@ -98,7 +99,7 @@ public class GetResidentialFamilyEmailAddressesQueryHandler
 
         switch (_settings?.ContactPreference)
         {
-            case ISentralGatewayConfiguration.ContactPreferenceOptions.MotherFirstThenFather:
+            case SentralGatewayConfiguration.ContactPreferenceOptions.MotherThenFather:
                 if (motherEmail.IsSuccess)
                     emailAddresses.Add(motherEmail.Value);
                 else
@@ -106,7 +107,7 @@ public class GetResidentialFamilyEmailAddressesQueryHandler
                     emailAddresses.Add(fatherEmail.Value);
 
                 break;
-            case ISentralGatewayConfiguration.ContactPreferenceOptions.FatherFirstThenMother:
+            case SentralGatewayConfiguration.ContactPreferenceOptions.FatherThenMother:
                 if (fatherEmail.IsSuccess)
                     emailAddresses.Add(fatherEmail.Value);
                 else
@@ -114,7 +115,7 @@ public class GetResidentialFamilyEmailAddressesQueryHandler
                         emailAddresses.Add(motherEmail.Value);
 
                 break;
-            case ISentralGatewayConfiguration.ContactPreferenceOptions.BothParentsIfPresent:
+            case SentralGatewayConfiguration.ContactPreferenceOptions.Both:
             default:
                 if (motherEmail.IsSuccess)
                     emailAddresses.Add(motherEmail.Value);

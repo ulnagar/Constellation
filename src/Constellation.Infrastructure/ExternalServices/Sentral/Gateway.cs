@@ -3,9 +3,10 @@
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.Awards;
 using Constellation.Application.Extensions;
-using Constellation.Application.Interfaces.GatewayConfigurations;
+using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
@@ -14,15 +15,29 @@ using System.Web;
 
 public partial class Gateway : ISentralGateway
 {
-    private readonly HttpClient _client;
-    private readonly ISentralGatewayConfiguration _settings;
+    private readonly SentralGatewayConfiguration _settings;
     private readonly ILogger _logger;
+    private readonly bool _logOnly = true;
+    private readonly HttpClient _client;
+
     private HtmlDocument _studentListPage;
 
-    public Gateway(ISentralGatewayConfiguration settings, ILogger logger)
+    public Gateway(
+        IOptions<SentralGatewayConfiguration> settings, 
+        ILogger logger)
     {
-        _settings = settings;
         _logger = logger.ForContext<ISentralGateway>();
+
+        _settings = settings.Value;
+
+        _logOnly = !_settings.IsConfigured();
+
+        if (_logOnly)
+        {
+            _logger.Information("Gateway initalised in log only mode");
+
+            return;
+        }
 
         var config = new HttpClientHandler
         {
@@ -143,6 +158,13 @@ public partial class Gateway : ISentralGateway
 
     public async Task<string> GetSentralStudentIdAsync(string studentName)
     {
+        if (_logOnly)
+        {
+            _logger.Information("GetSentralStudentIdAsync: studentName={studentName}", studentName);
+
+            return null;
+        }
+
         _studentListPage ??= await GetPageAsync($"{_settings.Server}/profiles/main/search?eduproq=&search=advanced&plan_type=plans");
 
         if (_studentListPage == null)
@@ -182,6 +204,13 @@ public partial class Gateway : ISentralGateway
 
     public async Task<ICollection<SentralReportDto>> GetStudentReportList(string sentralStudentId)
     {
+        if (_logOnly)
+        {
+            _logger.Information("GetStudentReportList: sentralStudentId={sentralStudentId}", sentralStudentId);
+
+            return new List<SentralReportDto>();
+        }
+
         HtmlNode reportTable = null;
         var page = await GetPageAsync($"{_settings.Server}/profiles/students/{sentralStudentId}/academic-history");
 
@@ -256,7 +285,6 @@ public partial class Gateway : ISentralGateway
 
     public async Task<byte[]> GetStudentReport(string sentralStudentId, string reportId)
     {
-        await Login();
 
         var formData = new List<KeyValuePair<string, string>>
         {
@@ -265,6 +293,15 @@ public partial class Gateway : ISentralGateway
         };
         var formDataEncoded = new FormUrlEncodedContent(formData);
 
+        if (_logOnly)
+        {
+            _logger.Information("GetStudentReport: sentralStudentId={sentralStudentId}, reportId={reportId}, formData={@formData}", sentralStudentId, reportId, formData);
+
+            return null;
+        }
+
+        await Login();
+
         var response = await _client.PostAsync($"{_settings.Server}/profiles/students/{sentralStudentId}/academic-history?type=sreport&page=printed_report", formDataEncoded);
 
         return await response.Content.ReadAsByteArrayAsync();
@@ -272,6 +309,13 @@ public partial class Gateway : ISentralGateway
 
     public async Task<byte[]> GetSentralStudentPhoto(string studentId)
     {
+        if (_logOnly)
+        {
+            _logger.Information("GetSentralStudentPhoto: studentId={studentId}", studentId);
+
+            return null;
+        }
+
         await Login();
 
         var response = await _client.GetAsync($"{_settings.Server}/_common/lib/photo?type=student&id={studentId}&w=250&h=250");
@@ -281,6 +325,13 @@ public partial class Gateway : ISentralGateway
 
     public async Task<string> GetSentralStudentIdFromSRN(string srn, string grade)
     {
+        if (_logOnly)
+        {
+            _logger.Information("GetSentralStudentIdFromSRN: srn={srn}, grade={grade}", srn, grade);
+
+            return null;
+        }
+
         var page = await GetPageAsync($"{_settings.Server}/admin/datasync/students?year={grade}&type=active");
 
         if (page == null)
@@ -321,6 +372,13 @@ public partial class Gateway : ISentralGateway
 
     public async Task<List<SentralPeriodAbsenceDto>> GetAbsenceDataAsync(string sentralStudentId)
     {
+        if (_logOnly)
+        {
+            _logger.Information("GetAbsenceDataAsync: sentralStudentId={sentralStudentId}", sentralStudentId);
+
+            return new List<SentralPeriodAbsenceDto>();
+        }
+
         var page = await GetPageAsync($"{_settings.Server}/attendancepxp/administration/student?id={sentralStudentId}");
 
         if (page == null)
@@ -445,6 +503,13 @@ public partial class Gateway : ISentralGateway
 
     private async Task<List<SentralPeriodAbsenceDto>> GetPartialAbsenceDataForTerm(string sentralStudentId, int term)
     {
+        if (_logOnly)
+        {
+            _logger.Information("GetPartialAbsenceDataForTerm: sentralStudentId={sentralStudentId}, term={term}", sentralStudentId, term);
+
+            return new List<SentralPeriodAbsenceDto>();
+        }
+
         var page = await GetPageAsync($"{_settings.Server}/attendance/administration/student/{sentralStudentId}?term={term}");
 
         if (page == null)
@@ -542,6 +607,13 @@ public partial class Gateway : ISentralGateway
 
     public async Task<List<DateTime>> GetExcludedDatesFromCalendar(string year)
     {
+        if (_logOnly)
+        {
+            _logger.Information("GetExcludedDatesFromCalendar: year={year}", year);
+
+            return new List<DateTime>();
+        }
+
         var page = await GetPageAsync($"{_settings.Server}/admin/settings/school/calendar/{year}/month");
 
         if (page == null)
@@ -581,6 +653,13 @@ public partial class Gateway : ISentralGateway
 
     public async Task<List<ValidAttendenceReportDate>> GetValidAttendanceReportDatesFromCalendar(string year)
     {
+        if (_logOnly)
+        {
+            _logger.Information("GetValidAttendanceReportDatesFromCalendar: year={year}", year);
+
+            return new List<ValidAttendenceReportDate>();
+        }
+
         var validDates = new List<ValidAttendenceReportDate>();
 
         var page = await GetPageAsync($"{_settings.Server}/admin/settings/school/calendar/{year}/term");
@@ -689,6 +768,13 @@ public partial class Gateway : ISentralGateway
 
     public async Task<IDictionary<string, IDictionary<string, string>>> GetParentContactEntry(string sentralStudentId)
     {
+        if (_logOnly)
+        {
+            _logger.Information("GetParentContactEntry: sentralStudentId={sentralStudentId}", sentralStudentId);
+
+            return new Dictionary<string, IDictionary<string, string>>();
+        }
+
         var result = new Dictionary<string, IDictionary<string, string>>();
 
         if (string.IsNullOrWhiteSpace(sentralStudentId))
@@ -711,7 +797,7 @@ public partial class Gateway : ISentralGateway
 
         switch (_settings.ContactPreference)
         {
-            case ISentralGatewayConfiguration.ContactPreferenceOptions.MotherFirstThenFather:
+            case SentralGatewayConfiguration.ContactPreferenceOptions.MotherThenFather:
                 if (!string.IsNullOrWhiteSpace(mothersEmail))
                 {
                     emailAddresses.Add(mothersEmail);
@@ -722,7 +808,7 @@ public partial class Gateway : ISentralGateway
                 }
 
                 break;
-            case ISentralGatewayConfiguration.ContactPreferenceOptions.FatherFirstThenMother:
+            case SentralGatewayConfiguration.ContactPreferenceOptions.FatherThenMother:
                 if (!string.IsNullOrWhiteSpace(fathersEmail))
                 {
                     emailAddresses.Add(fathersEmail);
@@ -733,7 +819,7 @@ public partial class Gateway : ISentralGateway
                 }
 
                 break;
-            case ISentralGatewayConfiguration.ContactPreferenceOptions.BothParentsIfPresent:
+            case SentralGatewayConfiguration.ContactPreferenceOptions.Both:
                 if (!string.IsNullOrWhiteSpace(mothersEmail))
                 {
                     emailAddresses.Add(mothersEmail);
@@ -766,6 +852,13 @@ public partial class Gateway : ISentralGateway
 
     public async Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateOnly date)
     {
+        if (_logOnly)
+        {
+            _logger.Information("GetRollMarkingReportAsync: date={date}", date);
+
+            return new List<RollMarkReportDto>();
+        }
+
         var sentralDate = date.ToString("yyyy-MM-dd");
 
         var primaryPage = await GetPageAsync($"{_settings.Server}/attendancepxp/period/administration/roll_report?campus_id={1}&range=single_day&date={sentralDate}&export=1");
@@ -827,6 +920,13 @@ public partial class Gateway : ISentralGateway
 
     public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(ILogger logger)
     {
+        if (_logOnly)
+        {
+            _logger.Information("GetFamilyDetailsReport");
+
+            return new List<FamilyDetailsDto>();
+        }
+
         var data = new List<FamilyDetailsDto>();
 
         var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
@@ -976,6 +1076,13 @@ public partial class Gateway : ISentralGateway
 
     public async Task<ICollection<AwardDetailDto>> GetAwardsReport()
     {
+        if (_logOnly)
+        {
+            _logger.Information("GetAwardsReport");
+
+            return new List<AwardDetailDto>();
+        }
+
         var data = new List<AwardDetailDto>();
 
         var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
@@ -1023,6 +1130,13 @@ public partial class Gateway : ISentralGateway
     public async Task<List<AwardIncidentDto>> GetAwardsListing(string sentralStudentId, string calYear)
     {
         List<AwardIncidentDto> data = new();
+
+        if (_logOnly)
+        {
+            _logger.Information("GetAwardsListing: sentralStudentId={sentralStudentId}, calYear={calYear}", sentralStudentId, calYear);
+
+            return data;
+        }
 
         var page = await GetPageAsync($"{_settings.Server}/wellbeing/students/incidents?id={sentralStudentId}&category=1&year={calYear}");
 
@@ -1096,6 +1210,13 @@ public partial class Gateway : ISentralGateway
 
     public async Task<byte[]> GetAwardDocument(string sentralStudentId, string incidentId)
     {
+        if (_logOnly)
+        {
+            _logger.Information("GetAwardDocument: sentralStudentId={sentralStudentId}, incidentId={incidentId}", sentralStudentId, incidentId);
+
+            return null;
+        }
+
         await Login();
 
         // Get the Issue Id first

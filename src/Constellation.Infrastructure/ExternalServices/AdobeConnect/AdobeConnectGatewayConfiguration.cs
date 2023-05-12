@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public sealed class AdobeConnectGatewayConfiguration
 {
+    public const string Section = "Constellation:Gateways:AdobeConnect";
+    
     public string ServerUrl { get; set; } = string.Empty;
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;

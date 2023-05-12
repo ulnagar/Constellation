@@ -9,7 +9,7 @@ public static class NetworkStatisticsServicesRegistration
     public static IServiceCollection AddNetworkStatisticsExternalService(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions<NetworkStatisticsGatewayConfiguration>();
-        services.Configure<NetworkStatisticsGatewayConfiguration>(configuration.GetSection("AppSettings:NetworkStatistics"));
+        services.Configure<NetworkStatisticsGatewayConfiguration>(configuration.GetSection(NetworkStatisticsGatewayConfiguration.Section));
 
         services.AddScoped<INetworkStatisticsGateway, Gateway>();
 

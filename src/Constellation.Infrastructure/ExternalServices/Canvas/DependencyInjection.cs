@@ -9,7 +9,7 @@ public static class CanvasServicesRegistration
     public static IServiceCollection AddCanvasExternalService(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions<CanvasGatewayConfiguration>();
-        services.Configure<CanvasGatewayConfiguration>(configuration.GetSection("AppSettings:Canvas"));
+        services.Configure<CanvasGatewayConfiguration>(configuration.GetSection(CanvasGatewayConfiguration.Section));
 
         services.AddScoped<ICanvasGateway, Gateway>();
 

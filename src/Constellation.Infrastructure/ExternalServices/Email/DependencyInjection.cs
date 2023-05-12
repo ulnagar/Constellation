@@ -10,7 +10,7 @@ public static class EmailServicesRegistration
     public static IServiceCollection AddEmailExternalService(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions<EmailGatewayConfiguration>();
-        services.Configure<EmailGatewayConfiguration>(configuration.GetSection("AppSettings:EmailServer"));
+        services.Configure<EmailGatewayConfiguration>(configuration.GetSection(EmailGatewayConfiguration.Section));
 
         services.AddScoped<IEmailGateway, Gateway>();
         services.AddScoped<IEmailService, Service>();

@@ -9,7 +9,7 @@ public static class LinkShortenerServicesRegistration
     public static IServiceCollection AddLinkShortenerExternalService(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions<LinkShortenerGatewayConfiguration>();
-        services.Configure<LinkShortenerGatewayConfiguration>(configuration.GetSection("AppSettings:LinkShortener"));
+        services.Configure<LinkShortenerGatewayConfiguration>(configuration.GetSection(LinkShortenerGatewayConfiguration.Section));
 
         services.AddScoped<ILinkShortenerGateway, Gateway>();
 
