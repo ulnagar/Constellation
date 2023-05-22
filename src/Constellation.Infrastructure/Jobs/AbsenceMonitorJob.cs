@@ -9,7 +9,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using Constellation.Infrastructure.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

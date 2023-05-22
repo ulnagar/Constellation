@@ -1,4 +1,4 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Core.Models.Absences;
 using Constellation.Infrastructure.Templates.Views.Shared;
 using System;
 using System.Collections.Generic;

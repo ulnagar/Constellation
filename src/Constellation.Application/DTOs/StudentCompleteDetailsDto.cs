@@ -110,7 +110,7 @@ namespace Constellation.Application.DTOs
             }
         }
 
-        public class Absence : IMapFrom<Constellation.Core.Models.Absence>
+        public class Absence : IMapFrom<Core.Models.Absences.Absence>
         {
             public Guid Id { get; set; }
             public string Type { get; set; }
@@ -128,7 +128,7 @@ namespace Constellation.Application.DTOs
 
             public void Mapping(Profile profile)
             {
-                profile.CreateMap<Constellation.Core.Models.Absence, Absence>()
+                profile.CreateMap<Core.Models.Absences.Absence, Absence>()
                     .ForMember(dest => dest.Timeframe, opt => opt.MapFrom(src => src.AbsenceTimeframe))
                     .ForMember(dest => dest.NotificationCount, opt => opt.MapFrom(src => src.Notifications.Count))
                     .ForMember(dest => dest.ResponsesCount, opt => opt.MapFrom(src => src.Responses.Count))

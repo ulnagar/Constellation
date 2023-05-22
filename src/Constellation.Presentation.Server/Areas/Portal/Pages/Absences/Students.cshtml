@@ -52,11 +52,11 @@
                 <td>@Html.DisplayFor(model => entry.AbsenceLength) minutes</td>
                 <td>@Html.DisplayFor(model => entry.OfferingName)</td>
                 <td class="text-center">
-                    @if (!entry.IsExplained && entry.Type == Constellation.Core.Models.Absence.Partial)
+                    @if (!entry.IsExplained && entry.Type == Absence.Partial)
                     {
                         <a asp-page="StudentExplanation" asp-area="Portal" asp-route-id="@entry.AbsenceId" class="btn btn-sm btn-primary btn-show-hover">Explain</a>
                     }
-                    else if (entry.Type == Constellation.Core.Models.Absence.Partial)
+                    else if (entry.Type == Absence.Partial)
                     {
                         <a asp-page="StudentExplanation" asp-area="Portal" asp-route-id="@entry.AbsenceId" class="btn btn-sm btn-secondary btn-show-hover">More Info...</a>
                     }

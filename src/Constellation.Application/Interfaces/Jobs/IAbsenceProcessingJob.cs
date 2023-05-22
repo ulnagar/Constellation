@@ -1,5 +1,5 @@
 ﻿using Constellation.Application.Features.Jobs.AbsenceMonitor.Models;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using System;
 using System.Collections.Generic;
 using System.Threading;

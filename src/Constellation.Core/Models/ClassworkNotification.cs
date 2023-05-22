@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Covers;
 
 namespace Constellation.Core.Models

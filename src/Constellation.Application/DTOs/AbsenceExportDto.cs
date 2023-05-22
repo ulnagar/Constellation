@@ -1,4 +1,4 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Core.Models.Absences;
 using System;
 
 namespace Constellation.Application.DTOs

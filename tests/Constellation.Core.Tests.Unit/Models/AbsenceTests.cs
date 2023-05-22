@@ -1,4 +1,4 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Core.Models.Absences;
 using FluentAssertions;
 
 namespace Constellation.Core.Tests.Unit.Models;

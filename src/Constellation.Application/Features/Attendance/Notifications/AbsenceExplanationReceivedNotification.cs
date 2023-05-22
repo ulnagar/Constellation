@@ -3,7 +3,7 @@
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
