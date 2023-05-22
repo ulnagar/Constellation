@@ -1,4 +1,5 @@
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Families;
 using System;
 using System.Collections.Generic;

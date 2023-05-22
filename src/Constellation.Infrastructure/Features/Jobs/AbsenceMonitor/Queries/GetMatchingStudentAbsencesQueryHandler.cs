@@ -1,6 +1,6 @@
 ﻿using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;

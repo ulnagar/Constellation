@@ -3,7 +3,7 @@ using AutoMapper.QueryableExtensions;
 using Constellation.Application.Features.Portal.School.Absences.Models;
 using Constellation.Application.Features.Portal.School.Absences.Queries;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;

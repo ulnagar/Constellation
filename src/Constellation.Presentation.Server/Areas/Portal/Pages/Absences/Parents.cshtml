@@ -54,11 +54,11 @@
                 <td>@Html.DisplayFor(model => entry.PeriodName)</td>
                 <td>@Html.DisplayFor(model => entry.OfferingName)</td>
                 <td class="text-center">
-                    @if (!entry.IsExplained && entry.Type == Constellation.Core.Models.Absence.Whole)
+                    @if (!entry.IsExplained && entry.Type == Absence.Whole)
                     {
                         <a asp-page="ParentExplanation" asp-area="Portal" asp-route-id="@entry.AbsenceId" class="btn btn-sm btn-primary">Explain</a>
                     }
-                    else if (entry.Type == Constellation.Core.Models.Absence.Whole)
+                    else if (entry.Type == Absence.Whole)
                     {
                         <a asp-page="ParentExplanation" asp-area="Portal" asp-route-id="@entry.AbsenceId" class="btn btn-sm btn-secondary">More Info...</a>
                     }

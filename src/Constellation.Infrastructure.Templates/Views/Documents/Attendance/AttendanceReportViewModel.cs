@@ -2,6 +2,7 @@
 using Constellation.Application.Common.Mapping;
 using Constellation.Application.Extensions;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.Models.EmailQueue;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Families;
 using System;

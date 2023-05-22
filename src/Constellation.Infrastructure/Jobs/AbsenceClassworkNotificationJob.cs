@@ -8,6 +8,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.DependencyInjection;

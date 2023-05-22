@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
 using Constellation.Application.DTOs;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using Constellation.Core.ValueObjects;
 using System.Collections.Generic;
 using System.Threading.Tasks;

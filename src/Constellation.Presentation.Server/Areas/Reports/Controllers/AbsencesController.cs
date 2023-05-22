@@ -6,7 +6,7 @@ using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using Constellation.Infrastructure.Templates.Views.Documents.Attendance;
 using Constellation.Presentation.Server.Areas.Reports.Models;
 using Constellation.Presentation.Server.BaseModels;
