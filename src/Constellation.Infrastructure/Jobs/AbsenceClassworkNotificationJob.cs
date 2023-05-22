@@ -1,178 +1,172 @@
-﻿namespace Constellation.Infrastructure.Jobs;
-
+﻿using Constellation.Application.DTOs.EmailRequests;
+using Constellation.Application.Families.GetResidentialFamilyEmailAddresses;
+using Constellation.Application.Features.Faculties.Queries;
+using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
+using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Jobs.AbsenceClassworkNotificationJob;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
-using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
-using Constellation.Core.Models.MissedWork;
-using Constellation.Core.Shared;
+using Constellation.Core.Models.Covers;
+using Constellation.Core.ValueObjects;
+using Constellation.Infrastructure.DependencyInjection;
+using Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
+using Microsoft.Extensions.Logging;
 
-public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob
+namespace Constellation.Infrastructure.Jobs
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IAbsenceRepository _absenceRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
-    private readonly ICourseRepository _courseRepository;
-    private readonly IStudentRepository _studentRepository;
-    private readonly IClassworkNotificationRepository _notificationRepository;
-    private readonly ILogger _logger;
-    private readonly IClassCoverRepository _classCoverRepository;
-    private readonly IStaffRepository _staffRepository;
-
-    public AbsenceClassworkNotificationJob(
-        IUnitOfWork unitOfWork,
-        IAbsenceRepository absenceRepository,
-        ICourseOfferingRepository offeringRepository,
-        ICourseRepository courseRepository,
-        IStudentRepository studentRepository,
-        IClassworkNotificationRepository notificationRepository,
-        IClassCoverRepository classCoverRepository,
-        IStaffRepository staffRepository,
-        ILogger logger)
+    public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob, IScopedService
     {
-        _unitOfWork = unitOfWork;
-        _absenceRepository = absenceRepository;
-        _offeringRepository = offeringRepository;
-        _courseRepository = courseRepository;
-        _studentRepository = studentRepository;
-        _notificationRepository = notificationRepository;
-        _logger = logger.ForContext<IAbsenceClassworkNotificationJob>();
-        _classCoverRepository = classCoverRepository;
-        _staffRepository = staffRepository;
-    }
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailService _emailService;
+        private readonly ILogger<IAbsenceMonitorJob> _logger;
+        private readonly IMediator _mediator;
+        private readonly IClassCoverRepository _classCoverRepository;
+        private readonly IStaffRepository _staffRepository;
 
-    public async Task StartJob(Guid jobId, DateOnly scanDate, CancellationToken token)
-    {
-        _logger.Information("{id}: Starting missed classwork notifications scan", jobId);
-
-        List<Absence> absencesFromDb = await _absenceRepository.GetWholeAbsencesForScanDate(scanDate);
-        List<Absence> absences = new();
-
-        List<CourseOffering> offerings = await _offeringRepository.GetAllActive(token);
-        List<Course> courses = await _courseRepository.GetAll(token);
-
-        foreach (Absence absence in absencesFromDb)
+        public AbsenceClassworkNotificationJob(
+            IUnitOfWork unitOfWork,
+            IEmailService emailService,
+            ILogger<IAbsenceMonitorJob> logger,
+            IMediator mediator,
+            IClassCoverRepository classCoverRepository,
+            IStaffRepository staffRepository)
         {
-            CourseOffering offering = offerings.FirstOrDefault(offering => offering.Id == absence.OfferingId);
-
-            if (offering is null)
-                continue;
-
-            Course course = courses.FirstOrDefault(course => course.Id == offering.CourseId);
-
-            if (course is null)
-                continue;
-
-            if (course.Name == "Tutorial" ||
-                course.Grade == Grade.Y05 ||
-                course.Grade == Grade.Y06)
-                continue;
-
-            absences.Add(absence);
+            _unitOfWork = unitOfWork;
+            _emailService = emailService;
+            _logger = logger;
+            _mediator = mediator;
+            _classCoverRepository = classCoverRepository;
+            _staffRepository = staffRepository;
         }
 
-        var absencesByClassAndDate = absences.GroupBy(absence => new { absence.OfferingId, absence.Date });
-
-        foreach (var group in absencesByClassAndDate)
+        public async Task StartJob(Guid jobId, DateTime scanDate, CancellationToken token)
         {
-            if (token.IsCancellationRequested)
-                return;
+            _logger.LogInformation("{id}: Starting missed classwork notifications scan", jobId);
 
-            DateOnly absenceDate = group.Key.Date;
-            int offeringId = group.Key.OfferingId;
+            var absences = await _unitOfWork.Absences.ForClassworkNotifications(scanDate);
 
-            // Make sure to filter out cancelled sessions and deleted teachers
-            List<Staff> teachers = await _staffRepository.GetPrimaryTeachersForOffering(offeringId, token);
-            List<string> studentIds = group
-                .Select(absence => absence.StudentId)
-                .Distinct()
-                .ToList();
+            var absencesByClassAndDate = absences.GroupBy(absence => new { absence.OfferingId, absence.Date.Date });
 
-            List<Student> students = await _studentRepository.GetListFromIds(studentIds, token);
-            var offering = offerings.FirstOrDefault(offering => offering.Id == offeringId);
-
-            var covers = await _classCoverRepository.GetAllForDateAndOfferingId(absenceDate, offeringId, token);
-
-            if (covers.Count > 0)
+            foreach (var group in absencesByClassAndDate)
             {
-                var course = courses.FirstOrDefault(course => course.Id == offering.Id);
+                if (token.IsCancellationRequested)
+                    return;
 
-                teachers = await _staffRepository.GetFacultyHeadTeachers(course.FacultyId, token);
-            }
+                var absenceDate = group.Key.Date;
+                var offeringId = group.Key.OfferingId;
 
-            List<ClassworkNotification> existing = await _notificationRepository.GetForOfferingAndDate(offeringId, absenceDate, token);
+                // Make sure to filter out cancelled sessions and deleted teachers
+                var teachers = group.First().Offering.Sessions.Where(session => !session.IsDeleted).Select(session => session.Teacher).Where(teacher => !teacher.IsDeleted).Distinct().ToList();
+                var students = group.Select(absence => absence.Student).Distinct().ToList();
+                var offering = group.First().Offering;
 
-            if (!existing.Any())
-            {
+                var covers = await _classCoverRepository.GetAllForDateAndOfferingId(DateOnly.FromDateTime(absenceDate), offeringId, token);
+
+                if (covers.Count > 0)
+                {
+                    teachers = await _staffRepository.GetFacultyHeadTeachers(offering.Course.FacultyId, token);
+                }
+
                 // create notification object in database
-                var notificationRequest = ClassworkNotification.Create(
-                    group.ToList(),
-                    teachers,
-                    covers.Any());
-
-                if (notificationRequest.IsFailure)
+                var notification = new ClassworkNotification
                 {
-                    _logger.Warning("Could not create Classwork Notification: {error} - {message}", notificationRequest.Error.Code, notificationRequest.Error.Message);
-                    continue;
-                }
+                    AbsenceDate = absenceDate,
+                    Absences = group.ToList(),
+                    IsCovered = covers.Any(),
+                    Offering = offering,
+                    OfferingId = offeringId,
+                    Teachers = teachers
+                };
 
-                _notificationRepository.Insert(notificationRequest.Value);
+                if (token.IsCancellationRequested)
+                    return;
 
-                await _unitOfWork.CompleteAsync(token);
-
-                continue;
-            }
-
-            // Somehow, and this should not happen, there is already an entry for this occurance?
-            // Compare the list of students to see who has been added (or removed) and update the database
-            // entry accordingly. Then, if the teacher has already responded, send the student/parent email
-            // with the details of work required.
-
-            _logger.Information("{id}: Found existing entries for {Offering} @ {AbsenceDate}", jobId, offering.Name, absenceDate.ToShortDateString());
-
-            List<Absence> newAbsences = new();
-
-            // Playground
-            ClassworkNotification check = existing.OrderBy(entry => entry.GeneratedAt).First();
-
-            if (check.CompletedAt.HasValue)
-            {
-                // create notification object in database
-                Result<ClassworkNotification> notificationRequest = ClassworkNotification.Create(
-                    group.ToList(),
-                    teachers,
-                    covers.Any());
-
-                if (notificationRequest.IsFailure)
+                // Check if the db already has an entry for this?
+                var check = await _unitOfWork.ClassworkNotifications.GetForDuplicateCheck(offeringId, absenceDate, token);
+                if (check == null)
                 {
-                    _logger.Warning("Could not create Classwork Notification: {error} - {message}", notificationRequest.Error.Code, notificationRequest.Error.Message);
-                    continue;
+                    try
+                    {
+                        _unitOfWork.Add(notification);
+                        await _unitOfWork.CompleteAsync(token);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning("{id}: Failed to save notification with error {@error}: {@notification}", jobId, ex.Message, notification);
+                        continue;
+                    }
+
+                    foreach (var teacher in teachers)
+                    _logger.LogInformation("{id}: Sending email for {Offering} @ {AbsenceDate} to {teacher} ({EmailAddress})", jobId, notification.Offering.Name, notification.AbsenceDate.ToShortDateString(), teacher.DisplayName, teacher.EmailAddress);
+
+                    var emailNotification = new ClassworkNotificationTeacherEmail
+                    {
+                        NotificationId = notification.Id,
+                        OfferingName = notification.Offering.Name,
+                        Students = notification.Absences.Select(absence => absence.Student.DisplayName).ToList(),
+                        AbsenceDate = notification.AbsenceDate,
+                        Teachers = notification.Teachers.Select(teacher => new ClassworkNotificationTeacherEmail.Teacher { Name = teacher.DisplayName, Email = teacher.EmailAddress}).ToList(),
+                        IsCovered = notification.IsCovered
+                    };
+
+                    await _emailService.SendTeacherClassworkNotificationRequest(emailNotification);
                 }
-
-                _notificationRepository.Insert(notificationRequest.Value);
-
-                await _unitOfWork.CompleteAsync(token);
-
-                continue;
-            }
-                
-            // Update existing
-            foreach (Absence absence in check.Absences)
-            {
-                if (!check.Absences.Contains(absence))
+                else
                 {
-                    newAbsences.Add(absence);
+                    // Somehow, and this should not happen, there is already an entry for this occurance?
+                    // Compare the list of students to see who has been added (or removed) and update the database
+                    // entry accordingly. Then, if the teacher has already responded, send the student/parent email
+                    // with the details of work required.
 
-                    _logger.Information("{id}: Adding {Student} to the existing entry for {AbsenceDate}", jobId, absence.StudentId, check.AbsenceDate.ToShortDateString());
+                    _logger.LogInformation("{id}: Found existing entry for {Offering} @ {AbsenceDate}", jobId, notification.Offering.Name, notification.AbsenceDate.ToShortDateString());
+
+                    var newAbsences = new List<Absence>();
+
+                    foreach (var absence in notification.Absences)
+                    {
+                        if (!check.Absences.Contains(absence))
+                        {
+                            newAbsences.Add(absence);
+
+                            _logger.LogInformation("{id}: Adding {Student} to the existing entry for {Offering} @ {AbsenceDate}", jobId, absence.Student.DisplayName, notification.Offering.Name, notification.AbsenceDate.ToShortDateString());
+                        }
+                    }
+
+                    if (check.CompletedBy != null)
+                    {
+                        // Teacher has already submitted response. Add new students and send their email directly
+                        foreach (var absence in newAbsences)
+                        {
+                            check.Absences.Add(absence);
+
+                            var parentEmailRequest = await _mediator.Send(new GetResidentialFamilyEmailAddressesQuery(absence.StudentId), token);
+
+                            List<EmailRecipient> parentEmails = new();
+
+                            if (parentEmailRequest.IsFailure)
+                            {
+                                // Cannot send email to parents as no valid email was found
+                            } 
+                            else
+                            {
+                                parentEmails = parentEmailRequest.Value;
+                            }
+
+                            await _emailService.SendStudentClassworkNotification(absence, check, parentEmails);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var absence in newAbsences)
+                            check.Absences.Add(absence);
+                    }
+
+                    await _unitOfWork.CompleteAsync(token);
                 }
             }
-
-            foreach (Absence absence in newAbsences)
-                check.AddAbsence(absence);
-
-            await _unitOfWork.CompleteAsync(token);
         }
     }
 }

@@ -4,10 +4,10 @@ using Constellation.Core.Common;
 
 public class ResponseType : StringEnumeration<ResponseType>
 {
-    public static readonly ResponseType Coordinator = new("Coordinator");
-    public static readonly ResponseType Parent = new("Parent");
-    public static readonly ResponseType Student = new("Student");
-    public static readonly ResponseType System = new("System");
+    public static ResponseType Coordinator = new("Coordinator");
+    public static ResponseType Parent = new("Parent");
+    public static ResponseType Student = new("Student");
+    public static ResponseType System = new("System");
 
     public ResponseType(string value)
         : base(value, value) { }
