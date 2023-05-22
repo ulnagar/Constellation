@@ -153,7 +153,7 @@ public class StaffRepository : IStaffRepository
         await _context
             .Set<Staff>()
             .Where(staff => 
-                staff.EmailAddress == emailAddress && 
+                emailAddress.Contains(staff.PortalUsername) && 
                 !staff.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 

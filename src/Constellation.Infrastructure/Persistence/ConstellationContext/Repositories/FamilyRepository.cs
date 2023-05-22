@@ -64,7 +64,10 @@ internal sealed class FamilyRepository : IFamilyRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Family>()
-            .AnyAsync(family => family.Parents.Any(parent => parent.EmailAddress.ToLower() == email.ToLower()), cancellationToken);
+            .AnyAsync(family => 
+                family.FamilyEmail.ToLower() == email.ToLower() ||
+                family.Parents.Any(parent => parent.EmailAddress.ToLower() == email.ToLower()
+            ), cancellationToken);
 
     public async Task<Dictionary<string, bool>> GetStudentIdsFromFamilyWithEmail(
         string email,
