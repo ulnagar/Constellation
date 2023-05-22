@@ -1,7 +1,7 @@
 ﻿@page "/Attendance/Absences/Details/{id:guid}"
 
-@using Constellation.Application.Features.Attendance.Commands
-@using Constellation.Application.Features.Attendance.Queries;
+@    using Constellation.Application.Features.Attendance.Commands
+@    using Constellation.Application.Features.Attendance.Queries;
 
 @inject HttpClient Http
 @inject NavigationManager navManager
@@ -28,7 +28,7 @@
                 <strong>Status</strong>
             </div>
             <div class="mb-2 col-md-10">
-                @if (Absence.Type == Constellation.Core.Models.Absence.Whole)
+                @if (Absence.Type == Core.Models.Absences.Absence.Whole)
                 {
                     @if (Absence.Explained)
                     {
@@ -39,18 +39,18 @@
                     }
                 }
 
-                @if (Absence.Type == Constellation.Core.Models.Absence.Partial)
+                @if (Absence.Type == Core.Models.Absences.Absence.Partial)
                 {
                     @if (Absence.Explained && Absence.AbsenceReason != "Absent")
                     {
                         <span><i class="fas fa-check" /> Explained Partial Absence via @Absence.AbsenceReason</span>
-                    } else if (Absence.Validation == Constellation.Core.Models.AbsenceResponse.Verified)
+                    } else if (Absence.Validation == AbsenceResponse.Verified)
                     {
                         <span><i class="fas fa-check" /> @Absence.Validation Partial Absence</span>
-                    } else if (Absence.Validation == Constellation.Core.Models.AbsenceResponse.Rejected)
+                    } else if (Absence.Validation == AbsenceResponse.Rejected)
                     {
                         <span><i class="fas fa-exclamation" /> @Absence.Validation Partial Absence</span>
-                    } else if (Absence.Validation == Constellation.Core.Models.AbsenceResponse.Pending)
+                    } else if (Absence.Validation == AbsenceResponse.Pending)
                     {
                         <span><i class="fas fa-question" /> @Absence.Validation Partial Absence</span>
                     } else
@@ -93,7 +93,7 @@
                 <strong>Explanation</strong>
             </div>
             <div class="mb-2 col-md-10">
-                @if (Absence.Type == Constellation.Core.Models.Absence.Whole)
+                @if (Absence.Type == Core.Models.Absences.Absence.Whole)
                 {
                     @if (Absence.Explained || !Absence.CanBeExplainedByParent)
                     {
@@ -104,7 +104,7 @@
                     }
                 }
 
-                @if (Absence.Type == Constellation.Core.Models.Absence.Partial)
+                @if (Absence.Type == Core.Models.Absences.Absence.Partial)
                 {
                     @if (Absence.Explained && Absence.AbsenceReason != "Absent")
                     {
@@ -117,7 +117,7 @@
                             "@Absence.Reason"<br />
                             @Absence.Validation by @Absence.ValidatedBy
                         </span>
-                    } else if (Absence.Validation == Core.Models.AbsenceResponse.Pending)
+                    } else if (Absence.Validation == AbsenceResponse.Pending)
                     {
                         <span>
                             "@Absence.Reason"<br />
@@ -131,7 +131,7 @@
             </div>
         </div>
 
-        @if (Absence.Type == Constellation.Core.Models.Absence.Whole && !Absence.Explained && Absence.CanBeExplainedByParent)
+        @if (Absence.Type == Core.Models.Absences.Absence.Whole && !Absence.Explained && Absence.CanBeExplainedByParent)
         {
             <div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mt-1">
                 <button class="btn btn-success btn-lg" type="submit">Submit</button>

@@ -5,7 +5,7 @@ using AutoMapper.QueryableExtensions;
 using Constellation.Application.Common.Mapping;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;

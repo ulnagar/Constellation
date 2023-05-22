@@ -3,7 +3,7 @@
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using Constellation.Core.ValueObjects;
 
 public class Service : ISMSService

@@ -1,7 +1,7 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
