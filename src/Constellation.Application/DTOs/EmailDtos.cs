@@ -1,4 +1,5 @@
-﻿using Constellation.Core.Models.Absences;
+﻿using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using System;
 using System.Collections.Generic;
 using System.Net.Mail;
@@ -46,20 +47,20 @@ namespace Constellation.Application.DTOs
                 public string PeriodName { get; set; }
                 public string ClassName { get; set; }
                 public string Explanation { get; set; }
-                public string AbsenceType { get; set; }
+                public AbsenceType AbsenceType { get; set; }
                 public string AbsenceTimeframe { get; set; }
 
-                public AbsenceDto(Absence absence, AbsenceResponse response)
+                public AbsenceDto(Absence absence, Response response, CourseOffering offering)
                 {
                     ReportedBy = "UNKNOWN SOURCE";
 
-                    if (response.Type == AbsenceResponse.Coordinator)
+                    if (response.Type == ResponseType.Coordinator)
                         ReportedBy = $"Reported by {response.From} (ACC)";
-                    else if (response.Type == AbsenceResponse.Parent)
+                    else if (response.Type == ResponseType.Parent)
                         ReportedBy = "Reported by Parent";
-                    else if (response.Type == AbsenceResponse.Student)
+                    else if (response.Type == ResponseType.Student)
                     {
-                        var status = (response.VerificationStatus == AbsenceResponse.Verified) ? "verified" : "rejected";
+                        var status = (response.VerificationStatus == ResponseVerificationStatus.Verified) ? "verified" : "rejected";
 
                         ReportedBy = $"Reported by Student and <strong>{status}</strong> by {response.Verifier} (ACC)";
 
@@ -67,9 +68,9 @@ namespace Constellation.Application.DTOs
                             ReportedBy += $"<br />with comment: {response.VerificationComment}";
                     }
 
-                    AbsenceDate = absence.Date;
+                    AbsenceDate = absence.Date.ToDateTime(TimeOnly.MinValue);
                     PeriodName = $"{absence.PeriodName} ({absence.PeriodTimeframe})";
-                    ClassName = absence.Offering.Name;
+                    ClassName = offering.Name;
                     Explanation = response.Explanation;
                     AbsenceType = absence.Type;
                     AbsenceTimeframe = absence.AbsenceTimeframe;
