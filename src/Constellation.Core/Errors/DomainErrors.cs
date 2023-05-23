@@ -6,6 +6,16 @@ using System;
 
 public static class DomainErrors
 {
+    public static class Absences
+    {
+        public static class Absence
+        {
+            public static readonly Func<AbsenceId, Error> NotFound = id => new Error(
+                "Absences.Absence.NotFound",
+                $"Could not find any absence with the id {id}");
+        }
+    }
+
     public static class Assets
     {
         public static class Allocations
@@ -318,6 +328,12 @@ public static class DomainErrors
                 $"Could not find a course with the id {id}");
         }
 
+        public static class Offering
+        {
+            public static readonly Func<int, Error> NotFound = id => new(
+                "Subjects.Offering.NotFound",
+                $"Could not find an offering with the id {id}");
+        }
     }
 
     public static class Permissions

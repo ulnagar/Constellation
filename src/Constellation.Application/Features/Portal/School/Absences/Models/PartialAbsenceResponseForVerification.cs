@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Application.Features.Portal.School.Absences.Models
 {
-    public class PartialAbsenceResponseForVerification : IMapFrom<AbsenceResponse>
+    public class PartialAbsenceResponseForVerification : IMapFrom<Response>
     {
         [Display(Name = DisplayNameDefaults.Student)]
         public string StudentName { get; set; }
@@ -24,14 +24,5 @@ namespace Constellation.Application.Features.Portal.School.Absences.Models
         [Display(Name = DisplayNameDefaults.AbsenceLength)]
         public int AbsenceLength { get; set; }
         public string Explanation { get; set; }
-
-        public void Mapping(Profile profile)
-        {
-            profile.CreateMap<AbsenceResponse, PartialAbsenceResponseForVerification>()
-                .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => $"{src.Absence.Student.FirstName} {src.Absence.Student.LastName}"))
-                .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.Absence.Offering.Name))
-                .ForMember(dest => dest.AbsenceTimeframe, opt => opt.MapFrom(src => src.Absence.AbsenceTimeframe))
-                .ForMember(dest => dest.AbsenceLength, opt => opt.MapFrom(src => src.Absence.AbsenceLength));
-        }
     }
 }

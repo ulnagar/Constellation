@@ -14,8 +14,6 @@ namespace Constellation.Application.Interfaces.Repositories
 {
     public interface IAppDbContext
     {
-        DbSet<Absence> Absences { get; set; }
-        DbSet<AbsenceResponse> AbsenceResponse { get; set; }
         DbSet<AdobeConnectOperation> AdobeConnectOperations { get; set; }
         DbSet<AppSettings> AppSettings { get; set; }
         DbSet<AppAccessToken> AspNetAccessTokens { get; set; }
