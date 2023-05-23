@@ -1,7 +1,9 @@
 ﻿@page "/Attendance/Absences/Details/{id:guid}"
 
-@    using Constellation.Application.Features.Attendance.Commands
-@    using Constellation.Application.Features.Attendance.Queries;
+@using Constellation.Application.Absences.GetAbsenceDetailsForParent;
+@using Constellation.Application.Features.Attendance.Commands
+@using Constellation.Application.Features.Attendance.Queries;
+@using Constellation.Core.Models.Absences;
 
 @inject HttpClient Http
 @inject NavigationManager navManager
@@ -17,7 +19,7 @@
         <a href="attendance/absences" class="btn btn-primary"><i class="fas fa-long-arrow-left" /> Go Back</a>
     </div>
 
-    <h2>@Absence.Type absence for @Absence.StudentName</h2>
+    <h2>@Absence.Type absence for @Absence.Student.DisplayName</h2>
 
     <EditForm Model="Command" OnValidSubmit="SubmitResponse">
         <DataAnnotationsValidator />
@@ -28,7 +30,7 @@
                 <strong>Status</strong>
             </div>
             <div class="mb-2 col-md-10">
-                @if (Absence.Type == Core.Models.Absences.Absence.Whole)
+                @if (Absence.Type == AbsenceType.Whole)
                 {
                     @if (Absence.Explained)
                     {
@@ -39,20 +41,22 @@
                     }
                 }
 
-                @if (Absence.Type == Core.Models.Absences.Absence.Partial)
+                @if (Absence.Type == AbsenceType.Partial)
                 {
                     @if (Absence.Explained && Absence.AbsenceReason != "Absent")
                     {
                         <span><i class="fas fa-check" /> Explained Partial Absence via @Absence.AbsenceReason</span>
-                    } else if (Absence.Validation == AbsenceResponse.Verified)
+                    } else if (Absence.VerificationStatus == ResponseVerificationStatus.Verified)
                     {
-                        <span><i class="fas fa-check" /> @Absence.Validation Partial Absence</span>
-                    } else if (Absence.Validation == AbsenceResponse.Rejected)
+                        <span><i class="fas fa-check" /> @Absence.VerificationStatus.Name Partial Absence</span>
+                    }
+                    else if (Absence.VerificationStatus == ResponseVerificationStatus.Rejected)
                     {
-                        <span><i class="fas fa-exclamation" /> @Absence.Validation Partial Absence</span>
-                    } else if (Absence.Validation == AbsenceResponse.Pending)
+                        <span><i class="fas fa-exclamation" /> @Absence.VerificationStatus.Name Partial Absence</span>
+                    }
+                    else if (Absence.VerificationStatus == ResponseVerificationStatus.Pending)
                     {
-                        <span><i class="fas fa-question" /> @Absence.Validation Partial Absence</span>
+                        <span><i class="fas fa-question" /> @Absence.VerificationStatus.Name Partial Absence</span>
                     } else
                     {
                         <span><i class="fas fa-exclamation" /> Unexplained Partial Absence</span>
@@ -93,7 +97,7 @@
                 <strong>Explanation</strong>
             </div>
             <div class="mb-2 col-md-10">
-                @if (Absence.Type == Core.Models.Absences.Absence.Whole)
+                @if (Absence.Type == AbsenceType.Whole)
                 {
                     @if (Absence.Explained || !Absence.CanBeExplainedByParent)
                     {
@@ -104,7 +108,7 @@
                     }
                 }
 
-                @if (Absence.Type == Core.Models.Absences.Absence.Partial)
+                @if (Absence.Type == AbsenceType.Partial)
                 {
                     @if (Absence.Explained && Absence.AbsenceReason != "Absent")
                     {
@@ -115,9 +119,9 @@
                     {
                         <span>
                             "@Absence.Reason"<br />
-                            @Absence.Validation by @Absence.ValidatedBy
+                            @Absence.VerificationStatus.Name by @Absence.ValidatedBy
                         </span>
-                    } else if (Absence.Validation == AbsenceResponse.Pending)
+                    } else if (Absence.VerificationStatus == ResponseVerificationStatus.Pending)
                     {
                         <span>
                             "@Absence.Reason"<br />
@@ -125,13 +129,13 @@
                         </span>
                     } else
                     {
-                        <span>Pending explanation by @Absence.StudentName</span>
+                        <span>Pending explanation by @Absence.Student.DisplayName</span>
                     }
                 }
             </div>
         </div>
 
-        @if (Absence.Type == Core.Models.Absences.Absence.Whole && !Absence.Explained && Absence.CanBeExplainedByParent)
+        @if (Absence.Type == AbsenceType.Whole && !Absence.Explained && Absence.CanBeExplainedByParent)
         {
             <div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mt-1">
                 <button class="btn btn-success btn-lg" type="submit">Submit</button>
@@ -148,7 +152,7 @@
 
     public bool ShowLoader { get; set; } = false;
 
-    internal AbsenceDetailDto Absence { get; set; } = new();
+    ParentAbsenceDetailsResponse Absence { get; set; }
     public ProvideParentWholeAbsenceExplanationCommand Command { get; set; } = new();
 
     protected override async Task OnParametersSetAsync()
@@ -157,7 +161,7 @@
 
         try
         {
-            Absence = await Http.GetFromJsonAsync<AbsenceDetailDto>($"Attendance/Details/{Id}");
+            Absence = await Http.GetFromJsonAsync<ParentAbsenceDetailsResponse>($"Attendance/Details/{Id}");
         }
         catch (AccessTokenNotAvailableException exception)
         {

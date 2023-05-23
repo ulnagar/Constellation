@@ -1,8 +1,9 @@
-﻿using Constellation.Core.Models.Identifiers;
+﻿namespace Constellation.Core.Errors;
+
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using System;
 
-namespace Constellation.Core.Errors;
 public static class DomainErrors
 {
     public static class Absences
@@ -12,13 +13,6 @@ public static class DomainErrors
             public static readonly Func<AbsenceId, Error> NotFound = id => new Error(
                 "Absences.Absence.NotFound",
                 $"Could not find any absence with the id {id}");
-        }
-
-        public static class Response
-        {
-            public static readonly Func<AbsenceResponseId, Error> NotFound = id => new Error(
-                "Absences.Response.NotFound",
-                $"Could not find any response with the id {id}");
         }
     }
 
@@ -282,28 +276,6 @@ public static class DomainErrors
         }
     }
 
-    public static class MissedWork
-    {
-        public static class ClassworkNotification
-        {
-            public static readonly Error RequireAbsenceToCreate = new(
-                "MissedWork.ClassworkNotification.RequireAbsenceToCreate",
-                "A Classwork Notification cannot be created without at least one linked Absence");
-
-            public static readonly Error RequireTeacherToCreate = new(
-                "MissedWork.ClassworkNotification.RequireTeacherToCreate",
-                "A Classwork Notification cannot be created without at least one linked Teacher");
-
-            public static readonly Error SplitCompletedNotification = new(
-                "MissedWork.ClassworkNotification.SplitCompletedNotification",
-                "Cannot split a Classwork Notification that has already been completed");
-
-            public static readonly Error AlreadyCompleted = new(
-                "MissedWork.ClassworkNotification.AlreadyCompleted",
-                "Notification has alrady been completed");
-        }
-    }
-
     public static class Partners
     {
         public static class Staff
@@ -330,10 +302,6 @@ public static class DomainErrors
             public static readonly Func<string, Error> NotFound = id => new Error(
                 "Partners.Student.NotFound",
                 $"A student with the Id {id} could not be found");
-
-            public static readonly Func<string, Error> NotFoundForSchool = id => new Error(
-                "Partners.Student.NotFoundForSchool",
-                $"No current students found linked to school with Id {id}");
         }
     }
 

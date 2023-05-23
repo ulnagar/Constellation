@@ -32,11 +32,4 @@ internal sealed class AbsenceResponseRepository : IAbsenceResponseRepository
         await _context
             .Set<Response>()
             .FirstOrDefaultAsync(response => response.Id == responseId, cancellationToken);
-
-    public async Task<int> GetCountForAbsence(
-        AbsenceId absenceId,
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<Response>()
-            .CountAsync(response => response.AbsenceId == absenceId, cancellationToken);
 }

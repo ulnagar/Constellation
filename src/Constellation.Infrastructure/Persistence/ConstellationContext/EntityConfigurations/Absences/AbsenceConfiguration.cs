@@ -28,12 +28,6 @@ public class AbsenceConfiguration : IEntityTypeConfiguration<Absence>
                 value => AbsenceType.FromValue(value));
 
         builder
-            .Property(absence => absence.AbsenceReason)
-            .HasConversion(
-                entry => entry.Value,
-                value => AbsenceReason.FromValue(value));
-
-        builder
             .HasOne<Student>()
             .WithMany()
             .HasForeignKey(absence => absence.StudentId);

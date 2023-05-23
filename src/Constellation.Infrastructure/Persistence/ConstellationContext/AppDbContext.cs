@@ -2,7 +2,6 @@
 using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Models.MissedWork;
