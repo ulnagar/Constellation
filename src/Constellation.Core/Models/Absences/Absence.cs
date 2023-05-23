@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Absences;
 
+using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
@@ -103,5 +104,20 @@ public class Absence : AggregateRoot
         _notifications.Add(notification);
 
         return notification;
+    }
+
+    public Result<Response> AddResponse(
+        ResponseType type,
+        string from,
+        string explanation)
+    {
+        var response = Response.Create(Id, DateTime.Now, type, from, explanation);
+
+        if (response.VerificationStatus == ResponseVerificationStatus.Pending)
+            RaiseDomainEvent(new PendingVerificationResponseCreatedDomainEvent(new DomainEventId(), response.Id, Id));
+
+        _responses.Add(response);
+
+        return response;
     }
 }
