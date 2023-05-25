@@ -7,8 +7,7 @@ using Microsoft.AspNetCore.Identity;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly AppDbContext _context;
-
-    public IAbsenceRepository Absences { get; set; }
+    
     public IAdobeConnectOperationsRepository AdobeConnectOperations { get; set; }
     public IAdobeConnectRoomRepository AdobeConnectRooms { get; set; }
     public IAppAccessTokenRepository AppAccessTokens { get; set; }
@@ -33,16 +32,11 @@ public class UnitOfWork : IUnitOfWork
     public IClassworkNotificationRepository ClassworkNotifications { get; set; }
     public IJobActivationRepository JobActivations { get; set; }
 
-    public string[] AbsenceReasons { get; set; } = {
-        "Absent", "Exempt", "Flexible", "Leave", "School Business", "Sick", "Shared Enrolment", "Suspended",
-        "Unjustified"
-    };
 
     public UnitOfWork(AppDbContext context, UserManager<AppUser> userManager)
     {
         _context = context;
 
-        Absences = new AbsenceRepository(context);
         AdobeConnectOperations = new AdobeConnectOperationsRepository(context);
         AdobeConnectRooms = new AdobeConnectRoomRepository(context);
         AppAccessTokens = new AppAccessTokenRepository(context);

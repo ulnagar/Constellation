@@ -2,8 +2,8 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Shared;
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,7 +42,7 @@ internal sealed class GetAbsenceSummaryForStudentQueryHandler
                 absence.Id,
                 absence.Explained,
                 absence.Type,
-                DateOnly.FromDateTime(absence.Date),
+                absence.Date,
                 absence.AbsenceTimeframe,
                 absence.PeriodName,
                 offering.Name));

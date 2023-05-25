@@ -118,21 +118,4 @@ public class ExportService : IExportService
 
         return result;
     }
-
-    public async Task<List<AbsenceExportDto>> CreateAbsenceExport(AbsenceFilterDto filter)
-    {
-        var absences = await _unitOfWork.Absences.ForReportAsync(filter);
-
-        absences = absences.OrderBy(a => a.Date.Date)
-            .ThenBy(a => a.PeriodTimeframe)
-            .ThenBy(a => a.Student.School.Name)
-            .ThenBy(a => a.Student.CurrentGrade)
-            .ToList()
-            .Where(a => a.Date.Year == DateTime.Now.Year)
-            .ToList();
-
-        var data = absences.Select(AbsenceExportDto.ConvertFromAbsence).ToList();
-
-        return data;
-    }
 }

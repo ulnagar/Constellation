@@ -116,6 +116,9 @@ public class Absence : AggregateRoot
         if (response.VerificationStatus == ResponseVerificationStatus.Pending)
             RaiseDomainEvent(new PendingVerificationResponseCreatedDomainEvent(new DomainEventId(), response.Id, Id));
 
+        if (response.VerificationStatus == ResponseVerificationStatus.NotRequired)
+            RaiseDomainEvent(new AbsenceResponseReceivedDomainEvent(new DomainEventId(), response.Id, Id));
+
         _responses.Add(response);
 
         return response;

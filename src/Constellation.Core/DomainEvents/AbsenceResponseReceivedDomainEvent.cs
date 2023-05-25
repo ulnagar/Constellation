@@ -2,7 +2,7 @@
 
 using Constellation.Core.Models.Identifiers;
 
-public sealed record PendingVerificationResponseCreatedDomainEvent(
+public sealed record AbsenceResponseReceivedDomainEvent(
     DomainEventId Id,
     AbsenceResponseId ResponseId,
     AbsenceId AbsenceId)

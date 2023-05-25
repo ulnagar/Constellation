@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
+using Constellation.Application.Absences.GetAbsencesForExport;
 using Constellation.Application.Contacts.GetContactList;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.CSV;
@@ -16,7 +17,7 @@ using System.Threading.Tasks;
 public interface IExcelService
 {
     Task<MemoryStream> CreatePTOFile(ICollection<InterviewExportDto> exportLines);
-    Task<MemoryStream> CreateAbsencesFile(ICollection<AbsenceExportDto> exportAbsences, string title);
+    Task<MemoryStream> CreateAbsencesFile(List<AbsenceExportResponse> exportAbsences, string title);
     Task<MemoryStream> CreateAwardsCalculationFile(MemoryStream stream);
     Task<MemoryStream> CreateTrainingModuleReportFile(ModuleDetailsDto data);
     Task<MemoryStream> CreateTrainingModuleStaffReportFile(StaffCompletionListDto data);
