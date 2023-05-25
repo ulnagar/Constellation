@@ -1,4 +1,5 @@
-﻿using Constellation.Application.Extensions;
+﻿using Constellation.Application.Absences.GetAbsencesForExport;
+using Constellation.Application.Extensions;
 using Constellation.Application.Families.GetResidentialFamilyEmailAddresses;
 using Constellation.Application.Families.GetResidentialFamilyMobileNumbers;
 using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
@@ -94,7 +95,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
 
         public async Task<IActionResult> BuildAbsencesExport(Absence_ReportViewModel viewModel)
         {
-            var data = await _exportService.CreateAbsenceExport(viewModel.Filter);
+            var data = await _mediator.Send(new GetAbsencesForExportQuery(viewModel.Filter));
 
             TempData["data"] = JsonConvert.SerializeObject(data);
 

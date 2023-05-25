@@ -512,7 +512,7 @@ public class Service : IEmailService
                 ClassName = absence.ClassName,
                 Explanation = absence.Explanation,
                 Source = absence.ReportedBy,
-                Type = absence.AbsenceType,
+                Type = absence.AbsenceType.Value,
                 AbsenceTime = absence.AbsenceTimeframe
             });
         }
