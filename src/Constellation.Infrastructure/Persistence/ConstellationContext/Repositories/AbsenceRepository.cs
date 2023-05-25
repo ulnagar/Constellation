@@ -44,4 +44,11 @@ public class AbsenceRepository : IAbsenceRepository
                 absence.Date < endOfYear)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<List<Absence>> GetAllFromCurrentYear(
+        CancellationToken cancellationToken = default) => 
+        await _context
+            .Set<Absence>()
+            .Where(absence => absence.Date.Year == DateTime.Today.Year)
+            .ToListAsync(cancellationToken);
 }

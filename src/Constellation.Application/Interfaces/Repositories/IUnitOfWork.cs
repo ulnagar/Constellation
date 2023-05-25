@@ -27,6 +27,7 @@ public interface IUnitOfWork
     ITimetablePeriodRepository Periods { get; set; }
     ICanvasOperationsRepository CanvasOperations { get; set; }
     IJobActivationRepository JobActivations { get; set; }
+        IJobActivationRepository JobActivations { get; set; }
 
 
     void Remove<TEntity>(TEntity entity) where TEntity : class;

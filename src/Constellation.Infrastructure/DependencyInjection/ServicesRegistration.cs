@@ -31,8 +31,6 @@ using Microsoft.Extensions.Configuration;
 using Scrutor;
 using Serilog;
 using System;
-using System.ComponentModel;
-using System.Configuration;
 using System.Reflection;
 
 public static class ServicesRegistration
