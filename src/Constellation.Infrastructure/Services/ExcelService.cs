@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
+using Constellation.Application.Absences.GetAbsencesForExport;
 using Constellation.Application.Contacts.GetContactList;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.CSV;
@@ -83,7 +84,7 @@ public class ExcelService : IExcelService
         return stream;
     }
 
-    public async Task<MemoryStream> CreateAbsencesFile(ICollection<AbsenceExportDto> exportAbsences, string title)
+    public async Task<MemoryStream> CreateAbsencesFile(List<AbsenceExportResponse> exportAbsences, string title)
     {
         var excel = new ExcelPackage();
         var workSheet = excel.Workbook.Worksheets.Add("Sheet 1");

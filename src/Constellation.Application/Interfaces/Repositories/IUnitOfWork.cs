@@ -5,7 +5,6 @@ namespace Constellation.Application.Interfaces.Repositories
 {
     public interface IUnitOfWork
     {
-        IAbsenceRepository Absences { get; set; }
         IAdobeConnectOperationsRepository AdobeConnectOperations { get; set; }
         IAdobeConnectRoomRepository AdobeConnectRooms { get; set; }
         IAppAccessTokenRepository AppAccessTokens { get; set; }
@@ -30,7 +29,6 @@ namespace Constellation.Application.Interfaces.Repositories
         IClassworkNotificationRepository ClassworkNotifications { get; set; }
         IJobActivationRepository JobActivations { get; set; }
 
-        string[] AbsenceReasons { get; set; }
 
         void Remove<TEntity>(TEntity entity) where TEntity : class;
         void Add<TEntity>(TEntity entity) where TEntity : class;
