@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Features\Attendance\Commands\**" />
+    <EmbeddedResource Remove="Features\Attendance\Commands\**" />
+    <None Remove="Features\Attendance\Commands\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Constellation.Core\Constellation.Core.csproj" />
   </ItemGroup>
 
@@ -22,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Attendance\Commands\" />
     <Folder Include="Features\Portal\School\Timetables\Models\" />
     <Folder Include="Features\StaffMembers\Queries\" />
   </ItemGroup>
