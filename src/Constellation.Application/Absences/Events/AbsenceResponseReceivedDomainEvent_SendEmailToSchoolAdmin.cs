@@ -49,7 +49,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
 
         if (absence is null)
         {
-            _logger.Warning();
+            _logger.Warning("{action}: Could not find absence with Id {id} in database", nameof(AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin), notification.AbsenceId);
 
             return;
         }
@@ -58,7 +58,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
 
         if (response is null)
         {
-            _logger.Warning();
+            _logger.Warning("{action}: Could not find response with Id {response_id} to absence with Id {absence_id} in database", nameof(AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin), notification.ResponseId, notification.AbsenceId);
 
             return;
         }
@@ -67,7 +67,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
 
         if (offering is null)
         {
-            _logger.Warning();
+            _logger.Warning("{action}: Could not find offering with Id {offering_id} when working on absence with Id {absence_id} in database", nameof(AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin), absence.OfferingId, notification.AbsenceId);
 
             return;
         }
@@ -76,7 +76,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
 
         if (student is null)
         {
-            _logger.Warning();
+            _logger.Warning("{action}: Could not find student with Id {student_id} when working on absence with Id {absence_id} in database", nameof(AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin), absence.StudentId, notification.AbsenceId);
 
             return;
         }
