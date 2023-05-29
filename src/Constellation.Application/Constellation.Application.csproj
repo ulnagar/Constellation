@@ -28,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Attendance\Commands\" />
     <Folder Include="Features\Portal\School\Timetables\Models\" />
     <Folder Include="Features\StaffMembers\Queries\" />
   </ItemGroup>
