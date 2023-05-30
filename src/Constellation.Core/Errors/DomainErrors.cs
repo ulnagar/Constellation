@@ -14,6 +14,13 @@ public static class DomainErrors
                 "Absences.Absence.NotFound",
                 $"Could not find any absence with the id {id}");
         }
+
+        public static class Response
+        {
+            public static readonly Func<AbsenceResponseId, Error> NotFound = id => new Error(
+                "Absences.Response.NotFound",
+                $"Could not find any response with the id {id}");
+        }
     }
 
     public static class Assets
@@ -302,6 +309,10 @@ public static class DomainErrors
             public static readonly Func<string, Error> NotFound = id => new Error(
                 "Partners.Student.NotFound",
                 $"A student with the Id {id} could not be found");
+
+            public static readonly Func<string, Error> NotFoundForSchool = id => new Error(
+                "Partners.Student.NotFoundForSchool",
+                $"No current students found linked to school with Id {id}");
         }
     }
 
