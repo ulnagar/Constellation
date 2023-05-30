@@ -123,4 +123,54 @@ public class Absence : AggregateRoot
 
         return response;
     }
+
+    public Response? GetExplainedResponse()
+    {
+        if (_responses.Count == 0)
+            return null;
+
+        var explainedResponse = _responses
+            .FirstOrDefault(response => 
+                response.VerificationStatus == ResponseVerificationStatus.NotRequired);
+
+        if (explainedResponse is not null)
+            return explainedResponse;
+
+        var verifiedResponse = _responses
+            .FirstOrDefault(response =>
+                response.VerificationStatus == ResponseVerificationStatus.Verified);
+
+        if (verifiedResponse is not null)
+            return verifiedResponse;
+
+        var rejectedResponse = _responses
+            .FirstOrDefault(response =>
+                response.VerificationStatus == ResponseVerificationStatus.Rejected);
+
+        if (rejectedResponse is not null)
+            return rejectedResponse;
+
+        var pendingResponse = _responses
+            .FirstOrDefault(response =>
+                response.VerificationStatus == ResponseVerificationStatus.Pending);
+
+        if (pendingResponse is not null)
+            return pendingResponse;
+
+        return _responses.First();
+    }
+
+    public void ResponseConfirmed(AbsenceResponseId responseId)
+    {
+        var response = _responses.First(response => response.Id == responseId);
+
+        if (response.VerificationStatus == ResponseVerificationStatus.Verified ||
+            response.VerificationStatus == ResponseVerificationStatus.Rejected)
+        {
+            RaiseDomainEvent(new AbsenceResponseConfirmedDomainEvent(
+                new DomainEventId(),
+                responseId,
+                Id));
+        }
+    }
 }

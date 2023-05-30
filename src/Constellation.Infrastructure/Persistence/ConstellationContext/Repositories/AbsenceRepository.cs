@@ -45,6 +45,23 @@ public class AbsenceRepository : IAbsenceRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Absence>> GetWithResponsesForStudentFromCurrentYear(
+    string StudentId,
+    CancellationToken cancellationToken = default)
+    {
+        var startOfYear = new DateOnly(DateTime.Today.Year, 1, 1);
+        var endOfYear = new DateOnly(DateTime.Today.Year, 12, 31);
+
+        return await _context
+            .Set<Absence>()
+            .Include(absence => absence.Responses)
+            .Where(absence =>
+                absence.StudentId == StudentId &&
+                absence.Date > startOfYear &&
+                absence.Date < endOfYear)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<Absence>> GetAllFromCurrentYear(
         CancellationToken cancellationToken = default) => 
         await _context
