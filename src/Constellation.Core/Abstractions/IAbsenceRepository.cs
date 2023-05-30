@@ -10,6 +10,7 @@ public interface IAbsenceRepository
 {
     Task<Absence> GetById(AbsenceId absenceId, CancellationToken cancellationToken = default);
     Task<List<Absence>> GetForStudentFromCurrentYear(string StudentId, CancellationToken cancellationToken = default);
+    Task<List<Absence>> GetWithResponsesForStudentFromCurrentYear(string StudentId, CancellationToken cancellationToken = default);
     Task<List<Absence>> GetAllFromCurrentYear(CancellationToken cancellationToken = default);
     void Insert(Absence absence);
 }
