@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Interfaces.Repositories;
 
-using Constellation.Core.Models;
+using Constellation.Core.Models.MissedWork;
 using System;
 using System.Collections.Generic;
 using System.Threading;

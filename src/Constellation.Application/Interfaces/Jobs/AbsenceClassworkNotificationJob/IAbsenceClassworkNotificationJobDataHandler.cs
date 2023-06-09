@@ -1,8 +1,8 @@
 ﻿using Constellation.Application.Models.EmailQueue;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Families;
+using Constellation.Core.Models.MissedWork;
 using System;
 using System.Collections.Generic;
 using System.Threading;

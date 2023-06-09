@@ -2,12 +2,12 @@
 
 using System;
 
-public sealed record AbsenceId(Guid Value)
+public sealed record ClassworkNotificationId(Guid Value)
 {
-    public static AbsenceId FromValue(Guid Value) =>
+    public static ClassworkNotificationId FromValue(Guid Value) =>
         new(Value);
 
-    public AbsenceId()
+    public ClassworkNotificationId()
         : this(Guid.NewGuid()) { }
 
     public override string ToString() =>

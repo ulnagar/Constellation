@@ -1,42 +1,37 @@
-﻿using Constellation.Core.Models.Absences;
+﻿namespace Constellation.Infrastructure.Templates.Views.Emails.Absences;
+
+using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using Constellation.Infrastructure.Templates.Views.Shared;
 using System;
 using System.Collections.Generic;
 
-namespace Constellation.Infrastructure.Templates.Views.Emails.Absences
+public class StudentAbsenceExplanationRequestEmailViewModel : EmailLayoutBaseViewModel
 {
-    public class StudentAbsenceExplanationRequestEmailViewModel : EmailLayoutBaseViewModel
+    public string StudentName { get; set; }
+    public string Link { get; set; }
+    public List<AbsenceEntry> Absences { get; set; } = new();
+
+    public class AbsenceEntry
     {
-        public StudentAbsenceExplanationRequestEmailViewModel()
+        public DateTime Date { get; set; }
+        public string PeriodName { get; set; }
+        public string PeriodTimeframe { get; set; }
+        public string OfferingName { get; set; }
+        public string AbsenceTimeframe { get; set; }
+
+        public static AbsenceEntry ConvertFromAbsence(Absence absence, CourseOffering offering)
         {
-            Absences = new List<AbsenceEntry>();
-        }
-
-        public string StudentName { get; set; }
-        public string Link { get; set; }
-        public ICollection<AbsenceEntry> Absences { get; set; }
-
-        public class AbsenceEntry
-        {
-            public DateTime Date { get; set; }
-            public string PeriodName { get; set; }
-            public string PeriodTimeframe { get; set; }
-            public string OfferingName { get; set; }
-            public string AbsenceTimeframe { get; set; }
-
-            public static AbsenceEntry ConvertFromAbsence(Absence absence)
+            var viewModel = new AbsenceEntry
             {
-                var viewModel = new AbsenceEntry
-                {
-                    Date = absence.Date,
-                    PeriodName = absence.PeriodName,
-                    PeriodTimeframe = absence.PeriodTimeframe,
-                    OfferingName = absence.Offering.Name,
-                    AbsenceTimeframe = absence.AbsenceTimeframe
-                };
+                Date = absence.Date.ToDateTime(TimeOnly.MinValue),
+                PeriodName = absence.PeriodName,
+                PeriodTimeframe = absence.PeriodTimeframe,
+                OfferingName = offering.Name,
+                AbsenceTimeframe = absence.AbsenceTimeframe
+            };
 
-                return viewModel;
-            }
+            return viewModel;
         }
     }
 }

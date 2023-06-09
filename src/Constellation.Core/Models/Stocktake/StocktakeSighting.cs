@@ -28,7 +28,7 @@ namespace Constellation.Core.Models.Stocktake
         public bool IsCancelled { get; set; }
         public string CancellationComment { get; set; }
         public string CancelledBy { get; set; }
-        public DateTime CancelledAt { get; set; } = new DateTime();
+        public DateTime CancelledAt { get; set; }
 
         public class UserTypes
         {

@@ -6,8 +6,6 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.Templates.Views.Documents.Covers;
 using System.Net.Mail;
-using static Constellation.Application.DTOs.StudentCompleteDetailsDto;
-using static Constellation.Application.DTOs.TimetableDataDto;
 
 internal sealed class EmailAttachmentService : IEmailAttachmentService
 {
