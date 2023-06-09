@@ -4,6 +4,7 @@ using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.MissedWork;
 using Constellation.Core.Models.Stocktake;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ContextExtensions;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ContextSets;

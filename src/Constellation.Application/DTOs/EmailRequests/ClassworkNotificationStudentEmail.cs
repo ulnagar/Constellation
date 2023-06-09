@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.DTOs.EmailRequests;
 
-using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.MissedWork;
 using System.Collections.Generic;
 
 public class ClassworkNotificationStudentEmail

@@ -132,15 +132,15 @@
             <div class="heading-row">Legend:</div>
             <div class="legend">
                 <div class="legend-box">
-                    <img src="@Model.GreenLightIcon" height="50px" width="50px" />
+                    <img src="@AttendanceReportViewModel.GreenLightIcon" height="50px" width="50px" />
                     All Absences Explained
                 </div>
                 <div class="legend-box">
-                    <img src="@Model.YellowLightIcon" height="50px" width="50px" />
+                    <img src="@AttendanceReportViewModel.YellowLightIcon" height="50px" width="50px" />
                     Some Absences Explained
                 </div>
                 <div class="legend-box">
-                    <img src="@Model.RedLightIcon" height="50px" width="50px" />
+                    <img src="@AttendanceReportViewModel.RedLightIcon" height="50px" width="50px" />
                     No Absences Explained
                 </div>
             </div>
@@ -210,15 +210,15 @@
                                             @{
                                                 if (periodAbsences.All(a => a.Explained))
                                                 {
-                                                    <img src="@Model.GreenLightIcon" height="50px" width="50px" />
+                                                    <img src="@AttendanceReportViewModel.GreenLightIcon" height="50px" width="50px" />
                                                 }
                                                 else if (periodAbsences.All(a => !a.Explained))
                                                 {
-                                                    <img src="@Model.RedLightIcon" height="50px" width="50px" />
+                                                    <img src="@AttendanceReportViewModel.RedLightIcon" height="50px" width="50px" />
                                                 }
                                                 else
                                                 {
-                                                    <img src="@Model.YellowLightIcon" height="50px" width="50px" />
+                                                    <img src="@AttendanceReportViewModel.YellowLightIcon" height="50px" width="50px" />
                                                 }
                                             }
                                         </td>

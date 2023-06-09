@@ -2,6 +2,9 @@
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+	Convert AbsenceClassworkNotificationJob
+		- New students being added to a notification should either be added to the 
+			original (earliest GeneratedAt if not completed), or create a new entry
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS

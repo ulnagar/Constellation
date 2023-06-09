@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
+using Constellation.Core.Models.MissedWork;
 using Microsoft.EntityFrameworkCore;
 
 public class ClassworkNotificationRepository : IClassworkNotificationRepository

@@ -1,9 +1,8 @@
-﻿namespace Constellation.Core.Errors;
-
-using Constellation.Core.Models.Identifiers;
+﻿using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using System;
 
+namespace Constellation.Core.Errors;
 public static class DomainErrors
 {
     public static class Absences
@@ -280,6 +279,24 @@ public static class DomainErrors
             public static readonly Func<TrainingModuleId, Error> NotFound = id => new Error(
                 "MandatoryTraining.Module.NotFound",
                 $"A training module with the Id {id.Value} could not be found");
+        }
+    }
+
+    public static class MissedWork
+    {
+        public static class ClassworkNotification
+        {
+            public static readonly Error RequireAbsenceToCreate = new(
+                "MissedWork.ClassworkNotification.RequireAbsenceToCreate",
+                "A Classwork Notification cannot be created without at least one linked Absence");
+
+            public static readonly Error RequireTeacherToCreate = new(
+                "MissedWork.ClassworkNotification.RequireTeacherToCreate",
+                "A Classwork Notification cannot be created without at least one linked Teacher");
+
+            public static readonly Error SplitCompletedNotification = new(
+                "MissedWork.ClassworkNotification.SplitCompletedNotification",
+                "Cannot split a Classwork Notification that has already been completed");
         }
     }
 

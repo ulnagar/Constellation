@@ -63,9 +63,18 @@ public class AbsenceRepository : IAbsenceRepository
     }
 
     public async Task<List<Absence>> GetAllFromCurrentYear(
-        CancellationToken cancellationToken = default) => 
+        CancellationToken cancellationToken = default) =>
         await _context
             .Set<Absence>()
-            .Where(absence => absence.Date.Year == DateTime.Today.Year)
+                .Where(absence => absence.Date.Year == DateTime.Today.Year)
             .ToListAsync(cancellationToken);
+
+    public async Task<List<Absence>> GetWholeAbsencesForScanDate(
+        DateOnly scanDate,
+        CancellationToken cancellationToken = default) =>
+            await _context.Set<Absence>()
+                .Where(absence =>
+                    absence.LastSeen.Date == scanDate.ToDateTime(TimeOnly.MinValue) &&
+                    absence.Type == AbsenceType.Whole)
+                .ToListAsync(cancellationToken);
 }
