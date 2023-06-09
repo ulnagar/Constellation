@@ -23,6 +23,12 @@ public class CourseRepository : ICourseRepository
             .Set<Course>()
             .FirstOrDefaultAsync(course => course.Id == courseId, cancellationToken);
 
+    public async Task<List<Course>> GetAll(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Course>()
+            .ToListAsync(cancellationToken);
+
     private IQueryable<Course> Collection()
     {
         return _context.Courses

@@ -10,6 +10,7 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.MissedWork;
 using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.Templates.Views.Emails.Absences;
 using Constellation.Infrastructure.Templates.Views.Emails.Auth;

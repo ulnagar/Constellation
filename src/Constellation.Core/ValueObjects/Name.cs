@@ -33,7 +33,7 @@ public sealed class Name : ValueObject
 
         return new Name(
             firstName.Trim(),
-            preferredName?.Trim(),
+            preferredName.Trim(),
             lastName.Trim());
     }
 

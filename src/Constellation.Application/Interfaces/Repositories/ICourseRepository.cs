@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 public interface ICourseRepository
 {
     Task<Course?> GetById(int courseId, CancellationToken cancellationToken = default);
+    Task<List<Course>> GetAll(CancellationToken cancellationToken = default);
 
     Course WithDetails(int id);
     Course WithFilter(Expression<Func<Course, bool>> predicate);

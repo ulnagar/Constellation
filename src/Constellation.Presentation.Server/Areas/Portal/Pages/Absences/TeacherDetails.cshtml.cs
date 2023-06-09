@@ -1,5 +1,6 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
+using Constellation.Core.Models.MissedWork;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
