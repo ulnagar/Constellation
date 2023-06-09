@@ -94,34 +94,4 @@ public class ClassworkNotification : AggregateRoot
 
         return newEntity;
     }
-
-    public void AddAbsence(
-        Absence absence)
-    {
-        if (_absences.Contains(absence))
-            return;
-
-        if (CompletedAt.HasValue)
-            return;
-
-        _absences.Add(absence);
-    }
-
-    public Result RecordResponse(
-        string description,
-        string completedBy,
-        string staffId)
-    {
-        if (!string.IsNullOrWhiteSpace(Description))
-            return Result.Failure(DomainErrors.MissedWork.ClassworkNotification.AlreadyCompleted);
-
-        Description = description;
-        CompletedBy = completedBy;
-        CompletedAt = DateTime.Now;
-        StaffId = staffId;
-
-        RaiseDomainEvent(new ClassworkNotificationCompletedDomainEvent(new DomainEventId(), Id));
-
-        return Result.Success();
-    }
 }

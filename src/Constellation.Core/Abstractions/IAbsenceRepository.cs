@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,5 +13,6 @@ public interface IAbsenceRepository
     Task<List<Absence>> GetForStudentFromCurrentYear(string StudentId, CancellationToken cancellationToken = default);
     Task<List<Absence>> GetWithResponsesForStudentFromCurrentYear(string StudentId, CancellationToken cancellationToken = default);
     Task<List<Absence>> GetAllFromCurrentYear(CancellationToken cancellationToken = default);
+    Task<List<Absence>> GetWholeAbsencesForScanDate(DateOnly scanDate, CancellationToken cancellationToken = default);
     void Insert(Absence absence);
 }
