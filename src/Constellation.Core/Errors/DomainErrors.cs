@@ -297,6 +297,10 @@ public static class DomainErrors
             public static readonly Error SplitCompletedNotification = new(
                 "MissedWork.ClassworkNotification.SplitCompletedNotification",
                 "Cannot split a Classwork Notification that has already been completed");
+
+            public static readonly Error AlreadyCompleted = new(
+                "MissedWork.ClassworkNotification.AlreadyCompleted",
+                "Notification has alrady been completed");
         }
     }
 
