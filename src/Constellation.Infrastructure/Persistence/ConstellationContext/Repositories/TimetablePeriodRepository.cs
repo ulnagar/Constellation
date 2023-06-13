@@ -20,6 +20,24 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             _context = context;
         }
 
+        public async Task<List<TimetablePeriod>> GetForOfferingOnDay(
+            int offeringId,
+            DateTime absenceDate,
+            int dayNumber,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<OfferingSession>()
+                .Where(session => session.OfferingId == offeringId &&
+                    // session was created before the absence date
+                    session.DateCreated < absenceDate &&
+                    // session is still current (not deleted) OR session was deleted after absence date
+                    (!session.IsDeleted || session.DateDeleted.Value.Date > absenceDate) &&
+                    // session is active on the absence day
+                    session.Period.Day == dayNumber)
+                .Select(session => session.Period)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+
         private IQueryable<TimetablePeriod> Collection()
         {
             return _context.Periods

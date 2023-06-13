@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Interfaces.Configuration;
+﻿namespace Constellation.Core.Models.Absences;
 
 using Constellation.Core.Common;
 using System;
