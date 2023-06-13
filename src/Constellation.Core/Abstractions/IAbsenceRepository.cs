@@ -14,5 +14,7 @@ public interface IAbsenceRepository
     Task<List<Absence>> GetWithResponsesForStudentFromCurrentYear(string StudentId, CancellationToken cancellationToken = default);
     Task<List<Absence>> GetAllFromCurrentYear(CancellationToken cancellationToken = default);
     Task<List<Absence>> GetWholeAbsencesForScanDate(DateOnly scanDate, CancellationToken cancellationToken = default);
+    Task<int> GetCountForStudentDateAndOffering(string studentId, DateOnly absenceDate, int offeringId, string absenceTimeframe, CancellationToken cancellationToken = default);
+    Task<List<Absence>> GetAllForStudentDateAndOffering(string studentId, DateOnly absenceDate, int offeringId, string absenceTimeframe, CancellationToken cancellationToken = default);
     void Insert(Absence absence);
 }
