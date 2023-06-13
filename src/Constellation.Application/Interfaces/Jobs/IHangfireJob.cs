@@ -1,11 +1,10 @@
-﻿using System;
+﻿namespace Constellation.Application.Interfaces.Jobs;
+
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Application.Interfaces.Jobs
+public interface IHangfireJob
 {
-    public interface IHangfireJob
-    {
-        Task StartJob(Guid jobId, CancellationToken token);
-    }
+    Task StartJob(Guid jobId, CancellationToken cancellationToken);
 }

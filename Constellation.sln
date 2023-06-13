@@ -11,7 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{380C8D8E-1
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E9022EAD-24FF-4322-8D72-CCD160384F97}"
 	ProjectSection(SolutionItems) = preProject
-		src\.editorconfig = src\.editorconfig
 		src\Directory.Build.props = src\Directory.Build.props
 	EndProjectSection
 EndProject
@@ -55,6 +54,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Portal.Schools.Client", "src\Constellation.Portal.Schools.Client\Constellation.Portal.Schools.Client.csproj", "{AA69D6F0-C765-4339-B649-689B9CC88F7C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Portal.Schools.Server", "src\Constellation.Portal.Schools.Server\Constellation.Portal.Schools.Server.csproj", "{E4566469-BDF9-4973-9285-A7CEC24D3607}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configuration", "configuration", "{97302346-9CCB-491B-AF65-35718830A88B}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -135,6 +139,7 @@ Global
 		{69CD5F3A-78CD-47AF-B6E4-F57A6E97F24F} = {5B9A88D0-9CFD-4A73-96E7-3D91BCDAC27A}
 		{AA69D6F0-C765-4339-B649-689B9CC88F7C} = {E9022EAD-24FF-4322-8D72-CCD160384F97}
 		{E4566469-BDF9-4973-9285-A7CEC24D3607} = {E9022EAD-24FF-4322-8D72-CCD160384F97}
+		{97302346-9CCB-491B-AF65-35718830A88B} = {380C8D8E-1770-4044-BF34-EB2BD3888599}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {266E1BC1-EC70-416D-8B6F-E86CB0C2066C}

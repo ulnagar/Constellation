@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace Constellation.Application.Interfaces.Configuration;
 
-namespace Constellation.Application.Interfaces.Configuration;
+using Constellation.Core.Models.Absences;
+using System;
+using System.Collections.Generic;
 
 public sealed class AppConfiguration
 {

@@ -68,6 +68,31 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Where(offering => offering.CourseId == courseId)
                 .ToListAsync(cancellationToken);
 
+        public async Task<List<CourseOffering>> GetCurrentEnrolmentsFromStudentForDate(
+            string studentId,
+            DateTime AbsenceDate,
+            int DayNumber,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<Enrolment>()
+                .Where(enrolment => enrolment.StudentId == studentId &&
+                    // enrolment was created before the absence date
+                    enrolment.DateCreated < AbsenceDate &&
+                    // enrolment is either still current (not deleted) OR was deleted after the absence date
+                    (!enrolment.IsDeleted || enrolment.DateDeleted.Value.Date > AbsenceDate) &&
+                    // offering ends after the absence date
+                    enrolment.Offering.EndDate > AbsenceDate &&
+                    enrolment.Offering.Sessions.Any(session =>
+                        // session was created before the absence date
+                        session.DateCreated < AbsenceDate &&
+                        // session is either still current (not deleted) OR was deleted after the absence date
+                        (!session.IsDeleted || session.DateDeleted.Value.Date > AbsenceDate) &&
+                        // session is for the same day as the absence
+                        session.Period.Day == DayNumber))
+                .Select(enrolment => enrolment.Offering)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+
         public CourseOffering WithDetails(int id)
         {
             return Collection()

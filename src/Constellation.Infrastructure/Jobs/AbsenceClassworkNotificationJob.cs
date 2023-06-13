@@ -1,16 +1,13 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Constellation.Application.DTOs.EmailRequests;
-using Constellation.Application.Families.GetResidentialFamilyEmailAddresses;
 using Constellation.Application.Interfaces.Jobs.AbsenceClassworkNotificationJob;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.MissedWork;
-using Constellation.Core.ValueObjects;
+using Constellation.Core.Shared;
 
 public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob
 {
@@ -20,9 +17,7 @@ public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob
     private readonly ICourseRepository _courseRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IClassworkNotificationRepository _notificationRepository;
-    private readonly IEmailService _emailService;
     private readonly ILogger _logger;
-    private readonly IMediator _mediator;
     private readonly IClassCoverRepository _classCoverRepository;
     private readonly IStaffRepository _staffRepository;
 
@@ -33,11 +28,9 @@ public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob
         ICourseRepository courseRepository,
         IStudentRepository studentRepository,
         IClassworkNotificationRepository notificationRepository,
-        IEmailService emailService,
-        ILogger logger,
-        IMediator mediator,
         IClassCoverRepository classCoverRepository,
-        IStaffRepository staffRepository)
+        IStaffRepository staffRepository,
+        ILogger logger)
     {
         _unitOfWork = unitOfWork;
         _absenceRepository = absenceRepository;
@@ -45,9 +38,7 @@ public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob
         _courseRepository = courseRepository;
         _studentRepository = studentRepository;
         _notificationRepository = notificationRepository;
-        _emailService = emailService;
         _logger = logger.ForContext<IAbsenceClassworkNotificationJob>();
-        _mediator = mediator;
         _classCoverRepository = classCoverRepository;
         _staffRepository = staffRepository;
     }
@@ -111,9 +102,9 @@ public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob
                 teachers = await _staffRepository.GetFacultyHeadTeachers(course.FacultyId, token);
             }
 
-            ClassworkNotification? check = await _notificationRepository.GetForOfferingAndDate(offeringId, absenceDate, token);
+            List<ClassworkNotification> existing = await _notificationRepository.GetForOfferingAndDate(offeringId, absenceDate, token);
 
-            if (check is not null)
+            if (!existing.Any())
             {
                 // create notification object in database
                 var notificationRequest = ClassworkNotification.Create(
@@ -128,59 +119,60 @@ public class AbsenceClassworkNotificationJob : IAbsenceClassworkNotificationJob
                 }
 
                 _notificationRepository.Insert(notificationRequest.Value);
-            }
-            else
-            {
-                // Somehow, and this should not happen, there is already an entry for this occurance?
-                // Compare the list of students to see who has been added (or removed) and update the database
-                // entry accordingly. Then, if the teacher has already responded, send the student/parent email
-                // with the details of work required.
-
-                _logger.Information("{id}: Found existing entry for {Offering} @ {AbsenceDate}", jobId, offering.Name, absenceDate.ToShortDateString());
-
-                var newAbsences = new List<Absence>();
-
-                foreach (var absence in check.Absences)
-                {
-                    if (!check.Absences.Contains(absence))
-                    {
-                        newAbsences.Add(absence);
-
-                        _logger.Information("{id}: Adding {Student} to the existing entry for {Offering} @ {AbsenceDate}", jobId, absence.Student.DisplayName, notification.Offering.Name, notification.AbsenceDate.ToShortDateString());
-                    }
-                }
-
-                if (check.CompletedBy != null)
-                {
-                    // Teacher has already submitted response. Add new students and send their email directly
-                    foreach (var absence in newAbsences)
-                    {
-                        check.Absences.Add(absence);
-
-                        var parentEmailRequest = await _mediator.Send(new GetResidentialFamilyEmailAddressesQuery(absence.StudentId), token);
-
-                        List<EmailRecipient> parentEmails = new();
-
-                        if (parentEmailRequest.IsFailure)
-                        {
-                            // Cannot send email to parents as no valid email was found
-                        } 
-                        else
-                        {
-                            parentEmails = parentEmailRequest.Value;
-                        }
-
-                        await _emailService.SendStudentClassworkNotification(absence, check, parentEmails);
-                    }
-                }
-                else
-                {
-                    foreach (var absence in newAbsences)
-                        check.Absences.Add(absence);
-                }
 
                 await _unitOfWork.CompleteAsync(token);
+
+                continue;
             }
+
+            // Somehow, and this should not happen, there is already an entry for this occurance?
+            // Compare the list of students to see who has been added (or removed) and update the database
+            // entry accordingly. Then, if the teacher has already responded, send the student/parent email
+            // with the details of work required.
+
+            _logger.Information("{id}: Found existing entries for {Offering} @ {AbsenceDate}", jobId, offering.Name, absenceDate.ToShortDateString());
+
+            List<Absence> newAbsences = new();
+
+            // Playground
+            ClassworkNotification check = existing.OrderBy(entry => entry.GeneratedAt).First();
+
+            if (check.CompletedAt.HasValue)
+            {
+                // create notification object in database
+                Result<ClassworkNotification> notificationRequest = ClassworkNotification.Create(
+                    group.ToList(),
+                    teachers,
+                    covers.Any());
+
+                if (notificationRequest.IsFailure)
+                {
+                    _logger.Warning("Could not create Classwork Notification: {error} - {message}", notificationRequest.Error.Code, notificationRequest.Error.Message);
+                    continue;
+                }
+
+                _notificationRepository.Insert(notificationRequest.Value);
+
+                await _unitOfWork.CompleteAsync(token);
+
+                continue;
+            }
+                
+            // Update existing
+            foreach (Absence absence in check.Absences)
+            {
+                if (!check.Absences.Contains(absence))
+                {
+                    newAbsences.Add(absence);
+
+                    _logger.Information("{id}: Adding {Student} to the existing entry for {AbsenceDate}", jobId, absence.StudentId, check.AbsenceDate.ToShortDateString());
+                }
+            }
+
+            foreach (Absence absence in newAbsences)
+                check.AddAbsence(absence);
+
+            await _unitOfWork.CompleteAsync(token);
         }
     }
 }
