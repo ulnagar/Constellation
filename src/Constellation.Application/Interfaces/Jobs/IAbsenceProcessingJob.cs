@@ -1,14 +1,14 @@
-﻿using Constellation.Application.Features.Jobs.AbsenceMonitor.Models;
+﻿namespace Constellation.Application.Interfaces.Jobs;
+
+using Constellation.Application.Features.Jobs.AbsenceMonitor.Models;
+using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Application.Interfaces.Jobs
+public interface IAbsenceProcessingJob
 {
-    public interface IAbsenceProcessingJob
-    {
-        Task<ICollection<Absence>> StartJob(Guid jobId, StudentForAbsenceScan student, CancellationToken cancellationToken);
-    }
+    Task<List<Absence>> StartJob(Guid jobId, Student student, CancellationToken cancellationToken);
 }

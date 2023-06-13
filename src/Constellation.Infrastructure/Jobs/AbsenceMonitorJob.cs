@@ -1,4 +1,6 @@
-﻿using Constellation.Application.Families.GetResidentialFamilyEmailAddresses;
+﻿namespace Constellation.Infrastructure.Jobs;
+
+using Constellation.Application.Families.GetResidentialFamilyEmailAddresses;
 using Constellation.Application.Families.GetResidentialFamilyMobileNumbers;
 using Constellation.Application.Features.Jobs.AbsenceMonitor.Commands;
 using Constellation.Application.Features.Jobs.AbsenceMonitor.Models;
@@ -7,288 +9,282 @@ using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Jobs.AbsenceClassworkNotificationJob;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
+using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Infrastructure.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
-namespace Constellation.Infrastructure.Jobs
+public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
 {
-    public class AbsenceMonitorJob : IAbsenceMonitorJob, IScopedService, IHangfireJob
+    private readonly IStudentRepository _studentRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAbsenceProcessingJob _absenceProcessor;
+    private readonly IAbsenceClassworkNotificationJob _classworkNotifier;
+    private readonly ILogger _logger;
+
+    public AbsenceMonitorJob(
+        IStudentRepository studentRepository,
+
+        IUnitOfWork unitOfWork,
+        IAbsenceProcessingJob absenceProcessor,
+        IAbsenceClassworkNotificationJob classworkNotifier,
+        ILogger logger)
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IAbsenceProcessingJob _absenceProcessor;
-        private readonly IEmailService _emailService;
-        private readonly ISMSService _smsService;
-        private readonly IAbsenceClassworkNotificationJob _classworkNotifier;
-        private readonly ILogger<IAbsenceMonitorJob> _logger;
-        private readonly IMediator _mediator;
+        _studentRepository = studentRepository;
+        _unitOfWork = unitOfWork;
+        _absenceProcessor = absenceProcessor;
+        _classworkNotifier = classworkNotifier;
+        _logger = logger.ForContext<IAbsenceMonitorJob>();
+    }
 
-        public AbsenceMonitorJob(
-            IUnitOfWork unitOfWork,
-            IAbsenceProcessingJob absenceProcessor,
-            IEmailService emailService,
-            ISMSService smsService,
-            IAbsenceClassworkNotificationJob classworkNotifier,
-            ILogger<IAbsenceMonitorJob> logger,
-            IMediator mediator)
+    public async Task StartJob(Guid jobId, CancellationToken cancellationToken)
+    {
+        _logger.Information("{id}: Starting Absence Monitor Scan.", jobId);
+
+        foreach (Grade grade in Enum.GetValues(typeof(Grade)))
         {
-            _unitOfWork = unitOfWork;
-            _absenceProcessor = absenceProcessor;
-            _emailService = emailService;
-            _smsService = smsService;
-            _classworkNotifier = classworkNotifier;
-            _logger = logger;
-            _mediator = mediator;
-        }
+            if (cancellationToken.IsCancellationRequested)
+                return;
 
-        public async Task StartJob(Guid jobId, CancellationToken token)
-        {
-            _logger.LogInformation("{id}: Starting Absence Monitor Scan.", jobId);
+            _logger.Information("{id}: Getting students from {grade}", jobId, grade);
 
-            foreach (Grade grade in Enum.GetValues(typeof(Grade)))
+            List<Student> students = await _studentRepository.GetCurrentStudentFromGrade(grade, cancellationToken);
+
+            students = students
+                .OrderBy(student => student.LastName)
+                .ThenBy(student => student.FirstName)
+                .ToList();
+
+            _logger.Information("{id}: Found {students} students to scan.", jobId, students.Count);
+
+            foreach (Student student in students)
             {
-                if (token.IsCancellationRequested)
+                if (cancellationToken.IsCancellationRequested)
                     return;
 
-                _logger.LogInformation("{id}: Getting students from {grade}", jobId, grade);
+                List<Absence> absences = await _absenceProcessor.StartJob(jobId, student, cancellationToken);
 
-                var students = await _mediator.Send(new GetStudentsForAbsenceScanQuery { Grade = grade }, token);
-                
-                students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
-
-                _logger.LogInformation("{id}: Found {students} students to scan.", jobId, students.Count);
-
-                foreach (var student in students)
+                if (absences.Any())
                 {
-                    if (token.IsCancellationRequested)
+                    if (cancellationToken.IsCancellationRequested)
                         return;
 
-                    var absences = await _absenceProcessor.StartJob(jobId, student, token);
+                    await _mediator.Send(new AddNewStudentAbsencesCommand { Absences = absences }, cancellationToken).ConfigureAwait(false);
 
-                    if (absences.Any())
-                    {
-                        if (token.IsCancellationRequested)
-                            return;
+                    if (string.IsNullOrWhiteSpace(student.SentralStudentId))
+                        continue;
 
-                        await _mediator.Send(new AddNewStudentAbsencesCommand { Absences = absences }, token);
+                    if (cancellationToken.IsCancellationRequested)
+                        return;
 
-                        if (string.IsNullOrWhiteSpace(student.SentralStudentId))
-                            continue;
-
-                        if (token.IsCancellationRequested)
-                            return;
-
-                        await SendStudentNotifications(jobId, student);
-                        await SendParentNotifications(jobId, student, token);
-                    }
-
-                    if (DateTime.Now.DayOfWeek == DayOfWeek.Monday)
-                    {
-                        if (token.IsCancellationRequested)
-                            return;
-
-                        await SendParentDigests(jobId, student, token);
-                        await SendCoordinatorDigests(jobId, student);
-                    }
-
-                    absences?.Clear();
-                    //_unitOfWork.ClearTrackerDb();
+                    await SendStudentNotifications(jobId, student);
+                    await SendParentNotifications(jobId, student, cancellationToken);
                 }
+
+                if (DateTime.Now.DayOfWeek == DayOfWeek.Monday)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                        return;
+
+                    await SendParentDigests(jobId, student, cancellationToken);
+                    await SendCoordinatorDigests(jobId, student);
+                }
+
+                absences?.Clear();
+                //_unitOfWork.ClearTrackerDb();
             }
-
-            await _classworkNotifier.StartJob(jobId, DateTime.Today, token);
-
-            await _unitOfWork.CompleteAsync(token);
         }
 
-        private async Task SendCoordinatorDigests(Guid jobId, StudentForAbsenceScan student)
+        await _classworkNotifier.StartJob(jobId, DateOnly.FromDateTime(DateTime.Today), cancellationToken);
+
+        await _unitOfWork.CompleteAsync(cancellationToken);
+    }
+
+    private async Task SendCoordinatorDigests(Guid jobId, StudentForAbsenceScan student)
+    {
+        var coordinatorDigestAbsences = await _mediator.Send(new GetUnexplainedAbsencesForDigestQuery { StudentId = student.StudentId, Type = Absence.Whole, AgeInWeeks = 2 }).ConfigureAwait(false);
+
+        if (coordinatorDigestAbsences.Any())
         {
-            var coordinatorDigestAbsences = await _mediator.Send(new GetUnexplainedAbsencesForDigestQuery { StudentId = student.StudentId, Type = Absence.Whole, AgeInWeeks = 2 });
+            var message = await _emailService.SendCoordinatorWholeAbsenceDigest(coordinatorDigestAbsences.ToList()).ConfigureAwait(false);
 
-            if (coordinatorDigestAbsences.Any())
+            if (message == null)
+                return;
+
+            foreach (var absence in coordinatorDigestAbsences)
+                await _mediator.Send(new AddNewAbsenceNotificationCommand
+                {
+                    AbsenceId = absence.Id,
+                    Type = NotificationType.Email,
+                    MessageBody = message.message,
+                    Recipients = new List<string> { "School Contacts" },
+                    MessageId = message.id
+                }).ConfigureAwait(false);
+
+            _logger.Information("{id}: School digest sent to {School} for {student}", jobId, student.SchoolName, student.DisplayName);
+
+            coordinatorDigestAbsences?.Clear();
+        }
+    }
+
+    private async Task SendParentDigests(Guid jobId, StudentForAbsenceScan student, CancellationToken cancellationToken = default)
+    {
+        var parentDigestAbsences = await _mediator.Send(new GetUnexplainedAbsencesForDigestQuery { StudentId = student.StudentId, Type = Absence.Whole, AgeInWeeks = 1 }, cancellationToken).ConfigureAwait(false);
+
+        if (parentDigestAbsences.Any())
+        {
+            var emailAddresses = await _mediator.Send(new GetResidentialFamilyEmailAddressesQuery(student.StudentId), cancellationToken).ConfigureAwait(false);
+
+            if (emailAddresses.IsSuccess)
             {
-                var message = await _emailService.SendCoordinatorWholeAbsenceDigest(coordinatorDigestAbsences.ToList());
+                var sentmessage = await _emailService.SendParentWholeAbsenceDigest(parentDigestAbsences.ToList(), emailAddresses.Value).ConfigureAwait(false);
 
-                if (message == null)
+                if (sentmessage == null)
                     return;
 
-                foreach (var absence in coordinatorDigestAbsences)
+                foreach (var absence in parentDigestAbsences)
                     await _mediator.Send(new AddNewAbsenceNotificationCommand
                     {
                         AbsenceId = absence.Id,
-                        Type = AbsenceNotification.Email,
-                        MessageBody = message.message,
+                        Type = NotificationType.Email,
+                        MessageBody = sentmessage.message,
                         Recipients = new List<string> { "School Contacts" },
-                        MessageId = message.id
-                    });
+                        MessageId = sentmessage.id
+                    }, cancellationToken).ConfigureAwait(false);
 
-                _logger.LogInformation("{id}: School digest sent to {School} for {student}", jobId, student.SchoolName, student.DisplayName);
-
-                coordinatorDigestAbsences?.Clear();
-            }
-        }
-
-        private async Task SendParentDigests(Guid jobId, StudentForAbsenceScan student, CancellationToken cancellationToken = default)
-        {
-            var parentDigestAbsences = await _mediator.Send(new GetUnexplainedAbsencesForDigestQuery { StudentId = student.StudentId, Type = Absence.Whole, AgeInWeeks = 1 }, cancellationToken);
-
-            if (parentDigestAbsences.Any())
-            {
-                var emailAddresses = await _mediator.Send(new GetResidentialFamilyEmailAddressesQuery(student.StudentId), cancellationToken);
-
-                if (emailAddresses.IsSuccess)
+                foreach (var address in emailAddresses.Value)
                 {
-                    var sentmessage = await _emailService.SendParentWholeAbsenceDigest(parentDigestAbsences.ToList(), emailAddresses.Value);
-
-                    if (sentmessage == null)
-                        return;
-
-                    foreach (var absence in parentDigestAbsences)
-                        await _mediator.Send(new AddNewAbsenceNotificationCommand
-                        {
-                            AbsenceId = absence.Id,
-                            Type = AbsenceNotification.Email,
-                            MessageBody = sentmessage.message,
-                            Recipients = new List<string> { "School Contacts" },
-                            MessageId = sentmessage.id
-                        }, cancellationToken);
-
-                    foreach (var address in emailAddresses.Value)
-                    {
-                        _logger.LogInformation("{id}: Parent digest sent to {address} for {student}", jobId, address.Email, student.DisplayName);
-                    }
+                    _logger.Information("{id}: Parent digest sent to {address} for {student}", jobId, address.Email, student.DisplayName);
                 }
-                else
-                {
-                    await _emailService.SendAdminAbsenceContactAlert(student.DisplayName);
-                }
-
-                parentDigestAbsences?.Clear();
             }
-        }
-
-        private async Task SendParentNotifications(Guid jobId, StudentForAbsenceScan student, CancellationToken cancellationToken = default)
-        {
-            var phoneNumbers = await _mediator.Send(new GetResidentialFamilyMobileNumbersQuery(student.StudentId), cancellationToken);
-            var emailAddresses = await _mediator.Send(new GetResidentialFamilyEmailAddressesQuery(student.StudentId), cancellationToken);
-
-            var recentWholeAbsences = await _mediator.Send(new GetRecentAbsencesForStudentQuery { StudentId = student.StudentId, AbsenceType = Absence.Whole }, cancellationToken);
-
-            // Send SMS or emails to parents
-            if (recentWholeAbsences.Any())
+            else
             {
-                var groupedAbsences = recentWholeAbsences.GroupBy(absence => absence.Date).ToList();
+                await _emailService.SendAdminAbsenceContactAlert(student.DisplayName).ConfigureAwait(false);
+            }
 
-                foreach (var group in groupedAbsences)
+            parentDigestAbsences?.Clear();
+        }
+    }
+
+    private async Task SendParentNotifications(Guid jobId, StudentForAbsenceScan student, CancellationToken cancellationToken = default)
+    {
+        var phoneNumbers = await _mediator.Send(new GetResidentialFamilyMobileNumbersQuery(student.StudentId), cancellationToken).ConfigureAwait(false);
+        var emailAddresses = await _mediator.Send(new GetResidentialFamilyEmailAddressesQuery(student.StudentId), cancellationToken).ConfigureAwait(false);
+
+        var recentWholeAbsences = await _mediator.Send(new GetRecentAbsencesForStudentQuery { StudentId = student.StudentId, AbsenceType = Absence.Whole }, cancellationToken).ConfigureAwait(false);
+
+        // Send SMS or emails to parents
+        if (recentWholeAbsences.Any())
+        {
+            var groupedAbsences = recentWholeAbsences.GroupBy(absence => absence.Date).ToList();
+
+            foreach (var group in groupedAbsences)
+            {
+                if (phoneNumbers.IsSuccess && phoneNumbers.Value.Any() && group.Key.Date == DateTime.Today.AddDays(-1).Date)
                 {
-                    if (phoneNumbers.IsSuccess && phoneNumbers.Value.Any() && group.Key.Date == DateTime.Today.AddDays(-1).Date)
+                    var sentMessages = await _smsService.SendAbsenceNotificationAsync(group.ToList(), phoneNumbers.Value).ConfigureAwait(false);
+
+                    if (sentMessages == null)
                     {
-                        var sentMessages = await _smsService.SendAbsenceNotificationAsync(group.ToList(), phoneNumbers.Value);
+                        // SMS Gateway failed. Send via email instead.
+                        _logger.Warning("{id}: SMS Sending Failed! Fallback to Email notifications.", jobId);
 
-                        if (sentMessages == null)
+                        if (emailAddresses.IsSuccess && emailAddresses.Value.Any())
                         {
-                            // SMS Gateway failed. Send via email instead.
-                            _logger.LogWarning("{id}: SMS Sending Failed! Fallback to Email notifications.", jobId);
+                            var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses.Value).ConfigureAwait(false);
 
-                            if (emailAddresses.IsSuccess && emailAddresses.Value.Any())
-                            {
-                                var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses.Value);
-
-                                foreach (var absence in group)
-                                    await _mediator.Send(new AddNewAbsenceNotificationCommand
-                                    {
-                                        AbsenceId = absence.Id,
-                                        Type = AbsenceNotification.Email,
-                                        MessageBody = message.message,
-                                        MessageId = message.id,
-                                        Recipients = emailAddresses.Value.Select(entry => entry.Email).ToList()
-                                    }, cancellationToken);
-
-                                foreach (var email in emailAddresses.Value)
-                                    _logger.LogInformation("{id}: Message sent via Email to {email} for Whole Absence on {Date}", jobId, email.Email, group.Key.Date.ToShortDateString());
-                            }
-                            else
-                            {
-                                _logger.LogError("{id}: Email addresses not found! Parents have not been notified!", jobId);
-                            }
-                        }
-
-                        // Once the message has been sent, add it to the database.
-                        if (sentMessages.Messages.Count > 0)
-                        {
                             foreach (var absence in group)
                                 await _mediator.Send(new AddNewAbsenceNotificationCommand
                                 {
                                     AbsenceId = absence.Id,
-                                    Type = AbsenceNotification.SMS,
-                                    MessageBody = sentMessages.Messages.First().MessageBody,
-                                    MessageId = sentMessages.Messages.First().OutgoingId,
-                                    Recipients = phoneNumbers.Value.Select(entry => entry.ToString(Core.ValueObjects.PhoneNumber.Format.None)).ToList()
-                                }, cancellationToken);
+                                    Type = NotificationType.Email,
+                                    MessageBody = message.message,
+                                    MessageId = message.id,
+                                    Recipients = emailAddresses.Value.Select(entry => entry.Email).ToList()
+                                }, cancellationToken).ConfigureAwait(false);
 
-                            foreach (var number in phoneNumbers.Value)
-                                _logger.LogInformation("{id}: Message sent via SMS to {number} for Whole Absence on {Date}", jobId, number.ToString(Core.ValueObjects.PhoneNumber.Format.Mobile), group.Key.Date.ToShortDateString());
+                            foreach (var email in emailAddresses.Value)
+                                _logger.Information("{id}: Message sent via Email to {email} for Whole Absence on {Date}", jobId, email.Email, group.Key.Date.ToShortDateString());
+                        }
+                        else
+                        {
+                            _logger.LogError("{id}: Email addresses not found! Parents have not been notified!", jobId);
                         }
                     }
-                    else if (emailAddresses.IsSuccess && emailAddresses.Value.Any())
-                    {
-                        var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses.Value);
 
+                    // Once the message has been sent, add it to the database.
+                    if (sentMessages.Messages.Count > 0)
+                    {
                         foreach (var absence in group)
                             await _mediator.Send(new AddNewAbsenceNotificationCommand
                             {
                                 AbsenceId = absence.Id,
-                                Type = AbsenceNotification.Email,
-                                MessageBody = message.message,
-                                MessageId = message.id,
-                                Recipients = emailAddresses.Value.Select(entry => entry.Email).ToList()
-                            }, cancellationToken);
+                                Type = NotificationType.SMS,
+                                MessageBody = sentMessages.Messages.First().MessageBody,
+                                MessageId = sentMessages.Messages.First().OutgoingId,
+                                Recipients = phoneNumbers.Value.Select(entry => entry.ToString(Core.ValueObjects.PhoneNumber.Format.None)).ToList()
+                            }, cancellationToken).ConfigureAwait(false);
 
-                        foreach (var email in emailAddresses.Value)
-                            _logger.LogInformation("{id}: Message sent via Email to {email} for Whole Absence on {Date}", jobId, email.Email, group.Key.Date.ToShortDateString());
-                    }
-                    else
-                    {
-                        await _emailService.SendAdminAbsenceContactAlert(student.DisplayName);
+                        foreach (var number in phoneNumbers.Value)
+                            _logger.Information("{id}: Message sent via SMS to {number} for Whole Absence on {Date}", jobId, number.ToString(Core.ValueObjects.PhoneNumber.Format.Mobile), group.Key.Date.ToShortDateString());
                     }
                 }
+                else if (emailAddresses.IsSuccess && emailAddresses.Value.Any())
+                {
+                    var message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), emailAddresses.Value).ConfigureAwait(false);
 
-                groupedAbsences?.Clear();
+                    foreach (var absence in group)
+                        await _mediator.Send(new AddNewAbsenceNotificationCommand
+                        {
+                            AbsenceId = absence.Id,
+                            Type = NotificationType.Email,
+                            MessageBody = message.message,
+                            MessageId = message.id,
+                            Recipients = emailAddresses.Value.Select(entry => entry.Email).ToList()
+                        }, cancellationToken).ConfigureAwait(false);
+
+                    foreach (var email in emailAddresses.Value)
+                        _logger.Information("{id}: Message sent via Email to {email} for Whole Absence on {Date}", jobId, email.Email, group.Key.Date.ToShortDateString());
+                }
+                else
+                {
+                    await _emailService.SendAdminAbsenceContactAlert(student.DisplayName).ConfigureAwait(false);
+                }
             }
 
-            recentWholeAbsences?.Clear();
+            groupedAbsences?.Clear();
         }
 
-        private async Task SendStudentNotifications(Guid jobId, StudentForAbsenceScan student)
+        recentWholeAbsences?.Clear();
+    }
+
+    private async Task SendStudentNotifications(Guid jobId, StudentForAbsenceScan student)
+    {
+        var recentPartialAbsences = await _mediator.Send(new GetRecentAbsencesForStudentQuery { StudentId = student.StudentId, AbsenceType = AbsenceType.Partial }).ConfigureAwait(false);
+
+        // Send emails to students
+        if (recentPartialAbsences.Any())
         {
-            var recentPartialAbsences = await _mediator.Send(new GetRecentAbsencesForStudentQuery { StudentId = student.StudentId, AbsenceType = Absence.Partial });
+            var recipients = new List<string> { student.EmailAddress };
 
-            // Send emails to students
-            if (recentPartialAbsences.Any())
+            var sentEmail = await _emailService.SendStudentPartialAbsenceExplanationRequest(recentPartialAbsences.ToList(), recipients).ConfigureAwait(false);
+
+            foreach (var absence in recentPartialAbsences)
             {
-                var recipients = new List<string> { student.EmailAddress };
-
-                var sentEmail = await _emailService.SendStudentPartialAbsenceExplanationRequest(recentPartialAbsences.ToList(), recipients);
-
-                foreach (var absence in recentPartialAbsences)
+                await _mediator.Send(new AddNewAbsenceNotificationCommand
                 {
-                    await _mediator.Send(new AddNewAbsenceNotificationCommand
-                    {
-                        AbsenceId = absence.Id,
-                        Type = AbsenceNotification.Email,
-                        MessageBody = sentEmail.message,
-                        MessageId = sentEmail.id,
-                        Recipients = recipients
-                    });
-                }
-
-                foreach (var email in recipients)
-                    _logger.LogInformation("{id}: Message sent via Email to {email} for Partial Absence on {Date}", jobId, email, recentPartialAbsences.First().Date.ToShortDateString());
-
-                recentPartialAbsences?.Clear();
+                    AbsenceId = absence.Id,
+                    Type = NotificationType.Email,
+                    MessageBody = sentEmail.message,
+                    MessageId = sentEmail.id,
+                    Recipients = recipients
+                }).ConfigureAwait(false);
             }
+
+            foreach (var email in recipients)
+                _logger.Information("{id}: Message sent via Email to {email} for Partial Absence on {Date}", jobId, email, recentPartialAbsences.First().Date.ToShortDateString());
+
+            recentPartialAbsences?.Clear();
         }
     }
 }

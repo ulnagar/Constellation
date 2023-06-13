@@ -145,6 +145,16 @@ public class StudentRepository : IStudentRepository
                 student.IsDeleted == false)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Student>> GetCurrentStudentFromGrade(
+        Grade grade, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student => 
+                student.IsDeleted == false &&
+                student.CurrentGrade == grade)
+            .ToListAsync(cancellationToken);
+
     public async Task<Student> ForDetailDisplayAsync(string id)
     {
         return await _context.Students

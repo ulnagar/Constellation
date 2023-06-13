@@ -29,7 +29,6 @@ public class UnitOfWork : IUnitOfWork
     public IStudentRepository Students { get; set; }
     public ITimetablePeriodRepository Periods { get; set; }
     public ICanvasOperationsRepository CanvasOperations { get; set; }
-    public IClassworkNotificationRepository ClassworkNotifications { get; set; }
     public IJobActivationRepository JobActivations { get; set; }
 
 
@@ -58,7 +57,6 @@ public class UnitOfWork : IUnitOfWork
         Students = new StudentRepository(context);
         Periods = new TimetablePeriodRepository(context);
         CanvasOperations = new CanvasOperationsRepository(context);
-        ClassworkNotifications = new ClassworkNotificationRepository(context);
         JobActivations = new JobActivationRepository(context);
     }
 

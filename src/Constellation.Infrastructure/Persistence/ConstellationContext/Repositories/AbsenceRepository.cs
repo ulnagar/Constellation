@@ -77,4 +77,34 @@ public class AbsenceRepository : IAbsenceRepository
                     absence.LastSeen.Date == scanDate.ToDateTime(TimeOnly.MinValue) &&
                     absence.Type == AbsenceType.Whole)
                 .ToListAsync(cancellationToken);
+
+    public async Task<int> GetCountForStudentDateAndOffering(
+        string studentId,
+        DateOnly absenceDate,
+        int offeringId,
+        string absenceTimeframe,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Absence>()
+            .CountAsync(absence =>
+                absence.StudentId == studentId &&
+                absence.Date == absenceDate &&
+                absence.OfferingId == offeringId &&
+                absence.AbsenceTimeframe == absenceTimeframe,
+                cancellationToken);
+
+    public async Task<List<Absence>> GetAllForStudentDateAndOffering(
+        string studentId, 
+        DateOnly absenceDate, 
+        int offeringId, 
+        string absenceTimeframe, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Absence>()
+            .Where(absence =>
+                absence.StudentId == studentId &&
+                absence.Date == absenceDate &&
+                absence.OfferingId == offeringId &&
+                absence.AbsenceTimeframe == absenceTimeframe)
+            .ToListAsync(cancellationToken);
 }

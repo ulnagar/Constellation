@@ -95,6 +95,18 @@ public class ClassworkNotification : AggregateRoot
         return newEntity;
     }
 
+    public void AddAbsence(
+        Absence absence)
+    {
+        if (_absences.Contains(absence))
+            return;
+
+        if (CompletedAt.HasValue)
+            return;
+
+        _absences.Add(absence);
+    }
+
     public Result RecordResponse(
         string description,
         string completedBy,

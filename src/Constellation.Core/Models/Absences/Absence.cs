@@ -21,7 +21,7 @@ public class Absence : AggregateRoot
         DateOnly date,
         string periodName,
         string periodTimeframe,
-        string absenceReason,
+        AbsenceReason absenceReason,
         TimeOnly startTime,
         TimeOnly endTime)
     {
@@ -52,7 +52,7 @@ public class Absence : AggregateRoot
 
     public int AbsenceLength { get; private set; }
     public string AbsenceTimeframe { get; private set; }
-    public string AbsenceReason { get; private set; }
+    public AbsenceReason AbsenceReason { get; private set; }
     public TimeOnly StartTime { get; private set; }
     public TimeOnly EndTime { get; private set; }
 
@@ -75,7 +75,7 @@ public class Absence : AggregateRoot
         DateOnly date,
         string periodName,
         string periodTimeframe,
-        string absenceReason,
+        AbsenceReason absenceReason,
         TimeOnly startTime,
         TimeOnly endTime)
     {
@@ -90,6 +90,9 @@ public class Absence : AggregateRoot
             absenceReason,
             startTime,
             endTime);
+
+        absence.FirstSeen = DateTime.Now;
+        absence.LastSeen = DateTime.Now;
 
         return absence;
     }
@@ -172,5 +175,51 @@ public class Absence : AggregateRoot
                 responseId,
                 Id));
         }
+    }
+
+    public void MergeAbsence(Absence other)
+    {
+        AbsenceReason = FindWorstAbsenceReason(new List<AbsenceReason> { AbsenceReason, other.AbsenceReason });
+
+        EndTime = other.EndTime;
+        AbsenceTimeframe = $"{AbsenceTimeframe.Split("- ")[0]} - {other.AbsenceTimeframe.Split(" - ")[1]}";
+        AbsenceLength += other.AbsenceLength;
+    }
+
+    public void UpdateLastSeen()
+    {
+        LastSeen = DateTime.Now;
+    }
+
+    public static AbsenceReason FindWorstAbsenceReason(List<AbsenceReason> reasons)
+    {
+        if (reasons.Any(reason => reason == AbsenceReason.Unjustified))
+            return AbsenceReason.Unjustified;
+
+        if (reasons.Any(reason => reason == AbsenceReason.Absent))
+            return AbsenceReason.Absent;
+
+        if (reasons.Any(reason => reason == AbsenceReason.Suspended))
+            return AbsenceReason.Suspended;
+
+        if (reasons.Any(reason => reason == AbsenceReason.Exempt))
+            return AbsenceReason.Exempt;
+
+        if (reasons.Any(reason => reason == AbsenceReason.Leave))
+            return AbsenceReason.Leave;
+
+        if (reasons.Any(reason => reason == AbsenceReason.Flexible))
+            return AbsenceReason.Flexible;
+
+        if (reasons.Any(reason => reason == AbsenceReason.Sick))
+            return AbsenceReason.Sick;
+
+        if (reasons.Any(reason => reason == AbsenceReason.SchoolBusiness))
+            return AbsenceReason.SchoolBusiness;
+
+        if (reasons.Any(reason => reason == AbsenceReason.SharedEnrolment))
+            return AbsenceReason.SharedEnrolment;
+
+        return null;
     }
 }
