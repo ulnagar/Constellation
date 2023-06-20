@@ -11,8 +11,10 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
 using Microsoft.Extensions.Options;
 using Serilog.Context;
+using System.Drawing;
 using System.Threading;
 
 public class AbsenceProcessingJob : IAbsenceProcessingJob
@@ -99,6 +101,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         List<SentralPeriodAbsenceDto> pxpAbsences = await _sentralService.GetAbsenceDataAsync(sentralId);
         List<SentralPeriodAbsenceDto> attendanceAbsences = await _sentralService.GetPartialAbsenceDataAsync(sentralId);
 
+        // If the webattend absence is not a whole day absence, calculate the absence length
         foreach (SentralPeriodAbsenceDto attendAbsence in attendanceAbsences.Where(aa => !aa.WholeDay))
         {
             if (cancellationToken.IsCancellationRequested)
@@ -111,6 +114,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
             attendAbsence.MinutesAbsent = Convert.ToInt32(absenceLength);
         }
 
+        // If there are no pxpabsences, return empty list
         if (pxpAbsences == null || pxpAbsences.Count == 0)
             return returnAbsences;
 
@@ -121,6 +125,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
             if (cancellationToken.IsCancellationRequested)
                 return returnAbsences;
 
+            // If the date of this group of absences is before the cut-off date(s), skip
             if (group.Key.Date < GetEarliestDate())
                 continue;
 
@@ -129,7 +134,12 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
             int cycleDay = group.Key.Date.GetDayNumber();
 
             // Get all enrolments for this student that were active on that date using the day of the cycle we identified above
-            List<CourseOffering> enrolledOfferings = await _offeringRepository.GetCurrentEnrolmentsFromStudentForDate(student.StudentId, group.Key.Date, cycleDay, cancellationToken);
+            List<CourseOffering> enrolledOfferings = await _offeringRepository
+                .GetCurrentEnrolmentsFromStudentForDate(
+                    student.StudentId, 
+                    group.Key.Date, 
+                    cycleDay, 
+                    cancellationToken);
             
             foreach (CourseOffering enrolledOffering in enrolledOfferings)
             {
@@ -160,6 +170,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                         .OrderBy(period => period.StartTime)
                         .ToList();
 
+                    // Calculate the length of the timetabled lesson
                     int totalBlockMinutes = coursePeriods
                         .Select(period => 
                             (int)period.EndTime
@@ -191,6 +202,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                             TimetablePeriod period = coursePeriods
                                 .First(timetableperiod => 
                                     timetableperiod.GetPeriodDescriptor() == absenceTime.Period);
+
                             absenceTime.MinutesAbsent = (int)period.EndTime.Subtract(period.StartTime).TotalMinutes;
                         }
 
@@ -203,7 +215,13 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                             return returnAbsences;
 
                         // These absences grouped together form a Whole Absence
-                        Absence? absenceRecord = await ProcessWholeAbsence(absencesToProcess, attendanceAbsences, enrolledOffering.Id, periodGroup.ToList(), totalAbsenceTime, cancellationToken);
+                        Absence? absenceRecord = await ProcessWholeAbsence(
+                            absencesToProcess, 
+                            attendanceAbsences, 
+                            enrolledOffering.Id, 
+                            periodGroup.ToList(), 
+                            totalAbsenceTime, 
+                            cancellationToken);
 
                         if (absenceRecord is not null)
                             returnAbsences.Add(absenceRecord);
@@ -336,13 +354,18 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         }
     }
 
-    private static void CalculatePxPAbsenceTimes(SentralPeriodAbsenceDto absence, IList<TimetablePeriod> periodGroup)
+    private static void CalculatePxPAbsenceTimes(
+        SentralPeriodAbsenceDto absence, 
+        List<TimetablePeriod> periodGroup)
     {
-        var period = (absence.Period.Contains('S'))
+        TimetablePeriod? period = (absence.Period.Contains('S'))
             ? periodGroup.FirstOrDefault(pg => pg.Name.Contains(absence.Period.Remove(0, 1)))
             : periodGroup.FirstOrDefault(pg => pg.Name.Contains(absence.Period));
 
-        var absenceLength = new TimeSpan(0, absence.MinutesAbsent, 0);
+        if (period is null)
+            return;
+
+        TimeSpan absenceLength = new TimeSpan(0, absence.MinutesAbsent, 0);
 
         switch (absence.PartialType)
         {
@@ -565,58 +588,92 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         };
     }
 
-    private Absence ProcessPartialAbsence(SentralPeriodAbsenceDto absence, IList<SentralPeriodAbsenceDto> webAttendAbsences, int courseEnrolmentId, IList<TimetablePeriod> periodGroup)
+    private async Task<Absence> ProcessPartialAbsence(
+        SentralPeriodAbsenceDto absence, 
+        List<SentralPeriodAbsenceDto> webAttendAbsences, 
+        int courseEnrolmentId, 
+        List<TimetablePeriod> periodGroup,
+        CancellationToken cancellationToken)
     {
         // Can we figure out when the (PxP) absence starts and ends?
         CalculatePxPAbsenceTimes(absence, periodGroup);
 
         // If we did figure this out, is there an (Attendance) absence that either exactly matches, or covers this timeframe?
-        var attendanceAbsence = SelectBestWebAttendEntryForPartialAbsence(absence, webAttendAbsences);
-        if (attendanceAbsence == null)
+        SentralPeriodAbsenceDto attendanceAbsence = SelectBestWebAttendEntryForPartialAbsence(absence, webAttendAbsences);
+        
+        if (attendanceAbsence is null)
             return null;
 
         // Create an object to save this data to the database.
-        var absenceRecord = CreateAbsence(new List<SentralPeriodAbsenceDto> { absence }, courseEnrolmentId, Absence.Partial, absence.MinutesAbsent, absence.Reason, periodGroup);
-
-        if (attendanceAbsence.Timeframe == "Whole Day")
-        {
-            // This Attendance entry explains the partial. Should create an explained entry.
-            var startTime = absence.StartTime;
-            var endTime = absence.EndTime;
-
-            absenceRecord.StartTime = startTime;
-            absenceRecord.EndTime = endTime;
-            absenceRecord.AbsenceTimeframe = $"{startTime.As12HourTime()} - {endTime.As12HourTime()}";
-        }
-        else
-        {
-            // This Attendance entry correlates to the partial.
-            if ((absence.StartTime != new TimeSpan() && absence.StartTime != attendanceAbsence.StartTime) || (absence.EndTime != new TimeSpan() && absence.EndTime != attendanceAbsence.EndTime))
-            {
-                // TIMES DO NOT MATCH!
-                absenceRecord.StartTime = (attendanceAbsence.StartTime > absence.StartTime) ? attendanceAbsence.StartTime : absence.StartTime;
-                absenceRecord.EndTime = (attendanceAbsence.EndTime < absence.EndTime) ? attendanceAbsence.EndTime : absence.EndTime;
-                absenceRecord.AbsenceTimeframe = $"{absenceRecord.StartTime.As12HourTime()} - {absenceRecord.EndTime.As12HourTime()}";
-            }
-            else
-            {
-                absenceRecord.StartTime = attendanceAbsence.StartTime;
-                absenceRecord.EndTime = attendanceAbsence.EndTime;
-                absenceRecord.AbsenceTimeframe = $"{absenceRecord.StartTime.As12HourTime()} - {absenceRecord.EndTime.As12HourTime()}";
-            }
-        }
+        var absenceRecord = CreateAbsence(
+            new List<SentralPeriodAbsenceDto> { absence },
+            attendanceAbsence,
+            courseEnrolmentId, 
+            AbsenceType.Partial,
+            AbsenceReason.FromValue(absence.Reason),
+            periodGroup);
 
         // If this absence was explained using an Accepted Partial Absence Reason, then the absence should be created as explained
-        if (_appSettings.DiscountedPartialReasons.Contains(absence.Reason))
+        if (_configuration.Absences.DiscountedPartialReasons.Contains(absenceRecord.AbsenceReason))
         {
             // This absence has been externally explained
-            if (attendanceAbsence != null)
+            absenceRecord.AddResponse(
+                ResponseType.System,
+                absence.ExternalExplanationSource,
+                absence.ExternalExplanation);
+        }
+
+        // Does this absence already exist in the database?
+        int absenceCount = await _absenceRepository.GetCountForStudentDateAndOffering(
+            _student.StudentId,
+            absenceRecord.Date,
+            absenceRecord.OfferingId,
+            absenceRecord.AbsenceTimeframe,
+            cancellationToken);
+
+        if (absenceCount > 0)
+        {
+            // There is an existing absence here
+            List<Absence> existingAbsences = await _absenceRepository.GetAllForStudentDateAndOffering(
+                _student.StudentId,
+                absenceRecord.Date,
+                absenceRecord.OfferingId,
+                absenceRecord.AbsenceTimeframe,
+                cancellationToken);
+
+            List<AbsenceReason> acceptedReasons = _configuration.Absences.DiscountedPartialReasons;
+
+            foreach (Absence existingAbsence in existingAbsences)
             {
-                absenceRecord.ExternalExplanation = attendanceAbsence.ExternalExplanation;
-                absenceRecord.ExternalExplanationSource = attendanceAbsence.ExternalExplanationSource;
+                // Update the last seen property with today's date
+                existingAbsence.UpdateLastSeen();
+
+                // If the new absence is explained with an accepted reason, and the existing absences are not, then update them to signify they were changed on Sentral
+                if (existingAbsences.All(innerabsence => !innerabsence.Explained) && _configuration.Absences.DiscountedPartialReasons.Contains(absenceRecord.AbsenceReason))
+                {
+                    _logger.Information("{id}: Student {student} ({grade}): Found external explaination for {Type} absence on {Date} - {PeriodName}", JobId, _student.DisplayName, _student.CurrentGrade.AsName(), absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName);
+
+                    // Is there an existing SYSTEM response? If not, create one
+                    List<Response> responses = await _responseRepository.GetAllForAbsence(
+                        existingAbsence.Id,
+                        cancellationToken);
+
+                    if (responses.All(response => response.Type != ResponseType.System))
+                    {
+                        existingAbsence.AddResponse(
+                            ResponseType.System,
+                            absence.ExternalExplanationSource,
+                            absence.ExternalExplanation);
+                    }
+
+                    responses = null;
+                }
             }
 
-            absenceRecord.ExternallyExplained = true;
+            existingAbsences = null;
+            absenceRecord = null;
+
+            return null;
         }
 
         return absenceRecord;
@@ -641,12 +698,27 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         AbsenceReason reason = (reasons.Count == 1) ? reasons.First() : Absence.FindWorstAbsenceReason(reasons);
 
         // Create an object to save this data to the database.
-        var absenceRecord = CreateAbsence(absencesToProcess, courseEnrolmentId, AbsenceType.Whole, reason, periodGroup);
+        Absence absenceRecord = CreateAbsence(
+            absencesToProcess, 
+            null,
+            courseEnrolmentId, 
+            AbsenceType.Whole, 
+            reason, 
+            periodGroup);
 
         // Find a webAttend absence that covers this set
-        var attendanceAbsence = SelectBestWebAttendEntryForWholeAbsence(absencesToProcess, webAttendAbsences, absenceRecord);
+        SentralPeriodAbsenceDto attendanceAbsence = SelectBestWebAttendEntryForWholeAbsence(
+            absencesToProcess, 
+            webAttendAbsences, 
+            absenceRecord);
+
         // Check database for all matching absences already known
-        int absenceCount = await _absenceRepository.GetCountForStudentDateAndOffering(_student.StudentId, absenceRecord.Date, absenceRecord.OfferingId, absenceRecord.AbsenceTimeframe, cancellationToken);
+        int absenceCount = await _absenceRepository.GetCountForStudentDateAndOffering(
+            _student.StudentId, 
+            absenceRecord.Date, 
+            absenceRecord.OfferingId, 
+            absenceRecord.AbsenceTimeframe, 
+            cancellationToken);
 
         if (attendanceAbsence == null)
         {
@@ -658,8 +730,16 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
             if (absenceCount > 0)
             {
                 // There is an existing absence here
-                List<Absence> existingAbsences = await _absenceRepository.GetAllForStudentDateAndOffering(_student.StudentId, absenceRecord.Date, absenceRecord.OfferingId, absenceRecord.AbsenceTimeframe, cancellationToken);
-                List<AbsenceReason> acceptedReasons = _configuration.Absences.DiscountedPartialReasons;
+                List<Absence> existingAbsences = await _absenceRepository.GetAllForStudentDateAndOffering(
+                    _student.StudentId, 
+                    absenceRecord.Date, 
+                    absenceRecord.OfferingId, 
+                    absenceRecord.AbsenceTimeframe, 
+                    cancellationToken);
+
+                List<AbsenceReason> acceptedReasons = _configuration.Absences.DiscountedWholeReasons;
+
+                _logger.Information("{id}: Found absences that have been removed from Sentral WebAttend for student {student} on date {date}", JobId, _student.DisplayName, absenceRecord.Date);
 
                 foreach (Absence existingAbsence in existingAbsences)
                 {
@@ -672,10 +752,14 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                         _logger.Information("{id}: Student {student} ({grade}): Found external explaination for {Type} absence on {Date} - {PeriodName}", JobId, _student.DisplayName, _student.CurrentGrade.AsName(), absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName);
 
                         // Is there an existing SYSTEM response? If not, create one
-                        var responses = await _responseRepository.GetAllForAbsence(existingAbsence.Id, cancellationToken);
+                        List<Response> responses = await _responseRepository.GetAllForAbsence(
+                            existingAbsence.Id, 
+                            cancellationToken);
+
                         if (responses.All(response => response.Type != ResponseType.System))
                         {
-                            var absenceDto = absencesToProcess.First(absence => AbsenceReason.FromValue(absence.Reason) == reason);
+                            SentralPeriodAbsenceDto absenceDto = absencesToProcess
+                                .First(absence => AbsenceReason.FromValue(absence.Reason) == reason);
 
                             existingAbsence.AddResponse(
                                 ResponseType.System,
@@ -690,15 +774,18 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                 existingAbsences = null;
             }
 
+            absenceRecord = null;
+
             return null;
         }
 
-        // If any part of this whole class absence was explained using an Accepted Whole Absence Reason, then the absence should not be processed as whole.
-        if (absencesToProcess.All(absence => AbsenceReason.FromValue(absence.Reason) == AbsenceReason.SharedEnrolment) ||
-            absencesToProcess.Any(absence => _configuration.Absences.DiscountedWholeReasons.Contains(AbsenceReason.FromValue(absence.Reason))))
+        // If all the parts of this whole absence have explained statuses, then record the explanation
+        if (absencesToProcess.All(absence =>
+                _configuration.Absences.DiscountedWholeReasons.Contains(AbsenceReason.FromValue(absence.Reason))))
         {
             // This absence has been externally explained
-            var absenceDto = absencesToProcess.First(absence => AbsenceReason.FromValue(absence.Reason) == reason);
+            SentralPeriodAbsenceDto absenceDto = absencesToProcess.First(absence => 
+                AbsenceReason.FromValue(absence.Reason) == reason);
 
             absenceRecord.AddResponse(
                 ResponseType.System,
@@ -709,7 +796,12 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         if (absenceCount > 0)
         {
             // There is an existing absence here
-            List<Absence> existingAbsences = await _absenceRepository.GetAllForStudentDateAndOffering(_student.StudentId, absenceRecord.Date, absenceRecord.OfferingId, absenceRecord.AbsenceTimeframe, cancellationToken);
+            List<Absence> existingAbsences = await _absenceRepository.GetAllForStudentDateAndOffering(
+                _student.StudentId, 
+                absenceRecord.Date, 
+                absenceRecord.OfferingId, 
+                absenceRecord.AbsenceTimeframe, 
+                cancellationToken);
 
             List<AbsenceReason> acceptedReasons = _configuration.Absences.DiscountedPartialReasons;
 
@@ -719,15 +811,19 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                 existingAbsence.UpdateLastSeen();
 
                 // If the new absence is explained with an accepted reason, and the existing absences are not, then update them to signify they were changed on Sentral
-                if (existingAbsences.All(innerabsence => !innerabsence.Explained) && absenceRecord.Responses.Any())
+                if (existingAbsences.All(innerabsence => !innerabsence.Explained) && 
+                    absenceRecord.Responses.Any())
                 {
                     _logger.Information("{id}: Student {student} ({grade}): Found external explaination for {Type} absence on {Date} - {PeriodName}", JobId, _student.DisplayName, _student.CurrentGrade.AsName(), absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName);
 
                     // Is there an existing SYSTEM response? If not, create one
-                    var responses = await _responseRepository.GetAllForAbsence(existingAbsence.Id, cancellationToken);
+                    List<Response> responses = await _responseRepository.GetAllForAbsence(
+                        existingAbsence.Id, 
+                        cancellationToken);
+
                     if (responses.All(response => response.Type != ResponseType.System))
                     {
-                        var newResponse = absenceRecord.Responses.First();
+                        Response newResponse = absenceRecord.Responses.First();
 
                         existingAbsence.AddResponse(
                             ResponseType.System,
@@ -756,6 +852,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
 
     private Absence CreateAbsence(
         List<SentralPeriodAbsenceDto> absencesToProcess, 
+        SentralPeriodAbsenceDto? attendanceAbsence,
         int courseEnrolmentId, 
         AbsenceType type, 
         AbsenceReason reason, 
@@ -777,6 +874,28 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
             periodTimeframe = $"{periodGroup.First().StartTime.As12HourTime()} - {periodGroup.Last().EndTime.As12HourTime()}";
             startTime = TimeOnly.FromTimeSpan(periodGroup.First().StartTime);
             endTime = TimeOnly.FromTimeSpan(periodGroup.Last().EndTime);
+        }
+
+        if (type == AbsenceType.Partial && attendanceAbsence is not null)
+        {
+            // Update the start time and end time appropriately
+
+            if (attendanceAbsence.Timeframe == "Whole Day")
+            {
+                // This Attendance entry explains the partial. Should create an explained entry.
+                startTime = TimeOnly.FromTimeSpan(absencesToProcess.First().StartTime);
+                endTime = TimeOnly.FromTimeSpan(absencesToProcess.First().EndTime);
+            }
+            else
+            {
+                // This Attendance entry correlates to the partial.
+                if (startTime != TimeOnly.FromTimeSpan(attendanceAbsence.StartTime) || endTime != TimeOnly.FromTimeSpan(attendanceAbsence.EndTime))
+                {
+                    // TIMES DO NOT MATCH!
+                    startTime = (TimeOnly.FromTimeSpan(attendanceAbsence.StartTime) > startTime) ? TimeOnly.FromTimeSpan(attendanceAbsence.StartTime) : startTime;
+                    endTime = (TimeOnly.FromTimeSpan(attendanceAbsence.EndTime) < endTime) ? TimeOnly.FromTimeSpan(attendanceAbsence.EndTime) : endTime;
+                }
+            }
         }
 
         var absence = Absence.Create(
