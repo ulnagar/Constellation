@@ -70,9 +70,8 @@ public class Service : IEmailService
             var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Reports/AcademicReportEmail.cshtml", viewModel);
 
             var toRecipients = new Dictionary<string, string>();
-            foreach (var entry in recipients)
-                if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                    toRecipients.Add(entry.Name, entry.Email);
+            if (!toRecipients.Any(recipient => recipient.Value == parent.Email))
+                toRecipients.Add(parent.Name, parent.Email);
 
             await _emailSender.Send(toRecipients, null, viewModel.Title, body, attachments, cancellationToken);
         }
