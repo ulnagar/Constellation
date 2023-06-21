@@ -51,7 +51,7 @@ public class Service : IEmailService
     {
         List<Attachment> attachments = new();
         var stream = new MemoryStream(file.FileData);
-        attachments.Add(new Attachment(stream, file.FileType, file.FileName));
+        attachments.Add(new Attachment(stream, file.FileName, file.FileType));
 
         foreach (var parent in recipients)
         {
