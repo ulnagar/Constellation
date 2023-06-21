@@ -7,9 +7,9 @@ namespace Constellation.Application.DTOs
         public static string Partial = "Partial";
         public static string Whole = "Whole";
 
-        public DateTime Date { get; set; }
-        public TimeSpan StartTime { get; set; }
-        public TimeSpan EndTime { get; set; }
+        public DateOnly Date { get; set; }
+        public TimeOnly StartTime { get; set; }
+        public TimeOnly EndTime { get; set; }
         public bool WholeDay { get; set; }
         public string Timeframe { get; set; }
         public string Period { get; set; }
@@ -32,7 +32,7 @@ namespace Constellation.Application.DTOs
                 return false;
             }
 
-            if (Date == new DateTime())
+            if (Date == DateOnly.MinValue)
             {
                 return false;
             }

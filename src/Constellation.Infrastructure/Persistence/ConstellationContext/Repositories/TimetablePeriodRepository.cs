@@ -38,6 +38,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Distinct()
                 .ToListAsync(cancellationToken);
 
+        // Method is not async as we are passing the async task to another method
+        public Task<List<TimetablePeriod>> GetForOfferingOnDay(
+            int offeringId,
+            DateOnly absenceDate,
+            int dayNumber,
+            CancellationToken cancellationToken = default) =>
+            GetForOfferingOnDay(offeringId, absenceDate.ToDateTime(TimeOnly.MinValue), dayNumber, cancellationToken);
+
         private IQueryable<TimetablePeriod> Collection()
         {
             return _context.Periods

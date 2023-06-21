@@ -65,7 +65,7 @@ internal sealed class GetAbsencesForFamilyQueryHandler
                     absence.PeriodTimeframe,
                     absence.AbsenceLength,
                     absence.AbsenceTimeframe,
-                    absence.AbsenceReason,
+                    absence.AbsenceReason.Value,
                     offering?.Name,
                     response?.Explanation,
                     response?.VerificationStatus,

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Constellation.Application.Absences.ProvideParentWholeAbsenceExplanation;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
@@ -107,4 +108,22 @@ public class AbsenceRepository : IAbsenceRepository
                 absence.OfferingId == offeringId &&
                 absence.AbsenceTimeframe == absenceTimeframe)
             .ToListAsync(cancellationToken);
+
+    public async Task<List<Absence>> GetUnexplainedWholeAbsencesForStudentWithDelay(
+        string studentId,
+        int ageInWeeks,
+        CancellationToken cancellationToken = default)
+    {
+        DateTime seenBefore = DateTime.Today.AddDays(-(ageInWeeks * 7));
+
+        return await _context
+            .Set<Absence>()
+            .Where(absence =>
+                absence.StudentId == studentId &&
+                !absence.Explained &&
+                absence.Type == AbsenceType.Whole &&
+                absence.FirstSeen < seenBefore)
+            .ToListAsync(cancellationToken);
+    }
+        
 }

@@ -13,6 +13,7 @@ public interface ITimetablePeriodRepository
     Task<List<TimetablePeriod>> GetAll(CancellationToken cancellationToken = default);
     Task<List<TimetablePeriod>> GetAllFromTimetable(List<string> timetables, CancellationToken cancellationToken = default);
     Task<List<TimetablePeriod>> GetForOfferingOnDay(int offeringId, DateTime absenceDate, int DayNumber, CancellationToken cancellationToken = default);
+    Task<List<TimetablePeriod>> GetForOfferingOnDay(int offeringId, DateOnly absenceDate, int DayNumber, CancellationToken cancellationToken = default);
     TimetablePeriod WithDetails(int id);
     TimetablePeriod WithFilter(Expression<Func<TimetablePeriod, bool>> predicate);
     ICollection<TimetablePeriod> All();

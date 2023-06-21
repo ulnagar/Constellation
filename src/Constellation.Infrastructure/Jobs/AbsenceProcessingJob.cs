@@ -27,10 +27,9 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
     private readonly ITimetablePeriodRepository _periodRepository;
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IAbsenceResponseRepository _responseRepository;
-    private readonly IUnitOfWork _unitOfWork;
 
     private Student _student;
-    private List<DateTime> _excludedDates = new(); 
+    private List<DateOnly> _excludedDates = new(); 
     private AppConfiguration _configuration;
     private Guid JobId { get; set; }
 
@@ -40,7 +39,6 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         ITimetablePeriodRepository periodRepository,
         IAbsenceRepository absenceRepository,
         IAbsenceResponseRepository responseRepository,
-        IUnitOfWork unitOfWork, 
         ISentralGateway sentralService,
         IEmailService emailService, 
         ILogger logger)
@@ -50,7 +48,6 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         _periodRepository = periodRepository;
         _absenceRepository = absenceRepository;
         _responseRepository = responseRepository;
-        _unitOfWork = unitOfWork;
         _sentralService = sentralService;
         _emailService = emailService;
 
@@ -107,9 +104,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
             if (cancellationToken.IsCancellationRequested)
                 return returnAbsences;
 
-            double absenceLength = attendAbsence.EndTime
-                .Subtract(attendAbsence.StartTime)
-                .TotalMinutes;
+            double absenceLength = (attendAbsence.EndTime - attendAbsence.StartTime).TotalMinutes;
 
             attendAbsence.MinutesAbsent = Convert.ToInt32(absenceLength);
         }
@@ -118,7 +113,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         if (pxpAbsences == null || pxpAbsences.Count == 0)
             return returnAbsences;
 
-        var groupedPxpAbsences = pxpAbsences.GroupBy(a => a.Date.Date);
+        var groupedPxpAbsences = pxpAbsences.GroupBy(a => a.Date);
 
         foreach (var group in groupedPxpAbsences)
         {
@@ -126,18 +121,18 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                 return returnAbsences;
 
             // If the date of this group of absences is before the cut-off date(s), skip
-            if (group.Key.Date < GetEarliestDate())
+            if (group.Key < GetEarliestDate())
                 continue;
 
             // Get the timetable for the day
             // Given the date, figure out what day of the cycle we are looking at.
-            int cycleDay = group.Key.Date.GetDayNumber();
+            int cycleDay = group.Key.GetDayNumber();
 
             // Get all enrolments for this student that were active on that date using the day of the cycle we identified above
             List<CourseOffering> enrolledOfferings = await _offeringRepository
                 .GetCurrentEnrolmentsFromStudentForDate(
                     student.StudentId, 
-                    group.Key.Date, 
+                    group.Key, 
                     cycleDay, 
                     cancellationToken);
             
@@ -156,7 +151,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                 }
 
                 // Get list of periods for this class on this day
-                List<TimetablePeriod> periods = await _periodRepository.GetForOfferingOnDay(enrolledOffering.Id, group.Key.Date, cycleDay, cancellationToken);
+                List<TimetablePeriod> periods = await _periodRepository.GetForOfferingOnDay(enrolledOffering.Id, group.Key, cycleDay, cancellationToken);
                     
                 // Find all contiguous periods
                 var periodGroups = periods.GroupConsecutive();
@@ -190,7 +185,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                         continue;
 
                     // Ignore absences from TODAY only
-                    if (absencesToProcess.First().Date.Date == DateTime.Today.Date)
+                    if (absencesToProcess.First().Date == DateOnly.FromDateTime(DateTime.Today))
                         continue;
 
                     int totalAbsenceTime = 0;
@@ -245,7 +240,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                         if (cancellationToken.IsCancellationRequested)
                             return returnAbsences;
 
-                        Absence? absenceRecord = ProcessPartialAbsence(absence, attendanceAbsences, enrolledOffering.Id, periodGroup.ToList());
+                        Absence? absenceRecord = await ProcessPartialAbsence(absence, attendanceAbsences, enrolledOffering.Id, periodGroup.ToList(), cancellationToken);
 
                         if (absenceRecord is not null)
                             detectedAbsences.Add(absenceRecord);
@@ -342,16 +337,17 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         return returnAbsences;
     }
 
-    private DateTime GetEarliestDate()
+    private DateOnly GetEarliestDate()
     {
+        // If the student should not be activated for absence scanning, set to tomorrow to disable scanning
+        if (!_student.AbsenceNotificationStartDate.HasValue)
+            return DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+
+        // If the local student set start date is after the system set start date, use the student one
         if (_student.AbsenceNotificationStartDate.HasValue && _student.AbsenceNotificationStartDate.Value > _configuration.Absences.AbsenceScanStartDate)
-        {
-            return _student.AbsenceNotificationStartDate.Value;
-        }
-        else
-        {
-            return _configuration.Absences.AbsenceScanStartDate;
-        }
+            return DateOnly.FromDateTime(_student.AbsenceNotificationStartDate.Value);
+
+        return DateOnly.FromDateTime(_configuration.Absences.AbsenceScanStartDate);
     }
 
     private static void CalculatePxPAbsenceTimes(
@@ -371,13 +367,13 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         {
             case "Late Arrival":
             case null:
-                absence.StartTime = period.StartTime;
-                absence.EndTime = period.StartTime.Add(absenceLength);
+                absence.StartTime = TimeOnly.FromTimeSpan(period.StartTime);
+                absence.EndTime = absence.StartTime.Add(absenceLength);
 
                 break;
             case "Early Leaver":
-                absence.EndTime = period.EndTime;
-                absence.StartTime = period.EndTime.Subtract(absenceLength);
+                absence.EndTime = TimeOnly.FromTimeSpan(period.EndTime);
+                absence.StartTime = absence.EndTime.Add(-absenceLength);
 
                 break;
             default:
@@ -385,21 +381,26 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         }
     }
 
-    private static void CalculateWebAttendAbsencePeriod(SentralPeriodAbsenceDto absence, IList<TimetablePeriod> periodGroup)
+    private static void CalculateWebAttendAbsencePeriod(
+        SentralPeriodAbsenceDto absence, 
+        List<TimetablePeriod> periodGroup)
     {
         foreach (var period in periodGroup)
         {
-            if (period.StartTime <= absence.StartTime && period.EndTime >= absence.EndTime)
+            TimeOnly pStart = TimeOnly.FromTimeSpan(period.StartTime);
+            TimeOnly pEnd = TimeOnly.FromTimeSpan(period.EndTime);
+
+            if (pStart <= absence.StartTime && pEnd >= absence.EndTime)
             {
                 absence.Period = period.Name;
 
                 if (absence.MinutesAbsent != period.EndTime.Subtract(period.StartTime).TotalMinutes)
                 {
-                    if (absence.StartTime == period.StartTime)
+                    if (absence.StartTime == pStart)
                     {
                         absence.PartialType = "Late Arrival";
                     }
-                    else if (absence.EndTime == period.EndTime)
+                    else if (absence.EndTime == pEnd)
                     {
                         absence.PartialType = "Early Leaver";
                     }
@@ -412,98 +413,118 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         }
     }
 
-    private SentralPeriodAbsenceDto SelectBestWebAttendEntryForPartialAbsence(SentralPeriodAbsenceDto absence, IList<SentralPeriodAbsenceDto> webAttendAbsences)
+    private async Task<SentralPeriodAbsenceDto> SelectBestWebAttendEntryForPartialAbsence(
+        SentralPeriodAbsenceDto absence, 
+        List<SentralPeriodAbsenceDto> webAttendAbsences,
+        CancellationToken cancellationToken)
     {
         // Excluded absences (either dates that are not valid, or length below thresholds):
         if (absence.MinutesAbsent == 5)
         {
-            _logger.LogInformation("{id}: Student {student} ({grade}): Found absence below Sentral threshold on {Date} - {Period} - {Reason}", JobId, _student.DisplayName, _student.CurrentGrade.AsName(), absence.Date.ToShortDateString(), absence.Period, absence.Reason);
+            _logger.Information("{id}: Student {student} ({grade}): Found absence below Sentral threshold on {Date} - {Period} - {Reason}", JobId, _student.DisplayName, _student.CurrentGrade.AsName(), absence.Date.ToShortDateString(), absence.Period, absence.Reason);
             return null;
         }
 
-        if (absence.Date.Date > DateTime.Today)
-        {
+        if (absence.Date > DateOnly.FromDateTime(DateTime.Today))
             // This absence is in the future. Likely the PxP roll has been opened and an unavilability automatically created,
             // but the roll has not been submitted, meaning no correlating entry in WebAttend.
             return null;
-        }
 
-        if (_excludedDates.Contains(absence.Date.Date))
-        {
+        if (_excludedDates.Contains(absence.Date))
             return null;
-        }
 
         // Check for a whole day WebAttendance Absence entry first
-        var wholeDayAttendanceAbsence = webAttendAbsences
-            .Where(aa => aa.Date.Date == absence.Date.Date && aa.WholeDay)
+        List<SentralPeriodAbsenceDto> wholeDayAttendanceAbsence = webAttendAbsences
+            .Where(aa => aa.Date == absence.Date && aa.WholeDay)
             .ToList();
 
         if (wholeDayAttendanceAbsence.Count == 1)
             return wholeDayAttendanceAbsence.First();
 
-        if (absence.StartTime != new TimeSpan())
+        if (absence.StartTime != TimeOnly.MinValue)
         {
-            var exactAttendanceAbsence = webAttendAbsences
-                .Where(aa => aa.Date.Date == absence.Date.Date && aa.StartTime == absence.StartTime && aa.MinutesAbsent == absence.MinutesAbsent)
-                .ToList();
+            int exactAttendanceAbsenceCount = webAttendAbsences
+                .Count(aa =>
+                    aa.Date == absence.Date &&
+                    aa.StartTime == absence.StartTime &&
+                    aa.MinutesAbsent == absence.MinutesAbsent);
 
-            if (exactAttendanceAbsence.Count == 1)
-                return exactAttendanceAbsence.First();
+            if (exactAttendanceAbsenceCount == 1)
+                return webAttendAbsences.First(aa => 
+                    aa.Date == absence.Date &&
+                    aa.StartTime == absence.StartTime &&
+                    aa.MinutesAbsent == absence.MinutesAbsent);
 
-            var approxAttendanceAbsence = webAttendAbsences
-                .Where(aa => aa.Date.Date == absence.Date.Date && aa.StartTime <= absence.StartTime && aa.EndTime >= absence.EndTime)
-                .ToList();
+            int approxAttendanceAbsenceCount = webAttendAbsences
+                .Count(aa =>
+                    aa.Date == absence.Date &&
+                    aa.StartTime <= absence.StartTime &&
+                    aa.EndTime >= absence.EndTime);
 
-            if (approxAttendanceAbsence.Count == 1)
-                return approxAttendanceAbsence.First();
+            if (approxAttendanceAbsenceCount == 1)
+                return webAttendAbsences.First(aa =>
+                    aa.Date == absence.Date &&
+                    aa.StartTime <= absence.StartTime &&
+                    aa.EndTime >= absence.EndTime);
         }
 
         // This is a timed partial?
         if (absence.PartialType == "Timed")
         {
-            var bestGuessWebAttendAbsences = webAttendAbsences.Where(aa =>
-                    aa.Date.Date == absence.Date.Date &&
+            int bestGuessWebAttendAbsencesCount = webAttendAbsences
+                .Count(aa =>
+                    aa.Date == absence.Date &&
                     aa.Reason == absence.Reason &&
-                    aa.MinutesAbsent == absence.MinutesAbsent)
-                .ToList();
+                    aa.MinutesAbsent == absence.MinutesAbsent);
 
-            if (bestGuessWebAttendAbsences.Count == 1)
-                return bestGuessWebAttendAbsences.First();
+            if (bestGuessWebAttendAbsencesCount == 1)
+                return webAttendAbsences.First(aa =>
+                    aa.Date == absence.Date &&
+                    aa.Reason == absence.Reason &&
+                    aa.MinutesAbsent == absence.MinutesAbsent);
 
-            if (bestGuessWebAttendAbsences.Count == 0)
+            if (bestGuessWebAttendAbsencesCount == 0)
             {
-                var nextBestGuessWebAttendAbsences = webAttendAbsences.Where(aa =>
-                        aa.Date.Date == absence.Date.Date &&
-                        aa.MinutesAbsent == absence.MinutesAbsent)
-                    .ToList();
+                int nextBestGuessWebAttendAbsencesCount = webAttendAbsences
+                    .Count(aa =>
+                        aa.Date == absence.Date &&
+                        aa.MinutesAbsent == absence.MinutesAbsent);
 
-                if (nextBestGuessWebAttendAbsences.Count == 1)
-                    return nextBestGuessWebAttendAbsences.First();
+                if (nextBestGuessWebAttendAbsencesCount == 1)
+                    return webAttendAbsences.First(aa =>
+                        aa.Date == absence.Date &&
+                        aa.MinutesAbsent == absence.MinutesAbsent);
             }
 
-            if (bestGuessWebAttendAbsences.Count > 1)
+            if (bestGuessWebAttendAbsencesCount > 1)
             {
                 // How do we tell these apart?
                 // Can we match the period for the WebAttend absences to the PxP absence entry?
 
-                var timetable = (_student.CurrentGrade == Grade.Y05 || _student.CurrentGrade == Grade.Y06)
+                string timetable = (_student.CurrentGrade == Grade.Y05 || _student.CurrentGrade == Grade.Y06)
                     ? "PRIMARY"
                     : "SECONDARY";
 
-                var periods = _unitOfWork.Periods.AllWithFilter(p => !p.IsDeleted && p.Timetable == timetable).ToList();
+                List<TimetablePeriod> periods = await _periodRepository.GetAllFromTimetable(new List<string> { timetable }, cancellationToken);
+
+                var bestGuessWebAttendAbsences = webAttendAbsences
+                    .Where(aa =>
+                        aa.Date == absence.Date &&
+                        aa.Reason == absence.Reason &&
+                        aa.MinutesAbsent == absence.MinutesAbsent);
 
                 foreach (var webAttendAbsence in bestGuessWebAttendAbsences)
-                {
                     CalculateWebAttendAbsencePeriod(webAttendAbsence, periods);
-                }
 
-                var lastAttemptWebAttendAbsences = bestGuessWebAttendAbsences.Where(aa =>
+                int lastAttemptWebAttendAbsencesCount = bestGuessWebAttendAbsences
+                    .Count(aa =>
                         aa.Period.Contains(absence.Period) &&
-                        aa.PartialType == absence.PartialType)
-                    .ToList();
+                        aa.PartialType == absence.PartialType);
 
-                if (lastAttemptWebAttendAbsences.Count == 1)
-                    return lastAttemptWebAttendAbsences.First();
+                if (lastAttemptWebAttendAbsencesCount == 1)
+                    return webAttendAbsences.First(aa =>
+                        aa.Period.Contains(absence.Period) &&
+                        aa.PartialType == absence.PartialType);
             }
         }
 
@@ -515,22 +536,23 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         return null;
     }
 
-    private SentralPeriodAbsenceDto SelectBestWebAttendEntryForWholeAbsence(IList<SentralPeriodAbsenceDto> absencesToProcess, IList<SentralPeriodAbsenceDto> webAttendAbsences, Absence absence)
+    private SentralPeriodAbsenceDto SelectBestWebAttendEntryForWholeAbsence(
+        List<SentralPeriodAbsenceDto> absencesToProcess, 
+        List<SentralPeriodAbsenceDto> webAttendAbsences, 
+        Absence absence)
     {
-        if (absence.Date.Date > DateTime.Today)
+        if (absence.Date > DateOnly.FromDateTime(DateTime.Today))
         {
             // This absence is in the future. Likely the PxP roll has been opened and an unavilability automatically created,
             // but the roll has not been submitted, meaning no correlating entry in WebAttend.
             return null;
         }
 
-        if (_excludedDates.Contains(absence.Date.Date))
-        {
+        if (_excludedDates.Contains(absence.Date))
             return null;
-        }
 
         var fromDayAttendanceAbsences = webAttendAbsences
-            .Where(aa => aa.Date.Date == absence.Date.Date)
+            .Where(aa => aa.Date == absence.Date)
             .ToList();
 
         // Check for a whole day WebAttendance Absence entry first
@@ -543,7 +565,9 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
 
         // Check for exact match on start and end times
         var forBlockAttendanceAbsences = fromDayAttendanceAbsences
-            .Where(aa => aa.StartTime == absence.StartTime && aa.EndTime == absence.EndTime)
+            .Where(aa => 
+                aa.StartTime == absence.StartTime && 
+                aa.EndTime == absence.EndTime)
             .ToList();
 
         if (forBlockAttendanceAbsences.Count == 1)
@@ -551,7 +575,9 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
 
         // Check for a larger webAttendAbsence that covers this absence
         var largerBlockAttendanceAbsences = fromDayAttendanceAbsences
-            .Where(aa => aa.StartTime <= absence.StartTime && aa.EndTime >= absence.EndTime)
+            .Where(aa => 
+                aa.StartTime <= absence.StartTime && 
+                aa.EndTime >= absence.EndTime)
             .ToList();
 
         if (largerBlockAttendanceAbsences.Count == 1)
@@ -559,7 +585,8 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
 
         // Check for multiple webAttendAbsences that combine to cover this absence
         var combinedBlockAttendanceAbsences = fromDayAttendanceAbsences
-            .Where(aa => (aa.StartTime >= absence.StartTime && aa.StartTime < absence.EndTime) ||
+            .Where(aa => 
+                (aa.StartTime >= absence.StartTime && aa.StartTime < absence.EndTime) ||
                 (aa.StartTime <= absence.StartTime && aa.EndTime > absence.StartTime))
             .ToList();
 
@@ -570,7 +597,9 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
             var webAttendStartTime = combinedBlockAttendanceAbsences.Min(aa => aa.StartTime);
             var webAttendEndTime = combinedBlockAttendanceAbsences.Max(aa => aa.EndTime);
 
-            if ((webAttendStartTime == absence.StartTime && webAttendEndTime == absence.EndTime && combinedBlockAttendanceAbsences.Sum(aa => aa.MinutesAbsent) == absencesToProcess.Sum(ab => ab.MinutesAbsent)) ||
+            if ((webAttendStartTime == absence.StartTime && 
+                webAttendEndTime == absence.EndTime && 
+                combinedBlockAttendanceAbsences.Sum(aa => aa.MinutesAbsent) == absencesToProcess.Sum(ab => ab.MinutesAbsent)) ||
                 combinedBlockAttendanceAbsences.Sum(aa => aa.MinutesAbsent) == adjustedAbsenceLength)
             {
                 return new SentralPeriodAbsenceDto
@@ -581,11 +610,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
             }
         }
 
-        return new SentralPeriodAbsenceDto
-        {
-            ExternalExplanation = "No Attendance entry found: suspect deleted and no longer valid",
-            ExternalExplanationSource = "ACOS SYSTEM",
-        };
+        return null;
     }
 
     private async Task<Absence> ProcessPartialAbsence(
@@ -599,7 +624,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         CalculatePxPAbsenceTimes(absence, periodGroup);
 
         // If we did figure this out, is there an (Attendance) absence that either exactly matches, or covers this timeframe?
-        SentralPeriodAbsenceDto attendanceAbsence = SelectBestWebAttendEntryForPartialAbsence(absence, webAttendAbsences);
+        SentralPeriodAbsenceDto attendanceAbsence = await SelectBestWebAttendEntryForPartialAbsence(absence, webAttendAbsences, cancellationToken);
         
         if (attendanceAbsence is null)
             return null;
@@ -883,17 +908,17 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
             if (attendanceAbsence.Timeframe == "Whole Day")
             {
                 // This Attendance entry explains the partial. Should create an explained entry.
-                startTime = TimeOnly.FromTimeSpan(absencesToProcess.First().StartTime);
-                endTime = TimeOnly.FromTimeSpan(absencesToProcess.First().EndTime);
+                startTime = absencesToProcess.First().StartTime;
+                endTime = absencesToProcess.First().EndTime;
             }
             else
             {
                 // This Attendance entry correlates to the partial.
-                if (startTime != TimeOnly.FromTimeSpan(attendanceAbsence.StartTime) || endTime != TimeOnly.FromTimeSpan(attendanceAbsence.EndTime))
+                if (startTime != attendanceAbsence.StartTime || endTime != attendanceAbsence.EndTime)
                 {
                     // TIMES DO NOT MATCH!
-                    startTime = (TimeOnly.FromTimeSpan(attendanceAbsence.StartTime) > startTime) ? TimeOnly.FromTimeSpan(attendanceAbsence.StartTime) : startTime;
-                    endTime = (TimeOnly.FromTimeSpan(attendanceAbsence.EndTime) < endTime) ? TimeOnly.FromTimeSpan(attendanceAbsence.EndTime) : endTime;
+                    startTime = (attendanceAbsence.StartTime > startTime) ? attendanceAbsence.StartTime : startTime;
+                    endTime = (attendanceAbsence.EndTime < endTime) ? attendanceAbsence.EndTime : endTime;
                 }
             }
         }
@@ -902,7 +927,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
             type,
             _student.StudentId,
             courseEnrolmentId,
-            DateOnly.FromDateTime(absencesToProcess.First().Date),
+            absencesToProcess.First().Date,
             periodName,
             periodTimeframe,
             reason,

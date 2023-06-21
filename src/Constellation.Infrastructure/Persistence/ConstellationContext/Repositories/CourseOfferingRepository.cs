@@ -93,6 +93,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Distinct()
                 .ToListAsync(cancellationToken);
 
+        // Method is not async as we are passing the task to another method
+        public Task<List<CourseOffering>> GetCurrentEnrolmentsFromStudentForDate(
+            string studentId,
+            DateOnly AbsenceDate,
+            int DayNumber,
+            CancellationToken cancellationToken = default) =>
+            GetCurrentEnrolmentsFromStudentForDate(studentId, AbsenceDate.ToDateTime(TimeOnly.MinValue), DayNumber, cancellationToken);
+    
         public CourseOffering WithDetails(int id)
         {
             return Collection()

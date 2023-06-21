@@ -14,7 +14,7 @@ public interface ISentralGateway
     Task<List<SentralPeriodAbsenceDto>> GetPartialAbsenceDataAsync(string sentralStudentId);
     Task<string> GetSentralStudentIdFromSRN(string srn, string grade);
     Task<IDictionary<string, IDictionary<string, string>>> GetParentContactEntry(string sentralStudentId);
-    Task<List<DateTime>> GetExcludedDatesFromCalendar(string year);
+    Task<List<DateOnly>> GetExcludedDatesFromCalendar(string year);
     Task<List<ValidAttendenceReportDate>> GetValidAttendanceReportDatesFromCalendar(string year);
     Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateOnly date);
     Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(ILogger logger);
