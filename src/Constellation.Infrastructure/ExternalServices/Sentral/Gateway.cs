@@ -391,20 +391,20 @@ public partial class Gateway : ISentralGateway
         if (absenceTable != null)
         {
             var rows = absenceTable.Descendants("tr");
-            var previousDate = new DateTime();
+            var previousDate = new DateOnly();
 
             foreach (var row in rows)
             {
                 var dateCell = row.ChildNodes.FindFirst("td");
                 var stringDate = dateCell.InnerText.Trim();
-                DateTime date;
+                DateOnly date;
 
                 if (stringDate == "No period absences have been recorded for this student.")
                     return absences;
 
                 if (string.IsNullOrWhiteSpace(stringDate) || stringDate == "&nbsp;")
                 {
-                    if (previousDate == new DateTime())
+                    if (previousDate == DateOnly.MinValue)
                     {
                         continue;
                     }
@@ -414,7 +414,7 @@ public partial class Gateway : ISentralGateway
                 }
                 else
                 {
-                    date = DateTime.Parse(stringDate).Date;
+                    date = DateOnly.Parse(stringDate);
                     previousDate = date;
                 }
 
@@ -541,7 +541,7 @@ public partial class Gateway : ISentralGateway
                     continue;
 
                 var stringDate = rowData[..rowData.IndexOf('_')];
-                var rowDate = DateTime.Parse(stringDate);
+                var rowDate = DateOnly.Parse(stringDate);
                 absence.Date = rowDate;
 
                 var cellNumber = 0;
@@ -561,11 +561,25 @@ public partial class Gateway : ISentralGateway
 
                             if (absence.Timeframe.Contains('-'))
                             {
-                                var startDateTime = DateTime.ParseExact(absence.Timeframe.Split(' ')[0], "h:mmtt", CultureInfo.InvariantCulture);
-                                absence.StartTime = startDateTime.TimeOfDay;
+                                var startTimeSuccess = TimeOnly.TryParseExact(absence.Timeframe.Split(' ')[0], "h:mmtt", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly startTime);
+                                if (startTimeSuccess)
+                                    absence.StartTime = startTime;
+                                else
+                                    _logger
+                                        .ForContext("DetectedTime", absence.Timeframe.Split(' ')[0])
+                                        .ForContext("AbsenceDate", absence.Date)
+                                        .ForContext("SentralStudentId", sentralStudentId)
+                                        .Information("Error parsing absence start time to TimeOnly object");
 
-                                var endDateTime = DateTime.ParseExact(absence.Timeframe.Split(' ')[2], "h:mmtt", CultureInfo.InvariantCulture);
-                                absence.EndTime = endDateTime.TimeOfDay;
+                                var endTimeSuccess = TimeOnly.TryParseExact(absence.Timeframe.Split(' ')[2], "h:mmtt", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly endTime);
+                                if (endTimeSuccess)
+                                    absence.EndTime = endTime;
+                                else
+                                    _logger
+                                        .ForContext("DetectedTime", absence.Timeframe.Split(' ')[0])
+                                        .ForContext("AbsenceDate", absence.Date)
+                                        .ForContext("SentralStudentId", sentralStudentId)
+                                        .Information("Error parsing absence end time to TimeOnly object");
                             }
                             else
                             {
@@ -605,23 +619,23 @@ public partial class Gateway : ISentralGateway
         return detectedAbsences;
     }
 
-    public async Task<List<DateTime>> GetExcludedDatesFromCalendar(string year)
+    public async Task<List<DateOnly>> GetExcludedDatesFromCalendar(string year)
     {
         if (_logOnly)
         {
             _logger.Information("GetExcludedDatesFromCalendar: year={year}", year);
 
-            return new List<DateTime>();
+            return new List<DateOnly>();
         }
 
         var page = await GetPageAsync($"{_settings.Server}/admin/settings/school/calendar/{year}/month");
 
         if (page == null)
-            return new List<DateTime>();
+            return new List<DateOnly>();
 
         var calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "CalendarTable").Value);
 
-        var nonSchoolDays = new List<DateTime>();
+        var nonSchoolDays = new List<DateOnly>();
 
         if (calendarTable != null)
         {
@@ -639,7 +653,7 @@ public partial class Gateway : ISentralGateway
                         if (!string.IsNullOrWhiteSpace(action))
                         {
                             var detectedDate = action.Split('\'')[1];
-                            var date = DateTime.Parse(detectedDate);
+                            var date = DateOnly.Parse(detectedDate);
 
                             nonSchoolDays.Add(date);
                         }

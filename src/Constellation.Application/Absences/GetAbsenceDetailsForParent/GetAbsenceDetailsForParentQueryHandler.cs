@@ -98,7 +98,7 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
             absence.PeriodTimeframe,
             absence.AbsenceLength,
             absence.AbsenceTimeframe,
-            absence.AbsenceReason,
+            absence.AbsenceReason.Value,
             offering.Name,
             (responses.Any() ? responses.First().Explanation : string.Empty),
             (responses.Any() ? responses.First().VerificationStatus : ResponseVerificationStatus.NotRequired),
