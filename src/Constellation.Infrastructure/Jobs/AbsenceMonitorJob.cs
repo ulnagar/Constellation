@@ -126,8 +126,6 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
         }
 
         await _classworkNotifier.StartJob(jobId, DateOnly.FromDateTime(DateTime.Today), cancellationToken);
-
-        await _unitOfWork.CompleteAsync(cancellationToken);
     }
 
     private async Task SendCoordinatorDigests(

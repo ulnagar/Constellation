@@ -79,7 +79,7 @@ public class AttendanceReportViewModel
                 OfferingId = absence.OfferingId,
                 StartTime = absence.StartTime.ToTimeSpan(),
                 Type = absence.Type.Value,
-                AbsenceReason = absence.AbsenceReason,
+                AbsenceReason = absence.AbsenceReason.Value,
                 AbsenceTimeframe = absence.AbsenceTimeframe,
                 Explained = absence.Explained,
                 ExplanationString = CalculateExplanationString(absence, responses)
