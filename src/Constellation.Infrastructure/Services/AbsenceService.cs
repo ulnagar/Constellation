@@ -1,193 +1,197 @@
-﻿using Constellation.Application.DTOs;
+﻿namespace Constellation.Infrastructure.Services;
+
+using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Infrastructure.DependencyInjection;
+using Constellation.Infrastructure.Persistence.ConstellationContext;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Constellation.Infrastructure.Services
+public class AbsenceService : IAbsenceService
 {
-    // Reviewed for ASYNC operations
-    public class AbsenceService : IAbsenceService, IScopedService
+    private readonly AppDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IEmailService _emailService;
+    
+    public AbsenceService(
+        AppDbContext context,
+        IUnitOfWork unitOfWork, 
+        IEmailService emailService)
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IEmailService _emailService;
-        
-        public AbsenceService(IUnitOfWork unitOfWork, IEmailService emailService)
+        _context = context;
+        _unitOfWork = unitOfWork;
+        _emailService = emailService;
+    }
+
+    public ServiceOperationResult<StudentWholeAbsence> CreateWholeAbsence(WholeAbsenceDto absenceResource)
+    {
+        // Set up return entity
+        var result = new ServiceOperationResult<StudentWholeAbsence>();
+
+        var studentAbsence = new StudentWholeAbsence
         {
-            _unitOfWork = unitOfWork;
-            _emailService = emailService;
-        }
+            DateScanned = absenceResource.DateScanned,
+            Date = absenceResource.Date,
+            StudentId = absenceResource.StudentId,
+            OfferingId = absenceResource.OfferingId,
+            PeriodTimeframe = absenceResource.PeriodTimeframe,
+            PeriodName = absenceResource.PeriodName,
+            LastSeen = absenceResource.DateScanned
+        };
 
-        public ServiceOperationResult<StudentWholeAbsence> CreateWholeAbsence(WholeAbsenceDto absenceResource)
+        _unitOfWork.Add(studentAbsence);
+
+        result.Success = true;
+        result.Entity = studentAbsence;
+
+        return result;
+    }
+
+    public ServiceOperationResult<StudentPartialAbsence> CreatePartialAbsence(PartialAbsenceDto absenceResource)
+    {
+        // Set up return entity
+        var result = new ServiceOperationResult<StudentPartialAbsence>();
+
+        var studentAbsence = new StudentPartialAbsence()
         {
-            // Set up return entity
-            var result = new ServiceOperationResult<StudentWholeAbsence>();
+            DateScanned = absenceResource.DateScanned,
+            Date = absenceResource.Date,
+            StudentId = absenceResource.StudentId,
+            OfferingId = absenceResource.OfferingId,
+            PeriodTimeframe = absenceResource.PeriodTimeframe,
+            PeriodName = absenceResource.PeriodName,
+            PartialAbsenceLength = absenceResource.PartialAbsenceLength,
+            PartialAbsenceTimeframe = absenceResource.PartialAbsenceTimeframe,
+            LastSeen = absenceResource.DateScanned
+        };
 
-            var studentAbsence = new StudentWholeAbsence
-            {
-                DateScanned = absenceResource.DateScanned,
-                Date = absenceResource.Date,
-                StudentId = absenceResource.StudentId,
-                OfferingId = absenceResource.OfferingId,
-                PeriodTimeframe = absenceResource.PeriodTimeframe,
-                PeriodName = absenceResource.PeriodName,
-                LastSeen = absenceResource.DateScanned
-            };
+        _unitOfWork.Add(studentAbsence);
 
-            _unitOfWork.Add(studentAbsence);
+        result.Success = true;
+        result.Entity = studentAbsence;
 
-            result.Success = true;
-            result.Entity = studentAbsence;
+        return result;
+    }
 
-            return result;
-        }
+    public async Task CreateSingleCoordinatorExplanation(Guid absenceId, string explanation, string userName)
+    {
+        var absence = await _unitOfWork.Absences.ForExplanationFromParent(absenceId);
 
-        public ServiceOperationResult<StudentPartialAbsence> CreatePartialAbsence(PartialAbsenceDto absenceResource)
+        var notificationEmail = new EmailDtos.AbsenceResponseEmail();
+
+        if (absence == null)
+            return;
+
+        var student = await _unitOfWork.Students.ForEditAsync(absence.StudentId);
+
+        var response = new AbsenceResponse()
         {
-            // Set up return entity
-            var result = new ServiceOperationResult<StudentPartialAbsence>();
+            Type = AbsenceResponse.Coordinator,
+            From = userName,
+            ReceivedAt = DateTime.Now,
+            Explanation = explanation
+        };
 
-            var studentAbsence = new StudentPartialAbsence()
-            {
-                DateScanned = absenceResource.DateScanned,
-                Date = absenceResource.Date,
-                StudentId = absenceResource.StudentId,
-                OfferingId = absenceResource.OfferingId,
-                PeriodTimeframe = absenceResource.PeriodTimeframe,
-                PeriodName = absenceResource.PeriodName,
-                PartialAbsenceLength = absenceResource.PartialAbsenceLength,
-                PartialAbsenceTimeframe = absenceResource.PartialAbsenceTimeframe,
-                LastSeen = absenceResource.DateScanned
-            };
+        absence.Responses.Add(response);
+        await _unitOfWork.CompleteAsync();
 
-            _unitOfWork.Add(studentAbsence);
+        notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
+        notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response));
+        notificationEmail.StudentName = student.DisplayName;
 
-            result.Success = true;
-            result.Entity = studentAbsence;
+        await _emailService.SendAbsenceReasonToSchoolAdmin(notificationEmail);
+        response.Forwarded = true;
 
-            return result;
-        }
+        await _unitOfWork.CompleteAsync();
+    }
 
-        public async Task CreateSingleCoordinatorExplanation(Guid absenceId, string explanation, string userName)
+    public async Task CreateSingleStudentExplanation(Guid absenceId, string explanation)
+    {
+        var absence = await _unitOfWork.Absences.ForExplanationFromStudent(absenceId);
+
+        if (absence == null)
+            return;
+
+        var response = new AbsenceResponse()
         {
-            var absence = await _unitOfWork.Absences.ForExplanationFromParent(absenceId);
+            Absence = absence,
+            AbsenceId = absence.Id,
+            Type = AbsenceResponse.Student,
+            From = AbsenceResponse.Student,
+            ReceivedAt = DateTime.Now,
+            Explanation = explanation,
+            VerificationStatus = AbsenceResponse.Pending,
+            VerifiedAt = DateTime.Now
+        };
 
-            var notificationEmail = new EmailDtos.AbsenceResponseEmail();
+        absence.Responses.Add(response);
+        await _unitOfWork.CompleteAsync();
 
-            if (absence == null)
-                return;
+        var notificationEmail = new EmailDtos.AbsenceResponseEmail();
 
-            var student = await _unitOfWork.Students.ForEditAsync(absence.StudentId);
+        var contacts = absence.Student
+            .School
+            .StaffAssignments
+            .Where(assignment => !assignment.IsDeleted && !assignment.SchoolContact.IsDeleted && assignment.Role == SchoolContactRole.Coordinator)
+            .Select(assignment => assignment.SchoolContact.EmailAddress)
+            .ToList();
 
-            var response = new AbsenceResponse()
-            {
-                Type = AbsenceResponse.Coordinator,
-                From = userName,
-                ReceivedAt = DateTime.Now,
-                Explanation = explanation
-            };
+        notificationEmail.Recipients.AddRange(contacts);
+        notificationEmail.PartialAbsences.Add(absence);
 
-            absence.Responses.Add(response);
-            await _unitOfWork.CompleteAsync();
+        var email = await _emailService.SendCoordinatorPartialAbsenceVerificationRequest(notificationEmail);
+        response.Forwarded = true;
 
-            notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
-            notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response));
-            notificationEmail.StudentName = student.DisplayName;
-
-            await _emailService.SendAbsenceReasonToSchoolAdmin(notificationEmail);
-            response.Forwarded = true;
-
-            await _unitOfWork.CompleteAsync();
-        }
-
-        public async Task CreateSingleStudentExplanation(Guid absenceId, string explanation)
+        var notification = new AbsenceNotification
         {
-            var absence = await _unitOfWork.Absences.ForExplanationFromStudent(absenceId);
+            Absence = absence,
+            AbsenceId = absence.Id,
+            OutgoingId = email.id,
+            Type = "Email",
+            Message = email.message,
+            Recipients = email.recipients,
+            SentAt = DateTime.Now,
+        };
 
-            if (absence == null)
-                return;
+        absence.Notifications.Add(notification);
 
-            var response = new AbsenceResponse()
-            {
-                Absence = absence,
-                AbsenceId = absence.Id,
-                Type = AbsenceResponse.Student,
-                From = AbsenceResponse.Student,
-                ReceivedAt = DateTime.Now,
-                Explanation = explanation,
-                VerificationStatus = AbsenceResponse.Pending,
-                VerifiedAt = DateTime.Now
-            };
+        await _unitOfWork.CompleteAsync();
+    }
 
-            absence.Responses.Add(response);
-            await _unitOfWork.CompleteAsync();
+    public async Task RecordCoordinatorVerificationOfPartialExplanation(Guid responseId, bool isVerified, string comment, string username)
+    {
+        var response = await _unitOfWork.Absences.AsResponseForVerificationByCoordinator(responseId);
 
-            var notificationEmail = new EmailDtos.AbsenceResponseEmail();
+        if (response == null)
+            return;
 
-            var contacts = absence.Student
-                .School
-                .StaffAssignments
-                .Where(assignment => !assignment.IsDeleted && !assignment.SchoolContact.IsDeleted && assignment.Role == SchoolContactRole.Coordinator)
-                .Select(assignment => assignment.SchoolContact.EmailAddress)
-                .ToList();
+        if (isVerified)
+            response.VerificationStatus = AbsenceResponse.Verified;
+        else
+            response.VerificationStatus = AbsenceResponse.Rejected;
 
-            notificationEmail.Recipients.AddRange(contacts);
-            notificationEmail.PartialAbsences.Add(absence);
+        response.Verifier = username;
+        response.VerificationComment = comment;
+        response.VerifiedAt = DateTime.Now;
 
-            var email = await _emailService.SendCoordinatorPartialAbsenceVerificationRequest(notificationEmail);
-            response.Forwarded = true;
+        await _unitOfWork.CompleteAsync();
 
-            var notification = new AbsenceNotification
-            {
-                Absence = absence,
-                AbsenceId = absence.Id,
-                OutgoingId = email.id,
-                Type = "Email",
-                Message = email.message,
-                Recipients = email.recipients,
-                SentAt = DateTime.Now,
-            };
+        var absence = await _unitOfWork.Absences.ForSendingNotificationAsync(response.AbsenceId.ToString());
+        var student = await _unitOfWork.Students.ForEditAsync(absence.StudentId);
 
-            absence.Notifications.Add(notification);
+        var notificationEmail = new EmailDtos.AbsenceResponseEmail();
 
-            await _unitOfWork.CompleteAsync();
-        }
+        notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
+        notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response));
+        notificationEmail.StudentName = student.DisplayName;
 
-        public async Task RecordCoordinatorVerificationOfPartialExplanation(Guid responseId, bool isVerified, string comment, string username)
-        {
-            var response = await _unitOfWork.Absences.AsResponseForVerificationByCoordinator(responseId);
+        await _emailService.SendAbsenceReasonToSchoolAdmin(notificationEmail);
+        response.Forwarded = true;
 
-            if (response == null)
-                return;
-
-            if (isVerified)
-                response.VerificationStatus = AbsenceResponse.Verified;
-            else
-                response.VerificationStatus = AbsenceResponse.Rejected;
-
-            response.Verifier = username;
-            response.VerificationComment = comment;
-            response.VerifiedAt = DateTime.Now;
-
-            await _unitOfWork.CompleteAsync();
-
-            var absence = await _unitOfWork.Absences.ForSendingNotificationAsync(response.AbsenceId.ToString());
-            var student = await _unitOfWork.Students.ForEditAsync(absence.StudentId);
-
-            var notificationEmail = new EmailDtos.AbsenceResponseEmail();
-
-            notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
-            notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response));
-            notificationEmail.StudentName = student.DisplayName;
-
-            await _emailService.SendAbsenceReasonToSchoolAdmin(notificationEmail);
-            response.Forwarded = true;
-
-            await _unitOfWork.CompleteAsync();
-        }
+        await _unitOfWork.CompleteAsync();
     }
 }

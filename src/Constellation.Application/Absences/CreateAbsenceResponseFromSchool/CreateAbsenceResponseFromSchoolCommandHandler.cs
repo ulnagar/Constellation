@@ -34,6 +34,7 @@ internal sealed class CreateAbsenceResponseFromSchoolCommandHandler
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<CreateAbsenceResponseFromSchoolCommand>();
     }
+
     public async Task<Result> Handle(CreateAbsenceResponseFromSchoolCommand request, CancellationToken cancellationToken)
     {
         var absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
