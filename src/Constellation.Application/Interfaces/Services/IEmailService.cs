@@ -28,7 +28,7 @@ public interface IEmailService
     // Absence Emails
     Task SendAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail);
     Task<EmailDtos.SentEmail> SendCoordinatorPartialAbsenceVerificationRequest(EmailDtos.AbsenceResponseEmail emailDto);
-    Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(List<Absence> absences);
+    Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(List<Absence> absences, List<EmailRecipient> recipients);
     Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(List<Absence> absences, List<EmailRecipient> emailAddresses);
     Task<EmailDtos.SentEmail> SendParentWholeAbsenceDigest(List<Absence> absences, List<EmailRecipient> emailAddresses);
     Task<EmailDtos.SentEmail> SendStudentPartialAbsenceExplanationRequest(List<Absence> absences, List<string> emailAddresses);

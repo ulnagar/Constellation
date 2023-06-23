@@ -330,13 +330,9 @@ public class Service : IEmailService
             return null;
     }
 
-    public async Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(List<Absence> absences)
+    public async Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(List<Absence> absences, List<EmailRecipient> recipients)
     {
-        var coordinators = await _unitOfWork.SchoolContacts.EmailAddressesOfAllInRoleAtSchool(absences.First().StudentId, SchoolContactRole.Coordinator);
-
-        coordinators = coordinators.Distinct().ToList();
-
-        if (coordinators == null || coordinators.Count == 0)
+        if (recipients is null || recipients.Count == 0)
             return null;
 
         var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
@@ -347,17 +343,17 @@ public class Service : IEmailService
             SenderName = absenceSettings.AbsenceCoordinatorName,
             SenderTitle = absenceSettings.AbsenceCoordinatorTitle,
             Title = "Absence Explanation Request",
-            StudentName = absences.First().Student.DisplayName,
-            SchoolName = absences.First().Student.School.Name,
+            StudentName = student.DisplayName,
+            SchoolName = student.School.Name,
             Absences = absences.Select(CoordinatorAbsenceDigestEmailViewModel.AbsenceEntry.ConvertFromAbsence).ToList()
         };
 
         var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/CoordinatorAbsenceDigestEmail.cshtml", viewModel);
 
         var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in coordinators)
-            if (!toRecipients.Any(recipient => recipient.Value == entry))
-                toRecipients.Add(entry, entry);
+        foreach (var entry in recipients)
+            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
+                toRecipients.Add(entry.Name, entry.Email);
 
         var message = await _emailSender.Send(toRecipients, null, viewModel.Title, body);
 
