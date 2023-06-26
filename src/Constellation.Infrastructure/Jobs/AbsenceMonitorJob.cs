@@ -1,11 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
 using Constellation.Application.DTOs;
-using Constellation.Application.Families.GetResidentialFamilyEmailAddresses;
-using Constellation.Application.Families.GetResidentialFamilyMobileNumbers;
-using Constellation.Application.Features.Jobs.AbsenceMonitor.Commands;
-using Constellation.Application.Features.Jobs.AbsenceMonitor.Models;
-using Constellation.Application.Features.Jobs.AbsenceMonitor.Queries;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Jobs.AbsenceClassworkNotificationJob;
 using Constellation.Application.Interfaces.Repositories;
@@ -17,8 +12,6 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
-using Constellation.Infrastructure.DependencyInjection;
-using LinqKit;
 
 public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
 {

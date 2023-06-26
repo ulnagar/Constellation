@@ -1,26 +1,20 @@
-﻿using System;
+﻿namespace Constellation.Application.DTOs.EmailRequests;
+
+using System;
 using System.Collections.Generic;
 using System.Net.Mail;
 
-namespace Constellation.Application.DTOs.EmailRequests
+public class AttendanceReportEmail : EmailBaseClass
 {
-    public class AttendanceReportEmail : EmailBaseClass
+    public List<Attachment> Attachments { get; set; } = new();
+    public string StudentName { get; set; }
+    public DateOnly StartDate { get; set; }
+    public DateOnly EndDate { get; set; }
+    public NotificationSequence NotificationType { get; set; }
+
+    public enum NotificationSequence
     {
-        public AttendanceReportEmail()
-        {
-            Attachments = new List<Attachment>();
-        }
-
-        public ICollection<Attachment> Attachments { get; set; }
-        public string StudentName { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public NotificationSequence NotificationType { get; set; }
-
-        public enum NotificationSequence
-        {
-            Student,
-            School
-        }
+        Student,
+        School
     }
 }

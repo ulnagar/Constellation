@@ -1,20 +1,9 @@
-﻿using System.Collections.Generic;
+﻿namespace Constellation.Application.DTOs.EmailRequests;
 
-namespace Constellation.Application.DTOs.EmailRequests
+using Constellation.Core.ValueObjects;
+using System.Collections.Generic;
+
+public abstract class EmailBaseClass
 {
-    public abstract class EmailBaseClass
-    {
-        public EmailBaseClass()
-        {
-            Recipients = new List<Recipient>();
-        }
-
-        public ICollection<Recipient> Recipients { get; set; }
-
-        public class Recipient
-        {
-            public string Name { get; set; }
-            public string Email { get; set; }
-        }
-    }
+    public List<EmailRecipient> Recipients { get; set; } = new();
 }
