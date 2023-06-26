@@ -189,7 +189,7 @@
                                         </th>
                                         <td>
                                             @{
-                                                var periodAbsences = Model.Absences.Where(a => a.Date.Date == entry.Date && a.OfferingId == group.OfferingId);
+                                                var periodAbsences = Model.Absences.Where(a => a.Date == entry.Date && a.OfferingId == group.OfferingId);
 
                                                 if (periodAbsences.Any())
                                                 {

@@ -5,6 +5,7 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
+using HtmlAgilityPack;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -126,4 +127,16 @@ public class AbsenceRepository : IAbsenceRepository
             .ToListAsync(cancellationToken);
     }
         
+    public async Task<List<Absence>> GetForStudentFromDateRange(
+        string studentId, 
+        DateOnly startDate, 
+        DateOnly endDate, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Absence>()
+            .Where(absence =>
+                absence.StudentId == studentId &&
+                absence.Date >= startDate &&
+                absence.Date <= endDate)
+            .ToListAsync(cancellationToken);
 }

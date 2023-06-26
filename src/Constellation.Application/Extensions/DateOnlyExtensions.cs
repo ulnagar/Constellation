@@ -38,4 +38,43 @@ public static class DateOnlyExtensions
 
         return day;
     }
+
+    public static DateOnly VerifyStartOfFortnight(this DateOnly startDate)
+    {
+        var dayNumber = startDate.GetDayNumber();
+        if (dayNumber > 1)
+        {
+            if (dayNumber > 5)
+                dayNumber += 1;
+            else
+                dayNumber -= 1;
+
+            startDate = startDate.AddDays(-dayNumber);
+
+            startDate = VerifyStartOfFortnight(startDate);
+        }
+        else if (dayNumber == 0)
+        {
+            startDate = startDate.AddDays(-2);
+            startDate = VerifyStartOfFortnight(startDate);
+        }
+
+        return startDate;
+    }
+
+    public static List<DateOnly> Range(this DateOnly startDate, DateOnly endDate)
+    {
+        List<DateOnly> datesInRange = new();
+
+        DateOnly currentDate = startDate;
+
+        while (currentDate <= endDate)
+        {
+            datesInRange.Add(currentDate);
+
+            currentDate = currentDate.AddDays(1);
+        }
+
+        return datesInRange;
+    }
 }

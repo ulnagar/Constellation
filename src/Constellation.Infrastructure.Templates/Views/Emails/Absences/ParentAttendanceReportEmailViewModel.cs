@@ -1,12 +1,11 @@
-﻿using Constellation.Infrastructure.Templates.Views.Shared;
+﻿namespace Constellation.Infrastructure.Templates.Views.Emails.Absences;
+
+using Constellation.Infrastructure.Templates.Views.Shared;
 using System;
 
-namespace Constellation.Infrastructure.Templates.Views.Emails.Absences
+public class ParentAttendanceReportEmailViewModel : EmailLayoutBaseViewModel
 {
-    public class ParentAttendanceReportEmailViewModel : EmailLayoutBaseViewModel
-    {
-        public string StudentName { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-    }
+    public string StudentName { get; set; }
+    public DateOnly StartDate { get; set; }
+    public DateOnly EndDate { get; set; }
 }

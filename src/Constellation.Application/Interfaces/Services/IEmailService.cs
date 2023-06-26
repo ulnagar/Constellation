@@ -27,7 +27,7 @@ public interface IEmailService
 
     // Absence Emails
     Task SendAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail);
-    Task<EmailDtos.SentEmail> SendCoordinatorPartialAbsenceVerificationRequest(EmailDtos.AbsenceResponseEmail emailDto);
+    Task<EmailDtos.SentEmail> SendCoordinatorPartialAbsenceVerificationRequest(List<Absence> absences, Student student, List<EmailRecipient> recipients);
     Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(List<Absence> absences, List<EmailRecipient> recipients);
     Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(List<Absence> absences, List<EmailRecipient> emailAddresses);
     Task<EmailDtos.SentEmail> SendParentWholeAbsenceDigest(List<Absence> absences, List<EmailRecipient> emailAddresses);
@@ -35,7 +35,8 @@ public interface IEmailService
 
 
     // Attendance Emails
-    Task<bool> SendAttendanceReport(AttendanceReportEmail notification);
+    Task<bool> SendParentAttendanceReportEmail(string studentName, DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task<bool> SendSchoolAttendanceReportEmail(DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<Attachment> attachments, CancellationToken cancellationToken = default);
 
 
     // ClassworkNotification Emails

@@ -15,7 +15,7 @@
 <dl>
     @foreach (var entry in Model.ClassList)
     {
-        <dt>@entry.Date.ToString("D")</dt>
+        <dt>@entry.Date.ToShortDateString()</dt>
         <dd>
             @entry.PeriodName (@entry.PeriodTimeframe) - @entry.OfferingName absent for the period of @entry.AbsenceTimeframe
             <br />@entry.Explanation
@@ -23,5 +23,5 @@
     }
 </dl>
 <p>Please review the accuracy of their description, and either verify or reject their response.</p>
-<p>A new Coordinator portal has been developed for absences. You can now view all outstanding absences for students at your school by going to the following site: <a href="@Model.PortalLink" target="_blank">@Model.PortalLink</a></p>
+<p>A new School portal has been developed for absences. You can now view all outstanding absences for students at your school by going to the following site: <a href="@CoordinatorAbsenceVerificationRequestEmailViewModel.PortalLink" target="_blank">@CoordinatorAbsenceVerificationRequestEmailViewModel.PortalLink</a></p>
 <p>If you have any questions or concerns about this absence, please contact our office on 1300 287 629 or at auroracoll-h.school@det.nsw.edu.au.</p>

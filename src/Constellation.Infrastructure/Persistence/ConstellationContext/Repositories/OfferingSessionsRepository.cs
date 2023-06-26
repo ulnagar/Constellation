@@ -15,6 +15,31 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
         _context = context;
     }
 
+    public async Task<List<OfferingSession>> GetAllForStudentAndDayDuringTime(
+        string studentId,
+        int day,
+        DateOnly date,
+        CancellationToken cancellationToken = default)
+    {
+        DateTime dateTime = date.ToDateTime(TimeOnly.MinValue);
+
+        return await _context
+            .Set<OfferingSession>()
+            .Where(session =>
+                session.Offering.StartDate <= dateTime &&
+                session.Offering.EndDate >= dateTime &&
+                session.Offering.Enrolments.Any(enrol =>
+                    enrol.StudentId == studentId &&
+                    enrol.DateCreated <= dateTime &&
+                    (!enrol.DateDeleted.HasValue || enrol.DateDeleted.Value >= dateTime)) &&
+                session.DateCreated <= dateTime &&
+                (!session.DateDeleted.HasValue || session.DateDeleted.Value >= dateTime) &&
+                session.Period.Day == day &&
+                session.Period.Type != "Other")
+            .ToListAsync(cancellationToken);
+    }
+        
+
     private IQueryable<OfferingSession> Collection()
     {
         return _context.Sessions
@@ -148,26 +173,7 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
             .ToListAsync();
     }
 
-    public async Task<ICollection<OfferingSession>> ForStudentAndDayAtTime(string studentId, int day, DateTime date)
-    {
-        var sessions = await _context.Sessions
-            .Include(s => s.Offering)
-                .ThenInclude(offering => offering.Course)
-            .Include(s => s.Period)
-            .Where(s =>
-                // Is the Offering (Class) valid for the date selected?
-                s.Offering.StartDate <= date && s.Offering.EndDate >= date &&
-                // Is the Student enrolled in the Offering at the date selected?
-                s.Offering.Enrolments.Any(e => e.StudentId == studentId && e.DateCreated <= date && (!e.DateDeleted.HasValue || e.DateDeleted.Value >= date)) &&
-                // Is the Session valid for the Offering at the date selected?
-                s.DateCreated <= date && (!s.DateDeleted.HasValue || s.DateDeleted.Value >= date) &&
-                // Is the Session for the Cycle Day selected?
-                s.Period.Day == day &&
-                s.Period.Type != "Other")
-            .ToListAsync();
-
-        return sessions;
-    }
+    
 
     public async Task<ICollection<OfferingSession>> ForOfferingAndPeriod(int offeringId, int periodId)
     {
