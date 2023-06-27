@@ -164,7 +164,6 @@ public class StudentRepository : IStudentRepository
             .Include(student => student.Absences)
             .ThenInclude(absence => absence.Responses)
             .Include(student => student.Absences)
-            .ThenInclude(absence => absence.Offering)
             .Include(student => student.Devices)
             .ThenInclude(alloc => alloc.Device)
             .Include(student => student.Enrolments)

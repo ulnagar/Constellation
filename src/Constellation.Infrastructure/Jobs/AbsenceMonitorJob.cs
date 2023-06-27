@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Jobs.AbsenceClassworkNotificationJob;
@@ -19,6 +20,7 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IFamilyRepository _familyRepository;
     private readonly ISchoolContactRepository _schoolContactRepository;
+    private readonly ICourseOfferingRepository _offeringRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAbsenceProcessingJob _absenceProcessor;
     private readonly IEmailService _emailService;
@@ -31,6 +33,7 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
         IAbsenceRepository absenceRepository,
         IFamilyRepository familyRepository,
         ISchoolContactRepository schoolContactRepository,
+        ICourseOfferingRepository offeringRepository,
         IUnitOfWork unitOfWork,
         IAbsenceProcessingJob absenceProcessor,
         IEmailService emailService,
@@ -42,6 +45,7 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
         _absenceRepository = absenceRepository;
         _familyRepository = familyRepository;
         _schoolContactRepository = schoolContactRepository;
+        _offeringRepository = offeringRepository;
         _unitOfWork = unitOfWork;
         _absenceProcessor = absenceProcessor;
         _emailService = emailService;
@@ -146,7 +150,25 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                     recipients.Add(result.Value);
             }
 
-            var message = await _emailService.SendCoordinatorWholeAbsenceDigest(digestAbsences, recipients);
+            List<AbsenceEntry> absenceEntries = new();
+
+            foreach (Absence absence in digestAbsences)
+            {
+                CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+
+                if (offering is null)
+                    continue;
+
+                absenceEntries.Add(new(
+                    absence.Id,
+                    absence.Date,
+                    absence.PeriodName,
+                    absence.PeriodTimeframe,
+                    offering.Name,
+                    absence.AbsenceTimeframe));
+            }
+
+            EmailDtos.SentEmail message = await _emailService.SendCoordinatorWholeAbsenceDigest(absenceEntries, student, recipients, cancellationToken);
 
             if (message == null)
                 return;
@@ -164,6 +186,7 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                     _logger.Information("{id}: School digest sent to {recipient} for {student}", jobId, recipient.Name, student.DisplayName);
             }
 
+            absenceEntries = null;
             coordinators = null;
             recipients = null;
             digestAbsences = null;
@@ -175,7 +198,7 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
         Student student, 
         CancellationToken cancellationToken = default)
     {
-        var digestAbsences = await _absenceRepository.GetUnexplainedWholeAbsencesForStudentWithDelay(student.StudentId, 1, cancellationToken);
+        List<Absence> digestAbsences = await _absenceRepository.GetUnexplainedWholeAbsencesForStudentWithDelay(student.StudentId, 1, cancellationToken);
 
         if (digestAbsences.Any())
         {
@@ -206,7 +229,25 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
 
             if (recipients.Any())
             {
-                EmailDtos.SentEmail sentmessage = await _emailService.SendParentWholeAbsenceDigest(digestAbsences, recipients);
+                List<AbsenceEntry> absenceEntries = new();
+
+                foreach (Absence absence in digestAbsences)
+                {
+                    CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+
+                    if (offering is null)
+                        continue;
+
+                    absenceEntries.Add(new(
+                        absence.Id,
+                        absence.Date,
+                        absence.PeriodName,
+                        absence.PeriodTimeframe,
+                        offering.Name,
+                        absence.AbsenceTimeframe));
+                }
+
+                EmailDtos.SentEmail sentmessage = await _emailService.SendParentWholeAbsenceDigest(absenceEntries, student, recipients, cancellationToken);
 
                 if (sentmessage == null)
                     return;
@@ -223,6 +264,8 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                     foreach (var recipient in recipients)
                         _logger.Information("{id}: Parent digest sent to {address} for {student}", jobId, recipient.Email, student.DisplayName);
                 }
+
+                absenceEntries = null;
             }
             else
             {
@@ -255,7 +298,7 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
 
             List<PhoneNumber> phoneNumbers = new();
 
-            foreach (var number in numbers)
+            foreach (string number in numbers)
             {
                 Result<PhoneNumber> result = PhoneNumber.Create(number);
 
@@ -265,7 +308,7 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
 
             List<EmailRecipient> recipients = new();
 
-            foreach (var family in families)
+            foreach (Family family in families)
             {
                 Result<EmailRecipient> result = EmailRecipient.Create(family.FamilyTitle, family.FamilyEmail);
 
@@ -273,7 +316,7 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                     recipients.Add(result.Value);
             }
 
-            foreach (var parent in parents)
+            foreach (Parent parent in parents)
             {
                 Result<Name> nameResult = Name.Create(parent.FirstName, string.Empty, parent.LastName);
 
@@ -286,13 +329,35 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                     recipients.Add(result.Value);
             }
 
-            List<IGrouping<DateOnly, Absence>> groupedAbsences = wholeAbsences.GroupBy(absence => absence.Date).ToList();
+            List<AbsenceEntry> absenceEntries = new();
 
-            foreach (IGrouping<DateOnly, Absence> group in groupedAbsences)
+            foreach (Absence absence in wholeAbsences)
+            {
+                CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+
+                if (offering is null)
+                    continue;
+
+                absenceEntries.Add(new(
+                    absence.Id,
+                    absence.Date,
+                    absence.PeriodName,
+                    absence.PeriodTimeframe,
+                    offering.Name,
+                    absence.AbsenceTimeframe));
+            }
+
+            List<IGrouping<DateOnly, AbsenceEntry>> groupedAbsences = absenceEntries.GroupBy(absence => absence.Date).ToList();
+
+            foreach (IGrouping<DateOnly, AbsenceEntry> group in groupedAbsences)
             {
                 if (phoneNumbers.Any() && group.Key == DateOnly.FromDateTime(DateTime.Today.AddDays(-1)))
                 {
-                    var sentMessages = await _smsService.SendAbsenceNotificationAsync(group.ToList(), phoneNumbers);
+                    SMSMessageCollectionDto sentMessages = await _smsService.SendAbsenceNotification(
+                        group.ToList(),
+                        student,
+                        phoneNumbers,
+                        cancellationToken);
 
                     if (sentMessages == null)
                     {
@@ -301,15 +366,17 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
 
                         if (recipients.Any())
                         {
-                            EmailDtos.SentEmail message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), recipients);
+                            EmailDtos.SentEmail message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), student, recipients, cancellationToken);
 
-                            foreach (var absence in group)
+                            foreach (AbsenceEntry entry in group)
                             {
                                 string emails = string.Join(", ", recipients.Select(entry => entry.Email));
 
+                                Absence absence = wholeAbsences.First(absence => absence.Id == entry.Id);
+
                                 absence.AddNotification(NotificationType.Email, message.message, emails);
 
-                                foreach (var recipient in recipients)
+                                foreach (EmailRecipient recipient in recipients)
                                     _logger.Information("{id}: Message sent via Email to {email} for Whole Absence on {Date}", jobId, recipient.Email, group.Key.ToShortDateString());
                             }
                         }
@@ -322,28 +389,32 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                     // Once the message has been sent, add it to the database.
                     if (sentMessages.Messages.Count > 0)
                     {
-                        foreach (var absence in group)
+                        foreach (AbsenceEntry entry in group)
                         {
                             string sentToNumbers = string.Join(", ", phoneNumbers.Select(entry => entry.ToString(PhoneNumber.Format.Mobile)));
 
+                            Absence absence = wholeAbsences.First(absence => absence.Id == entry.Id);
+
                             absence.AddNotification(NotificationType.SMS, sentMessages.Messages.First().MessageBody, sentToNumbers);
 
-                            foreach (var number in phoneNumbers)
+                            foreach (PhoneNumber number in phoneNumbers)
                                 _logger.Information("{id}: Message sent via SMS to {number} for Whole Absence on {Date}", jobId, number.ToString(PhoneNumber.Format.Mobile), group.Key.ToShortDateString());
                         }
                     }
                 }
                 else if (recipients.Any())
                 {
-                    EmailDtos.SentEmail message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), recipients);
+                    EmailDtos.SentEmail message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), student, recipients, cancellationToken);
 
-                    foreach (var absence in group)
+                    foreach (AbsenceEntry entry in group)
                     {
                         string emails = string.Join(", ", recipients.Select(entry => entry.Email));
 
+                        Absence absence = wholeAbsences.First(absence => absence.Id == entry.Id);
+
                         absence.AddNotification(NotificationType.Email, message.message, emails);
 
-                        foreach (var recipient in recipients)
+                        foreach (EmailRecipient recipient in recipients)
                             _logger.Information("{id}: Message sent via Email to {email} for Whole Absence on {Date}", jobId, recipient.Email, group.Key.ToShortDateString());
                     }
                 }
@@ -353,7 +424,12 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                 }
             }
 
+            absenceEntries = null;
             groupedAbsences = null;
+            families = null;
+            parents = null;
+            numbers = null;
+            phoneNumbers = null;
         }
 
         wholeAbsences = null;
@@ -368,19 +444,46 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
         // Send emails to students
         if (partialAbsences.Any())
         {
-            var recipients = new List<string> { student.EmailAddress };
+            List<EmailRecipient> recipients = new();
 
-            var sentEmail = await _emailService.SendStudentPartialAbsenceExplanationRequest(partialAbsences, recipients);
+            Result<EmailRecipient> result = EmailRecipient.Create(student.DisplayName, student.EmailAddress);
 
-            foreach (var absence in partialAbsences)
+            if (result.IsSuccess)
+            {
+                recipients.Add(result.Value);
+            }
+
+            List<AbsenceEntry> absenceEntries = new();
+
+            foreach (Absence absence in partialAbsences)
+            {
+                CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+
+                if (offering is null)
+                    continue;
+
+                absenceEntries.Add(new(
+                    absence.Id,
+                    absence.Date,
+                    absence.PeriodName,
+                    absence.PeriodTimeframe,
+                    offering.Name,
+                    absence.AbsenceTimeframe));
+            }
+
+            EmailDtos.SentEmail sentEmail = await _emailService.SendStudentPartialAbsenceExplanationRequest(absenceEntries, student, recipients, cancellationToken);
+
+            foreach (Absence absence in partialAbsences)
             {
                 absence.AddNotification(NotificationType.Email, sentEmail.message, student.EmailAddress);
 
-                foreach (var email in recipients)
-                    _logger.Information("{id}: Message sent via Email to {email} for Partial Absence on {Date}", jobId, email, absence.Date.ToShortDateString());
+                foreach (EmailRecipient recipient in recipients)
+                    _logger.Information("{id}: Message sent via Email to {student} ({email}) for Partial Absence on {Date}", jobId, recipient.Name, recipient.Email, absence.Date.ToShortDateString());
             }
 
+            recipients = null;
             partialAbsences = null;
+            absenceEntries = null;
         }
     }
 }

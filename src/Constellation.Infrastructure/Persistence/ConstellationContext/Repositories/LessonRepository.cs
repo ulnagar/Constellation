@@ -19,6 +19,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             _context = context;
         }
 
+        public async Task<List<Lesson>> GetOverdueForSchool(
+            string schoolCode,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<Lesson>()
+                .Where(lesson => 
+                    lesson.DueDate < DateTime.Today && 
+                    lesson.Rolls.Any(roll => 
+                        roll.SchoolCode == schoolCode &&    
+                        roll.Status == LessonStatus.Active))
+                .ToListAsync(cancellationToken);
+
         public async Task<Lesson> Get(Guid id)
         {
             return await _context.Lessons.FirstOrDefaultAsync(lesson => lesson.Id == id);

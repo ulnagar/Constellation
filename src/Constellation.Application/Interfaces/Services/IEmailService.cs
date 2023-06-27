@@ -1,5 +1,7 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
+using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
+using Constellation.Application.Absences.ConvertResponseToAbsenceExplanation;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Core.Models;
@@ -27,11 +29,11 @@ public interface IEmailService
 
     // Absence Emails
     Task SendAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail);
-    Task<EmailDtos.SentEmail> SendCoordinatorPartialAbsenceVerificationRequest(List<Absence> absences, Student student, List<EmailRecipient> recipients);
-    Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(List<Absence> absences, List<EmailRecipient> recipients);
-    Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(List<Absence> absences, List<EmailRecipient> emailAddresses);
-    Task<EmailDtos.SentEmail> SendParentWholeAbsenceDigest(List<Absence> absences, List<EmailRecipient> emailAddresses);
-    Task<EmailDtos.SentEmail> SendStudentPartialAbsenceExplanationRequest(List<Absence> absences, List<string> emailAddresses);
+    Task<EmailDtos.SentEmail> SendCoordinatorPartialAbsenceVerificationRequest(List<AbsenceExplanation> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
+    Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
+    Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(List<AbsenceEntry> absences, Student student, List<EmailRecipient> emailAddresses, CancellationToken cancellationToken = default);
+    Task<EmailDtos.SentEmail> SendParentWholeAbsenceDigest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> emailAddresses, CancellationToken cancellationToken = default);
+    Task<EmailDtos.SentEmail> SendStudentPartialAbsenceExplanationRequest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
 
 
     // Attendance Emails
@@ -40,9 +42,9 @@ public interface IEmailService
 
 
     // ClassworkNotification Emails
-    Task SendTeacherClassworkNotificationRequest(ClassworkNotificationTeacherEmail notification);
-    Task SendStudentClassworkNotification(Absence absence, ClassworkNotification notification, List<EmailRecipient> parentEmails);
-    Task SendTeacherClassworkNotificationCopy(Absence absence, ClassworkNotification notification, Staff teacher);
+    Task SendTeacherClassworkNotificationRequest(string offeringName, ClassworkNotification notification, List<Student> students, CancellationToken cancellationToken = default);
+    Task SendStudentClassworkNotification(ClassworkNotification notification, string offeringName, string courseName, Student student, Staff teacher, List<EmailRecipient> parentEmails, bool isExplained, CancellationToken cancellationToken = default);
+    Task SendTeacherClassworkNotificationCopy(ClassworkNotification notification, string offeringName, string courseName, Student student, Staff teacher, CancellationToken cancellationToken = default);
 
 
     // RollMarking Emails

@@ -1,15 +1,14 @@
-﻿using Constellation.Infrastructure.Templates.Views.Shared;
+﻿namespace Constellation.Infrastructure.Templates.Views.Emails.MissedWork;
+
+using Constellation.Infrastructure.Templates.Views.Shared;
 using System;
 using System.Collections.Generic;
 
-namespace Constellation.Infrastructure.Templates.Views.Emails.MissedWork
+public class TeacherMissedWorkNotificationEmailViewModel : EmailLayoutBaseViewModel
 {
-    public class TeacherMissedWorkNotificationEmailViewModel : EmailLayoutBaseViewModel
-    {
-        public string OfferingName { get; set; }
-        public DateTime AbsenceDate { get; set; }
-        public ICollection<string> StudentList { get; set; }
-        public string Link { get; set; }
-        public bool IsCovered { get; set; }
-    }
+    public string OfferingName { get; set; }
+    public DateOnly AbsenceDate { get; set; }
+    public List<string> StudentList { get; set; } = new();
+    public string Link { get; set; }
+    public bool IsCovered { get; set; }
 }

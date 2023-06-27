@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Absences.Events;
 
+using Constellation.Application.Absences.ConvertResponseToAbsenceExplanation;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
@@ -22,6 +23,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
     private readonly IAbsenceResponseRepository _responseRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ISchoolContactRepository _contactRepository;
+    private readonly ICourseOfferingRepository _offeringRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
@@ -30,6 +32,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
         IAbsenceResponseRepository responseRepository,
         IStudentRepository studentRepository,
         ISchoolContactRepository contactRepository,
+        ICourseOfferingRepository offeringRepository,
         IEmailService emailService,
         ILogger logger)
     {
@@ -37,6 +40,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
         _responseRepository = responseRepository;
         _studentRepository = studentRepository;
         _contactRepository = contactRepository;
+        _offeringRepository = offeringRepository;
         _emailService = emailService;
         _logger = logger.ForContext<PendingVerificationResponseCreatedDomainEvent>();
     }
@@ -84,7 +88,28 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
                 recipients.Add(result.Value);
         }
 
-        var message = await _emailService.SendCoordinatorPartialAbsenceVerificationRequest(new List<Absence> { absence }, student, recipients);
+        CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+
+        if (offering is null)
+        {
+            _logger.Warning("Could not locate course offering with Id {id}", absence.OfferingId);
+
+            return;
+        }
+
+        AbsenceExplanation explanation = new(
+            absence.Date, 
+            absence.PeriodName, 
+            absence.PeriodTimeframe, 
+            offering.Name, 
+            absence.AbsenceTimeframe, 
+            response.Explanation);
+
+        var message = await _emailService.SendCoordinatorPartialAbsenceVerificationRequest(
+            new List<AbsenceExplanation> { explanation },
+            student,
+            recipients,
+            cancellationToken);
 
         if (message == null)
             return;

@@ -13,6 +13,7 @@ public interface ICourseRepository
 {
     Task<Course?> GetById(int courseId, CancellationToken cancellationToken = default);
     Task<List<Course>> GetAll(CancellationToken cancellationToken = default);
+    Task<Course?> GetByLessonId(Guid lessonId, CancellationToken cancellationToken = default);
 
     Course WithDetails(int id);
     Course WithFilter(Expression<Func<Course, bool>> predicate);
