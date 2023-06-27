@@ -1,10 +1,12 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
+using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.Features.Attendance.Queries;
 using Constellation.Application.Features.Portal.School.Absences.Commands;
 using Constellation.Application.Features.Portal.School.Absences.Models;
 using Constellation.Application.Features.Portal.School.Absences.Queries;
 using Constellation.Core.Models;
+using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.IO.Compression;
@@ -86,42 +88,49 @@ public class AbsencesController : BaseAPIController
     }
 
     [HttpPost("Report")]
-    public async Task<IActionResult> GenerateAttendanceReports([FromBody] AttendanceReportSelectForm Request)
+    public async Task<IActionResult> GenerateAttendanceReports([FromBody] AttendanceReportSelectForm Request, CancellationToken cancellationToken = default)
     {
+        var endDate = Request.StartDate.AddDays(12);
+
         if (Request.Students.Count > 1)
         {
-            var reports = new List<StoredFile>();
+            List<StoredFile> reports = new();
 
             // We need to loop each student id and collate the report into a zip file.
-            foreach (var student in Request.Students)
+            foreach (string studentId in Request.Students)
             {
-                var report = await _mediator.Send(new GetStudentAttendanceReportQuery { StudentId = student, StartDate = Request.StartDate });
-                reports.Add(report);
+                Result<StoredFile> reportRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(studentId, Request.StartDate, endDate), cancellationToken);
+                
+                if (reportRequest.IsSuccess)
+                    reports.Add(reportRequest.Value);
             }
 
             // Zip all reports
-            using var memoryStream = new MemoryStream();
-            using (var zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Create))
+            using MemoryStream memoryStream = new MemoryStream();
+            using (ZipArchive zipArchive = new(memoryStream, ZipArchiveMode.Create))
             {
-                foreach (var file in reports)
+                foreach (StoredFile file in reports)
                 {
-                    var zipArchiveEntry = zipArchive.CreateEntry(file.Name);
-                    using var streamWriter = new StreamWriter(zipArchiveEntry.Open());
-                    var fileData = file.FileData;
+                    ZipArchiveEntry zipArchiveEntry = zipArchive.CreateEntry(file.Name);
+                    using StreamWriter streamWriter = new StreamWriter(zipArchiveEntry.Open());
+                    byte[] fileData = file.FileData;
                     streamWriter.BaseStream.Write(fileData, 0, fileData.Length);
                 }
             }
 
-            var attachmentStream = new MemoryStream(memoryStream.ToArray());
+            MemoryStream attachmentStream = new MemoryStream(memoryStream.ToArray());
 
             return File(attachmentStream.ToArray(), MediaTypeNames.Application.Zip, "Attendance Reports.zip");
         }
         else
         {
             // We only have one student, so just download that file.
-            var file = await _mediator.Send(new GetStudentAttendanceReportQuery { StudentId = Request.Students.First(), StartDate = Request.StartDate });
+            Result<StoredFile> fileRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(Request.Students.First(), Request.StartDate, endDate), cancellationToken);
 
-            return File(file.FileData, file.FileType, file.Name);
+            if (fileRequest.IsFailure)
+                return BadRequest();
+
+            return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.Name);
         }
     }
 }

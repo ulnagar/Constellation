@@ -2,11 +2,15 @@ namespace Constellation.Portal.Parents.Server.Controllers;
 
 using Constellation.Application.Absences.GetAbsenceDetailsForParent;
 using Constellation.Application.Absences.ProvideParentWholeAbsenceExplanation;
+using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Attendance.Queries;
+using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Asn1.Cms;
 
 [Route("[controller]")]
 public class AttendanceController : BaseAPIController
@@ -76,9 +80,9 @@ public class AttendanceController : BaseAPIController
     }
 
     [HttpPost("Reports/Download")]
-    public async Task<IActionResult> GetAttendanceReport([FromBody] AttendanceReportRequest request)
+    public async Task<IActionResult> GetAttendanceReport([FromBody] AttendanceReportRequest request, CancellationToken cancellationToken = default)
     {
-        var authorised = await HasAuthorizedAccessToStudent(_mediator, request.StudentId);
+        bool authorised = await HasAuthorizedAccessToStudent(_mediator, request.StudentId);
 
         if (!authorised)
         {
@@ -86,10 +90,13 @@ public class AttendanceController : BaseAPIController
         }
 
         // Create file as stream
-        var stream = await _mediator.Send(new GetAttendanceReportForStudentQuery { StudentId = request.StudentId, StartDate = request.StartDate, EndDate = request.EndDate });
+        Result<StoredFile> fileRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(request.StudentId, request.StartDate, request.EndDate), cancellationToken);
 
-        var filename = $"Attendance Report - {request.StartDate:yyyy-MM-dd}.pdf";
+        if (fileRequest.IsFailure)
+        {
+            return BadRequest();
+        }
 
-        return File(stream, "application/pdf", filename);
+        return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.Name);
     }
 }

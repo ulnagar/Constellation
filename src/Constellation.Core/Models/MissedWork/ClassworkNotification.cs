@@ -107,6 +107,16 @@ public class ClassworkNotification : AggregateRoot
         _absences.Add(absence);
     }
 
+    public void RemoveAbsence(
+        Absence absence)
+    {
+        if (CompletedAt.HasValue)
+            return;
+
+        if (_absences.Contains(absence))
+            _absences.Remove(absence);
+    }
+
     public Result RecordResponse(
         string description,
         string completedBy,

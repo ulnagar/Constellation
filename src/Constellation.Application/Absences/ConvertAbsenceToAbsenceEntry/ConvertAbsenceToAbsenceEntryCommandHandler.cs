@@ -53,6 +53,7 @@ internal sealed class ConvertAbsenceToAbsenceEntryCommandHandler
             timeframe = absence.AbsenceTimeframe;
 
         return new AbsenceEntry(
+            absence.Id,
             absence.Date,
             absence.PeriodName,
             absence.PeriodTimeframe,
