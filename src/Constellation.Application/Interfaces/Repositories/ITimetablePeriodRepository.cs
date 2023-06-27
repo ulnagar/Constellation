@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 public interface ITimetablePeriodRepository
 {
-    Task<TimetablePeriod> GetById(int periodId, CancellationToken cancellationToken = default);
     Task<List<TimetablePeriod>> GetByDayAndOfferingId(int dayNumber, int offeringId, CancellationToken cancellationToken = default);
     Task<List<TimetablePeriod>> GetAll(CancellationToken cancellationToken = default);
     Task<List<TimetablePeriod>> GetAllFromTimetable(List<string> timetables, CancellationToken cancellationToken = default);

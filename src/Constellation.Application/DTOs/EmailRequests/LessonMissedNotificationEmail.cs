@@ -1,25 +1,19 @@
-﻿using System.Collections.Generic;
+﻿namespace Constellation.Application.DTOs.EmailRequests;
 
-namespace Constellation.Application.DTOs.EmailRequests
+using System.Collections.Generic;
+
+public class LessonMissedNotificationEmail : EmailBaseClass
 {
-    public class LessonMissedNotificationEmail : EmailBaseClass
+    public string SchoolName { get; set; }
+    public NotificationSequence NotificationType { get; set; }
+    public List<EmailDtos.LessonEmail.LessonItem> Lessons { get; set; } = new();
+
+    public enum NotificationSequence
     {
-        public LessonMissedNotificationEmail()
-        {
-            Lessons = new List<EmailDtos.LessonEmail.LessonItem>();
-        }
-
-        public string SchoolName { get; set; }
-        public NotificationSequence NotificationType { get; set; }
-        public ICollection<EmailDtos.LessonEmail.LessonItem> Lessons { get; set; }
-
-        public enum NotificationSequence
-        {
-            First,
-            Second,
-            Third,
-            Final,
-            Alert
-        }
+        First,
+        Second,
+        Third,
+        Final,
+        Alert
     }
 }

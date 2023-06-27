@@ -311,7 +311,6 @@ public static class ServicesRegistration
         services.AddOptions<AppConfiguration>();
         services.Configure<AppConfiguration>(configuration.GetSection(AppConfiguration.Section));
 
-        services.AddScoped<IAbsenceService, AbsenceService>();
         services.AddScoped<IActiveDirectoryActionsService, ActiveDirectoryActionsService>();
         services.AddScoped<IAdobeConnectRoomService, AdobeConnectRoomService>();
         services.AddScoped<IAuthService, AuthService>();

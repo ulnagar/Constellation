@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.SMS;
 
+using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models.Absences;
+using Constellation.Core.Models;
 using Constellation.Core.ValueObjects;
 
 public class Service : ISMSService
@@ -17,24 +18,31 @@ public class Service : ISMSService
         _linkShortenerService = linkShortenerService;
     }
 
-    public async Task<SMSMessageCollectionDto> SendAbsenceNotificationAsync(List<Absence> absences, List<PhoneNumber> phoneNumbers)
+    public async Task<SMSMessageCollectionDto> SendAbsenceNotification(
+        List<AbsenceEntry> absences,
+        Student student,
+        List<PhoneNumber> phoneNumbers,
+        CancellationToken cancellationToken = default)
     {
-        var classList = absences.Select(a => a.Offering.Name).Distinct().ToList();
-        var classListString = "";
-        foreach (var _class in classList.OrderBy(c => c))
-            classListString += $"{_class}\r\n";
+        string classListString = string.Empty;
+        foreach (string offering in absences.Select(absence => absence.OfferingName).OrderBy(c => c))
+            classListString += $"{offering}\r\n";
 
-        var student = absences.First().Student;
-        var date = absences.First().Date;
-
-        var link = $"https://acos.aurora.nsw.edu.au/parents";
+        string link = $"https://acos.aurora.nsw.edu.au/parents";
         link = await _linkShortenerService.ShortenURL(link);
 
-        var messageText = $"{student.FirstName} was reported absent from the following classes on {date.ToShortDateString()}\r\n{classListString}To explain these absences, please click here {link}";
+        string messageText = $"{student.FirstName} was reported absent from the following classes on {absences.First().Date.ToShortDateString()}\r\n{classListString}To explain these absences, please click here {link}";
 
-        var notifyUri = "json+https://acos.aurora.nsw.edu.au/api/SMS/Delivery";
+        string notifyUri = "json+https://acos.aurora.nsw.edu.au/api/SMS/Delivery";
 
-        var messageContent = new SMSMessageToSend { origin = "Aurora", destinations = phoneNumbers.Select(number => number.ToString(PhoneNumber.Format.None)).ToList(), message = messageText, notifyUrl = notifyUri };
+        SMSMessageToSend messageContent = new SMSMessageToSend
+        {
+            origin = "Aurora",
+            destinations = phoneNumbers.Select(number => number.ToString(PhoneNumber.Format.None)).ToList(),
+            message = messageText,
+            notifyUrl = notifyUri
+        };
+
         return await _service.SendSmsAsync(messageContent);
     }
 }
