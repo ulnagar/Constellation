@@ -38,7 +38,6 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
                 session.Period.Type != "Other")
             .ToListAsync(cancellationToken);
     }
-        
 
     private IQueryable<OfferingSession> Collection()
     {

@@ -21,7 +21,6 @@ using System.Net.Mail;
 using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
-using static Constellation.Infrastructure.Templates.Views.Documents.Attendance.AttendanceReportViewModel;
 
 public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
 {
@@ -31,6 +30,9 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IAbsenceResponseRepository _responseRepository;
     private readonly IOfferingSessionsRepository _sessionRepository;
+    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly IEmailService _emailService;
     private readonly IPDFService _pdfService;
     private readonly IRazorViewToStringRenderer _renderService;
@@ -46,6 +48,9 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
         IAbsenceRepository absenceRepository,
         IAbsenceResponseRepository responseRepository,
         IOfferingSessionsRepository sessionRepository,
+        ITimetablePeriodRepository periodRepository,
+        ICourseOfferingRepository offeringRepository,
+        ICourseRepository courseRepository,
         IEmailService emailService,
         IPDFService pdfService, 
         IRazorViewToStringRenderer renderService,
@@ -58,6 +63,9 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
         _absenceRepository = absenceRepository;
         _responseRepository = responseRepository;
         _sessionRepository = sessionRepository;
+        _periodRepository = periodRepository;
+        _offeringRepository = offeringRepository;
+        _courseRepository = courseRepository;
         _emailService = emailService;
         _pdfService = pdfService;
         _renderService = renderService;
@@ -296,30 +304,40 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
                 DayNumber = date.GetDayNumber()
             };
 
-            List<OfferingSession> sessions = await _sessionRepository.GetAllForStudentAndDayDuringTime(student.StudentId, date.GetDayNumber(), date);
+            List<OfferingSession> sessions = await _sessionRepository.GetAllForStudentAndDayDuringTime(student.StudentId, entry.DayNumber, date);
 
-            var groupedSessions = sessions.OrderBy(session => session.Period.StartTime).GroupBy(session => session.OfferingId).ToList();
-
-            ////// Cannot do the below line as the repository does not return PERIOD entity
-            foreach (OfferingSession session in sessions
-                .OrderBy(s => s.Period.StartTime)
-                .GroupBy(s => s.OfferingId))
+            foreach (IGrouping<int, OfferingSession> offeringSessions in sessions.GroupBy(s => s.OfferingId))
             {
-                entry.SessionsByOffering.Add(new()
-                {
-                    PeriodName = sessions.Count() > 1 ? $"{sessions.First().Period.Name} - {sessions.Last().Period.Name}" : sessions.First().Period.Name,
-                    PeriodTimeframe = $"{sessions.First().Period.StartTime.As12HourTime()} - {sessions.Last().Period.EndTime.As12HourTime()}",
-                    OfferingName = sessions.First().Offering.Name,
-                    CourseName = sessions.First().Offering.Course.Name,
-                    OfferingId = sessions.Key
-                });
-            }
+                CourseOffering offering = await _offeringRepository.GetById(offeringSessions.Key, cancellationToken);
+                Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 
-            entry.SessionsByOffering = sessions
-                .OrderBy(s => s.Period.StartTime)
-                .GroupBy(s => s.OfferingId)
-                .Select(AttendanceReportViewModel.SessionByOffering.ConvertFromSessionGroup)
-                .ToList();
+                List<TimetablePeriod> periods = await _periodRepository.GetForOfferingOnDay(offeringSessions.Key, date, entry.DayNumber, cancellationToken);
+                TimetablePeriod firstPeriod = periods.First(period => period.StartTime == periods.Min(p => p.StartTime));
+                TimetablePeriod lastPeriod = periods.First(period => period.EndTime == periods.Max(p => p.EndTime));
+                
+                if (periods.Count() == 1)
+                {
+                    entry.SessionsByOffering.Add(new()
+                    {
+                        PeriodName = periods.First().Name,
+                        PeriodTimeframe = $"{firstPeriod.StartTime.As12HourTime()} - {lastPeriod.EndTime.As12HourTime()}",
+                        OfferingName = offering.Name,
+                        CourseName = course.Name,
+                        OfferingId = offeringSessions.Key
+                    });
+                }
+                else
+                {
+                    entry.SessionsByOffering.Add(new()
+                    {
+                        PeriodName = $"{firstPeriod.Name} - {lastPeriod.Name}",
+                        PeriodTimeframe = $"{firstPeriod.StartTime.As12HourTime()} - {lastPeriod.EndTime.As12HourTime()}",
+                        OfferingName = offering.Name,
+                        CourseName = course.Name,
+                        OfferingId = offeringSessions.Key
+                    });
+                }
+            }
 
             viewModel.DateData.Add(entry);
         }
