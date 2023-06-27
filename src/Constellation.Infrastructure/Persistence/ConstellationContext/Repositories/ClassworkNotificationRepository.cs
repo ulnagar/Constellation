@@ -32,6 +32,17 @@ public class ClassworkNotificationRepository : IClassworkNotificationRepository
                 record.AbsenceDate == absenceDate)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<ClassworkNotification>> GetOutstandingForStudent(
+        string studentId, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<ClassworkNotification>()
+            .Include(notification => notification.Absences)
+            .Where(notification => 
+                notification.Absences.Any(absence => absence.StudentId == studentId) &&
+                !notification.CompletedAt.HasValue)
+            .ToListAsync(cancellationToken);
+
     public void Insert(ClassworkNotification record) =>
         _context.Set<ClassworkNotification>().Add(record);
 }

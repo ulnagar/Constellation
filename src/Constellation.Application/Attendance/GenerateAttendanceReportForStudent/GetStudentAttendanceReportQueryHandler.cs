@@ -1,54 +1,45 @@
-﻿namespace Constellation.Infrastructure.Features.Attendance.Queries;
+﻿namespace Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 
+using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Extensions;
 using Constellation.Application.Features.Attendance.Queries;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
-using Constellation.Infrastructure.Templates.Views.Documents.Attendance;
-using Microsoft.EntityFrameworkCore;
+using Constellation.Core.Shared;
+using System;
+using System.Collections.Generic;
 using System.Net.Mime;
+using System.Threading;
+using System.Threading.Tasks;
 
-public class GetStudentAttendanceReportQueryHandler : IRequestHandler<GetStudentAttendanceReportQuery, StoredFile>
+public class GenerateAttendanceReportForStudentQueryHandler 
+    : IQueryHandler<GenerateAttendanceReportForStudentQuery, StoredFile>
 {
-    private readonly IAppDbContext _context;
+    private readonly IStudentRepository _studentRepository;
     private readonly ISentralGateway _sentralGateway;
     private readonly IRazorViewToStringRenderer _renderService;
     private readonly IPDFService _pdfService;
 
-    public GetStudentAttendanceReportQueryHandler(
-        IAppDbContext context,
-        IPDFService pdfService,
-        IRazorViewToStringRenderer renderService)
-    {
-        _context = context;
-        _pdfService = pdfService;
-        _renderService = renderService;
-    }
+    public GenerateAttendanceReportForStudentQueryHandler(
+        IStudentRepository studentRepository,
 
-    public GetStudentAttendanceReportQueryHandler(
-        IAppDbContext context,
         ISentralGateway sentralGateway,
         IRazorViewToStringRenderer renderService,
         IPDFService pdfService)
     {
-        _context = context;
+        _studentRepository = studentRepository;
         _sentralGateway = sentralGateway;
         _renderService = renderService;
         _pdfService = pdfService;
     }
 
-    public async Task<StoredFile> Handle(GetStudentAttendanceReportQuery request, CancellationToken cancellationToken)
+    public async Task<Result<StoredFile>> Handle(GenerateAttendanceReportForStudentQuery request, CancellationToken cancellationToken)
     {
-        var excludedDates = _sentralGateway switch
-        {
-            null => new List<DateTime>(),
-            _ => await _sentralGateway.GetExcludedDatesFromCalendar(request.StartDate.Year.ToString())
-        };
+        List<DateOnly> excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(request.StartDate.Year.ToString());
 
-        var student = await _context.Students
-            .SingleOrDefaultAsync(student => student.StudentId == request.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         var viewModel = new AttendanceReportViewModel
         {

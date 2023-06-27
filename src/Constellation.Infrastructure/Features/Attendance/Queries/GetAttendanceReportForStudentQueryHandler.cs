@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Features.Attendance.Queries;
 
+using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.Extensions;
-using Constellation.Application.Features.Attendance.Queries;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -13,7 +13,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class GetAttendanceReportForStudentQueryHandler : IRequestHandler<GetAttendanceReportForStudentQuery, MemoryStream>
+public class GetAttendanceReportForStudentQueryHandler : IRequestHandler<GenerateAttendanceReportForStudentQuery, MemoryStream>
 {
     private readonly IAppDbContext _context;
     private readonly ISentralGateway _sentralGateway;
@@ -39,7 +39,7 @@ public class GetAttendanceReportForStudentQueryHandler : IRequestHandler<GetAtte
         _pdfService = pdfService;
     }
 
-    public async Task<MemoryStream> Handle(GetAttendanceReportForStudentQuery request, CancellationToken cancellationToken)
+    public async Task<MemoryStream> Handle(GenerateAttendanceReportForStudentQuery request, CancellationToken cancellationToken)
     {
         if (_sentralGateway is null)
             return null;
