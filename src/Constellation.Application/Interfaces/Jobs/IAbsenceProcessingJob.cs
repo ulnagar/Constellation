@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Application.Interfaces.Jobs;
 
-using Constellation.Application.Features.Jobs.AbsenceMonitor.Models;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using System;
