@@ -1,6 +1,7 @@
-﻿@    using Constellation.Application.Models.Auth
+﻿@using Constellation.Application.Models.Auth
+@using Constellation.Core.Models
+@using Constellation.Core.Models.Absences;
 
-@    using Constellation.Core.Models
 @model Absence_Details_ViewModel
 
 @{
@@ -97,8 +98,8 @@
             
             @if (authorised)
             {
-                <a asp-action="SendNotification" asp-controller="Absences" asp-area="Reports" asp-route-id="@Model.Absence.Id" asp-route-method="@AbsenceNotification.SMS" class="btn btn-info">Resend SMS</a>
-                <a asp-action="SendNotification" asp-controller="Absences" asp-area="Reports" asp-route-id="@Model.Absence.Id" asp-route-method="@AbsenceNotification.Email" class="btn btn-info">Resent Email</a>
+                <a asp-action="SendNotification" asp-controller="Absences" asp-area="Reports" asp-route-id="@Model.Absence.Id" asp-route-method="@NotificationType.SMS" class="btn btn-info">Resend SMS</a>
+                <a asp-action="SendNotification" asp-controller="Absences" asp-area="Reports" asp-route-id="@Model.Absence.Id" asp-route-method="@NotificationType.Email" class="btn btn-info">Resent Email</a>
             }
             
             <table class="table-striped data-table">
@@ -152,19 +153,19 @@
                             </td>
                             <td>@Html.DisplayFor(model => item.Explanation)</td>
                             <td>
-                                @if (item.VerificationStatus == AbsenceResponse.Verified)
+                                @if (item.VerificationStatus == ResponseVerificationStatus.Verified)
                                 {
                                     <a href="#" data-toggle="tooltip" title="Verified by @item.Verifier on @item.VerifiedAt.Value.ToShortDateString()"><span class="label label-success"><span class="glyphicon glyphicon-ok" /> Verified</span></a>
                                 }
-                                else if (item.VerificationStatus == AbsenceResponse.Rejected)
+                                else if (item.VerificationStatus == ResponseVerificationStatus.Rejected)
                                 {
                                     <a href="#" data-toggle="tooltip" title="Rejected by @item.Verifier on @item.VerifiedAt.Value.ToShortDateString() with comment @item.VerificationComment"><span class="label label-danger"><span class="glyphicon glyphicon-remove" /> Rejected</span></a>
                                 }
-                                else if (item.VerificationStatus == AbsenceResponse.Pending)
+                                else if (item.VerificationStatus == ResponseVerificationStatus.Pending)
                                 {
                                     @:<span class="label label-info"><span class="glyphicon glyphicon-refresh" /> Pending</span>
                                 }
-                                else if (item.VerificationStatus == null || item.VerificationStatus == AbsenceResponse.NotRequired || item.Type == AbsenceResponse.Parent || item.Type == AbsenceResponse.Coordinator)
+                                else if (item.VerificationStatus == null || item.VerificationStatus == ResponseVerificationStatus.NotRequired || item.Type == ResponseVerificationStatus.Parent || item.Type == ResponseVerificationStatus.Coordinator)
                                 {
                                     @:<span class="label label-info"><span class="glyphicon glyphicon-ban-circle" /> Not Required</span>
                                 }
