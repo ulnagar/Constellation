@@ -208,12 +208,12 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
             if (success)
             {
                 foreach (EmailRecipient recipient in recipients)
-                    _logger.Information("{id}: Message sent via Email to {parent} ({email}) with attachment: {filename}", JobId, recipient.Name, recipient.Email, filename);
+                    _logger.Information("{id}: Message sent via Email to {parent} ({email}) with attachment: {filename}", JobId, recipient.Name, recipient.Email, file.Name);
             }
             else
             {
                 foreach (EmailRecipient recipient in recipients)
-                    _logger.Warning("{id}: FAILED to send email to {parent} ({email}) with attachment: {filename}", JobId, recipient.Name, recipient.Email, filename);
+                    _logger.Warning("{id}: FAILED to send email to {parent} ({email}) with attachment: {filename}", JobId, recipient.Name, recipient.Email, file.Name);
             }
         }
         else

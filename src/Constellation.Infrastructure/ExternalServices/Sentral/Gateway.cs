@@ -715,62 +715,64 @@ public partial class Gateway : ISentralGateway
                         // This is a calendar row starting with the week number
                         WeekName = $"Week {firstChildNode.InnerText.Trim()}";
 
-                        var entry = new ValidAttendenceReportDate
-                        {
-                            Description = $"{TermName} {WeekName}",
-                            TermGroup = TermName
-                        };
+                        DateOnly startDate = new();
+                        DateOnly endDate = new();
 
                         var startDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[1].GetAttributeValue("onclick", "");
                         if (!string.IsNullOrWhiteSpace(startDateAction))
                         {
                             var detectedDate = startDateAction.Split('\'')[1];
-                            var date = DateTime.Parse(detectedDate);
+                            var date = DateOnly.Parse(detectedDate);
 
-                            entry.StartDate = date;
+                            startDate = date;
                         }
 
                         var endDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[5].GetAttributeValue("onclick", "");
                         if (!string.IsNullOrWhiteSpace(endDateAction))
                         {
                             var detectedDate = endDateAction.Split('\'')[1];
-                            var date = DateTime.Parse(detectedDate);
+                            var date = DateOnly.Parse(detectedDate);
 
-                            entry.EndDate = date;
+                            endDate = date;
                         }
 
-                        validDates.Add(entry);
+                        validDates.Add(new ValidAttendenceReportDate(
+                            TermName,
+                            startDate,
+                            endDate,
+                            $"{TermName} {WeekName}"));
                     }
                     else
                     {
                         // This is a calendar row starting with the week number
                         WeekName = $"Week {firstChildNode.InnerText.Trim()} - Week {rows[row + 1].ChildNodes.Where(node => node.Name != "#text").First().InnerText.Trim()}";
-
-                        var entry = new ValidAttendenceReportDate
-                        {
-                            Description = $"{TermName} {WeekName}",
-                            TermGroup = TermName
-                        };
+                        
+                        DateOnly startDate = new();
+                        DateOnly endDate = new();
 
                         var startDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[1].GetAttributeValue("onclick", "");
                         if (!string.IsNullOrWhiteSpace(startDateAction))
                         {
                             var detectedDate = startDateAction.Split('\'')[1];
-                            var date = DateTime.Parse(detectedDate);
+                            var date = DateOnly.Parse(detectedDate);
 
-                            entry.StartDate = date;
+                            startDate = date;
                         }
 
                         var endDateAction = rows[row + 1].ChildNodes.Where(node => node.Name != "#text").ToArray()[5].GetAttributeValue("onclick", "");
                         if (!string.IsNullOrWhiteSpace(endDateAction))
                         {
                             var detectedDate = endDateAction.Split('\'')[1];
-                            var date = DateTime.Parse(detectedDate);
+                            var date = DateOnly.Parse(detectedDate);
 
-                            entry.EndDate = date;
+                            endDate = date;
                         }
 
-                        validDates.Add(entry);
+                        validDates.Add(new ValidAttendenceReportDate(
+                            TermName,
+                            startDate,
+                            endDate,
+                            $"{TermName} {WeekName}"));
 
                         row++;
                     }
