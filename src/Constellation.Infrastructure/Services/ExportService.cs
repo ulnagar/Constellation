@@ -132,7 +132,8 @@ public class ExportService : IExportService
         DateOnly startDate,
         List<DateOnly> excludedDates,
         List<AttendanceAbsenceDetail> absences,
-        List<AttendanceDateDetail> dates)
+        List<AttendanceDateDetail> dates,
+        CancellationToken cancellationToken = default)
     {
         var endDate = startDate.AddDays(12);
 

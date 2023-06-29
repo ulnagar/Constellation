@@ -13,5 +13,5 @@ public sealed record AttendanceDateDetail(
         string PeriodTimeframe,
         string OfferingName,
         string CourseName,
-        int OfferingId)
+        int OfferingId);
 }
