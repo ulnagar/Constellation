@@ -3,6 +3,7 @@ namespace Constellation.Portal.Parents.Server.Controllers;
 using Constellation.Application.Absences.GetAbsenceDetailsForParent;
 using Constellation.Application.Absences.ProvideParentWholeAbsenceExplanation;
 using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
+using Constellation.Application.Attendance.GetValidAttendanceReportDates;
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Attendance.Queries;
 using Constellation.Core.Models;

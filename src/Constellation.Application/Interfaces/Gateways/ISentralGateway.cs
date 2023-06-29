@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Interfaces.Gateways;
 
+using Constellation.Application.Attendance.GetValidAttendanceReportDates;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.Awards;
 using Serilog;

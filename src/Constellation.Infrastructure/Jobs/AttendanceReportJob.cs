@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
@@ -7,11 +8,9 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
-using Constellation.Infrastructure.Templates.Views.Documents.Attendance;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,8 +33,7 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
     private readonly ICourseOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IEmailService _emailService;
-    private readonly IPDFService _pdfService;
-    private readonly IRazorViewToStringRenderer _renderService;
+    private readonly IMediator _mediator;
     private readonly ISentralGateway _sentralGateway;
     private readonly ILogger _logger;
 
@@ -52,8 +50,7 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
         ICourseOfferingRepository offeringRepository,
         ICourseRepository courseRepository,
         IEmailService emailService,
-        IPDFService pdfService, 
-        IRazorViewToStringRenderer renderService,
+        IMediator mediator,
         ISentralGateway sentralGateway, 
         ILogger logger)
     {
@@ -67,8 +64,7 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
         _offeringRepository = offeringRepository;
         _courseRepository = courseRepository;
         _emailService = emailService;
-        _pdfService = pdfService;
-        _renderService = renderService;
+        _mediator = mediator;
         _sentralGateway = sentralGateway;
         _logger = logger.ForContext<IAttendanceReportJob>();
     }
@@ -77,7 +73,8 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
     {
         JobId = jobId;
 
-        DateOnly dateToReport = DateOnly.FromDateTime(DateTime.Today.AddDays(-1)).VerifyStartOfFortnight();
+        DateOnly startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-1)).VerifyStartOfFortnight();
+        DateOnly endDate = startDate.AddDays(12);
 
         List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
         List<IGrouping<string, Student>> studentsBySchool = students
@@ -101,20 +98,16 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
 
                 _logger.Information("{id}: Creating Report for {name}", JobId, student.DisplayName);
                 // Get Data from server
-                var definition = new { header = "", body = "" };
+                Result<StoredFile> studentReportRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(student.StudentId, startDate, endDate), cancellationToken);
 
-                (string,string) data = await GetStudentData(student, dateToReport, cancellationToken);
-
-                // Save to a temporary file
-                MemoryStream pdfStream = _pdfService
-                    .StringToPdfStream(data.Item2, data.Item1);
+                if (studentReportRequest.IsFailure)
+                    continue;
 
                 string tempFile = Path.GetTempFileName();
-                File.WriteAllBytes(tempFile, pdfStream.ToArray());
-                string filename = $"{student.LastName}, {student.FirstName} - {dateToReport:yyyy-MM-dd} - Attendance Report.pdf";
-                studentFiles.Add(tempFile, filename);
+                File.WriteAllBytes(tempFile, studentReportRequest.Value.FileData);
+                studentFiles.Add(tempFile, studentReportRequest.Value.Name);
 
-                await SendParentEmail(pdfStream, filename, student, dateToReport, cancellationToken);
+                await SendParentEmail(studentReportRequest.Value, student, startDate, cancellationToken);
             }
 
             _logger.Information("{id}: Sending reports to school {school}", JobId, school.First().School.Name);
@@ -154,8 +147,8 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
                 }
             }
 
-            // Email the file to the parents
-            await SendSchoolEmailAsync(school.Key, attachmentList, dateToReport, cancellationToken);
+            // Email the file to the school contacts
+            await SendSchoolEmailAsync(school.Key, attachmentList, startDate, cancellationToken);
 
             _logger.Information("{id}: Cleaning up temporary files created for {school}", JobId, school.First().School.Name);
 
@@ -169,8 +162,7 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
     }
 
     private async Task SendParentEmail(
-        MemoryStream pdfStream, 
-        string filename, 
+        StoredFile file,
         Student student, 
         DateOnly dateToReport, 
         CancellationToken cancellationToken)
@@ -203,12 +195,14 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
 
         if (recipients.Any())
         {
+            MemoryStream stream = new MemoryStream(file.FileData);
+
             bool success = await _emailService.SendParentAttendanceReportEmail(
                 student.DisplayName, 
                 dateToReport, 
                 dateToReport.AddDays(12), 
                 recipients, 
-                new List<Attachment> { new(pdfStream, filename) }, 
+                new List<Attachment> { new(stream, file.Name) }, 
                 cancellationToken);
 
             if (success)
@@ -270,81 +264,5 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
                     _logger.Warning("{id}: FAILED to send email to {contact} ({email}) with Attendance Reports for {school}", JobId, recipient.Name, recipient.Email, schoolCode);
             }
         }
-    }
-
-    private async Task<ValueTuple<string, string>> GetStudentData(
-        Student student, 
-        DateOnly startDate,
-        CancellationToken cancellationToken)
-    {
-        AttendanceReportViewModel viewModel = new()
-        {
-            StudentName = student.DisplayName,
-            StartDate = startDate.VerifyStartOfFortnight(),
-            ExcludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(startDate.Year.ToString())
-        };
-
-        DateOnly endDate = viewModel.StartDate.AddDays(12);
-        List<Absence> periodAbsences = await _absenceRepository.GetForStudentFromDateRange(student.StudentId, viewModel.StartDate, endDate, cancellationToken);
-
-        foreach (var absence in periodAbsences)
-        {
-            List<Response> responses = await _responseRepository.GetAllForAbsence(absence.Id, cancellationToken);
-
-            viewModel.Absences.Add(AttendanceReportViewModel.AbsenceDto.ConvertFromAbsence(absence, responses));
-        }
-
-        List<DateOnly> reportableDates = viewModel.StartDate.Range(endDate);
-
-        foreach (DateOnly date in reportableDates)
-        {
-            AttendanceReportViewModel.DateSessions entry = new()
-            {
-                Date = date,
-                DayNumber = date.GetDayNumber()
-            };
-
-            List<OfferingSession> sessions = await _sessionRepository.GetAllForStudentAndDayDuringTime(student.StudentId, entry.DayNumber, date);
-
-            foreach (IGrouping<int, OfferingSession> offeringSessions in sessions.GroupBy(s => s.OfferingId))
-            {
-                CourseOffering offering = await _offeringRepository.GetById(offeringSessions.Key, cancellationToken);
-                Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
-
-                List<TimetablePeriod> periods = await _periodRepository.GetForOfferingOnDay(offeringSessions.Key, date, entry.DayNumber, cancellationToken);
-                TimetablePeriod firstPeriod = periods.First(period => period.StartTime == periods.Min(p => p.StartTime));
-                TimetablePeriod lastPeriod = periods.First(period => period.EndTime == periods.Max(p => p.EndTime));
-                
-                if (periods.Count() == 1)
-                {
-                    entry.SessionsByOffering.Add(new()
-                    {
-                        PeriodName = periods.First().Name,
-                        PeriodTimeframe = $"{firstPeriod.StartTime.As12HourTime()} - {lastPeriod.EndTime.As12HourTime()}",
-                        OfferingName = offering.Name,
-                        CourseName = course.Name,
-                        OfferingId = offeringSessions.Key
-                    });
-                }
-                else
-                {
-                    entry.SessionsByOffering.Add(new()
-                    {
-                        PeriodName = $"{firstPeriod.Name} - {lastPeriod.Name}",
-                        PeriodTimeframe = $"{firstPeriod.StartTime.As12HourTime()} - {lastPeriod.EndTime.As12HourTime()}",
-                        OfferingName = offering.Name,
-                        CourseName = course.Name,
-                        OfferingId = offeringSessions.Key
-                    });
-                }
-            }
-
-            viewModel.DateData.Add(entry);
-        }
-
-        string headerString = await _renderService.RenderViewToStringAsync("/Views/Documents/Attendance/AttendanceReportHeader.cshtml", viewModel);
-        string htmlString = await _renderService.RenderViewToStringAsync("/Views/Documents/Attendance/AttendanceReport.cshtml", viewModel);
-
-        return new (headerString, htmlString);
     }
 }
