@@ -6,12 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Features\Attendance\Commands\**" />
-    <EmbeddedResource Remove="Features\Attendance\Commands\**" />
-    <None Remove="Features\Attendance\Commands\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Constellation.Core\Constellation.Core.csproj" />
   </ItemGroup>
 

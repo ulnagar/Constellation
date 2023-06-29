@@ -171,14 +171,14 @@
                     {
                         <h4>@entry.Date.ToLongDateString()</h4>
 
-                        if (!entry.SessionsByOffering.Any())
+                        if (!entry.Sessions.Any())
                         {
                             <span>No classes scheduled this day</span>
                         }
                         else
                         {
                             <table class="mt-3 table-roll">
-                                @foreach (var group in entry.SessionsByOffering)
+                                @foreach (var group in entry.Sessions)
                                 {
                                     <tr>
                                         <th>
@@ -197,7 +197,7 @@
                                                     {
                                                         <strong>@absence.Type (@absence.AbsenceTimeframe) - @absence.AbsenceReason</strong>
 
-                                                        @Html.Raw(absence.ExplanationString)
+                                                        @Html.Raw(absence.Explanation)
                                                     }
                                                 }
                                                 else

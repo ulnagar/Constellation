@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Sentral;
 
+using Constellation.Application.Attendance.GetValidAttendanceReportDates;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.Awards;
 using Constellation.Application.Extensions;
