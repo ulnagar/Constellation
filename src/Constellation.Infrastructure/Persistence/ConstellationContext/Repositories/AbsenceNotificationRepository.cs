@@ -22,4 +22,12 @@ internal sealed class AbsenceNotificationRepository : IAbsenceNotificationReposi
         await _context
             .Set<Notification>()
             .CountAsync(notification => notification.AbsenceId == absenceId, cancellationToken);
+
+    public async Task<List<Notification>> GetAllForAbsence(
+        AbsenceId absenceId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Notification>()
+            .Where(notification => notification.AbsenceId == absenceId)
+            .ToListAsync(cancellationToken);
 }

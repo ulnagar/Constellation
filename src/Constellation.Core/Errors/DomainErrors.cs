@@ -306,6 +306,13 @@ public static class DomainErrors
 
     public static class Partners
     {
+        public static class School
+        {
+            public static readonly Func<string, Error> NotFound = id => new(
+                "Partners.School.NotFound",
+                $"A school with the code {id} could not be found");
+        }
+
         public static class Staff
         {
             public static readonly Func<int, Error> NotFoundLinkedToOffering = id => new Error(
