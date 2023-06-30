@@ -18,4 +18,5 @@ public class AuthPolicies
     public const string CanEditCovers = "CanEditCovers";
     public const string CanEditCasuals = "CanEditCasuals";
     public const string CanEditStudents = "CanEditStudents";
+    public const string CanManageAbsences = "CanManageAbsences";
 }
