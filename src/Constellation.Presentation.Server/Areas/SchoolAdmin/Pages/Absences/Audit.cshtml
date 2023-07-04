@@ -1,14 +1,16 @@
 ﻿@page
-@model Constellation.Presentation.Server.Areas.Partner.Pages.Students.AbsenceAuditModel
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Absences.AuditModel
+
+@inject IAuthorizationService authorisationService
 
 @{
-    var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin));
+    var authorised = await authorisationService.AuthorizeAsync(User, AuthPolicies.CanManageAbsences);
 }
 
 <h2>Student Absence Settings</h2>
 
 <div class="page-menu">
-    @if (authorised)
+    @if (authorised.Succeeded)
     {
         <div class="btn-group new-group" role="group">
             <a asp-action="AbsenceSettings" asp-controller="Students" asp-area="Partner" class="btn btn-warning">Absence Settings</a>

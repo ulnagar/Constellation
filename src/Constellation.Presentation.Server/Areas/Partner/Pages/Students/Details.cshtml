@@ -332,7 +332,7 @@
                             <td>@item.Timeframe (@item.PeriodName)</td>
                             <td>@item.OfferingName</td>
                             <td>
-                                @Html.ActionLink("More Info...", "AbsenceDetails", "Students", new { area = "Partner", id = item.AbsenceId}, new {@class = "btn btn-sm btn-info btn-show-hover"})
+                                <a asp-page="Absences/Details" asp-area="SchoolAdmin" asp-route-id="@item.AbsenceId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                             </td>
                         </tr>
                     }

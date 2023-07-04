@@ -1,22 +1,22 @@
-﻿@model Student_AbsenceSettingsViewModel
+﻿@page
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Absences.SettingsModel
 
-<h2>Enable Absence Scanning per Student</h2>
+<h2>Student Absence Configuration</h2>
 
 <div class="row">
     <a asp-action="Index" asp-controller="Students" asp-area="Partner" class="btn btn-danger btn-pull-right-solo">Go Back</a>
 </div>
 
-<hr/>
+<hr />
 
-<form asp-action="AbsenceSettings" asp-controller="Students" asp-area="Partner" method="post">
-
+<form method="post">
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
         <div class="form-group row">
             <label asp-for="StudentId" class="col-md-2">Student</label>
             <div class="col-md-3">
-                <select asp-for="StudentId" asp-items="@Model.StudentList" class="form-control combo">
+                <select asp-for="StudentId" asp-items="@Model.Students" class="form-control combo">
                     <option value="">-- Select --</option>
                 </select>
                 <span asp-validation-for="StudentId" class="text-danger"></span>
@@ -26,7 +26,7 @@
         <div class="form-group row">
             <label asp-for="SchoolCode" class="col-md-2">School</label>
             <div class="col-md-3">
-                <select asp-for="SchoolCode" asp-items="@Model.SchoolList" class="form-control combo">
+                <select asp-for="SchoolCode" asp-items="@Model.Schools" class="form-control combo">
                     <option value="">-- Select --</option>
                 </select>
                 <span asp-validation-for="SchoolCode" class="text-danger"></span>
@@ -36,18 +36,10 @@
         <div class="form-group row">
             <label asp-for="Grade" class="col-md-2"></label>
             <div class="col-md-3">
-                <select asp-for="Grade" asp-items="@Model.GradeList" class="form-control combo">
+                <select asp-for="Grade" asp-items="@Model.Grades" class="form-control combo">
                     <option value="">-- Select --</option>
                 </select>
                 <span asp-validation-for="Grade" class="text-danger"></span>
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <label asp-for="StartDate" class="col-md-2">Start Date</label>
-            <div class="col-md-3">
-                <input asp-for="StartDate" class="form-control" />
-                <span asp-validation-for="StartDate" class="text-danger"></span>
             </div>
         </div>
 
@@ -69,7 +61,7 @@
 
     <script>
         $(document)
-            .ready(function() {
+            .ready(function () {
                 $('.combo').on('select2:select', function (e) {
                     updateDescriptionText();
                 })
