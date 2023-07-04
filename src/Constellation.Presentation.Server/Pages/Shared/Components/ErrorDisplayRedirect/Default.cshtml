@@ -11,7 +11,14 @@
                 <span>@Model.Error.Message</span>
             </div>
             <div class="modal-footer">
-                <a href="@Model.RedirectPath" class="btn btn-success">Ok</a>
+                @if (string.IsNullOrWhiteSpace(Model.RedirectPath))
+                {
+                    <button type="button" class="btn btn-success" data-dismiss="modal">Ok</button>
+                }
+                else
+                {
+                    <a href="@Model.RedirectPath" class="btn btn-success">Ok</a>
+                }
             </div>
         </div>
     </div>
