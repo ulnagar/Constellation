@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 
 public sealed record AbsenceDetailsResponse(
+    AbsenceId AbsenceId,
     string StudentId,
     Name StudentName,
     Grade StudentGrade,

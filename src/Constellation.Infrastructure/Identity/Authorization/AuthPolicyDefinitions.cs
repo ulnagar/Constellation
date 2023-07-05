@@ -56,7 +56,7 @@ public static class AuthPolicyDefinitions
             policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.PartnerEdit));
 
         options.AddPolicy(AuthPolicies.CanManageAbsences, policy =>
-            policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.ReportsAbsencesNotify, AuthPermissions.ReportsAbsencesRun))
+            policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.ReportsAbsencesNotify, AuthPermissions.ReportsAbsencesRun));
 
         return options;
     }

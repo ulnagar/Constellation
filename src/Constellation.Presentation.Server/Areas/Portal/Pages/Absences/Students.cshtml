@@ -1,6 +1,8 @@
 ﻿@page "{studentId}"
 @model Constellation.Presentation.Server.Areas.Portal.Pages.Absences.StudentsModel
 
+@using Constellation.Core.Models.Absences;
+
 <h2>All Absences for @Model.StudentName</h2>
 
 <div>
@@ -52,13 +54,9 @@
                 <td>@Html.DisplayFor(model => entry.AbsenceLength) minutes</td>
                 <td>@Html.DisplayFor(model => entry.OfferingName)</td>
                 <td class="text-center">
-                    @if (!entry.IsExplained && entry.Type == Absence.Partial)
+                    @if (!entry.IsExplained && entry.Type == AbsenceType.Partial)
                     {
                         <a asp-page="StudentExplanation" asp-area="Portal" asp-route-id="@entry.AbsenceId" class="btn btn-sm btn-primary btn-show-hover">Explain</a>
-                    }
-                    else if (entry.Type == Absence.Partial)
-                    {
-                        <a asp-page="StudentExplanation" asp-area="Portal" asp-route-id="@entry.AbsenceId" class="btn btn-sm btn-secondary btn-show-hover">More Info...</a>
                     }
                 </td>
             </tr>
