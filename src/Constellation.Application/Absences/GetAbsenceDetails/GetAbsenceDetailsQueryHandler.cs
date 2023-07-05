@@ -118,6 +118,7 @@ internal sealed class GetAbsenceDetailsQueryHandler
         }
 
         AbsenceDetailsResponse result = new(
+            absence.Id,
             student.StudentId,
             studentNameRequest.Value,
             student.CurrentGrade,

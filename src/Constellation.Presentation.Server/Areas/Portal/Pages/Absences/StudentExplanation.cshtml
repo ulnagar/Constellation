@@ -1,0 +1,66 @@
+﻿@page "/Portal/Absences/Students/Explanation/{id}"
+@model Constellation.Presentation.Server.Areas.Portal.Pages.Absences.StudentExplanationModel
+
+<h2>Absence Explanation</h2>
+
+<div class="row">
+    <a asp-page="Students" asp-area="Portal" asp-route-studentId="@Model.StudentId" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<form method="post">
+    <div class="form-horizontal">
+        @Html.HiddenFor(model => model.Id)
+        @Html.HiddenFor(model => model.StudentId)
+
+        <div class="form-group row">
+            <label asp-for="Absence.AbsenceDate" class="col-md-2">Date</label>
+            <div class="col-md-6">
+                @Model.Absence.AbsenceDate.ToLongDateString()
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Absence.Student" class="col-md-2">Student</label>
+            <div class="col-md-6">
+                @Model.Absence.Student.DisplayName
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Absence.OfferingName" class="col-md-2">Class</label>
+            <div class="col-md-6">
+                @Model.Absence.OfferingName
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Absence.PeriodName" class="col-md-2">Period</label>
+            <div class="col-md-6">
+                @Model.Absence.PeriodName (@Model.Absence.PeriodTimeframe)
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Absence.AbsenceTimeframe" class="col-md-2">Absence</label>
+            <div class="col-md-6">
+                @Model.Absence.AbsenceTimeframe (@Model.Absence.AbsenceLength minutes)
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Reason" class="col-md-2"></label>
+            <div class="col-md-6">
+                <textarea asp-for="Reason" rows="5" cols="100" class="form-control"></textarea>
+                <span asp-validation-for="Reason" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-offset-2 col-md-3">
+                <input type="submit" value="Submit" class="btn btn-primary btn-block btn-lg"/>
+            </div>
+        </div>
+    </div>
+</form>

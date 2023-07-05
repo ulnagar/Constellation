@@ -9,10 +9,10 @@ using Constellation.Application.Schools.Models;
 using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
 using Constellation.Core.Enums;
 using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Server.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static Constellation.Presentation.Server.Areas.ShortTerm.Pages.Covers.CreateModel;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
