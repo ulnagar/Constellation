@@ -1,6 +1,7 @@
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Families;
+using Constellation.Core.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -63,6 +64,16 @@ namespace Constellation.Core.Models
             IncludeInAbsenceNotifications = true;
             AbsenceNotificationStartDate = startDate;
             return Task.CompletedTask;
+        }
+
+        public Name? GetName()
+        {
+            var request = Name.Create(FirstName, string.Empty, LastName);
+
+            if (request.IsSuccess)
+                return request.Value;
+
+            return null;
         }
     }
 }

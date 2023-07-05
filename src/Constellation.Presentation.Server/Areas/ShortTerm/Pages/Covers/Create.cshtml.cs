@@ -8,6 +8,7 @@ using Constellation.Application.StaffMembers.GetStaffForSelectionList;
 using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
 using Constellation.Core.ValueObjects;
 using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Server.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -167,10 +168,4 @@ public class CreateModel : BasePageModel
         string DisplayName,
         string SortName,
         string Category);
-
-    public sealed record ClassRecord(
-        int Id,
-        string Name,
-        string Teacher,
-        string Grade);
 }
