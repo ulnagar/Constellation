@@ -81,7 +81,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
             viewModel.AbsenceScanStartDate = settings.Absences.AbsenceScanStartDate;
             viewModel.PartialLengthThreshold = settings.Absences.PartialLengthThreshold;
 
-            viewModel.AbsenceReasonList = new MultiSelectList(_unitOfWork.AbsenceReasons);
+            viewModel.AbsenceReasonList = null;
 
             return View("Absence", viewModel);
         }
@@ -93,7 +93,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
             if (!ModelState.IsValid)
             {
                 await UpdateViewModel(viewModel);
-                viewModel.AbsenceReasonList = new MultiSelectList(_unitOfWork.AbsenceReasons);
+                viewModel.AbsenceReasonList = null;
                 return View("Absence", viewModel);
             }
 

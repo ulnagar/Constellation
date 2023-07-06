@@ -18,6 +18,13 @@ public static class DomainErrors
                 $"Could not find any absence with the id {id}");
         }
 
+        public static class Report
+        {
+            public static readonly Error NoFilterSupplied = new(
+                "Absences.Report.NoFilterSupplied",
+                "Cannot generate report without a supplied filter");
+        }
+
         public static class Response
         {
             public static readonly Func<AbsenceResponseId, Error> NotFound = id => new Error(
@@ -290,6 +297,10 @@ public static class DomainErrors
     {
         public static class ClassworkNotification
         {
+            public static readonly Func<ClassworkNotificationId, Error> NotFound = id => new(
+                "MissedWork.ClassworkNotification.NotFound",
+                $"Could not find any notification record with the Id {id}");
+
             public static readonly Error RequireAbsenceToCreate = new(
                 "MissedWork.ClassworkNotification.RequireAbsenceToCreate",
                 "A Classwork Notification cannot be created without at least one linked Absence");

@@ -1,95 +1,63 @@
-﻿using Constellation.Application.Interfaces.Repositories;
+﻿namespace Constellation.Presentation.Server.Areas.Home.Pages;
+
 using Constellation.Application.MandatoryTraining.GetCountOfExpiringCertificatesForStaffMember;
+using Constellation.Application.MissedWork.GetOutstandingNotificationsForTeacher;
+using Constellation.Application.MissedWork.Models;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.StaffMembers.GetStaffByEmail;
+using Constellation.Application.StaffMembers.Models;
+using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Constellation.Presentation.Server.Areas.Home.Pages
+[Authorize]
+public class DashboardModel : BasePageModel
 {
-    [Authorize]
-    public class DashboardModel : BasePageModel
+    private readonly IMediator _mediator;
+
+    public DashboardModel(IMediator mediator)
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMediator _mediator;
+        _mediator = mediator;
+    }
 
-        public DashboardModel(IUnitOfWork unitOfWork, IMediator mediator)
-            : base()
-        {
-            _unitOfWork = unitOfWork;
-            _mediator = mediator;
-            ClassworkNotifications = new List<ClassworkNotificationDto>();
-        }
+    public string UserName { get; set; }
+    public bool IsAdmin { get; set; }
+    public string StaffId { get; set; }
 
-        public string UserName { get; set; }
+    public List<NotificationSummary> ClassworkNotifications { get; set; } = new();
+    public int ExpiringTraining { get; set; } = 0;
 
-        public ICollection<ClassworkNotificationDto> ClassworkNotifications { get; set; }
+    public async Task<IActionResult> OnGet(CancellationToken cancellationToken = default)
+    {
+        await GetClasses(_mediator);
 
-        public bool IsAdmin { get; set; }
+        string? username = User.Identity.Name;
+        bool IsStaff = User.IsInRole(AuthRoles.StaffMember);
+        IsAdmin = User.IsInRole(AuthRoles.Admin);
 
-        public int ExpiringTraining { get; set; }
-        public string StaffId { get; set; }
+        if (!IsStaff && !IsAdmin)
+            return RedirectToPage("Index", new { area = "" });
 
-        public class ClassworkNotificationDto
-        {
-            public ClassworkNotificationDto()
-            {
-                Students = new List<string>();
-            }
+        Result<StaffSelectionListResponse> teacherRequest = await _mediator.Send(new GetStaffByEmailQuery(username), cancellationToken);
 
-            public Guid Id { get; set; }
-            public string ClassName { get; set; }
-            public DateTime ClassDate { get; set; }
-            public ICollection<string> Students { get; set; }
-        }
-
-        public async Task<IActionResult> OnGet()
-        {
-            var username = User.Identity.Name;
-            var IsStaff = User.IsInRole(AuthRoles.StaffMember);
-            IsAdmin = User.IsInRole(AuthRoles.Admin);
-
-            if (!IsStaff && !IsAdmin)
-            {
-                return RedirectToPage("Index", new { area = "" });
-            }
-
-            var teacher = await _unitOfWork.Staff.FromEmailForExistCheck(username);
-
-            if (teacher == null) return Page();
-
-            var trainingExpiringSoonRequest = await _mediator.Send(new GetCountOfExpiringCertificatesForStaffMemberQuery(teacher.StaffId));
-
-            if (trainingExpiringSoonRequest.IsSuccess)
-            {
-                ExpiringTraining = trainingExpiringSoonRequest.Value;
-            } 
-            else
-            {
-                ExpiringTraining = 0;
-            }
-
-            StaffId = teacher.StaffId;
-
-            UserName = teacher.DisplayName;
-
-            await GetClasses(_unitOfWork);
-
-            var classworkNotifications = await _unitOfWork.ClassworkNotifications.GetOutstandingForTeacher(teacher.StaffId);
-
-            foreach (var notification in classworkNotifications)
-            {
-                ClassworkNotifications.Add(new ClassworkNotificationDto
-                {
-                    Id = notification.Id,
-                    ClassName = notification.Offering.Name,
-                    ClassDate = notification.AbsenceDate,
-                    Students = notification.Absences.Select(absence => absence.Student.DisplayName).ToList()
-                });
-            }
-
+        if (teacherRequest.IsFailure) 
             return Page();
-        }
+
+        StaffId = teacherRequest.Value.StaffId;
+        UserName = $"{teacherRequest.Value.FirstName} {teacherRequest.Value.LastName})";
+
+        Result<int> trainingExpiringSoonRequest = await _mediator.Send(new GetCountOfExpiringCertificatesForStaffMemberQuery(StaffId));
+
+        if (trainingExpiringSoonRequest.IsSuccess)
+            ExpiringTraining = trainingExpiringSoonRequest.Value;
+
+        Result<List<NotificationSummary>> notificationRequest = await _mediator.Send(new GetOutstandingNotificationsForTeacherQuery(StaffId), cancellationToken);
+
+        if (notificationRequest.IsSuccess)
+            ClassworkNotifications = notificationRequest.Value;
+
+        return Page();
     }
 }

@@ -1,9 +1,9 @@
-﻿@page "{studentId}"
+﻿@page "{StudentId}"
 @model Constellation.Presentation.Server.Areas.Portal.Pages.Absences.StudentsModel
 
 @using Constellation.Core.Models.Absences;
 
-<h2>All Absences for @Model.StudentName</h2>
+<h2>Absences for @Model.StudentName</h2>
 
 <div>
     @{
@@ -35,26 +35,24 @@
             <th></th>
             <th>Type</th>
             <th>Date</th>
-            <th>Time</th>
             <th>Period</th>
-            <th>Length</th>
+            <th>Absence</th>
             <th>Class</th>
-            <th>Action</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var entry in Model.Explanations)
+        @foreach (var entry in Model.Absences)
         {
             <tr>
                 <td>@Html.DisplayFor(model => entry.IsExplained, "BooleanTick")</td>
-                <td>@Html.DisplayFor(model => entry.Type)</td>
-                <td>@Html.DisplayFor(model => entry.Date, "ShortDate")</td>
-                <td>@Html.DisplayFor(model => entry.PeriodTimeframe)</td>
-                <td>@Html.DisplayFor(model => entry.PeriodName)</td>
-                <td>@Html.DisplayFor(model => entry.AbsenceLength) minutes</td>
-                <td>@Html.DisplayFor(model => entry.OfferingName)</td>
+                <td>@entry.AbsenceType</td>
+                <td>@entry.AbsenceDate.ToShortDateString()</td>
+                <td>@entry.PeriodName</td>
+                <td>@entry.Timeframe</td>
+                <td>@entry.OfferingName</td>
                 <td class="text-center">
-                    @if (!entry.IsExplained && entry.Type == AbsenceType.Partial)
+                    @if (!entry.IsExplained && entry.AbsenceType == AbsenceType.Partial)
                     {
                         <a asp-page="StudentExplanation" asp-area="Portal" asp-route-id="@entry.AbsenceId" class="btn btn-sm btn-primary btn-show-hover">Explain</a>
                     }

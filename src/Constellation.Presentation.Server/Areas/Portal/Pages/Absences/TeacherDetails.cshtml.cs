@@ -1,72 +1,48 @@
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
-using Constellation.Core.Models.MissedWork;
+namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences;
+
+using Constellation.Application.MissedWork.GetNotificationDetails;
+using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
-namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
+public class TeacherDetailsModel : BasePageModel
 {
-    public class TeacherDetailsModel : BasePageModel
+    private readonly IMediator _mediator;
+
+    public TeacherDetailsModel(
+        IMediator mediator)
     {
-        private readonly IUnitOfWork _unitOfWork;
+        _mediator = mediator;
+    }
 
-        public TeacherDetailsModel(IUnitOfWork unitOfWork)
-            : base()
+    [BindProperty(SupportsGet = true)]
+    public Guid Id { get; set; }
+
+    public NotificationDetails Notification { get; set; }
+
+    public async Task OnGet(CancellationToken cancellationToken = default)
+    {
+        await GetClasses(_mediator);
+
+        ClassworkNotificationId notificationId = ClassworkNotificationId.FromValue(Id);
+
+        Result<NotificationDetails> entry = await _mediator.Send(new GetNotificationDetailsQuery(notificationId), cancellationToken);
+
+        if (entry.IsFailure)
         {
-            _unitOfWork = unitOfWork;
-        }
-
-        [BindProperty(SupportsGet = true)]
-        public Guid Id { get; set; }
-        public NotificationDto Notification { get; set; }
-
-        public async Task<IActionResult> OnGet()
-        {
-            var entry = await _unitOfWork.ClassworkNotifications.Get(Id);
-
-            Notification = NotificationDto.ConvertFromNotification(entry);
-
-            await GetClasses(_unitOfWork);
-
-            return Page();
-        }
-
-        public class NotificationDto
-        {
-            public Guid Id { get; set; }
-            public string Description { get; set; }
-            public Staff CompletedBy { get; set; }
-            public string StaffId { get; set; }
-            public DateTime? CompletedAt { get; set; }
-            public DateTime GeneratedAt { get; set; }
-            public ICollection<Student> Students { get; set; }
-            public ICollection<Staff> Teachers { get; set; }
-            public string OfferingName { get; set; }
-            public DateTime AbsenceDate { get; set; }
-
-            public static NotificationDto ConvertFromNotification(ClassworkNotification entry)
+            Error = new()
             {
-                var viewModel = new NotificationDto
-                {
-                    Id = entry.Id,
-                    Description = entry.Description,
-                    CompletedBy = entry.CompletedBy,
-                    CompletedAt = entry.CompletedAt,
-                    StaffId = entry.StaffId,
-                    GeneratedAt = entry.GeneratedAt,
-                    Teachers = entry.Teachers,
-                    AbsenceDate = entry.AbsenceDate,
-                    OfferingName = entry.Offering.Name,
-                    Students = entry.Absences.Select(absence => absence.Student).ToList()
-                };
+                Error = entry.Error,
+                RedirectPath = null
+            };
 
-                return viewModel;
-            }
+            return;
         }
+
+        Notification = entry.Value;
     }
 }

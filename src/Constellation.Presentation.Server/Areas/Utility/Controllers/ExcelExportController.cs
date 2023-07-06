@@ -28,19 +28,19 @@ namespace Constellation.Presentation.Server.Areas.Utility.Controllers
             _exportService = exportService;
         }
 
-        public async Task<IActionResult> ExportAbsences(string title)
-        {
-            var data = JsonConvert.DeserializeObject<ICollection<AbsenceExportDto>>((string)TempData["data"]);
+        //public async Task<IActionResult> ExportAbsences(string title)
+        //{
+        //    var data = JsonConvert.DeserializeObject<ICollection<AbsenceExportDto>>((string)TempData["data"]);
 
-            var stream = await _excelService.CreateAbsencesFile(data, title);
+        //    var stream = await _excelService.CreateAbsencesFile(data, title);
 
-            var fs = new FileStreamResult(stream, "application/vnd.openxmlformats-office")
-            {
-                FileDownloadName = "AbsencesExport.xlsx"
-            };
+        //    var fs = new FileStreamResult(stream, "application/vnd.openxmlformats-office")
+        //    {
+        //        FileDownloadName = "AbsencesExport.xlsx"
+        //    };
 
-            return fs;
-        }
+        //    return fs;
+        //}
 
         public async Task<IActionResult> ExportInterviews(InterviewExportSelectionDto filter, CancellationToken cancellationToken)
         {

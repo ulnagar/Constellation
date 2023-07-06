@@ -1,6 +1,8 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Absences;
 
+using Constellation.Application.Absences.ExportAbsencesReport;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
+using Constellation.Application.Contacts.ExportContactList;
 using Constellation.Application.Contacts.GetContactList;
 using Constellation.Application.Offerings.GetOfferingsForSelectionList;
 using Constellation.Application.Schools.GetCurrentPartnerSchoolsWithStudentsList;
@@ -53,6 +55,29 @@ public class ReportModel : BasePageModel
             return await OnPostExport(cancellationToken);
 
         return await PreparePage(cancellationToken);
+    }
+
+    public async Task<IActionResult> OnPostExport(CancellationToken cancellationToken)
+    {
+        var file = await _mediator.Send(new ExportAbsencesReportCommand(
+                Filter.Offerings,
+                Filter.Grades,
+                Filter.Schools,
+                Filter.Students),
+            cancellationToken);
+
+        if (file.IsFailure)
+        {
+            Error = new ErrorDisplay
+            {
+                Error = file.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return File(file.Value.FileData, file.Value.FileType, file.Value.FileName);
     }
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken)

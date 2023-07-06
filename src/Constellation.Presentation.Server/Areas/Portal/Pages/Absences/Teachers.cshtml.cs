@@ -1,88 +1,56 @@
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models.MissedWork;
+namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences;
+
+using Constellation.Application.MissedWork.GetNotificationsForTeacher;
+using Constellation.Application.MissedWork.Models;
+using Constellation.Application.StaffMembers.GetStaffByEmail;
+using Constellation.Application.StaffMembers.Models;
+using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences
+public class TeachersModel : BasePageModel
 {
-    public class TeachersModel : BasePageModel
+    private readonly IMediator _mediator;
+
+    public TeachersModel(
+        IMediator mediator)
     {
-        private readonly IUnitOfWork _unitOfWork;
+        _mediator = mediator;
+    }
 
-        public TeachersModel(IUnitOfWork unitOfWork)
-            : base()
+    public List<NotificationSummary> Notifications { get; set; } = new();
+
+    [BindProperty(SupportsGet = true)]
+    public FilterDto Filter { get; set; }
+
+    public async Task OnGet(CancellationToken cancellationToken = default)
+    {
+        await GetClasses(_mediator);
+
+        string? username = User.Identity.Name;
+        Result<StaffSelectionListResponse> teacherRequest = await _mediator.Send(new GetStaffByEmailQuery(username), cancellationToken);
+
+        if (teacherRequest.IsFailure)
+            return;
+
+        Result<List<NotificationSummary>> notificationRequest = await _mediator.Send(new GetNotificationsForTeacherQuery(teacherRequest.Value.StaffId), cancellationToken);
+
+        if (notificationRequest.IsFailure)
+            return;
+
+        Notifications = Filter switch
         {
-            _unitOfWork = unitOfWork;
+            FilterDto.Complete => notificationRequest.Value.Where(notification => notification.IsCompleted).ToList(),
+            FilterDto.All => notificationRequest.Value.ToList(),
+            _ => notificationRequest.Value.Where(notification => notification.IsCompleted).ToList()
+        };
+    }
 
-            Notifications = new List<NotificationDto>();
-        }
-
-        public ICollection<NotificationDto> Notifications { get; set; }
-        [BindProperty(SupportsGet = true)]
-        public FilterDto Filter { get; set; }
-
-
-        public async Task<IActionResult> OnGet()
-        {
-            var user = User.Identity.Name;
-            var teacher = await _unitOfWork.Staff.FromEmailForExistCheck(user);
-
-            if (teacher != null)
-            {
-                var notifications = await _unitOfWork.ClassworkNotifications.GetForTeacher(teacher.StaffId);
-
-                Notifications = Filter switch
-                {
-                    FilterDto.Complete => notifications.Where(notification => notification.CompletedAt.HasValue).Select(notification => NotificationDto.ConvertFromNotification(notification)).ToList(),
-                    FilterDto.All => notifications.Select(notification => NotificationDto.ConvertFromNotification(notification)).ToList(),
-                    _ => notifications.Where(notification => !notification.CompletedAt.HasValue).Select(notification => NotificationDto.ConvertFromNotification(notification)).ToList(),
-                };
-            }
-
-            await GetClasses(_unitOfWork);
-
-            return Page();
-        }
-
-        public class NotificationDto
-        {
-            public NotificationDto()
-            {
-                Students = new List<string>();
-            }
-
-            public Guid Id { get; set; }
-            public DateTime ClassDate { get; set; }
-            public string ClassName { get; set; }
-            public int NumStudents { get; set; }
-            public ICollection<string> Students { get; set; }
-            public bool IsCompleted { get; set; }
-
-            public static NotificationDto ConvertFromNotification(ClassworkNotification notification)
-            {
-                var viewModel = new NotificationDto
-                {
-                    Id = notification.Id,
-                    ClassDate = notification.AbsenceDate,
-                    ClassName = notification.Offering.Name,
-                    NumStudents = notification.Absences.Count,
-                    Students = notification.Absences.Select(absence => absence.Student).OrderBy(student => student.LastName).Select(student => student.DisplayName).ToList(),
-                    IsCompleted = notification.CompletedAt.HasValue
-                };
-
-                return viewModel;
-            }
-        }
-
-        public enum FilterDto
-        {
-            Pending,
-            Complete,
-            All
-        }
+    public enum FilterDto
+    {
+        Pending,
+        Complete,
+        All
     }
 }

@@ -2,7 +2,6 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences;
 
 using Constellation.Application.Absences.CreateAbsenceResponseFromStudent;
 using Constellation.Application.Absences.GetAbsenceForStudentResponse;
-using Constellation.Application.Absences.ProvideStudentPartialAbsenceExplanation;
 using Constellation.Core.Models.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
