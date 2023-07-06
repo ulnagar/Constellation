@@ -1,6 +1,8 @@
 ﻿@page "/Portal/Absences/Teachers/Update/{Id}"
 @model Constellation.Presentation.Server.Areas.Portal.Pages.Absences.TeacherUpdateModel
 
+@using Constellation.Core.ValueObjects;
+
 @{
     Layout = "/Pages/Shared/_WebLayout.cshtml";
 }
@@ -14,25 +16,25 @@
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         @Html.HiddenFor(model => model.Id)
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Notification.OfferingName, "Class", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-6 control-label text-left">
+        <div class="form-group row">
+            <label asp-for="Notification.OfferingName" class="col-md-2">Class</label>
+            <div class="col-md-5">
                 @Model.Notification.OfferingName
             </div>
         </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Notification.AbsenceDate, "Absence Date", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-6 control-label text-left">
+        <div class="form-group row">
+            <label asp-for="Notification.AbsenceDate" class="col-md-2">Absence Date</label>
+            <div class="col-md-5">
                 @Model.Notification.AbsenceDate.ToLongDateString()
             </div>
         </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Notification.Students, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-6 control-label text-left">
+        <div class="form-group row">
+            <label asp-for="Notification.Students" class="col-md-2">Students</label>
+            <div class="col-md-5">
                 <ul>
-                    @foreach (var student in Model.Notification.Students)
+                    @foreach (Name student in Model.Notification.Students)
                     {
                         <li>@student.DisplayName</li>
                     }
@@ -40,16 +42,16 @@
             </div>
         </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Description, "Missed Work", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="form-group row">
+            <label asp-for="Notification.Description" class="col-md-2">Missed Work</label>
             <div class="col-md-10">
-                @Html.TextAreaFor(model => model.Description, 5, 100, new { @class = "form-control summernote" })
-                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                <textarea asp-for="Notification.Description" rows="5" cols="100" class="form-control summernote"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
             </div>
         </div>
 
         <div class="form-group">
-            <div class="col-md-offset-2 col-md-3">
+            <div class="col-md-3">
                 <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
             </div>
         </div>
