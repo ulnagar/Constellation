@@ -62,11 +62,11 @@
                 <td>
                     @if (item.IsCompleted)
                     {
-                        <a asp-page="TeacherDetails" asp-area="Portal" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                        <a asp-page="TeacherDetails" asp-area="Portal" asp-route-id="@item.NotificationId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                     }
                     else
                     {
-                        <a asp-page="TeacherUpdate" asp-area="Portal" asp-route-id="@item.Id" class="btn btn-sm btn-success btn-show-hover">Submit Work...</a>
+                        <a asp-page="TeacherUpdate" asp-area="Portal" asp-route-id="@item.NotificationId" class="btn btn-sm btn-success btn-show-hover">Submit Work...</a>
                     }
                 </td>
             </tr>

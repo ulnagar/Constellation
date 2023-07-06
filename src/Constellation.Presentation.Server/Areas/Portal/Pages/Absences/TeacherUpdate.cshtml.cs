@@ -7,6 +7,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models;
 using Constellation.Core.Models.MissedWork;
+using Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
@@ -20,36 +21,30 @@ using System.Threading.Tasks;
 [Roles(AuthRoles.Admin, AuthRoles.StaffMember)]
 public class TeacherUpdateModel : BasePageModel
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ISentralGateway _sentralService;
-    private readonly IEmailService _emailService;
     private readonly IMediator _mediator;
 
-    public TeacherUpdateModel(IUnitOfWork unitOfWork, ISentralGateway sentralService, IEmailService emailService, IMediator mediator)
-        : base()
+    public TeacherUpdateModel(
+        IMediator mediator)
     {
-        _unitOfWork = unitOfWork;
-        _sentralService = sentralService;
-        _emailService = emailService;
         _mediator = mediator;
     }
 
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }
+
     public NotificationDto Notification { get; set; }
+
     [BindProperty]
     [Required]
     public string Description { get; set; }
 
-    public async Task<IActionResult> OnGet()
+    public async Task OnGet(CancellationToken cancellationToken = default)
     {
+        await GetClasses(_mediator);
+
         var entry = await _unitOfWork.ClassworkNotifications.Get(Id);
 
         Notification = NotificationDto.ConvertFromNotification(entry);
-
-        await GetClasses(_unitOfWork);
-
-        return Page();
     }
 
     public async Task<IActionResult> OnPost(CancellationToken cancellationToken)

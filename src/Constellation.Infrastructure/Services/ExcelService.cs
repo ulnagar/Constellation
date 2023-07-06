@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
 using Constellation.Application.Absences.GetAbsencesForExport;
+using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
 using Constellation.Application.Contacts.GetContactList;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.CSV;
@@ -84,20 +85,22 @@ public class ExcelService : IExcelService
         return stream;
     }
 
-    public async Task<MemoryStream> CreateAbsencesFile(List<AbsenceExportResponse> exportAbsences, string title)
+    public async Task<MemoryStream> CreateAbsencesReportFile(
+        List<FilteredAbsenceResponse> exportAbsences, 
+        CancellationToken cancellationToken = default)
     {
         var excel = new ExcelPackage();
         var workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
-        var pageTitle = workSheet.Cells[1, 1].RichText.Add(title);
-        pageTitle.Bold = true;
-        pageTitle.Size = 16;
+        //var pageTitle = workSheet.Cells[1, 1].RichText.Add();
+        //pageTitle.Bold = true;
+        //pageTitle.Size = 16;
 
         workSheet.Cells[2, 1].LoadFromCollection(exportAbsences, true);
         workSheet.Cells[2, 6, workSheet.Dimension.Rows, 6].Style.Numberformat.Format = "dd/MM/yyyy";
         workSheet.Cells[2, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
         var memoryStream = new MemoryStream();
-        await excel.SaveAsAsync(memoryStream);
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;
 
         return memoryStream;

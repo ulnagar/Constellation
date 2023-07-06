@@ -78,14 +78,14 @@
                             }
                         </td>
                         <td>
-                            <a href="/Portal/Absences/Teachers/Update/@item.Id" class="btn btn-sm btn-success btn-show-hover">Submit Work...</a>
+                            <a asp-page="/Absences/Teachers/Update" asp-area="Portal" asp-route-id="@item.NotificationId" class="btn btn-sm btn-success btn-show-hover">Submit Work...</a>
                         </td>
                     </tr>
                 }
             } else
             {
                 <tr>
-                    <td colspan="5">No Items Found!</td>
+                    <td colspan="4">No Items Found!</td>
                 </tr>
             }
         </tbody>
