@@ -3,6 +3,7 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
+using Constellation.Core.Models.Absences;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
@@ -54,6 +55,25 @@ internal sealed class GetAbsencesForFamilyQueryHandler
 
                 var response = absence.GetExplainedResponse();
 
+                AbsenceForFamilyResponse.AbsenceStatus status = AbsenceForFamilyResponse.AbsenceStatus.VerifiedPartial;
+
+                if (absence.Type == AbsenceType.Whole)
+                {
+                    if (absence.Explained)
+                        status = AbsenceForFamilyResponse.AbsenceStatus.ExplainedWhole;
+                    else
+                        status = AbsenceForFamilyResponse.AbsenceStatus.UnexplainedWhole;
+                }
+                else
+                {
+                    if (response is null)
+                        status = AbsenceForFamilyResponse.AbsenceStatus.UnexplainedPartial;
+                    else if (response.VerificationStatus == ResponseVerificationStatus.Verified)
+                        status = AbsenceForFamilyResponse.AbsenceStatus.VerifiedPartial;
+                    else
+                        status = AbsenceForFamilyResponse.AbsenceStatus.UnverifiedPartial;
+                }
+
                 var entry = new AbsenceForFamilyResponse(
                     absence.Id,
                     student.StudentId,
@@ -70,6 +90,7 @@ internal sealed class GetAbsencesForFamilyQueryHandler
                     response?.Explanation,
                     response?.VerificationStatus,
                     absence.Explained,
+                    status,
                     studentIds.First(entry => entry.Key == absence.StudentId).Value);
 
                 results.Add(entry);

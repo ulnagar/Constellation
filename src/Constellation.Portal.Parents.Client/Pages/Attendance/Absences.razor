@@ -1,6 +1,7 @@
 ﻿@page "/Attendance/Absences/"
 
-@using Constellation.Application.Features.Attendance.Queries
+@using Constellation.Application.Absences.GetAbsencesForFamily;
+@using Constellation.Core.Shared;
 
 @inject HttpClient Http
 @inject IJSRuntime JS
@@ -91,12 +92,12 @@
 
     <div class="d-flex flex-column justify-content-around">
         <div class="accordion accordion-flush" id="accordion">
-            @foreach (var month in FilteredAbsences.GroupBy(absence => absence.Date.Month))
+            @foreach (var month in FilteredAbsences.GroupBy(absence => absence.AbsenceDate.Month))
             {
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="accordion-header-@month.Key">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-@month.Key" aria-expanded="false" aria-controls="accordion-item-@month.Key">
-                            @month.First().Date.ToString("MMMM")
+                            @month.First().AbsenceDate.ToString("MMMM")
                         </button>
                     </h2>
                     <div id="accordion-item-@month.Key" class="accordion-collapse collapse" aria-labelledby="accordion-header-@month.Key" data-bs-parent="#accordion">
@@ -106,9 +107,9 @@
                                 <div class="w-auto p-3 mb-2 shadow position-relative">
                                     <div class="row d-flex align-items-center"> @*Display as flex to enable vertical centering of the button in the second div*@
                                         <div class="col-lg-8">
-                                            <div class="h5">@entry.StudentName (@entry.StudentCurrentGrade) - @entry.AbsenceReason</div>
+                                            <div class="h5">@entry.StudentName (@entry.StudentGrade) - @entry.AbsenceReason</div>
                                             @*<div><span class="me-2">@entry.Status.ToString()</span> <span class="me-2">@entry.Id</span></div>*@
-                                            <div><span class="me-2">@entry.Date.ToString("dd/MM")</span> <span class="me-2">@entry.OfferingName</span> @entry.AbsenceLength min (@entry.AbsenceTimeframe)</div>
+                                            <div><span class="me-2">@entry.AbsenceDate.ToString("dd/MM")</span> <span class="me-2">@entry.OfferingName</span> @entry.AbsenceLength min (@entry.AbsenceTimeframe)</div>
                     
                                             @*If this is a unverified partial absence, include the student explanation in the view*@
                                             @if (!string.IsNullOrWhiteSpace(entry.Explanation))
@@ -139,8 +140,8 @@
 
     private bool ShowLoader { get; set; } = false;
 
-    private List<AbsenceDto> AbsencesList = new();
-    private List<AbsenceDto> FilteredAbsences { get; set; } = new();
+    private List<AbsenceForFamilyResponse> AbsencesList = new();
+    private List<AbsenceForFamilyResponse> FilteredAbsences { get; set; } = new();
     private AbsenceCategory AbsencesType { get; set; } = AbsenceCategory.UnexplainedWholes;
 
     private int ExplainedWholesCount = 0;
@@ -155,18 +156,23 @@
 
         try
         {
-            AbsencesList = await Http.GetFromJsonAsync<List<AbsenceDto>>($"Attendance");
+            Result<List<AbsenceForFamilyResponse>> absenceRequest = await Http.GetFromJsonAsync<Result<List<AbsenceForFamilyResponse>>>($"Attendance");
+
+            if (absenceRequest.IsSuccess)
+            {
+                AbsencesList = absenceRequest.Value;
+            }
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
         }
 
-        VerifiedPartialsCount = AbsencesList.Count(absence => absence.Status == AbsenceDto.AbsenceStatus.VerifiedPartial);
-        ExplainedWholesCount = AbsencesList.Count(absence => absence.Status == AbsenceDto.AbsenceStatus.ExplainedWhole);
-        UnexplainedPartialsCount = AbsencesList.Count(absence => absence.Status == AbsenceDto.AbsenceStatus.UnexplainedPartial);
-        UnverifiedPartialsCount = AbsencesList.Count(absence =>  absence.Status == AbsenceDto.AbsenceStatus.UnverifiedPartial);
-        UnexplainedWholesCount = AbsencesList.Count(absence => absence.Status == AbsenceDto.AbsenceStatus.UnexplainedWhole);
+        VerifiedPartialsCount = AbsencesList.Count(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.VerifiedPartial);
+        ExplainedWholesCount = AbsencesList.Count(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.ExplainedWhole);
+        UnexplainedPartialsCount = AbsencesList.Count(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.UnexplainedPartial);
+        UnverifiedPartialsCount = AbsencesList.Count(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.UnverifiedPartial);
+        UnexplainedWholesCount = AbsencesList.Count(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.UnexplainedWhole);
 
         await FilterAbsences();
 
@@ -188,47 +194,47 @@
         {
             case AbsenceCategory.UnexplainedPartials:
                 FilteredAbsences = AbsencesList
-                    .Where(absence => absence.Status == AbsenceDto.AbsenceStatus.UnexplainedPartial)
-                    .OrderBy(absence => absence.Date)
-                    .ThenBy(absence => absence.StudentCurrentGrade)
-                    .ThenBy(absence => absence.StudentLastName)
-                    .ThenBy(absence => absence.StudentFirstName)
+                    .Where(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.UnexplainedPartial)
+                    .OrderBy(absence => absence.AbsenceDate)
+                    .ThenBy(absence => absence.StudentGrade)
+                    .ThenBy(absence => absence.StudentName.LastName)
+                    .ThenBy(absence => absence.StudentName.FirstName)
                     .ToList();
                 break;
             case AbsenceCategory.UnexplainedWholes:
                 FilteredAbsences = AbsencesList
-                    .Where(absence => absence.Status == AbsenceDto.AbsenceStatus.UnexplainedWhole)
-                    .OrderBy(absence => absence.Date)
-                    .ThenBy(absence => absence.StudentCurrentGrade)
-                    .ThenBy(absence => absence.StudentLastName)
-                    .ThenBy(absence => absence.StudentFirstName)
+                    .Where(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.UnexplainedWhole)
+                    .OrderBy(absence => absence.AbsenceDate)
+                    .ThenBy(absence => absence.StudentGrade)
+                    .ThenBy(absence => absence.StudentName.LastName)
+                    .ThenBy(absence => absence.StudentName.FirstName)
                     .ToList();
                 break;
             case AbsenceCategory.UnverifiedPartials:
                 FilteredAbsences = AbsencesList
-                    .Where(absence => absence.Status == AbsenceDto.AbsenceStatus.UnverifiedPartial)
-                    .OrderBy(absence => absence.Date)
-                    .ThenBy(absence => absence.StudentCurrentGrade)
-                    .ThenBy(absence => absence.StudentLastName)
-                    .ThenBy(absence => absence.StudentFirstName)
+                    .Where(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.UnverifiedPartial)
+                    .OrderBy(absence => absence.AbsenceDate)
+                    .ThenBy(absence => absence.StudentGrade)
+                    .ThenBy(absence => absence.StudentName.LastName)
+                    .ThenBy(absence => absence.StudentName.FirstName)
                     .ToList();
                 break;
             case AbsenceCategory.ExplainedWholes:
                 FilteredAbsences = AbsencesList
-                    .Where(absence => absence.Status == AbsenceDto.AbsenceStatus.ExplainedWhole)
-                    .OrderBy(absence => absence.Date)
-                    .ThenBy(absence => absence.StudentCurrentGrade)
-                    .ThenBy(absence => absence.StudentLastName)
-                    .ThenBy(absence => absence.StudentFirstName)
+                    .Where(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.ExplainedWhole)
+                    .OrderBy(absence => absence.AbsenceDate)
+                    .ThenBy(absence => absence.StudentGrade)
+                    .ThenBy(absence => absence.StudentName.LastName)
+                    .ThenBy(absence => absence.StudentName.FirstName)
                     .ToList();
                 break;
             case AbsenceCategory.VerifiedPartials:
                 FilteredAbsences = AbsencesList
-                    .Where(absence => absence.Status == AbsenceDto.AbsenceStatus.VerifiedPartial)
-                    .OrderBy(absence => absence.Date)
-                    .ThenBy(absence => absence.StudentCurrentGrade)
-                    .ThenBy(absence => absence.StudentLastName)
-                    .ThenBy(absence => absence.StudentFirstName)
+                    .Where(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.VerifiedPartial)
+                    .OrderBy(absence => absence.AbsenceDate)
+                    .ThenBy(absence => absence.StudentGrade)
+                    .ThenBy(absence => absence.StudentName.LastName)
+                    .ThenBy(absence => absence.StudentName.FirstName)
                     .ToList();
                 break;
         }

@@ -1,9 +1,9 @@
 ﻿@page "/Attendance/Absences/Details/{id:guid}"
 
 @using Constellation.Application.Absences.GetAbsenceDetailsForParent;
-@using Constellation.Application.Features.Attendance.Commands
-@using Constellation.Application.Features.Attendance.Queries;
+@using Constellation.Application.Absences.ProvideParentWholeAbsenceExplanation;
 @using Constellation.Core.Models.Absences;
+@using Constellation.Core.Models.Identifiers;
 
 @inject HttpClient Http
 @inject NavigationManager navManager
@@ -21,7 +21,7 @@
 
     <h2>@Absence.Type absence for @Absence.Student.DisplayName</h2>
 
-    <EditForm Model="Command" OnValidSubmit="SubmitResponse">
+    <EditForm Model="Comment" OnValidSubmit="SubmitResponse">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
@@ -104,7 +104,7 @@
                         <span>"@Absence.Reason"</span>
                     } else
                     {
-                        <InputTextArea @bind-Value="Command.Comment" rows="5" cols="100" class="form-control" />
+                        <InputTextArea @bind-Value="Comment" rows="5" cols="100" class="form-control" />
                     }
                 }
 
@@ -153,7 +153,7 @@
     public bool ShowLoader { get; set; } = false;
 
     ParentAbsenceDetailsResponse Absence { get; set; }
-    public ProvideParentWholeAbsenceExplanationCommand Command { get; set; } = new();
+    public string Comment { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -173,10 +173,16 @@
 
     async Task SubmitResponse()
     {
-        Command.AbsenceId = Id;
-
         if (Absence.CanBeExplainedByParent)
+        {
+            AbsenceId absenceId = AbsenceId.FromValue(Id);
+
+            ProvideParentWholeAbsenceExplanationCommand Command = new(
+                absenceId,
+                Comment);
+
             await Http.PostAsJsonAsync<ProvideParentWholeAbsenceExplanationCommand>($"Attendance/ParentExplanation", Command);
+        }
 
         navManager.NavigateTo("Attendance/Absences");
     }

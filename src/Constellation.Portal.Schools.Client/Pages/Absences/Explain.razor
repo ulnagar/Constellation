@@ -1,7 +1,8 @@
-﻿@page "/Absences/Whole/{AbsenceId:guid}/Explain"
+﻿@page "/Absences/Whole/{absenceId:guid}/Explain"
 
-@using Constellation.Application.Features.Portal.School.Absences.Commands;
-@using Constellation.Application.Features.Portal.School.Absences.Models;
+@using Constellation.Application.Absences.CreateAbsenceResponseFromSchool;
+@using Constellation.Application.Absences.GetAbsenceDetailsForSchool;
+@using Constellation.Core.Models.Identifiers;
 
 @attribute [Authorize]
 
@@ -13,13 +14,13 @@
     <h1>Whole Absence Explanation</h1>
 
     <div>
-        <EditForm Model="Command" OnValidSubmit="SubmitResponse">
+        <EditForm Model="Comment" OnValidSubmit="SubmitResponse">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Absence Date</label>
-                <div class="col-md-6">@Absence?.Date.ToShortDateString()</div>
+                <div class="col-md-6">@Absence?.AbsenceDate.ToShortDateString()</div>
             </div>
 
             <div class="mb-3 row">
@@ -45,7 +46,7 @@
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Comment</label>
                 <div class="col-md-6">
-                    <InputTextArea @bind-Value="Command.Comment" rows="5" cols="100" class="form-control" />
+                    <InputTextArea @bind-Value="Comment" rows="5" cols="100" class="form-control" />
                 </div>
             </div>
 
@@ -66,12 +67,11 @@
     private bool IsLoading { get; set; } = false;
 
     [Parameter]
-    public Guid AbsenceId { get; set; }
+    public Guid absenceId { get; set; }
     public Guid CurrentAbsenceId { get; set; }
 
-    public WholeAbsenceForSchoolExplanation Absence { get; set; }
-
-    public ProvideSchoolAbsenceExplanationCommand Command { get; set; } = new();
+    public SchoolAbsenceDetailsResponse Absence { get; set; }
+    public string Comment { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -87,21 +87,12 @@
             NavigationManager.NavigateTo("Absences");
         }
 
-        if (AbsenceId != Guid.NewGuid())
+        if (absenceId != Guid.NewGuid())
         {
-            if (AbsenceId != CurrentAbsenceId)
-            {
-                Absence = await Http.GetFromJsonAsync<WholeAbsenceForSchoolExplanation>($"api/Absences/Whole/{AbsenceId}");
-                Command = new();
+            if (absenceId != CurrentAbsenceId)
+                Absence = await Http.GetFromJsonAsync<SchoolAbsenceDetailsResponse>($"api/Absences/Whole/{absenceId}");
 
-                Command.AbsenceId = AbsenceId;
-            }
-
-            CurrentAbsenceId = AbsenceId;
-        } else
-        {
-            Absence = new();
-            Command = new();
+            CurrentAbsenceId = absenceId;
         }
 
         IsLoading = false;
@@ -113,9 +104,14 @@
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-        Command.UserEmail = authState.User.Identity.Name;
+        AbsenceId AbsenceId = AbsenceId.FromValue(absenceId);
 
-        await Http.PostAsJsonAsync<ProvideSchoolAbsenceExplanationCommand>($"api/Absences/Whole/{AbsenceId}/Explain", Command);
+        CreateAbsenceResponseFromSchoolCommand Command = new(
+            AbsenceId,
+            Comment,
+            authState.User.Identity.Name);
+
+        await Http.PostAsJsonAsync<CreateAbsenceResponseFromSchoolCommand>($"api/Absences/Whole/{AbsenceId}/Explain", Command);
 
         NavigationManager.NavigateTo("Absences");
 

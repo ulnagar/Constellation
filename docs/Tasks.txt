@@ -2,7 +2,7 @@
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-	Move absence pages to SchoolAdmin\Absences including reports, audits, details, and configuration
+	Create MissedWork event handlers
 
 	Convert AbsenceClassworkNotificationJob
 		- New students being added to a notification should either be added to the 

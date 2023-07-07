@@ -1,17 +1,20 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
+using Constellation.Application.Absences.CreateAbsenceResponseFromSchool;
+using Constellation.Application.Absences.GetAbsenceDetailsForSchool;
+using Constellation.Application.Absences.GetAbsenceResponseDetailsForSchool;
+using Constellation.Application.Absences.GetOutstandingAbsencesForSchool;
+using Constellation.Application.Absences.RejectStudentExplanation;
+using Constellation.Application.Absences.VerifyStudenExplanation;
 using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
-using Constellation.Application.Features.Attendance.Queries;
-using Constellation.Application.Features.Portal.School.Absences.Commands;
-using Constellation.Application.Features.Portal.School.Absences.Models;
-using Constellation.Application.Features.Portal.School.Absences.Queries;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Portal.Schools.Client.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.IO.Compression;
 using System.Net.Mime;
-using static Constellation.Portal.Schools.Client.Pages.Absences.Report;
 
 [Route("api/[controller]")]
 public class AbsencesController : BaseAPIController
@@ -26,29 +29,44 @@ public class AbsencesController : BaseAPIController
     }
 
     [HttpGet("{schoolCode}/All")]
-    public async Task<List<AbsenceForPortalList>> GetForSchool(string schoolCode, CancellationToken cancellationToken = default)
+    public async Task<List<OutstandingAbsencesForSchoolResponse>> GetForSchool(string schoolCode, CancellationToken cancellationToken = default)
     {
         var user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve absences for school {code} by user {user}", schoolCode, user.DisplayName);
 
-        var students = await _mediator.Send(new GetUnProcessedAbsencesFromSchoolQuery { SchoolCode = schoolCode }, cancellationToken);
+        Result<List<OutstandingAbsencesForSchoolResponse>> request = await _mediator.Send(new GetOutstandingAbsencesForSchoolQuery(schoolCode), cancellationToken);
 
-        return students.ToList();
+        if (request.IsFailure)
+        {
+            _logger.Warning("Could not retrieve absences for school {code} due to error {@error}", schoolCode, request.Error);
+            return new List<OutstandingAbsencesForSchoolResponse>();
+        }
+
+        return request.Value;
     }
 
     [HttpGet("Whole/{absenceId:guid}")]
-    public async Task<WholeAbsenceForSchoolExplanation> GetWholeAbsenceForExplanation(Guid absenceId)
+    public async Task<SchoolAbsenceDetailsResponse?> GetWholeAbsenceForExplanation(Guid absenceId, CancellationToken cancellationToken = default)
     {
         var user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve absence for explanation by user {user} with id {id}", user.DisplayName, absenceId.ToString());
 
-        return await _mediator.Send(new GetAbsenceForSchoolExplanationQuery { Id = absenceId });
+        AbsenceId Id = AbsenceId.FromValue(absenceId);
+
+        Result<SchoolAbsenceDetailsResponse> request = await _mediator.Send(new GetAbsenceDetailsForSchoolQuery(Id), cancellationToken);
+
+        if (request.IsFailure)
+        {
+            return null;
+        }
+
+        return request.Value;
     }
 
     [HttpPost("Whole/{absenceId:guid}/Explain")]
-    public async Task ExplainWholeAbsence([FromQuery] Guid AbsenceId, [FromBody] ProvideSchoolAbsenceExplanationCommand Command)
+    public async Task ExplainWholeAbsence([FromQuery] Guid AbsenceId, [FromBody] CreateAbsenceResponseFromSchoolCommand Command)
     {
         var user = await GetCurrentUser();
 
@@ -57,18 +75,26 @@ public class AbsencesController : BaseAPIController
         await _mediator.Send(Command);
     }
 
-    [HttpGet("Partial/{responseId:guid}")]
-    public async Task<PartialAbsenceResponseForVerification> GetPartialAbsenceForVerification(Guid responseId)
+    [HttpGet("Partial/{absenceId:guid}/Response/{responseId:guid}")]
+    public async Task<SchoolAbsenceResponseDetailsResponse?> GetPartialAbsenceForVerification(Guid absenceId, Guid responseId, CancellationToken cancellationToken = default)
     {
         var user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve absence for verification by user {user} with id {id}", user.DisplayName, responseId.ToString());
 
-        return await _mediator.Send(new GetAbsenceResponseForVerificationQuery { Id = responseId });
+        AbsenceId AbsenceId = AbsenceId.FromValue(absenceId);
+        AbsenceResponseId ResponseId = AbsenceResponseId.FromValue(responseId);
+
+        Result<SchoolAbsenceResponseDetailsResponse> request = await _mediator.Send(new GetAbsenceResponseDetailsForSchoolQuery(AbsenceId, ResponseId), cancellationToken);
+
+        if (request.IsFailure)
+            return null;
+
+        return request.Value;
     }
 
     [HttpPost("Partial/{responseId:guid}/Verify")]
-    public async Task VerifyPartialAbsence([FromQuery] Guid ResponseId, [FromBody] VerifyAbsenceResponseCommand Command)
+    public async Task VerifyPartialAbsence([FromQuery] Guid ResponseId, [FromBody] VerifyStudentExplanationCommand Command)
     {
         var user = await GetCurrentUser();
 
@@ -78,7 +104,7 @@ public class AbsencesController : BaseAPIController
     }
 
     [HttpPost("Partial/{responseId:guid}/Reject")]
-    public async Task RejectPartialAbsence([FromQuery] Guid ResponseId, [FromBody] RejectAbsenceResponseCommand Command)
+    public async Task RejectPartialAbsence([FromQuery] Guid ResponseId, [FromBody] RejectStudentExplanationCommand Command)
     {
         var user = await GetCurrentUser();
 

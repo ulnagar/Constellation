@@ -5,5 +5,8 @@ using Constellation.Core.Models.Identifiers;
 
 public sealed record ProvideParentWholeAbsenceExplanationCommand(
     AbsenceId AbsenceId,
-    string Comment,
-    string ParentEmail) : ICommand;
+    string Comment) : ICommand
+{
+    public string ParentEmail { get; set; }
+}
+

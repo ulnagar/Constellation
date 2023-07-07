@@ -22,4 +22,15 @@ public sealed record AbsenceForFamilyResponse(
     string? Explanation,
     ResponseVerificationStatus? VerificationStatus,
     bool IsExplained,
-    bool CanParentExplainAbsence);
+    AbsenceForFamilyResponse.AbsenceStatus Status,
+    bool CanParentExplainAbsence)
+{
+    public enum AbsenceStatus
+    {
+        VerifiedPartial,
+        ExplainedWhole,
+        UnexplainedPartial,
+        UnverifiedPartial,
+        UnexplainedWhole
+    }
+}

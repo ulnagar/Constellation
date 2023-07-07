@@ -1,8 +1,8 @@
 ﻿@page "/Absences/"
 
 @using System.Threading
-@using Constellation.Application.Features.Portal.School.Absences.Models;
-@using static Constellation.Application.Features.Portal.School.Absences.Queries.GetUnProcessedAbsencesFromSchoolQuery
+@using Constellation.Application.Absences.GetOutstandingAbsencesForSchool;
+@using Constellation.Application.Extensions;
 
 @attribute [Authorize]
 
@@ -66,7 +66,7 @@
 
     <div>
         <div class="mt-3">
-            <GroupedDataTable Items="FilteredAbsences.GroupBy(student => student.StudentName).ToList()" TItem="AbsenceForPortalList" TKey="string">
+            <GroupedDataTable Items="FilteredAbsences.GroupBy(student => student.StudentName.DisplayName).ToList()" TItem="OutstandingAbsencesForSchoolResponse" TKey="string">
                 <TableHeader>
                     <th>Date</th>
                     <th>Time</th>
@@ -76,10 +76,10 @@
                     <th>Action</th>
                 </TableHeader>
                 <GroupRowTemplate Context="entry">
-                    <td colspan="6">@entry.StudentName @entry.StudentCurrentGrade</td>
+                    <td colspan="6">@entry.StudentName.DisplayName @entry.StudentGrade.AsName()</td>
                 </GroupRowTemplate>
                 <RowTemplate Context="entry">
-                    <td>@entry.Date.ToShortDateString()</td>
+                    <td>@entry.AbsenceDate.ToShortDateString()</td>
                     <td>@entry.AbsenceTimeframe</td>
                     <td>@entry.PeriodName (@entry.PeriodTimeframe)</td>
                     <td>@entry.AbsenceLength</td>
@@ -87,11 +87,11 @@
                     <td>
                         @if (AbsencesType == AbsenceCategory.UnverifiedPartials)
                         {
-                            <button class="btn btn-info btn-show-hover" @onclick="() => GoToPartialVerification(entry.ReasonId.Value)">Verify</button>
+                            <button class="btn btn-info btn-show-hover" @onclick="() => GoToPartialVerification(entry.AbsenceResponseId.Value)">Verify</button>
                         }
                         @if (AbsencesType == AbsenceCategory.UnexplainedWholes)
                         {
-                            <button class="btn btn-info btn-show-hover" @onclick="() => GoToWholeExplanation(entry.Id)">Explain</button>
+                            <button class="btn btn-info btn-show-hover" @onclick="() => GoToWholeExplanation(entry.AbsenceId.Value)">Explain</button>
                         }
                     </td>
                 </RowTemplate>
@@ -111,8 +111,8 @@
     public int UnverifiedPartialsCount { get; set; }
     public int UnexplainedWholesCount { get; set; }
 
-    public ICollection<AbsenceForPortalList> Absences { get; set; } = new List<AbsenceForPortalList>();
-    public ICollection<AbsenceForPortalList> FilteredAbsences { get; set; } = new List<AbsenceForPortalList>();
+    public List<OutstandingAbsencesForSchoolResponse> Absences { get; set; } = new();
+    public List<OutstandingAbsencesForSchoolResponse> FilteredAbsences { get; set; } = new();
     public AbsenceCategory AbsencesType { get; set; } = AbsenceCategory.UnverifiedPartials;
 
     public CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
@@ -125,10 +125,10 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            Absences = await Http.GetFromJsonAsync<List<AbsenceForPortalList>>($"api/Absences/{SelectedSchool.Code}/All", cancellationTokenSource.Token);
+            Absences = await Http.GetFromJsonAsync<List<OutstandingAbsencesForSchoolResponse>>($"api/Absences/{SelectedSchool.Code}/All", cancellationTokenSource.Token);
 
-            UnexplainedPartialsCount = Absences.Count(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.ReasonId == null);
-            UnverifiedPartialsCount = Absences.Count(absence =>  absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.ReasonId != null);
+            UnexplainedPartialsCount = Absences.Count(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.AbsenceResponseId == null);
+            UnverifiedPartialsCount = Absences.Count(absence =>  absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.AbsenceResponseId != null);
             UnexplainedWholesCount = Absences.Count(absence => absence.AbsenceTimeframe == absence.PeriodTimeframe);
 
             FilterAbsences();
@@ -162,7 +162,7 @@
         {
             case AbsenceCategory.UnexplainedPartials:
                 FilteredAbsences = Absences
-                    .Where(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.ReasonId == null)
+                    .Where(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.AbsenceResponseId == null)
                     .ToList();
                 break;
             case AbsenceCategory.UnexplainedWholes:
@@ -172,12 +172,16 @@
                 break;
             case AbsenceCategory.UnverifiedPartials:
                 FilteredAbsences = Absences
-                    .Where(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.ReasonId != null)
+                    .Where(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.AbsenceResponseId != null)
                     .ToList();
                 break;
         }
 
-        FilteredAbsences = FilteredAbsences.OrderBy(absence => absence.StudentCurrentGrade).ThenBy(absence => absence.StudentLastName).ThenBy(absence => absence.StudentFirstName).ToList();
+        FilteredAbsences = FilteredAbsences
+            .OrderBy(absence => absence.StudentGrade)
+            .ThenBy(absence => absence.StudentName.LastName)
+            .ThenBy(absence => absence.StudentName.FirstName)
+            .ToList();
     }
 
     private void GoToPartialVerification(Guid responseId)
