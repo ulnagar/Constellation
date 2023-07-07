@@ -21,20 +21,9 @@ public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
                 value => AbsenceNotificationId.FromValue(value));
 
         builder
-            .Property(notification => notification.AbsenceId)
-            .HasConversion(
-                id => id.Value,
-                value => AbsenceId.FromValue(value));
-
-        builder
             .Property(notification => notification.Type)
             .HasConversion(
                 entry => entry.Value,
                 value => NotificationType.FromValue(value));
-
-        builder
-            .HasOne<Absence>()
-            .WithMany()
-            .HasForeignKey(notification => notification.AbsenceId);
     }
 }

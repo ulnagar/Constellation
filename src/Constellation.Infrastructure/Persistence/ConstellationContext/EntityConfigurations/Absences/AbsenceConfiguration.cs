@@ -3,6 +3,7 @@
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -20,6 +21,18 @@ public class AbsenceConfiguration : IEntityTypeConfiguration<Absence>
             .HasConversion(
                 id => id.Value,
                 value => AbsenceId.FromValue(value));
+
+        builder
+            .Property(absence => absence.Date)
+            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+
+        builder
+            .Property(absence => absence.StartTime)
+            .HasConversion<TimeOnlyConverter, TimeOnlyComparer>();
+
+        builder
+            .Property(absence => absence.EndTime)
+            .HasConversion<TimeOnlyConverter, TimeOnlyComparer>();
 
         builder
             .Property(absence => absence.Type)
@@ -45,10 +58,12 @@ public class AbsenceConfiguration : IEntityTypeConfiguration<Absence>
 
         builder
             .HasMany(absence => absence.Notifications)
-            .WithOne();
+            .WithOne()
+            .HasForeignKey(notification => notification.AbsenceId);
 
         builder
             .HasMany(absence => absence.Responses)
-            .WithOne();
+            .WithOne()
+            .HasForeignKey(response => response.AbsenceId);
     }
 }

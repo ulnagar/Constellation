@@ -22,6 +22,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
                 .HasMany(s => s.FamilyMemberships)
                 .WithOne()
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder
+                .HasMany(student => student.Absences)
+                .WithOne()
+                .HasForeignKey(absence => absence.StudentId);
         }
     }
 }

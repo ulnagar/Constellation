@@ -17,18 +17,16 @@ public class ClassworkNotification : AggregateRoot
 
     private ClassworkNotification(
         ClassworkNotificationId id,
-        List<Absence> absences,
-        List<Staff> teachers,
+        int offeringId,
+        DateOnly absenceDate,
         bool isCovered)
     {
         Id = id;
         GeneratedAt = DateTime.Now;
-        _absences = absences;
-        _teachers = teachers;
         IsCovered = isCovered;
 
-        OfferingId = absences.First().OfferingId;
-        AbsenceDate = absences.First().Date;
+        OfferingId = offeringId;
+        AbsenceDate = absenceDate;
     }
 
     public ClassworkNotificationId Id { get; private set; }
@@ -60,9 +58,14 @@ public class ClassworkNotification : AggregateRoot
 
         var entity = new ClassworkNotification(
             new ClassworkNotificationId(),
-            absences,
-            teachers,
+            absences.First().OfferingId,
+            absences.First().Date,
             isCovered);
+
+        foreach (Absence absence in absences)
+            entity.AddAbsence(absence);
+
+        entity._teachers.AddRange(teachers);
 
         entity.RaiseDomainEvent(new ClassworkNotificationCreatedDomainEvent(new DomainEventId(), entity.Id));
 
@@ -86,9 +89,14 @@ public class ClassworkNotification : AggregateRoot
 
         var newEntity = new ClassworkNotification(
             new ClassworkNotificationId(),
-            absences,
-            _teachers,
+            absences.First().OfferingId,
+            absences.First().Date,
             IsCovered);
+
+        foreach (Absence absence in absences)
+            newEntity.AddAbsence(absence);
+
+        newEntity._teachers.AddRange(_teachers);
 
         newEntity.RaiseDomainEvent(new ClassworkNotificationSplitDomainEvent(new DomainEventId(), Id, newEntity.Id));
 

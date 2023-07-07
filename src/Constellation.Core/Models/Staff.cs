@@ -26,6 +26,5 @@ public class Staff
     public virtual List<TeacherAdobeConnectOperation> AdobeConnectOperations { get; set; } = new();
     public virtual List<TeacherAdobeConnectGroupOperation> AdobeConnectGroupOperations { get; set; } = new();
     public virtual List<TeacherMSTeamOperation> MSTeamOperations { get; set; } = new();
-    public virtual List<ClassworkNotification> ClassworkNotifications { get; set; } = new();
     public virtual List<TrainingCompletion> TrainingCompletionRecords { get; set; } = new();
 }

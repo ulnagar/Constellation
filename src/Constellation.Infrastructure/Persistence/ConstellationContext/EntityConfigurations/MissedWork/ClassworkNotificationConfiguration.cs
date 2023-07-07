@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.MissedWork;
 
 using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MissedWork;
+using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -32,11 +34,16 @@ internal sealed class ClassworkNotificationConfiguration : IEntityTypeConfigurat
             .HasForeignKey(notification => notification.StaffId);
 
         builder
-            .HasMany(notification => notification.Absences)
+            .HasMany<Absence>(notification => notification.Absences)
             .WithMany();
 
         builder
-            .HasMany(notification => notification.Teachers)
+            .HasMany<Staff>(notification => notification.Teachers)
             .WithMany();
+            //.UsingEntity("_Staff_ClassworkNotification");
+
+        builder
+            .Property(notification => notification.AbsenceDate)
+            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }
