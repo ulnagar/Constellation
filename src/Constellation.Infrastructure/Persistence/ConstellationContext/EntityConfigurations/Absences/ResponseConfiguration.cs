@@ -20,11 +20,11 @@ public class ResponseConfiguration : IEntityTypeConfiguration<Response>
                 id => id.Value,
                 value => AbsenceResponseId.FromValue(value));
 
-        builder
-            .Property(response => response.AbsenceId)
-            .HasConversion(
-                id => id.Value,
-                value => AbsenceId.FromValue(value));
+        //builder
+        //    .Property(response => response.AbsenceId)
+        //    .HasConversion(
+        //        id => id.Value,
+        //        value => AbsenceId.FromValue(value));
 
         builder
             .Property(response => response.Type)
@@ -38,9 +38,9 @@ public class ResponseConfiguration : IEntityTypeConfiguration<Response>
                 entry => entry.Value,
                 value => ResponseVerificationStatus.FromValue(value));
 
-        builder
-            .HasOne<Absence>()
-            .WithMany()
-            .HasForeignKey(response => response.AbsenceId);
+        //builder
+        //    .HasOne<Absence>()
+        //    .WithMany()
+        //    .HasForeignKey(response => response.AbsenceId);
     }
 }

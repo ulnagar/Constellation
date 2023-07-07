@@ -19,6 +19,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
 
             builder.HasMany(o => o.Sessions)
                 .WithOne(s => s.Offering);
+
+            builder
+                .HasMany(offering => offering.Absences)
+                .WithOne()
+                .HasForeignKey(absence => absence.OfferingId);
         }
     }
 }
