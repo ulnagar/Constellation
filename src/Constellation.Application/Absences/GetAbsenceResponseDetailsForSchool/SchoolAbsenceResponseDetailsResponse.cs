@@ -8,6 +8,7 @@ public sealed record SchoolAbsenceResponseDetailsResponse(
     Name StudentName,
     string ClassName,
     AbsenceId AbsenceId,
+    AbsenceResponseId ResponseId,
     DateOnly AbsenceDate,
     string PeriodName,
     string PeriodTimeframe,

@@ -70,6 +70,7 @@ internal sealed class GetAbsenceResponseDetailsForSchoolQueryHandler
             nameRequest.Value,
             offering?.Name,
             absence.Id,
+            response.Id,
             absence.Date,
             absence.PeriodName,
             absence.PeriodTimeframe,

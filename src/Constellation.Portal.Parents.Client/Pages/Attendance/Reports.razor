@@ -1,7 +1,8 @@
 ﻿@page "/Attendance/Reports/"
 
-@    using Constellation.Application.DTOs
-@    using Constellation.Application.Features.Partners.Students.Queries
+@using Constellation.Application.Attendance.GetValidAttendanceReportDates;
+@using Constellation.Application.DTOs
+@using Constellation.Application.Features.Partners.Students.Queries
 
 @inject HttpClient Http
 @inject IJSRuntime JS
@@ -66,7 +67,7 @@
                         <div class="accordion-body">
                             @foreach (var entry in term)
                             {
-                                var disabled = entry.EndDate.Date > DateTime.Today;
+                                var disabled = entry.EndDate > DateOnly.FromDateTime(DateTime.Today);
 
                                 <div class="w-auto p-3 ms-3 me-3 mb-2 shadow position-relative @(disabled ? "disabled" : "")">
                                     <div class="row d-flex align-items-center">

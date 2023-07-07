@@ -4,6 +4,7 @@
 @using System.ComponentModel.DataAnnotations
 @using Constellation.Application.Extensions;
 @using Constellation.Core.Models;
+@using Constellation.Portal.Schools.Client.Shared.Models;
 
 @attribute [Authorize]
 
@@ -182,13 +183,5 @@
             IsLoading = false;
             NavigationManager.NavigateTo("Absences");
         }
-    }
-
-    public class AttendanceReportSelectForm
-    {
-        [Required]
-        public List<string> Students { get; set; } = new();
-        [Required]
-        public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     }
 }

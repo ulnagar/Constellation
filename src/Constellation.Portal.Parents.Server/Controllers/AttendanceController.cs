@@ -1,17 +1,17 @@
 namespace Constellation.Portal.Parents.Server.Controllers;
 
 using Constellation.Application.Absences.GetAbsenceDetailsForParent;
+using Constellation.Application.Absences.GetAbsencesForFamily;
 using Constellation.Application.Absences.ProvideParentWholeAbsenceExplanation;
 using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.Attendance.GetValidAttendanceReportDates;
 using Constellation.Application.DTOs;
-using Constellation.Application.Features.Attendance.Queries;
+using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Org.BouncyCastle.Asn1.Cms;
 
 [Route("[controller]")]
 public class AttendanceController : BaseAPIController
@@ -28,13 +28,13 @@ public class AttendanceController : BaseAPIController
     }
 
     [HttpGet]
-    public async Task<IList<AbsenceDto>> Get()
+    public async Task<Result<List<AbsenceForFamilyResponse>>> Get()
     {
-        var user = await GetCurrentUser();
+        AppUser user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve attendance data for parent {name}", user.UserName);
 
-        return await _mediator.Send(new GetAbsencesForFamilyQuery { ParentEmail = user.Email });
+        return await _mediator.Send(new GetAbsencesForFamilyQuery(user.Email));
     }
 
     [HttpGet("Details/{id:guid}")]
@@ -77,7 +77,14 @@ public class AttendanceController : BaseAPIController
     [HttpGet("Reports/Dates")]
     public async Task<IList<ValidAttendenceReportDate>> GetReportDates()
     {
-        return await _mediator.Send(new GetValidAttendenceReportDatesQuery());
+        var request = await _mediator.Send(new GetValidAttendenceReportDatesQuery());
+
+        if (request.IsFailure)
+        {
+            return new List<ValidAttendenceReportDate>();
+        }
+
+        return request.Value;
     }
 
     [HttpPost("Reports/Download")]
