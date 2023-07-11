@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth;
 
 using Constellation.Application.AdminDashboards.AuditUser;
+using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
@@ -17,18 +18,21 @@ public class IndexModel : BasePageModel
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
     private readonly LinkGenerator _linkGenerator;
+    private readonly IAuthService _authService;
 
     public IndexModel(
         IMediator mediator,
         UserManager<AppUser> userManager,
         RoleManager<AppRole> roleManager,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        IAuthService authService)
         : base()
     {
         _mediator = mediator;
         _userManager = userManager;
         _roleManager = roleManager;
         _linkGenerator = linkGenerator;
+        _authService = authService;
     }
 
     public int StaffUserCount { get; set; }
@@ -126,5 +130,10 @@ public class IndexModel : BasePageModel
         }
 
         return RedirectToPage("Index");
+    }
+
+    public async Task OnGetAuditAllUsers(CancellationToken cancellationToken = default)
+    {
+        await _authService.AuditAllUsers(cancellationToken);
     }
 }

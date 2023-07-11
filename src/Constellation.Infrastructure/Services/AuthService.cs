@@ -2,15 +2,17 @@
 
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Auth.Command;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Families;
 using Constellation.Infrastructure.DependencyInjection;
+using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,22 +21,25 @@ public class AuthService : IAuthService, IScopedService
 {
     private readonly IMediator _mediator;
     private readonly IParentRepository _parentRepository;
-    private readonly IAppDbContext _context;
+    private readonly AppDbContext _context;
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
+    private readonly ILogger _logger;
 
     public AuthService(
         IParentRepository parentRepository,
-        IAppDbContext context,
+        AppDbContext context,
         IMediator mediator,
         UserManager<AppUser> userManager,
-        RoleManager<AppRole> roleManager)
+        RoleManager<AppRole> roleManager,
+        ILogger logger)
     {
         _parentRepository = parentRepository;
         _context = context;
         _mediator = mediator;
         _userManager = userManager;
         _roleManager = roleManager;
+        _logger = logger.ForContext<IAuthService>();
     }
 
     public async Task<IdentityResult> CreateUser(UserTemplateDto userDetails)
@@ -420,5 +425,233 @@ public class AuthService : IAuthService, IScopedService
         }
 
         return result;
+    }
+    
+    public async Task AuditAllUsers(CancellationToken cancellationToken)
+    {
+        _logger.Information("Starting scan of users");
+
+        // Get all users
+        List<AppUser> users = _userManager.Users.ToList();
+
+        _logger.Information("Found {count} users currently registered", users.Count);
+
+        // Get all family/parent details
+        List<Family> families = await _context
+            .Set<Family>()
+            .Include(family => family.Parents)
+            .Include(family => family.Students)
+            .Where(family => !family.IsDeleted)
+            .ToListAsync(cancellationToken);
+
+        _logger.Information("Found {count} families currently registered", families.Count);
+
+        List<Parent> parents = families
+            .SelectMany(family => family.Parents)
+            .ToList();
+
+        _logger.Information("Found {count} parents currently registered", parents.Count);
+
+        // Get all staff details
+        List<Staff> staff = await _context
+            .Set<Staff>()
+            .Where(member => !member.IsDeleted)
+            .ToListAsync(cancellationToken);
+
+        _logger.Information("Found {count} staff members currently registered", staff.Count);
+
+        // Get all school contact details
+        List<SchoolContact> contacts = await _context
+            .Set<SchoolContact>()
+            .Include(contact => contact.Assignments.Where(role => !role.IsDeleted))
+            .ThenInclude(role => role.School)
+            .Where(contact => !contact.IsDeleted)
+            .ToListAsync(cancellationToken);
+
+        _logger.Information("Found {count} school contacts currently registered", contacts.Count);
+
+        foreach (AppUser user in users)
+        {
+            if (user.Email.Contains("auroracollegeitsupport@det.nsw.edu.au") || user.Email.Contains("noemail@here.com"))
+                continue;
+
+            _logger
+                .ForContext(nameof(AppUser), user, true)
+                .Information("Checking user {email}", user.Email);
+
+            List<Family> matchingFamilies = families
+                .Where(family => family.FamilyEmail == user.Email)
+                .ToList();
+
+            List<Parent> matchingParents = parents
+                .Where(parent => parent.EmailAddress == user.Email)
+                .ToList();
+
+            if (matchingParents.Any() || matchingFamilies.Any())
+            {
+                _logger.Information("Found matching parent and/or family");
+
+                user.IsParent = true;
+            }
+
+            Staff matchingStaff = staff
+                .Where(member => member.EmailAddress == user.Email)
+                .FirstOrDefault();
+
+            if (matchingStaff is not null)
+            {
+                _logger.Information("Found matching staff member");
+
+                user.IsStaffMember = true;
+                user.StaffId = matchingStaff.StaffId;
+            }
+
+            SchoolContact contact = contacts
+                .Where(contact =>
+                    contact.EmailAddress == user.Email &&
+                    contact.Assignments.Any())
+                .FirstOrDefault();
+
+            if (contact is not null)
+            {
+                _logger.Information("Found matching school contact");
+
+                user.IsSchoolContact = true;
+                user.SchoolContactId = contact.Id;
+            }
+
+            if (!matchingParents.Any() &&
+                !matchingFamilies.Any() &&
+                matchingStaff is null &&
+                contact is null)
+            {
+                // User is not linked to any known account!
+
+                _logger.Information("Found no matching user types.");
+                _logger
+                    .ForContext(nameof(AppUser), user, true)
+                    .Information("User will be deleted");
+
+                await _userManager.DeleteAsync(user);
+            }
+        }
+
+        _logger.Information("Finished processing registered users");
+
+        users = _userManager.Users.ToList();
+
+        _logger.Information("{count} registered users remaining", users.Count);
+
+        foreach (Parent parent in parents)
+        {
+            _logger
+                .ForContext(nameof(Parent), parent, true)
+                .Information("Checking parent {name}", $"{parent.FirstName} {parent.LastName}");
+
+            if (!users.Any(user => user.Email == parent.EmailAddress))
+            {
+                _logger.Information("Found no matching user.");
+                _logger.Information("User will be created");
+
+                var user = new AppUser
+                {
+                    UserName = parent.EmailAddress,
+                    Email = parent.EmailAddress,
+                    FirstName = parent.FirstName,
+                    LastName = parent.LastName,
+                    IsParent = true
+                };
+
+                var result = await _userManager.CreateAsync(user);
+
+                if (!result.Succeeded)
+                    _logger
+                        .ForContext("Request", user, true)
+                        .Warning("Failed to create user due to error {@error}", result.Errors);
+            }
+            else
+            {
+                _logger.Information("User found.");
+            }
+        }
+
+        foreach (Staff member in staff)
+        {
+            _logger
+                .ForContext(nameof(Staff), member, true)
+                .Information("Checking staff member {name}", $"{member.FirstName} {member.LastName}");
+
+            if (!users.Any(user => user.Email == member.EmailAddress))
+            {
+                _logger.Information("Found no matching user.");
+                _logger.Information("User will be created");
+
+                var user = new AppUser
+                {
+                    UserName = member.EmailAddress,
+                    Email = member.EmailAddress,
+                    FirstName = member.FirstName,
+                    LastName = member.LastName,
+                    IsStaffMember = true,
+                    StaffId = member.StaffId
+                };
+
+                var result = await _userManager.CreateAsync(user);
+
+                if (!result.Succeeded)
+                    _logger
+                        .ForContext("Request", user, true)
+                        .Warning("Failed to create user due to error {@error}", result.Errors);
+            }
+            else
+            {
+                _logger.Information("User found.");
+            }
+        }
+
+        foreach (SchoolContact contact in contacts)
+        {
+            if (!contact.Assignments.Any(role => !role.IsDeleted))
+            {
+                continue;
+            }
+
+            _logger
+                .ForContext(nameof(SchoolContact), contact, true)
+                .Information("Checking school contact {name}", $"{contact.FirstName} {contact.LastName}");
+
+            if (!users.Any(user => user.Email == contact.EmailAddress))
+            {
+                _logger.Information("Found no matching user.");
+                _logger.Information("User will be created");
+
+                var user = new AppUser
+                {
+                    UserName = contact.EmailAddress,
+                    Email = contact.EmailAddress,
+                    FirstName = contact.FirstName,
+                    LastName = contact.LastName,
+                    IsSchoolContact = true,
+                    SchoolContactId = contact.Id
+                };
+
+                var result = await _userManager.CreateAsync(user);
+
+                if (!result.Succeeded)
+                    _logger
+                        .ForContext("Request", user, true)
+                        .Warning("Failed to create user due to error {@error}", result.Errors);
+            }
+            else
+            {
+                _logger.Information("User found.");
+            }
+        }
+
+        _logger.Information("Finished processing potential users");
+
+        users = _userManager.Users.ToList();
+
+        _logger.Information("{count} total users now registered", users.Count);
     }
 }

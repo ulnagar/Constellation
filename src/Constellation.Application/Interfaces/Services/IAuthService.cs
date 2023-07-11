@@ -19,4 +19,5 @@ public interface IAuthService
     Task<UserAuditDto> VerifyContactAccess(string email);
     Task RepairSchoolContactUser(int schoolContactId);
     Task AuditParentUsers(CancellationToken cancellationToken = default);
+    Task AuditAllUsers(CancellationToken cancellationToken);
 }

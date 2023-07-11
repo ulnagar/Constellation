@@ -65,58 +65,63 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
             return;
         }
 
-        var oldUser = await _userManager.FindByEmailAsync(notification.OldEmail);
+        // If there is an AppUser with the old email address, update their properties to reflect the new state
+        AppUser oldUser = await _userManager.FindByEmailAsync(notification.OldEmail);
 
-        var otherParents = await _parentRepository.GetParentsByEmail(notification.OldEmail, cancellationToken);
-
-        if (otherParents is null || otherParents.Count == 0)
+        if (oldUser is not null)
         {
-            oldUser.IsParent = false;
-        }
+            var otherParents = await _parentRepository.GetParentsByEmail(notification.OldEmail, cancellationToken);
 
-        var staffMember = await _staffRepository.GetByEmailAddress(notification.OldEmail, cancellationToken);
-
-        if (staffMember is null)
-        {
-            oldUser.IsStaffMember = false;
-            oldUser.StaffId = null;
-        }
-
-        var schoolContact = await _contactRepository.GetWithRolesByEmailAddress(notification.OldEmail, cancellationToken);
-
-        if (schoolContact is null)
-        {
-            oldUser.IsSchoolContact = false;
-            oldUser.SchoolContactId = 0;
-        }
-
-        if (!oldUser.IsSchoolContact && !oldUser.IsStaffMember && !oldUser.IsParent)
-        {
-            var deleteResult = await _userManager.DeleteAsync(oldUser);
-
-            if (!deleteResult.Succeeded)
+            if (otherParents is null || otherParents.Count == 0)
             {
-                _logger.Warning(
-                    "EID {eid}: Could not delete old user {uid} while attempting to update parent {pid} in family {fid}",
-                    notification.Id.ToString(),
-                    oldUser.Id.ToString(),
-                    notification.ParentId.ToString(),
-                    notification.FamilyId.ToString());
+                oldUser.IsParent = false;
+            }
 
-                foreach (var error in deleteResult.Errors)
+            var staffMember = await _staffRepository.GetByEmailAddress(notification.OldEmail, cancellationToken);
+
+            if (staffMember is null)
+            {
+                oldUser.IsStaffMember = false;
+                oldUser.StaffId = null;
+            }
+
+            var schoolContact = await _contactRepository.GetWithRolesByEmailAddress(notification.OldEmail, cancellationToken);
+
+            if (schoolContact is null)
+            {
+                oldUser.IsSchoolContact = false;
+                oldUser.SchoolContactId = 0;
+            }
+
+            if (!oldUser.IsSchoolContact && !oldUser.IsStaffMember && !oldUser.IsParent)
+            {
+                var deleteResult = await _userManager.DeleteAsync(oldUser);
+
+                if (!deleteResult.Succeeded)
                 {
                     _logger.Warning(
-                        "EID {eid}: Failed with error {error}",
+                        "EID {eid}: Could not delete old user {uid} while attempting to update parent {pid} in family {fid}",
                         notification.Id.ToString(),
-                        error);
+                        oldUser.Id.ToString(),
+                        notification.ParentId.ToString(),
+                        notification.FamilyId.ToString());
+
+                    foreach (var error in deleteResult.Errors)
+                    {
+                        _logger.Warning(
+                            "EID {eid}: Failed with error {error}",
+                            notification.Id.ToString(),
+                            error);
+                    }
                 }
             }
-        }
-        else
-        {
-            await _userManager.UpdateAsync(oldUser);
+            else
+            {
+                await _userManager.UpdateAsync(oldUser);
+            }
         }
 
+        // Is there already a registered user with this email address?
         var existingUser = await _userManager.FindByEmailAsync(notification.NewEmail);
 
         if (existingUser is not null)
