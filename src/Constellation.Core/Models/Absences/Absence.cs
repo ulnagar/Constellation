@@ -59,12 +59,7 @@ public class Absence : AggregateRoot
     public IReadOnlyList<Notification> Notifications => _notifications;
     public IReadOnlyList<Response> Responses => _responses;
 
-    public bool Explained => Responses.Any(response =>
-        response.Type == ResponseType.Student && response.VerificationStatus == ResponseVerificationStatus.Verified ||
-        response.Type == ResponseType.Parent || 
-        response.Type == ResponseType.Coordinator ||
-        response.Type == ResponseType.System);
-
+    public bool Explained { get; private set; }
     public DateTime FirstSeen { get; private set; }
     public DateTime LastSeen { get; private set; }
 
@@ -120,7 +115,11 @@ public class Absence : AggregateRoot
             RaiseDomainEvent(new PendingVerificationResponseCreatedDomainEvent(new DomainEventId(), response.Id, Id));
 
         if (response.VerificationStatus == ResponseVerificationStatus.NotRequired)
+        {
             RaiseDomainEvent(new AbsenceResponseReceivedDomainEvent(new DomainEventId(), response.Id, Id));
+
+            Explained = true;
+        }
 
         _responses.Add(response);
 
@@ -174,6 +173,8 @@ public class Absence : AggregateRoot
                 new DomainEventId(),
                 responseId,
                 Id));
+
+            Explained = true;
         }
     }
 
