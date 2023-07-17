@@ -166,6 +166,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "ExternallyExplained",
                 table: "Absences_Absences");
 
+            migrationBuilder.AddColumn<bool>(
+                name: "Explained",
+                table: "Absences_Absences",
+                type: "bit",
+                nullable: false,
+                defaultValue: 0);
+
             migrationBuilder.AddColumn<string>(
                 name: "CompletedBy",
                 table: "MissedWork_ClassworkNotifications",
@@ -310,6 +317,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "IX_AbsenceClassworkNotification_ClassworkNotificationsId",
                 table: "AbsenceClassworkNotification",
                 newName: "IX_AbsenceClassworkNotification_ClassworkNotificationId");
+
+            // Data migration
+
+            // populate new explained column in absences table
+            migrationBuilder.Sql(
+                @"UPDATE [Absences_Absences]
+                    SET Explained = 
+	                    CASE
+		                    WHEN [Absences_Absences].[Type] = 'Whole' AND (SELECT COUNT([Absences_Responses].[Id]) FROM [Absences_Responses] WHERE [Absences_Absences].[Id] = [Absences_Responses].[AbsenceId] AND [Absences_Responses].[Type] <> 'Student') > 0 THEN 1
+		                    WHEN [Absences_Absences].[Type] = 'Partial' AND (SELECT COUNT([Absences_Responses].[Id]) FROM [Absences_Responses] WHERE [Absences_Absences].[Id] = [Absences_Responses].[AbsenceId] AND [Absences_Responses].[VerificationStatus] = 'Verified') > 0 THEN 1
+		                    ELSE 0
+	                    END");
         }
 
         /// <inheritdoc />
@@ -416,6 +435,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 newName: "ClassworkNotifications");
 
             // Add/Update Columns
+
+            migrationBuilder.DropColumn(
+                name: "Explained",
+                table: "Absences");
 
             migrationBuilder.AddColumn<string>(
                 name: "ExternalExplanation",

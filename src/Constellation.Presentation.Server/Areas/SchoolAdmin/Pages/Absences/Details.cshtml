@@ -73,7 +73,7 @@
             <label asp-for="Absence.AbsenceLength">Absence Length</label>
         </dt>
         <dd class="col-md-10">
-            <span>@Model.Absence.AbsenceTimeframe minutes</span>
+            <span>@Model.Absence.AbsenceLength minutes</span>
         </dd>
 
         <dt class="col-md-2">
@@ -90,7 +90,7 @@
 <div>
     <ul class="nav nav-pills">
         <li class="nav-item">
-            <a class="nav-link" href="#notifications" data-toggle="tab" role="tab">
+            <a class="nav-link active" href="#notifications" data-toggle="tab" role="tab">
                 Notifications
                 @if (Model.Absence.Notifications.Any())
                 {
@@ -99,7 +99,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" href="#responses" data-toggle="tab" role="tab">
+            <a class="nav-link" href="#responses" data-toggle="tab" role="tab">
                 Responses
                 @if (Model.Absence.Responses.Any())
                 {
@@ -131,10 +131,10 @@
                     @foreach (var item in Model.Absence.Notifications.OrderBy(n => n.SentAt))
                     {
                         <tr>
-                            <td>@Html.DisplayFor(model => item.Type)</td>
-                            <td>@Html.DisplayFor(model => item.Recipients)</td>
-                            <td>@Html.DisplayFor(model => item.Message, "EmailContent")</td>
-                            <td>@Html.DisplayFor(model => item.SentAt, "ShortDate")</td>
+                            <td>@item.Type.Value</td>
+                            <td>@item.Recipients</td>
+                            <td>Click to view</td>
+                            <td>@item.SentAt.ToShortDateString()</td>
                         </tr>
                     }
                 </tbody>
@@ -157,8 +157,8 @@
                     @foreach (var item in Model.Absence.Responses.OrderBy(r => r.ReceivedAt))
                     {
                         <tr>
-                            <td>@Html.DisplayFor(model => item.Type)</td>
-                            <td>@Html.DisplayFor(model => item.Explanation)</td>
+                            <td>@item.Type.Value</td>
+                            <td>@item.Explanation</td>
                             <td>
                                 @if (item.Status == ResponseVerificationStatus.Verified)
                                 {
@@ -177,7 +177,7 @@
                                     @:<span class="label label-info"><span class="glyphicon glyphicon-ban-circle" /> Not Required</span>
                                 }
                             </td>
-                            <td>@Html.DisplayFor(model => item.ReceivedAt, "ShortDate")</td>
+                            <td>@item.ReceivedAt.ToShortDateString()</td>
                         </tr>
                     }
                 </tbody>
