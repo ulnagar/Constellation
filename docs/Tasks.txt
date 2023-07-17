@@ -11,7 +11,7 @@ CURRENT TASK
 	PRE-MIGRATION:
 		Run this TSQL script to convert EXTERNAL EXPLANATION fields in Absences into separate Responses.
 
-			SELECT 'INSERT INTO [dbo].[AbsenceResponse]
+		SELECT 'INSERT INTO [dbo].[AbsenceResponse]
 			   ([Id]
 			   ,[AbsenceId]
 			   ,[ReceivedAt]
