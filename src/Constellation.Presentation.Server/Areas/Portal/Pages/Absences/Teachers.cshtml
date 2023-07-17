@@ -49,8 +49,8 @@
         {
             <tr>
                 <td>@Html.DisplayFor(model => item.IsCompleted, "BooleanTick")</td>
-                <td>@Html.DisplayFor(model => item.ClassName)</td>
-                <td>@Html.DisplayFor(model => item.ClassDate, "ShortDate")</td>
+                <td>@item.ClassName</td>
+                <td>@item.ClassDate.ToShortDateString()</td>
                 <td>
                     <ul>
                         @foreach (var student in item.Students)

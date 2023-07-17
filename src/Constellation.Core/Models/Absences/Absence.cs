@@ -74,7 +74,7 @@ public class Absence : AggregateRoot
         TimeOnly startTime,
         TimeOnly endTime)
     {
-        var absence = new Absence(
+        Absence absence = new Absence(
             new AbsenceId(),
             type,
             studentId,
@@ -97,7 +97,7 @@ public class Absence : AggregateRoot
         string message,
         string recipients)
     {
-        var notification = Notification.Create(Id, type, message, recipients);
+        Notification notification = Notification.Create(Id, type, message, recipients);
 
         _notifications.Add(notification);
 
@@ -109,7 +109,7 @@ public class Absence : AggregateRoot
         string from,
         string explanation)
     {
-        var response = Response.Create(Id, DateTime.Now, type, from, explanation);
+        Response response = Response.Create(Id, DateTime.Now, type, from, explanation);
 
         if (response.VerificationStatus == ResponseVerificationStatus.Pending)
             RaiseDomainEvent(new PendingVerificationResponseCreatedDomainEvent(new DomainEventId(), response.Id, Id));
@@ -131,28 +131,31 @@ public class Absence : AggregateRoot
         if (_responses.Count == 0)
             return null;
 
-        var explainedResponse = _responses
+        if (!Explained)
+            return null;
+
+        Response explainedResponse = _responses
             .FirstOrDefault(response => 
                 response.VerificationStatus == ResponseVerificationStatus.NotRequired);
 
         if (explainedResponse is not null)
             return explainedResponse;
 
-        var verifiedResponse = _responses
+        Response verifiedResponse = _responses
             .FirstOrDefault(response =>
                 response.VerificationStatus == ResponseVerificationStatus.Verified);
 
         if (verifiedResponse is not null)
             return verifiedResponse;
 
-        var rejectedResponse = _responses
+        Response rejectedResponse = _responses
             .FirstOrDefault(response =>
                 response.VerificationStatus == ResponseVerificationStatus.Rejected);
 
         if (rejectedResponse is not null)
             return rejectedResponse;
 
-        var pendingResponse = _responses
+        Response pendingResponse = _responses
             .FirstOrDefault(response =>
                 response.VerificationStatus == ResponseVerificationStatus.Pending);
 
@@ -164,7 +167,7 @@ public class Absence : AggregateRoot
 
     public void ResponseConfirmed(AbsenceResponseId responseId)
     {
-        var response = _responses.First(response => response.Id == responseId);
+        Response response = _responses.First(response => response.Id == responseId);
 
         if (response.VerificationStatus == ResponseVerificationStatus.Verified ||
             response.VerificationStatus == ResponseVerificationStatus.Rejected)

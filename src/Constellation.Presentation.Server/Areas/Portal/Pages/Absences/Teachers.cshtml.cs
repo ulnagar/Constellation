@@ -43,7 +43,7 @@ public class TeachersModel : BasePageModel
         {
             FilterDto.Complete => notificationRequest.Value.Where(notification => notification.IsCompleted).ToList(),
             FilterDto.All => notificationRequest.Value.ToList(),
-            _ => notificationRequest.Value.Where(notification => notification.IsCompleted).ToList()
+            _ => notificationRequest.Value.Where(notification => !notification.IsCompleted).ToList()
         };
     }
 

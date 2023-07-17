@@ -61,7 +61,7 @@ internal sealed class GetNotificationsForTeacherQueryHandler
                 offering.Name,
                 notification.AbsenceDate,
                 studentNames,
-                false));
+                notification.CompletedAt.HasValue));
         }
 
         return result;

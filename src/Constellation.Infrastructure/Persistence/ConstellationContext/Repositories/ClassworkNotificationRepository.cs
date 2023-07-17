@@ -19,6 +19,7 @@ public class ClassworkNotificationRepository : IClassworkNotificationRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<ClassworkNotification>()
+            .Include(notification => notification.Absences)
             .FirstOrDefaultAsync(record => record.Id ==  notificationId, cancellationToken);
 
     public async Task<List<ClassworkNotification>> GetForTeacher(
