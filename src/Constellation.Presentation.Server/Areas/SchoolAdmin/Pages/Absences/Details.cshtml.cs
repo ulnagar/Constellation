@@ -20,6 +20,7 @@ public class DetailsModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
+    [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }
 
     public AbsenceDetailsResponse Absence;

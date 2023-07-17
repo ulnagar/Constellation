@@ -33,7 +33,7 @@ public class Absence : AggregateRoot
         PeriodName = periodName;
         PeriodTimeframe = periodTimeframe;
         AbsenceLength = (int)(endTime - startTime).TotalMinutes;
-        AbsenceTimeframe = $"{startTime:hh:MM tt} - {endTime:hh:MM tt}";
+        AbsenceTimeframe = $"{startTime:hh:mm tt} - {endTime:hh:mm tt}";
         AbsenceReason = absenceReason;
         StartTime = startTime;
         EndTime = endTime;
