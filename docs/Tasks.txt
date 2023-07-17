@@ -8,36 +8,6 @@ CURRENT TASK
 		- New students being added to a notification should either be added to the 
 			original (earliest GeneratedAt if not completed), or create a new entry
 
-	PRE-MIGRATION:
-		Run this TSQL script to convert EXTERNAL EXPLANATION fields in Absences into separate Responses.
-
-		SELECT 'INSERT INTO [dbo].[AbsenceResponse]
-			   ([Id]
-			   ,[AbsenceId]
-			   ,[ReceivedAt]
-			   ,[Type]
-			   ,[From]
-			   ,[Explanation]
-			   ,[VerificationStatus]
-			   ,[Verifier]
-			   ,[VerifiedAt]
-			   ,[VerificationComment]
-			   ,[Forwarded])
-		 VALUES
-			   (''' + CONVERT(nvarchar(max), NEWID()) + ''',
-			   ''' + CONVERT(nvarchar(max), Id) + ''',
-			   Cast(''' + CONVERT(nvarchar(max), DateScanned) + ''' as datetime2),
-			   ''System'',
-			   ''' + REPLACE(ExternalExplanationSource, '''', '''''') + ''',
-			   ''' + REPLACE(ExternalExplanation, '''', '''''') + ''',
-			   ''NR'',
-			   null,
-			   null,
-			   null,
-			   1);'
-		  FROM [CONSTELLATION_DEV].[dbo].[Absences]
-		  where ExternalExplanation is not null;
-
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~
