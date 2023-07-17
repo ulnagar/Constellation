@@ -13,8 +13,42 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Absences Table
+            // Migrate data
 
+            // move all explanations in the absences table to separate records in the responses table
+            migrationBuilder.Sql(
+                @"INSERT INTO [dbo].AbsenceResponse
+	                ([Id]
+	                ,[AbsenceId]
+	                ,[ReceivedAt]
+	                ,[Type]
+	                ,[From]
+	                ,[Explanation]
+	                ,[VerificationStatus]
+	                ,[Verifier]
+	                ,[VerifiedAt]
+	                ,[VerificationComment]
+	                ,[Forwarded])
+                SELECT NEWID(), Id, DateScanned, 'System', ExternalExplanationSource, ExternalExplanation, 'NR', null, null, null, 1
+                FROM [CONSTELLATION_TEST].[dbo].[Absences]
+                where ExternalExplanation is not null;");
+
+            // delete orphaned entries in the classworknotificationstaff table
+            migrationBuilder.Sql(
+                @"DELETE 
+		            FROM CONSTELLATION_TEST.dbo.ClassworkNotificationStaff
+		            WHERE ClassworkNotificationsId in (
+			            SELECT ClassworkNotificationsId
+			            FROM CONSTELLATION_TEST.dbo.ClassworkNotificationStaff cns
+			            WHERE NOT EXISTS
+			            (
+				            SELECT 1 
+				            FROM CONSTELLATION_TEST.dbo.ClassworkNotifications cn
+				            WHERE cn.Id = cns.ClassworkNotificationsId
+			            )
+		            )");
+
+            // Drop Indexes
             migrationBuilder.DropIndex(
                 name: "IX_Absences_OfferingId",
                 table: "Absences");
@@ -22,6 +56,24 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
             migrationBuilder.DropIndex(
                 name: "IX_Absences_StudentId",
                 table: "Absences");
+
+            migrationBuilder.DropIndex(
+                name: "IX_AbsenceNotification_AbsenceId",
+                table: "AbsenceNotification");
+
+            migrationBuilder.DropIndex(
+                name: "IX_AbsenceResponse_AbsenceId",
+                table: "AbsenceResponse");
+
+            migrationBuilder.DropIndex(
+                name: "IX_ClassworkNotifications_OfferingId",
+                table: "ClassworkNotifications");
+
+            migrationBuilder.DropIndex(
+                name: "IX_ClassworkNotifications_StaffId",
+                table: "ClassworkNotifications");
+
+            // Drop Foreign Keys
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Absences_Offerings_OfferingId",
@@ -31,13 +83,71 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "FK_Absences_Students_StudentId",
                 table: "Absences");
 
+            migrationBuilder.DropForeignKey(
+                name: "FK_AbsenceNotification_Absences_AbsenceId",
+                table: "AbsenceNotification");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_AbsenceResponse_Absences_AbsenceId",
+                table: "AbsenceResponse");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_ClassworkNotifications_Offerings_OfferingId",
+                table: "ClassworkNotifications");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_ClassworkNotifications_Staff_StaffId",
+                table: "ClassworkNotifications");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_AbsenceClassworkNotification_ClassworkNotifications_ClassworkNotificationsId",
+                table: "AbsenceClassworkNotification");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_AbsenceClassworkNotification_Absences_AbsencesId",
+                table: "AbsenceClassworkNotification");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_ClassworkNotificationStaff_ClassworkNotifications_ClassworkNotificationsId",
+                table: "ClassworkNotificationStaff");
+
+            // Drop Primary keys
+
             migrationBuilder.DropPrimaryKey(
-                name: "PK_Absences", 
+                name: "PK_Absences",
                 table: "Absences");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_AbsenceNotification",
+                table: "AbsenceNotification");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_AbsenceResponse",
+                table: "AbsenceResponse");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_ClassworkNotifications",
+                table: "ClassworkNotifications");
+
+            // Rename table
 
             migrationBuilder.RenameTable(
                 name: "Absences",
                 newName: "Absences_Absences");
+
+            migrationBuilder.RenameTable(
+                name: "AbsenceNotification",
+                newName: "Absences_Notifications");
+
+            migrationBuilder.RenameTable(
+                name: "AbsenceResponse",
+                newName: "Absences_Responses");
+
+            migrationBuilder.RenameTable(
+                name: "ClassworkNotifications",
+                newName: "MissedWork_ClassworkNotifications");
+
+            // Add/Update Columns
 
             migrationBuilder.RenameColumn(
                 name: "DateScanned",
@@ -56,10 +166,45 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "ExternallyExplained",
                 table: "Absences_Absences");
 
+            migrationBuilder.AddColumn<string>(
+                name: "CompletedBy",
+                table: "MissedWork_ClassworkNotifications",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.RenameColumn(
+                name: "ClassworkNotificationsId",
+                table: "AbsenceClassworkNotification",
+                newName: "ClassworkNotificationId");
+
+            migrationBuilder.RenameColumn(
+                name: "ClassworkNotificationsId",
+                table: "ClassworkNotificationStaff",
+                newName: "ClassworkNotificationId");
+
+            // Add Primary Keys
+
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Absences_Absences",
                 table: "Absences_Absences",
                 column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Absences_Notifications",
+                table: "Absences_Notifications",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Absences_Responses",
+                table: "Absences_Responses",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_MissedWork_ClassworkNotifications",
+                table: "MissedWork_ClassworkNotifications",
+                column: "Id");
+
+            // Add Foreign Keys
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Absences_Absences_Offerings_OfferingId",
@@ -76,39 +221,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 principalTable: "Students",
                 principalColumn: "StudentId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Absences_Absences_OfferingId",
-                table: "Absences_Absences",
-                column: "OfferingId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Absences_Absences_StudentId",
-                table: "Absences_Absences",
-                column: "StudentId");
-
-            // AbsenceNotifications table
-
-            migrationBuilder.DropIndex(
-                name: "IX_AbsenceNotification_AbsenceId",
-                table: "AbsenceNotification");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_AbsenceNotification_Absences_AbsenceId",
-                table: "AbsenceNotification");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_AbsenceNotification",
-                table: "AbsenceNotification");
-
-            migrationBuilder.RenameTable(
-                name: "AbsenceNotification",
-                newName: "Absences_Notifications");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_Absences_Notifications",
-                table: "Absences_Notifications",
-                column: "Id");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_Absences_Notifications_Absences_Absences_AbsenceId",
                 table: "Absences_Notifications",
@@ -116,82 +228,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 principalTable: "Absences_Absences",
                 principalColumn: "Id");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Absences_Notifications_AbsenceId",
-                table: "Absences_Notifications",
-                column: "AbsenceId");
-
-            // AbsenceResponse table
-
-            migrationBuilder.DropIndex(
-                name: "IX_AbsenceResponse_AbsenceId",
-                table: "AbsenceResponse");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_AbsenceResponse_Absences_AbsenceId",
-                table: "AbsenceResponse");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_AbsenceResponse",
-                table: "AbsenceResponse");
-
-            migrationBuilder.RenameTable(
-                name: "AbsenceResponse",
-                newName: "Absences_Responses");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_Absences_Responses",
-                table: "Absences_Responses",
-                column: "Id");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_Absences_Responses_Absences_Absences_AbsenceId",
                 table: "Absences_Responses",
                 column: "AbsenceId",
                 principalTable: "Absences_Absences",
                 principalColumn: "Id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Absences_Responses_AbsenceId",
-                table: "Absences_Responses",
-                column: "AbsenceId");
-
-            // ClassworkNotifications table
-
-            migrationBuilder.DropIndex(
-                name: "IX_ClassworkNotifications_OfferingId",
-                table: "ClassworkNotifications");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ClassworkNotifications_StaffId",
-                table: "ClassworkNotifications");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_ClassworkNotifications_Offerings_OfferingId",
-                table: "ClassworkNotifications");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_ClassworkNotifications_Staff_StaffId",
-                table: "ClassworkNotifications");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_ClassworkNotifications",
-                table: "ClassworkNotifications");
-
-            migrationBuilder.RenameTable(
-                name: "ClassworkNotifications",
-                newName: "MissedWork_ClassworkNotifications");
-
-            migrationBuilder.AddColumn<string>(
-                name: "CompletedBy",
-                table: "MissedWork_ClassworkNotifications",
-                type: "nvarchar(max)",
-                nullable: true);
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_MissedWork_ClassworkNotifications",
-                table: "MissedWork_ClassworkNotifications",
-                column: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_MissedWork_ClassworkNotifications_Offerings_OfferingId",
@@ -208,6 +250,52 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 principalTable: "Staff",
                 principalColumn: "StaffId");
 
+            migrationBuilder.AddForeignKey(
+                name: "FK_AbsenceClassworkNotification_Absences_Absences_AbsencesId",
+                table: "AbsenceClassworkNotification",
+                column: "AbsencesId",
+                principalTable: "Absences_Absences",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.NoAction);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AbsenceClassworkNotification_MissedWork_ClassworkNotifications_ClassworkNotificationId",
+                table: "AbsenceClassworkNotification",
+                column: "ClassworkNotificationId",
+                principalTable: "MissedWork_ClassworkNotifications",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.NoAction);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_ClassworkNotificationStaff_MissedWork_ClassworkNotifications_ClassworkNotificationId",
+                table: "ClassworkNotificationStaff",
+                column: "ClassworkNotificationId",
+                principalTable: "MissedWork_ClassworkNotifications",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.NoAction);
+
+            // Add Indexes
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Absences_Absences_OfferingId",
+                table: "Absences_Absences",
+                column: "OfferingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Absences_Absences_StudentId",
+                table: "Absences_Absences",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Absences_Notifications_AbsenceId",
+                table: "Absences_Notifications",
+                column: "AbsenceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Absences_Responses_AbsenceId",
+                table: "Absences_Responses",
+                column: "AbsenceId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_MissedWork_ClassworkNotifications_OfferingId",
                 table: "MissedWork_ClassworkNotifications",
@@ -218,66 +306,16 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 table: "MissedWork_ClassworkNotifications",
                 column: "StaffId");
 
-            // AbsenceClassworkNotification table
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_AbsenceClassworkNotification_ClassworkNotifications_ClassworkNotificationsId",
-                table: "AbsenceClassworkNotification");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_AbsenceClassworkNotification_Absences_AbsencesId",
-                table: "AbsenceClassworkNotification");
-
-            migrationBuilder.RenameColumn(
-                name: "ClassworkNotificationsId",
-                table: "AbsenceClassworkNotification",
-                newName: "ClassworkNotificationId");
-
             migrationBuilder.RenameIndex(
                 name: "IX_AbsenceClassworkNotification_ClassworkNotificationsId",
                 table: "AbsenceClassworkNotification",
                 newName: "IX_AbsenceClassworkNotification_ClassworkNotificationId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_AbsenceClassworkNotification_Absences_Absences_AbsencesId",
-                table: "AbsenceClassworkNotification",
-                column: "AbsencesId",
-                principalTable: "Absences_Absences",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_AbsenceClassworkNotification_MissedWork_ClassworkNotifications_ClassworkNotificationId",
-                table: "AbsenceClassworkNotification",
-                column: "ClassworkNotificationId",
-                principalTable: "MissedWork_ClassworkNotifications",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            // ClassworkNotificationStaff
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_ClassworkNotificationStaff_ClassworkNotifications_ClassworkNotificationsId",
-                table: "ClassworkNotificationStaff");
-
-            migrationBuilder.RenameColumn(
-                name: "ClassworkNotificationsId",
-                table: "ClassworkNotificationStaff",
-                newName: "ClassworkNotificationId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_ClassworkNotificationStaff_MissedWork_ClassworkNotifications_ClassworkNotificationId",
-                table: "ClassworkNotificationStaff",
-                column: "ClassworkNotificationId",
-                principalTable: "MissedWork_ClassworkNotifications",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // Absences Table
+            // Drop Indexes
 
             migrationBuilder.DropIndex(
                 name: "IX_Absences_Absences_StudentId",
@@ -287,6 +325,24 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "IX_Absences_Absences_OfferingId",
                 table: "Absences_Absences");
 
+            migrationBuilder.DropIndex(
+                name: "IX_Absences_Notifications_AbsenceId",
+                table: "Absences_Notifications");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Absences_Responses_AbsenceId",
+                table: "Absences_Responses");
+
+            migrationBuilder.DropIndex(
+                name: "IX_MissedWork_ClassworkNotifications_OfferingId",
+                table: "MissedWork_ClassworkNotifications");
+
+            migrationBuilder.DropIndex(
+                name: "IX_MissedWork_ClassworkNotifications_StaffId",
+                table: "MissedWork_ClassworkNotifications");
+
+            // Drop Foreign Keys
+
             migrationBuilder.DropForeignKey(
                 name: "FK_Absences_Absences_Students_StudentId",
                 table: "Absences_Absences");
@@ -295,41 +351,132 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "FK_Absences_Absences_Offerings_OfferingId",
                 table: "Absences_Absences");
 
+            migrationBuilder.DropForeignKey(
+                name: "FK_Absences_Notifications_Absences_Absences_AbsenceId",
+                table: "Absences_Notifications");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Absences_Responses_Absences_Absences_AbsenceId",
+                table: "Absences_Responses");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_MissedWork_ClassworkNotifications_Offerings_OfferingId",
+                table: "MissedWork_ClassworkNotifications");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_MissedWork_ClassworkNotifications_Staff_StaffId",
+                table: "MissedWork_ClassworkNotifications");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_AbsenceClassworkNotification_MissedWork_ClassworkNotifications_ClassworkNotificationId",
+                table: "AbsenceClassworkNotification");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_AbsenceClassworkNotification_Absences_Absences_AbsencesId",
+                table: "AbsenceClassworkNotification");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_ClassworkNotificationStaff_MissedWork_ClassworkNotifications_ClassworkNotificationId",
+                table: "ClassworkNotificationStaff");
+
+            // Drop Primary Keys
+
             migrationBuilder.DropPrimaryKey(
                 name: "PK_Absences_Absences",
                 table: "Absences_Absences");
 
-            migrationBuilder.AddColumn<string>(
-                name: "ExternalExplanation",
-                table: "Absences_Absences",
-                type: "nvarchar(max)",
-                nullable: true);
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_Absences_Notifications",
+                table: "Absences_Notifications");
 
-            migrationBuilder.AddColumn<string>(
-                name: "ExternalExplanationSource",
-                table: "Absences_Absences",
-                type: "nvarchar(max)",
-                nullable: true);
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_Absences_Responses",
+                table: "Absences_Responses");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "ExternallyExplained",
-                table: "Absences_Absences",
-                type: "bit",
-                nullable: false);
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_MissedWork_ClassworkNotifications",
+                table: "MissedWork_ClassworkNotifications");
 
-            migrationBuilder.RenameColumn(
-                name: "FirstSeen",
-                table: "Absences_Absences",
-                newName: "DateScanned");
+            // Rename table
 
             migrationBuilder.RenameTable(
                 name: "Absences_Absences",
                 newName: "Absences");
 
+            migrationBuilder.RenameTable(
+                name: "Absences_Notifications",
+                newName: "AbsenceNotifications");
+
+            migrationBuilder.RenameTable(
+                name: "Absences_Responses",
+                newName: "AbsenceResponse");
+
+            migrationBuilder.RenameTable(
+                name: "MissedWork_ClassworkNotifications",
+                newName: "ClassworkNotifications");
+
+            // Add/Update Columns
+
+            migrationBuilder.AddColumn<string>(
+                name: "ExternalExplanation",
+                table: "Absences",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "ExternalExplanationSource",
+                table: "Absences",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "ExternallyExplained",
+                table: "Absences",
+                type: "bit",
+                nullable: false);
+
+            migrationBuilder.RenameColumn(
+                name: "FirstSeen",
+                table: "Absences",
+                newName: "DateScanned");
+
+            migrationBuilder.DropColumn(
+                name: "CompletedBy",
+                table: "ClassworkNotifications");
+
+            migrationBuilder.RenameColumn(
+                name: "ClassworkNotificationId",
+                table: "AbsenceClassworkNotification",
+                newName: "ClassworkNotificationsId");
+
+            migrationBuilder.RenameColumn(
+                name: "ClassworkNotificationId",
+                table: "ClassworkNotificationStaff",
+                newName: "ClassworkNotificationsId");
+
+            // Add Primary Keys
+
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Absences",
                 table: "Absences",
                 column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_AbsenceNotification",
+                table: "AbsenceNotification",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_AbsenceResponse",
+                table: "AbsenceResponse",
+                column: "Id");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_ClassworkNotifications",
+                table: "ClassworkNotifications",
+                column: "Id");
+
+            // Add Foreign Keys
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Absences_Students_StudentId",
@@ -347,39 +494,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Absences_OfferingId",
-                table: "Absences",
-                column: "OfferingId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Absences_StudentId",
-                table: "Absences",
-                column: "StudentId");
-
-            // AbsenceNotifications table
-
-            migrationBuilder.DropIndex(
-                name: "IX_Absences_Notifications_AbsenceId",
-                table: "Absences_Notifications");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Absences_Notifications_Absences_Absences_AbsenceId",
-                table: "Absences_Notifications");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_Absences_Notifications",
-                table: "Absences_Notifications");
-
-            migrationBuilder.RenameTable(
-                name: "Absences_Notifications",
-                newName: "AbsenceNotifications");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_AbsenceNotification",
-                table: "AbsenceNotification",
-                column: "Id");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_AbsenceNotification_Absences_AbsenceId",
                 table: "AbsenceNotification",
@@ -388,34 +502,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
-            migrationBuilder.CreateIndex(
-                name: "IX_AbsenceNotification_AbsenceId",
-                table: "AbsenceNotification",
-                column: "AbsenceId");
-
-            // AbsenceResponse table
-
-            migrationBuilder.DropIndex(
-                name: "IX_Absences_Responses_AbsenceId",
-                table: "Absences_Responses");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Absences_Responses_Absences_Absences_AbsenceId",
-                table: "Absences_Responses");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_Absences_Responses",
-                table: "Absences_Responses");
-
-            migrationBuilder.RenameTable(
-                name: "Absences_Responses",
-                newName: "AbsenceResponse");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_AbsenceResponse",
-                table: "AbsenceResponse",
-                column: "Id");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_AbsenceResponse_Absences_AbsenceId",
                 table: "AbsenceResponse",
@@ -423,46 +509,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 principalTable: "Absences",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AbsenceResponse_AbsenceId",
-                table: "AbsenceResponse",
-                column: "AbsenceId");
-
-            // ClassworkNotifications table
-
-            migrationBuilder.DropIndex(
-                name: "IX_MissedWork_ClassworkNotifications_OfferingId",
-                table: "MissedWork_ClassworkNotifications");
-
-            migrationBuilder.DropIndex(
-                name: "IX_MissedWork_ClassworkNotifications_StaffId",
-                table: "MissedWork_ClassworkNotifications");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_MissedWork_ClassworkNotifications_Offerings_OfferingId",
-                table: "MissedWork_ClassworkNotifications");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_MissedWork_ClassworkNotifications_Staff_StaffId",
-                table: "MissedWork_ClassworkNotifications");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_MissedWork_ClassworkNotifications",
-                table: "MissedWork_ClassworkNotifications");
-
-            migrationBuilder.DropColumn(
-                name: "CompletedBy",
-                table: "MissedWork_ClassworkNotifications");
-
-            migrationBuilder.RenameTable(
-                name: "MissedWork_ClassworkNotifications",
-                newName: "ClassworkNotifications");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_ClassworkNotifications",
-                table: "ClassworkNotifications",
-                column: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_ClassworkNotifications_Staff_StaffId",
@@ -477,36 +523,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 column: "OfferingId",
                 principalTable: "Offerings",
                 principalColumn: "Id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ClassworkNotifications_OfferingId",
-                table: "ClassworkNotifications",
-                column: "OfferingId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ClassworkNotifications_StaffId",
-                table: "ClassworkNotifications",
-                column: "StaffId");
-
-            // AbsenceClassworkNotification table
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_AbsenceClassworkNotification_MissedWork_ClassworkNotifications_ClassworkNotificationId",
-                table: "AbsenceClassworkNotification");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_AbsenceClassworkNotification_Absences_Absences_AbsencesId",
-                table: "AbsenceClassworkNotification");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_AbsenceClassworkNotification_ClassworkNotificationId",
-                table: "AbsenceClassworkNotification",
-                newName: "IX_AbsenceClassworkNotification_ClassworkNotificationsId");
-
-            migrationBuilder.RenameColumn(
-                name: "ClassworkNotificationId",
-                table: "AbsenceClassworkNotification",
-                newName: "ClassworkNotificationsId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_AbsenceClassworkNotification_Absences_AbsencesId",
@@ -524,17 +540,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
-            // ClassworkNotificationStaff
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_ClassworkNotificationStaff_MissedWork_ClassworkNotifications_ClassworkNotificationId",
-                table: "ClassworkNotificationStaff");
-
-            migrationBuilder.RenameColumn(
-                name: "ClassworkNotificationId",
-                table: "ClassworkNotificationStaff",
-                newName: "ClassworkNotificationsId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ClassworkNotificationStaff_ClassworkNotifications_ClassworkNotificationsId",
                 table: "ClassworkNotificationStaff",
@@ -542,6 +547,43 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 principalTable: "ClassworkNotifications",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
+
+            // Add Indexes
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Absences_OfferingId",
+                table: "Absences",
+                column: "OfferingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Absences_StudentId",
+                table: "Absences",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AbsenceNotification_AbsenceId",
+                table: "AbsenceNotification",
+                column: "AbsenceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AbsenceResponse_AbsenceId",
+                table: "AbsenceResponse",
+                column: "AbsenceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClassworkNotifications_OfferingId",
+                table: "ClassworkNotifications",
+                column: "OfferingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClassworkNotifications_StaffId",
+                table: "ClassworkNotifications",
+                column: "StaffId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_AbsenceClassworkNotification_ClassworkNotificationId",
+                table: "AbsenceClassworkNotification",
+                newName: "IX_AbsenceClassworkNotification_ClassworkNotificationsId");
         }
     }
 }
