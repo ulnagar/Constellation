@@ -6,6 +6,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Abstractions;
+using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -136,12 +137,23 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
                     }
                 }
 
-                var school = await _schoolRepository.GetById(staffMember.SchoolCode, token);
-                var principals = await _schoolContactRepository.GetPrincipalsForSchool(staffMember.SchoolCode, token);
-
-                foreach (var principal in principals)
+                if (staffMember.IsShared)
                 {
-                    entry.AddPrincipalDetails(principal, school);
+                    School sharedSchool = await _schoolRepository.GetById(staffMember.SchoolCode, token);
+                    List<SchoolContact> sharedSchoolPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(staffMember.SchoolCode, token);
+
+                    foreach (SchoolContact principal in sharedSchoolPrincipals)
+                    {
+                        entry.AddPrincipalDetails(principal, sharedSchool);
+                    }
+                }
+
+                School localSchool = await _schoolRepository.GetById("8912", token);
+                List<SchoolContact> localSchoolPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(staffMember.SchoolCode, token);
+
+                foreach (SchoolContact principal in localSchoolPrincipals)
+                {
+                    entry.AddPrincipalDetails(principal, localSchool);
                 }
 
                 entry.RecordEffectiveDate = DateTime.MinValue;
