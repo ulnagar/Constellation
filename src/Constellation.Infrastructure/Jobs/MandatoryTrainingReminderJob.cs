@@ -154,7 +154,6 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
                 if (staffMember.IsShared)
                 {
                     School sharedSchool = await _schoolRepository.GetById(staffMember.SchoolCode, token);
-
                     List<SchoolContact> sharedSchoolPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(staffMember.SchoolCode, token);
 
                     foreach (SchoolContact principal in sharedSchoolPrincipals)
@@ -164,10 +163,9 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
                 }
 
                 School localSchool = await _schoolRepository.GetById("8912", token);
+                List<SchoolContact> localSchoolPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(staffMember.SchoolCode, token);
 
-                List<SchoolContact> localPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(localSchool.Code, token);
-
-                foreach (SchoolContact principal in localPrincipals)
+                foreach (SchoolContact principal in localSchoolPrincipals)
                 {
                     entry.AddPrincipalDetails(principal, localSchool);
                 }
