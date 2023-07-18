@@ -57,6 +57,7 @@ public class IndexModel : BasePageModel
         public string LastName { get; set; }
         public string Email { get; set; }
         public List<string> Roles { get; set; } = new();
+        public DateTime? LastLoggedIn { get; set; }
 
         public bool IsLocked { get; set; }
     }
@@ -103,6 +104,7 @@ public class IndexModel : BasePageModel
                 LastName = user.LastName,
                 Email = user.Email,
                 Roles = memberRoles,
+                LastLoggedIn = user.LastLoggedIn,
                 IsLocked = locked
             });
         }

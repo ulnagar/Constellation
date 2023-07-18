@@ -138,14 +138,14 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> BulkRemoveSession(int offeringId)
+        public async Task<IActionResult> BulkRemoveSession(int id)
         {
-            if (offeringId == 0)
+            if (id == 0)
             {
                 return RedirectToAction("Index", "Classes", new { area = "Subject" });
             }
 
-            var offering = await _unitOfWork.CourseOfferings.ForSessionEditAsync(offeringId);
+            var offering = await _unitOfWork.CourseOfferings.ForSessionEditAsync(id);
 
             if (offering == null)
             {
