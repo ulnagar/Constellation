@@ -201,7 +201,7 @@ public class ExcelService : IExcelService
         nameDetail.Size = 16;
         
         workSheet.Cells[2, 1].Value = $"Exported at {DateTime.Now:F}";
-        workSheet.Cells[3, 1].Value = $"Link to module: {new Uri(data.Url)}";
+        workSheet.Cells[3, 1].Value = $"Link to module: {data.Url}";
 
         workSheet.Cells[7, 1].LoadFromCollection(data.Completions, opt =>
         {

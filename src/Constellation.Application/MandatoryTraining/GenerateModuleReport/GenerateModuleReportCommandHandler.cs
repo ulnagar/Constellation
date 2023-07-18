@@ -53,7 +53,7 @@ internal sealed class GenerateModuleReportCommandHandler
         data.Id = module.Id;
         data.Name = module.Name;
         data.Expiry = module.Expiry.GetDisplayName();
-        data.Url = module.Url;
+        data.Url = (string.IsNullOrWhiteSpace(module.Url) ? string.Empty : module.Url);
         data.IsActive = !module.IsDeleted;
 
         foreach (var completion in completions.Where(record => !record.IsDeleted))
