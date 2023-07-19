@@ -10,6 +10,7 @@ namespace Constellation.Application.Interfaces.Repositories
 {
     public interface ISchoolRepository
     {
+        Task<List<School>> GetAllActive(CancellationToken cancellationToken = default);
         Task<School?> GetById(string id, CancellationToken cancellationToken = default);
         Task<List<School>> GetAll(CancellationToken cancellationToken = default);
         Task<List<School>> GetWithCurrentStudents(CancellationToken cancellationToken = default);

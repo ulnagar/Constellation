@@ -47,7 +47,7 @@ internal sealed class ParentRemovedFromFamilyDomainEvent_RemoveUser
             existingUser.IsParent = false;
         }
 
-        var staffMember = await _staffRepository.GetByEmailAddress(notification.EmailAddress, cancellationToken);
+        var staffMember = await _staffRepository.GetCurrentByEmailAddress(notification.EmailAddress, cancellationToken);
 
         if (staffMember is null)
         {

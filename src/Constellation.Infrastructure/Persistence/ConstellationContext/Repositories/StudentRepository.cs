@@ -34,6 +34,25 @@ public class StudentRepository : IStudentRepository
             .Where(student => student.StudentId == studentId)
             .FirstOrDefaultAsync(cancellationToken);
 
+    public async Task<Student?> GetCurrentByEmailAddress(
+        string emailAddress, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student =>
+                emailAddress.Contains(student.PortalUsername) &&
+                !student.IsDeleted)
+            .FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<Student?> GetAnyByEmailAddress(
+        string emailAddress, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student =>
+                emailAddress.Contains(student.PortalUsername))
+            .FirstOrDefaultAsync(cancellationToken);
+
     public async Task<List<Student>> GetListFromIds(
         List<string> studentIds,
         CancellationToken cancellationToken = default) =>

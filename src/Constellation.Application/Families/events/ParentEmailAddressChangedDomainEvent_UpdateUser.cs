@@ -77,7 +77,7 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
                 oldUser.IsParent = false;
             }
 
-            var staffMember = await _staffRepository.GetByEmailAddress(notification.OldEmail, cancellationToken);
+            var staffMember = await _staffRepository.GetCurrentByEmailAddress(notification.OldEmail, cancellationToken);
 
             if (staffMember is null)
             {

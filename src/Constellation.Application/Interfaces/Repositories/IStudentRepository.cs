@@ -22,6 +22,22 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<List<Student>> GetFilteredStudents(List<int> OfferingIds, List<Grade> Grades, List<string> SchoolCodes, CancellationToken cancellationToken = default);
         Task<List<Student>> GetCurrentStudentsFromSchool(string SchoolCode, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// Get a current student with a specified email address. Only returns current students.
+        /// </summary>
+        /// <param name="emailAddress"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Student?> GetCurrentByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Get any student with a specified email address. Can return deleted students.
+        /// </summary>
+        /// <param name="emailAddress"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Student?> GetAnyByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
+
         Task <Student> GetForExistCheck(string id);
         Task<ICollection<Student>> AllWithAbsenceScanSettings();
         Task<ICollection<Student>> AllActiveAsync();

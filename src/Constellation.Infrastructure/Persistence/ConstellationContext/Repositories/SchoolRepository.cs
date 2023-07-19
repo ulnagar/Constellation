@@ -16,6 +16,16 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             _context = context;
         }
 
+        public async Task<List<School>> GetAllActive(
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<School>()
+                .Where(school => 
+                    school.Students.Any(student => !student.IsDeleted) ||
+                    school.Staff.Any(staff => !staff.IsDeleted))
+                .ToListAsync(cancellationToken);
+
+
         private IQueryable<School> Collection()
         {
             return _context.Schools
