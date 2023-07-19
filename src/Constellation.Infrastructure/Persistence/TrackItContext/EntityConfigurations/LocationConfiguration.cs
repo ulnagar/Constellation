@@ -9,7 +9,12 @@ namespace Constellation.Infrastructure.Persistence.TrackItContext.EntityConfigur
         public void Configure(EntityTypeBuilder<Location> builder)
         {
             builder.HasKey(e => e.Sequence).HasName("PK_LOCATION_");
-            builder.ToTable("_LOCATION_", "_SMDBA_");
+            builder.ToTable("_LOCATION_", "_SMDBA_", tb =>
+            {
+                tb.HasTrigger("sm_ad__LOCATION_st");
+                tb.HasTrigger("sm_ai__LOCATION_st");
+                tb.HasTrigger("sm_au__LOCATION_st");
+            });
             builder.HasIndex(e => new { e.Country, e.Sequence }, "Country");
             builder.HasIndex(e => new { e.SeqCountry, e.Sequence }, "FK_LOCATION_SEQ_COUNTRY");
             builder.HasIndex(e => e.SeqPriority, "FK_LOCATION_SEQ_PRIORITY");

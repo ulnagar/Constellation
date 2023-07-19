@@ -9,7 +9,12 @@ namespace Constellation.Infrastructure.Persistence.TrackItContext.EntityConfigur
         public void Configure(EntityTypeBuilder<Department> builder)
         {
             builder.HasKey(e => e.Sequence).HasName("PK_DEPART_");
-            builder.ToTable("_DEPART_", "_SMDBA_");
+            builder.ToTable("_DEPART_", "_SMDBA_", tb =>
+            {
+                tb.HasTrigger("sm_ad__DEPART_st");
+                tb.HasTrigger("sm_ai__DEPART_st");
+                tb.HasTrigger("sm_au__DEPART_st");
+            });
             builder.HasIndex(e => new { e.Assistmanager, e.Sequence }, "FK_DEPART_ASSISTMANAGER");
             builder.HasIndex(e => new { e.Location, e.Sequence }, "FK_DEPART_LOCATION");
             builder.HasIndex(e => new { e.SeqDeptmanager, e.Sequence }, "FK_DEPART_SEQ_DEPTMANAGER");

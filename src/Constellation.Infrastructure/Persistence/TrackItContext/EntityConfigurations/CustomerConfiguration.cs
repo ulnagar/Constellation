@@ -9,7 +9,12 @@ namespace Constellation.Infrastructure.Persistence.TrackItContext.EntityConfigur
         public void Configure(EntityTypeBuilder<Customer> builder)
         {
             builder.HasKey(e => e.Sequence).HasName("PK_CUSTOMER_");
-            builder.ToTable("_CUSTOMER_", "_SMDBA_");
+            builder.ToTable("_CUSTOMER_", "_SMDBA_", tb =>
+            {
+                tb.HasTrigger("sm_ad__CUSTOMER_st");
+                tb.HasTrigger("sm_ai__CUSTOMER_st");
+                tb.HasTrigger("sm_au__CUSTOMER_st");
+            });
             builder.HasIndex(e => e.Winuserid, "CUSTOMER_WINUSERID");
             builder.HasIndex(e => new { e.Fname, e.Sequence }, "Client First Name");
             builder.HasIndex(e => new { e.Name, e.Sequence }, "Client Last Name");

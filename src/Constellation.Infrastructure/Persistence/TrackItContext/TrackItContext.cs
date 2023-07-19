@@ -20,11 +20,6 @@ namespace Constellation.Infrastructure.Persistence.TrackItContext
         {
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly(), t => t.GetTypeInfo().Namespace.Contains("TrackItContext"));
 
-            //builder.ApplyConfiguration(new CustomerConfiguration());
-            //builder.ApplyConfiguration(new DepartConfiguration());
-            //builder.ApplyConfiguration(new LocationConfiguration());
-            //builder.ApplyConfiguration(new SmsysrecnumConfiguration());
-
             base.OnModelCreating(builder);
         }
     }
