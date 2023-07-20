@@ -43,7 +43,7 @@ internal sealed class CreateClassworkNotificationResponseCommandHandler
             return Result.Failure(DomainErrors.MissedWork.ClassworkNotification.NotFound(request.NotificationId));
         }
 
-        Staff teacher = await _staffRepository.GetByEmailAddress(request.TeacherEmailAddress, cancellationToken);
+        Staff teacher = await _staffRepository.GetCurrentByEmailAddress(request.TeacherEmailAddress, cancellationToken);
 
         if (teacher is null)
         {

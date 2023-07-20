@@ -21,7 +21,7 @@ internal sealed class GetStaffByEmailQueryHandler
 
     public async Task<Result<StaffSelectionListResponse>> Handle(GetStaffByEmailQuery request, CancellationToken cancellationToken) 
     {
-        Staff teacher = await _staffRepository.GetByEmailAddress(request.EmailAddress, cancellationToken);
+        Staff teacher = await _staffRepository.GetCurrentByEmailAddress(request.EmailAddress, cancellationToken);
 
         return new StaffSelectionListResponse(teacher.StaffId, teacher.FirstName, teacher.LastName);
     }
