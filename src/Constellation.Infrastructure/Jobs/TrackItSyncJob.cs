@@ -68,31 +68,43 @@ public class TrackItSyncJob : ITrackItSyncJob, IHangfireJob
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            if (customer.Emailid is not null)
-                customer.Emailid = ConvertEmailToEmailId(ConvertEmailIdToEmail(customer.Emailid));
+            if (customer.Emailid is null)
+                continue;
 
             string emailAddress = ConvertEmailIdToEmail(customer.Emailid);
+            customer.Emailid = ConvertEmailToEmailId(emailAddress);
+            
+            if (customer.Inactive == 1)
+                continue;
 
             if (emailAddress.Contains("@det.nsw.edu.au"))
             {
                 Staff staffMember = await _staffRepository.GetAnyByEmailAddress(emailAddress, cancellationToken);
 
-                if (staffMember is null)
-                    customer.Inactive = 1;
+                if (staffMember is not null && !staffMember.IsDeleted)
+                    continue;
 
-                if (staffMember.DateDeleted.HasValue && staffMember.DateDeleted.Value.AddDays(7) < DateTime.Today)
-                    customer.Inactive = 1;
+                if (staffMember is not null && staffMember.DateDeleted.HasValue && staffMember.DateDeleted.Value.AddDays(7) > DateTime.Today)
+                    continue;
+
+                _logger.Information("{id}: Customer: {user} no longer active - removing", jobId, emailAddress);
+
+                customer.Inactive = 1;
             }
 
             if (emailAddress.Contains("@education.nsw.gov.au"))
             {
                 Student student = await _studentRepository.GetAnyByEmailAddress(ConvertEmailIdToEmail(customer.Emailid), cancellationToken);
 
-                if (student is null)
-                    customer.Inactive = 1;
+                if (student is not null && !student.IsDeleted)
+                    continue;
 
-                if (student.DateDeleted.HasValue && student.DateDeleted.Value.AddDays(7) < DateTime.Today)
-                    customer.Inactive = 1;
+                if (student is not null && student.DateDeleted.HasValue && student.DateDeleted.Value.AddDays(7) > DateTime.Today)
+                    continue;
+
+                _logger.Information("{id}: Customer: {user} no longer active - removing", jobId, emailAddress);
+
+                customer.Inactive = 1;
             }
         }
 
@@ -333,6 +345,8 @@ public class TrackItSyncJob : ITrackItSyncJob, IHangfireJob
         
         var location = _tiContext.Locations.FirstOrDefault(c => c.Note == staff.SchoolCode);
         customer.Location = location?.Sequence;
+
+        customer.Inactive = 0;
 
         customer.Updated();
     }
