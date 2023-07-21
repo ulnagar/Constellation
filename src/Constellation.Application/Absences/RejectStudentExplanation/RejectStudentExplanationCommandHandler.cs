@@ -5,11 +5,13 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Org.BouncyCastle.Crypto;
 using Serilog;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,25 +19,22 @@ internal sealed class RejectStudentExplanationCommandHandler
     : ICommandHandler<RejectStudentExplanationCommand>
 {
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly IAbsenceResponseRepository _responseRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public RejectStudentExplanationCommandHandler(
         IAbsenceRepository absenceRepository,
-        IAbsenceResponseRepository responseRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
-        _responseRepository = responseRepository;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<RejectStudentExplanationCommand>();
     }
 
     public async Task<Result> Handle(RejectStudentExplanationCommand request, CancellationToken cancellationToken)
     {
-        var absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
+        Absence absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
 
         if (absence is null)
         {
@@ -44,7 +43,7 @@ internal sealed class RejectStudentExplanationCommandHandler
             return Result.Failure(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
         }
 
-        var response = await _responseRepository.GetById(request.ResponseId, cancellationToken);
+        Response response = absence.Responses.FirstOrDefault(response => response.Id == request.ResponseId);
 
         if (response is null)
         {

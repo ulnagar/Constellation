@@ -4,9 +4,12 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
+using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,20 +17,17 @@ internal sealed class GetAbsenceResponseDetailsForSchoolQueryHandler
     : IQueryHandler<GetAbsenceResponseDetailsForSchoolQuery, SchoolAbsenceResponseDetailsResponse>
 {
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly IAbsenceResponseRepository _responseRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ICourseOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public GetAbsenceResponseDetailsForSchoolQueryHandler(
         IAbsenceRepository absenceRepository,
-        IAbsenceResponseRepository responseRepository,
         IStudentRepository studentRepository,
         ICourseOfferingRepository offeringRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
-        _responseRepository = responseRepository;
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
         _logger = logger.ForContext<GetAbsenceResponseDetailsForSchoolQuery>();
@@ -35,7 +35,7 @@ internal sealed class GetAbsenceResponseDetailsForSchoolQueryHandler
 
     public async Task<Result<SchoolAbsenceResponseDetailsResponse>> Handle(GetAbsenceResponseDetailsForSchoolQuery request, CancellationToken cancellationToken)
     {
-        var absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
+        Absence absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
 
         if (absence is null)
         {
@@ -44,7 +44,7 @@ internal sealed class GetAbsenceResponseDetailsForSchoolQueryHandler
             return Result.Failure<SchoolAbsenceResponseDetailsResponse>(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
         }
 
-        var response = await _responseRepository.GetById(request.ResponseId, cancellationToken);
+        Response response = absence.Responses.FirstOrDefault(response => response.Id == request.ResponseId);
 
         if (response is null)
         {
@@ -53,7 +53,7 @@ internal sealed class GetAbsenceResponseDetailsForSchoolQueryHandler
             return Result.Failure<SchoolAbsenceResponseDetailsResponse>(DomainErrors.Absences.Response.NotFound(request.ResponseId));
         }
 
-        var student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -62,12 +62,10 @@ internal sealed class GetAbsenceResponseDetailsForSchoolQueryHandler
             return Result.Failure<SchoolAbsenceResponseDetailsResponse>(DomainErrors.Partners.Student.NotFound(absence.StudentId));
         }
 
-        var nameRequest = Name.Create(student.FirstName, string.Empty, student.LastName);
+        CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
-        var offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
-
-        var entry = new SchoolAbsenceResponseDetailsResponse(
-            nameRequest.Value,
+        SchoolAbsenceResponseDetailsResponse entry = new(
+            student.GetName(),
             offering?.Name,
             absence.Id,
             response.Id,

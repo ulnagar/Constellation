@@ -47,7 +47,7 @@ internal sealed class GetAbsencesForFamilyQueryHandler
         {
             var nameRequest = Name.Create(student.FirstName, string.Empty, student.LastName);
 
-            var absences = await _absenceRepository.GetWithResponsesForStudentFromCurrentYear(student.StudentId, cancellationToken);
+            var absences = await _absenceRepository.GetForStudentFromCurrentYear(student.StudentId, cancellationToken);
 
             foreach (var absence in absences)
             {

@@ -22,7 +22,6 @@ public class GenerateAttendanceReportForStudentQueryHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly IAbsenceResponseRepository _absenceResponseRepository;
     private readonly IOfferingSessionsRepository _sessionRepository;
     private readonly ICourseOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
@@ -33,7 +32,6 @@ public class GenerateAttendanceReportForStudentQueryHandler
     public GenerateAttendanceReportForStudentQueryHandler(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
-        IAbsenceResponseRepository absenceResponseRepository,
         IOfferingSessionsRepository sessionRepository,
         ICourseOfferingRepository offeringRepository,
         ICourseRepository courseRepository,
@@ -43,7 +41,6 @@ public class GenerateAttendanceReportForStudentQueryHandler
     {
         _studentRepository = studentRepository;
         _absenceRepository = absenceRepository;
-        _absenceResponseRepository = absenceResponseRepository;
         _sessionRepository = sessionRepository;
         _offeringRepository = offeringRepository;
         _courseRepository = courseRepository;
@@ -61,7 +58,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
         DateOnly startDate = request.StartDate.VerifyStartOfFortnight();
         DateOnly endDate = startDate.AddDays(12);
 
-        List<Absence> absences = await _absenceRepository.GetWithResponsesForStudentFromDateRange(student.StudentId, startDate, endDate, cancellationToken);
+        List<Absence> absences = await _absenceRepository.GetForStudentFromDateRange(student.StudentId, startDate, endDate, cancellationToken);
 
         List<AttendanceAbsenceDetail> absenceDetails = new();
 

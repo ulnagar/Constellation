@@ -8,6 +8,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Shared;
 using Serilog;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,18 +16,15 @@ internal sealed class ConvertResponseToAbsenceExplanationCommandHandler
     : ICommandHandler<ConvertResponseToAbsenceExplanationCommand, AbsenceExplanation>
 {
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly IAbsenceResponseRepository _responseRepository;
     private readonly ICourseOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public ConvertResponseToAbsenceExplanationCommandHandler(
         IAbsenceRepository absenceRepository,
-        IAbsenceResponseRepository responseRepository,
         ICourseOfferingRepository offeringRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
-        _responseRepository = responseRepository;
         _offeringRepository = offeringRepository;
         _logger = logger.ForContext<ConvertResponseToAbsenceExplanationCommand>();
     }
@@ -42,7 +40,7 @@ internal sealed class ConvertResponseToAbsenceExplanationCommandHandler
             return Result.Failure<AbsenceExplanation>(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
         }
 
-        Response response = await _responseRepository.GetById(request.ResponseId, cancellationToken);
+        Response response = absence.Responses.FirstOrDefault(response => response.Id == request.ResponseId);
 
         if (response is null)
         {

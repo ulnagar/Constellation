@@ -20,23 +20,17 @@ internal sealed class GetAbsenceDetailsQueryHandler
     : IQueryHandler<GetAbsenceDetailsQuery, AbsenceDetailsResponse>
 {
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly IAbsenceResponseRepository _responseRepository;
-    private readonly IAbsenceNotificationRepository _notificationRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly ILogger _logger;
 
     public GetAbsenceDetailsQueryHandler(
         IAbsenceRepository absenceRepository,
-        IAbsenceResponseRepository responseRepository,
-        IAbsenceNotificationRepository notificationRepository,
         IStudentRepository studentRepository,
         ISchoolRepository schoolRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
-        _responseRepository = responseRepository;
-        _notificationRepository = notificationRepository;
         _studentRepository = studentRepository;
         _schoolRepository = schoolRepository;
         _logger = logger.ForContext<GetAbsenceDetailsQuery>();
@@ -82,13 +76,9 @@ internal sealed class GetAbsenceDetailsQueryHandler
             return Result.Failure<AbsenceDetailsResponse>(DomainErrors.Partners.School.NotFound(student.SchoolCode));
         }
 
-        List<Response> responses = await _responseRepository.GetAllForAbsence(absence.Id, cancellationToken);
-
-        List<Notification> notifications = await _notificationRepository.GetAllForAbsence(absence.Id, cancellationToken);
-
         List<AbsenceDetailsResponse.AbsenceResponseDetails> convertedResponses = new();
 
-        foreach (Response response in responses)
+        foreach (Response response in absence.Responses)
         {
             AbsenceDetailsResponse.AbsenceResponseDetails entry = new(
                 response.Id,
@@ -105,7 +95,7 @@ internal sealed class GetAbsenceDetailsQueryHandler
 
         List<AbsenceDetailsResponse.AbsenceNotificationDetails> convertedNotifications = new();
 
-        foreach (Notification notification in notifications)
+        foreach (Notification notification in absence.Notifications)
         {
             AbsenceDetailsResponse.AbsenceNotificationDetails entry = new(
                 notification.Id,

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Absences.Events;
 
 using Constellation.Application.Absences.ConvertResponseToAbsenceExplanation;
+using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
@@ -20,7 +21,6 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
     : INotificationHandler<PendingVerificationResponseCreatedDomainEvent>
 {
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly IAbsenceResponseRepository _responseRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ISchoolContactRepository _contactRepository;
     private readonly ICourseOfferingRepository _offeringRepository;
@@ -29,7 +29,6 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
 
     public PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordinator(
         IAbsenceRepository absenceRepository,
-        IAbsenceResponseRepository responseRepository,
         IStudentRepository studentRepository,
         ISchoolContactRepository contactRepository,
         ICourseOfferingRepository offeringRepository,
@@ -37,7 +36,6 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
-        _responseRepository = responseRepository;
         _studentRepository = studentRepository;
         _contactRepository = contactRepository;
         _offeringRepository = offeringRepository;
@@ -48,7 +46,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
     public async Task Handle(PendingVerificationResponseCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
         // Send email to ACC to let them know there is a response that requires verification.
-        var absence = await _absenceRepository.GetById(notification.AbsenceId, cancellationToken);
+        Absence absence = await _absenceRepository.GetById(notification.AbsenceId, cancellationToken);
 
         if (absence is null)
         {
@@ -56,7 +54,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             return;
         }
 
-        var response = await _responseRepository.GetById(notification.ResponseId, cancellationToken);
+        Response response = absence.Responses.FirstOrDefault(response => response.Id == notification.ResponseId);
 
         if (response is null)
         {
@@ -64,7 +62,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             return;
         }
 
-        var student = await _studentRepository.GetWithSchoolById(absence.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetWithSchoolById(absence.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -105,7 +103,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             absence.AbsenceTimeframe, 
             response.Explanation);
 
-        var message = await _emailService.SendCoordinatorPartialAbsenceVerificationRequest(
+        EmailDtos.SentEmail message = await _emailService.SendCoordinatorPartialAbsenceVerificationRequest(
             new List<AbsenceExplanation> { explanation },
             student,
             recipients,

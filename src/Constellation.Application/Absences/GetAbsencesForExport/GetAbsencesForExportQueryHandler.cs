@@ -4,6 +4,8 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
+using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
@@ -17,8 +19,6 @@ internal sealed class GetAbsencesForExportQueryHandler
     : IQueryHandler<GetAbsencesForExportQuery, List<AbsenceExportResponse>>
 {
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly IAbsenceResponseRepository _responseRepository;
-    private readonly IAbsenceNotificationRepository _notificationRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly ICourseOfferingRepository _offeringRepository;
@@ -26,16 +26,12 @@ internal sealed class GetAbsencesForExportQueryHandler
 
     public GetAbsencesForExportQueryHandler(
         IAbsenceRepository absenceRepository,
-        IAbsenceResponseRepository responseRepository,
-        IAbsenceNotificationRepository notificationRepository,
         IStudentRepository studentRepository,
         ISchoolRepository schoolRepository,
         ICourseOfferingRepository offeringRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
-        _responseRepository = responseRepository;
-        _notificationRepository = notificationRepository;
         _studentRepository = studentRepository;
         _schoolRepository = schoolRepository;
         _offeringRepository = offeringRepository;
@@ -44,7 +40,7 @@ internal sealed class GetAbsencesForExportQueryHandler
 
     public async Task<Result<List<AbsenceExportResponse>>> Handle(GetAbsencesForExportQuery request, CancellationToken cancellationToken)
     {
-        var absences = await _absenceRepository.GetAllFromCurrentYear(cancellationToken);
+        List<Absence> absences = await _absenceRepository.GetAllFromCurrentYear(cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(request.Filter.StudentId))
             absences = absences
@@ -65,7 +61,7 @@ internal sealed class GetAbsencesForExportQueryHandler
 
         foreach (var absence in absences)
         {
-            var student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
 
             if (!string.IsNullOrWhiteSpace(request.Filter.SchoolCode) && student.SchoolCode != request.Filter.SchoolCode)
                 continue;
@@ -73,18 +69,12 @@ internal sealed class GetAbsencesForExportQueryHandler
             if (request.Filter.Grade.HasValue && student.CurrentGrade != (Grade)request.Filter.Grade)
                 continue;
 
-            var school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
+            School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
 
-            var studentNameRequest = Name.Create(student.FirstName, string.Empty, student.LastName);
-
-            var offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
-
-            var notifications = await _notificationRepository.GetCountForAbsence(absence.Id, cancellationToken);
-
-            var responses = await _responseRepository.GetCountForAbsence(absence.Id, cancellationToken);
+            CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
             var entry = new AbsenceExportResponse(
-                studentNameRequest.Value,
+                student.GetName(),
                 student.CurrentGrade,
                 school.Name,
                 absence.Explained,
@@ -94,8 +84,8 @@ internal sealed class GetAbsencesForExportQueryHandler
                 absence.AbsenceLength,
                 absence.AbsenceTimeframe,
                 offering.Name,
-                notifications,
-                responses);
+                absence.Notifications.Count,
+                absence.Responses.Count);
 
             results.Add(entry);
         }

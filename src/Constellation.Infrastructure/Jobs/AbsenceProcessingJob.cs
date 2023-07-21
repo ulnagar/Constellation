@@ -26,7 +26,6 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
     private readonly ICourseOfferingRepository _offeringRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly IAbsenceResponseRepository _responseRepository;
 
     private Student _student;
     private List<DateOnly> _excludedDates = new(); 
@@ -38,7 +37,6 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         ICourseOfferingRepository offeringRepository,
         ITimetablePeriodRepository periodRepository,
         IAbsenceRepository absenceRepository,
-        IAbsenceResponseRepository responseRepository,
         ISentralGateway sentralService,
         IEmailService emailService, 
         ILogger logger)
@@ -47,7 +45,6 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         _offeringRepository = offeringRepository;
         _periodRepository = periodRepository;
         _absenceRepository = absenceRepository;
-        _responseRepository = responseRepository;
         _sentralService = sentralService;
         _emailService = emailService;
 
@@ -295,8 +292,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                                     _logger.Information("{id}: Student {student} ({grade}): Found external explaination for {Type} absence on {Date} - {PeriodName}", JobId, student.DisplayName, student.CurrentGrade.AsName(), newAbsence.Type, newAbsence.Date.ToShortDateString(), newAbsence.PeriodName);
 
                                     // Is there an existing SYSTEM response? If not, create one
-                                    var responses = await _responseRepository.GetAllForAbsence(existingAbsence.Id, cancellationToken);
-                                    if (responses.All(response => response.Type != ResponseType.System))
+                                    if (existingAbsence.Responses.All(response => response.Type != ResponseType.System))
                                     {
                                         var newResponse = newAbsence.Responses.First();
 
@@ -679,19 +675,13 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                     _logger.Information("{id}: Student {student} ({grade}): Found external explaination for {Type} absence on {Date} - {PeriodName}", JobId, _student.DisplayName, _student.CurrentGrade.AsName(), absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName);
 
                     // Is there an existing SYSTEM response? If not, create one
-                    List<Response> responses = await _responseRepository.GetAllForAbsence(
-                        existingAbsence.Id,
-                        cancellationToken);
-
-                    if (responses.All(response => response.Type != ResponseType.System))
+                    if (existingAbsence.Responses.All(response => response.Type != ResponseType.System))
                     {
                         existingAbsence.AddResponse(
                             ResponseType.System,
                             absence.ExternalExplanationSource,
                             absence.ExternalExplanation);
                     }
-
-                    responses = null;
                 }
             }
 
@@ -777,11 +767,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                         _logger.Information("{id}: Student {student} ({grade}): Found external explaination for {Type} absence on {Date} - {PeriodName}", JobId, _student.DisplayName, _student.CurrentGrade.AsName(), absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName);
 
                         // Is there an existing SYSTEM response? If not, create one
-                        List<Response> responses = await _responseRepository.GetAllForAbsence(
-                            existingAbsence.Id, 
-                            cancellationToken);
-
-                        if (responses.All(response => response.Type != ResponseType.System))
+                        if (existingAbsence.Responses.All(response => response.Type != ResponseType.System))
                         {
                             SentralPeriodAbsenceDto absenceDto = absencesToProcess
                                 .First(absence => AbsenceReason.FromValue(absence.Reason) == reason);
@@ -791,8 +777,6 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                                 absenceDto.ExternalExplanationSource,
                                 absenceDto.ExternalExplanation);
                         }
-
-                        responses = null;
                     }
                 }
 
@@ -842,11 +826,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                     _logger.Information("{id}: Student {student} ({grade}): Found external explaination for {Type} absence on {Date} - {PeriodName}", JobId, _student.DisplayName, _student.CurrentGrade.AsName(), absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName);
 
                     // Is there an existing SYSTEM response? If not, create one
-                    List<Response> responses = await _responseRepository.GetAllForAbsence(
-                        existingAbsence.Id, 
-                        cancellationToken);
-
-                    if (responses.All(response => response.Type != ResponseType.System))
+                    if (existingAbsence.Responses.All(response => response.Type != ResponseType.System))
                     {
                         Response newResponse = absenceRecord.Responses.First();
 

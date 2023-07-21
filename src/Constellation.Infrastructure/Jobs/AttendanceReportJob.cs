@@ -27,7 +27,6 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
     private readonly IFamilyRepository _familyRepository;
     private readonly ISchoolContactRepository _contactRepository;
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly IAbsenceResponseRepository _responseRepository;
     private readonly IOfferingSessionsRepository _sessionRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
     private readonly ICourseOfferingRepository _offeringRepository;
@@ -44,7 +43,6 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
         IFamilyRepository familyRepository,
         ISchoolContactRepository contactRepository,
         IAbsenceRepository absenceRepository,
-        IAbsenceResponseRepository responseRepository,
         IOfferingSessionsRepository sessionRepository,
         ITimetablePeriodRepository periodRepository,
         ICourseOfferingRepository offeringRepository,
@@ -58,7 +56,6 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
         _familyRepository = familyRepository;
         _contactRepository = contactRepository;
         _absenceRepository = absenceRepository;
-        _responseRepository = responseRepository;
         _sessionRepository = sessionRepository;
         _periodRepository = periodRepository;
         _offeringRepository = offeringRepository;

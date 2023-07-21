@@ -55,7 +55,7 @@ internal sealed class GetOutstandingAbsencesForSchoolQueryHandler
                 continue;
             }
 
-            var absences = await _absenceRepository.GetWithResponsesForStudentFromCurrentYear(student.StudentId, cancellationToken);
+            var absences = await _absenceRepository.GetForStudentFromCurrentYear(student.StudentId, cancellationToken);
 
             if (absences.Count == 0)
                 continue;

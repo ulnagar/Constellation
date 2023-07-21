@@ -1,11 +1,9 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Application.Absences.ProvideParentWholeAbsenceExplanation;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
-using HtmlAgilityPack;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -26,10 +24,14 @@ public class AbsenceRepository : IAbsenceRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Absence>()
+            .Include(absence => absence.Responses)
+            .Include(absence => absence.Notifications)
             .FirstOrDefaultAsync(absence => absence.Id == absenceId, cancellationToken);
 
     public void Insert(Absence absence) =>
-        _context.Set<Absence>().Add(absence);
+        _context
+            .Set<Absence>()
+            .Add(absence);
 
     public async Task<List<Absence>> GetForStudentFromCurrentYear(
         string StudentId,
@@ -40,23 +42,8 @@ public class AbsenceRepository : IAbsenceRepository
 
         return await _context
             .Set<Absence>()
-            .Where(absence =>
-                absence.StudentId == StudentId &&
-                absence.Date > startOfYear &&
-                absence.Date < endOfYear)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<List<Absence>> GetWithResponsesForStudentFromCurrentYear(
-    string StudentId,
-    CancellationToken cancellationToken = default)
-    {
-        var startOfYear = new DateOnly(DateTime.Today.Year, 1, 1);
-        var endOfYear = new DateOnly(DateTime.Today.Year, 12, 31);
-
-        return await _context
-            .Set<Absence>()
             .Include(absence => absence.Responses)
+            .Include(absence => absence.Notifications)
             .Where(absence =>
                 absence.StudentId == StudentId &&
                 absence.Date > startOfYear &&
@@ -68,13 +55,18 @@ public class AbsenceRepository : IAbsenceRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Absence>()
-                .Where(absence => absence.Date.Year == DateTime.Today.Year)
+            .Include(absence => absence.Responses)
+            .Include(absence => absence.Notifications)
+            .Where(absence => absence.Date.Year == DateTime.Today.Year)
             .ToListAsync(cancellationToken);
 
     public async Task<List<Absence>> GetWholeAbsencesForScanDate(
         DateOnly scanDate,
         CancellationToken cancellationToken = default) =>
-            await _context.Set<Absence>()
+            await _context
+                .Set<Absence>()
+                .Include(absence => absence.Responses)
+                .Include(absence => absence.Notifications)
                 .Where(absence =>
                     absence.LastSeen.Date == scanDate.ToDateTime(TimeOnly.MinValue) &&
                     absence.Type == AbsenceType.Whole)
@@ -103,6 +95,8 @@ public class AbsenceRepository : IAbsenceRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Absence>()
+            .Include(absence => absence.Responses)
+            .Include(absence => absence.Notifications)
             .Where(absence =>
                 absence.StudentId == studentId &&
                 absence.Date == absenceDate &&
@@ -119,6 +113,8 @@ public class AbsenceRepository : IAbsenceRepository
 
         return await _context
             .Set<Absence>()
+            .Include(absence => absence.Responses)
+            .Include(absence => absence.Notifications)
             .Where(absence =>
                 absence.StudentId == studentId &&
                 !absence.Explained &&
@@ -134,20 +130,8 @@ public class AbsenceRepository : IAbsenceRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Absence>()
-            .Where(absence =>
-                absence.StudentId == studentId &&
-                absence.Date >= startDate &&
-                absence.Date <= endDate)
-            .ToListAsync(cancellationToken);
-
-    public async Task<List<Absence>> GetWithResponsesForStudentFromDateRange(
-        string studentId,
-        DateOnly startDate,
-        DateOnly endDate,
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<Absence>()
             .Include(absence => absence.Responses)
+            .Include(absence => absence.Notifications)
             .Where(absence =>
                 absence.StudentId == studentId &&
                 absence.Date >= startDate &&

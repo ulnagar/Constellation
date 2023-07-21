@@ -19,18 +19,15 @@ internal sealed class CreateAbsenceResponseFromSchoolCommandHandler
     : ICommandHandler<CreateAbsenceResponseFromSchoolCommand>
 {
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly IAbsenceResponseRepository _responseRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public CreateAbsenceResponseFromSchoolCommandHandler(
         IAbsenceRepository absenceRepository,
-        IAbsenceResponseRepository responseRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
-        _responseRepository = responseRepository;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<CreateAbsenceResponseFromSchoolCommand>();
     }
