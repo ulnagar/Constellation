@@ -13,7 +13,6 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.MissedWork;
 using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.Templates.Views.Emails.Absences;
 using Constellation.Infrastructure.Templates.Views.Emails.Auth;
@@ -21,7 +20,6 @@ using Constellation.Infrastructure.Templates.Views.Emails.Awards;
 using Constellation.Infrastructure.Templates.Views.Emails.Covers;
 using Constellation.Infrastructure.Templates.Views.Emails.Lessons;
 using Constellation.Infrastructure.Templates.Views.Emails.MandatoryTraining;
-using Constellation.Infrastructure.Templates.Views.Emails.MissedWork;
 using Constellation.Infrastructure.Templates.Views.Emails.Reports;
 using Constellation.Infrastructure.Templates.Views.Emails.RollMarking;
 using Microsoft.Extensions.Options;
@@ -400,21 +398,6 @@ public class Service : IEmailService
         };
 
         await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "[Aurora College] Constellation Data Issue Identified", body);
-    }
-
-    public async Task SendAdminClassworkNotificationContactAlert(Student student, Staff teacher, ClassworkNotification notification)
-    {
-        var viewModel = $"<p>The student {student.DisplayName} did not receive notification of the classwork required to catch up on their absence ({notification.Id}) as there are no parent contact details available in Sentral.</p>";
-
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
-
-        var toRecipients = new Dictionary<string, string>
-        {
-            { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" },
-            { teacher.DisplayName, teacher.EmailAddress }
-        };
-
-        await _emailSender.Send(toRecipients, null, "[Aurora College] Constellation Data Issue Identified", body);
     }
 
     public async Task SendParentContactChangeReportEmail(
@@ -959,152 +942,6 @@ public class Service : IEmailService
                 toRecipients.Add(entry.Name, entry.Email);
 
         await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", $"[Aurora College] Service Log Output - {notification.Source}", body);
-    }
-
-    public async Task SendTeacherClassworkNotificationRequest(
-        string offeringName,
-        ClassworkNotification notification,
-        List<Student> students,
-        CancellationToken cancellationToken = default)
-    {
-        var viewModel = new TeacherMissedWorkNotificationEmailViewModel
-        {
-            Preheader = "",
-            SenderName = _configuration.Absences.AbsenceCoordinatorName,
-            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
-            Title = $"[Aurora College] Missed Classwork Notification - {offeringName}",
-            OfferingName = offeringName,
-            AbsenceDate = notification.AbsenceDate,
-            StudentList = students.Select(student => student.DisplayName).ToList(),
-            Link = $"https://acos.aurora.nsw.edu.au/Portal/Absences/Teachers/Update/{notification.Id}",
-            IsCovered = notification.IsCovered
-        };
-
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MissedWork/TeacherMissedWorkNotificationEmail.cshtml", viewModel);
-
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in notification.Teachers)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.EmailAddress))
-                toRecipients.Add(entry.DisplayName, entry.EmailAddress);
-
-        await _emailSender.Send(toRecipients, null, viewModel.Title, body, cancellationToken);
-    }
-
-    public async Task SendTeacherClassworkNotificationCopy(
-        ClassworkNotification notification, 
-        string offeringName,
-        string courseName,
-        Student student,
-        Staff teacher,
-        CancellationToken cancellationToken = default)
-    {
-        var viewModel = new StudentMissedWorkNotificationEmailViewModel
-        {
-            Preheader = "",
-            SenderName = notification.CompletedBy,
-            SenderTitle = "Teacher",
-            Title = $"[Aurora College] Missed Classwork Notification - {offeringName} - {notification.AbsenceDate.ToShortDateString()}",
-            OfferingName = offeringName,
-            AbsenceDate = notification.AbsenceDate,
-            CourseName = courseName,
-            StudentName = student.FirstName,
-            WorkDescription = notification.Description
-        };
-
-        var toRecipients = new Dictionary<string, string>
-        {
-            { teacher.DisplayName, teacher.EmailAddress }
-        };
-
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MissedWork/StudentMissedWorkNotificationEmail.cshtml", viewModel);
-
-        await _emailSender.Send(toRecipients, teacher.EmailAddress, viewModel.Title, body, cancellationToken);
-    }
-
-    public async Task SendStudentClassworkNotification(
-        ClassworkNotification notification, 
-        string offeringName,
-        string courseName,
-        Student student,
-        Staff teacher,
-        List<EmailRecipient> parentEmails,
-        bool isExplained,
-        CancellationToken cancellationToken = default)
-    {
-        var viewModel = new StudentMissedWorkNotificationEmailViewModel
-        {
-            Preheader = "",
-            SenderName = notification.CompletedBy,
-            SenderTitle = "Teacher",
-            Title = $"[Aurora College] Missed Classwork Notification - {offeringName} - {notification.AbsenceDate.ToShortDateString()}",
-            OfferingName = offeringName,
-            AbsenceDate = notification.AbsenceDate,
-            CourseName = courseName,
-            StudentName = student.FirstName,
-            WorkDescription = notification.Description
-        };
-
-        var toRecipients = new Dictionary<string, string>();
-
-        if (parentEmails != null)
-        {
-            if (!isExplained)
-            {
-                await SendParentClassworkNotification(
-                    notification, 
-                    offeringName, 
-                    courseName, 
-                    student, 
-                    teacher, 
-                    parentEmails, 
-                    cancellationToken);
-            }
-            else
-            {
-                foreach (var entry in parentEmails)
-                    if (toRecipients.All(recipient => recipient.Value != entry.Email))
-                        toRecipients.Add(entry.Name, entry.Email);
-            }
-        }
-
-        toRecipients.Add(student.DisplayName, student.EmailAddress);
-
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MissedWork/StudentMissedWorkNotificationEmail.cshtml", viewModel);
-
-        await _emailSender.Send(toRecipients, teacher.EmailAddress, viewModel.Title, body, cancellationToken);
-    }
-
-    private async Task SendParentClassworkNotification(
-        ClassworkNotification notification, 
-        string offeringName,
-        string courseName,
-        Student student,
-        Staff teacher,
-        List<EmailRecipient> parentEmails,
-        CancellationToken cancellationToken = default)
-    {
-        var viewModel = new ParentMissedWorkNotificationEmailViewModel
-        {
-            Preheader = "",
-            SenderName = notification.CompletedBy,
-            SenderTitle = "Teacher",
-            Title = $"[Aurora College] Missed Classwork Notification - {offeringName} - {notification.AbsenceDate.ToShortDateString()}",
-            OfferingName = offeringName,
-            AbsenceDate = notification.AbsenceDate,
-            CourseName = courseName,
-            StudentName = student.FirstName,
-            WorkDescription = notification.Description,
-            Link = $"https://acos.aurora.nsw.edu.au/parents"
-        };
-
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MissedWork/ParentMissedWorkNotificationEmail.cshtml", viewModel);
-
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in parentEmails)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                toRecipients.Add(entry.Name, entry.Email);
-
-        await _emailSender.Send(toRecipients, teacher.EmailAddress, viewModel.Title, body, cancellationToken);
     }
 
     public async Task SendDailyRollMarkingReport(List<RollMarkingEmailDto> entries, DateOnly reportDate, Dictionary<string, string> recipients)

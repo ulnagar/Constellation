@@ -3,7 +3,6 @@
 using Constellation.Application;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Jobs.AbsenceClassworkNotificationJob;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
@@ -206,7 +205,6 @@ public static class ServicesRegistration
 
     internal static IServiceCollection AddHangfireJobs(this IServiceCollection services)
     {
-        services.AddScoped<IAbsenceClassworkNotificationJob, AbsenceClassworkNotificationJob>();
         services.AddScoped<IAbsenceMonitorJob, AbsenceMonitorJob>();
         services.AddScoped<IAbsenceProcessingJob, AbsenceProcessingJob>();
         services.AddScoped<IAttendanceReportJob, AttendanceReportJob>();

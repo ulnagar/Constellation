@@ -9,7 +9,6 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.MissedWork;
 using Constellation.Core.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -41,12 +40,6 @@ public interface IEmailService
     Task<bool> SendSchoolAttendanceReportEmail(DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<Attachment> attachments, CancellationToken cancellationToken = default);
 
 
-    // ClassworkNotification Emails
-    Task SendTeacherClassworkNotificationRequest(string offeringName, ClassworkNotification notification, List<Student> students, CancellationToken cancellationToken = default);
-    Task SendStudentClassworkNotification(ClassworkNotification notification, string offeringName, string courseName, Student student, Staff teacher, List<EmailRecipient> parentEmails, bool isExplained, CancellationToken cancellationToken = default);
-    Task SendTeacherClassworkNotificationCopy(ClassworkNotification notification, string offeringName, string courseName, Student student, Staff teacher, CancellationToken cancellationToken = default);
-
-
     // RollMarking Emails
     Task SendDailyRollMarkingReport(List<RollMarkingEmailDto> entries, DateOnly reportDate, Dictionary<string, string> recipients);
     Task SendNoRollMarkingReport(DateOnly reportDate, Dictionary<string, string> recipients);
@@ -66,7 +59,6 @@ public interface IEmailService
     Task SendAdminAbsenceContactAlert(string studentName);
     Task SendAdminAbsenceSentralAlert(string studentName);
     Task SendAdminLowCreditAlert(double credit);
-    Task SendAdminClassworkNotificationContactAlert(Student student, Staff teacher, ClassworkNotification notification);
     Task SendMasterFileConsistencyReportEmail(MemoryStream report, string emailAddress, CancellationToken cancellationToken = default);
     Task SendAssignmentUploadFailedNotification(string assignmentName, AssignmentId assignmentId, string studentName, AssignmentSubmissionId submissionId, CancellationToken cancellationToken = default);
 

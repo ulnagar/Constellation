@@ -1,8 +1,6 @@
 ﻿namespace Constellation.Presentation.Server.Areas.Home.Pages;
 
 using Constellation.Application.MandatoryTraining.GetCountOfExpiringCertificatesForStaffMember;
-using Constellation.Application.MissedWork.GetOutstandingNotificationsForTeacher;
-using Constellation.Application.MissedWork.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.StaffMembers.GetStaffByEmail;
 using Constellation.Application.StaffMembers.Models;
@@ -26,7 +24,6 @@ public class DashboardModel : BasePageModel
     public bool IsAdmin { get; set; }
     public string StaffId { get; set; }
 
-    public List<NotificationSummary> ClassworkNotifications { get; set; } = new();
     public int ExpiringTraining { get; set; } = 0;
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken = default)
@@ -52,11 +49,6 @@ public class DashboardModel : BasePageModel
 
         if (trainingExpiringSoonRequest.IsSuccess)
             ExpiringTraining = trainingExpiringSoonRequest.Value;
-
-        Result<List<NotificationSummary>> notificationRequest = await _mediator.Send(new GetOutstandingNotificationsForTeacherQuery(StaffId), cancellationToken);
-
-        if (notificationRequest.IsSuccess)
-            ClassworkNotifications = notificationRequest.Value;
 
         return Page();
     }

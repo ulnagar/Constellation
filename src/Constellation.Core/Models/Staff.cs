@@ -1,8 +1,6 @@
 ﻿namespace Constellation.Core.Models;
 
-using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.MandatoryTraining;
-using Constellation.Core.Models.MissedWork;
 using System;
 using System.Collections.Generic;
 

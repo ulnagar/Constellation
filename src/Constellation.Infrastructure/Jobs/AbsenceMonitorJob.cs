@@ -4,7 +4,6 @@ using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
 using Constellation.Application.Absences.SendAbsenceNotificationToParent;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Jobs.AbsenceClassworkNotificationJob;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
@@ -26,7 +25,6 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
     private readonly IAbsenceProcessingJob _absenceProcessor;
     private readonly IEmailService _emailService;
     private readonly ISMSService _smsService;
-    private readonly IAbsenceClassworkNotificationJob _classworkNotifier;
     private readonly IMediator _mediator;
     private readonly ILogger _logger;
 
@@ -40,7 +38,6 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
         IAbsenceProcessingJob absenceProcessor,
         IEmailService emailService,
         ISMSService smsService,
-        IAbsenceClassworkNotificationJob classworkNotifier,
         IMediator mediator,
         ILogger logger)
     {
@@ -53,7 +50,6 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
         _absenceProcessor = absenceProcessor;
         _emailService = emailService;
         _smsService = smsService;
-        _classworkNotifier = classworkNotifier;
         _mediator = mediator;
         _logger = logger.ForContext<IAbsenceMonitorJob>();
     }
@@ -125,8 +121,6 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                 absences = null;
             }
         }
-
-        await _classworkNotifier.StartJob(jobId, DateOnly.FromDateTime(DateTime.Today), cancellationToken);
     }
 
     private async Task SendCoordinatorDigests(

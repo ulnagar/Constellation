@@ -4,7 +4,6 @@ using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.MandatoryTraining;
-using Constellation.Core.Models.MissedWork;
 using Constellation.Core.Models.Stocktake;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ContextExtensions;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ContextSets;
@@ -49,7 +48,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<LessonRoll> LessonRolls { get; set; }
         public DbSet<CanvasOperation> CanvasOperations { get; set; }
-        public DbSet<ClassworkNotification> ClassworkNotifications { get; set; }
         public DbSet<JobActivation> JobActivations { get; set; }
         public DbSet<StoredFile> StoredFiles { get; set; }
         public DbSet<StocktakeEvent> StocktakeEvents { get; set; }

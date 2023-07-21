@@ -30,20 +30,20 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 	                ,[VerificationComment]
 	                ,[Forwarded])
                 SELECT NEWID(), Id, DateScanned, 'System', ExternalExplanationSource, ExternalExplanation, 'NR', null, null, null, 1
-                FROM [CONSTELLATION_TEST].[dbo].[Absences]
+                FROM [CONSTELLATION_DEV].[dbo].[Absences]
                 where ExternalExplanation is not null;");
 
             // delete orphaned entries in the classworknotificationstaff table
             migrationBuilder.Sql(
                 @"DELETE 
-		            FROM CONSTELLATION_TEST.dbo.ClassworkNotificationStaff
+		            FROM CONSTELLATION_DEV.dbo.ClassworkNotificationStaff
 		            WHERE ClassworkNotificationsId in (
 			            SELECT ClassworkNotificationsId
-			            FROM CONSTELLATION_TEST.dbo.ClassworkNotificationStaff cns
+			            FROM CONSTELLATION_DEV.dbo.ClassworkNotificationStaff cns
 			            WHERE NOT EXISTS
 			            (
 				            SELECT 1 
-				            FROM CONSTELLATION_TEST.dbo.ClassworkNotifications cn
+				            FROM CONSTELLATION_DEV.dbo.ClassworkNotifications cn
 				            WHERE cn.Id = cns.ClassworkNotificationsId
 			            )
 		            )");
