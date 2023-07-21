@@ -7,28 +7,29 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
-using System;
+using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class CreateRollCommandHandler : ICommandHandler<CreateRollCommand, TutorialRollId>
 {
-    private readonly ITutorialRollRepository _rollRepository;
 	private readonly IGroupTutorialRepository _tutorialRepository;
 	private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger _logger;
 
-    public CreateRollCommandHandler(IUnitOfWork unitOfWork,
+    public CreateRollCommandHandler(
         IGroupTutorialRepository tutorialRepository,
-        ITutorialRollRepository rollRepository)
+        IUnitOfWork unitOfWork,
+        ILogger logger)
     {
-        _unitOfWork = unitOfWork;
         _tutorialRepository = tutorialRepository;
-        _rollRepository = rollRepository;
+        _unitOfWork = unitOfWork;
+        _logger = logger.ForContext<CreateRollCommand>();
     }
 
     public async Task<Result<TutorialRollId>> Handle(CreateRollCommand request, CancellationToken cancellationToken)
     {
-        var tutorial = await _tutorialRepository.GetWholeAggregate(request.TutorialId, cancellationToken);
+        GroupTutorial tutorial = await _tutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
             return Result.Failure<TutorialRollId>(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
@@ -37,11 +38,12 @@ internal sealed class CreateRollCommandHandler : ICommandHandler<CreateRollComma
 
         if (rollResult.IsFailure)
         {
-            //TODO: Log error
+            _logger
+                .ForContext("Error", rollResult.Error, true)
+                .Warning("Could not create roll due to error");
+
             return Result.Failure<TutorialRollId>(rollResult.Error);
         }
-
-        _rollRepository.Insert(rollResult.Value);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

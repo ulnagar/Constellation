@@ -5,7 +5,10 @@ using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
+using Constellation.Core.Models;
+using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Shared;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,20 +32,18 @@ internal sealed class GetTutorialWithDetailsByIdQueryHandler
 
     public async Task<Result<GroupTutorialDetailResponse>> Handle(GetTutorialWithDetailsByIdQuery request, CancellationToken cancellationToken)
     {
-        var tutorial = await _groupTutorialRepository.GetWholeAggregate(request.Id, cancellationToken);
+        GroupTutorial tutorial = await _groupTutorialRepository.GetById(request.Id, cancellationToken);
 
         if (tutorial is null)
-        {
             return Result.Failure<GroupTutorialDetailResponse>(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.Id));
-        }
 
-        var teacherLinks = tutorial.Teachers.Where(teacher => !teacher.IsDeleted).ToList();
-        var studentLinks = tutorial.CurrentEnrolments.ToList();
+        List<TutorialTeacher> teacherLinks = tutorial.Teachers.Where(teacher => !teacher.IsDeleted).ToList();
+        List<TutorialEnrolment> studentLinks = tutorial.CurrentEnrolments.ToList();
 
-        var teacherEntities = await _staffRepository.GetListFromIds(teacherLinks.Select(teacher => teacher.StaffId).ToList(), cancellationToken);
-        var studentEntities = await _studentRepository.GetListFromIds(studentLinks.Select(student => student.StudentId).ToList(), cancellationToken);
+        List<Staff> teacherEntities = await _staffRepository.GetListFromIds(teacherLinks.Select(teacher => teacher.StaffId).ToList(), cancellationToken);
+        List<Student> studentEntities = await _studentRepository.GetListFromIds(studentLinks.Select(student => student.StudentId).ToList(), cancellationToken);
 
-        var teachers = teacherLinks
+        List<TutorialTeacherResponse> teachers = teacherLinks
             .Select(teacher => 
                 new TutorialTeacherResponse(
                     teacher.Id, 
@@ -50,7 +51,7 @@ internal sealed class GetTutorialWithDetailsByIdQueryHandler
                     teacher.EffectiveTo))
             .ToList();
 
-        var students = studentLinks
+        List<TutorialEnrolmentResponse> students = studentLinks
             .Select(student =>
                 new TutorialEnrolmentResponse(
                     student.Id,
@@ -59,7 +60,7 @@ internal sealed class GetTutorialWithDetailsByIdQueryHandler
                     student.EffectiveTo))
             .ToList();
 
-        var response = new GroupTutorialDetailResponse(
+        GroupTutorialDetailResponse response = new(
             tutorial.Id,
             tutorial.Name,
             tutorial.StartDate,

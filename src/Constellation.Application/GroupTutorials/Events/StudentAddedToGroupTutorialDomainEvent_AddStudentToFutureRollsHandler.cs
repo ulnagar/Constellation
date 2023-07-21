@@ -5,7 +5,9 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.GroupTutorials;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,42 +16,37 @@ internal sealed class StudentAddedToGroupTutorialDomainEvent_AddStudentToFutureR
     : IDomainEventHandler<StudentAddedToGroupTutorialDomainEvent>
 {
     private readonly IGroupTutorialRepository _groupTutorialRepository;
-    private readonly ITutorialEnrolmentRepository _tutorialEnrolmentRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public StudentAddedToGroupTutorialDomainEvent_AddStudentToFutureRollsHandler(
         IGroupTutorialRepository groupTutorialRepository,
-        ITutorialEnrolmentRepository tutorialEnrolmentRepository,
         IUnitOfWork unitOfWork)
     {
         _groupTutorialRepository = groupTutorialRepository;
-        _tutorialEnrolmentRepository = tutorialEnrolmentRepository;
         _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(StudentAddedToGroupTutorialDomainEvent notification, CancellationToken cancellationToken)
     {
-        var tutorial = await _groupTutorialRepository.GetWithRollsById(notification.TutorialId, cancellationToken);
+        GroupTutorial tutorial = await _groupTutorialRepository.GetById(notification.TutorialId, cancellationToken);
 
         if (tutorial is null)
             return;
 
-        var enrolment = await _tutorialEnrolmentRepository.GetById(notification.EnrolmentId, cancellationToken);
+        TutorialEnrolment enrolment = tutorial.Enrolments.FirstOrDefault(enrolment => enrolment.Id == notification.EnrolmentId);
 
         if (enrolment is null)
             return;
 
         // Find all future non-marked rolls to add student to
-        var rolls = tutorial.Rolls
+        List<TutorialRoll> rolls = tutorial.Rolls
             .Where(roll => 
                 roll.SessionDate > DateOnly.FromDateTime(DateTime.Today) && 
                 roll.Status == TutorialRollStatus.Unsubmitted)
             .ToList();
 
-        foreach (var roll in rolls)
-        {
+        foreach (TutorialRoll roll in rolls)
             roll.AddStudent(enrolment.StudentId, true);
-        }
 
         await _unitOfWork.CompleteAsync(cancellationToken);
     }

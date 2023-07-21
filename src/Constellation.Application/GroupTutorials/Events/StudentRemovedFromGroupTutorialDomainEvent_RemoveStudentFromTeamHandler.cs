@@ -7,41 +7,43 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.GroupTutorials;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class StudentRemovedFromGroupTutorialDomainEvent_RemoveStudentFromTeamHandler
     : IDomainEventHandler<StudentRemovedFromGroupTutorialDomainEvent>
 {
+    private readonly IMSTeamOperationsRepository _operationsRepository;
     private readonly IGroupTutorialRepository _groupTutorialRepository;
-    private readonly ITutorialEnrolmentRepository _tutorialEnrolmentRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public StudentRemovedFromGroupTutorialDomainEvent_RemoveStudentFromTeamHandler(
+        IMSTeamOperationsRepository operationsRepository,
         IGroupTutorialRepository groupTutorialRepository,
-        ITutorialEnrolmentRepository tutorialEnrolmentRepository,
         IUnitOfWork unitOfWork)
     {
+        _operationsRepository = operationsRepository;
         _groupTutorialRepository = groupTutorialRepository;
-        _tutorialEnrolmentRepository = tutorialEnrolmentRepository;
         _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(StudentRemovedFromGroupTutorialDomainEvent notification, CancellationToken cancellationToken)
     {
-        var tutorial = await _groupTutorialRepository.GetById(notification.TutorialId, cancellationToken);
+        GroupTutorial tutorial = await _groupTutorialRepository.GetById(notification.TutorialId, cancellationToken);
 
         if (tutorial is null)
             return;
 
-        var enrolment = await _tutorialEnrolmentRepository.GetById(notification.EnrolmentId, cancellationToken);
+        TutorialEnrolment enrolment = tutorial.Enrolments.FirstOrDefault(enrolment => enrolment.Id == notification.EnrolmentId);
 
         if (enrolment is null)
             return;
 
         // Create Team
-        var operation = new StudentEnrolledMSTeamOperation
+        StudentEnrolledMSTeamOperation operation = new()
         {
             DateScheduled = DateTime.Now,
             TeamName = MicrosoftTeamsHelper.FormatTeamName(tutorial.Name),
@@ -49,7 +51,8 @@ internal sealed class StudentRemovedFromGroupTutorialDomainEvent_RemoveStudentFr
             StudentId = enrolment.StudentId
         };
 
-        _unitOfWork.Add(operation);
+        _operationsRepository.Insert(operation);
+
         await _unitOfWork.CompleteAsync(cancellationToken);
     }
 }

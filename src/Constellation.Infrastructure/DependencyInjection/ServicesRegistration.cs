@@ -134,9 +134,6 @@ public static class ServicesRegistration
         services.AddScoped<IStudentRepository, StudentRepository>();
         services.AddScoped<IGroupTutorialRepository, GroupTutorialRepository>();
         services.AddScoped<IStaffRepository, StaffRepository>();
-        services.AddScoped<ITutorialEnrolmentRepository, TutorialEnrolmentRepository>();
-        services.AddScoped<ITutorialRollRepository, TutorialRollRepository>();
-        services.AddScoped<ITutorialTeacherRepository, TutorialTeacherRepository>();
         services.AddScoped<ISchoolContactRepository, SchoolContactRepository>();
         services.AddScoped<IFamilyRepository, FamilyRepository>();
         services.AddScoped<IFacultyRepository, FacultyRepository>();

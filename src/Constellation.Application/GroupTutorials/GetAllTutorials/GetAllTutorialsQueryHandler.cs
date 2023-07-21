@@ -3,6 +3,8 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
+using Constellation.Core.Models;
+using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,45 +15,35 @@ internal sealed class GetAllTutorialsQueryHandler
     : IQueryHandler<GetAllTutorialsQuery, List<GroupTutorialSummaryResponse>>
 {
     private readonly IGroupTutorialRepository _groupTutorialRepository;
-    private readonly ITutorialEnrolmentRepository _tutorialEnrolmentRepository;
-    private readonly ITutorialTeacherRepository _tutorialTeacherRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IStudentRepository _studentRepository;
 
     public GetAllTutorialsQueryHandler(
         IGroupTutorialRepository groupTutorialRepository,
-        ITutorialEnrolmentRepository tutorialEnrolmentRepository,
-        ITutorialTeacherRepository tutorialTeacherRepository,
         IStaffRepository staffRepository,
         IStudentRepository studentRepository)
     {
         _groupTutorialRepository = groupTutorialRepository;
-        _tutorialEnrolmentRepository = tutorialEnrolmentRepository;
-        _tutorialTeacherRepository = tutorialTeacherRepository;
         _staffRepository = staffRepository;
         _studentRepository = studentRepository;
     }
 
     public async Task<Result<List<GroupTutorialSummaryResponse>>> Handle(GetAllTutorialsQuery request, CancellationToken cancellationToken)
     {
-        var tutorials = await _groupTutorialRepository.GetAllWithTeachersAndStudents(cancellationToken);
+        List<GroupTutorial> tutorials = await _groupTutorialRepository.GetAll(cancellationToken);
 
-        var summaryList = new List<GroupTutorialSummaryResponse>();
+        List<GroupTutorialSummaryResponse> summaryList = new();
 
         if (tutorials is null)
-        {
             return summaryList;
-        }
 
-        foreach (var tutorial in tutorials)
+        foreach (GroupTutorial tutorial in tutorials)
         {
-            var teacherLinks = await _tutorialTeacherRepository.GetActiveForTutorial(tutorial.Id, cancellationToken);
-            var teachers = await _staffRepository.GetListFromIds(teacherLinks.Select(teacher => teacher.StaffId).ToList(), cancellationToken);
+            List<Staff> teachers = await _staffRepository.GetListFromIds(tutorial.Teachers.Select(teacher => teacher.StaffId).ToList(), cancellationToken);
 
-            var studentLinks = await _tutorialEnrolmentRepository.GetActiveForTutorial(tutorial.Id, cancellationToken);
-            var students = await _studentRepository.GetListFromIds(studentLinks.Select(student => student.StudentId).ToList(), cancellationToken);
+            List<Student> students = await _studentRepository.GetListFromIds(tutorial.Enrolments.Select(student => student.StudentId).ToList(), cancellationToken);
 
-            var entry = new GroupTutorialSummaryResponse(
+            GroupTutorialSummaryResponse entry = new(
                 tutorial.Id,
                 tutorial.Name,
                 tutorial.StartDate,

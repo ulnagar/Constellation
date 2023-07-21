@@ -7,8 +7,11 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
+using Constellation.Core.Models;
+using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,27 +38,26 @@ internal sealed class GenerateTutorialAttendanceReportQueryHandler
 
     public async Task<Result<FileDto>> Handle(GenerateTutorialAttendanceReportQuery request, CancellationToken cancellationToken)
     {
-        var tutorial = await _groupTutorialRepository.GetWithRollsById(request.TutorialId, cancellationToken);
+        GroupTutorial tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
-        {
             return Result.Failure<FileDto>(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
-        }
 
-        var reportableRolls = tutorial.Rolls.Where(roll => roll.Status == Core.Enums.TutorialRollStatus.Submitted).ToList();
+        List<TutorialRoll> reportableRolls = tutorial.Rolls
+            .Where(roll => roll.Status == Core.Enums.TutorialRollStatus.Submitted)
+            .ToList();
 
-        var studentLinks = reportableRolls.SelectMany(roll => roll.Students).Select(student => student.StudentId).Distinct().ToList();
-        var studentEntities = await _studentRepository.GetListFromIds(studentLinks, cancellationToken);
+        List<Student> studentEntities = await _studentRepository.GetListFromIds(tutorial.Enrolments.Select(enrolment => enrolment.StudentId).ToList(), cancellationToken);
 
-        var rolls = new List<TutorialRollDetailsDto>();
+        List<TutorialRollDetailsDto> rolls = new();
 
-        foreach (var roll in reportableRolls )
+        foreach (TutorialRoll roll in reportableRolls )
         {
-            var students = new List<TutorialRollStudentDetailsDto>();
+            List<TutorialRollStudentDetailsDto> students = new();
 
-            foreach (var student in roll.Students)
+            foreach (TutorialRollStudent student in roll.Students)
             {
-                var entity = studentEntities.FirstOrDefault(entry => entry.StudentId == student.StudentId);
+                Student entity = studentEntities.FirstOrDefault(entry => entry.StudentId == student.StudentId);
 
                 if (entity is null)
                     continue;
@@ -68,7 +70,7 @@ internal sealed class GenerateTutorialAttendanceReportQueryHandler
                     student.Present));
             }
 
-            var staffMember = await _staffRepository.GetForExistCheck(roll.StaffId);
+            Staff staffMember = await _staffRepository.GetForExistCheck(roll.StaffId);
 
             rolls.Add(new(
                 roll.Id,
@@ -78,16 +80,16 @@ internal sealed class GenerateTutorialAttendanceReportQueryHandler
                 students));
         }
 
-        var dto = new TutorialDetailsDto(
+        TutorialDetailsDto dto = new(
             tutorial.Id,
             tutorial.Name,
             tutorial.StartDate,
             tutorial.EndDate,
             rolls);
 
-        var fileStream = await _excelService.CreateGroupTutorialAttendanceFile(dto);
+        MemoryStream fileStream = await _excelService.CreateGroupTutorialAttendanceFile(dto);
 
-        var response = new FileDto
+        FileDto response = new()
         {
             FileData = fileStream.ToArray(),
             FileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

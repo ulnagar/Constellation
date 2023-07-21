@@ -5,6 +5,8 @@ using Constellation.Application.GroupTutorials.AddStudentToRoll;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
+using Constellation.Core.Models;
+using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Shared;
 using System.Linq;
 using System.Threading;
@@ -29,26 +31,20 @@ internal sealed class AddStudentToTutorialRollCommandHandler
 
     public async Task<Result> Handle(AddStudentToTutorialRollCommand request, CancellationToken cancellationToken)
     {
-        var tutorial = await _groupTutorialRepository.GetWithRollsById(request.TutorialId, cancellationToken);
+        GroupTutorial tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
-        {
             return Result.Failure(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
-        }
 
-        var roll = tutorial.Rolls.FirstOrDefault(roll => roll.Id == request.RollId);
+        TutorialRoll roll = tutorial.Rolls.FirstOrDefault(roll => roll.Id == request.RollId);
 
         if (roll is null)
-        {
             return Result.Failure(DomainErrors.GroupTutorials.TutorialRoll.NotFound(request.RollId));
-        }
 
-        var student = await _studentRepository.GetForExistCheck(request.StudentId);
+        Student student = await _studentRepository.GetForExistCheck(request.StudentId);
 
         if (student is null)
-        {
             return Result.Failure(DomainErrors.Partners.Staff.NotFound(request.StudentId));
-        }
 
         roll.AddStudent(student.StudentId, false);
 

@@ -5,6 +5,8 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
+using Constellation.Core.Models;
+using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Shared;
 using Serilog;
 using System;
@@ -165,13 +167,12 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         if (team.Description.Split(';').Contains("GTUT"))
         {
             // Group Tutorial Team which will have a group tutorial
-            var teamCourse = team.Name.Split(" - ")[2];
+            string teamCourse = team.Name.Split(" - ")[2];
 
-            var tutorial = await _groupTutorialRepository.GetWithTeachersAndStudentsByName(teamCourse);
+            GroupTutorial tutorial = await _groupTutorialRepository.GetByName(teamCourse);
 
             if (tutorial is null)
             {
-                //error
                 _logger.Warning("Could not identify Group Tutorial from name {name}", teamCourse);
 
                 return Result.Failure<List<TeamMembershipResponse>>(new Error("GroupTutorials.GroupTutorial.NotFound", $"Could not identify Group Tutorial from name {teamCourse}."));
@@ -179,16 +180,16 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
             // Enrolled Students
 
-            var studentIds = tutorial
+            List<string> studentIds = tutorial
                 .CurrentEnrolments
                 .Select(enrol => enrol.StudentId)
                 .ToList();
 
-            var students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
+            List<Student> students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
 
-            foreach (var student in students)
+            foreach (Student student in students)
             {
-                var entry = new TeamMembershipResponse(
+                TeamMembershipResponse entry = new(
                     team.Id,
                     student.EmailAddress,
                     TeamsMembershipLevel.Member.Value);
@@ -199,7 +200,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
             // Class Teachers
 
-            var teacherIds = tutorial
+            List<string> teacherIds = tutorial
                 .Teachers
                 .Where(member =>
                     !member.IsDeleted &&
@@ -208,11 +209,11 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 .Select(member => member.StaffId)
                 .ToList();
 
-            var teachers = await _staffRepository.GetListFromIds(teacherIds, cancellationToken);
+            List<Staff> teachers = await _staffRepository.GetListFromIds(teacherIds, cancellationToken);
 
-            foreach (var teacher in teachers)
+            foreach (Staff teacher in teachers)
             {
-                var entry = new TeamMembershipResponse(
+                TeamMembershipResponse entry = new(
                     team.Id,
                     teacher.EmailAddress,
                     TeamsMembershipLevel.Owner.Value);
@@ -224,7 +225,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
         // Mandatory Owners
 
-        var standardOwners = new List<string>
+        List<string> standardOwners = new()
         {
             "michael.necovski2@det.nsw.edu.au",
             "christopher.robertson@det.nsw.edu.au",
@@ -237,9 +238,9 @@ internal sealed class GetTeamMembershipByIdQueryHandler
             "benjamin.hillsley@det.nsw.edu.au"
         };
 
-        foreach (var owner in standardOwners)
+        foreach (string owner in standardOwners)
         {
-            var entry = new TeamMembershipResponse(
+            TeamMembershipResponse entry = new(
                 team.Id,
                 owner,
                 TeamsMembershipLevel.Owner.Value);

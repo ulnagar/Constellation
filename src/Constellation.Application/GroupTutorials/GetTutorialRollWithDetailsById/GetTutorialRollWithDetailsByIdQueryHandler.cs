@@ -5,7 +5,10 @@ using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
+using Constellation.Core.Models;
+using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Shared;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,32 +32,28 @@ internal sealed class GetTutorialRollWithDetailsByIdQueryHandler
 
     public async Task<Result<TutorialRollDetailResponse>> Handle(GetTutorialRollWithDetailsByIdQuery request, CancellationToken cancellationToken)
     {
-        var tutorial = await _groupTutorialRepository.GetWithRollsById(request.TutorialId, cancellationToken);
+        GroupTutorial tutorial = await _groupTutorialRepository.GetById(request.TutorialId, cancellationToken);
 
         if (tutorial is null)
-        {
             return Result.Failure<TutorialRollDetailResponse>(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
-        }
 
-        var roll = tutorial.Rolls.FirstOrDefault(roll => roll.Id == request.RollId);
+        TutorialRoll roll = tutorial.Rolls.FirstOrDefault(roll => roll.Id == request.RollId);
 
         if (roll is null)
-        {
             return Result.Failure<TutorialRollDetailResponse>(DomainErrors.GroupTutorials.TutorialRoll.NotFound(request.RollId));
-        }
 
         string staffName = string.Empty;
 
         if (roll.Status == Core.Enums.TutorialRollStatus.Submitted)
         {
-            var staffMember = await _staffRepository.GetForExistCheck(roll.StaffId);
+            Staff staffMember = await _staffRepository.GetForExistCheck(roll.StaffId);
 
             staffName = staffMember.DisplayName;
         }
 
-        var studentEntities = await _studentRepository.GetListFromIds(roll.Students.Select(student => student.StudentId).ToList(), cancellationToken);
+        List<Student> studentEntities = await _studentRepository.GetListFromIds(roll.Students.Select(student => student.StudentId).ToList(), cancellationToken);
 
-        var students = roll.Students
+        List<TutorialRollStudentResponse> students = roll.Students
             .Select(student =>
                 new TutorialRollStudentResponse(
                     student.StudentId,
@@ -64,7 +63,7 @@ internal sealed class GetTutorialRollWithDetailsByIdQueryHandler
                     student.Present))
             .ToList();
 
-        var response = new TutorialRollDetailResponse(
+        TutorialRollDetailResponse response = new(
             roll.Id,
             tutorial.Id,
             tutorial.Name,
