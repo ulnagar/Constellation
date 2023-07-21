@@ -372,6 +372,15 @@ public class Service : IEmailService
 
     }
 
+    public async Task SendMissedWorkEmail(
+        Student student, 
+        List<EmailRecipient> recipients, 
+        CancellationToken cancellationToken = default)
+    {
+        //TODO
+    }
+
+
     public async Task SendAdminAbsenceSentralAlert(string studentName)
     {
         var viewModel = $"<p>{studentName} cannot be located in the Sentral Users list and does not currently have a Sentral Student Id specified.</p>";

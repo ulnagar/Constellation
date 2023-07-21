@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
+using Constellation.Application.Absences.SendAbsenceDigestToCoordinator;
+using Constellation.Application.Absences.SendAbsenceDigestToParent;
 using Constellation.Application.Absences.SendAbsenceNotificationToParent;
-using Constellation.Application.DTOs;
+using Constellation.Application.Absences.SendAbsenceNotificationToStudent;
+using Constellation.Application.Absences.SendMissedWorkEmailToStudent;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -10,21 +12,14 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
-using Constellation.Core.Models.Families;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Constellation.Core.Models.Identifiers;
 
 public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly IFamilyRepository _familyRepository;
-    private readonly ISchoolContactRepository _schoolContactRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAbsenceProcessingJob _absenceProcessor;
-    private readonly IEmailService _emailService;
-    private readonly ISMSService _smsService;
     private readonly IMediator _mediator;
     private readonly ILogger _logger;
 
@@ -37,19 +32,13 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
         IUnitOfWork unitOfWork,
         IAbsenceProcessingJob absenceProcessor,
         IEmailService emailService,
-        ISMSService smsService,
         IMediator mediator,
         ILogger logger)
     {
         _studentRepository = studentRepository;
         _absenceRepository = absenceRepository;
-        _familyRepository = familyRepository;
-        _schoolContactRepository = schoolContactRepository;
-        _offeringRepository = offeringRepository;
         _unitOfWork = unitOfWork;
         _absenceProcessor = absenceProcessor;
-        _emailService = emailService;
-        _smsService = smsService;
         _mediator = mediator;
         _logger = logger.ForContext<IAbsenceMonitorJob>();
     }
@@ -95,17 +84,32 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                     if (cancellationToken.IsCancellationRequested)
                         return;
 
-                    await SendStudentNotifications(
-                        jobId, 
-                        student, 
-                        absences.Where(absence => absence.Type == AbsenceType.Partial).ToList(), 
-                        cancellationToken);
+                    List<AbsenceId> partialAbsenceIds = absences
+                        .Where(absence => absence.Type == AbsenceType.Partial)
+                        .Select(absence => absence.Id)
+                        .ToList();
 
-                    await _mediator.Send(new SendAbsenceNotificationToParentCommand(
-                        jobId,
-                        student.StudentId,
-                        absences.Where(absence => absence.Type == AbsenceType.Whole).Select(absence => absence.Id).ToList()),
-                        cancellationToken);
+                    if (partialAbsenceIds.Count != 0)
+                        await _mediator.Send(new SendAbsenceNotificationToStudentCommand(
+                            jobId,
+                            student.StudentId,
+                            partialAbsenceIds),
+                            cancellationToken);
+
+                    List<AbsenceId> wholeAbsenceIds = absences
+                        .Where(absence => absence.Type == AbsenceType.Whole)
+                        .Select(absence => absence.Id)
+                        .ToList();
+
+                    if (wholeAbsenceIds.Count != 0)
+                        await _mediator.Send(new SendAbsenceNotificationToParentCommand(
+                            jobId,
+                            student.StudentId,
+                            wholeAbsenceIds),
+                            cancellationToken);
+
+                    partialAbsenceIds = null;
+                    wholeAbsenceIds = null;
                 }
 
                 if (DateTime.Now.DayOfWeek == DayOfWeek.Monday)
@@ -113,219 +117,25 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                     if (cancellationToken.IsCancellationRequested)
                         return;
 
-                    await SendParentDigests(jobId, student, cancellationToken);
-                    await SendCoordinatorDigests(jobId, student, cancellationToken);
+                    await _mediator.Send(new SendAbsenceDigestToParentCommand(jobId, student.StudentId), cancellationToken);
+                    await _mediator.Send(new SendAbsenceDigestToCoordinatorCommand(jobId, student.StudentId), cancellationToken);
+                }
+
+                // If there was any whole absence found for yesterday, send the missed work email to student and parents
+                if (absences.Any(absence => 
+                    absence.Date == DateOnly.FromDateTime(DateTime.Today.AddDays(-1)) && 
+                    absence.Type == AbsenceType.Whole))
+                {
+                    // Send missed work generic email
+                    await _mediator.Send(new SendMissedWorkEmailToStudentCommand(
+                        jobId, 
+                        student.StudentId),
+                        cancellationToken);
                 }
 
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 absences = null;
             }
-        }
-    }
-
-    private async Task SendCoordinatorDigests(
-        Guid jobId, 
-        Student student,
-        CancellationToken cancellationToken)
-    {
-        List<Absence> digestAbsences = await _absenceRepository.GetUnexplainedWholeAbsencesForStudentWithDelay(student.StudentId, 2, cancellationToken);
-
-        if (digestAbsences.Any())
-        {
-            List<SchoolContact> coordinators = await _schoolContactRepository.GetBySchoolAndRole(student.SchoolCode, SchoolContactRole.Coordinator, cancellationToken);
-
-            List<EmailRecipient> recipients = new();
-
-            foreach (SchoolContact coordinator in coordinators)
-            {
-                Result<Name> nameResult = Name.Create(coordinator.FirstName, string.Empty, coordinator.LastName);
-                if (nameResult.IsFailure)
-                    continue;
-
-                Result<EmailRecipient> result = EmailRecipient.Create(nameResult.Value.DisplayName, coordinator.EmailAddress);
-
-                if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))
-                    recipients.Add(result.Value);
-            }
-
-            List<AbsenceEntry> absenceEntries = new();
-
-            foreach (Absence absence in digestAbsences)
-            {
-                CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
-
-                if (offering is null)
-                    continue;
-
-                absenceEntries.Add(new(
-                    absence.Id,
-                    absence.Date,
-                    absence.PeriodName,
-                    absence.PeriodTimeframe,
-                    offering.Name,
-                    absence.AbsenceTimeframe));
-            }
-
-            EmailDtos.SentEmail message = await _emailService.SendCoordinatorWholeAbsenceDigest(absenceEntries, student, recipients, cancellationToken);
-
-            if (message == null)
-                return;
-
-            string emails = string.Join(", ", recipients.Select(entry => entry.Email));
-
-            foreach (var absence in digestAbsences)
-            {
-                absence.AddNotification(
-                    NotificationType.Email,
-                    message.message,
-                    emails);
-
-                foreach (EmailRecipient recipient in recipients)
-                    _logger.Information("{id}: School digest sent to {recipient} for {student}", jobId, recipient.Name, student.DisplayName);
-            }
-
-            absenceEntries = null;
-            coordinators = null;
-            recipients = null;
-            digestAbsences = null;
-        }
-    }
-
-    private async Task SendParentDigests(
-        Guid jobId, 
-        Student student, 
-        CancellationToken cancellationToken = default)
-    {
-        List<Absence> digestAbsences = await _absenceRepository.GetUnexplainedWholeAbsencesForStudentWithDelay(student.StudentId, 1, cancellationToken);
-
-        if (digestAbsences.Any())
-        {
-            List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
-            List<Parent> parents = families.SelectMany(family => family.Parents).ToList();
-            List<EmailRecipient> recipients = new();
-
-            foreach (var family in families)
-            {
-                Result<EmailRecipient> result = EmailRecipient.Create(family.FamilyTitle, family.FamilyEmail);
-
-                if (result.IsSuccess)
-                    recipients.Add(result.Value);
-            }
-
-            foreach (var parent in parents)
-            {
-                Result<Name> nameResult = Name.Create(parent.FirstName, string.Empty, parent.LastName);
-
-                if (nameResult.IsFailure)
-                    continue;
-
-                Result<EmailRecipient> result = EmailRecipient.Create(nameResult.Value.DisplayName, parent.EmailAddress);
-
-                if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))
-                    recipients.Add(result.Value);
-            }
-
-            if (recipients.Any())
-            {
-                List<AbsenceEntry> absenceEntries = new();
-
-                foreach (Absence absence in digestAbsences)
-                {
-                    CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
-
-                    if (offering is null)
-                        continue;
-
-                    absenceEntries.Add(new(
-                        absence.Id,
-                        absence.Date,
-                        absence.PeriodName,
-                        absence.PeriodTimeframe,
-                        offering.Name,
-                        absence.AbsenceTimeframe));
-                }
-
-                EmailDtos.SentEmail sentmessage = await _emailService.SendParentWholeAbsenceDigest(absenceEntries, student, recipients, cancellationToken);
-
-                if (sentmessage == null)
-                    return;
-
-                string emails = string.Join(", ", recipients.Select(entry => entry.Email));
-
-                foreach (Absence absence in digestAbsences)
-                {
-                    absence.AddNotification(
-                        NotificationType.Email,
-                        sentmessage.message,
-                        emails);
-
-                    foreach (var recipient in recipients)
-                        _logger.Information("{id}: Parent digest sent to {address} for {student}", jobId, recipient.Email, student.DisplayName);
-                }
-
-                absenceEntries = null;
-            }
-            else
-            {
-                await _emailService.SendAdminAbsenceContactAlert(student.DisplayName);
-            }
-
-            families = null;
-            parents = null;
-            recipients = null;
-            digestAbsences = null;
-        }
-    }
-
-    private async Task SendStudentNotifications(
-        Guid jobId, 
-        Student student, 
-        List<Absence> partialAbsences, 
-        CancellationToken cancellationToken = default)
-    {
-        // Send emails to students
-        if (partialAbsences.Any())
-        {
-            List<EmailRecipient> recipients = new();
-
-            Result<EmailRecipient> result = EmailRecipient.Create(student.DisplayName, student.EmailAddress);
-
-            if (result.IsSuccess)
-            {
-                recipients.Add(result.Value);
-            }
-
-            List<AbsenceEntry> absenceEntries = new();
-
-            foreach (Absence absence in partialAbsences)
-            {
-                CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
-
-                if (offering is null)
-                    continue;
-
-                absenceEntries.Add(new(
-                    absence.Id,
-                    absence.Date,
-                    absence.PeriodName,
-                    absence.PeriodTimeframe,
-                    offering.Name,
-                    absence.AbsenceTimeframe));
-            }
-
-            EmailDtos.SentEmail sentEmail = await _emailService.SendStudentPartialAbsenceExplanationRequest(absenceEntries, student, recipients, cancellationToken);
-
-            foreach (Absence absence in partialAbsences)
-            {
-                absence.AddNotification(NotificationType.Email, sentEmail.message, student.EmailAddress);
-
-                foreach (EmailRecipient recipient in recipients)
-                    _logger.Information("{id}: Message sent via Email to {student} ({email}) for Partial Absence on {Date}", jobId, recipient.Name, recipient.Email, absence.Date.ToShortDateString());
-            }
-
-            recipients = null;
-            partialAbsences = null;
-            absenceEntries = null;
         }
     }
 }
