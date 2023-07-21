@@ -49,6 +49,7 @@ internal class AssignmentRepository : IAssignmentRepository
 
         return await _context
             .Set<CanvasAssignment>()
+            .Include(assignment => assignment.Submissions)
             .Where(assignment => 
                 (assignment.DueDate >= today || (!assignment.LockDate.HasValue || assignment.LockDate.Value > today)) &&
                 (!assignment.UnlockDate.HasValue || assignment.UnlockDate.Value <= today))

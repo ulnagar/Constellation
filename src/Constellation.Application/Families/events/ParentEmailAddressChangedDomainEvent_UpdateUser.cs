@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
+using Constellation.Core.Models.Families;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System.Linq;
@@ -15,7 +16,6 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
     : IDomainEventHandler<ParentEmailAddressChangedDomainEvent>
 {
     private readonly IFamilyRepository _familyRepository;
-    private readonly IParentRepository _parentRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolContactRepository _contactRepository;
     private readonly UserManager<AppUser> _userManager;
@@ -23,14 +23,12 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
 
     public ParentEmailAddressChangedDomainEvent_UpdateUser(
         IFamilyRepository familyRepository,
-        IParentRepository parentRepository,
         IStaffRepository staffRepository,
         ISchoolContactRepository contactRepository,
         UserManager<AppUser> userManager,
         Serilog.ILogger logger)
     {
         _familyRepository = familyRepository;
-        _parentRepository = parentRepository;
         _staffRepository = staffRepository;
         _contactRepository = contactRepository;
         _userManager = userManager;
@@ -39,7 +37,7 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
 
     public async Task Handle(ParentEmailAddressChangedDomainEvent notification, CancellationToken cancellationToken)
     {
-        var family = await _familyRepository.GetFamilyById(notification.FamilyId, cancellationToken);
+        Family family = await _familyRepository.GetFamilyById(notification.FamilyId, cancellationToken);
 
         if (family is null)
         {
@@ -52,7 +50,7 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
             return;
         }
 
-        var parent = family.Parents.FirstOrDefault(entry => entry.Id == notification.ParentId);
+        Parent parent = family.Parents.FirstOrDefault(entry => entry.Id == notification.ParentId);
 
         if (parent is null)
         {
@@ -70,9 +68,9 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
 
         if (oldUser is not null)
         {
-            var otherParents = await _parentRepository.GetParentsByEmail(notification.OldEmail, cancellationToken);
+            int otherParents = await _familyRepository.CountOfParentsWithEmailAddress(notification.OldEmail, cancellationToken);
 
-            if (otherParents is null || otherParents.Count == 0)
+            if (otherParents == 0)
             {
                 oldUser.IsParent = false;
             }

@@ -13,20 +13,20 @@ using System.Threading.Tasks;
 internal sealed class ParentRemovedFromFamilyDomainEvent_RemoveUser
     : IDomainEventHandler<ParentRemovedFromFamilyDomainEvent>
 {
-    private readonly IParentRepository _parentRepository;
+    private readonly IFamilyRepository _familyRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolContactRepository _contactRepository;
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger _logger;
 
     public ParentRemovedFromFamilyDomainEvent_RemoveUser(
-        IParentRepository parentRepository,
+        IFamilyRepository familyRepository,
         IStaffRepository staffRepository,
         ISchoolContactRepository contactRepository,
         UserManager<AppUser> userManager,
         Serilog.ILogger logger)
     {
-        _parentRepository = parentRepository;
+        _familyRepository = familyRepository;
         _staffRepository = staffRepository;
         _contactRepository = contactRepository;
         _userManager = userManager;
@@ -40,9 +40,9 @@ internal sealed class ParentRemovedFromFamilyDomainEvent_RemoveUser
         if (existingUser is null)
             return;
 
-        var otherParents = await _parentRepository.GetParentsByEmail(notification.EmailAddress, cancellationToken);
+        int otherParents = await _familyRepository.CountOfParentsWithEmailAddress(notification.EmailAddress, cancellationToken);
 
-        if (otherParents is null || otherParents.Count == 0)
+        if (otherParents == 0)
         {
             existingUser.IsParent = false;
         }

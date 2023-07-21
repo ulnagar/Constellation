@@ -15,7 +15,7 @@ internal sealed class FamilyRepository : IFamilyRepository
         _context = context;
     }
 
-    public async Task<bool> GetFamilyByEmail(
+    public async Task<bool> DoesFamilyWithEmailExist(
         EmailAddress email,
         CancellationToken cancellationToken = default) =>
         await _context
@@ -79,6 +79,13 @@ internal sealed class FamilyRepository : IFamilyRepository
                 family.Parents.Any(parent => parent.EmailAddress.ToLower() == email.ToLower()))
             .SelectMany(family => family.Students)
             .ToDictionaryAsync(member => member.StudentId, member => member.IsResidentialFamily, cancellation);
+
+    public async Task<int> CountOfParentsWithEmailAddress(
+        string email,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Parent>()
+            .CountAsync(parent => parent.EmailAddress.ToLower() == email.ToLower(), cancellationToken);
 
     public void Insert(Family family) =>
         _context.Set<Family>().Add(family);

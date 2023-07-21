@@ -26,14 +26,14 @@ internal sealed class CreateFamilyCommandHandler
 
     public async Task<Result<Family>> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
     {
-        var existingFamily = await _familyRepository.GetFamilyByEmail(request.FamilyEmail, cancellationToken);
+        bool existingFamily = await _familyRepository.DoesFamilyWithEmailExist(request.FamilyEmail, cancellationToken);
 
         if (existingFamily)
             return Result.Failure<Family>(DomainErrors.Families.Family.EmailAlreadyInUse);
 
-        var family = Family.Create(new FamilyId(), request.FamilyTitle);
+        Family family = Family.Create(new FamilyId(), request.FamilyTitle);
 
-        var result = family.UpdateFamilyAddress(
+        Result result = family.UpdateFamilyAddress(
             request.FamilyTitle,
             request.AddressLine1,
             (request.AddressLine2 is null ? string.Empty : request.AddressLine2),
@@ -43,7 +43,7 @@ internal sealed class CreateFamilyCommandHandler
         if (result.IsFailure)
             return Result.Failure<Family>(result.Error);
 
-        var emailResult = family.UpdateFamilyEmail(request.FamilyEmail.Email);
+        Result emailResult = family.UpdateFamilyEmail(request.FamilyEmail.Email);
 
         if (emailResult.IsFailure)
             return Result.Failure<Family>(emailResult.Error);

@@ -20,21 +20,21 @@ using System.Threading.Tasks;
 public class AuthService : IAuthService, IScopedService
 {
     private readonly IMediator _mediator;
-    private readonly IParentRepository _parentRepository;
+    private readonly IFamilyRepository _familyRepository;
     private readonly AppDbContext _context;
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
     private readonly ILogger _logger;
 
     public AuthService(
-        IParentRepository parentRepository,
+        IFamilyRepository familyRepository,
         AppDbContext context,
         IMediator mediator,
         UserManager<AppUser> userManager,
         RoleManager<AppRole> roleManager,
         ILogger logger)
     {
-        _parentRepository = parentRepository;
+        _familyRepository = familyRepository;
         _context = context;
         _mediator = mediator;
         _userManager = userManager;
@@ -361,10 +361,11 @@ public class AuthService : IAuthService, IScopedService
     public async Task AuditParentUsers(CancellationToken cancellationToken = default)
     {
         // Get list of Parents
-        var parents = await _parentRepository.GetAllParentsOfActiveStudents(cancellationToken);
+        List<Family> families = await _familyRepository.GetAllCurrent(cancellationToken);
+        List<Parent> parents = families.SelectMany(family => family.Parents).ToList();
 
         // Find each Parent in AppUsers
-        foreach (var parent in parents)
+        foreach (Parent parent in parents)
         {
             await _mediator.Send(new RegisterParentContactAsUserCommand
             {
