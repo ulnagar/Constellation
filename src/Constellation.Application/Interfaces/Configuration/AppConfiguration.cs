@@ -10,6 +10,7 @@ public sealed class AppConfiguration
 
     public AbsencesConfiguration Absences { get; set; }
     public LessonsConfiguration Lessons { get; set; }
+    public MandatoryTrainingConfiguration MandatoryTraining { get; set; }
 
 
     public class AbsencesConfiguration
@@ -39,5 +40,10 @@ public sealed class AppConfiguration
         public string CoordinatorName { get; set; }
         public string CoordinatorTitle { get; set; }
         public List<string> HeadTeacherEmail { get; set; }
+    }
+
+    public class MandatoryTrainingConfiguration
+    {
+        public List<string> CoordinatorIds { get; set; }
     }
 }

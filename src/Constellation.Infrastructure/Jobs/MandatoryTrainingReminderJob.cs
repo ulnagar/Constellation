@@ -1,84 +1,89 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
 using Constellation.Application.Helpers;
+using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
+using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Shared;
+using Constellation.Core.ValueObjects;
+using Microsoft.Extensions.Options;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static Constellation.Application.MandatoryTraining.Models.CompletionRecordExtendedDetailsDto;
 
 public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
 {
+    private readonly AppConfiguration _configuration;
     private readonly ITrainingModuleRepository _trainingModuleRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly ISchoolContactRepository _schoolContactRepository;
-    private readonly ITrainingCompletionRepository _trainingCompletionRepository;
     private readonly IEmailService _emailService;
+    private readonly ILogger _logger;
 
     public MandatoryTrainingReminderJob(
+        IOptions<AppConfiguration> configuration,
         ITrainingModuleRepository trainingModuleRepository,
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
         ISchoolRepository schoolRepository,
         ISchoolContactRepository schoolContactRepository,
-        ITrainingCompletionRepository trainingCompletionRepository,
-        IEmailService emailService)
+        IEmailService emailService,
+        ILogger logger)
     {
+        _configuration = configuration.Value;
         _trainingModuleRepository = trainingModuleRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
         _schoolRepository = schoolRepository;
         _schoolContactRepository = schoolContactRepository;
-        _trainingCompletionRepository = trainingCompletionRepository;
         _emailService = emailService;
+        _logger = logger.ForContext<IMandatoryTrainingReminderJob>();
     }
 
-    public async Task StartJob(Guid jobId, CancellationToken token)
+    public async Task StartJob(Guid jobId, CancellationToken cancellationToken)
     {
-        var detailedRecords = new List<CompletionRecordExtendedDetailsDto>();
-
-        // Get the list of overdue completions
+        List<CompletionRecordExtendedDetailsDto> detailedRecords = new();
 
         // - Get all modules
-        var modules = await _trainingModuleRepository.GetCurrentModules(token);
+        List<TrainingModule> modules = await _trainingModuleRepository.GetAllCurrent(cancellationToken);
 
         // - Get all staff
-        var staff = await _staffRepository.GetAllActive(token);
+        List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
 
-        // - Get all completions
-        var records = await _trainingCompletionRepository.GetAllCurrent(token);
-
-        // - Build a collection of completions by each staff member for each module
-        foreach (var record in records)
+        foreach (TrainingModule module in modules)
         {
-            var entry = new CompletionRecordExtendedDetailsDto();
-            entry.AddRecordDetails(record);
-
-            var module = modules.FirstOrDefault(module => module.Id == record.TrainingModuleId);
-
-            if (module is not null)
-                entry.AddModuleDetails(module);
-
-            var staffMember = staff.FirstOrDefault(staffMember => staffMember.StaffId == record.StaffId);
-
-            if (staffMember is not null)
+            foreach (Staff staffMember in staff)
             {
+                List<TrainingCompletion> records = module.Completions
+                    .Where(record =>
+                        record.StaffId == staffMember.StaffId &&
+                        !record.IsDeleted)
+                    .ToList();
+
+                TrainingCompletion record = records
+                    .OrderByDescending(record =>
+                        (record.CompletedDate.HasValue) ? record.CompletedDate.Value : record.CreatedAt)
+                    .FirstOrDefault();
+
+                CompletionRecordExtendedDetailsDto entry = new();
+                entry.AddModuleDetails(module);
                 entry.AddStaffDetails(staffMember);
 
-                var faculties = await _facultyRepository.GetCurrentForStaffMember(staffMember.StaffId, token);
+                List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(staffMember.StaffId, cancellationToken);
 
-                foreach (var faculty in faculties)
+                foreach (Faculty faculty in faculties)
                 {
-                    var headTeachers = faculty
+                    List<Staff> headTeachers = faculty
                         .Members
                         .Where(member =>
                             !member.IsDeleted &&
@@ -86,7 +91,7 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
                         .Select(member => member.Staff)
                         .ToList();
 
-                    foreach (var headTeacher in headTeachers)
+                    foreach (Staff headTeacher in headTeachers)
                     {
                         entry.AddHeadTeacherDetails(faculty, headTeacher);
                     }
@@ -94,9 +99,9 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
 
                 if (staffMember.IsShared)
                 {
-                    School sharedSchool = await _schoolRepository.GetById(staffMember.SchoolCode, token);
+                    School sharedSchool = await _schoolRepository.GetById(staffMember.SchoolCode, cancellationToken);
 
-                    List<SchoolContact> sharedSchoolPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(staffMember.SchoolCode, token);
+                    List<SchoolContact> sharedSchoolPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(staffMember.SchoolCode, cancellationToken);
 
                     foreach (SchoolContact principal in sharedSchoolPrincipals)
                     {
@@ -104,150 +109,108 @@ public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
                     }
                 }
 
-                School localSchool = await _schoolRepository.GetById("8912", token);
+                School localSchool = await _schoolRepository.GetById("8912", cancellationToken);
 
-                List<SchoolContact> localPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(localSchool.Code, token);
+                List<SchoolContact> localPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(localSchool.Code, cancellationToken);
 
                 foreach (SchoolContact principal in localPrincipals)
                 {
                     entry.AddPrincipalDetails(principal, localSchool);
                 }
-            }
 
-            detailedRecords.Add(entry);
-        }
+                if (record is not null)
+                    entry.AddRecordDetails(record);
 
-        // - If a staff member has not completed a module, create a blank entry for them
-        foreach (var module in modules)
-        {
-            var staffIds = staff.Select(staff => staff.StaffId).ToList();
-            var staffRecords = detailedRecords.Where(record => record.ModuleId == module.Id).Select(record => record.StaffId).ToList();
-
-            var missingStaffIds = staffIds.Except(staffRecords).ToList();
-
-            foreach (var staffId in missingStaffIds)
-            {
-                var entry = new CompletionRecordExtendedDetailsDto();
-                entry.AddModuleDetails(module);
-
-                var staffMember = staff.First(member => member.StaffId == staffId);
-                entry.AddStaffDetails(staffMember);
-
-                var faculties = await _facultyRepository.GetCurrentForStaffMember(staffMember.StaffId, token);
-
-                foreach (var faculty in faculties)
-                {
-                    var headTeachers = faculty
-                        .Members
-                        .Where(member =>
-                            !member.IsDeleted &&
-                            member.Role == Core.Enums.FacultyMembershipRole.Manager)
-                        .Select(member => member.Staff)
-                        .ToList();
-
-                    foreach (var headTeacher in headTeachers)
-                    {
-                        entry.AddHeadTeacherDetails(faculty, headTeacher);
-                    }
-                }
-
-                if (staffMember.IsShared)
-                {
-                    School sharedSchool = await _schoolRepository.GetById(staffMember.SchoolCode, token);
-                    List<SchoolContact> sharedSchoolPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(staffMember.SchoolCode, token);
-
-                    foreach (SchoolContact principal in sharedSchoolPrincipals)
-                    {
-                        entry.AddPrincipalDetails(principal, sharedSchool);
-                    }
-                }
-
-                School localSchool = await _schoolRepository.GetById("8912", token);
-                List<SchoolContact> localSchoolPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(staffMember.SchoolCode, token);
-
-                foreach (SchoolContact principal in localSchoolPrincipals)
-                {
-                    entry.AddPrincipalDetails(principal, localSchool);
-                }
-
-                entry.RecordEffectiveDate = DateTime.MinValue;
-                entry.RecordNotRequired = false;
+                entry.CalculateExpiry();
 
                 detailedRecords.Add(entry);
             }
         }
 
-        // - Find only most recent entries
-        foreach (var record in detailedRecords)
-        {
-            var duplicates = detailedRecords.Where(entry =>
-                    entry.ModuleId == record.ModuleId &&
-                    entry.StaffId == record.StaffId &&
-                    entry.RecordId != record.RecordId)
-                .ToList();
-
-            if (duplicates.All(entry => entry.RecordEffectiveDate < record.RecordEffectiveDate))
-            {
-                record.IsLatest = true;
-                record.CalculateExpiry();
-            }
-        }
-
-        // Remove entries for staff who are no longer active
-        var recordStaff = detailedRecords.Select(record => record.StaffId).Distinct().ToList();
-        foreach (var staffId in recordStaff)
-        {
-            if (staff.All(member => member.StaffId != staffId))
-            {
-                detailedRecords.RemoveAll(record => record.StaffId == staffId);
-            }
-        }
-
         // - Remove all entries that are not due for expiry within 30 days, or have not already expired
-        var latestRecords = detailedRecords.Where(record => record.IsLatest && record.TimeToExpiry <= 30).ToList();
+        List<CompletionRecordExtendedDetailsDto> latestRecords = detailedRecords
+            .Where(record => record.TimeToExpiry <= 30)
+            .ToList();
 
         // Group by staff member
         // - Send emails to each staff member
-        foreach (var teacher in latestRecords.GroupBy(record => record.StaffEmail))
+        foreach (var teacher in latestRecords.GroupBy(record => record.StaffEntry))
         {
-            await SendEmail(teacher.ToList());
+            await SendEmail(teacher.ToList(), cancellationToken);
         }
     }
 
-    public async Task SendEmail(List<CompletionRecordExtendedDetailsDto> entries)
+    public async Task SendEmail(List<CompletionRecordExtendedDetailsDto> entries, CancellationToken cancellationToken = default)
     {
-        var warning = entries
-            .Where(record => record.TimeToExpiry <= 30 && record.TimeToExpiry > 14)
-            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", Date = record.DueDate.Value.ToShortDateString() })
-            .ToDictionary(record => record.Name, record => record.Date);
+        Dictionary<string, string> warning = entries
+            .Where(record => 
+                record.TimeToExpiry <= 30 && 
+                record.TimeToExpiry > 14)
+            .ToDictionary(
+                record => $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", 
+                record => (record.DueDate.HasValue) ? record.DueDate.Value.ToShortDateString() : "Not Yet Completed");
 
-        var alert = entries
-            .Where(record => record.TimeToExpiry <= 14 && record.TimeToExpiry > 0)
-            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", Date = record.DueDate.Value.ToShortDateString() })
-            .ToDictionary(record => record.Name, record => record.Date);
+        Dictionary<string, string> alert = entries
+            .Where(record => 
+                record.TimeToExpiry <= 14 && 
+                record.TimeToExpiry > 0)
+            .ToDictionary(
+                record => $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", 
+                record => (record.DueDate.HasValue) ? record.DueDate.Value.ToShortDateString() : "Not Yet Completed");
 
-        var expired = entries.Where(record => record.TimeToExpiry <= 0)
-            .Select(record => new { Name = $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", Date = record.DueDate.Value.ToShortDateString() })
-            .ToDictionary(record => record.Name, record => record.Date);
+        Dictionary<string, string> expired = entries
+            .Where(record => record.TimeToExpiry <= 0)
+            .ToDictionary(
+                record => $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})",
+                record => (record.DueDate.HasValue) ? record.DueDate.Value.ToShortDateString() : "Not Yet Completed");
 
-        var warningRecipients = new Dictionary<string, string> { { entries.First().StaffName, entries.First().StaffEmail } };
+        List<EmailRecipient> warningRecipients = new();
 
-        var alertRecipients = new Dictionary<string, string>(warningRecipients);
-        var headTeachers = entries.SelectMany(entry => entry.StaffHeadTeachers).Distinct(new CompletionRecordExtendedDetailsDto.FacultyContactDto.Comparer()).ToList();
-        foreach (var teacher in headTeachers)
+        warningRecipients.Add(entries.First().StaffEntry);
+
+        List<EmailRecipient> alertRecipients = new(warningRecipients);
+
+        IEnumerable<EmailRecipient> headTeachers = entries
+            .SelectMany(entry => entry.StaffHeadTeachers)
+            .Distinct();
+
+        foreach (EmailRecipient teacher in headTeachers)
         {
-            if (alertRecipients.All(entry => entry.Key != teacher.FacultyHeadTeacherName))
-                alertRecipients.Add(teacher.FacultyHeadTeacherName, teacher.FacultyHeadTeacherEmail);
+            if (alertRecipients.All(entry => entry != teacher))
+                alertRecipients.Add(teacher);
         }
 
-        var expiredRecipients = new Dictionary<string, string>(alertRecipients);
-        if (expiredRecipients.All(entry => entry.Key != "Cathy Crouch"))
-            expiredRecipients.Add("Cathy Crouch", "catherine.crouch@det.nsw.edu.au");
+        List<EmailRecipient> expiredRecipients = new(alertRecipients);
 
-        foreach (var principal in entries.First().PrincipalContacts)
+        foreach (string coordinatorId in _configuration.MandatoryTraining.CoordinatorIds)
         {
-            if (expiredRecipients.All(entry => entry.Key != principal.FacultyHeadTeacherName))
-                expiredRecipients.Add(principal.FacultyHeadTeacherName, principal.FacultyHeadTeacherEmail);
+            Staff member = await _staffRepository.GetById(coordinatorId, cancellationToken);
+            if (member is not null)
+            {
+                Result<EmailRecipient> coordinatorRequest = EmailRecipient.Create(member.DisplayName, member.EmailAddress);
+
+                if (coordinatorRequest.IsFailure)
+                {
+                    _logger
+                    .ForContext("Error", coordinatorRequest.Error)
+                        .Warning("Could not generate EmailRecipient for {staff}", member.DisplayName);
+
+                    continue;
+                }
+
+                if (expiredRecipients.All(entry => entry != coordinatorRequest.Value))
+                    expiredRecipients.Add(coordinatorRequest.Value);
+            }
+        }
+
+        IEnumerable<EmailRecipient> principals = entries
+            .SelectMany(entry => entry.PrincipalContacts)
+            .Distinct();
+
+        foreach (EmailRecipient principal in entries.First().PrincipalContacts)
+        {
+            if (expiredRecipients.All(entry => entry != principal))
+                expiredRecipients.Add(principal);
         }
 
         if (warning.Count > 0)

@@ -122,7 +122,7 @@
 
                     if (canViewDetailsTest.Succeeded)
                     {
-                            <a asp-page="Details" asp-route-id="@item.Id.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                            <a asp-page="Details" asp-route-moduleId="@item.ModuleId.Value" asp-route-completionId="@item.Id.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
                     }
                 }
             </td>

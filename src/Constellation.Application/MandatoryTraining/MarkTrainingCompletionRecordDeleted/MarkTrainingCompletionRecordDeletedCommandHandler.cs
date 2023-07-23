@@ -4,30 +4,49 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Serilog;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class MarkTrainingCompletionRecordDeletedCommandHandler
     : ICommandHandler<MarkTrainingCompletionRecordDeletedCommand>
 {
-    private readonly ITrainingCompletionRepository _trainingCompletionRepository;
+    private readonly ITrainingModuleRepository _moduleRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger _logger;
 
     public MarkTrainingCompletionRecordDeletedCommandHandler(
-        ITrainingCompletionRepository trainingCompletionRepository,
-        IUnitOfWork unitOfWork)
+        ITrainingModuleRepository moduleRepository,
+        IUnitOfWork unitOfWork,
+        ILogger logger)
     {
-        _trainingCompletionRepository = trainingCompletionRepository;
+        _moduleRepository = moduleRepository;
         _unitOfWork = unitOfWork;
+        _logger = logger.ForContext<MarkTrainingCompletionRecordDeletedCommand>();
     }
 
     public async Task<Result> Handle(MarkTrainingCompletionRecordDeletedCommand request, CancellationToken cancellationToken)
     {
-        var record = await _trainingCompletionRepository.GetById(request.RecordId, cancellationToken);
+        TrainingModule module = await _moduleRepository.GetById(request.ModuleId, cancellationToken);
+
+        if (module is null)
+        {
+            _logger.Warning("Could not find Training Module with Id {id}", request.ModuleId);
+
+            return Result.Failure(DomainErrors.MandatoryTraining.Module.NotFound(request.ModuleId));
+        }
+
+        TrainingCompletion record = module.Completions.FirstOrDefault(record => record.Id == request.CompletionId);
 
         if (record is null)
-            return Result.Failure(DomainErrors.MandatoryTraining.Completion.NotFound(request.RecordId));
+        {
+            _logger.Warning("Could not find Training Completion with Id {id}", request.CompletionId);
+
+            return Result.Failure(DomainErrors.MandatoryTraining.Completion.NotFound(request.CompletionId));
+        }
 
         record.Delete();
         await _unitOfWork.CompleteAsync(cancellationToken);

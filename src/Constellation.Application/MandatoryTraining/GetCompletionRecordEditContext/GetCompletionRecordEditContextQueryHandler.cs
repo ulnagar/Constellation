@@ -2,27 +2,42 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions;
+using Constellation.Core.Errors;
+using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Serilog;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class GetCompletionRecordEditContextQueryHandler 
     : IQueryHandler<GetCompletionRecordEditContextQuery, CompletionRecordEditContextDto>
 {
-    private readonly ITrainingCompletionRepository _trainingCompletionRepository;
+    private readonly ITrainingModuleRepository _moduleRepository;
+    private readonly ILogger _logger;
 
     public GetCompletionRecordEditContextQueryHandler(
-        ITrainingCompletionRepository trainingCompletionRepository)
+        ITrainingModuleRepository moduleRepository,
+        ILogger logger)
     {
-        _trainingCompletionRepository = trainingCompletionRepository;
+        _moduleRepository = moduleRepository;
+        _logger = logger;
     }
 
     public async Task<Result<CompletionRecordEditContextDto>> Handle(GetCompletionRecordEditContextQuery request, CancellationToken cancellationToken)
     {
-        var record = await _trainingCompletionRepository.GetById(request.Id, cancellationToken);
+        TrainingModule module = await _moduleRepository.GetById(request.ModuleId, cancellationToken);
 
-        var entity = new CompletionRecordEditContextDto
+        if (module is null)
+        {
+            _logger.Warning("Could not find Training Module with Id {id}", request.ModuleId);
+            return Result.Failure<CompletionRecordEditContextDto>(DomainErrors.MandatoryTraining.Module.NotFound(request.ModuleId));
+        }
+
+        TrainingCompletion record = module.Completions.FirstOrDefault(record => record.Id == request.CompletionId);
+
+        CompletionRecordEditContextDto entity = new()
         {
             Id = record.Id,
             TrainingModuleId = record.TrainingModuleId,

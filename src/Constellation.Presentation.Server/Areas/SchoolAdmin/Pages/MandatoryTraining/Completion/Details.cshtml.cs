@@ -7,6 +7,7 @@ using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -32,7 +33,10 @@ public class DetailsModel : BasePageModel
     }
 
     [BindProperty(SupportsGet = true)]
-    public Guid Id { get; set; }
+    public Guid CompletionId { get; set; }
+    [BindProperty(SupportsGet = true)]
+    public Guid ModuleId { get; set; }
+
     public CompletionRecordDto Record { get; set; } = new();
     public CompletionRecordCertificateDetailsDto UploadedCertificate { get; set; } = new();
 
@@ -40,7 +44,10 @@ public class DetailsModel : BasePageModel
     {
         await GetClasses(_mediator);
 
-        var recordRequest = await _mediator.Send(new GetCompletionRecordDetailsQuery(TrainingCompletionId.FromValue(Id)));
+        Result<CompletionRecordDto> recordRequest = await _mediator.Send(
+            new GetCompletionRecordDetailsQuery(
+                TrainingModuleId.FromValue(ModuleId),
+                TrainingCompletionId.FromValue(CompletionId)));
 
         if (recordRequest.IsFailure)
         {
@@ -55,7 +62,7 @@ public class DetailsModel : BasePageModel
 
         Record = recordRequest.Value;
 
-        var certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateFileByIdQuery(StoredFile.TrainingCertificate, Record.Id.ToString()));
+        Result<CompletionRecordCertificateDetailsDto> certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateFileByIdQuery(StoredFile.TrainingCertificate, Record.Id.ToString()));
 
         if (certificateRequest.IsFailure)
             UploadedCertificate = null;
@@ -91,7 +98,7 @@ public class DetailsModel : BasePageModel
         
         if (canEditTest.Succeeded)
         {
-            await _mediator.Send(new MarkTrainingCompletionRecordDeletedCommand(TrainingCompletionId.FromValue(Id)));
+            await _mediator.Send(new MarkTrainingCompletionRecordDeletedCommand(TrainingModuleId.FromValue(ModuleId), TrainingCompletionId.FromValue(CompletionId)));
         }
 
         return RedirectToPage("Index");

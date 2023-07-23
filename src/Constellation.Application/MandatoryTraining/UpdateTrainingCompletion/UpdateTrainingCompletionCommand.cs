@@ -6,7 +6,7 @@ using Constellation.Core.Models.Identifiers;
 using System;
 
 public sealed record UpdateTrainingCompletionCommand(
-    TrainingCompletionId Id,
+    TrainingCompletionId CompletionId,
     string StaffId,
     TrainingModuleId TrainingModuleId,
     DateTime CompletedDate,

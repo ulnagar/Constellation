@@ -5,5 +5,6 @@ using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Models.Identifiers;
 
 public sealed record GetCompletionRecordDetailsQuery(
-    TrainingCompletionId Id)
+    TrainingModuleId ModuleId,
+    TrainingCompletionId CompletionId)
     : IQuery<CompletionRecordDto>;

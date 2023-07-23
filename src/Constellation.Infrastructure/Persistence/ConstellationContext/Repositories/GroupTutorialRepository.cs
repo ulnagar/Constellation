@@ -18,14 +18,14 @@ internal sealed class GroupTutorialRepository : IGroupTutorialRepository
     public async Task<GroupTutorial?> GetById(
     GroupTutorialId id,
     CancellationToken cancellationToken = default) =>
-    await _dbContext
-        .Set<GroupTutorial>()
-        .Include(tutorial => tutorial.Enrolments)
-        .Include(tutorial => tutorial.Teachers)
-        .Include(tutorial => tutorial.Rolls)
-        .ThenInclude(roll => roll.Students)
-        .Where(tutorial => tutorial.Id == id)
-        .FirstOrDefaultAsync(cancellationToken);
+        await _dbContext
+            .Set<GroupTutorial>()
+            .Include(tutorial => tutorial.Enrolments)
+            .Include(tutorial => tutorial.Teachers)
+            .Include(tutorial => tutorial.Rolls)
+            .ThenInclude(roll => roll.Students)
+            .Where(tutorial => tutorial.Id == id)
+            .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<GroupTutorial?> GetByName(
         string name,

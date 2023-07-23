@@ -4,9 +4,11 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Shared;
+using Constellation.Core.ValueObjects;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 public class CompletionRecordExtendedDetailsDto
 {
@@ -15,10 +17,9 @@ public class CompletionRecordExtendedDetailsDto
     public TrainingModuleExpiryFrequency ModuleFrequency { get; set; }
 
     public string StaffId { get; set; }
-    public string StaffName { get; set; }
-    public string StaffEmail { get; set; }
-    public List<FacultyContactDto> StaffHeadTeachers { get; set; } = new();
-    public List<FacultyContactDto> PrincipalContacts { get; set; } = new();
+    public EmailRecipient StaffEntry { get; set; }
+    public List<EmailRecipient> StaffHeadTeachers { get; set; } = new();
+    public List<EmailRecipient> PrincipalContacts { get; set; } = new();
 
     public TrainingCompletionId RecordId { get; set; }
     public bool RecordNotRequired { get; set; }
@@ -27,39 +28,6 @@ public class CompletionRecordExtendedDetailsDto
     public bool IsLatest { get; set; }
     public int TimeToExpiry { get; set; }
     public DateTime? DueDate { get; set; }
-
-    public class FacultyContactDto
-    {
-        public Guid FacultyId { get; set; }
-        public string FacultyName { get; set; }
-        public string FacultyHeadTeacherName { get; set; }
-        public string FacultyHeadTeacherEmail { get; set; }
-
-        public class Comparer : IEqualityComparer<FacultyContactDto>
-        {
-            public bool Equals(FacultyContactDto x, FacultyContactDto y)
-            {
-                if (ReferenceEquals(x, y)) return true;
-
-                if (ReferenceEquals(x, null) || ReferenceEquals(y, null)) return false;
-
-                if (x.FacultyHeadTeacherEmail == y.FacultyHeadTeacherEmail)
-                    return true;
-
-                return false;
-            }
-
-            public int GetHashCode([DisallowNull] FacultyContactDto obj)
-            {
-                int hashId = obj.FacultyId.GetHashCode();
-                int hashName = obj.FacultyName == null ? 0 : obj.FacultyName.GetHashCode();
-                int hashTeacherName = obj.FacultyHeadTeacherName == null ? 0 : obj.FacultyHeadTeacherName.GetHashCode();
-                int hashTeacherEmail = obj.FacultyHeadTeacherEmail == null ? 0 : obj.FacultyHeadTeacherEmail.GetHashCode();
-
-                return hashId ^ hashName ^ hashTeacherName ^ hashTeacherEmail;
-            }
-        }
-    }
 
     public void AddModuleDetails(TrainingModule module)
     {
@@ -71,29 +39,41 @@ public class CompletionRecordExtendedDetailsDto
     public void AddStaffDetails(Staff staff)
     {
         StaffId = staff.StaffId;
-        StaffName = staff.DisplayName;
-        StaffEmail = staff.EmailAddress;
+
+        Result<EmailRecipient> request = EmailRecipient.Create(
+            staff.DisplayName,
+            staff.EmailAddress);
+
+        if (request.IsFailure)
+            return;
+
+        StaffEntry = request.Value;
     }
 
     public void AddHeadTeacherDetails(Faculty faculty, Staff headTeacher)
     {
-        StaffHeadTeachers.Add(new FacultyContactDto
-        {
-            FacultyId = faculty.Id,
-            FacultyName = faculty.Name,
-            FacultyHeadTeacherName = headTeacher.DisplayName,
-            FacultyHeadTeacherEmail = headTeacher.EmailAddress
-        });
+        Result<EmailRecipient> request = EmailRecipient.Create(
+            headTeacher.DisplayName,
+            headTeacher.EmailAddress);
+
+        if (request.IsFailure)
+            return;
+
+        if (StaffHeadTeachers.All(entry => entry != request.Value))
+            StaffHeadTeachers.Add(request.Value);
     }
 
     public void AddPrincipalDetails(SchoolContact principal, School school)
     {
-        PrincipalContacts.Add(new FacultyContactDto
-        {
-            FacultyName = school.Name,
-            FacultyHeadTeacherName = principal.DisplayName,
-            FacultyHeadTeacherEmail = principal.EmailAddress
-        });
+        Result<EmailRecipient> request = EmailRecipient.Create(
+            principal.DisplayName,
+            principal.EmailAddress);
+
+        if (request.IsFailure)
+            return;
+
+        if (PrincipalContacts.All(entry => entry != request.Value))
+            PrincipalContacts.Add(request.Value);
     }
 
     public void AddRecordDetails(TrainingCompletion record)
@@ -103,7 +83,7 @@ public class CompletionRecordExtendedDetailsDto
         RecordEffectiveDate = record.NotRequired ? record.CreatedAt : record.CompletedDate.Value;
     }
 
-    public void CalculateExpiry()
+    public void CalculateExpiry() 
     {
         if (ModuleId is null || ModuleId.Value == Guid.Empty || RecordId is null || RecordId.Value == Guid.Empty)
         {

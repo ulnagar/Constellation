@@ -1,4 +1,4 @@
-﻿@page "{id:Guid}"
+﻿@page "/SchoolAdmin/MandatoryTraining/Modules/{ModuleId:Guid}/Completions/{CompletionId:Guid}"
 @using Constellation.Application.Helpers
 @using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion
 @model DetailsModel
@@ -11,7 +11,7 @@
 
     if (authorised.Succeeded)
     {
-        <form asp-page-handler="DeleteRecord" asp-route-id="@Model.Id" method="post">
+        <form asp-page-handler="DeleteRecord" asp-route-completionId="@Model.CompletionId" asp-route-moduleId="@Model.ModuleId" method="post">
             <div class="page-menu">
                 <a asp-page="Upsert" asp-route-id="@Model.Record.Id.Value" asp-route-mode="@UpsertModel.ModeOptions.FULL" class="btn btn-warning">Edit</a>
             

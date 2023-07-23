@@ -1012,70 +1012,52 @@ public class Service : IEmailService
         await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
     }
 
-    public async Task SendTrainingExpiryWarningEmail(Dictionary<string, string> courses, Dictionary<string, string> recipients)
+    public async Task SendTrainingExpiryWarningEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients)
     {
         var viewModel = new TrainingExpiringSoonWarningEmailViewModel
         {
             Preheader = "This is an automated message. Please do not reply.",
             SenderName = "",
             SenderTitle = "",
-            Title = $"[Aurora College] Mandatory Training Expiry Warning - {recipients.First().Key}",
+            Title = $"[Aurora College] Mandatory Training Expiry Warning - {recipients.First().Name}",
             Courses = courses
         };
 
         var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MandatoryTraining/TrainingExpiryWarningEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var recipient in recipients)
-        {
-            toRecipients.Add(recipient.Key, recipient.Value);
-        }
-
-        await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
+        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
     }
 
-    public async Task SendTrainingExpiryAlertEmail(Dictionary<string, string> courses, Dictionary<string, string> recipients)
+    public async Task SendTrainingExpiryAlertEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients)
     {
         var viewModel = new TrainingExpiringSoonAlertEmailViewModel
         {
             Preheader = "This is an automated message. Please do not reply.",
             SenderName = "",
             SenderTitle = "",
-            Title = $"[Aurora College] Mandatory Training Expiry Warning - {recipients.First().Key}",
+            Title = $"[Aurora College] Mandatory Training Expiry Warning - {recipients.First().Name}",
             Courses = courses
         };
 
         var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MandatoryTraining/TrainingExpiryWarningEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var recipient in recipients)
-        {
-            toRecipients.Add(recipient.Key, recipient.Value);
-        }
-
-        await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
+        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
     }
 
-    public async Task SendTrainingExpiredEmail(Dictionary<string, string> courses, Dictionary<string, string> recipients)
+    public async Task SendTrainingExpiredEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients)
     {
         var viewModel = new TrainingExpiredAlertEmailViewModel
         {
             Preheader = "This is an automated message. Please do not reply.",
             SenderName = "",
             SenderTitle = "",
-            Title = $"[Aurora College] Mandatory Training Expiry Warning - {recipients.First().Key}",
+            Title = $"[Aurora College] Mandatory Training Expiry Warning - {recipients.First().Name}",
             Courses = courses
         };
 
         var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MandatoryTraining/TrainingExpiryWarningEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var recipient in recipients)
-        {
-            toRecipients.Add(recipient.Key, recipient.Value);
-        }
-
-        await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
+        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
     }
 
     public async Task SendMasterFileConsistencyReportEmail(MemoryStream report, string emailAddress, CancellationToken cancellationToken = default)

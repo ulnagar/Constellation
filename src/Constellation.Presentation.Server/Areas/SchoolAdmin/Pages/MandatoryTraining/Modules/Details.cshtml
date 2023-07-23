@@ -1,4 +1,4 @@
-﻿@page "{Id:Guid}"
+﻿@page "/SchoolAdmin/MandatoryTraining/Modules/{Id:Guid}"
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules.DetailsModel
 
 @inject IAuthorizationService AuthorizationService
@@ -181,7 +181,7 @@
                                 }
                             </td>
                             <td>
-                                <a asp-page="/MandatoryTraining/Completion/Details" asp-route-id="@item.Id.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                                <a asp-page="/MandatoryTraining/Completion/Details" asp-route-moduleId="@item.ModuleId.Value" asp-route-completionId="@item.Id.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
                             </td>
                         </tr>
                     }

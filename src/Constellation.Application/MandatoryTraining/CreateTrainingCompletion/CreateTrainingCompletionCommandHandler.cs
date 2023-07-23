@@ -9,52 +9,54 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class CreateTrainingCompletionCommandHandler 
     : ICommandHandler<CreateTrainingCompletionCommand>
 {
-    private readonly ITrainingCompletionRepository _trainingCompletionRepository;
     private readonly ITrainingModuleRepository _trainingModuleRepository;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateTrainingCompletionCommandHandler(
-        ITrainingCompletionRepository trainingCompletionRepository,
         ITrainingModuleRepository trainingModuleRepository,
         IDateTimeProvider dateTimeProvider,
         IUnitOfWork unitOfWork)
     {
-        _trainingCompletionRepository = trainingCompletionRepository;
         _trainingModuleRepository = trainingModuleRepository;
         _dateTimeProvider = dateTimeProvider;
         _unitOfWork = unitOfWork;
     }
     public async Task<Result> Handle(CreateTrainingCompletionCommand request, CancellationToken cancellationToken)
     {
-        // Check that another record does not already exist for this user, module, and date.
-        var existingRecord = await _trainingCompletionRepository
-            .AnyExistingRecordForTeacherAndDate(
-                request.StaffId,
-                request.TrainingModuleId,
-                request.CompletedDate,
-                request.NotRequired,
-                cancellationToken);
-
-        if (existingRecord)
-        {
-            return Result.Failure(DomainErrors.MandatoryTraining.Completion.AlreadyExists);
-        }
-
-        var module = await _trainingModuleRepository.GetById(request.TrainingModuleId, cancellationToken);
+        TrainingModule module = await _trainingModuleRepository.GetById(request.TrainingModuleId, cancellationToken);
 
         if (module is null)
         {
             return Result.Failure(DomainErrors.MandatoryTraining.Module.NotFound(request.TrainingModuleId));
         }
 
-        var recordEntity = TrainingCompletion.Create(
+        // Check that another record does not already exist for this user, module, and date.
+        List<TrainingCompletion> records = module.Completions
+            .Where(record =>
+                record.StaffId == request.StaffId &&
+                !record.IsDeleted)
+            .ToList();
+
+        TrainingCompletion record = records
+            .OrderByDescending(record =>
+                (record.CompletedDate.HasValue) ? record.CompletedDate.Value : record.CreatedAt)
+            .FirstOrDefault();
+
+        if (record is not null &&
+            (!request.NotRequired) ? record.CompletedDate.Value == request.CompletedDate :
+            (request.NotRequired && record.NotRequired) ? true : false)
+            return Result.Failure(DomainErrors.MandatoryTraining.Completion.AlreadyExists);
+
+        TrainingCompletion recordEntity = TrainingCompletion.Create(
             new TrainingCompletionId(),
             request.StaffId,
             request.TrainingModuleId);
@@ -64,16 +66,15 @@ internal sealed class CreateTrainingCompletionCommandHandler
         else
             recordEntity.SetCompletedDate(request.CompletedDate);
 
-        _trainingCompletionRepository.Insert(recordEntity);
-
         if (request.File is null)
         {
+            module.AddCompletion(recordEntity);
             await _unitOfWork.CompleteAsync(cancellationToken);
 
             return Result.Success();
         }
 
-        var fileEntity = new StoredFile
+        StoredFile fileEntity = new()
         {
             Name = request.File.FileName,
             FileType = request.File.FileType,

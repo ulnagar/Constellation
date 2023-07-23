@@ -44,13 +44,6 @@ public class StaffRepository : IStaffRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Staff>()
-            .FirstOrDefaultAsync(staff => staff.StaffId == staffId, cancellationToken);
-
-    public async Task<Staff?> GetByIdWithFacultyMemberships(
-        string staffId,
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<Staff>()
             .Include(staff => staff.Faculties)
             .FirstOrDefaultAsync(staff => staff.StaffId == staffId, cancellationToken);
 
@@ -136,6 +129,7 @@ public class StaffRepository : IStaffRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Staff>()
+            .Include(staff => staff.Faculties)
             .Where(staff => !staff.IsDeleted)
             .ToListAsync(cancellationToken);
 

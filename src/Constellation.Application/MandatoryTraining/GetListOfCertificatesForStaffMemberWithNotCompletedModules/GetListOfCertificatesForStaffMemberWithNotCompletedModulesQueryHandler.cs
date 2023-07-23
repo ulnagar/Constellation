@@ -4,6 +4,8 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Abstractions;
+using Constellation.Core.Models;
+using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,20 +16,17 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
     : IQueryHandler<GetListOfCertificatesForStaffMemberWithNotCompletedModulesQuery, StaffCompletionListDto>
 {
     private readonly ITrainingModuleRepository _trainingModuleRepository;
-    private readonly ITrainingCompletionRepository _trainingCompletionRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IFacultyRepository _facultyRepository;
 
     public GetListOfCertificatesForStaffMemberWithNotCompletedModulesQueryHandler(
         ITrainingModuleRepository trainingModuleRepository,
-        ITrainingCompletionRepository trainingCompletionRepository,
         IStaffRepository staffRepository,
         ISchoolRepository schoolRepository,
         IFacultyRepository facultyRepository)
     {
         _trainingModuleRepository = trainingModuleRepository;
-        _trainingCompletionRepository = trainingCompletionRepository;
         _staffRepository = staffRepository;
         _schoolRepository = schoolRepository;
         _facultyRepository = facultyRepository;
@@ -35,85 +34,63 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
 
     public async Task<Result<StaffCompletionListDto>> Handle(GetListOfCertificatesForStaffMemberWithNotCompletedModulesQuery request, CancellationToken cancellationToken)
     {
-        var data = new StaffCompletionListDto();
+        StaffCompletionListDto data = new();
 
         // - Get all modules
-        var modules = await _trainingModuleRepository.GetCurrentModules(cancellationToken);
+        List<TrainingModule> modules = await _trainingModuleRepository.GetAllCurrent(cancellationToken);
 
         // - Get staff member
-        var staff = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        Staff staff = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         // - Get Staff school details
-        var school = await _schoolRepository.GetById(staff.SchoolCode, cancellationToken);
+        School school = await _schoolRepository.GetById(staff.SchoolCode, cancellationToken);
 
         // - Get Staff Faculties
-        var faculties = await _facultyRepository.GetCurrentForStaffMember(staff.StaffId, cancellationToken);
-
-        // - Get completions for staff member
-        var records = await _trainingCompletionRepository.GetCurrentForStaffMember(request.StaffId, cancellationToken);
-            
+        List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(staff.StaffId, cancellationToken);
+     
         data.StaffId = request.StaffId;
         data.Name = staff.DisplayName;
         data.SchoolName = school.Name;
         data.EmailAddress = staff.EmailAddress;
         data.Faculties = faculties.Select(faculty => faculty.Name).ToList();
 
-        // - Build a collection of completions by each staff member for each module
-        foreach (var record in records)
+        foreach (TrainingModule module in modules)
         {
-            var entry = new CompletionRecordExtendedDetailsDto();
-            entry.AddRecordDetails(record);
-
-            entry.AddModuleDetails(record.Module);
-
-            entry.AddStaffDetails(staff);
-
-            data.Modules.Add(entry);
-        }
-
-        // Create blank entries for any missing modules
-        foreach (var module in modules)
-        {
-            if (data.Modules.Any(record => record.ModuleId == module.Id))
-                continue;
-
-            var entry = new CompletionRecordExtendedDetailsDto();
-            entry.AddModuleDetails(module);
-
-            entry.AddStaffDetails(staff);
-
-            entry.RecordEffectiveDate = null;
-            entry.RecordNotRequired = false;
-
-            data.Modules.Add(entry);
-        }
-
-        var duplicateEntries = new List<CompletionRecordExtendedDetailsDto>();
-
-        // - Remove all superceded entries
-        foreach (var record in data.Modules)
-        {
-            var duplicates = data.Modules.Where(entry =>
-                    entry.ModuleId == record.ModuleId &&
-                    entry.StaffId == record.StaffId &&
-                    entry.RecordId != record.RecordId)
+            List<TrainingCompletion> records = module.Completions
+                .Where(record =>
+                    record.StaffId == staff.StaffId &&
+                    !record.IsDeleted)
                 .ToList();
 
-            if (duplicates.All(entry => entry.RecordEffectiveDate < record.RecordEffectiveDate))
+            TrainingCompletion record = records
+                .OrderByDescending(record =>
+                    (record.CompletedDate.HasValue) ? record.CompletedDate.Value : record.CreatedAt)
+                .FirstOrDefault();
+
+            CompletionRecordExtendedDetailsDto entry = new();
+            entry.AddModuleDetails(module);
+            entry.AddStaffDetails(staff);
+
+            foreach (Faculty faculty in faculties)
             {
-                record.IsLatest = true;
-                record.CalculateExpiry();
+                List<Staff> headTeachers = faculty
+                    .Members
+                    .Where(member =>
+                        !member.IsDeleted &&
+                        member.Role == Core.Enums.FacultyMembershipRole.Manager)
+                    .Select(member => member.Staff)
+                    .ToList();
 
-                foreach (var duplicate in duplicates)
-                {
-                    duplicateEntries.Add(duplicate);
-                }
+                foreach (Staff headTeacher in headTeachers)
+                    entry.AddHeadTeacherDetails(faculty, headTeacher);
             }
-        }
 
-        foreach (var entry in duplicateEntries)
-        {
-            data.Modules.Remove(entry);
+            if (record is not null)
+                entry.AddRecordDetails(record);
+
+            entry.CalculateExpiry();
+
+            data.Modules.Add(entry);
         }
 
         return data;

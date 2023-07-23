@@ -24,7 +24,7 @@ internal sealed class GetListOfModuleSummaryQueryHandler
     {
         List<ModuleSummaryDto> data = new();
 
-        var modules = await _trainingModuleRepository.GetCurrentModules(cancellationToken);
+        var modules = await _trainingModuleRepository.GetAllCurrent(cancellationToken);
 
         if (modules is null)
         {

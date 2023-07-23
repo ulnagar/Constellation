@@ -74,10 +74,10 @@ public interface IEmailService
     Task SendMagicLinkLoginEmail(MagicLinkEmail notification);
 
     // Training Module Emails
-    Task SendTrainingExpiryWarningEmail(Dictionary<string, string> courses, Dictionary<string, string> recipients);
-    Task SendTrainingExpiryAlertEmail(Dictionary<string, string> courses, Dictionary<string, string> recipients);
-    Task SendTrainingExpiredEmail(Dictionary<string, string> courses, Dictionary<string, string> recipients);
-
+    Task SendTrainingExpiryWarningEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients);
+    Task SendTrainingExpiryAlertEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients);
+    Task SendTrainingExpiredEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients);
+        
     // Report Emails
     Task SendAcademicReportToNonResidentialParent(List<EmailRecipient> recipients, Name studentName, string ReportingPeriod, string Year, FileDto file, CancellationToken cancellationToken = default);
 }

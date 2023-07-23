@@ -4,8 +4,10 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Abstractions;
+using Constellation.Core.Models;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -14,18 +16,15 @@ using System.Threading.Tasks;
 internal sealed class GetListOfCompletionRecordsQueryHandler 
     : IQueryHandler<GetListOfCompletionRecordsQuery, List<CompletionRecordDto>>
 {
-    private readonly ITrainingCompletionRepository _trainingCompletionRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
     private readonly ITrainingModuleRepository _trainingModuleRepository;
 
     public GetListOfCompletionRecordsQueryHandler(
-        ITrainingCompletionRepository trainingCompletionRepository,
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
         ITrainingModuleRepository trainingModuleRepository)
     {
-        _trainingCompletionRepository = trainingCompletionRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
         _trainingModuleRepository = trainingModuleRepository;
@@ -34,38 +33,50 @@ internal sealed class GetListOfCompletionRecordsQueryHandler
     public async Task<Result<List<CompletionRecordDto>>> Handle(GetListOfCompletionRecordsQuery request, CancellationToken cancellationToken)
     {
         List<CompletionRecordDto> data = new();
-        List<TrainingCompletion> records = new();
+        List<Staff> staffMembers = new();
 
         if (string.IsNullOrWhiteSpace(request.StaffId))
-            records = await _trainingCompletionRepository.GetAllCurrent(cancellationToken);
+            staffMembers = await _staffRepository.GetAllActive(cancellationToken);
         else
-            records = await _trainingCompletionRepository.GetCurrentForStaffMember(request.StaffId, cancellationToken);
+            staffMembers.Add(await _staffRepository.GetById(request.StaffId));
 
-        foreach (var staffMemberRecords in records.GroupBy(record => record.StaffId))
+        List<TrainingModule> modules = await _trainingModuleRepository.GetAllCurrent(cancellationToken);
+
+        foreach (Staff staffMember in staffMembers)
         {
-            var staff = await _staffRepository.GetByIdWithFacultyMemberships(staffMemberRecords.Key, cancellationToken);
-
-            var facultyIds = staff
+            List<Guid> facultyIds = staffMember
                 .Faculties
                 .Where(member => !member.IsDeleted)
                 .Select(member => member.FacultyId)
                 .ToList();
 
-            var faculties = await _facultyRepository.GetListFromIds(facultyIds, cancellationToken);
+            List<Faculty> faculties = await _facultyRepository.GetListFromIds(facultyIds, cancellationToken);
 
-            foreach (var record in staffMemberRecords)
+            foreach (TrainingModule module in modules)
             {
-                var module = await _trainingModuleRepository.GetById(record.TrainingModuleId, cancellationToken);
+                List<TrainingCompletion> records = module.Completions
+                    .Where(record =>
+                        record.StaffId == staffMember.StaffId &&
+                        !record.IsDeleted)
+                    .ToList();
 
-                var entry = new CompletionRecordDto
+                TrainingCompletion record = records
+                    .OrderByDescending(record => 
+                        (record.CompletedDate.HasValue) ? record.CompletedDate.Value : record.CreatedAt)
+                    .FirstOrDefault();
+
+                if (record is null)
+                    continue;
+
+                CompletionRecordDto entry = new()
                 {
                     Id = record.Id,
                     ModuleId = module.Id,
                     ModuleName = module.Name,
                     ModuleExpiry = module.Expiry,
                     StaffId = record.StaffId,
-                    StaffFirstName = staff.FirstName,
-                    StaffLastName = staff.LastName,
+                    StaffFirstName = staffMember.FirstName,
+                    StaffLastName = staffMember.LastName,
                     StaffFaculty = string.Join(",", faculties.Select(faculty => faculty.Name)),
                     CompletedDate = record.CompletedDate,
                     NotRequired = record.NotRequired,
@@ -76,20 +87,6 @@ internal sealed class GetListOfCompletionRecordsQueryHandler
                 entry.Status = CompletionRecordDto.ExpiryStatus.Active;
 
                 data.Add(entry);
-            }
-        }
-
-        foreach (var record in data)
-        {
-            if (data.Any(other =>
-                other.Id != record.Id &&
-                other.ModuleId == record.ModuleId && // true
-                other.StaffId == record.StaffId && // true
-                (other.NotRequired && other.CreatedAt > record.CompletedDate || // false
-                !other.NotRequired && !record.NotRequired && other.CompletedDate > record.CompletedDate || // false
-                record.NotRequired && record.CreatedAt < other.CompletedDate))) // false
-            {
-                record.Status = CompletionRecordDto.ExpiryStatus.Superceded;
             }
         }
 

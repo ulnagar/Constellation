@@ -114,7 +114,7 @@ public class UpsertModel : BasePageModel
         if (Id.HasValue)
         {
             // Get existing entry from database and populate fields
-            var entityRequest = await _mediator.Send(new GetCompletionRecordEditContextQuery(TrainingCompletionId.FromValue(Id.Value)));
+            var entityRequest = await _mediator.Send(new GetCompletionRecordEditContextQuery(TrainingModuleId.FromValue(ModuleId.Value), TrainingCompletionId.FromValue(Id.Value)));
             
             if (entityRequest.IsFailure)
             {

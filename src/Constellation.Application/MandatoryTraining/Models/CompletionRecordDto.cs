@@ -2,6 +2,7 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
+using Microsoft.VisualBasic;
 using System;
 
 public class CompletionRecordDto

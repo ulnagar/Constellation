@@ -17,14 +17,15 @@ internal sealed class TrainingModuleRepository
         _context = context;
     }
 
-    public async Task<List<TrainingModule>> GetCurrentModules(
+    public async Task<List<TrainingModule>> GetAllCurrent(
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<TrainingModule>()
+            .Include(module => module.Completions)
             .Where(module => !module.IsDeleted)
             .ToListAsync(cancellationToken);
 
-    public async Task<TrainingModule?> GetWithCompletionByName(
+    public async Task<TrainingModule?> GetByName(
         string name,
         CancellationToken cancellationToken = default) =>
         await _context
@@ -38,6 +39,7 @@ internal sealed class TrainingModuleRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<TrainingModule>()
+            .Include(module => module.Completions)
             .Where(module => module.Id == id)
             .FirstOrDefaultAsync(cancellationToken);
 
