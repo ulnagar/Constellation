@@ -25,5 +25,9 @@ internal sealed class TrainingModuleConfiguration : IEntityTypeConfiguration<Tra
             .WithOne(completion => completion.Module)
             .HasForeignKey(completion => completion.TrainingModuleId)
             .OnDelete(DeleteBehavior.ClientCascade);
+
+        builder
+            .Navigation(module => module.Completions)
+            .AutoInclude();
     }
 }

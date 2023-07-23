@@ -62,8 +62,15 @@ public class AbsenceConfiguration : IEntityTypeConfiguration<Absence>
             .HasForeignKey(notification => notification.AbsenceId);
 
         builder
+            .Navigation(absence => absence.Notifications)
+            .AutoInclude();
+
+        builder
             .HasMany(absence => absence.Responses)
             .WithOne()
             .HasForeignKey(response => response.AbsenceId);
+
+        builder.Navigation(absence => absence.Responses)
+            .AutoInclude();
     }
 }

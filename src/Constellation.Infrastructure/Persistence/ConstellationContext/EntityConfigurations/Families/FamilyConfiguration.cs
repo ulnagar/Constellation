@@ -27,9 +27,17 @@ public class FamilyConfiguration : IEntityTypeConfiguration<Family>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
+            .Navigation(family => family.Parents)
+            .AutoInclude();
+
+        builder
             .HasMany(family => family.Students)
             .WithOne()
             .HasForeignKey(family => family.FamilyId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .Navigation(family => family.Students)
+            .AutoInclude();
     }
 }

@@ -28,16 +28,28 @@ internal sealed class GroupTutorialConfiguration : IEntityTypeConfiguration<Grou
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
+            .Navigation(tutorial => tutorial.Teachers)
+            .AutoInclude();
+
+        builder
             .HasMany(tutorial => tutorial.Rolls)
             .WithOne()
             .HasForeignKey(roll => roll.TutorialId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
+            .Navigation(tutorial => tutorial.Rolls)
+            .AutoInclude();
+
+        builder
             .HasMany(tutorial => tutorial.Enrolments)
             .WithOne()
             .HasForeignKey(e => e.TutorialId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .Navigation(tutorial => tutorial.Enrolments)
+            .AutoInclude();
 
         builder
             .Property(tutorial => tutorial.StartDate)
