@@ -188,15 +188,5 @@ namespace Constellation.Infrastructure.Services
 
             return result;
         }
-
-        public async Task EnableStudentAbsenceNotifications(string studentId, DateTime startDate)
-        {
-            var student = await _unitOfWork.Students.ForEditAsync(studentId);
-
-            if (student == null)
-                return;
-
-            await student.EnableAbsenceNotifications(startDate);
-        }
     }
 }

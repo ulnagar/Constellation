@@ -5,6 +5,7 @@ using Constellation.Application.Helpers;
 using Constellation.Application.Schools.GetSchoolsForSelectionList;
 using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Absences;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -33,6 +34,13 @@ public class SettingsModel : BasePageModel
     public string SchoolCode { get; set; }
     [BindProperty(SupportsGet = false)]
     public int Grade { get; set; }
+
+    [BindProperty]
+    public string Type { get; set; }
+    [BindProperty]
+    public DateOnly StartDate { get; set; }
+    [BindProperty]
+    public DateOnly? EndDate { get; set; }
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
@@ -120,19 +128,25 @@ public class SettingsModel : BasePageModel
             return Page();
         }
 
-        var request = await _mediator.Send(new SetAbsenceConfigurationForStudentCommand(StudentId, SchoolCode, Grade), cancellationToken);
+        var request = await _mediator.Send(new SetAbsenceConfigurationForStudentCommand(
+            StudentId, 
+            SchoolCode, 
+            Grade,
+            AbsenceType.FromValue(Type),
+            StartDate,
+            EndDate), cancellationToken);
 
         if (request.IsFailure)
         {
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByAction("Index", "Students", new { area = "Partner" })
+                RedirectPath = _linkGenerator.GetPathByPage(page: "/Absences/Audit", values: new { area = "SchoolAdmin" })
             };
 
             return Page();
         }
 
-        return RedirectToAction("Index", "Students", new { area = "Partner" });
+        return RedirectToPage("/Absences/Audit", new { area = "SchoolAdmin" });
     }
 }

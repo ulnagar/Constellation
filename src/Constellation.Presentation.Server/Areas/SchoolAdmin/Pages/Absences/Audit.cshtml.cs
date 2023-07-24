@@ -36,7 +36,12 @@ public class AuditModel : BasePageModel
             return;
         }
         
-        Students = studentRequest.Value;
+        Students = studentRequest
+            .Value
+            .OrderBy(student => student.School)
+            .ThenBy(student => student.Grade)
+            .ThenBy(student => student.Name)
+            .ToList();
 
         return;
     }

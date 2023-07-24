@@ -149,32 +149,6 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
             return View("AttendanceQuery", viewModel);
         }
 
-        public async Task<IActionResult> AbsenceSettings()
-        {
-            var students = await _unitOfWork.Students.AllWithAbsenceScanSettings();
-
-            var viewModel = await CreateViewModel<Student_AbsenceSettings_ViewModel>();
-
-            foreach (var student in students)
-            {
-                var item = new Student_AbsenceSettings_ViewModel.StudentItem
-                {
-                    Id = student.StudentId,
-                    Name = student.DisplayName,
-                    SchoolName = student.School.Name,
-                    Grade = student.CurrentGrade,
-                    IsEnabled = student.IncludeInAbsenceNotifications,
-                    EnabledFromDate = student.AbsenceNotificationStartDate,
-                };
-
-                viewModel.Students.Add(item);
-            }
-
-            viewModel.Students = viewModel.Students.OrderBy(student => student.Name).OrderBy(student => student.SchoolName).ToList();
-
-            return View(viewModel);
-        }
-
         public async Task<IActionResult> InterviewDetails()
         {
             var offerings = await _unitOfWork.CourseOfferings.ForSelectionAsync();

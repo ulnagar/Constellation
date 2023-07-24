@@ -1,5 +1,7 @@
 ﻿using Constellation.Core.Enums;
+using Constellation.Core.Models.Absences;
 using System;
+using System.Collections.Generic;
 
 namespace Constellation.Application.Students.GetStudentsWithAbsenceSettings;
 
@@ -9,5 +11,10 @@ public sealed record StudentAbsenceSettingsResponse(
     string Gender,
     Grade Grade,
     string School,
-    bool AbsenceEnabled,
-    DateOnly? AbsenceEnabledFrom);
+    List<StudentAbsenceSettingsResponse.AbsenceConfigurationResponse> AbsenceSettings)
+{
+    public sealed record AbsenceConfigurationResponse(
+        AbsenceType AbsenceType,
+        DateOnly StartDate,
+        DateOnly EndDate);
+}

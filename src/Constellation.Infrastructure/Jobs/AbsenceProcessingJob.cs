@@ -11,9 +11,11 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Students;
 using Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
 using Microsoft.Extensions.Options;
 using Serilog.Context;
+using System.Configuration;
 using System.Drawing;
 using System.Threading;
 
@@ -61,7 +63,42 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
 
         List<Absence> returnAbsences = new();
 
-        if (student.AbsenceNotificationStartDate is null)
+        List<DateOnly> activePartialScanDates = new();
+        List<DateOnly> activeWholeScanDates = new();
+
+        foreach (AbsenceConfiguration config in student.AbsenceConfigurations)
+        {
+            if (config.IsDeleted || config.CalendarYear != DateTime.Today.Year)
+                continue;
+
+            if (config.AbsenceType == AbsenceType.Partial)
+            {
+                List<DateOnly> validDates = config.ScanStartDate.Range(config.ScanEndDate);
+
+                foreach (DateOnly validDate in validDates)
+                {
+                    if (validDate >= DateOnly.FromDateTime(DateTime.Today))
+                        continue;
+
+                    activePartialScanDates.Add(validDate);
+                }
+            }
+
+            if (config.AbsenceType == AbsenceType.Whole)
+            {
+                List<DateOnly> validDates = config.ScanStartDate.Range(config.ScanEndDate);
+
+                foreach (DateOnly validDate in validDates)
+                {
+                    if (validDate >= DateOnly.FromDateTime(DateTime.Today))
+                        continue;
+
+                    activeWholeScanDates.Add(validDate);
+                }
+            }
+        }
+
+        if (activePartialScanDates.Count == 0 && activeWholeScanDates.Count == 0)
         {
             _logger.Information("{id}: - Student absence scanning disabled. Skipping.", JobId);
         }
@@ -117,8 +154,8 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
             if (cancellationToken.IsCancellationRequested)
                 return returnAbsences;
 
-            // If the date of this group of absences is before the cut-off date(s), skip
-            if (group.Key < GetEarliestDate())
+            // If the date of this group of absences is not a valid scan date, skip
+            if (!activePartialScanDates.Contains(group.Key) && !activeWholeScanDates.Contains(group.Key))
                 continue;
 
             // Get the timetable for the day
@@ -206,6 +243,10 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                         if (cancellationToken.IsCancellationRequested)
                             return returnAbsences;
 
+                        // If the absence is not on a valid scan date, skip
+                        if (!activeWholeScanDates.Contains(absencesToProcess.First().Date))
+                            continue;
+
                         // These absences grouped together form a Whole Absence
                         Absence? absenceRecord = await ProcessWholeAbsence(
                             absencesToProcess, 
@@ -224,8 +265,8 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                     // These absences cannot be grouped together, therefore are partial
                     List<Absence> detectedAbsences = new();
 
-                    // If the absence is too early, skip
-                    if (absencesToProcess.First().Date < GetEarliestDate())
+                    // If the absence is not on a valid scan date, skip
+                    if (!activePartialScanDates.Contains(absencesToProcess.First().Date))
                         continue;
 
                     // If there are no AttendanceAbsences to match to, Partials cannot be created, Skip
@@ -331,19 +372,6 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         _student = null;
 
         return returnAbsences;
-    }
-
-    private DateOnly GetEarliestDate()
-    {
-        // If the student should not be activated for absence scanning, set to tomorrow to disable scanning
-        if (!_student.AbsenceNotificationStartDate.HasValue)
-            return DateOnly.FromDateTime(DateTime.Today.AddDays(1));
-
-        // If the local student set start date is after the system set start date, use the student one
-        if (_student.AbsenceNotificationStartDate.HasValue && _student.AbsenceNotificationStartDate.Value > _configuration.Absences.AbsenceScanStartDate)
-            return DateOnly.FromDateTime(_student.AbsenceNotificationStartDate.Value);
-
-        return DateOnly.FromDateTime(_configuration.Absences.AbsenceScanStartDate);
     }
 
     private static void CalculatePxPAbsenceTimes(
@@ -702,9 +730,6 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         int totalAbsenceTime, 
         CancellationToken cancellationToken)
     {
-        if (absencesToProcess.First().Date < GetEarliestDate())
-            return null;
-
         // Calculate acceptable reason
         List<AbsenceReason> reasons = absencesToProcess
             .Select(absence => AbsenceReason.FromValue(absence.Reason))

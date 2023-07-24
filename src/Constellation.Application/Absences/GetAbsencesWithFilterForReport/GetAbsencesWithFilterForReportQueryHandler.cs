@@ -47,12 +47,15 @@ internal sealed class GetAbsencesWithFilterForReportQueryHandler
         if (request.StudentIds.Any())
             students.AddRange(await _studentRepository.GetListFromIds(request.StudentIds, cancellationToken));
 
-        students.AddRange(await _studentRepository
-            .GetFilteredStudents(
-                request.OfferingCodes,
-                request.Grades,
-                request.SchoolCodes,
-                cancellationToken));
+        if (request.OfferingCodes.Any() ||
+            request.Grades.Any() ||
+            request.SchoolCodes.Any())
+            students.AddRange(await _studentRepository
+                .GetFilteredStudents(
+                    request.OfferingCodes,
+                    request.Grades,
+                    request.SchoolCodes,
+                    cancellationToken));
 
         students = students
             .Distinct()

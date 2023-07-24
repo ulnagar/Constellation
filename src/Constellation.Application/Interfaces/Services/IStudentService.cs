@@ -14,6 +14,5 @@ namespace Constellation.Application.Interfaces.Services
 
         Task EnrolStudentInClass(string studentId, int offeringId);
         Task UnenrolStudentFromClass(string studentId, int offeringId);
-        Task EnableStudentAbsenceNotifications(string studentId, DateTime startDate);
     }
 }

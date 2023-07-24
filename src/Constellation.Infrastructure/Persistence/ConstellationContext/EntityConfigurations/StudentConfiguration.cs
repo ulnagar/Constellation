@@ -27,6 +27,16 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
                 .HasMany(student => student.Absences)
                 .WithOne()
                 .HasForeignKey(absence => absence.StudentId);
+
+            builder
+                .HasMany(student => student.AbsenceConfigurations)
+                .WithOne()
+                .HasForeignKey(config => config.StudentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder
+                .Navigation(student => student.AbsenceConfigurations)
+                .AutoInclude();
         }
     }
 }

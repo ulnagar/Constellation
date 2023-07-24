@@ -21,7 +21,7 @@
                 <div class="row nested-row">
                     <div class="col-md-6">
                         <label asp-for="Filter.Students">Students</label>
-                        <div id="SelectedCategoriesList"> </div>
+                        <div id="SelectedStudentsList"> </div>
                     </div>
                     <div class="col-md-6">
                         <label asp-for="Filter.Schools">Schools</label>
@@ -84,7 +84,7 @@
                 </td>
                 <td>@item.Type.Value</td>
                 <td>@item.AbsenceDate.ToShortDateString()</td>
-                <td>@item.AbsenceTimeframe (item.PeriodName)</td>
+                <td>@item.AbsenceTimeframe (@item.PeriodName)</td>
                 <td>@item.OfferingName</td>
                 <td>@item.NotificationCount</td>
                 <td>@item.ResponseCount</td>
@@ -286,9 +286,9 @@
                     @:toggleGrade('@grade');
                 }
 
-                @foreach (var category in Model.Filter.Students)
+                @foreach (var student in Model.Filter.Students)
                 {
-                    @:toggleCategory('@category');
+                    @:toggleStudent('@student');
                 }
 
                 @foreach (var offering in Model.Filter.Offerings)
@@ -344,12 +344,12 @@
 
         $studentOption.on('select2:select', function (e) {
             var code = e.params.data.id;
-            toggleSchool(code);
+            toggleStudent(code);
         });
 
         $studentOption.on('select2:unselect', function (e) {
             var code = e.params.data.id;
-            toggleSchool(code);
+            toggleStudent(code);
         });
 
         function toggleGrade(grade) {

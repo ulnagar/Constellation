@@ -319,6 +319,17 @@ public static class DomainErrors
 
         public static class Student
         {
+            public static class AbsenceConfiguration
+            {
+                public static readonly Error AlreadyCancelled = new(
+                    "Partners.Student.AbsenceConfiguration.AlreadyCancelled",
+                    "This absence configuration has already been marked cancelled");
+
+                public static readonly Func<DateOnly, DateOnly, Error> RecordForRangeExists = (startDate, endDate) => new(
+                    "Partners.Student.AbsenceConfiguration.RecordForRangeExists",
+                    $"A current configuration exists that covers some or all of the dates from {startDate} to {endDate}");
+            }
+
             public static readonly Error InvalidId = new(
                 "Partners.Student.InvalidId",
                 "The provided student id is not valid");

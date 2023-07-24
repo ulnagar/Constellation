@@ -15,5 +15,11 @@ internal sealed class SetAbsenceConfigurationForStudentCommandValidator : Abstra
             .NotEmpty()
             .When(command => string.IsNullOrWhiteSpace(command.StudentId))
             .WithMessage("You must specify either a Student or a School");
+
+        RuleFor(command => command.StartDate)
+            .NotEmpty()
+            .LessThanOrEqualTo(command => command.EndDate.Value)
+            .When(command => command.EndDate.HasValue)
+            .WithMessage("The Start Date must be before the End Date");
     }
 }

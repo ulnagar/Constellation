@@ -5,6 +5,9 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Students;
+using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -51,6 +54,24 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         public async Task<IActionResult> Active()
         {
             var students = await _unitOfWork.Students.ForListAsync(student => !student.IsDeleted);
+
+            foreach (var student in students)
+            {
+                if (student.AbsenceConfigurations.Count == 0 && student.IncludeInAbsenceNotifications)
+                {
+                    Result<AbsenceConfiguration> wholeRequest = AbsenceConfiguration.Create(student.StudentId, AbsenceType.Whole, DateOnly.FromDateTime(student.AbsenceNotificationStartDate.Value), null);
+
+                    if (wholeRequest.IsSuccess)
+                        student.AddAbsenceConfiguration(wholeRequest.Value);
+
+                    Result<AbsenceConfiguration> partialRequest = AbsenceConfiguration.Create(student.StudentId, AbsenceType.Partial, DateOnly.FromDateTime(student.AbsenceNotificationStartDate.Value), null);
+
+                    if (partialRequest.IsSuccess)
+                        student.AddAbsenceConfiguration(partialRequest.Value);
+
+                    await _unitOfWork.CompleteAsync();
+                }
+            }
 
             var viewModel = await CreateViewModel<Student_ViewModel>();
             viewModel.Students = students.Select(Student_ViewModel.StudentDto.ConvertFromStudent).ToList();

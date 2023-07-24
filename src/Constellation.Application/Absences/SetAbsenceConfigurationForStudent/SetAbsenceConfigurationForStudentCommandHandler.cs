@@ -4,9 +4,9 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Serilog;
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,8 +43,31 @@ internal sealed class SetAbsenceConfigurationForStudentCommandHandler
 
             foreach (var student in students)
             {
-                student.IncludeInAbsenceNotifications = true;
-                student.AbsenceNotificationStartDate = DateTime.Today;
+                Result<AbsenceConfiguration> configRequest = AbsenceConfiguration.Create(
+                    student.StudentId,
+                    request.AbsenceType,
+                    request.StartDate,
+                    request.EndDate);
+
+                if (configRequest.IsFailure)
+                {
+                    _logger
+                        .ForContext("Error", configRequest.Error)
+                        .Warning("Failed to create Absence Configuration for student {student}", student.DisplayName);
+
+                    return Result.Failure(configRequest.Error);
+                }
+
+                Result studentRequest = student.AddAbsenceConfiguration(configRequest.Value);
+
+                if (studentRequest.IsFailure)
+                {
+                    _logger
+                        .ForContext("Error", studentRequest.Error)
+                        .Warning("Failed to add Absence Configuration for student");
+
+                    return Result.Failure(studentRequest.Error);
+                }
             }
 
             await _unitOfWork.CompleteAsync(cancellationToken);
@@ -56,8 +79,31 @@ internal sealed class SetAbsenceConfigurationForStudentCommandHandler
         {
             var student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
-            student.IncludeInAbsenceNotifications = true;
-            student.AbsenceNotificationStartDate = DateTime.Today;
+            Result<AbsenceConfiguration> configRequest = AbsenceConfiguration.Create(
+                student.StudentId,
+                request.AbsenceType,
+                request.StartDate,
+                request.EndDate);
+
+            if (configRequest.IsFailure)
+            {
+                _logger
+                    .ForContext("Error", configRequest.Error)
+                    .Warning("Failed to create Absence Configuration for student {student}", student.DisplayName);
+
+                return Result.Failure(configRequest.Error);
+            }
+
+            Result studentRequest = student.AddAbsenceConfiguration(configRequest.Value);
+
+            if (studentRequest.IsFailure)
+            {
+                _logger
+                    .ForContext("Error", studentRequest.Error)
+                    .Warning("Failed to add Absence Configuration for student");
+
+                return Result.Failure(studentRequest.Error);
+            }
 
             await _unitOfWork.CompleteAsync(cancellationToken);
 

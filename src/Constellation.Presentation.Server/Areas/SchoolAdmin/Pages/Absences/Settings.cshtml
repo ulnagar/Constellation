@@ -47,6 +47,33 @@
             <label class="text-danger" id="selection-display"><span></span></label>
         </div>
 
+        <div class="form-group row">
+            <label asp-for="Type" class="col-md-2">Absence Type</label>
+            <div class="col-md-3">
+                <select asp-for="Type" class="form-control combo">
+                    <option value="Partial">Partial Absences</option>
+                    <option value="Whole">Whole Absences</option>
+                </select>
+                <span asp-validation-for="Type" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="StartDate" class="col-md-2">Starts From</label>
+            <div class="col-md-3">
+                <input type="date" asp-for="StartDate" class="form-control" />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="EndDate" class="col-md-2">Ends At</label>
+            <div class="col-md-3">
+                <input type="date" asp-for="EndDate" class="form-control" />
+                <span asp-validation-for="EndDate" class="text-danger"></span>
+            </div>
+        </div>
+
         <div class="form-group">
             <div class="col-md-offset-2 col-md-3">
                 <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />

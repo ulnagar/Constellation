@@ -2,7 +2,8 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Errors;
+using Constellation.Core.Models;
+using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using System;
 using System.Collections.Generic;
@@ -21,25 +22,35 @@ internal sealed class GetStudentsWithAbsenceSettingsQueryHandler
 
     public async Task<Result<List<StudentAbsenceSettingsResponse>>> Handle(GetStudentsWithAbsenceSettingsQuery request, CancellationToken cancellationToken)
     {
-        var returnData = new List<StudentAbsenceSettingsResponse>();
+        List<StudentAbsenceSettingsResponse> returnData = new();
 
-        var students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
 
-        if (students is null)
-        {
-            return Result.Failure<List<StudentAbsenceSettingsResponse>>(DomainErrors.Partners.Student.NotFound("00000000"));
-        }
+        if (students.Count == 0)
+            return returnData;
 
         foreach(var student in students)
         {
-            var entry = new StudentAbsenceSettingsResponse(
+            List<StudentAbsenceSettingsResponse.AbsenceConfigurationResponse> absenceConfigurationResponses = new();
+
+            foreach (AbsenceConfiguration configuration in student.AbsenceConfigurations)
+            {
+                if (configuration.IsDeleted || configuration.CalendarYear != DateTime.Today.Year)
+                    continue;
+
+                absenceConfigurationResponses.Add(new(
+                    configuration.AbsenceType,
+                    configuration.ScanStartDate,
+                    configuration.ScanEndDate));
+            }
+
+            StudentAbsenceSettingsResponse entry = new(
                 student.StudentId,
                 student.DisplayName,
                 student.Gender,
                 student.CurrentGrade,
                 student.School.Name,
-                student.IncludeInAbsenceNotifications,
-                (student.IncludeInAbsenceNotifications) ? DateOnly.FromDateTime(student.AbsenceNotificationStartDate.Value) : null);
+                absenceConfigurationResponses);
 
             returnData.Add(entry);
         }

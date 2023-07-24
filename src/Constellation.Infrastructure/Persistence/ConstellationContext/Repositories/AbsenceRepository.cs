@@ -140,13 +140,20 @@ public class AbsenceRepository : IAbsenceRepository
 
     public async Task<List<Absence>> GetForStudents(
         List<string> studentIds,
-        CancellationToken cancellationToken = default) =>
-        await _context
+        CancellationToken cancellationToken = default)
+    {
+        DateOnly startOfYear = new(DateTime.Today.Year, 1, 1);
+        DateOnly endOfYear = new(DateTime.Today.Year, 12, 31);
+
+        return await _context
             .Set<Absence>()
             .Include(absence => absence.Responses)
             .Include(absence => absence.Notifications)
             .Where(absence =>
                 studentIds.Contains(absence.StudentId) &&
-                absence.Date.Year == DateTime.Today.Year)
+                absence.Date >= startOfYear &&
+                absence.Date <= endOfYear)
             .ToListAsync(cancellationToken);
+    }
+        
 }

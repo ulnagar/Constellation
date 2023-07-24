@@ -1,4 +1,5 @@
 ﻿@page
+@using Constellation.Core.Models.Absences;
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Absences.AuditModel
 
 @inject IAuthorizationService authorisationService
@@ -13,7 +14,7 @@
     @if (authorised.Succeeded)
     {
         <div class="btn-group new-group" role="group">
-            <a asp-action="AbsenceSettings" asp-controller="Students" asp-area="Partner" class="btn btn-warning">Absence Settings</a>
+            <a asp-page="/Absences/Settings" asp-area="SchoolAdmin" class="btn btn-warning">Absence Settings</a>
         </div>
     }
 
@@ -22,30 +23,46 @@
 
 <hr />
 
-<table class="table-striped table-hover data-table">
+<table class="table-striped table-hover grouped-data-table">
     <thead>
         <tr>
+            <th>School</th>
             <th>SRN</th>
             <th>Name</th>
             <th>Grade</th>
-            <th>School</th>
             <th>Enabled?</th>
-            <th>Scan Start Date</th>
+            <th>Scan Range</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model.Students)
         {
+            bool anyWholeAbsences = item.AbsenceSettings.Any(entry => entry.AbsenceType == AbsenceType.Whole);
+            bool anyPartialAbsences = item.AbsenceSettings.Any(entry => entry.AbsenceType == AbsenceType.Partial);
+
             <tr>
-                <td>@Html.DisplayFor(model => item.SRN)</td>
-                <td>@Html.DisplayFor(model => item.Gender, "Gender") @Html.DisplayFor(model => item.Name)</td>
+                <td>@item.School</td>
+                <td>@item.SRN</td>
+                <td>@Html.DisplayFor(model => item.Gender, "Gender") @item.Name</td>
                 <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
-                <td>@Html.DisplayFor(model => item.School)</td>
-                <td>@Html.DisplayFor(model => item.AbsenceEnabled, "Boolean")</td>
+                <td>@Html.DisplayFor(model => anyWholeAbsences, "Boolean") Whole</td>
                 <td>
-                    @if (item.AbsenceEnabledFrom.HasValue)
+                    @foreach (var entry in item.AbsenceSettings.Where(entry => entry.AbsenceType == AbsenceType.Whole))
                     {
-                        @item.AbsenceEnabledFrom.Value.ToShortDateString()
+                        <span>@entry.StartDate.ToShortDateString() - @entry.EndDate.ToShortDateString()</span>
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td>@item.School</td>
+                <td>@item.SRN</td>
+                <td>@Html.DisplayFor(model => item.Gender, "Gender") @item.Name</td>
+                <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
+                <td>@Html.DisplayFor(model => anyPartialAbsences, "Boolean") Partial</td>
+                <td>
+                    @foreach (var entry in item.AbsenceSettings.Where(entry => entry.AbsenceType == AbsenceType.Partial))
+                    {
+                        <span>@entry.StartDate.ToShortDateString() - @entry.EndDate.ToShortDateString()</span>
                     }
                 </td>
             </tr>
