@@ -42,6 +42,10 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGet()
     {
+
+        ViewData["ActivePage"] = "Completions";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         await GetClasses(_mediator);
 
         Result<CompletionRecordDto> recordRequest = await _mediator.Send(
@@ -72,6 +76,10 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetDownloadCertificate()
     {
+
+        ViewData["ActivePage"] = "Completions";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         await GetClasses(_mediator);
 
         var certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateFileByIdQuery(StoredFile.TrainingCertificate, Record.Id.ToString()));
@@ -94,6 +102,10 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostDeleteRecord()
     {
+
+        ViewData["ActivePage"] = "Completions";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         var canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
         
         if (canEditTest.Succeeded)

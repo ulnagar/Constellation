@@ -80,6 +80,10 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnGet()
     {
+
+        ViewData["ActivePage"] = "Completions";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         await GetClasses(_mediator);
 
         var canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
@@ -168,6 +172,10 @@ public class UpsertModel : BasePageModel
 
     private async Task SetUpForm()
     {
+
+        ViewData["ActivePage"] = "Completions";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         StaffOptions = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
         ModuleOptions = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
 
@@ -196,6 +204,10 @@ public class UpsertModel : BasePageModel
 
     private async Task<FileDto> GetUploadedFile()
     {
+
+        ViewData["ActivePage"] = "Completions";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         if (FormFile is not null)
         {
             var staffMember = await _mediator.Send(new GetStaffMemberNameByIdQuery { StaffId = StaffId });
@@ -234,6 +246,10 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdate()
     {
+
+        ViewData["ActivePage"] = "Completions";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         // Check if the Module allows not required if the not required has been selected.
         if (ModuleId is not null && NotRequired)
         {

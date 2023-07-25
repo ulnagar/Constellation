@@ -82,6 +82,8 @@ public class ReportModel : BasePageModel
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken)
     {
+        ViewData["ActivePage"] = "Report";
+
         await GetClasses(_mediator);
 
         var classesResponse = await _mediator.Send(new GetOfferingsForSelectionListQuery(), cancellationToken);

@@ -42,6 +42,10 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGet()
     {
+
+        ViewData["ActivePage"] = "Modules";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         await GetClasses(_mediator);
 
         var moduleRequest = await _mediator.Send(new GetModuleDetailsQuery(TrainingModuleId.FromValue(Id)));
@@ -67,6 +71,10 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetDownloadReport()
     {
+
+        ViewData["ActivePage"] = "Modules";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
 
         if (!isAuthorised.Succeeded)
@@ -98,6 +106,10 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetDownloadReportWithCertificates()
     {
+
+        ViewData["ActivePage"] = "Modules";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
 
         if (!isAuthorised.Succeeded)
@@ -129,6 +141,10 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetRetireModule()
     {
+
+        ViewData["ActivePage"] = "Modules";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
 
         if (!isAuthorised.Succeeded)
@@ -151,6 +167,10 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetReinstateModule()
     {
+
+        ViewData["ActivePage"] = "Modules";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
 
         if (!isAuthorised.Succeeded)

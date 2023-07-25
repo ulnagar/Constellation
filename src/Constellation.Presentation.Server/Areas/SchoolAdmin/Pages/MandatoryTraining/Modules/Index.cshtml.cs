@@ -31,6 +31,10 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
+
+        ViewData["ActivePage"] = "Modules";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         await GetClasses(_mediator);
 
         var moduleRequest = await _mediator.Send(new GetListOfModuleSummaryQuery());

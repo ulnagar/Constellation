@@ -37,14 +37,6 @@
         <a asp-page="/Awards/Index" asp-area="SchoolAdmin" asp-route-filter="@IndexModel.FilterDto.Recent" class="btn @recent_style">Recent (20)</a>
         <a asp-page="/Awards/Index" asp-area="SchoolAdmin" asp-route-filter="@IndexModel.FilterDto.ThisYear" class="btn @thisYear_style">This Year</a>
     </div>
-
-    <a asp-page="/Awards/Dashboard" asp-area="SchoolAdmin" class="btn btn-secondary">Dashboard</a>
-    <a asp-page="/Awards/Leaderboard" asp-area="SchoolAdmin" class="btn btn-secondary">Leaderboard</a>
-
-    @if (authorisedTest.Succeeded)
-    {
-        <a asp-page="/Awards/Changes" asp-area="SchoolAdmin" class="btn btn-secondary">Recent Changes</a>
-    }
 </div>
 
 <hr />

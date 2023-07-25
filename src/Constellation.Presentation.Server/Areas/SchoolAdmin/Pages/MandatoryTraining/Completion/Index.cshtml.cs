@@ -40,6 +40,10 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGet()
     {
+
+        ViewData["ActivePage"] = "Completions";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         await GetClasses(_mediator);
 
         // If user does not have details view permissions, only show their own records
@@ -92,6 +96,10 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostStaffReport()
     {
+
+        ViewData["ActivePage"] = "Completions";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
 
         if (!isAuthorised.Succeeded)

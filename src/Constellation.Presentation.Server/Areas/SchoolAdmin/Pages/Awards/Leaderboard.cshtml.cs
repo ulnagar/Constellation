@@ -31,6 +31,8 @@ public class LeaderboardModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
+        ViewData["ActivePage"] = "Leaderboard";
+
         await GetClasses(_mediator);
 
         var statisticsRequest = await _mediator.Send(new GetStudentAwardStatisticsQuery(), cancellationToken);
@@ -56,6 +58,8 @@ public class LeaderboardModel : BasePageModel
 
     public async Task OnPostFilter(CancellationToken cancellationToken = default)
     {
+        ViewData["ActivePage"] = "Leaderboard";
+
         await GetClasses(_mediator);
 
         var statisticsRequest = await _mediator.Send(new GetStudentAwardStatisticsQuery(FromDate, ToDate), cancellationToken);

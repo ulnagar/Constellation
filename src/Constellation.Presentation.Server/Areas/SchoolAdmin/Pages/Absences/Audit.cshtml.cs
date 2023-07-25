@@ -21,6 +21,9 @@ public class AuditModel : BasePageModel
 
     public async Task OnGet()
     {
+
+        ViewData["ActivePage"] = "Audit";
+
         await GetClasses(_mediator);
 
         var studentRequest = await _mediator.Send(new GetStudentsWithAbsenceSettingsQuery());

@@ -44,6 +44,9 @@ public class SettingsModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
+
+        ViewData["ActivePage"] = "Audit";
+
         await GetClasses(_mediator);
 
         var students = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery(), cancellationToken);
@@ -83,6 +86,9 @@ public class SettingsModel : BasePageModel
 
     public async Task<IActionResult> OnPost(CancellationToken cancellationToken = default)
     {
+
+        ViewData["ActivePage"] = "Audit";
+
         if (string.IsNullOrWhiteSpace(StudentId) && string.IsNullOrWhiteSpace(SchoolCode))
         {
             Error = new()

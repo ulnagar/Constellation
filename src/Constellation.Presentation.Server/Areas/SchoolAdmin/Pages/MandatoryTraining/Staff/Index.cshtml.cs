@@ -1,7 +1,9 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Staff;
 
+using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.GetListOfCertificatesForStaffMemberWithNotCompletedModules;
 using Constellation.Application.MandatoryTraining.Models;
+using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +29,9 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
+        ViewData["ActivePage"] = "Staff";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         await GetClasses(_mediator);
 
         var completionRequest = await _mediator.Send(new GetListOfCertificatesForStaffMemberWithNotCompletedModulesQuery(StaffId));

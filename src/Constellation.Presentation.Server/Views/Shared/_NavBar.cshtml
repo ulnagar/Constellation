@@ -1,7 +1,7 @@
 ﻿@using Constellation.Application.Models.Auth
 
 @model Constellation.Presentation.Server.BaseModels.IBaseModel
-<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3 fixed-top">
+<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark box-shadow fixed-top">
     <div class="container">
         <a class="navbar-brand" asp-area="Home" asp-page="/Dashboard"><img src="~/logo.svg" class="nav-bar-logo d-inline-block align-middle" />Constellation</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,14 +49,11 @@
                 </li>
 
                 <li class="nav-item dropdown">
-                    <a href="~/css/" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">School Admin <span class="caret"></span></a>
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">School Admin <span class="caret"></span></a>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" asp-area="SchoolAdmin" asp-page="/MandatoryTraining/Modules/Index">Training Modules</a>
-                        <a class="dropdown-item" asp-area="SchoolAdmin" asp-page="/MandatoryTraining/Completion/Index">Training Certificates</a>
-                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" asp-area="SchoolAdmin" asp-page="/Absences/Report">Absences</a>
                         <a class="dropdown-item" asp-area="SchoolAdmin" asp-page="/Awards/Index">Awards</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" asp-area="SchoolAdmin" asp-page="/Absences/Audit">Absences</a>
+                        <a class="dropdown-item" asp-area="SchoolAdmin" asp-page="/MandatoryTraining/Completion/Index">Mandatory Training</a>
                     </div>
                 </li>
                                 

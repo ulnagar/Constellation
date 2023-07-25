@@ -14,34 +14,6 @@
 
 <h2>Awards Leaderboards</h2>
 
-<div class="page-menu">
-    @*<form asp-page-handler="Filter" method="post" class="form-inline">
-        <div class="form-row align-items-center">
-            <div class="col-auto">
-                <label asp-for="FromDate">Show From</label>
-            </div>
-            <div class="col-auto">
-                <input asp-for="FromDate" class="form-control" type="date" />
-            </div>
-            <div class="col-auto">
-                <label asp-for="ToDate">To</label>
-            </div>
-            <div class="col-auto">
-                <input asp-for="ToDate" class="form-control" type="date" />
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary mb-2">Filter</button>
-                @if (Model.IsFiltered)
-                {
-                    <a asp-page="/Awards/Leaderboard" asp-area="Reports" class="btn btn-primary ml-3 mb-2">Show All</a>
-                }
-            </div>
-        </div>
-    </form>*@
-
-    <a asp-page="/Awards/Index" asp-area="SchoolAdmin" class="btn btn-danger btn-pull-right">Go Back</a>
-</div>
-
 <hr />
 
 <div>

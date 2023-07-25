@@ -42,6 +42,10 @@ public class UpsertModel : BasePageModel
 
     public async Task OnGet()
     {
+
+        ViewData["ActivePage"] = "Modules";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         await GetClasses(_mediator);
 
         if (Id.HasValue)
@@ -71,6 +75,10 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdate()
     {
+
+        ViewData["ActivePage"] = "Modules";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         if (Id.HasValue)
         {
             // Update existing entry

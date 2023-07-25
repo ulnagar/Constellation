@@ -14,16 +14,15 @@
     @if (authorised.Succeeded)
     {
         <div class="btn-group new-group" role="group">
-            <a asp-page="/Absences/Settings" asp-area="SchoolAdmin" class="btn btn-warning">Absence Settings</a>
+            <a asp-page="/Absences/Settings" asp-area="SchoolAdmin" class="btn btn-warning">Create New</a>
         </div>
     }
 
-    <a asp-action="Index" asp-controller="Students" asp-area="Partner" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />
 
-<table class="table-striped table-hover grouped-data-table">
+<table class="table-striped table-hover grouped-data-table" style="width: 100%">
     <thead>
         <tr>
             <th>School</th>

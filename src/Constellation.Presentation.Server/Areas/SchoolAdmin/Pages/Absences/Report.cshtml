@@ -53,7 +53,7 @@
 
 <hr />
 
-<table class="table-striped table-hover custom-data-table">
+<table class="table-striped table-hover grouped-data-table" style="width: 100%">
     <thead>
         <tr>
             <th>Student</th>
@@ -271,15 +271,15 @@
     <script>
         $(document)
             .ready(function () {
-                $('.custom-data-table').DataTable({
-                    "order": [],
-                    "rowGroup": {
-                        "dataSrc": 0
-                    },
-                    "columnDefs": [
-                        { "visible": false, "targets": 0 }
-                    ]
-                });
+                //$('.custom-data-table').DataTable({
+                //    "order": [],
+                //    "rowGroup": {
+                //        "dataSrc": 0
+                //    },
+                //    "columnDefs": [
+                //        { "visible": false, "targets": 0 }
+                //    ]
+                //});
 
                 @foreach (var grade in Model.Filter.Grades)
                 {

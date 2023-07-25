@@ -49,6 +49,8 @@ builder.Services.AddDateOnlyTimeOnlyStringConverters();
 
 builder.Services.Replace(ServiceDescriptor.Singleton<IHtmlGenerator, CustomHtmlGenerator>());
 
+builder.WebHost.UseStaticWebAssets();
+
 var app = builder.Build();
 
 if (!app.Environment.IsProduction())

@@ -21,14 +21,12 @@
     <link rel="stylesheet" href="~/Constellation.Presentation.Server.styles.css" />
 </head>
 <body>
-    <header>
-        @await Html.PartialAsync("_NavBar", Model) 
-    </header>
+    @await Html.PartialAsync("_NavBar", Model) 
 
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div id="main-container" class="container">
+        <div class="pb-3">
             @RenderBody()
-        </main>
+        </div>
 
         @if (Model.Error is not null)
         {
@@ -37,7 +35,7 @@
         }
     </div>
 
-    <footer class="border-top footer fixed-bottom">
+    <footer class="footer fixed-bottom">
         @await Html.PartialAsync("_Footer")
     </footer>
 

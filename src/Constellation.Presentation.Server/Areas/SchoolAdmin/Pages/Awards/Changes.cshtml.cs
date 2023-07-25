@@ -33,6 +33,8 @@ public class ChangesModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
+        ViewData["ActivePage"] = "Changes";
+
         await GetClasses(_mediator);
 
         var statisticsRequest = await _mediator.Send(new GetStudentAwardStatisticsQuery(), cancellationToken);

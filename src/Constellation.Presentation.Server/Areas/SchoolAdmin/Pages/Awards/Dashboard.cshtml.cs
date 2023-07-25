@@ -20,11 +20,15 @@ public class DashboardModel : BasePageModel
 
     public async Task OnGet()
     {
+        ViewData["ActivePage"] = "Dashboard";
+
         await GetClasses(_mediator);
     }
 
     public async Task<IActionResult> OnPostGetData(CancellationToken cancellationToken = default)
     {
+        ViewData["ActivePage"] = "Dashboard";
+
         var request = await _mediator.Send(new GetAwardCountsByTypeByGradeQuery(DateTime.Today.Year), cancellationToken);
 
         if (request.IsFailure)

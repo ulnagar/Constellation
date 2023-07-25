@@ -27,6 +27,9 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
+
+        ViewData["ActivePage"] = "Report";
+
         await GetClasses(_mediator);
 
         AbsenceId absenceId = AbsenceId.FromValue(Id);
@@ -49,6 +52,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetSendNotification(string studentId, CancellationToken cancellationToken = default)
     {
+
+        ViewData["ActivePage"] = "Report";
+
         AbsenceId absenceId = AbsenceId.FromValue(Id);
 
         await _mediator.Send(new SendAbsenceNotificationToParentCommand(Guid.NewGuid(), studentId, new List<AbsenceId> { absenceId }), cancellationToken);

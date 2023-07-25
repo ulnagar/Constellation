@@ -68,6 +68,7 @@ public class Student
     {
         if (_absenceConfigurations.Any(config =>
             !config.IsDeleted &&
+            config.AbsenceType == configuration.AbsenceType &&
             DoDateRangesOverlap(configuration.ScanStartDate, configuration.ScanEndDate, config.ScanStartDate, config.ScanEndDate)))
         {
             return Result.Failure(DomainErrors.Partners.Student.AbsenceConfiguration.RecordForRangeExists(configuration.ScanStartDate, configuration.ScanEndDate));

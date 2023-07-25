@@ -30,11 +30,19 @@ public class UploadModel : BasePageModel
 
     public async Task OnGetAsync()
     {
+
+        ViewData["ActivePage"] = "Completions";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         await GetClasses(_mediator);
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
+
+        ViewData["ActivePage"] = "Completions";
+        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
         if (UploadFile is not null)
         {
             try

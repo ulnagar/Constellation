@@ -40,6 +40,8 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
+        ViewData["ActivePage"] = "List";
+
         await GetClasses(_mediator);
 
         Result<List<AwardResponse>> awardRequest = Filter switch
@@ -68,6 +70,8 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGetAttemptDownload(string Id, CancellationToken cancellationToken = default)
     {
+        ViewData["ActivePage"] = "List";
+
         var awardId = StudentAwardId.FromValue(Guid.Parse(Id));
 
         var fileRequest = await _mediator.Send(new GetAwardCertificateQuery(awardId), cancellationToken);
