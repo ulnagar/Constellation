@@ -27,6 +27,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Scrutor;
 using Serilog;
 using System;
@@ -34,14 +35,14 @@ using System.Reflection;
 
 public static class ServicesRegistration
 {
-    public static IServiceCollection AddStaffPortalInfrastructureComponents(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddStaffPortalInfrastructureComponents(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         services.AddConstellationContext(configuration)
             .AddTrackItContext(configuration);
 
         services.AddStaffPortalAuthentication(configuration);
 
-        services.AddExternalServiceGateways(configuration)
+        services.AddExternalServiceGateways(configuration, environment)
             .AddEmailTemplateEngine(configuration)
             .AddHangfireJobs();
 
@@ -66,7 +67,7 @@ public static class ServicesRegistration
 
         return services;
     }
-    public static IServiceCollection AddHangfireServerInfrastructureComponents(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddHangfireServerInfrastructureComponents(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         services.AddMediatR(new[] { Constellation.Application.AssemblyReference.Assembly, Constellation.Infrastructure.AssemblyReference.Assembly, Constellation.Core.AssemblyReference.Assembly });
 
@@ -80,7 +81,7 @@ public static class ServicesRegistration
         services.AddConstellationContext(configuration)
             .AddTrackItContext(configuration);
 
-        services.AddExternalServiceGateways(configuration)
+        services.AddExternalServiceGateways(configuration, environment)
             .AddEmailTemplateEngine(configuration)
             .AddHangfireJobs();
 
@@ -123,10 +124,10 @@ public static class ServicesRegistration
         return services;
     }
 
-    public static IServiceCollection AddSchoolPortalInfrastructureComponents(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddSchoolPortalInfrastructureComponents(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         services.AddConstellationContext(configuration)
-            .AddExternalServiceGateways(configuration)
+            .AddExternalServiceGateways(configuration, environment)
             .AddEmailTemplateEngine(configuration);
         
         services.AddSchoolPortalAuthentication();
@@ -181,10 +182,10 @@ public static class ServicesRegistration
         return services;
     }
 
-    public static IServiceCollection AddParentPortalInfrastructureComponents(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddParentPortalInfrastructureComponents(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         services.AddConstellationContext(configuration)
-            .AddExternalServiceGateways(configuration)
+            .AddExternalServiceGateways(configuration, environment)
             .AddEmailTemplateEngine(configuration);
 
         services.AddParentPortalAuthentication();
@@ -224,15 +225,15 @@ public static class ServicesRegistration
         return services;
     }
 
-    internal static IServiceCollection AddExternalServiceGateways(this IServiceCollection services, IConfiguration configuration)
+    internal static IServiceCollection AddExternalServiceGateways(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         services.AddAdobeConnectExternalService(configuration);
         services.AddCanvasExternalService(configuration);
         services.AddDoEDataServicesGateway(configuration);
-        services.AddLinkShortenerExternalService(configuration);
+        services.AddLinkShortenerExternalService(configuration, environment);
         services.AddNetworkStatisticsExternalService(configuration);
         services.AddSentralExternalService(configuration);
-        services.AddSMSExternalService(configuration);
+        services.AddSMSExternalService(configuration, environment);
 
         return services;
     }

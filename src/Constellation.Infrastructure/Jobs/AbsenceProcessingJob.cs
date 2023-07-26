@@ -24,7 +24,6 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
     private readonly ISentralGateway _sentralService;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
-    private readonly IMediator _mediator;
     private readonly ICourseOfferingRepository _offeringRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
     private readonly IAbsenceRepository _absenceRepository;
@@ -51,13 +50,13 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         _emailService = emailService;
 
         _logger = logger.ForContext<IAbsenceMonitorJob>();
-        LogContext.PushProperty(nameof(JobId), JobId);
     }
 
     public async Task<List<Absence>> StartJob(Guid jobId, Student student, CancellationToken cancellationToken)
     {
         JobId = jobId;
         _student = student;
+        LogContext.PushProperty(nameof(JobId), JobId);
 
         _logger.Information("{id}: Scanning student {student} ({grade})", JobId, student.DisplayName, student.CurrentGrade.AsName());
 
@@ -101,6 +100,8 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
         if (activePartialScanDates.Count == 0 && activeWholeScanDates.Count == 0)
         {
             _logger.Information("{id}: - Student absence scanning disabled. Skipping.", JobId);
+
+            return returnAbsences;
         }
 
         string sentralId = student.SentralStudentId;
@@ -668,8 +669,8 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
             // This absence has been externally explained
             absenceRecord.AddResponse(
                 ResponseType.System,
-                absence.ExternalExplanationSource,
-                absence.ExternalExplanation);
+                attendanceAbsence.ExternalExplanationSource,
+                attendanceAbsence.ExternalExplanation);
         }
 
         // Does this absence already exist in the database?
@@ -698,7 +699,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                 existingAbsence.UpdateLastSeen();
 
                 // If the new absence is explained with an accepted reason, and the existing absences are not, then update them to signify they were changed on Sentral
-                if (existingAbsences.All(innerabsence => !innerabsence.Explained) && _configuration.Absences.DiscountedPartialReasons.Contains(absenceRecord.AbsenceReason))
+                if (!existingAbsence.Explained && _configuration.Absences.DiscountedPartialReasons.Contains(absenceRecord.AbsenceReason))
                 {
                     _logger.Information("{id}: Student {student} ({grade}): Found external explaination for {Type} absence on {Date} - {PeriodName}", JobId, _student.DisplayName, _student.CurrentGrade.AsName(), absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName);
 
@@ -707,8 +708,8 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                     {
                         existingAbsence.AddResponse(
                             ResponseType.System,
-                            absence.ExternalExplanationSource,
-                            absence.ExternalExplanation);
+                            attendanceAbsence.ExternalExplanationSource,
+                            attendanceAbsence.ExternalExplanation);
                     }
                 }
             }
@@ -823,8 +824,8 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
 
             absenceRecord.AddResponse(
                 ResponseType.System,
-                absenceDto.ExternalExplanationSource,
-                absenceDto.ExternalExplanation);
+                attendanceAbsence.ExternalExplanationSource,
+                attendanceAbsence.ExternalExplanation);
         }
 
         if (absenceCount > 0)

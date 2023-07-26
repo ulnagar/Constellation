@@ -85,7 +85,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages
 
             IHangfireJob job = scope.ServiceProvider.GetService(type) as IHangfireJob;
 
-            await job.StartJob(default, default);
+            await job.StartJob(Guid.NewGuid(), default);
         }
 
         public void OnPostRemoveJob(string actionName)

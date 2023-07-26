@@ -26,12 +26,8 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
     public AbsenceMonitorJob(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
-        IFamilyRepository familyRepository,
-        ISchoolContactRepository schoolContactRepository,
-        ICourseOfferingRepository offeringRepository,
         IUnitOfWork unitOfWork,
         IAbsenceProcessingJob absenceProcessor,
-        IEmailService emailService,
         IMediator mediator,
         ILogger logger)
     {

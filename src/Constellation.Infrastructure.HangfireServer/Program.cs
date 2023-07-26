@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(options);
 builder.Host.UseSerilog();
 LoggingConfiguration.SetupLogging(builder.Configuration, Serilog.Events.LogEventLevel.Debug);
 
-builder.Services.RegisterServices(builder.Configuration);
+builder.Services.RegisterServices(builder.Configuration, builder.Environment);
 builder.Services.AddHostedService<Worker>();
 
 SelectPdf.GlobalProperties.HtmlEngineFullPath = @"q:\inetpub\wwwroot\hangfire\Select.Html.dep";

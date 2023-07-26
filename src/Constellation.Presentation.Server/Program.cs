@@ -20,7 +20,7 @@ builder.Host.UseSerilog();
 LoggingConfiguration.SetupLogging(builder.Configuration, Serilog.Events.LogEventLevel.Debug);
 
 // Add services to the container.
-builder.Services.AddStaffPortalInfrastructureComponents(builder.Configuration);
+builder.Services.AddStaffPortalInfrastructureComponents(builder.Configuration, builder.Environment);
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();

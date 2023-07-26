@@ -10,7 +10,7 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 
-public partial class Gateway : ISMSGateway
+internal sealed class Gateway : ISMSGateway
 {
     private Uri _uri;
     private readonly HttpClient _client;

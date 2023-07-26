@@ -31,7 +31,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 	                ,[Forwarded])
                 SELECT NEWID(), Id, DateScanned, 'System', ExternalExplanationSource, ExternalExplanation, 'NR', null, null, null, 1
                 FROM [CONSTELLATION_DEV].[dbo].[Absences]
-                where ExternalExplanation is not null;");
+                where ExternallyExplained = 1;");
 
             // delete orphaned entries in the classworknotificationstaff table
             migrationBuilder.Sql(
@@ -326,7 +326,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     SET Explained = 
 	                    CASE
 		                    WHEN [Absences_Absences].[Type] = 'Whole' AND (SELECT COUNT([Absences_Responses].[Id]) FROM [Absences_Responses] WHERE [Absences_Absences].[Id] = [Absences_Responses].[AbsenceId] AND [Absences_Responses].[Type] <> 'Student') > 0 THEN 1
-		                    WHEN [Absences_Absences].[Type] = 'Partial' AND (SELECT COUNT([Absences_Responses].[Id]) FROM [Absences_Responses] WHERE [Absences_Absences].[Id] = [Absences_Responses].[AbsenceId] AND [Absences_Responses].[VerificationStatus] = 'Verified') > 0 THEN 1
+		                    WHEN [Absences_Absences].[Type] = 'Partial' AND (SELECT COUNT([Absences_Responses].[Id]) FROM [Absences_Responses] WHERE [Absences_Absences].[Id] = [Absences_Responses].[AbsenceId] AND ([Absences_Responses].[VerificationStatus] = 'Verified' OR [Absences_Responses].[VerificationStatus] = 'NR')) > 0 THEN 1
 		                    ELSE 0
 	                    END");
         }

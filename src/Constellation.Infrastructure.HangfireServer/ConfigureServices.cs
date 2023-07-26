@@ -9,11 +9,11 @@ using Hangfire.SqlServer;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration config, IHostEnvironment environment)
 	{
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-        services.AddHangfireServerInfrastructureComponents(config);
+        services.AddHangfireServerInfrastructureComponents(config, environment);
 
         services.AddIdentity<AppUser, AppRole>()
             .AddEntityFrameworkStores<AppDbContext>();
