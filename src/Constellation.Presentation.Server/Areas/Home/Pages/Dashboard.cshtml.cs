@@ -43,7 +43,7 @@ public class DashboardModel : BasePageModel
             return Page();
 
         StaffId = teacherRequest.Value.StaffId;
-        UserName = $"{teacherRequest.Value.FirstName} {teacherRequest.Value.LastName})";
+        UserName = $"{teacherRequest.Value.FirstName} {teacherRequest.Value.LastName}";
 
         Result<int> trainingExpiringSoonRequest = await _mediator.Send(new GetCountOfExpiringCertificatesForStaffMemberQuery(StaffId));
 
