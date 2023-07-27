@@ -74,6 +74,8 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                     foreach (Absence absence in absences)
                         _absenceRepository.Insert(absence);
 
+                    await _unitOfWork.CompleteAsync(cancellationToken);
+
                     if (string.IsNullOrWhiteSpace(student.SentralStudentId))
                         continue;
 
@@ -81,7 +83,9 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                         return;
 
                     List<AbsenceId> partialAbsenceIds = absences
-                        .Where(absence => absence.Type == AbsenceType.Partial)
+                        .Where(absence => 
+                            absence.Type == AbsenceType.Partial &&
+                            !absence.Explained)
                         .Select(absence => absence.Id)
                         .ToList();
 
@@ -93,7 +97,9 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                             cancellationToken);
 
                     List<AbsenceId> wholeAbsenceIds = absences
-                        .Where(absence => absence.Type == AbsenceType.Whole)
+                        .Where(absence => 
+                            absence.Type == AbsenceType.Whole &&
+                            !absence.Explained)
                         .Select(absence => absence.Id)
                         .ToList();
 
@@ -128,7 +134,10 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                         student.StudentId),
                         cancellationToken);
                 }
-
+                
+                // If the student has absences with new external explanations,
+                // and without any new absences, their details will not be saved
+                // unless we re-save here
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 absences = null;
             }

@@ -54,7 +54,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
         if (!request.AbsenceIds.Any())
         {
             _logger.Warning("{jobId}: No absences defined to send notifications for.", request.JobId);
-            return Result.Failure(Error.None);
+            return Result.Failure(IntegrationErrors.Absences.Notifications.Parents.NoAbsencesDetected);
         }
 
         Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
@@ -71,7 +71,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
         {
             Absence absence = await _absenceRepository.GetById(absenceId, cancellationToken);
 
-            if (absence is not null)
+            if (absence is not null && !absence.Explained)
                 absences.Add(absence);
         }
 
@@ -81,9 +81,8 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                 .ForContext(nameof(request.AbsenceIds), request.AbsenceIds)
                 .Warning("{jobId}: Could not find any valid absences from Ids provided", request.JobId);
 
-            return Result.Failure(Error.None);
+            return Result.Failure(IntegrationErrors.Absences.Notifications.Parents.NoAbsencesDetected);
         }
-
 
         List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
         List<Parent> parents = families.SelectMany(family => family.Parents).ToList();

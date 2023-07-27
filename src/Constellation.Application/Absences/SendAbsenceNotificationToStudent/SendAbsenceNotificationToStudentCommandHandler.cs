@@ -56,7 +56,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
         {
             Absence absence = await _absenceRepository.GetById(absenceId, cancellationToken);
 
-            if (absence is not null)
+            if (absence is not null && !absence.Explained)
                 absences.Add(absence);
         }
 

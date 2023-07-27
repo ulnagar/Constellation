@@ -25,6 +25,7 @@ public partial class Gateway : ISentralGateway
 
     public Gateway(
         IOptions<SentralGatewayConfiguration> settings, 
+        IHttpClientFactory factory,
         ILogger logger)
     {
         _logger = logger.ForContext<ISentralGateway>();
@@ -40,16 +41,7 @@ public partial class Gateway : ISentralGateway
             return;
         }
 
-        var config = new HttpClientHandler
-        {
-            CookieContainer = new CookieContainer()
-        };
-
-        var proxy = WebRequest.DefaultWebProxy;
-        config.UseProxy = true;
-        config.Proxy = proxy;
-
-        _client = new HttpClient(config);
+        _client = factory.CreateClient("sentral");
     }
 
     private async Task Login()
