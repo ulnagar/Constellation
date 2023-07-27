@@ -79,6 +79,16 @@ public static class DomainErrors
             $"Cannot update role {role}");
     }
 
+    public static class Awards
+    {
+        public static class NominationPeriod
+        {
+            public static readonly Error PastDate = new(
+                "Awards.NominationPeriod.PastDate",
+                "The specified Lockout Date for the Nomination Period is in the past and invalid");
+        }
+    }
+
     public static class Casuals
     {
         public static class Casual

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.ValueObjects;
 
 using Constellation.Core.Primitives;
+using Constellation.Core.Shared;
 using System.Collections.Generic;
 
 public sealed class CoverTeacherType : ValueObject
