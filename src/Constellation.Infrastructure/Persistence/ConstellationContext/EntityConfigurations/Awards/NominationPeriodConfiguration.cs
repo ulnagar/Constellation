@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Awards;
 
+using Constellation.Core.Enums;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
@@ -34,6 +35,16 @@ internal sealed class NominationPeriodConfiguration
 
         builder
             .Navigation(period => period.Nominations)
+            .AutoInclude();
+
+        builder
+            .HasMany(period => period.IncludedGrades)
+            .WithOne()
+            .HasForeignKey(grade => grade.PeriodId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .Navigation(period => period.IncludedGrades)
             .AutoInclude();
     }
 }

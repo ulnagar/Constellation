@@ -1,0 +1,39 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards.Nominations.IndexModel
+
+@using Constellation.Application.Extensions;
+
+@{
+}
+
+<h2>Nomination Periods</h2>
+
+<div class="page-menu">
+    <a asp-page="Upsert" asp-area="SchoolAdmin" class="btn btn-primary">Create</a>
+</div>
+
+<hr />
+
+<table class="table table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th>Active To</th>
+            <th>Included Grades</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var row in Model.Periods)
+        {
+            <tr>
+                <td>@row.LockoutDate</td>
+                <td>
+                    @String.Join(", ", row.IncludedGrades.Select(grade => grade.AsName()).ToList())
+                </td>
+                <td>
+                    <a asp-page="Details" asp-area="SchoolAdmin" asp-route-id="@row.PeriodId.ToString()" class="btn btn-sm btn-show-hover btn-secondary">More Info...</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

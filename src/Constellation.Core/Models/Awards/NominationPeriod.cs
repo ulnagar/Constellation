@@ -10,7 +10,7 @@ using System.Collections.Generic;
 public sealed class NominationPeriod
 {
     private List<Nomination> _nominations = new();
-    private List<Grade> _grades = new();
+    private List<NominationPeriodGrade> _grades = new();
 
     private NominationPeriod() { }
 
@@ -20,12 +20,14 @@ public sealed class NominationPeriod
     {
         Id = new();
 
-        _grades = includedGrades;
+        foreach (Grade grade in includedGrades)
+            _grades.Add(new(Id, grade));
+
         LockoutDate = lockoutDate;
     }
 
     public AwardNominationPeriodId Id { get; private set; }
-    public IReadOnlyList<Grade> IncludedGrades => _grades;
+    public IReadOnlyList<NominationPeriodGrade> IncludedGrades => _grades;
     public DateOnly LockoutDate { get; private set; }
     public IReadOnlyList<Nomination> Nominations => _nominations;
 
