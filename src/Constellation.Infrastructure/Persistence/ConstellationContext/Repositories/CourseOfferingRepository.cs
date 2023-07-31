@@ -57,6 +57,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                     offering.StartDate <= DateTime.Now && 
                     offering.EndDate >= DateTime.Now &&
                     offering.Sessions.Any(session => !session.IsDeleted))
+                .OrderBy(offering => offering.Course.Grade)
+                .ThenBy(offering => offering.Name)
                 .ToListAsync(cancellationToken);
 
         public async Task<List<CourseOffering>> GetByCourseId(

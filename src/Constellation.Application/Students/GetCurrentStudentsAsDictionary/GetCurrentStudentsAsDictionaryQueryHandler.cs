@@ -23,6 +23,12 @@ public sealed class GetCurrentStudentsAsDictionaryQueryHandler
     {
         var students = await _studentRepository.ForSelectionListAsync();
 
+        students = students
+            .OrderBy(student => student.CurrentGrade)
+            .ThenBy(student => student.LastName)
+            .ThenBy(student => student.FirstName)
+            .ToList();
+
         return students.ToDictionary(k => k.StudentId, k => $"{k.DisplayName} ({k.CurrentGrade.AsName()})");
     }
 }

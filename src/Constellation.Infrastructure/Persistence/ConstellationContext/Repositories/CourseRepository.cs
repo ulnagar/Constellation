@@ -27,6 +27,7 @@ public class CourseRepository : ICourseRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Course>()
+            .Include(course => course.Faculty)
             .ToListAsync(cancellationToken);
 
     public async Task<Course?> GetByLessonId(

@@ -1,8 +1,7 @@
 ﻿namespace Constellation.Presentation.Server.Areas.Subject.Controllers;
 
+using Constellation.Application.Courses.GetCoursesForSelectionList;
 using Constellation.Application.Features.Subject.Assignments.Queries;
-using Constellation.Application.Features.Subject.Courses.Models;
-using Constellation.Application.Features.Subject.Courses.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.Areas.Subject.Models.Assignments;
@@ -31,8 +30,8 @@ public class AssignmentsController : BaseController
     public async Task<IActionResult> Create_Step1()
     {
         var viewModel = await CreateViewModel<CreateViewModel>();
-        var courses = await _mediator.Send(new GetCoursesForDropdownSelectionQuery());
-        viewModel.CoursesList = new SelectList(courses, nameof(CourseForDropdownSelection.Id), nameof(CourseForDropdownSelection.DisplayName), null, nameof(CourseForDropdownSelection.Faculty));
+        var courses = await _mediator.Send(new GetCoursesForSelectionListQuery());
+        viewModel.CoursesList = new SelectList(courses.Value, nameof(CourseSummaryResponse.Id), nameof(CourseSummaryResponse.DisplayName), null, nameof(CourseSummaryResponse.FacultyName));
 
         return View(viewModel);
     }
@@ -43,13 +42,13 @@ public class AssignmentsController : BaseController
     {
         await UpdateViewModel(viewModel);
 
-        var courses = await _mediator.Send(new GetCoursesForDropdownSelectionQuery());
-        viewModel.CourseName = courses.FirstOrDefault(course => course.Id == viewModel.Command.CourseId)?.DisplayName;
+        var courses = await _mediator.Send(new GetCoursesForSelectionListQuery());
+        viewModel.CourseName = courses.Value.FirstOrDefault(course => course.Id == viewModel.Command.CourseId)?.DisplayName;
 
         var canvasAssignments = await _mediator.Send(new GetAssignmentsFromCourseForDropdownSelectionQuery { CourseId = viewModel.Command.CourseId });
         if (!canvasAssignments.IsValidResponse)
         {
-            viewModel.CoursesList = new SelectList(courses, nameof(CourseForDropdownSelection.Id), nameof(CourseForDropdownSelection.DisplayName), null, nameof(CourseForDropdownSelection.Faculty));
+            viewModel.CoursesList = new SelectList(courses.Value, nameof(CourseSummaryResponse.Id), nameof(CourseSummaryResponse.DisplayName), null, nameof(CourseSummaryResponse.FacultyName));
 
             foreach (var error in canvasAssignments.Errors)
                 ModelState.AddModelError("", error);
@@ -69,8 +68,8 @@ public class AssignmentsController : BaseController
     {
         await UpdateViewModel(viewModel);
 
-        var courses = await _mediator.Send(new GetCoursesForDropdownSelectionQuery());
-        viewModel.CourseName = courses.FirstOrDefault(course => course.Id == viewModel.Command.CourseId)?.DisplayName;
+        var courses = await _mediator.Send(new GetCoursesForSelectionListQuery());
+        viewModel.CourseName = courses.Value.FirstOrDefault(course => course.Id == viewModel.Command.CourseId)?.DisplayName;
 
         var canvasAssignments = await _mediator.Send(new GetAssignmentsFromCourseForDropdownSelectionQuery { CourseId = viewModel.Command.CourseId });
         viewModel.Assignments = canvasAssignments.Result;
@@ -95,8 +94,8 @@ public class AssignmentsController : BaseController
         {
             await UpdateViewModel(viewModel);
 
-            var courses = await _mediator.Send(new GetCoursesForDropdownSelectionQuery());
-            viewModel.CourseName = courses.FirstOrDefault(course => course.Id == viewModel.Command.CourseId)?.DisplayName;
+            var courses = await _mediator.Send(new GetCoursesForSelectionListQuery());
+            viewModel.CourseName = courses.Value.FirstOrDefault(course => course.Id == viewModel.Command.CourseId)?.DisplayName;
 
             var canvasAssignments = await _mediator.Send(new GetAssignmentsFromCourseForDropdownSelectionQuery { CourseId = viewModel.Command.CourseId });
             viewModel.Assignments = canvasAssignments.Result;

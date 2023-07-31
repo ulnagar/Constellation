@@ -1,4 +1,57 @@
-﻿@page
+﻿@page "/Awards/Nominations/{PeriodId:guid}/Details"
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards.Nominations.DetailsModel
-@{
-}
+@using Constellation.Application.Extensions;
+
+<h2>Nomination Period Details</h2>
+
+<div class="page-menu">
+    <a asp-page="/Awards/Nominations/Nominate" asp-area="SchoolAdmin" asp-route-periodId="@Model.PeriodId" class="btn btn-primary">Add Nomination</a>
+
+    <a asp-page="Index" asp-area="SchoolAdmin" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div>
+    <dl class="row">
+        <dt class="col-md-2">
+            <label asp-for="Period.LockoutDate">Lockout Date</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Period.LockoutDate.ToShortDateString()</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Period.IncludedGrades">Grades</label>
+        </dt>
+        <dd class="col-md-10">
+            @String.Join(", ", Model.Period.IncludedGrades.Select(grade => grade.AsName()).ToList())
+        </dd>
+    </dl>
+</div>
+
+<hr />
+
+<h3>Nominations</h3>
+
+<table class="table-striped data-table">
+    <thead>
+        <tr>
+            <th>Award</th>
+            <th>Student</th>
+            <th>Nominated By</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.Period.Nominations)
+        {
+            <tr>
+                <td>@entry.AwardType.Value<br />@entry.Description</td>
+                <td>@entry.Student.DisplayName</td>
+                <th>@entry.NominatedBy</th>
+                <th></th>
+            </tr>
+        }
+    </tbody>
+</table>

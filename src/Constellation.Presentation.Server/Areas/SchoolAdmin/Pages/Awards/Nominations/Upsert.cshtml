@@ -1,5 +1,6 @@
 ﻿@page
 @using Constellation.Core.Enums;
+@using Constellation.Application.Extensions;
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards.Nominations.UpsertModel
 @{
 }
@@ -19,16 +20,32 @@
         <div class="form-group row">
             <label asp-for="LockoutDate" class="col-md-2">Lock Date</label>
             <div class="col-md-3">
-                <input asp-for="LockoutDate" class="form-control" type="date" />
+                <input asp-for="LockoutDate" class="form-control" type="date" value="@Model.LockoutDate.ToString("yyyy")-@Model.LockoutDate.ToString("MM")-@Model.LockoutDate.ToString("dd")" />
                 <span asp-validation-for="LockoutDate" class="text-danger"></span>
             </div>
         </div>
 
         <div class="form-group row">
             <label asp-for="Grades" class="col-md-2">Included Grades</label>
-            <div class="col-md-3">
-                <select asp-for="Grades" asp-items="@Html.GetEnumSelectList<Grade>()" class="form-control combo">
-                </select>
+            <div class="col-md-8">
+                <div class="row">
+                    <button id="gradeSelect-@Grade.Y05" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y05')">@Grade.Y05.AsName()</button>
+                    <button id="gradeSelect-@Grade.Y06" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y06')">@Grade.Y06.AsName()</button>
+                </div>
+
+                <div class="row">
+                    <button id="gradeSelect-@Grade.Y07" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y07')">@Grade.Y07.AsName()</button>
+                    <button id="gradeSelect-@Grade.Y08" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y08')">@Grade.Y08.AsName()</button>
+                    <button id="gradeSelect-@Grade.Y09" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y09')">@Grade.Y09.AsName()</button>
+                    <button id="gradeSelect-@Grade.Y10" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y10')">@Grade.Y10.AsName()</button>
+                </div>
+
+                <div class="row">
+                    <button id="gradeSelect-@Grade.Y11" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y11')">@Grade.Y11.AsName()</button>
+                    <button id="gradeSelect-@Grade.Y12" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y12')">@Grade.Y12.AsName()</button>
+                </div>
+
+                <div id="SelectedGradesList"> </div>
                 <span asp-validation-for="Grades" class="text-danger"></span>
             </div>
         </div>
@@ -43,4 +60,29 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function toggleGrade(grade) {
+            var selectDiv = $('#gradeSelect-' + grade);
+            if (selectDiv.hasClass('btn-info')) {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
+
+                $('#i-gradeSelect-' + grade).remove();
+            }
+            else {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info')
+
+                var input = $('<input>').attr('id', 'i-gradeSelect-' + grade)
+                    .attr('name', 'Grades')
+                    .attr('type', "hidden");
+                input.val(grade);
+                var classInputDiv = $('#SelectedGradesList');
+                classInputDiv.append(input);
+            }
+        }
+    </script>
 }

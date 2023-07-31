@@ -254,6 +254,7 @@ public static class ServicesRegistration
     {
         services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
         services.AddScoped<UpdateAuditableEntitiesInterceptor>();
+        services.AddScoped<CreateAuditLogEntitiesInterceptor>();
 
         services.AddDbContext<AppDbContext>(
             (sp, options) =>
@@ -266,7 +267,8 @@ public static class ServicesRegistration
 
                 options.AddInterceptors(new List<IInterceptor> {
                     sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>(),
-                    sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
+                    sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>(),
+                    sp.GetRequiredService<CreateAuditLogEntitiesInterceptor>()
                 });
             });
 

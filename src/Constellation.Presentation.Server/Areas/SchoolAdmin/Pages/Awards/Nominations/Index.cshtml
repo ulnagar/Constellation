@@ -31,7 +31,7 @@
                     @String.Join(", ", row.IncludedGrades.Select(grade => grade.AsName()).ToList())
                 </td>
                 <td>
-                    <a asp-page="Details" asp-area="SchoolAdmin" asp-route-id="@row.PeriodId.ToString()" class="btn btn-sm btn-show-hover btn-secondary">More Info...</a>
+                    <a asp-page="Details" asp-area="SchoolAdmin" asp-route-periodId="@row.PeriodId.ToString()" class="btn btn-sm btn-show-hover btn-secondary">More Info...</a>
                 </td>
             </tr>
         }

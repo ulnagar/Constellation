@@ -1,19 +1,33 @@
 ﻿namespace Constellation.Core.Models.Awards;
 
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Primitives;
 using Constellation.Core.ValueObjects;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-public abstract class Nomination
+public abstract class Nomination : IFullyAuditableEntity
 {
     public AwardNominationId Id { get; protected set; }
     public AwardNominationPeriodId PeriodId { get; protected set; }
     public string StudentId { get; protected set; }
     public AwardType AwardType { get; protected set; }
+
+    public string CreatedBy { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public string ModifiedBy { get; set; }
+    public DateTime ModifiedAt { get; set; }
+
+    public bool IsDeleted { get; private set; }
+
+    public string DeletedBy { get; set; }
+    public DateTime DeletedAt { get; set; }
+
+    public void Delete()
+    {
+        IsDeleted = true;
+    }
+
+    public abstract string GetDescription();
 }
 
 public sealed class FirstInSubjectNomination : Nomination
@@ -39,6 +53,8 @@ public sealed class FirstInSubjectNomination : Nomination
     public void UpdateCourseName(string courseName) => CourseName = courseName;
 
     public override string ToString() => $"{AwardType.ToString()} in {CourseName}";
+
+    public override string GetDescription() => $"First in Course {CourseName}";
 }
 
 public sealed class AcademicExcellenceNomination : Nomination
@@ -71,6 +87,8 @@ public sealed class AcademicExcellenceNomination : Nomination
     public void UpdateClassName(string className) => ClassName = className;
 
     public override string ToString() => $"{AwardType.ToString()} in {CourseName} for {ClassName}";
+
+    public override string GetDescription() => $"Academic Excellence {CourseName}";
 }
 
 public sealed class AcademicAchievementNomination : Nomination
@@ -103,6 +121,7 @@ public sealed class AcademicAchievementNomination : Nomination
     public void UpdateClassName(string className) => ClassName = className;
 
     public override string ToString() => $"{AwardType.ToString()} in {CourseName} for {ClassName}";
+    public override string GetDescription() => $"Academic Achievement {CourseName} - {ClassName}";
 }
 
 public sealed class PrincipalsAwardNomination : Nomination
@@ -118,6 +137,8 @@ public sealed class PrincipalsAwardNomination : Nomination
     }
 
     public override string ToString() => $"{AwardType.ToString()}";
+
+    public override string GetDescription() => $"Principals Award";
 }
 
 public sealed class GalaxyMedalNomination : Nomination
@@ -133,6 +154,8 @@ public sealed class GalaxyMedalNomination : Nomination
     }
 
     public override string ToString() => $"{AwardType.ToString()}";
+
+    public override string GetDescription() => $"Galaxy Medal";
 }
 
 public sealed class UniversalAchieverNomination : Nomination
@@ -148,4 +171,5 @@ public sealed class UniversalAchieverNomination : Nomination
     }
 
     public override string ToString() => $"{AwardType.ToString()}";
+    public override string GetDescription() => $"Universal Achiever Award";
 }
