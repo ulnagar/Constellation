@@ -1,11 +1,14 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards.Nominations;
 
+using Constellation.Application.Awards.CreateAwardNomination;
 using Constellation.Application.Awards.GetAllNominationPeriods;
 using Constellation.Application.Awards.GetNominationPeriod;
 using Constellation.Application.Courses.GetCoursesForSelectionList;
-using Constellation.Application.Offerings.GetOfferingsForSelectionList;
-using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
+using Constellation.Application.Offerings.GetFilteredOfferingsForSelectionList;
+using Constellation.Application.Students.GetFilteredStudentsForSelectionList;
+using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
@@ -41,10 +44,14 @@ public class NominateModel : BasePageModel
     public int CourseId { get; set; }
     [BindProperty]
     public int OfferingId { get; set; }
+    [BindProperty]
+    public Phase CurrentStep { get; set; }
+    [BindProperty]
+    public List<Phase> PreviousSteps { get; set; } = new();
 
-    public Dictionary<string, string> StudentsList { get; set; }
+    public List<StudentForSelectionList> StudentsList { get; set; }
     public SelectList Courses { get; set; }
-    public List<OfferingSelectionListResponse> Offerings { get; set; }
+    public SelectList Offerings { get; set; }
 
     public async Task OnGet()
     {
@@ -62,7 +69,82 @@ public class NominateModel : BasePageModel
             return Page();
         }
 
-        // Persist new entry
+        AwardType AwardType = AwardType.FromValue(Type);
+
+        if (CurrentStep == Phase.AwardSelection &&
+            (AwardType.Equals(AwardType.FirstInSubject) ||
+            AwardType.Equals(AwardType.AcademicExcellence) ||
+            AwardType.Equals(AwardType.AcademicAchievement)))
+        {
+            PreviousSteps.Add(Phase.AwardSelection);
+            CurrentStep = Phase.CourseSelection;
+
+            await PreparePage();
+            return Page();
+        }
+
+        if (CurrentStep == Phase.AwardSelection &&
+            (AwardType.Equals(AwardType.GalaxyMedal) ||
+            AwardType.Equals(AwardType.PrincipalsAward) ||
+            AwardType.Equals(AwardType.UniversalAchiever)))
+        {
+            PreviousSteps.Add(Phase.AwardSelection);
+            CurrentStep = Phase.StudentSelection;
+
+            await PreparePage();
+            return Page();
+        }
+
+        if (CurrentStep == Phase.CourseSelection && 
+            (AwardType.Equals(AwardType.AcademicExcellence) ||
+            AwardType.Equals(AwardType.AcademicAchievement)))
+        {
+            PreviousSteps.Add(Phase.CourseSelection);
+            CurrentStep = Phase.OfferingSelection;
+
+            await PreparePage();
+            return Page();
+        }
+
+        if (CurrentStep == Phase.CourseSelection && 
+            AwardType.Equals(AwardType.FirstInSubject))
+        {
+            PreviousSteps.Add(Phase.CourseSelection);
+            CurrentStep = Phase.StudentSelection;
+
+            await PreparePage();
+            return Page();
+        }
+
+        if (CurrentStep == Phase.OfferingSelection)
+        {
+            PreviousSteps.Add(Phase.OfferingSelection);
+            CurrentStep = Phase.StudentSelection;
+
+            await PreparePage();
+            return Page();
+        }
+
+        CreateAwardNominationCommand command = new(
+            AwardNominationPeriodId.FromValue(PeriodId),
+            AwardType.FromValue(Type),
+            CourseId,
+            OfferingId,
+            StudentId);
+
+        Result response = await _mediator.Send(command);
+
+        if (response.IsFailure)
+        {
+            Error = new()
+            {
+                Error = response.Error,
+                RedirectPath = null
+            };
+
+            await PreparePage();
+            return Page();
+        }
 
         return RedirectToPage("/Awards/Nominations/Details", new { area = "SchoolAdmin", PeriodId = PeriodId });
     }
@@ -71,94 +153,204 @@ public class NominateModel : BasePageModel
     {
         await GetClasses(_mediator);
 
-        var AwardPeriodId = AwardNominationPeriodId.FromValue(PeriodId);
+        AwardNominationPeriodId AwardPeriodId = AwardNominationPeriodId.FromValue(PeriodId);
 
-        var periodRequest = await _mediator.Send(new GetNominationPeriodRequest(AwardPeriodId));
+        Result<NominationPeriodDetailResponse> periodRequest = await _mediator.Send(new GetNominationPeriodRequest(AwardPeriodId));
 
-        // Filter students and courses by the grades that were selected in the NominationPeriod entry
-        // Filter offerings based on the NominationPeriod first, then on the selected course later
-
-        var studentsRequest = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery());
-
-        if (studentsRequest.IsFailure)
+        if (periodRequest.IsFailure)
         {
             Error = new()
             {
-                Error = studentsRequest.Error,
+                Error = periodRequest.Error,
                 RedirectPath = _linkGenerator.GetPathByPage("/Awards/Nominations/Details", values: new { area = "SchoolAdmin", PeriodId = PeriodId })
             };
 
             return;
         }
 
-        StudentsList = studentsRequest.Value;
-
-        var offeringRequest = await _mediator.Send(new GetOfferingsForSelectionListQuery());
-
-        if (offeringRequest.IsFailure)
-        {
-            Error = new()
-            {
-                Error = offeringRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Awards/Nominations/Details", values: new { area = "SchoolAdmin", PeriodId = PeriodId })
-            };
-
+        if (CurrentStep == Phase.AwardSelection)
             return;
+
+        if (CurrentStep == Phase.CourseSelection)
+        {
+            Result<List<CourseSummaryResponse>> coursesRequest = await _mediator.Send(new GetCoursesForSelectionListQuery());
+
+            if (coursesRequest.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = coursesRequest.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/Awards/Nominations/Details", values: new { area = "SchoolAdmin", PeriodId = PeriodId })
+                };
+
+                return;
+            }
+
+            Courses = new SelectList(coursesRequest.Value.Where(course => periodRequest.Value.IncludedGrades.Contains(course.Grade)), "Id", "DisplayName", null, "FacultyName");
         }
 
-        Offerings = offeringRequest.Value;
-
-        var coursesRequest = await _mediator.Send(new GetCoursesForSelectionListQuery());
-
-        if (coursesRequest.IsFailure)
+        if (PreviousSteps.Contains(Phase.CourseSelection))
         {
-            Error = new()
-            {
-                Error = coursesRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Awards/Nominations/Details", values: new { area = "SchoolAdmin", PeriodId = PeriodId })
-            };
+            Result<List<CourseSummaryResponse>> coursesRequest = await _mediator.Send(new GetCoursesForSelectionListQuery());
 
-            return;
+            if (coursesRequest.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = coursesRequest.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/Awards/Nominations/Details", values: new { area = "SchoolAdmin", PeriodId = PeriodId })
+                };
+
+                return;
+            }
+
+            Courses = new SelectList(coursesRequest.Value.Where(course => periodRequest.Value.IncludedGrades.Contains(course.Grade)), "Id", "DisplayName", CourseId, "FacultyName");
         }
 
-        Courses = new SelectList(coursesRequest.Value, "Id", "DisplayName", null, "FacultyName");
+        if (CurrentStep == Phase.OfferingSelection)
+        {
+            Result<List<OfferingForSelectionList>> offeringRequest = await _mediator.Send(new GetFilteredOfferingsForSelectionListQuery(new List<int> { CourseId }));
+
+            if (offeringRequest.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = offeringRequest.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/Awards/Nominations/Details", values: new { area = "SchoolAdmin", PeriodId = PeriodId })
+                };
+
+                return;
+            }
+
+            Offerings = new SelectList(offeringRequest.Value, "Id", "Name");
+        }
+
+        if (PreviousSteps.Contains(Phase.OfferingSelection))
+        {
+            Result<List<OfferingForSelectionList>> offeringRequest = await _mediator.Send(new GetFilteredOfferingsForSelectionListQuery(new List<int> { CourseId }));
+
+            if (offeringRequest.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = offeringRequest.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/Awards/Nominations/Details", values: new { area = "SchoolAdmin", PeriodId = PeriodId })
+                };
+
+                return;
+            }
+
+            Offerings = new SelectList(offeringRequest.Value, "Id", "Name", OfferingId);
+        }
+
+        if (CurrentStep == Phase.StudentSelection && OfferingId > 0)
+        {
+            Result<List<StudentForSelectionList>> studentsRequest = await _mediator.Send(new GetFilteredStudentsForSelectionListQuery(periodRequest.Value.IncludedGrades, new List<int> { OfferingId }, new List<int>()));
+
+            if (studentsRequest.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = studentsRequest.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/Awards/Nominations/Details", values: new { area = "SchoolAdmin", PeriodId = PeriodId })
+                };
+
+                return;
+            }
+
+            StudentsList = studentsRequest.Value;
+        }
+        else if (CurrentStep == Phase.StudentSelection && CourseId > 0)
+        {
+            Result<List<StudentForSelectionList>> studentsRequest = await _mediator.Send(new GetFilteredStudentsForSelectionListQuery(new List<Grade>(), new List<int>(), new List<int> { CourseId } ));
+
+            if (studentsRequest.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = studentsRequest.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/Awards/Nominations/Details", values: new { area = "SchoolAdmin", PeriodId = PeriodId })
+                };
+
+                return;
+            }
+
+            StudentsList = studentsRequest.Value;
+        }
+        else if (CurrentStep == Phase.StudentSelection)
+        {
+            Result<List<StudentForSelectionList>> studentsRequest = await _mediator.Send(new GetFilteredStudentsForSelectionListQuery(periodRequest.Value.IncludedGrades, new List<int>(), new List<int>()));
+
+            if (studentsRequest.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = studentsRequest.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/Awards/Nominations/Details", values: new { area = "SchoolAdmin", PeriodId = PeriodId })
+                };
+
+                return;
+            }
+
+            StudentsList = studentsRequest.Value;
+        }
     }
 
     private void ValidateEntries()
     {
-        if (StudentId is null)
+        if (CurrentStep == Phase.AwardSelection || PreviousSteps.Contains(Phase.AwardSelection)) 
         {
-            ModelState.AddModelError("StudentId", "You must select a student");
+            if (Type is null)
+            {
+                ModelState.AddModelError("AwardType", "You must select an award type");
+            }
+
+            if (Type != AwardType.FirstInSubject.Value &&
+                Type != AwardType.AcademicExcellence.Value &&
+                Type != AwardType.AcademicAchievement.Value &&
+                Type != AwardType.PrincipalsAward.Value &&
+                Type != AwardType.GalaxyMedal.Value &&
+                Type != AwardType.UniversalAchiever.Value)
+            {
+                ModelState.AddModelError("AwardType", "You must select a valid award type");
+            }
         }
 
-        if (Type is null)
+        if (CurrentStep == Phase.CourseSelection || PreviousSteps.Contains(Phase.CourseSelection))
         {
-            ModelState.AddModelError("AwardType", "You must select an award type");
+            if ((Type == AwardType.FirstInSubject.Value ||
+                Type == AwardType.AcademicExcellence.Value ||
+                Type == AwardType.AcademicAchievement.Value) &&
+                CourseId == 0)
+            {
+                ModelState.AddModelError("CourseId", "You must select a valid course");
+            }
         }
 
-        if (Type != AwardType.FirstInSubject.Value ||
-            Type != AwardType.AcademicExcellence.Value ||
-            Type != AwardType.AcademicAchievement.Value ||
-            Type != AwardType.PrincipalsAward.Value ||
-            Type != AwardType.GalaxyMedal.Value ||
-            Type != AwardType.UniversalAchiever.Value)
+        if (CurrentStep == Phase.OfferingSelection || PreviousSteps.Contains(Phase.OfferingSelection))
         {
-            ModelState.AddModelError("AwardType", "You must select a valid award type");
+            if ((Type == AwardType.AcademicExcellence.Value ||
+                Type == AwardType.AcademicAchievement.Value) &&
+                OfferingId == 0)
+            {
+                ModelState.AddModelError("OfferingId", "You must select a valid class");
+            }
         }
 
-        if ((Type == AwardType.FirstInSubject.Value ||
-            Type == AwardType.AcademicExcellence.Value ||
-            Type == AwardType.AcademicAchievement.Value) &&
-            CourseId == 0)
+        if (CurrentStep == Phase.StudentSelection)
         {
-            ModelState.AddModelError("CourseId", "You must select a valid course");
+            if (StudentId is null)
+            {
+                ModelState.AddModelError("StudentId", "You must select a student");
+            }
         }
+    }
 
-        if ((Type == AwardType.AcademicExcellence.Value ||
-            Type == AwardType.AcademicAchievement.Value) &&
-            OfferingId == 0)
-        {
-            ModelState.AddModelError("OfferingId", "You must select a valid class");
-        }
+    public enum Phase
+    {
+        AwardSelection,
+        CourseSelection,
+        OfferingSelection,
+        StudentSelection
     }
 }

@@ -6,6 +6,7 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public sealed class NominationPeriod
 {
@@ -40,4 +41,10 @@ public sealed class NominationPeriod
 
         return Result.Success(new NominationPeriod(lockoutDate, grades));
     }
+
+    public void AddNomination(Nomination nomination) =>
+        _nominations.Add(nomination);
+
+    public void DeleteNomination(Nomination nomination) =>
+        _nominations.Remove(nomination);
 }

@@ -60,6 +60,7 @@ internal sealed class GetNominationPeriodRequestHandler
             }
 
             NominationPeriodDetailResponse.NominationResponse entry = new(
+                nomination.Id,
                 student.GetName(),
                 nomination.AwardType,
                 nomination.GetDescription(),

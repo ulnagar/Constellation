@@ -17,6 +17,7 @@ public interface IStudentRepository
     Task<List<Student>> GetCurrentStudentsWithSchool(CancellationToken cancellationToken = default);
     Task<List<Student>> GetListFromIds(List<string> studentIds, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentEnrolmentsForOffering(int offeringId, CancellationToken cancellationToken = default);
+    Task<List<Student>> GetCurrentEnrolmentsForCourse(int courseId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentEnrolmentsForOfferingWithSchool(int offeringId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentStudentsWithFamilyMemberships(CancellationToken cancellationToken = default);
     Task<bool> IsValidStudentId(string studentId, CancellationToken cancellationToken = default);

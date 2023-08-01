@@ -91,6 +91,17 @@ public static class DomainErrors
                 "Awards.NominationPeriod.PastDate",
                 "The specified Lockout Date for the Nomination Period is in the past and invalid");
         }
+
+        public static class Nomination
+        {
+            public static readonly Error NotRecognised = new(
+                "Awards.Nomination.NotRecognised",
+                "Could not identify award type being nominated");
+
+            public static readonly Func<AwardNominationId, Error> NotFound = id => new(
+                "Awards.Nomination.NotFound",
+                $"Could not find a nomination with the id {id}");
+        }
     }
 
     public static class Casuals

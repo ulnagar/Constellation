@@ -32,5 +32,26 @@ public abstract class ValueObject : IEquatable<ValueObject>
             .SequenceEqual(other.GetAtomicValues());
     }
 
+    protected static bool EqualOperator(ValueObject left, ValueObject right)
+    {
+        if (ReferenceEquals(left, null) ^ ReferenceEquals(right, null)) 
+            return false;
 
+        return ReferenceEquals(left, right);
+    }
+
+    protected static bool NotEqualOperator(ValueObject left, ValueObject right)
+    {
+        return !(EqualOperator(left, right));
+    }
+
+    public static bool operator ==(ValueObject left, ValueObject right)
+    {
+        return EqualOperator(left, right);
+    }
+
+    public static bool operator !=(ValueObject left, ValueObject right)
+    {
+        return NotEqualOperator(left, right);
+    }
 }

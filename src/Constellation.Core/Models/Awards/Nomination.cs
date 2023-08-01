@@ -32,7 +32,7 @@ public abstract class Nomination : IFullyAuditableEntity
 
 public sealed class FirstInSubjectNomination : Nomination
 {
-    private FirstInSubjectNomination(
+    public FirstInSubjectNomination(
         AwardNominationPeriodId periodId,
         string studentId,
         int courseId, 
@@ -59,7 +59,7 @@ public sealed class FirstInSubjectNomination : Nomination
 
 public sealed class AcademicExcellenceNomination : Nomination
 {
-    private AcademicExcellenceNomination(
+    public AcademicExcellenceNomination(
         AwardNominationPeriodId periodId,
         string studentId,
         int courseId,
@@ -93,7 +93,7 @@ public sealed class AcademicExcellenceNomination : Nomination
 
 public sealed class AcademicAchievementNomination : Nomination
 {
-    private AcademicAchievementNomination(
+    public AcademicAchievementNomination(
         AwardNominationPeriodId periodId,
         string studentId,
         int courseId,
@@ -126,7 +126,7 @@ public sealed class AcademicAchievementNomination : Nomination
 
 public sealed class PrincipalsAwardNomination : Nomination
 {
-    private PrincipalsAwardNomination(
+    public PrincipalsAwardNomination(
         AwardNominationPeriodId periodId,
         string studentId)
     {
@@ -143,7 +143,7 @@ public sealed class PrincipalsAwardNomination : Nomination
 
 public sealed class GalaxyMedalNomination : Nomination
 {
-    private GalaxyMedalNomination(
+    public GalaxyMedalNomination(
         AwardNominationPeriodId periodId,
         string studentId)
     {
@@ -160,7 +160,7 @@ public sealed class GalaxyMedalNomination : Nomination
 
 public sealed class UniversalAchieverNomination : Nomination
 {
-    private UniversalAchieverNomination(
+    public UniversalAchieverNomination(
         AwardNominationPeriodId periodId,
         string studentId)
     {

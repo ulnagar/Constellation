@@ -2,6 +2,7 @@
 
 using Constellation.Application.Absences.GetAbsencesForExport;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
+using Constellation.Application.Awards.ExportAwardNominations;
 using Constellation.Application.Contacts.GetContactList;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.CSV;
@@ -10,6 +11,7 @@ using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Infrastructure.DependencyInjection;
@@ -699,6 +701,25 @@ public class ExcelService : IExcelService
         var workSheet = excel.Workbook.Worksheets.Add("Contacts");
 
         workSheet.Cells[1, 1].LoadFromCollection(contacts, true);
+
+        workSheet.View.FreezePanes(2, 1);
+        workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFilter = true;
+        workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
+
+        var memoryStream = new MemoryStream();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+
+        memoryStream.Position = 0;
+
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateAwardNominationsExportFile(List<AwardNominationExportDto> nominations, CancellationToken cancellationToken = default)
+    {
+        var excel = new ExcelPackage();
+        var workSheet = excel.Workbook.Worksheets.Add("Nominations");
+
+        workSheet.Cells[1, 1].LoadFromCollection(nominations, true);
 
         workSheet.View.FreezePanes(2, 1);
         workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFilter = true;

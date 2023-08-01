@@ -1,6 +1,9 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards.Nominations;
 
+using Constellation.Application.Awards.DeleteAwardNomination;
+using Constellation.Application.Awards.ExportAwardNominations;
 using Constellation.Application.Awards.GetNominationPeriod;
+using Constellation.Application.DTOs;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
@@ -49,5 +52,67 @@ public class DetailsModel : BasePageModel
         }
 
         Period = periodRequest.Value;
+    }
+
+    public async Task<IActionResult> OnGetExport(CancellationToken cancellationToken = default)
+    {
+        AwardNominationPeriodId awardNominationPeriodId = AwardNominationPeriodId.FromValue(PeriodId);
+
+        Result<FileDto> fileRequest = await _mediator.Send(new ExportAwardNominationsCommand(awardNominationPeriodId), cancellationToken);
+
+        if (fileRequest.IsFailure)
+        {
+            Result<NominationPeriodDetailResponse> periodRequest = await _mediator.Send(new GetNominationPeriodRequest(awardNominationPeriodId), cancellationToken);
+
+            if (periodRequest.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = periodRequest.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/Awards/Nominations/Index", values: new { area = "SchoolAdmin" })
+                };
+
+                return Page();
+            }
+
+            Period = periodRequest.Value;
+
+            return Page();
+        }
+
+        return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
+    }
+
+    public async Task OnGetDelete(AwardNominationId entryId, CancellationToken cancellationToken = default)
+    {
+        AwardNominationPeriodId awardNominationPeriodId = AwardNominationPeriodId.FromValue(PeriodId);
+
+        Result request = await _mediator.Send(new DeleteAwardNominationCommand(awardNominationPeriodId, entryId), cancellationToken);
+
+        if (request.IsFailure)
+        {
+            Error = new()
+            {
+                Error = request.Error,
+                RedirectPath = null
+            };
+        }
+
+        Result<NominationPeriodDetailResponse> periodRequest = await _mediator.Send(new GetNominationPeriodRequest(awardNominationPeriodId), cancellationToken);
+
+        if (periodRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = periodRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Awards/Nominations/Index", values: new { area = "SchoolAdmin" })
+            };
+
+            return;
+        }
+
+        Period = periodRequest.Value;
+
+        return;
     }
 }

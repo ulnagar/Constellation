@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public sealed class AwardType : ValueObject
 {
-    public static readonly AwardType FirstInSubject = new("First in Subject");
+    public static readonly AwardType FirstInSubject = new("First in Course");
     public static readonly AwardType AcademicAchievement = new("Academic Achievement");
     public static readonly AwardType AcademicExcellence = new("Academic Excellence");
     public static readonly AwardType PrincipalsAward = new("Principals Award");

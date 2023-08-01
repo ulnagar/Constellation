@@ -1,12 +1,14 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
+using Constellation.Application.Awards.ExportAwardNominations;
 using Constellation.Application.Contacts.GetContactList;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.CSV;
 using Constellation.Application.ExternalDataConsistency;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.MandatoryTraining.Models;
+using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Infrastructure.Jobs;
 using System.Collections.Generic;
@@ -28,4 +30,5 @@ public interface IExcelService
     Task<List<MasterFileStudent>> GetStudentsFromMasterFile(MemoryStream stream);
     Task<MemoryStream> CreateMasterFileConsistencyReport(List<UpdateItem> updateItems, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateContactExportFile(List<ContactResponse> contacts, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateAwardNominationsExportFile(List<AwardNominationExportDto> nominations, CancellationToken cancellationToken = default);
 }

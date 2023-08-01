@@ -2,10 +2,16 @@
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards.Nominations.DetailsModel
 @using Constellation.Application.Extensions;
 
+@{
+    bool authorised = true;
+}
+
 <h2>Nomination Period Details</h2>
 
 <div class="page-menu">
     <a asp-page="/Awards/Nominations/Nominate" asp-area="SchoolAdmin" asp-route-periodId="@Model.PeriodId" class="btn btn-primary">Add Nomination</a>
+
+    <a asp-page-handler="Export" class="btn btn-warning">Export Nominations</a>
 
     <a asp-page="Index" asp-area="SchoolAdmin" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
@@ -49,8 +55,13 @@
             <tr>
                 <td>@entry.AwardType.Value<br />@entry.Description</td>
                 <td>@entry.Student.DisplayName</td>
-                <th>@entry.NominatedBy</th>
-                <th></th>
+                <td>@entry.NominatedBy</td>
+                <td>
+                    @if (authorised)
+                    {
+                        <a asp-page-handler="Delete" asp-route-entryId="@entry.Id" class="btn btn-sm btn-danger">Remove</a>
+                    }
+                </td>
             </tr>
         }
     </tbody>

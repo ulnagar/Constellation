@@ -69,6 +69,14 @@ public class StudentRepository : IStudentRepository
             .Where(student => student.Enrolments.Any(enrolment => enrolment.OfferingId == offeringId && !enrolment.IsDeleted))
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Student>> GetCurrentEnrolmentsForCourse(
+        int courseId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student => student.Enrolments.Any(enrolment => enrolment.Offering.CourseId == courseId && !enrolment.IsDeleted))
+            .ToListAsync(cancellationToken);
+
     public async Task<List<Student>> GetCurrentEnrolmentsForOfferingWithSchool(
         int offeringId,
         CancellationToken cancellationToken = default) =>
