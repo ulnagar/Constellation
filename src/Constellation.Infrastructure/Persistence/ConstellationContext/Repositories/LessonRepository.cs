@@ -1,6 +1,6 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SciencePracs;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -19,11 +19,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             _context = context;
         }
 
-        public async Task<List<Lesson>> GetOverdueForSchool(
+        public async Task<List<SciencePracLesson>> GetOverdueForSchool(
             string schoolCode,
             CancellationToken cancellationToken = default) =>
             await _context
-                .Set<Lesson>()
+                .Set<SciencePracLesson>()
                 .Where(lesson => 
                     lesson.DueDate < DateTime.Today && 
                     lesson.Rolls.Any(roll => 
@@ -31,17 +31,17 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                         roll.Status == LessonStatus.Active))
                 .ToListAsync(cancellationToken);
 
-        public async Task<Lesson> Get(Guid id)
+        public async Task<SciencePracLesson> Get(Guid id)
         {
             return await _context.Lessons.FirstOrDefaultAsync(lesson => lesson.Id == id);
         }
 
-        public async Task<ICollection<Lesson>> GetAll()
+        public async Task<ICollection<SciencePracLesson>> GetAll()
         {
             return await _context.Lessons.ToListAsync();
         }
 
-        public async Task<ICollection<Lesson>> GetWithRollsForSchool(string schoolCode)
+        public async Task<ICollection<SciencePracLesson>> GetWithRollsForSchool(string schoolCode)
         {
             return await _context.Lessons
                 .Include(lesson => lesson.Offerings)
@@ -52,7 +52,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToListAsync();
         }
 
-        public async Task<ICollection<Lesson>> GetWithActiveRollsForSchool(string schoolCode)
+        public async Task<ICollection<SciencePracLesson>> GetWithActiveRollsForSchool(string schoolCode)
         {
             return await _context.Lessons
                 .Include(lesson => lesson.Offerings)
@@ -63,7 +63,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToListAsync();
         }
 
-        public async Task<ICollection<Lesson>> GetWithAllRollsForSchool(string schoolCode)
+        public async Task<ICollection<SciencePracLesson>> GetWithAllRollsForSchool(string schoolCode)
         {
             return await _context.Lessons
                 .Include(lesson => lesson.Offerings)
@@ -74,7 +74,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToListAsync();
         }
 
-        public async Task<LessonRoll> GetRollForPortal(Guid id)
+        public async Task<SciencePracRoll> GetRollForPortal(Guid id)
         {
             return await _context.LessonRolls
                 .Include(roll => roll.Lesson)
@@ -85,7 +85,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .SingleOrDefaultAsync(roll => roll.Id == id);
         }
 
-        public async Task<ICollection<Lesson>> GetAllForPortalAdmin()
+        public async Task<ICollection<SciencePracLesson>> GetAllForPortalAdmin()
         {
             return await _context.Lessons
                 .Include(lesson => lesson.Offerings)
@@ -95,7 +95,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToListAsync();
         }
 
-        public async Task<Lesson> GetForEdit(Guid id)
+        public async Task<SciencePracLesson> GetForEdit(Guid id)
         {
             return await _context.Lessons
                 .Include(lesson => lesson.Offerings)
@@ -104,7 +104,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .SingleOrDefaultAsync(lesson => lesson.Id == id);
         }
 
-        public async Task<Lesson> GetForDelete(Guid id)
+        public async Task<SciencePracLesson> GetForDelete(Guid id)
         {
             return await _context.Lessons
                 .Include(lesson => lesson.Rolls)
@@ -112,7 +112,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .SingleOrDefaultAsync(lesson => lesson.Id == id);
         }
 
-        public async Task<Lesson> GetWithDetailsForLessonsPortal(Guid id)
+        public async Task<SciencePracLesson> GetWithDetailsForLessonsPortal(Guid id)
         {
             return await _context.Lessons
                 .Include(lesson => lesson.Offerings)
@@ -127,7 +127,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .SingleOrDefaultAsync(lesson => lesson.Id == id);
         }
 
-        public async Task<ICollection<Lesson>> GetAllForCourse(int courseId)
+        public async Task<ICollection<SciencePracLesson>> GetAllForCourse(int courseId)
         {
             return await _context.Lessons
                 .Include(lesson => lesson.Offerings)
@@ -137,7 +137,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToListAsync();
         }
 
-        public async Task<ICollection<LessonRoll>> GetRollsForStudent(string studentId)
+        public async Task<ICollection<SciencePracRoll>> GetRollsForStudent(string studentId)
         {
             return await _context.LessonRolls
                 .Include(roll => roll.Lesson)
@@ -149,7 +149,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToListAsync();
         }
 
-        public async Task<ICollection<Lesson>> GetAllForNotifications()
+        public async Task<ICollection<SciencePracLesson>> GetAllForNotifications()
         {
             return await _context.Lessons
                 .Include(lesson => lesson.Rolls)
@@ -159,7 +159,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToListAsync();
         }
 
-        public async Task<ICollection<Lesson>> GetForClass(int code)
+        public async Task<ICollection<SciencePracLesson>> GetForClass(int code)
         {
             return await _context.Lessons
                 .Include(lesson => lesson.Rolls)

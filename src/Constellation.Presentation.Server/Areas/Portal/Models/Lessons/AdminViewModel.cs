@@ -1,5 +1,5 @@
 ﻿using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SciencePracs;
 using Constellation.Presentation.Server.BaseModels;
 using System;
 using System.Collections.Generic;
@@ -30,7 +30,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
             public string AttendanceStatistics { get; set; }
             public LessonStatus Status { get; set; }
 
-            public static LessonDto ConvertFromLesson(Lesson lesson)
+            public static LessonDto ConvertFromLesson(SciencePracLesson lesson)
             {
                 var viewModel = new LessonDto
                 {
@@ -45,7 +45,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
                 return viewModel;
             }
 
-            public static LessonDto ConvertFromRoll(LessonRoll roll)
+            public static LessonDto ConvertFromRoll(SciencePracRoll roll)
             { 
                 var viewModel = new LessonDto
                 {

@@ -3,6 +3,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.SciencePracs;
 using Constellation.Infrastructure.DependencyInjection;
 using System;
 using System.Linq;
@@ -44,7 +45,7 @@ namespace Constellation.Infrastructure.Services
 
                 foreach (var school in schools)
                 {
-                    var roll = new LessonRoll
+                    var roll = new SciencePracAttendance
                     {
                         SchoolCode = school.Key,
                         Status = LessonStatus.Active
@@ -52,7 +53,7 @@ namespace Constellation.Infrastructure.Services
 
                     foreach (var student in school)
                     {
-                        roll.Attendance.Add(new LessonRoll.LessonRollStudentAttendance
+                        roll.Attendance.Add(new SciencePracRoll.LessonRollStudentAttendance
                         {
                             StudentId = student.StudentId
                         });
@@ -89,7 +90,7 @@ namespace Constellation.Infrastructure.Services
 
                 foreach (var school in schools)
                 {
-                    var roll = new LessonRoll
+                    var roll = new SciencePracAttendance
                     {
                         SchoolCode = school.Key,
                         Status = LessonStatus.Active
@@ -97,7 +98,7 @@ namespace Constellation.Infrastructure.Services
 
                     foreach (var student in school)
                     {
-                        roll.Attendance.Add(new LessonRoll.LessonRollStudentAttendance
+                        roll.Attendance.Add(new SciencePracRoll.LessonRollStudentAttendance
                         {
                             StudentId = student.StudentId
                         });
@@ -132,14 +133,14 @@ namespace Constellation.Infrastructure.Services
 
                 foreach (var school in schools)
                 {
-                    var roll = new LessonRoll
+                    var roll = new SciencePracAttendance
                     {
                         SchoolCode = school.Key
                     };
 
                     foreach (var student in school)
                     {
-                        roll.Attendance.Add(new LessonRoll.LessonRollStudentAttendance
+                        roll.Attendance.Add(new SciencePracRoll.LessonRollStudentAttendance
                         {
                             StudentId = student.StudentId
                         });
@@ -172,14 +173,14 @@ namespace Constellation.Infrastructure.Services
 
                 foreach (var school in schools)
                 {
-                    var roll = new LessonRoll
+                    var roll = new SciencePracAttendance
                     {
                         SchoolCode = school.Key
                     };
 
                     foreach (var student in school)
                     {
-                        roll.Attendance.Add(new LessonRoll.LessonRollStudentAttendance
+                        roll.Attendance.Add(new SciencePracRoll.LessonRollStudentAttendance
                         {
                             StudentId = student.StudentId
                         });
@@ -237,7 +238,7 @@ namespace Constellation.Infrastructure.Services
                 if (roll.Attendance.Any(attendance => attendance.StudentId == studentId))
                     continue;
 
-                var attend = new LessonRoll.LessonRollStudentAttendance
+                var attend = new SciencePracRoll.LessonRollStudentAttendance
                 {
                     LessonRollId = roll.Id,
                     StudentId = studentId
@@ -250,14 +251,14 @@ namespace Constellation.Infrastructure.Services
 
             foreach (var lesson in newRollsRequired)
             {
-                var roll = new LessonRoll
+                var roll = new SciencePracAttendance
                 {
                     LessonId = lesson.Id,
                     SchoolCode = schoolCode,
                     Status = LessonStatus.Active
                 };
 
-                roll.Attendance.Add(new LessonRoll.LessonRollStudentAttendance
+                roll.Attendance.Add(new SciencePracRoll.LessonRollStudentAttendance
                 {
                     StudentId = studentId
                 });

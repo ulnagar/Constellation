@@ -1,6 +1,6 @@
 ﻿using Constellation.Application.Helpers;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SciencePracs;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -38,7 +38,7 @@ namespace Constellation.Application.DTOs
         [Display(Name =DisplayNameDefaults.School)]
         public string School { get; set; }
 
-        public static LessonRollDto ConvertFromRoll(LessonRoll roll)
+        public static LessonRollDto ConvertFromRoll(SciencePracRoll roll)
         {
             var viewModel = new LessonRollDto
             {
@@ -76,7 +76,7 @@ namespace Constellation.Application.DTOs
             public string DisplayName { get; set; }
             public bool Present { get; set; }
 
-            public static StudentRollDto ConvertFromRollAttendance(LessonRoll.LessonRollStudentAttendance rollAttendance)
+            public static StudentRollDto ConvertFromRollAttendance(SciencePracRoll.LessonRollStudentAttendance rollAttendance)
             {
                 var viewModel = new StudentRollDto
                 {

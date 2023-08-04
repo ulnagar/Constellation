@@ -4,6 +4,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Families;
+using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
@@ -30,7 +31,7 @@ public class Student
         PartialAbsences = new List<StudentPartialAbsence>();
         WholeAbsences = new List<StudentWholeAbsence>();
 
-        LessonsAttended = new List<LessonRoll.LessonRollStudentAttendance>();
+        LessonsAttended = new List<SciencePracRoll.LessonRollStudentAttendance>();
     }
 
     public string StudentId { get; set; }
@@ -61,7 +62,7 @@ public class Student
     public ICollection<Absence> Absences { get; set; }
     public ICollection<StudentPartialAbsence> PartialAbsences { get; set; }
     public ICollection<StudentWholeAbsence> WholeAbsences { get; set; }
-    public ICollection<LessonRoll.LessonRollStudentAttendance> LessonsAttended { get; set; }
+    public ICollection<SciencePracRoll.LessonRollStudentAttendance> LessonsAttended { get; set; }
     public IReadOnlyCollection<AbsenceConfiguration> AbsenceConfigurations => _absenceConfigurations;
 
     public Result AddAbsenceConfiguration(AbsenceConfiguration configuration)

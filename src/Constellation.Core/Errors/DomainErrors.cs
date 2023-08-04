@@ -379,6 +379,35 @@ public static class DomainErrors
         }
     }
 
+    public static class SciencePracs
+    {
+        public static class Lesson
+        {
+            public static readonly Func<DateOnly, Error> PastDueDate = date => new(
+                "SciencePracs.Lesson.PastDueDate",
+                $"Cannot create a Lesson due in the past ({date})");
+
+            public static readonly Error EmptyName = new(
+                "SciencePracs.Lesson.EmptyName",
+                "Cannot create a Lesson with a blank name");
+        }
+
+        public static class Roll
+        {
+            public static readonly Error AlreadyExistsForSchool = new(
+                "SciencePracs.Roll.AlreadyExistsForSchool",
+                "A Roll already exists in this Lesson for this school");
+
+            public static readonly Error CommentRequiredNonePresent = new(
+                "SciencePracs.Rolls.CommentRequiredNonePresent",
+                "Cannot mark a roll with no students present without providing a comment");
+
+            public static readonly Error CannotCancelCompletedRoll = new(
+                "SciencePracs.Rolls.CannotCancelCompletedRolls",
+                "Cannot mark roll cancelled if it has already been submitted as marked");
+        }
+    }
+
     public static class Subjects
     {
         public static class Course

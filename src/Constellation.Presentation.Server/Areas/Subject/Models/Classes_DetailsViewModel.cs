@@ -1,5 +1,6 @@
 ﻿using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.SciencePracs;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
@@ -125,7 +126,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
             public string Name { get; set; }
             public ICollection<LessonStudentDto> Students { get; set; }
 
-            public static LessonDto ConvertFromLesson(Lesson lesson, CourseOffering offering)
+            public static LessonDto ConvertFromLesson(SciencePracLesson lesson, CourseOffering offering)
             {
                 var viewModel = new LessonDto
                 {
@@ -153,7 +154,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
             public bool WasPresent { get; set; }
             public string Comment { get; set; }
 
-            public static LessonStudentDto ConvertFromLessonAttendance(LessonRoll.LessonRollStudentAttendance attendance)
+            public static LessonStudentDto ConvertFromLessonAttendance(SciencePracRoll.LessonRollStudentAttendance attendance)
             {
                 var viewModel = new LessonStudentDto
                 {

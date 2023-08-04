@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Constellation.Core.Models.SciencePracs;
+using System;
 using System.Collections.Generic;
 
 namespace Constellation.Core.Models
@@ -8,7 +9,7 @@ namespace Constellation.Core.Models
         public SchoolContact()
         {
             Assignments = new List<SchoolContactRole>();
-            LessonRolls = new List<LessonRoll>();
+            LessonRolls = new List<SciencePracRoll>();
 
             IsDeleted = false;
             DateEntered = DateTime.Now;
@@ -25,6 +26,6 @@ namespace Constellation.Core.Models
         public bool SelfRegistered { get; set; }
         public string DisplayName => FirstName + " " + LastName;
         public ICollection<SchoolContactRole> Assignments { get; set; }
-        public ICollection<LessonRoll> LessonRolls { get; set; }
+        public ICollection<SciencePracRoll> LessonRolls { get; set; }
     }
 }

@@ -1,12 +1,12 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Core.Models.SciencePracs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations
 {
-    public class LessonConfiguration : IEntityTypeConfiguration<Lesson>
+    public class LessonConfiguration : IEntityTypeConfiguration<SciencePracLesson>
     {
-        public void Configure(EntityTypeBuilder<Lesson> builder)
+        public void Configure(EntityTypeBuilder<SciencePracLesson> builder)
         {
             builder.HasKey(lesson => lesson.Id);
 
@@ -20,9 +20,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
         }
     }
 
-    public class LessonRollConfiguration : IEntityTypeConfiguration<LessonRoll>
+    public class LessonRollConfiguration : IEntityTypeConfiguration<SciencePracRoll>
     {
-        public void Configure(EntityTypeBuilder<LessonRoll> builder)
+        public void Configure(EntityTypeBuilder<SciencePracRoll> builder)
         {
             builder.HasKey(roll => roll.Id);
 
@@ -38,9 +38,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
         }
     }
 
-    public class LessonRollStudentAttendanceConfiguration : IEntityTypeConfiguration<LessonRoll.LessonRollStudentAttendance>
+    public class LessonRollStudentAttendanceConfiguration : IEntityTypeConfiguration<SciencePracRoll.LessonRollStudentAttendance>
     {
-        public void Configure(EntityTypeBuilder<LessonRoll.LessonRollStudentAttendance> builder)
+        public void Configure(EntityTypeBuilder<SciencePracRoll.LessonRollStudentAttendance> builder)
         {
             builder.HasKey(roll => roll.Id);
 

@@ -1,6 +1,6 @@
 ﻿using Constellation.Application.Helpers;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SciencePracs;
 using Constellation.Presentation.Server.BaseModels;
 using System;
 using System.Collections.Generic;
@@ -27,7 +27,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
         public bool Overdue { get; set; }
         public ICollection<RollDto> Rolls { get; set; }
 
-        public static AdminDetailViewModel ConvertFromLesson(Lesson lesson)
+        public static AdminDetailViewModel ConvertFromLesson(SciencePracLesson lesson)
         {
             var viewModel = new AdminDetailViewModel
             {
@@ -61,7 +61,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
             public LessonStatus Status { get; set; }
             public ICollection<StudentAttendanceDto> Attendance { get; set; }
 
-            public static RollDto ConvertFromRoll(LessonRoll roll)
+            public static RollDto ConvertFromRoll(SciencePracRoll roll)
             {
                 var viewModel = new RollDto
                 {
@@ -101,7 +101,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
             public string DisplayName { get; set; }
             public bool Present { get; set; }
 
-            public static StudentAttendanceDto ConvertFromAttendance(LessonRoll.LessonRollStudentAttendance attendance)
+            public static StudentAttendanceDto ConvertFromAttendance(SciencePracRoll.LessonRollStudentAttendance attendance)
             {
                 var viewModel = new StudentAttendanceDto
                 {

@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
 using Constellation.Application.Common.Mapping;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SciencePracs;
 using System;
 using System.Linq;
 
 namespace Constellation.Application.Features.Portal.School.ScienceRolls.Models
 {
-    public class ScienceLessonRollForList : IMapFrom<LessonRoll>
+    public class ScienceLessonRollForList : IMapFrom<SciencePracRoll>
     {
         public Guid Id { get; set; }
         public Guid LessonId { get; set; }
@@ -22,7 +22,7 @@ namespace Constellation.Application.Features.Portal.School.ScienceRolls.Models
 
         public void Mapping(Profile profile)
         {
-            profile.CreateMap<LessonRoll, ScienceLessonRollForList>()
+            profile.CreateMap<SciencePracRoll, ScienceLessonRollForList>()
                 .ForMember(dest => dest.LessonGrade, opt => opt.MapFrom(src => src.Lesson.Offerings.First().Course.Grade))
                 .ForMember(dest => dest.IsSubmitted, opt => opt.MapFrom(src => src.LessonDate.HasValue))
                 .ForMember(dest => dest.LessonCourseName, opt => opt.MapFrom(src => src.Lesson.Offerings.First().Course.Name))

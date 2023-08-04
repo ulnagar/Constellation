@@ -8,6 +8,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.Services;
@@ -73,7 +74,7 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
 
         foreach (School school in schools)
         {
-            List<Lesson> lessons = await _lessonRepository.GetOverdueForSchool(school.Code, cancellationToken);
+            List<SciencePracLesson> lessons = await _lessonRepository.GetOverdueForSchool(school.Code, cancellationToken);
 
             if (lessons is null || lessons.Count == 0)
                 continue;
@@ -84,7 +85,7 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
                 SchoolName = school.Name
             };
 
-            foreach (Lesson lesson in lessons)
+            foreach (SciencePracLesson lesson in lessons)
             {
                 Course course = await _courseRepository.GetByLessonId(lesson.Id, cancellationToken);
 

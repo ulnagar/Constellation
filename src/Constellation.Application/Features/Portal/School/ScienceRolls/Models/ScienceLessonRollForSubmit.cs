@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
 using Constellation.Application.Common.Mapping;
 using Constellation.Application.Helpers;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SciencePracs;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Application.Features.Portal.School.ScienceRolls.Models
 {
-    public class ScienceLessonRollForSubmit : IMapFrom<LessonRoll>
+    public class ScienceLessonRollForSubmit : IMapFrom<SciencePracRoll>
     {
         public Guid Id { get; set; }
         
@@ -40,11 +40,11 @@ namespace Constellation.Application.Features.Portal.School.ScienceRolls.Models
 
         public void Mapping(Profile profile)
         {
-            profile.CreateMap<LessonRoll, ScienceLessonRollForSubmit>()
+            profile.CreateMap<SciencePracRoll, ScienceLessonRollForSubmit>()
                 .ForMember(dest => dest.TeacherName, opt => opt.Ignore());
         }
 
-        public class StudentAttendance : IMapFrom<LessonRoll.LessonRollStudentAttendance>
+        public class StudentAttendance : IMapFrom<SciencePracRoll.LessonRollStudentAttendance>
         {
             public Guid Id { get; set; }
 

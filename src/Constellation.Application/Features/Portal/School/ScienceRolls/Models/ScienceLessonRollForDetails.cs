@@ -1,11 +1,11 @@
 ﻿using Constellation.Application.Common.Mapping;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SciencePracs;
 using System;
 using System.Collections.Generic;
 
 namespace Constellation.Application.Features.Portal.School.ScienceRolls.Models
 {
-    public class ScienceLessonRollForDetails : IMapFrom<LessonRoll>
+    public class ScienceLessonRollForDetails : IMapFrom<SciencePracRoll>
     {
         public Guid Id { get; set; }
         public string LessonName { get; set; }
@@ -17,7 +17,7 @@ namespace Constellation.Application.Features.Portal.School.ScienceRolls.Models
         public string Comment { get; set; }
         public ICollection<RollAttendance> Attendance { get; set; } = new List<RollAttendance>();
         
-        public class RollAttendance : IMapFrom<LessonRoll.LessonRollStudentAttendance>
+        public class RollAttendance : IMapFrom<SciencePracRoll.LessonRollStudentAttendance>
         {
             public string StudentFirstName { get; set; }
             public string StudentLastName { get; set; } 

@@ -1,7 +1,7 @@
 ﻿using Constellation.Application.Features.Partners.Students.Notifications;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SciencePracs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -77,7 +77,7 @@ namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.
                 if (roll.Attendance.Any(Attendance => Attendance.StudentId == notification.StudentId))
                     continue;
 
-                var attendance = new LessonRoll.LessonRollStudentAttendance
+                var attendance = new SciencePracRoll.LessonRollStudentAttendance
                 {
                     LessonRollId = roll.Id,
                     StudentId = notification.StudentId
@@ -98,14 +98,14 @@ namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.
 
             foreach (var lesson in newRolls)
             {
-                var roll = new LessonRoll
+                var roll = new SciencePracAttendance
                 {
                     LessonId = lesson.Id,
                     SchoolCode = notification.NewSchoolCode,
                     Status = LessonStatus.Active
                 };
 
-                roll.Attendance.Add(new LessonRoll.LessonRollStudentAttendance
+                roll.Attendance.Add(new SciencePracRoll.LessonRollStudentAttendance
                 {
                     StudentId = notification.StudentId
                 });

@@ -1,5 +1,6 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
+using Constellation.Core.Models.SciencePracs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -107,7 +108,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Lessons
             public string CourseName { get; set; }
             public RollDto Roll { get; set; }
 
-            public static LessonDto ConvertFromLesson(Lesson lesson)
+            public static LessonDto ConvertFromLesson(SciencePracLesson lesson)
             {
                 var viewModel = new LessonDto
                 {
@@ -131,7 +132,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Lessons
             public bool Submitted { get; set; }
             public string AttendanceStatistics { get; set; }
 
-            public static RollDto ConvertFromRoll(LessonRoll roll)
+            public static RollDto ConvertFromRoll(SciencePracRoll roll)
             {
                 var viewModel = new RollDto
                 {
