@@ -1,9 +1,13 @@
-﻿@page
+﻿@page "{id:Guid?}"
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards.Nominations.UpsertModel
 
 @using Constellation.Core.Enums;
 
-<h2>Create new Nomination Period</h2>
+@{
+    string Title = Model.Id.HasValue ? "Edit Nomination Period" : "Create new Nomination Period";
+}
+
+<h2>@Title</h2>
 
 <div class="page-menu">
     <a asp-page="Index" asp-area="SchoolAdmin" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -14,6 +18,7 @@
 <form method="post">
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Id)
 
         <div class="form-group row">
             <label asp-for="Name" class="col-md-2">Name</label>
@@ -31,29 +36,48 @@
             </div>
         </div>
 
+        
         <div class="form-group row">
             <label asp-for="Grades" class="col-md-2">Included Grades</label>
-            <div class="col-md-8">
-                <div class="row">
-                    <button id="gradeSelect-@Grade.Y05" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y05')">@Grade.Y05.AsName()</button>
-                    <button id="gradeSelect-@Grade.Y06" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y06')">@Grade.Y06.AsName()</button>
-                </div>
+            @if (Model.Id.HasValue)
+            {
+                <div class="col-md-8">
+                    <div class="row">
+                        <span class="text-danger">You cannot edit selected grades for an existing nomination period.</span>
+                    </div>
 
-                <div class="row">
-                    <button id="gradeSelect-@Grade.Y07" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y07')">@Grade.Y07.AsName()</button>
-                    <button id="gradeSelect-@Grade.Y08" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y08')">@Grade.Y08.AsName()</button>
-                    <button id="gradeSelect-@Grade.Y09" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y09')">@Grade.Y09.AsName()</button>
-                    <button id="gradeSelect-@Grade.Y10" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y10')">@Grade.Y10.AsName()</button>
+                    <div class="row">
+                        @foreach (var grade in Model.Grades)
+                        {
+                            <button type="button" class="btn btn-info m-2">@grade.AsName()</button>
+                        }
+                    </div>
                 </div>
+            }
+            else
+            {
+                <div class="col-md-8">
+                    <div class="row">
+                        <button id="gradeSelect-@Grade.Y05" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y05')">@Grade.Y05.AsName()</button>
+                        <button id="gradeSelect-@Grade.Y06" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y06')">@Grade.Y06.AsName()</button>
+                    </div>
 
-                <div class="row">
-                    <button id="gradeSelect-@Grade.Y11" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y11')">@Grade.Y11.AsName()</button>
-                    <button id="gradeSelect-@Grade.Y12" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y12')">@Grade.Y12.AsName()</button>
+                    <div class="row">
+                        <button id="gradeSelect-@Grade.Y07" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y07')">@Grade.Y07.AsName()</button>
+                        <button id="gradeSelect-@Grade.Y08" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y08')">@Grade.Y08.AsName()</button>
+                        <button id="gradeSelect-@Grade.Y09" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y09')">@Grade.Y09.AsName()</button>
+                        <button id="gradeSelect-@Grade.Y10" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y10')">@Grade.Y10.AsName()</button>
+                    </div>
+
+                    <div class="row">
+                        <button id="gradeSelect-@Grade.Y11" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y11')">@Grade.Y11.AsName()</button>
+                        <button id="gradeSelect-@Grade.Y12" type="button" class="btn btn-outline-info select-button m-2" onClick="toggleGrade('@Grade.Y12')">@Grade.Y12.AsName()</button>
+                    </div>
+
+                    <div id="SelectedGradesList"> </div>
+                    <span asp-validation-for="Grades" class="text-danger"></span>
                 </div>
-
-                <div id="SelectedGradesList"> </div>
-                <span asp-validation-for="Grades" class="text-danger"></span>
-            </div>
+            }
         </div>
 
         <div class="form-group">

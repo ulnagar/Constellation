@@ -9,6 +9,12 @@ public static class IdentityDefaults
 {
     public static async Task SeedRoles(RoleManager<AppRole> roleManager)
     {
+        await CreateRoleWithPermission(roleManager, AuthRoles.ExecStaffMember,
+            new[]
+            {
+                AuthPermissions.SchoolAdmin.Awards.Add
+            });
+
         await CreateRoleWithPermission(roleManager, AuthRoles.Admin, 
             new[] { 
                 AuthPermissions.SchoolAdmin.Awards.Add,

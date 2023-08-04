@@ -11,13 +11,14 @@
 <h2>Nomination Period Details</h2>
 
 <div class="page-menu">
-    @if (canAddTest.Succeeded)
+    @if (canAddTest.Succeeded && Model.Period.LockoutDate >= DateOnly.FromDateTime(DateTime.Today))
     {
         <a asp-page="/Awards/Nominations/Nominate" asp-area="SchoolAdmin" asp-route-periodId="@Model.PeriodId" class="btn btn-primary">Add Nomination</a>
     }
 
     @if (canManageTest.Succeeded)
     {
+        <a asp-page="/Awards/Nominations/Upsert" asp-area="SchoolAdmin" asp-route-id="@Model.PeriodId" class="btn btn-primary">Edit</a>
         <a asp-page-handler="Export" class="btn btn-warning">Export Nominations</a>
     }
 

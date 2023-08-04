@@ -4,13 +4,13 @@
 @inject IAuthorizationService authService;
 
 @{
-    AuthorizationResult canAddTest = await authService.AuthorizeAsync(User, AuthPolicies.CanAddAwards);
+    AuthorizationResult canManageTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAwards);
 }
 
 <h2>Nomination Periods</h2>
 
 <div class="page-menu">
-    @if (canAddTest.Succeeded)
+    @if (canManageTest.Succeeded)
     {
         <a asp-page="Upsert" asp-area="SchoolAdmin" class="btn btn-primary">Create</a>
     }

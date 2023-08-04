@@ -22,7 +22,7 @@ public sealed class NominationPeriod
         Id = new();
 
         foreach (Grade grade in includedGrades)
-            _grades.Add(new(Id, grade));
+            AddGrade(grade);
 
         Name = name;
         LockoutDate = lockoutDate;
@@ -47,4 +47,8 @@ public sealed class NominationPeriod
 
     public void AddNomination(Nomination nomination) =>
         _nominations.Add(nomination);
+
+    public void UpdateName(string name) => Name = name;
+    public void UpdateLockoutDate(DateOnly date) => LockoutDate = date;
+    private void AddGrade(Grade grade) => _grades.Add(new(Id, grade));
 }
