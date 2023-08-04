@@ -2,6 +2,16 @@
 
 public class AuthPermissions
 {
+    public static class SchoolAdmin
+    {
+        public static class Awards
+        {
+            public const string View = "SchoolAdmin.Awards.View";
+            public const string Add = "SchoolAdmin.Awards.Add";
+            public const string Manage = "SchoolAdmin.Awards.Manage";
+        }
+    }
+
     public const string PartnerView = "Partner.View";
     public const string PartnerDetailsView = "Partner.View.Details";
     public const string PartnerEdit = "Partner.Edit";

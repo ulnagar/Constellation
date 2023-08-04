@@ -1,6 +1,7 @@
 ﻿@page "{id:Guid?}"
-@using Constellation.Core.Enums
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules.UpsertModel
+
+@using Constellation.Core.Enums
 
 @{
     var title = Model.Id.HasValue ? "Edit Training Module" : "Create New Training Module";

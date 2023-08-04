@@ -1,17 +1,25 @@
 ﻿@page "/Awards/Nominations/{PeriodId:guid}/Details"
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards.Nominations.DetailsModel
-@using Constellation.Application.Extensions;
+
+@inject IAuthorizationService authService;
 
 @{
-    bool authorised = true;
+    AuthorizationResult canAddTest = await authService.AuthorizeAsync(User, AuthPolicies.CanAddAwards);
+    AuthorizationResult canManageTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAwards);
 }
 
 <h2>Nomination Period Details</h2>
 
 <div class="page-menu">
-    <a asp-page="/Awards/Nominations/Nominate" asp-area="SchoolAdmin" asp-route-periodId="@Model.PeriodId" class="btn btn-primary">Add Nomination</a>
+    @if (canAddTest.Succeeded)
+    {
+        <a asp-page="/Awards/Nominations/Nominate" asp-area="SchoolAdmin" asp-route-periodId="@Model.PeriodId" class="btn btn-primary">Add Nomination</a>
+    }
 
-    <a asp-page-handler="Export" class="btn btn-warning">Export Nominations</a>
+    @if (canManageTest.Succeeded)
+    {
+        <a asp-page-handler="Export" class="btn btn-warning">Export Nominations</a>
+    }
 
     <a asp-page="Index" asp-area="SchoolAdmin" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
@@ -20,6 +28,13 @@
 
 <div>
     <dl class="row">
+        <dt class="col-md-2">
+            <label asp-for="Period.Name">Name</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Period.Name</span>
+        </dd>
+
         <dt class="col-md-2">
             <label asp-for="Period.LockoutDate">Lockout Date</label>
         </dt>
@@ -57,9 +72,9 @@
                 <td>@entry.Student.DisplayName</td>
                 <td>@entry.NominatedBy</td>
                 <td>
-                    @if (authorised)
+                    @if (canManageTest.Succeeded)
                     {
-                        <a asp-page-handler="Delete" asp-route-entryId="@entry.Id" class="btn btn-sm btn-danger">Remove</a>
+                        <a asp-page-handler="Delete" asp-route-entryId="@entry.Id.Value" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
                     }
                 </td>
             </tr>

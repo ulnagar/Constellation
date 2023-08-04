@@ -1,15 +1,19 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards.Nominations.IndexModel
 
-@using Constellation.Application.Extensions;
+@inject IAuthorizationService authService;
 
 @{
+    AuthorizationResult canAddTest = await authService.AuthorizeAsync(User, AuthPolicies.CanAddAwards);
 }
 
 <h2>Nomination Periods</h2>
 
 <div class="page-menu">
-    <a asp-page="Upsert" asp-area="SchoolAdmin" class="btn btn-primary">Create</a>
+    @if (canAddTest.Succeeded)
+    {
+        <a asp-page="Upsert" asp-area="SchoolAdmin" class="btn btn-primary">Create</a>
+    }
 </div>
 
 <hr />
@@ -17,6 +21,7 @@
 <table class="table table-striped table-hover data-table">
     <thead>
         <tr>
+            <th>Name</th>
             <th>Active To</th>
             <th>Included Grades</th>
             <th></th>
@@ -26,6 +31,7 @@
         @foreach (var row in Model.Periods)
         {
             <tr>
+                <td>@row.Name</td>
                 <td>@row.LockoutDate</td>
                 <td>
                     @String.Join(", ", row.IncludedGrades.Select(grade => grade.AsName()).ToList())

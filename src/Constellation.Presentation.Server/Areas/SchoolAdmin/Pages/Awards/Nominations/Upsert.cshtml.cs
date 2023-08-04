@@ -1,12 +1,15 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards.Nominations;
 
 using Constellation.Application.Awards.CreateNominationPeriod;
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+[Authorize(Policy = AuthPolicies.CanAddAwards)]
 public class UpsertModel : BasePageModel
 {
     private readonly IMediator _mediator;
@@ -20,6 +23,8 @@ public class UpsertModel : BasePageModel
     [ViewData]
     public string ActivePage => "Nominations";
 
+    [BindProperty]
+    public string Name { get; set; } = string.Empty;
     [BindProperty]
     public DateOnly LockoutDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     [BindProperty]
@@ -38,7 +43,7 @@ public class UpsertModel : BasePageModel
         if (!ModelState.IsValid) 
             return Page();
 
-        Result request = await _mediator.Send(new CreateNominationPeriodCommand(LockoutDate, Grades), cancellationToken);
+        Result request = await _mediator.Send(new CreateNominationPeriodCommand(Name, LockoutDate, Grades), cancellationToken);
 
         if (request.IsFailure)
         {

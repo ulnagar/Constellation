@@ -58,6 +58,15 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanManageAbsences, policy =>
             policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.ReportsAbsencesNotify, AuthPermissions.ReportsAbsencesRun));
 
+        options.AddPolicy(AuthPolicies.CanAddAwards, policy =>
+            policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.SchoolAdmin.Awards.Add));
+
+        options.AddPolicy(AuthPolicies.CanManageAwards, policy =>
+            policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.SchoolAdmin.Awards.Manage));
+
+        options.AddPolicy(AuthPolicies.CanViewAwardNominations, policy =>
+            policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.SchoolAdmin.Awards.View));
+
         return options;
     }
 }

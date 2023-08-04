@@ -1,9 +1,7 @@
 ﻿@page
-@using Constellation.Core.Enums;
-@using Constellation.Application.Extensions;
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards.Nominations.UpsertModel
-@{
-}
+
+@using Constellation.Core.Enums;
 
 <h2>Create new Nomination Period</h2>
 
@@ -16,6 +14,14 @@
 <form method="post">
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group row">
+            <label asp-for="Name" class="col-md-2">Name</label>
+            <div class="col-md-3">
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
 
         <div class="form-group row">
             <label asp-for="LockoutDate" class="col-md-2">Lock Date</label>

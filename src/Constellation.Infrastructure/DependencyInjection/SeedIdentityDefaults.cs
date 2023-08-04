@@ -11,6 +11,9 @@ public static class IdentityDefaults
     {
         await CreateRoleWithPermission(roleManager, AuthRoles.Admin, 
             new[] { 
+                AuthPermissions.SchoolAdmin.Awards.Add,
+                AuthPermissions.SchoolAdmin.Awards.View,
+                AuthPermissions.SchoolAdmin.Awards.Manage,
                 AuthPermissions.AssignmentsEdit,
                 AuthPermissions.AssignmentsSubmit,
                 AuthPermissions.ContactsEdit,
@@ -52,6 +55,9 @@ public static class IdentityDefaults
 
         await CreateRoleWithPermission(roleManager, AuthRoles.Editor,
             new[] {
+                AuthPermissions.SchoolAdmin.Awards.Add,
+                AuthPermissions.SchoolAdmin.Awards.View,
+                AuthPermissions.SchoolAdmin.Awards.Manage,
                 AuthPermissions.AssignmentsEdit,
                 AuthPermissions.AssignmentsSubmit,
                 AuthPermissions.ContactsEdit,
@@ -88,6 +94,7 @@ public static class IdentityDefaults
 
         await CreateRoleWithPermission(roleManager, AuthRoles.StaffMember,
             new[] {
+                AuthPermissions.SchoolAdmin.Awards.View,
                 AuthPermissions.AssignmentsEdit,
                 AuthPermissions.GroupTutorialsView,
                 AuthPermissions.LessonsView,
@@ -134,6 +141,14 @@ public static class IdentityDefaults
             new[]
             {
                 AuthPermissions.GroupTutorialsEdit });
+
+        await CreateRoleWithPermission(roleManager, AuthRoles.AwardsManager,
+            new[]
+            {
+                AuthPermissions.SchoolAdmin.Awards.Add,
+                AuthPermissions.SchoolAdmin.Awards.View,
+                AuthPermissions.SchoolAdmin.Awards.Manage,
+            });
 
         await CreateRole(roleManager, AuthRoles.LessonsUser);
         await CreateRole(roleManager, AuthRoles.CoverRecipient);

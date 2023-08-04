@@ -51,7 +51,7 @@ internal sealed class DeleteAwardNominationCommandHandler
             return Result.Failure(DomainErrors.Awards.Nomination.NotFound(request.NominationId));
         }
 
-        period.DeleteNomination(nomination);
+        nomination.Delete();
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

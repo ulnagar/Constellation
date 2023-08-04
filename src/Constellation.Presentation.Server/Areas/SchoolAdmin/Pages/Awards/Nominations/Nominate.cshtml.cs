@@ -4,6 +4,7 @@ using Constellation.Application.Awards.CreateAwardNomination;
 using Constellation.Application.Awards.GetAllNominationPeriods;
 using Constellation.Application.Awards.GetNominationPeriod;
 using Constellation.Application.Courses.GetCoursesForSelectionList;
+using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetFilteredOfferingsForSelectionList;
 using Constellation.Application.Students.GetFilteredStudentsForSelectionList;
 using Constellation.Core.Enums;
@@ -12,9 +13,11 @@ using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
+[Authorize(Policy = AuthPolicies.CanAddAwards)]
 public class NominateModel : BasePageModel
 {
     private readonly IMediator _mediator;

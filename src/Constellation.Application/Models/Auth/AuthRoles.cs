@@ -13,5 +13,6 @@
         public const string CoverRecipient = "Cover Email Recipient";
         public const string MandatoryTrainingEditor = "Mandatory Training Editor";
         public const string GroupTutorialsEditor = "Group Tutorials Editor";
+        public const string AwardsManager = "Awards Manager";
     }
 }

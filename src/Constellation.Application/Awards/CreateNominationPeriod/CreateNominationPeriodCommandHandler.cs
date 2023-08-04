@@ -28,7 +28,7 @@ internal sealed class CreateNominationPeriodCommandHandler
 
     public async Task<Result> Handle(CreateNominationPeriodCommand request, CancellationToken cancellationToken)
     {
-        Result<NominationPeriod> periodRequest = NominationPeriod.Create(request.Grades, request.LockoutDate);
+        Result<NominationPeriod> periodRequest = NominationPeriod.Create(request.Name, request.Grades, request.LockoutDate);
 
         if (periodRequest.IsFailure)
         {

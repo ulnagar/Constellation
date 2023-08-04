@@ -40,6 +40,7 @@ internal sealed class GetAllNominationPeriodsQueryHandler
 
             responses.Add(new(
                 period.Id,
+                period.Name,
                 period.LockoutDate,
                 grades));
         }

@@ -70,6 +70,7 @@ internal sealed class GetNominationPeriodRequestHandler
         }
 
         NominationPeriodDetailResponse response = new(
+            period.Name,
             period.LockoutDate,
             period.IncludedGrades.Select(entry => entry.Grade).ToList(),
             nominations);

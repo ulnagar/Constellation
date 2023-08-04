@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 
 public sealed record NominationPeriodDetailResponse(
+    string Name,
     DateOnly LockoutDate,
     List<Grade> IncludedGrades,
     List<NominationPeriodDetailResponse.NominationResponse> Nominations)

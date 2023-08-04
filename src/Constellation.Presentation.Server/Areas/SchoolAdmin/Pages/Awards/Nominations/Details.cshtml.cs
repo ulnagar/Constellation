@@ -4,13 +4,15 @@ using Constellation.Application.Awards.DeleteAwardNomination;
 using Constellation.Application.Awards.ExportAwardNominations;
 using Constellation.Application.Awards.GetNominationPeriod;
 using Constellation.Application.DTOs;
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
+[Authorize(Policy = AuthPolicies.CanViewAwardNominations)]
 public class DetailsModel : BasePageModel
 {
     private readonly IMediator _mediator;
@@ -83,11 +85,12 @@ public class DetailsModel : BasePageModel
         return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
     }
 
-    public async Task OnGetDelete(AwardNominationId entryId, CancellationToken cancellationToken = default)
+    public async Task OnGetDelete(Guid entryId, CancellationToken cancellationToken = default)
     {
         AwardNominationPeriodId awardNominationPeriodId = AwardNominationPeriodId.FromValue(PeriodId);
+        AwardNominationId awardNominationId = AwardNominationId.FromValue(entryId);
 
-        Result request = await _mediator.Send(new DeleteAwardNominationCommand(awardNominationPeriodId, entryId), cancellationToken);
+        Result request = await _mediator.Send(new DeleteAwardNominationCommand(awardNominationPeriodId, awardNominationId), cancellationToken);
 
         if (request.IsFailure)
         {
