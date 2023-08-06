@@ -15,7 +15,6 @@ public interface IUnitOfWork
     IDeviceRepository Devices { get; set; }
     IEnrolmentRepository Enrolments { get; set; }
     IIdentityRepository Identities { get; set; }
-    ILessonRepository Lessons { get; set; }
     IMSTeamOperationsRepository MSTeamOperations { get; set; }
     IOfferingSessionsRepository OfferingSessions { get; set; }
     ISchoolContactRepository SchoolContacts { get; set; }

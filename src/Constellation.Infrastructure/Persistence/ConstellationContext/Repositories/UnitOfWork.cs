@@ -18,7 +18,6 @@ public class UnitOfWork : IUnitOfWork
     public IDeviceRepository Devices { get; set; }
     public IEnrolmentRepository Enrolments { get; set; }
     public IIdentityRepository Identities { get; set; }
-    public ILessonRepository Lessons { get; set; }
     public IMSTeamOperationsRepository MSTeamOperations { get; set; }
     public IOfferingSessionsRepository OfferingSessions { get; set; }
     public ISchoolContactRepository SchoolContacts { get; set; }
@@ -46,7 +45,6 @@ public class UnitOfWork : IUnitOfWork
         Devices = new DeviceRepository(context);
         Enrolments = new EnrolmentRepository(context);
         Identities = new IdentityRepository(userManager);
-        Lessons = new LessonRepository(context);
         MSTeamOperations = new MSTeamOperationsRepository(context);
         OfferingSessions = new OfferingSessionsRepository(context);
         SchoolContacts = new SchoolContactRepository(context);

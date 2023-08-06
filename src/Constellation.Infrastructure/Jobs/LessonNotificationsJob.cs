@@ -6,6 +6,7 @@ using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.SciencePracs;
@@ -27,8 +28,11 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
     private readonly ICourseRepository _courseRepository;
     private readonly ISchoolContactRepository _contactRepository;
     private readonly IEmailService _emailService;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly AppConfiguration _configuration;
     private readonly ILogHandler<ILessonNotificationsJob> _logger;
+
+    private readonly DateOnly Today = DateOnly.FromDateTime(DateTime.Today);
 
     public LessonNotificationsJob(
         ILessonRepository lessonRepository,
@@ -37,6 +41,7 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
         ISchoolContactRepository contactRepository,
         IEmailService emailService,
         IOptions<AppConfiguration> configuration,
+        IUnitOfWork unitOfWork,
         ILogHandler<ILessonNotificationsJob> logger)
     {
         _lessonRepository = lessonRepository;
@@ -44,6 +49,7 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
         _courseRepository = courseRepository;
         _contactRepository = contactRepository;
         _emailService = emailService;
+        _unitOfWork = unitOfWork;
         _configuration = configuration.Value;
         _logger = logger;
     }
@@ -74,16 +80,20 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
 
         foreach (School school in schools)
         {
-            List<SciencePracLesson> lessons = await _lessonRepository.GetOverdueForSchool(school.Code, cancellationToken);
+            List<SciencePracLesson> lessons = await _lessonRepository.GetAllForSchool(school.Code, cancellationToken);
+
+            lessons = lessons
+                .Where(lesson =>
+                    lesson.Rolls.Any(roll =>
+                        roll.SchoolCode == school.Code &&
+                        roll.Status == LessonStatus.Active) &&
+                    lesson.DueDate < Today)
+                .ToList();
 
             if (lessons is null || lessons.Count == 0)
                 continue;
 
-            EmailDtos.LessonEmail schoolEmailDto = new()
-            {
-                SchoolCode = school.Code,
-                SchoolName = school.Name
-            };
+            List<LessonEmail.LessonItem> lessonItems = new();
 
             foreach (SciencePracLesson lesson in lessons)
             {
@@ -92,23 +102,29 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
                 if (course is null)
                     continue;
 
+                SciencePracRoll roll = lesson.Rolls.SingleOrDefault(roll => roll.SchoolCode == school.Code);
+
+                if (roll is null)
+                    continue;
+
                 string description = $"{course.Grade} {lesson.Name}";
 
                 if (course.Grade == Grade.Y11 || course.Grade == Grade.Y12)
-                {
                     description = $"{course.Grade} {course.Name} {lesson.Name}";
-                }
 
-                int overdue = (DateTime.Today.Subtract(lesson.DueDate).Days / 7) + 1;
-
-                schoolEmailDto.Lessons.Add(
-                    new EmailDtos.LessonEmail.LessonItem 
-                    { 
-                        Name = description, 
-                        DueDate = lesson.DueDate, 
-                        OverdueSeverity = overdue 
-                    });
+                lessonItems.Add(
+                    new LessonEmail.LessonItem(
+                        lesson.Id,
+                        roll.Id,
+                        description,
+                        lesson.DueDate, 
+                        roll.NotificationCount));
             }
+
+            LessonEmail schoolEmailDto = new(
+                school.Code,
+                school.Name,
+                lessonItems);
 
             // who are the school contacts to send the emails to?
             List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(school.Code, cancellationToken);
@@ -151,11 +167,11 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
             // 3. third email a week after second (SPT, ACC, & SCHOOL)
             // 4. fourth email a week after third (SPT, ACC, SCHOOL, & PRINCIPAL)
             // 5. remaining emails sent to SPC/HT (SPC & HT)
-            var firstWarning = schoolEmailDto.Lessons.Where(lesson => lesson.OverdueSeverity == 1).ToList();
-            var secondWarning = schoolEmailDto.Lessons.Where(lesson => lesson.OverdueSeverity == 2).ToList();
-            var thirdWarning = schoolEmailDto.Lessons.Where(lesson => lesson.OverdueSeverity == 3).ToList();
-            var finalWarning = schoolEmailDto.Lessons.Where(lesson => lesson.OverdueSeverity == 4).ToList();
-            var alert = schoolEmailDto.Lessons.Where(lesson => lesson.OverdueSeverity >= 5).ToList();
+            var firstWarning = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount == 0).ToList();
+            var secondWarning = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount == 1).ToList();
+            var thirdWarning = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount == 2).ToList();
+            var finalWarning = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount == 3).ToList();
+            var alert = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount >= 4).ToList();
 
             _logger.Log(LogSeverity.Information, $"");
             _logger.Log(LogSeverity.Information, $"Emails for {school.Name} to be delivered to:");
@@ -175,8 +191,8 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
 
             if (firstWarning.Any())
             {
-                foreach (EmailDtos.LessonEmail.LessonItem lesson in firstWarning)
-                    _logger.Log(LogSeverity.Information, $" (1W) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
+                foreach (LessonEmail.LessonItem item in firstWarning)
+                    _logger.Log(LogSeverity.Information, $" (1W) {item.Name} - {item.DueDate.ToShortDateString()}");
 
                 LessonMissedNotificationEmail notification = new()
                 {
@@ -190,11 +206,21 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
                 };
 
                 await _emailService.SendLessonMissedEmail(notification);
+
+                foreach (LessonEmail.LessonItem item in firstWarning)
+                {
+                    SciencePracRoll roll = lessons
+                        .Where(lesson => lesson.Id == item.LessonId)
+                        .SelectMany(lesson => lesson.Rolls)
+                        .First(roll => roll.Id == item.RollId);
+
+                    roll.IncrementNotificationCount();
+                }
             }
 
             if (secondWarning.Any())
             {
-                foreach (EmailDtos.LessonEmail.LessonItem lesson in secondWarning)
+                foreach (LessonEmail.LessonItem lesson in secondWarning)
                     _logger.Log(LogSeverity.Information, $" (2W) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
 
                 LessonMissedNotificationEmail notification = new()
@@ -210,11 +236,21 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
                 };
 
                 await _emailService.SendLessonMissedEmail(notification);
+
+                foreach (LessonEmail.LessonItem item in secondWarning)
+                {
+                    SciencePracRoll roll = lessons
+                        .Where(lesson => lesson.Id == item.LessonId)
+                        .SelectMany(lesson => lesson.Rolls)
+                        .First(roll => roll.Id == item.RollId);
+
+                    roll.IncrementNotificationCount();
+                }
             }
 
             if (thirdWarning.Any())
             {
-                foreach (EmailDtos.LessonEmail.LessonItem lesson in thirdWarning)
+                foreach (LessonEmail.LessonItem lesson in thirdWarning)
                     _logger.Log(LogSeverity.Information, $" (3W) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
 
                 LessonMissedNotificationEmail notification = new()
@@ -231,11 +267,21 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
                 };
 
                 await _emailService.SendLessonMissedEmail(notification);
+
+                foreach (LessonEmail.LessonItem item in thirdWarning)
+                {
+                    SciencePracRoll roll = lessons
+                        .Where(lesson => lesson.Id == item.LessonId)
+                        .SelectMany(lesson => lesson.Rolls)
+                        .First(roll => roll.Id == item.RollId);
+
+                    roll.IncrementNotificationCount();
+                }
             }
 
             if (finalWarning.Any())
             {
-                foreach (EmailDtos.LessonEmail.LessonItem lesson in finalWarning)
+                foreach (LessonEmail.LessonItem lesson in finalWarning)
                     _logger.Log(LogSeverity.Information, $" (4W) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
 
                 LessonMissedNotificationEmail notification = new()
@@ -252,11 +298,21 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
                 };
 
                 await _emailService.SendLessonMissedEmail(notification);
+
+                foreach (LessonEmail.LessonItem item in finalWarning)
+                {
+                    SciencePracRoll roll = lessons
+                        .Where(lesson => lesson.Id == item.LessonId)
+                        .SelectMany(lesson => lesson.Rolls)
+                        .First(roll => roll.Id == item.RollId);
+
+                    roll.IncrementNotificationCount();
+                }
             }
 
             if (alert.Any())
             {
-                foreach (EmailDtos.LessonEmail.LessonItem lesson in alert)
+                foreach (LessonEmail.LessonItem lesson in alert)
                     _logger.Log(LogSeverity.Information, $" (FW) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
 
                 LessonMissedNotificationEmail notification = new()
@@ -268,7 +324,19 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
                 };
 
                 await _emailService.SendLessonMissedEmail(notification);
+
+                foreach (LessonEmail.LessonItem item in firstWarning)
+                {
+                    SciencePracRoll roll = lessons
+                        .Where(lesson => lesson.Id == item.LessonId)
+                        .SelectMany(lesson => lesson.Rolls)
+                        .First(roll => roll.Id == item.RollId);
+
+                    roll.IncrementNotificationCount();
+                }
             }
+
+            await _unitOfWork.CompleteAsync(cancellationToken);
         }
 
         var logNotification = new ServiceLogEmail

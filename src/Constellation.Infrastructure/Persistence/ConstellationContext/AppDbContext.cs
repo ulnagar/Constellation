@@ -46,8 +46,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public DbSet<DeviceAllocation> DeviceAllocations { get; set; }
         public DbSet<StudentWholeAbsence> WholeAbsences { get; set; }
         public DbSet<StudentPartialAbsence> PartialAbsences { get; set; }
-        public DbSet<SciencePracLesson> Lessons { get; set; }
-        public DbSet<SciencePracRoll> LessonRolls { get; set; }
         public DbSet<CanvasOperation> CanvasOperations { get; set; }
         public DbSet<JobActivation> JobActivations { get; set; }
         public DbSet<StoredFile> StoredFiles { get; set; }

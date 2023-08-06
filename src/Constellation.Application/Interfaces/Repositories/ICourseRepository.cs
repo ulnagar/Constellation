@@ -3,6 +3,7 @@ namespace Constellation.Application.Interfaces.Repositories;
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -13,7 +14,7 @@ public interface ICourseRepository
 {
     Task<Course?> GetById(int courseId, CancellationToken cancellationToken = default);
     Task<List<Course>> GetAll(CancellationToken cancellationToken = default);
-    Task<Course?> GetByLessonId(Guid lessonId, CancellationToken cancellationToken = default);
+    Task<Course?> GetByLessonId(SciencePracLessonId lessonId, CancellationToken cancellationToken = default);
 
     Course WithDetails(int id);
     Course WithFilter(Expression<Func<Course, bool>> predicate);

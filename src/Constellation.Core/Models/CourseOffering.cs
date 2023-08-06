@@ -1,8 +1,6 @@
-﻿using System;
+﻿using Constellation.Core.Models.Absences;
+using System;
 using System.Collections.Generic;
-using Constellation.Core.Models.Absences;
-using Constellation.Core.Models.Covers;
-using Constellation.Core.Models.SciencePracs;
 
 namespace Constellation.Core.Models
 {
@@ -37,7 +35,6 @@ namespace Constellation.Core.Models
         public ICollection<Enrolment> Enrolments { get;  set; }
         public ICollection<OfferingSession> Sessions { get;  set; }
         public ICollection<OfferingResource> Resources { get;  set; }
-        public ICollection<SciencePracLesson> Lessons { get; set; }
         public ICollection<Absence> Absences { get; set; }
     }
 }

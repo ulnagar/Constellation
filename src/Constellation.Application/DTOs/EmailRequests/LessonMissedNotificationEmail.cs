@@ -6,7 +6,7 @@ public class LessonMissedNotificationEmail : EmailBaseClass
 {
     public string SchoolName { get; set; }
     public NotificationSequence NotificationType { get; set; }
-    public List<EmailDtos.LessonEmail.LessonItem> Lessons { get; set; } = new();
+    public List<LessonEmail.LessonItem> Lessons { get; set; } = new();
 
     public enum NotificationSequence
     {

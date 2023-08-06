@@ -1,9 +1,7 @@
 ﻿using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Awards;
-using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Stocktake;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -25,8 +23,6 @@ namespace Constellation.Application.Interfaces.Repositories
         DbSet<Device> Devices { get; set; }
         DbSet<Enrolment> Enrolments { get; set; }
         DbSet<JobActivation> JobActivations { get; set; }
-        DbSet<SciencePracRoll> LessonRolls { get; set; }
-        DbSet<SciencePracLesson> Lessons { get; set; }
         DbSet<MSTeamOperation> MSTeamOperations { get; set; }
         DbSet<OfferingResource> OfferingResources { get; set; }
         DbSet<CourseOffering> Offerings { get; set; }

@@ -9,7 +9,6 @@ using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
@@ -819,7 +818,7 @@ public class Service : IEmailService
             Title = "[Aurora College] Science Practical Lesson Overdue",
             Link = "https://acos.aurora.nsw.edu.au/schools",
             SchoolName = notification.SchoolName,
-            Lessons = notification.Lessons.Select(FirstWarningEmailViewModel.LessonEntry.ConvertFromLessonItem).ToList()
+            Lessons = notification.Lessons
         };
 
         var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/FirstWarningEmail.cshtml", viewModel);
@@ -844,7 +843,7 @@ public class Service : IEmailService
             Title = "[Aurora College] Science Practical Lesson Overdue",
             Link = "https://acos.aurora.nsw.edu.au/schools",
             SchoolName = notification.SchoolName,
-            Lessons = notification.Lessons.Select(SecondWarningEmailViewModel.LessonEntry.ConvertFromLessonItem).ToList()
+            Lessons = notification.Lessons
         };
 
         var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/SecondWarningEmail.cshtml", viewModel);
@@ -869,7 +868,7 @@ public class Service : IEmailService
             Title = "[Aurora College] Science Practical Lesson Overdue",
             Link = "https://acos.aurora.nsw.edu.au/schools",
             SchoolName = notification.SchoolName,
-            Lessons = notification.Lessons.Select(SecondWarningEmailViewModel.LessonEntry.ConvertFromLessonItem).ToList()
+            Lessons = notification.Lessons
         };
 
         var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/SecondWarningEmail.cshtml", viewModel);
@@ -894,7 +893,7 @@ public class Service : IEmailService
             Title = "[Aurora College] Science Practical Lesson Overdue",
             Link = "https://acos.aurora.nsw.edu.au/schools",
             SchoolName = notification.SchoolName,
-            Lessons = notification.Lessons.Select(FinalWarningEmailViewModel.LessonEntry.ConvertFromLessonItem).ToList()
+            Lessons = notification.Lessons
         };
 
         var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/FinalWarningEmail.cshtml", viewModel);
@@ -918,7 +917,7 @@ public class Service : IEmailService
             SenderTitle = settings.LessonsCoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
             SchoolName = notification.SchoolName,
-            Lessons = notification.Lessons.Select(CoordinatorNotificationEmailViewModel.LessonEntry.ConvertFromLessonItem).ToList()
+            Lessons = notification.Lessons
         };
 
         var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/CoordinatorNotificationEmail.cshtml", viewModel);

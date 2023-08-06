@@ -33,6 +33,7 @@ public sealed class SciencePracRoll
     public DateTime? SubmittedDate { get; private set; }
     public string Comment { get; private set; }
     public LessonStatus Status { get; private set; }
+    public int NotificationCount { get; private set; }
 
     public Result MarkRoll(
         int schoolContactId,
@@ -87,4 +88,6 @@ public sealed class SciencePracRoll
 
         return Result.Success();
     }
+
+    public void IncrementNotificationCount() => NotificationCount++;
 }

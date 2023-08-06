@@ -30,8 +30,6 @@ public class Student
         Absences = new List<Absence>();
         PartialAbsences = new List<StudentPartialAbsence>();
         WholeAbsences = new List<StudentWholeAbsence>();
-
-        LessonsAttended = new List<SciencePracRoll.LessonRollStudentAttendance>();
     }
 
     public string StudentId { get; set; }
@@ -62,7 +60,6 @@ public class Student
     public ICollection<Absence> Absences { get; set; }
     public ICollection<StudentPartialAbsence> PartialAbsences { get; set; }
     public ICollection<StudentWholeAbsence> WholeAbsences { get; set; }
-    public ICollection<SciencePracRoll.LessonRollStudentAttendance> LessonsAttended { get; set; }
     public IReadOnlyCollection<AbsenceConfiguration> AbsenceConfigurations => _absenceConfigurations;
 
     public Result AddAbsenceConfiguration(AbsenceConfiguration configuration)

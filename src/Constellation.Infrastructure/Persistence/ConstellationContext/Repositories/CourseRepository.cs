@@ -4,6 +4,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SciencePracs;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -31,7 +32,7 @@ public class CourseRepository : ICourseRepository
             .ToListAsync(cancellationToken);
 
     public async Task<Course?> GetByLessonId(
-        Guid lessonId,
+        SciencePracLessonId lessonId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SciencePracLesson>()
