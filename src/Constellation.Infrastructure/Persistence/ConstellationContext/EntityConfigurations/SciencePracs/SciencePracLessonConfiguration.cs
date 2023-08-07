@@ -22,7 +22,7 @@ public class SciencePracLessonConfiguration : IEntityTypeConfiguration<SciencePr
 
         builder
             .HasMany(lesson => lesson.Offerings)
-            .WithMany();
+            .WithOne();
 
         builder
             .HasMany(lesson => lesson.Rolls)

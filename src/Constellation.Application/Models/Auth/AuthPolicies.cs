@@ -22,4 +22,5 @@ public class AuthPolicies
     public const string CanAddAwards = "CanAddAwards";
     public const string CanManageAwards = "CanManageAwards";
     public const string CanViewAwardNominations = "CanViewAwards";
+    public const string CanManageSciencePracs = "CanManageSciencePracs";
 }

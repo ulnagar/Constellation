@@ -1,0 +1,45 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Lessons.IndexModel
+
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageSciencePracs);
+}
+
+<h2>Science Prac Lessons</h2>
+
+<div class="page-menu">
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="Upsert" asp-area="Subject" class="btn btn-primary">Create</a>
+    }
+</div>
+
+<hr />
+
+<table class="table table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Due Date</th>
+            <th>Name</th>
+            <th>Completed</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var response in Model.Lessons)
+        {
+            <tr>
+                <td></td>
+                <td>@response.DueDate.ToShortDateString()</td>
+                <td>@response.Name</td>
+                <td>@response.OutstandingRolls / @response.TotalRolls</td>
+                <td>
+                    <a asp-page="Details" asp-area="Subject" asp-route-id="@response.LessonId" class="btn btn-sm btn-default btn-show-hover">More Info...</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -10,13 +10,13 @@ using System.Linq;
 
 public sealed class SciencePracLesson : AggregateRoot
 {
-    private readonly List<CourseOffering> _offerings = new();
+    private readonly List<SciencePracLessonOffering> _offerings = new();
     private readonly List<SciencePracRoll> _rolls = new();
     
     private SciencePracLesson(
         string name,
         DateOnly dueDate,
-        List<CourseOffering> offerings,
+        List<int> offerings,
         bool doNotGenerateRolls)
     {
         Id = new();
@@ -25,21 +25,21 @@ public sealed class SciencePracLesson : AggregateRoot
         DueDate = dueDate;
         DoNotGenerateRolls = doNotGenerateRolls;
 
-        foreach (CourseOffering offering in offerings)
+        foreach (int offering in offerings)
             AddOffering(offering);
     }
 
     public SciencePracLessonId Id { get; private set; }
     public string Name { get; private set; }
     public DateOnly DueDate { get; private set; }
-    public IReadOnlyList<CourseOffering> Offerings => _offerings;
+    public IReadOnlyList<SciencePracLessonOffering> Offerings => _offerings;
     public IReadOnlyList<SciencePracRoll> Rolls => _rolls;
     public bool DoNotGenerateRolls { get; private set; }
 
     public static Result<SciencePracLesson> Create(
         string name,
         DateOnly dueDate,
-        List<CourseOffering> offerings,
+        List<int> offerings,
         bool doNotGenerateRolls)
     {
         if (dueDate < DateOnly.FromDateTime(DateTime.Today))
@@ -54,12 +54,12 @@ public sealed class SciencePracLesson : AggregateRoot
             doNotGenerateRolls);
     }
 
-    public void AddOffering(CourseOffering offering)
+    public void AddOffering(int offering)
     {
-        if (_offerings.Contains(offering))
+        if (_offerings.Any(entry => entry.OfferingId == offering))
             return;
 
-        _offerings.Add(offering);
+        _offerings.Add(new (Id, offering));
     }
 
     public Result AddRoll(SciencePracRoll roll)
@@ -86,5 +86,13 @@ public sealed class SciencePracLesson : AggregateRoot
         DueDate = dueDate;
 
         return Result.Success();
+    }
+
+    public void Cancel()
+    {
+        foreach (SciencePracRoll roll in _rolls)
+            roll.CancelRoll("Lesson Cancelled");
+
+        DoNotGenerateRolls = true;
     }
 }

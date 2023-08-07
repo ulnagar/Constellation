@@ -390,6 +390,14 @@ public static class DomainErrors
             public static readonly Error EmptyName = new(
                 "SciencePracs.Lesson.EmptyName",
                 "Cannot create a Lesson with a blank name");
+
+            public static readonly Func<SciencePracLessonId, Error> NotFound = id => new(
+                "SciencePracs.Lesson.NotFound",
+                $"Could not find a lesson with the Id {id}");
+
+            public static readonly Error RollCompleted = new(
+                "SciencePracs.Lesson.RollCompleted",
+                "Cannot cancel a lesson that has completed rolls");
         }
 
         public static class Roll
