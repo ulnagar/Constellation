@@ -413,6 +413,10 @@ public static class DomainErrors
             public static readonly Error CannotCancelCompletedRoll = new(
                 "SciencePracs.Rolls.CannotCancelCompletedRolls",
                 "Cannot mark roll cancelled if it has already been submitted as marked");
+
+            public static readonly Func<SciencePracRollId, Error> NotFound = id => new(
+                "SciencePracs.Rolls.NotFound",
+                $"Could not find a roll with the Id {id}");
         }
     }
 

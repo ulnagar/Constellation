@@ -67,6 +67,9 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanViewAwardNominations, policy =>
             policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.SchoolAdmin.Awards.View));
 
+        options.AddPolicy(AuthPolicies.CanManageSciencePracs, policy =>
+            policy.RequireRole(AuthRoles.LessonsEditor));
+
         return options;
     }
 }

@@ -1,12 +1,133 @@
 ﻿@page "/SciencePracs/Lessons/{lessonId:guid}/Roll/{rollId:guid}"
 @model Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Lessons.RollModel
+
+@inject IAuthorizationService authService
+
 @{
+    AuthorizationResult canManageTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageSciencePracs);
 }
 
 <h2>Roll Details</h2>
 
 <div class="page-menu">
+    @if (canManageTest.Succeeded && Model.Roll.Status == Constellation.Core.Enums.LessonStatus.Active)
+    {
+        <a asp-page="Submit" asp-area="Subject" asp-route-lessonId="@Model.LessonId" asp-route-rollId="@Model.RollId" class="btn btn-default">Submit Roll</a>
+        <a asp-page-handler="Cancel" asp-area="Subject" asp-route-lessonId="@Model.LessonId" asp-route-rollId="@Model.RollId" class="btn btn-danger">Cancel</a>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Send Notification
+            </button>
+            <div class="dropdown-menu">
+                <a asp-page-handler="SendNotification" asp-route-increment="false" class="dropdown-item">Resend Previous Notification</a>
+                <a asp-page-handler="SendNotificatoin" asp-route-increment="true" class="dropdown-item">Send Next Notification</a>
+            </div>
+        </div>
+    }
 
+    <a asp-page="Details" asp-area="Subject" asp-route-id="@Model.LessonId" class="btn btn-danger">Go Back</a>
 </div>
 
 <hr />
+
+<div>
+    <dl class="row">
+        <dt class="col-md-2">
+            <label asp-for="Roll.LessonId"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Roll.LessonId</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Roll.Name"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Roll.Name</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Roll.DueDate"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Roll.DueDate.ToShortDateString()</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Roll.SchoolName"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Roll.SchoolCode - @Model.Roll.SchoolName</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Roll.Status"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Roll.Status.ToString()</span>
+        </dd>
+    </dl>
+</div>
+
+<hr />
+
+@if (Model.Roll.ContactDetails is not null)
+{
+    <h3>Submission Details</h3>
+
+    <div>
+        <dl class="row">
+            <dt class="col-md-2">
+                <label asp-for="Roll.ContactDetails"></label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Roll.ContactDetails.ContactName.DisplayName (@Model.Roll.ContactDetails.ContactEmail)</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Roll.DateDelivered"></label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Roll.DateDelivered.Value.ToShortDateString()</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Roll.DateSubmitted"></label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Roll.DateSubmitted.Value</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Roll.Comment"></label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Roll.Comment</span>
+            </dd>
+        </dl>
+    </div>
+
+    <hr />
+}
+
+<h3>Attendance</h3>
+
+<table class="table table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th>SRN</th>
+            <th>Name</th>
+            <th>Present?</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.Roll.Attendance)
+        {
+            <tr>
+                <td>@entry.StudentId</td>
+                <td>@entry.StudentName.DisplayName</td>
+                <td>@entry.Present</td>
+            </tr>
+        }
+    </tbody>
+</table>

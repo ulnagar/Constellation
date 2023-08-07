@@ -15,6 +15,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             _context = context;
         }
 
+        public async Task<SchoolContact?> GetById(
+            int contactId, 
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<SchoolContact>()
+                .SingleOrDefaultAsync(entry => entry.Id == contactId, cancellationToken);        
+            
         public async Task<List<SchoolContact>> GetPrincipalsForSchool(
             string schoolCode,
             CancellationToken cancellationToken = default) =>
