@@ -28,6 +28,8 @@ public sealed class SciencePracRoll
     public SciencePracLessonId LessonId { get; private set; }
     public string SchoolCode { get; private set; }
     public int? SchoolContactId { get; private set; }
+    public string SubmittedBy { get; private set; }
+
     public IReadOnlyCollection<SciencePracAttendance> Attendance => _attendance;
     public DateOnly? LessonDate { get; private set; }
     public DateTime? SubmittedDate { get; private set; }
@@ -37,6 +39,7 @@ public sealed class SciencePracRoll
 
     public Result MarkRoll(
         int schoolContactId,
+        string submittedBy,
         DateOnly lessonDate,
         string comment,
         List<string> presentStudents,
@@ -69,6 +72,7 @@ public sealed class SciencePracRoll
             return Result.Failure(DomainErrors.SciencePracs.Roll.CommentRequiredNonePresent);
 
         SchoolContactId = schoolContactId;
+        SubmittedBy = submittedBy;
         LessonDate = lessonDate;
         Comment = comment;
         SubmittedDate = DateTime.Now;

@@ -1,4 +1,70 @@
-﻿@page
+﻿@page "{id:guid?}"
 @model Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Lessons.UpsertModel
+
 @{
+    string Title = (Model.Id.HasValue) ? "Edit Lesson" : "Create New Lesson";
 }
+
+<h2>@Title</h2>
+
+<div class="page-menu">
+    <a asp-page="Index" asp-area="Subject" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-page-handler="Submit" method="post">
+    <div class="form-horizontal">
+
+        <div class="row">
+            <label asp-for="LessonName" class="col-md-2"></label>
+            <div class="col-md-5">
+                <input asp-for="LessonName" class="form-control" />
+                <span asp-validation-for="LessonName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <label asp-for="DueDate" class="col-md-2"></label>
+            <div class="col-md-5">
+                <input asp-for="DueDate" class="form-control" />
+                <span asp-validation-for="DueDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <label asp-for="CourseId" class="col-md-2"></label>
+            <div class="col-md-5">
+                @if (Model.Id.HasValue)
+                {
+                    SelectListItem course = Model.CourseList.FirstOrDefault(entry => entry.Value == Model.CourseId.ToString());
+                    <span>@course.Text</span>
+                }
+                else
+                {
+                    <select asp-for="CourseId" asp-items="@Model.CourseList" class="form-control combo">
+                        <option value="">-- Select --</option>
+                    </select>
+                    <span asp-validation-for="CourseId" class="text-danger"></span>
+                }
+            </div>
+        </div>
+
+        @if (!Model.Id.HasValue)
+        {
+            <div class="row">
+                <label asp-for="DoNotGenerateRolls" class="col-md-2"></label>
+                <div class="col-md-5">
+                    <input asp-for="DoNotGenerateRolls" class="form-control" />
+                    <span asp-validation-for="DoNotGenerateRolls" class="text-danger"></span>
+                </div>
+            </div>
+        }
+
+        <div class="form-group">
+            <div class="col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
