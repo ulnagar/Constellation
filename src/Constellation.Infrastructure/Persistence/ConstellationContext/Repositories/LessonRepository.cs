@@ -2,6 +2,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
 using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
+using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
@@ -49,10 +50,36 @@ public class LessonRepository : ILessonRepository
                 lesson.Rolls.Any(roll => roll.SchoolCode == SchoolCode))
             .ToListAsync(cancellationToken);
 
+    public async Task<List<SciencePracLesson>> GetAllForCourse(
+        int CourseId,
+        CancellationToken cancellationToken = default)
+    {
+        var offeringIds = await _context
+            .Set<CourseOffering>()
+            .Where(offering => offering.CourseId == CourseId)
+            .Select(offering => offering.Id)
+            .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<SciencePracLesson>()
+            .Where(lesson => lesson.Offerings.Any(record => offeringIds.Contains(record.OfferingId)))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<SciencePracLesson>> GetAllForOffering(
+        int OfferingId, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SciencePracLesson>()
+            .Where(lesson => lesson.Offerings.Any(record => record.OfferingId == OfferingId))
+            .ToListAsync(cancellationToken);
+        
     public async Task<SciencePracLesson> GetById(
         SciencePracLessonId LessonId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SciencePracLesson>()
             .SingleOrDefaultAsync(lesson => lesson.Id == LessonId, cancellationToken);
+
+    public void Insert(SciencePracLesson lesson) => _context.Set<SciencePracLesson>().Add(lesson);
 }

@@ -4,6 +4,7 @@ using Constellation.Application.Features.Faculties.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Partner.Models;
@@ -26,6 +27,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
     [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class ClassesController : BaseController
     {
+        private readonly ILessonRepository _lessonRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICourseOfferingService _offeringService;
         private readonly IAdobeConnectService _adobeConnectService;
@@ -34,11 +36,18 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         private readonly IAppDbContext _context;
         private readonly IMediator _mediator;
 
-        public ClassesController(IUnitOfWork unitOfWork, ICourseOfferingService offeringService,
-            IAdobeConnectService adobeConnectService, IOperationService operationsService,
-            IStudentService studentService, IAppDbContext context, IMediator mediator)
+        public ClassesController(
+            ILessonRepository lessonRepository,
+            IUnitOfWork unitOfWork, 
+            ICourseOfferingService offeringService,
+            IAdobeConnectService adobeConnectService, 
+            IOperationService operationsService,
+            IStudentService studentService, 
+            IAppDbContext context, 
+            IMediator mediator)
             : base(unitOfWork)
         {
+            _lessonRepository = lessonRepository;
             _unitOfWork = unitOfWork;
             _offeringService = offeringService;
             _adobeConnectService = adobeConnectService;
@@ -145,7 +154,6 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             viewModel.Class = Classes_DetailsViewModel.OfferingDto.ConvertFromOffering(offering);
             viewModel.Students = offering.Enrolments.Where(enrol => !enrol.IsDeleted).Select(enrol => enrol.Student).Select(Classes_DetailsViewModel.StudentDto.ConvertFromStudent).ToList();
             viewModel.Sessions = offering.Sessions.Where(session => !session.IsDeleted).Select(Classes_DetailsViewModel.SessionDto.ConvertFromSession).ToList();
-            viewModel.Lessons = offering.Lessons.Select(lesson => Classes_DetailsViewModel.LessonDto.ConvertFromLesson(lesson, offering)).ToList();
             viewModel.StudentList = new SelectList(students, "StudentId", "DisplayName", null, "CurrentGrade");
             viewModel.AddSessionDto = new Sessions_AssignmentViewModel
             {
@@ -156,6 +164,39 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
                 RoomList = new SelectList(rooms, "ScoId", "Name")
             };
 
+            var lessons = await _lessonRepository.GetAllForOffering(offering.Id);
+
+            foreach (var lesson in lessons)
+            {
+                var entry = new Classes_DetailsViewModel.LessonDto()
+                {
+                    Id = lesson.Id,
+                    Name = lesson.Name,
+                    DueDate = lesson.DueDate
+                };
+
+                foreach (var record in lesson.Rolls)
+                {
+                    var school = await _unitOfWork.Schools.GetById(record.SchoolCode);
+
+                    foreach (var student in record.Attendance)
+                    {
+                        var studentEntry = await _unitOfWork.Students.GetById(student.StudentId);
+
+                        entry.Students.Add(new()
+                        {
+                            SchoolName = school.Name,
+                            Name = studentEntry.DisplayName,
+                            Status = record.Status,
+                            Comment = record.Comment,
+                            WasPresent = student.Present
+                        });
+                    }
+                }
+
+                viewModel.Lessons.Add(entry);
+            }
+            
             return View(viewModel);
         }
 
@@ -248,12 +289,12 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
                 //await _operationsService.CreateClassroomMSTeam(offering.Id, DateTime.Now);
             }
 
-            var lessons = await _unitOfWork.Lessons.GetAllForCourse(offering.CourseId);
+            var lessons = await _lessonRepository.GetAllForCourse(offering.CourseId);
 
-            foreach (var lesson in lessons.Where(lesson => lesson.DueDate > DateTime.Today))
+            foreach (var lesson in lessons.Where(lesson => lesson.DueDate > DateOnly.FromDateTime(DateTime.Today)))
             {
                 // Add offering to the lesson
-                lesson.Offerings.Add(offering);
+                lesson.AddOffering(offering.Id);
             }
 
             await _unitOfWork.CompleteAsync();

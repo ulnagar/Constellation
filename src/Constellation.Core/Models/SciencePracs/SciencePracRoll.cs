@@ -93,5 +93,17 @@ public sealed class SciencePracRoll
         return Result.Success();
     }
 
+    public Result ReinstateRoll()
+    {
+        if (Status != LessonStatus.Cancelled)
+            return Result.Failure(DomainErrors.SciencePracs.Roll.MustBeCancelled);
+
+        Status = LessonStatus.Active;
+        SubmittedDate = null;
+        Comment = null;
+
+        return Result.Success();
+    }
+
     public void IncrementNotificationCount() => NotificationCount++;
 }

@@ -1,5 +1,6 @@
 ﻿using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -121,29 +122,10 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
                 Students = new List<LessonStudentDto>();
             }
 
-            public Guid Id { get; set; }
-            public DateTime DueDate { get; set; }
+            public SciencePracLessonId Id { get; set; }
+            public DateOnly DueDate { get; set; }
             public string Name { get; set; }
             public ICollection<LessonStudentDto> Students { get; set; }
-
-            public static LessonDto ConvertFromLesson(SciencePracLesson lesson, CourseOffering offering)
-            {
-                var viewModel = new LessonDto
-                {
-                    Id = lesson.Id,
-                    DueDate = lesson.DueDate,
-                    Name = lesson.Name
-                };
-
-                var enrolledStudents = offering.Enrolments.Where(enrol => !enrol.IsDeleted).Select(enrol => enrol.StudentId).ToList();
-
-                foreach (var student in lesson.Rolls.SelectMany(roll => roll.Attendance).Where(attend => enrolledStudents.Contains(attend.StudentId)))
-                {
-                    viewModel.Students.Add(LessonStudentDto.ConvertFromLessonAttendance(student));
-                }
-
-                return viewModel;
-            }
         }
 
         public class LessonStudentDto
@@ -153,20 +135,6 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
             public LessonStatus Status { get; set; }
             public bool WasPresent { get; set; }
             public string Comment { get; set; }
-
-            public static LessonStudentDto ConvertFromLessonAttendance(SciencePracRoll.LessonRollStudentAttendance attendance)
-            {
-                var viewModel = new LessonStudentDto
-                {
-                    Name = attendance.Student.DisplayName,
-                    SchoolName = attendance.Student.School.Name,
-                    Status = attendance.LessonRoll.Status,
-                    WasPresent = attendance.Present,
-                    Comment = attendance.LessonRoll.Comment
-                };
-
-                return viewModel;
-            }
         }
     }
 }

@@ -417,6 +417,10 @@ public static class DomainErrors
             public static readonly Func<SciencePracRollId, Error> NotFound = id => new(
                 "SciencePracs.Rolls.NotFound",
                 $"Could not find a roll with the Id {id}");
+
+            public static readonly Error MustBeCancelled = new(
+                "SciencePracs.Rolls.MustBeCancelled",
+                "Cannot reinstate roll that has not been cancelled");
         }
     }
 

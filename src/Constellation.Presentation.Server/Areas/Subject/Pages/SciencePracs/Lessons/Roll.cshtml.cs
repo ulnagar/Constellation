@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Les
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SciencePracs.CancelLessonRoll;
 using Constellation.Application.SciencePracs.GetLessonRollDetails;
+using Constellation.Application.SciencePracs.ReinstateLessonRoll;
 using Constellation.Application.SciencePracs.SendLessonNotification;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
@@ -60,6 +61,25 @@ public class RollModel : BasePageModel
         }
 
         return RedirectToPage("Index", new { area = "Subject" });
+    }
+
+    public async Task<IActionResult> OnGetReinstate()
+    {
+        SciencePracLessonId sciencePracLessonId = SciencePracLessonId.FromValue(LessonId);
+        SciencePracRollId sciencePracRollId = SciencePracRollId.FromValue(RollId);
+
+        Result reinstateRequest = await _mediator.Send(new ReinstateLessonRollCommand(sciencePracLessonId, sciencePracRollId));
+
+        if (reinstateRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = reinstateRequest.Error,
+                RedirectPath = null
+            };
+        }
+
+        return await PreparePage();
     }
 
     public async Task<IActionResult> OnGetSendNotification(bool increment)

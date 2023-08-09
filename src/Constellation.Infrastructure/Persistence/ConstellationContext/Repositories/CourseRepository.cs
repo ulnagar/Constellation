@@ -33,13 +33,22 @@ public class CourseRepository : ICourseRepository
 
     public async Task<Course?> GetByLessonId(
         SciencePracLessonId lessonId,
-        CancellationToken cancellationToken = default) =>
-        await _context
+        CancellationToken cancellationToken = default)
+    {
+        var record = await _context
             .Set<SciencePracLesson>()
             .Where(lesson => lesson.Id == lessonId)
             .Select(lesson => lesson.Offerings.First())
-            .Select(offering => offering.Course)
             .FirstOrDefaultAsync(cancellationToken);
+
+        if (record is null)
+            return null;
+
+        return await _context
+            .Set<Course>()
+            .Where(course => course.Offerings.Any(offering => offering.Id == record.OfferingId))
+            .FirstOrDefaultAsync(cancellationToken);
+    }
 
     private IQueryable<Course> Collection()
     {
