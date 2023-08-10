@@ -113,7 +113,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "NotificationCount",
                 table: "SciencePracs_Rolls",
                 type: "int",
-                nullable: false);
+                nullable: false,
+                defaultValue: 0);
 
             migrationBuilder.RenameTable(
                 name: "LessonRollStudentAttendance",
