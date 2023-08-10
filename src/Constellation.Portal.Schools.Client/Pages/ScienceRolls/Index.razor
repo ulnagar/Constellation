@@ -1,5 +1,6 @@
 ﻿@page "/ScienceRolls/"
-@using Constellation.Application.Features.Portal.School.ScienceRolls.Models;
+@using Constellation.Application.SciencePracs.GetLessonRollsForSchoolsPortal;
+@using Constellation.Core.Models.Identifiers;
 
 @attribute [Authorize]
 
@@ -43,7 +44,7 @@
 
     <hr />
 
-    <GroupedDataTable Items="FilteredLessons.GroupBy(lesson => lesson.Grade).ToList()" TItem="ScienceLessonRollForList" TKey="string">
+    <GroupedDataTable Items="FilteredLessons.GroupBy(lesson => lesson.Grade).ToList()" TItem="ScienceLessonRollSummary" TKey="string">
         <TableHeader>
                 <th></th>
                 <th>Lesson</th>
@@ -75,11 +76,11 @@
             <td>
                 @if (entry.IsSubmitted)
                 {
-                    <button class="btn btn-success btn-sm" @onclick="() => ViewRoll(entry.Id)">@entry.Statistics</button>
+                    <button class="btn btn-success btn-sm" @onclick="() => ViewRoll(entry.Id, entry.LessonId)">@entry.Statistics</button>
                 }
                 else
                 {
-                    <button class="btn btn-warning btn-sm" @onclick="() => SubmitRoll(entry.Id)">Submit Roll</button>
+                    <button class="btn btn-warning btn-sm" @onclick="() => SubmitRoll(entry.Id, entry.LessonId)">Submit Roll</button>
                 }
             </td>
         </RowTemplate>
@@ -93,8 +94,8 @@
 
     private bool IsLoading { get; set; } = false;
 
-    public List<ScienceLessonRollForList> Lessons { get; set; } = new();
-    public List<ScienceLessonRollForList> FilteredLessons { get; set; } = new();
+    public List<ScienceLessonRollSummary> Lessons { get; set; } = new();
+    public List<ScienceLessonRollSummary> FilteredLessons { get; set; } = new();
     public FilterCategory FilterType { get; set; } = FilterCategory.Pending;
 
     protected override async Task OnParametersSetAsync()
@@ -105,7 +106,7 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            Lessons = await Http.GetFromJsonAsync<List<ScienceLessonRollForList>>($"api/Rolls/ForSchool/{SelectedSchool.Code}");
+            Lessons = await Http.GetFromJsonAsync<List<ScienceLessonRollSummary>>($"api/Rolls/ForSchool/{SelectedSchool.Code}");
 
             FilterLessons();
         }
@@ -155,13 +156,13 @@
         FilteredLessons = FilteredLessons.OrderBy(lesson => lesson.Grade).ThenBy(lesson => lesson.LessonCourseName).ThenBy(lesson => lesson.LessonDueDate).ToList();
     }
 
-    private void ViewRoll(Guid RollId)
+    private void ViewRoll(SciencePracRollId RollId, SciencePracLessonId LessonId)
     {
-        NavigationManager.NavigateTo($"ScienceRolls/{RollId}");
+        NavigationManager.NavigateTo($"ScienceRolls/{LessonId.Value}/{RollId.Value}");
     }
 
-    private void SubmitRoll(Guid RollId)
+    private void SubmitRoll(SciencePracRollId RollId, SciencePracLessonId LessonId)
     {
-        NavigationManager.NavigateTo($"ScienceRolls/{RollId}/Submit");
+        NavigationManager.NavigateTo($"ScienceRolls/{LessonId.Value}/{RollId.Value}/Submit");
     }
 }

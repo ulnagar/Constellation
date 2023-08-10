@@ -1,0 +1,19 @@
+﻿namespace Constellation.Application.SciencePracs.GetLessonRollsForSchoolsPortal;
+
+using Constellation.Core.Enums;
+using Constellation.Core.Models.Identifiers;
+using System;
+
+public sealed class ScienceLessonRollSummary
+{
+    public SciencePracRollId Id { get; set; }
+    public SciencePracLessonId LessonId { get; set; }
+    public string LessonName { get; set; }
+    public Grade LessonGrade { get; set; }
+    public string Grade => $"Year {(int)LessonGrade:D2}";
+    public string LessonCourseName { get; set; }
+    public DateOnly LessonDueDate { get; set; }
+    public bool IsSubmitted { get; set; }
+    public bool IsOverdue => LessonDueDate < DateOnly.FromDateTime(DateTime.Now) && !IsSubmitted;
+    public string Statistics { get; set; }
+}

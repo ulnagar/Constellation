@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
-using Constellation.Application.Features.Portal.School.ScienceRolls.Commands;
-using Constellation.Application.Features.Portal.School.ScienceRolls.Models;
-using Constellation.Application.Features.Portal.School.ScienceRolls.Queries;
+using Constellation.Application.SciencePracs.GetLessonRollDetailsForSchoolsPortal;
+using Constellation.Application.SciencePracs.GetLessonRollsForSchoolsPortal;
+using Constellation.Application.SciencePracs.GetLessonRollSubmitContextForSchoolsPortal;
+using Constellation.Application.SciencePracs.SubmitRoll;
+using Constellation.Core.Models.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,43 +21,66 @@ public class RollsController : BaseAPIController
     }
 
     [HttpGet("ForSchool/{code}")]
-    public async Task<List<ScienceLessonRollForList>> GetForSchool([FromRoute] string code)
+    public async Task<List<ScienceLessonRollSummary>> GetForSchool([FromRoute] string code)
     {
         var user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve Science Lesson Rolls for school {code} by user {user}", code, user.DisplayName);
 
-        var rolls = await _mediator.Send(new GetScienceLessonRollsForSchoolQuery { SchoolCode = code });
+        var rollsRequest = await _mediator.Send(new GetLessonRollsForSchoolQuery(code));
 
-        return rolls.ToList();
+        if (rollsRequest.IsFailure)
+        {
+            return new List<ScienceLessonRollSummary>();
+        }
+
+        return rollsRequest.Value;
     }
 
     [HttpGet("Details/{rollId:guid}")]
-    public async Task<ScienceLessonRollForDetails> GetRollDetails([FromRoute] Guid rollId)
+    public async Task<ScienceLessonRollDetails> GetRollDetails([FromRoute] Guid rollId, Guid lessonId)
     {
         var user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve Roll details for roll {code} by user {user}", rollId, user.DisplayName);
 
-        return await _mediator.Send(new GetScienceLessonRollForDisplayQuery { RollId = rollId });
+        SciencePracLessonId LessonId = SciencePracLessonId.FromValue(lessonId);
+        SciencePracRollId RollId = SciencePracRollId.FromValue(rollId);
+
+        var request = await _mediator.Send(new GetLessonRollDetailsForSchoolsPortalQuery(LessonId, RollId));
+    
+        if (request.IsFailure)
+        {
+            return null;
+        }
+
+        return request.Value;
     }
 
     [HttpGet("ForSubmit/{rollId:guid}")]
-    public async Task<ScienceLessonRollForSubmit> GetRollForSubmit([FromRoute] Guid rollId)
+    public async Task<ScienceLessonRollForSubmit> GetRollForSubmit([FromRoute] Guid rollId, Guid lessonId)
     {
         var user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve Roll submission details for roll {code} by user {user}", rollId, user.DisplayName);
 
-        return await _mediator.Send(new GetScienceLessonRollForSubmitQuery { RollId = rollId });
+        SciencePracLessonId LessonId = SciencePracLessonId.FromValue(lessonId);
+        SciencePracRollId RollId = SciencePracRollId.FromValue(rollId);
+
+        var request = await _mediator.Send(new GetLessonRollSubmitContextForSchoolsPortalQuery(LessonId, RollId));
+    
+        if (request.IsFailure)
+        {
+            return null;
+        }
+
+        return request.Value;
     }
 
     [HttpPost("Submit/{rollId:guid}")]
-    public async Task SubmitMarkedRoll([FromRoute] Guid rollId, [FromBody] SubmitScienceLessonRollCommand command)
+    public async Task SubmitMarkedRoll([FromRoute] Guid rollId, [FromBody] SubmitRollCommand command)
     {
         var user = await GetCurrentUser();
-
-        command.UserEmail = user.Email;
 
         _logger.Information("Requested to submit roll with details {@details} by user {user}", command, user.DisplayName);
 

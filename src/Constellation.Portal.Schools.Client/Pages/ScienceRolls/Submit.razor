@@ -1,6 +1,7 @@
-﻿@page "/ScienceRolls/{RollId:guid}/Submit"
-@using Constellation.Application.Features.Portal.School.ScienceRolls.Commands;
-@using Constellation.Application.Features.Portal.School.ScienceRolls.Models;
+﻿@page "/ScienceRolls/{LessonId:guid}/{RollId:guid}/Submit"
+@using Constellation.Application.SciencePracs.GetLessonRollSubmitContextForSchoolsPortal;
+@using Constellation.Application.SciencePracs.SubmitRoll;
+@using Constellation.Core.Models.Identifiers;
 
 @attribute [Authorize]
 
@@ -105,9 +106,10 @@
     public Guid RollId { get; set; }
     public Guid CurrentRollId { get; set; }
 
-    public ScienceLessonRollForSubmit Roll { get; set; } = new();
+    [Parameter]
+    public Guid LessonId { get; set; }
 
-    public SubmitScienceLessonRollCommand Command { get; set; } = new();
+    public ScienceLessonRollForSubmit Roll { get; set; } = new();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -129,12 +131,7 @@
 
             CurrentRollId = RollId;
 
-            Roll = await Http.GetFromJsonAsync<ScienceLessonRollForSubmit>($"api/Rolls/ForSubmit/{RollId}");
-            Roll.LessonDate = DateTime.Today;
-
-            Command = new SubmitScienceLessonRollCommand();
-            Command.RollId = RollId;
-            Command.UserEmail = authState.User.Identity.Name;
+            Roll = await Http.GetFromJsonAsync<ScienceLessonRollForSubmit>($"api/Rolls/ForSubmit/{RollId}?lessonId={LessonId}");
         }
 
         IsLoading = false;
@@ -144,15 +141,28 @@
     {
         IsLoading = true;
 
-        Command.LessonDate = Roll.LessonDate;
-        Command.Comment = Roll.Comment;
+        List<string> presentStudents = Roll.Attendance
+            .Where(entry => entry.Present)
+            .Select(entry => entry.StudentId)
+            .ToList();
 
-        foreach (var entry in Roll.Attendance)
-        {
-            Command.Attendance.Add(entry.Id, entry.Present);
-        }
+        List<string> absentStudents = Roll.Attendance
+            .Where(entry => !entry.Present)
+            .Select(entry => entry.StudentId)
+            .ToList();
 
-        await Http.PostAsJsonAsync<SubmitScienceLessonRollCommand>($"api/Rolls/Submit/{RollId}", Command);
+        SciencePracLessonId lessonId = SciencePracLessonId.FromValue(LessonId);
+        SciencePracRollId rollId = SciencePracRollId.FromValue(RollId);
+
+        SubmitRollCommand command = new(
+            lessonId,
+            rollId,
+            Roll.LessonDate,
+            Roll.Comment,
+            presentStudents,
+            absentStudents);
+
+        await Http.PostAsJsonAsync<SubmitRollCommand>($"api/Rolls/Submit/{RollId}?lessonId={LessonId}", command);
 
         IsLoading = false;
 

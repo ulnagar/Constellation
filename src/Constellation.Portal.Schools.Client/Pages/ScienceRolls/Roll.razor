@@ -1,5 +1,5 @@
-﻿@page "/ScienceRolls/{RollId:guid}"
-@using Constellation.Application.Features.Portal.School.ScienceRolls.Models;
+﻿@page "/ScienceRolls/{LessonId:guid}/{RollId:guid}"
+@using Constellation.Application.SciencePracs.GetLessonRollDetailsForSchoolsPortal;
 
 @attribute [Authorize]
 
@@ -90,9 +90,12 @@
     [Parameter]
     public Guid RollId { get; set; }
 
+    [Parameter]
+    public Guid LessonId { get; set; }
+
     public bool Editable { get; set; }
 
-    public ScienceLessonRollForDetails MarkedRoll { get; set; } = new();
+    public ScienceLessonRollDetails MarkedRoll { get; set; } = new();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -102,9 +105,9 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            MarkedRoll = await Http.GetFromJsonAsync<ScienceLessonRollForDetails>($"api/Rolls/Details/{RollId}");
+            MarkedRoll = await Http.GetFromJsonAsync<ScienceLessonRollDetails>($"api/Rolls/Details/{RollId}?lessonId={LessonId}");
 
-            if (MarkedRoll.LessonDate > DateTime.Today.AddDays(-14))
+            if (MarkedRoll.LessonDate > DateOnly.FromDateTime(DateTime.Today.AddDays(-14)))
             {
                 Editable = true;
             }
