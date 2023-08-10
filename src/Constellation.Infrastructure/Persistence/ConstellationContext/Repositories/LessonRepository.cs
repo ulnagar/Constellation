@@ -74,6 +74,16 @@ public class LessonRepository : ILessonRepository
             .Where(lesson => lesson.Offerings.Any(record => record.OfferingId == OfferingId))
             .ToListAsync(cancellationToken);
         
+    public async Task<List<SciencePracLesson>> GetAllForStudent(
+        string StudentId, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SciencePracLesson>()
+            .Where(lesson => lesson.Rolls.Any(roll => 
+                roll.Attendance.Any(attendance => 
+                    attendance.StudentId == StudentId)))
+            .ToListAsync(cancellationToken);
+
     public async Task<SciencePracLesson> GetById(
         SciencePracLessonId LessonId,
         CancellationToken cancellationToken = default) =>

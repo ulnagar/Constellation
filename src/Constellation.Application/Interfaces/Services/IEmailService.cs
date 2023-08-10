@@ -24,7 +24,7 @@ public interface IEmailService
 
     // Lesson Emails
     Task SendLessonMissedEmail(LessonMissedNotificationEmail notification);
-
+    Task SendStudentLessonCompletedEmail(Student student, string lessonName, string courseName, CancellationToken cancellationToken);
 
     // Absence Emails
     Task SendAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail);

@@ -46,6 +46,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             CancellationToken cancellationToken = default) =>
             await _context
                 .Set<CourseOffering>()
+                .Include(offering => offering.Enrolments)
                 .Where(offering => offering.Id == offeringId)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -293,11 +294,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ThenInclude(session => session.Teacher)
                 .Include(offering => offering.Sessions)
                 .ThenInclude(session => session.Period)
-                .Include(offering => offering.Lessons)
-                .ThenInclude(lesson => lesson.Rolls)
-                .ThenInclude(roll => roll.Attendance)
-                .ThenInclude(attend => attend.Student)
-                .ThenInclude(student => student.School)
                 .SingleOrDefaultAsync(offering => offering.Id == id);
         }
 

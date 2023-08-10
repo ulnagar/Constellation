@@ -1,55 +1,64 @@
-﻿using Constellation.Application.Features.Partners.Students.Notifications;
+﻿namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.StudentWithdrawn;
+
+using Constellation.Application.Features.Partners.Students.Notifications;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions;
+using Constellation.Core.Enums;
+using Constellation.Core.Models.SciencePracs;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.StudentWithdrawn
+public class RemoveOutstandingLessonRolls 
+    : INotificationHandler<StudentWithdrawnNotification>
 {
-    public class RemoveOutstandingLessonRolls : INotificationHandler<StudentWithdrawnNotification>
+    private readonly ILogger _logger;
+    private readonly ILessonRepository _lessonRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public RemoveOutstandingLessonRolls(
+        ILessonRepository lessonRepository,
+        IUnitOfWork unitOfWork,
+        ILogger logger)
     {
-        private readonly IAppDbContext _context;
-        private readonly ILogger _logger;
+        _logger = logger.ForContext<StudentWithdrawnNotification>();
+        _lessonRepository = lessonRepository;
+        _unitOfWork = unitOfWork;
+    }
 
-        public RemoveOutstandingLessonRolls(IAppDbContext context, ILogger logger)
+    public async Task Handle(StudentWithdrawnNotification notification, CancellationToken cancellationToken)
+    {
+        _logger.Information("Attempting to remove student ({studentId}) from outstanding lesson rolls due to withdrawal event.", notification.StudentId);
+
+        List<SciencePracLesson> lessons = await _lessonRepository.GetAllForStudent(notification.StudentId);
+
+        List<SciencePracRoll> rolls = lessons
+            .SelectMany(lesson =>
+                lesson.Rolls.Where(roll =>
+                    roll.Attendance.Any(attendance =>
+                        attendance.StudentId == notification.StudentId) &&
+                    roll.Status == LessonStatus.Active))
+            .ToList();
+
+        foreach (SciencePracRoll roll in rolls)
         {
-            _context = context;
-            _logger = logger.ForContext<StudentWithdrawnNotification>();
-        }
+            SciencePracLesson lesson = lessons.First(lesson => lesson.Id == roll.LessonId);
 
-        public async Task Handle(StudentWithdrawnNotification notification, CancellationToken cancellationToken)
-        {
-            _logger.Information("Attempting to remove student ({studentId}) from outstanding lesson rolls due to withdrawal event.", notification.StudentId);
-            using var dbContextTransaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-
-            var lessons = await _context.LessonRolls
-                .Include(roll => roll.Attendance)
-                .Include(roll => roll.Lesson)
-                .Where(roll => roll.Attendance.Any(student => student.StudentId == notification.StudentId) && roll.Status == Core.Enums.LessonStatus.Active)
-                .ToListAsync(cancellationToken);
-
-            foreach (var lesson in lessons)
+            if (roll.Attendance.Count == 1)
             {
-                var attendance = lesson.Attendance.First(student => student.StudentId == notification.StudentId);
+                _logger.Information("Removing empty roll for lesson {lesson} at school {school}", lesson.Name, roll.SchoolCode);
 
-                lesson.Attendance.Remove(attendance);
-
-                _logger.Information("Removed student from lesson {lessonName}", lesson.Lesson.Name);
-
-                if (lesson.Attendance.Count < 1)
-                {
-                    _logger.Information("Removing empty roll for lesson {lesson} at school {school}", lesson.Lesson.Name, lesson.SchoolCode);
-                    _context.Remove(lesson);
-                }
+                lesson.Cancel();
             }
 
-            await _context.SaveChangesAsync(cancellationToken);
-
-            await dbContextTransaction.CommitAsync(cancellationToken);
-            _logger.Information("Finished removing student ({studentId}) from outstanding lesson rolls", notification.StudentId);
+            roll.RemoveStudent(notification.StudentId);
+            _logger.Information("Removed student from lesson {lessonName}", lesson.Name);
         }
+
+        await _unitOfWork.CompleteAsync(cancellationToken);
+
+        _logger.Information("Finished removing student ({studentId}) from outstanding lesson rolls", notification.StudentId);
     }
 }

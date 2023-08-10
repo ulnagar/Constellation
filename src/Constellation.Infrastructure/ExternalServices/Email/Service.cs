@@ -930,7 +930,32 @@ public class Service : IEmailService
         await _emailSender.Send(toRecipients, settings.LessonsCoordinatorEmail, viewModel.Title, body);
     }
 
+    public async Task SendStudentLessonCompletedEmail(
+        Student student,
+        string lessonName,
+        string courseName,
+        CancellationToken cancellationToken)
+    {
+        var viewModel = new StudentMarkedPresentEmailViewModel
+        {
+            Title = $"Congratulations on finishing your Science Prac!",
+            SenderName = "Silvia Rudmann",
+            SenderTitle = "R/Head Teacher Science and Agriculture",
+            Preheader = "",
+            StudentName = student.DisplayName,
+            LessonTitle = lessonName,
+            Subject = courseName
+        };
 
+        var toRecipients = new Dictionary<string, string>
+            {
+                { student.DisplayName, student.EmailAddress }
+            };
+
+        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/StudentMarkedPresentEmail.cshtml", viewModel);
+
+        await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+    }
 
     public async Task SendServiceLogEmail(ServiceLogEmail notification)
     {

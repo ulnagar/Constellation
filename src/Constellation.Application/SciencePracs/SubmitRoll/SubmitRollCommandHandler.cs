@@ -52,7 +52,8 @@ internal sealed class SubmitRollCommandHandler
             return Result.Failure(DomainErrors.SciencePracs.Roll.NotFound(request.RollId));
         }
 
-        Result submitRequest = roll.MarkRoll(
+        Result submitRequest = lesson.MarkRoll(
+            roll.Id,
             0,
             _currentUserService.UserName,
             request.LessonDate,

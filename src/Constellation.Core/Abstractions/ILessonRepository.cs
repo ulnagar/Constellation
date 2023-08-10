@@ -13,6 +13,7 @@ public interface ILessonRepository
     Task<List<SciencePracLesson>> GetAllForSchool(string SchoolCode, CancellationToken cancellationToken = default);
     Task<List<SciencePracLesson>> GetAllForOffering(int OfferingId, CancellationToken cancellationToken = default);
     Task<List<SciencePracLesson>> GetAllForCourse(int CourseId, CancellationToken cancellationToken = default);
+    Task<List<SciencePracLesson>> GetAllForStudent(string StudentId, CancellationToken cancellationToken = default);
     Task<SciencePracLesson> GetById(SciencePracLessonId LessonId, CancellationToken cancellationToken = default);
     void Insert(SciencePracLesson lesson);
 }

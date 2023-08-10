@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.SciencePracs;
 
+using Constellation.Core.DomainEvents;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
@@ -27,6 +28,8 @@ public sealed class SciencePracLesson : AggregateRoot
 
         foreach (int offering in offerings)
             AddOffering(offering);
+
+        RaiseDomainEvent(new SciencePracLessonCreatedDomainEvent(new(), Id));
     }
 
     public SciencePracLessonId Id { get; private set; }
@@ -52,6 +55,38 @@ public sealed class SciencePracLesson : AggregateRoot
             dueDate,
             offerings,
             doNotGenerateRolls);
+    }
+
+    public Result MarkRoll(
+        SciencePracRollId rollId,
+        int schoolContactId,
+        string submittedBy,
+        DateOnly lessonDate,
+        string comment,
+        List<string> presentStudents,
+        List<string> absentStudents)
+    {
+        SciencePracRoll roll = _rolls.FirstOrDefault(roll => roll.Id == rollId);
+
+        if (roll is null)
+        {
+            return Result.Failure(DomainErrors.SciencePracs.Roll.NotFound(rollId));
+        }
+
+        Result attempt = roll.MarkRoll(
+            schoolContactId,
+            submittedBy,
+            lessonDate,
+            comment,
+            presentStudents,
+            absentStudents);
+
+        if (attempt.IsFailure)
+            return attempt;
+
+        RaiseDomainEvent(new SciencePracRollSubmittedDomainEvent(new(), Id, rollId));
+
+        return Result.Success();
     }
 
     public void AddOffering(int offering)

@@ -37,7 +37,7 @@ public sealed class SciencePracRoll
     public LessonStatus Status { get; private set; }
     public int NotificationCount { get; private set; }
 
-    public Result MarkRoll(
+    internal Result MarkRoll(
         int schoolContactId,
         string submittedBy,
         DateOnly lessonDate,
@@ -103,6 +103,28 @@ public sealed class SciencePracRoll
         Comment = null;
 
         return Result.Success();
+    }
+
+    public void AddStudent(string studentId)
+    {
+        SciencePracAttendance record = _attendance.FirstOrDefault(entry => entry.StudentId == studentId);
+        
+        if (record is not null)
+            return;
+
+        _attendance.Add(new(
+            Id,
+            studentId));
+    }
+
+    public void RemoveStudent(string studentId)
+    {
+        SciencePracAttendance record = _attendance.FirstOrDefault(entry => entry.StudentId == studentId);
+
+        if (record is null)
+            return;
+
+        _attendance.Remove(record);
     }
 
     public void IncrementNotificationCount() => NotificationCount++;
