@@ -14,6 +14,9 @@ public sealed class SciencePracLesson : AggregateRoot
     private readonly List<SciencePracLessonOffering> _offerings = new();
     private readonly List<SciencePracRoll> _rolls = new();
     
+    // Required for EF Core
+    private SciencePracLesson() { }
+
     private SciencePracLesson(
         string name,
         DateOnly dueDate,

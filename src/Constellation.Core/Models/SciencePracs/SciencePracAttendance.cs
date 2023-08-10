@@ -5,12 +5,12 @@ using Constellation.Core.Models.Identifiers;
 public sealed class SciencePracAttendance
 {
     public SciencePracAttendance(
-        SciencePracRollId rollId,
+        SciencePracRollId sciencePracRollId,
         string studentId)
     {
         Id = new();
 
-        SciencePracRollId = rollId;
+        SciencePracRollId = sciencePracRollId;
         StudentId = studentId;
     }
 

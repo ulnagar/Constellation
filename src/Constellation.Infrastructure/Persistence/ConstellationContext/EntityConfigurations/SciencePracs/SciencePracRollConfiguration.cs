@@ -3,6 +3,7 @@
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -20,6 +21,10 @@ public class SciencePracRollConfiguration : IEntityTypeConfiguration<SciencePrac
             .HasConversion(
                 id => id.Value,
                 value => SciencePracRollId.FromValue(value));
+
+        builder
+            .Property(roll => roll.LessonDate)
+            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .HasOne<School>()
