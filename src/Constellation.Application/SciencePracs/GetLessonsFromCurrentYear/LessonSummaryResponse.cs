@@ -5,7 +5,9 @@ using System;
 
 public sealed record LessonSummaryResponse(
     SciencePracLessonId LessonId,
+    string CourseName,
     string Name,
     DateOnly DueDate,
-    int OutstandingRolls,
-    int TotalRolls);
+    int CompletedRolls,
+    int TotalRolls,
+    bool Overdue);

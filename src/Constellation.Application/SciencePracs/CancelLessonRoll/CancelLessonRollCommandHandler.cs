@@ -71,6 +71,8 @@ internal sealed class CancelLessonRollCommandHandler
             return Result.Failure(cancelRequest.Error);
         }
 
+        await _unitOfWork.CompleteAsync(cancellationToken);
+
         return Result.Success();
     }
 }

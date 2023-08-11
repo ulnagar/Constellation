@@ -319,6 +319,10 @@ img.training.status-icon.blink {
     overflow: auto;
 }
 
+.page-menu:has(button.dropdown-toggle) {
+    overflow: visible;
+}
+
 /* Change Checkbox input into css toggle switch */
 
 input.checkbox-toggle {

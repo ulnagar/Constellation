@@ -16,7 +16,7 @@
 <form asp-page-handler="Submit" method="post">
     <div class="form-horizontal">
 
-        <div class="row">
+        <div class="form-group row">
             <label asp-for="LessonName" class="col-md-2"></label>
             <div class="col-md-5">
                 <input asp-for="LessonName" class="form-control" />
@@ -24,16 +24,16 @@
             </div>
         </div>
 
-        <div class="row">
+        <div class="form-group row">
             <label asp-for="DueDate" class="col-md-2"></label>
             <div class="col-md-5">
-                <input asp-for="DueDate" class="form-control" />
+                <input asp-for="DueDate" class="form-control" type="date" value="@Model.DueDate.ToString("yyyy")-@Model.DueDate.ToString("MM")-@Model.DueDate.ToString("dd")" />
                 <span asp-validation-for="DueDate" class="text-danger"></span>
             </div>
         </div>
 
-        <div class="row">
-            <label asp-for="CourseId" class="col-md-2"></label>
+        <div class="form-group row">
+            <label asp-for="CourseId" class="col-md-2">Course</label>
             <div class="col-md-5">
                 @if (Model.Id.HasValue)
                 {
@@ -52,8 +52,8 @@
 
         @if (!Model.Id.HasValue)
         {
-            <div class="row">
-                <label asp-for="DoNotGenerateRolls" class="col-md-2"></label>
+            <div class="form-group row">
+                <label asp-for="DoNotGenerateRolls" class="col-md-2">Skip Creating Rolls</label>
                 <div class="col-md-5">
                     <input asp-for="DoNotGenerateRolls" class="form-control" />
                     <span asp-validation-for="DoNotGenerateRolls" class="text-danger"></span>

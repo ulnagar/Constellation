@@ -34,7 +34,8 @@ public class SciencePracRollConfiguration : IEntityTypeConfiguration<SciencePrac
         builder
             .HasMany(roll => roll.Attendance)
             .WithOne()
-            .HasForeignKey(attendance => attendance.SciencePracRollId);
+            .HasForeignKey(attendance => attendance.SciencePracRollId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .Navigation(roll => roll.Attendance)

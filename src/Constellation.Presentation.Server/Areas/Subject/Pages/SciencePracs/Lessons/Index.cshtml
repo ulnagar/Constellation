@@ -1,6 +1,7 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Lessons.IndexModel
 
+@using Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Lessons
 @inject IAuthorizationService authService
 
 @{
@@ -10,9 +11,39 @@
 <h2>Science Prac Lessons</h2>
 
 <div class="page-menu">
+    @{
+        var all_style = "btn-outline-secondary";
+        var overdue_style = all_style;
+        var current_style = all_style;
+        var future_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case IndexModel.FilterDto.All:
+                all_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Overdue:
+                overdue_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Current:
+                current_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Future:
+                future_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Overdue" class="btn @overdue_style">Overdue</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Current" class="btn @current_style">Current</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Future" class="btn @future_style">Future</a>
+    </div>
+
     @if (canEditTest.Succeeded)
     {
-        <a asp-page="Upsert" asp-area="Subject" class="btn btn-primary">Create</a>
+        <a asp-page="Upsert" asp-area="Subject" class="btn btn-success">Create</a>
     }
 </div>
 
@@ -23,6 +54,7 @@
         <tr>
             <th></th>
             <th>Due Date</th>
+            <th>Course</th>
             <th>Name</th>
             <th>Completed</th>
             <th></th>
@@ -32,12 +64,18 @@
         @foreach (var response in Model.Lessons)
         {
             <tr>
-                <td></td>
-                <td>@response.DueDate.ToShortDateString()</td>
-                <td>@response.Name</td>
-                <td>@response.OutstandingRolls / @response.TotalRolls</td>
                 <td>
-                    <a asp-page="Details" asp-area="Subject" asp-route-id="@response.LessonId" class="btn btn-secondary btn-show-hover">More Info...</a>
+                    @if (response.Overdue)
+                    {
+                        <i class="fal fa-alarm-exclamation"></i>
+                    }
+                </td>
+                <td>@response.DueDate.ToShortDateString()</td>
+                <td>@response.CourseName</td>
+                <td>@response.Name</td>
+                <td>@response.CompletedRolls / @response.TotalRolls</td>
+                <td>
+                    <a asp-page="Details" asp-area="Subject" asp-route-id="@response.LessonId" class="btn btn-info btn-show-hover">More Info...</a>
                 </td>
             </tr>
         }

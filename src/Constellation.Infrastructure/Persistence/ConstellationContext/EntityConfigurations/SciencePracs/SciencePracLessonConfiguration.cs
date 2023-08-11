@@ -27,12 +27,14 @@ public class SciencePracLessonConfiguration : IEntityTypeConfiguration<SciencePr
 
         builder
             .HasMany(lesson => lesson.Offerings)
-            .WithOne();
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasMany(lesson => lesson.Rolls)
             .WithOne()
-            .HasForeignKey(roll => roll.LessonId);
+            .HasForeignKey(roll => roll.LessonId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .Navigation(lesson => lesson.Offerings)

@@ -48,7 +48,9 @@ internal sealed class CancelLessonCommandHandler
             return Result.Failure(DomainErrors.SciencePracs.Lesson.RollCompleted);
         }
 
-        lesson.Cancel();
+        _lessonRepository.Delete(lesson);
+
+        await _unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();
     }

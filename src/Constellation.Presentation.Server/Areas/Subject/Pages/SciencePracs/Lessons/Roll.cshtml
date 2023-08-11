@@ -1,4 +1,5 @@
-﻿@page "/SciencePracs/Lessons/{lessonId:guid}/Roll/{rollId:guid}"
+﻿@page "/Subject/SciencePracs/Lessons/{lessonId:guid}/Roll/{rollId:guid}"
+@using Constellation.Core.Enums;
 @model Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Lessons.RollModel
 
 @inject IAuthorizationService authService
@@ -12,8 +13,8 @@
 <div class="page-menu">
     @if (canManageTest.Succeeded && Model.Roll.Status == Constellation.Core.Enums.LessonStatus.Active)
     {
-        <a asp-page="Submit" asp-area="Subject" asp-route-lessonId="@Model.LessonId" asp-route-rollId="@Model.RollId" class="btn btn-default">Submit Roll</a>
-        <a asp-page-handler="Cancel" asp-area="Subject" asp-route-lessonId="@Model.LessonId" asp-route-rollId="@Model.RollId" class="btn btn-danger">Cancel</a>
+        <a asp-page="Submit" asp-area="Subject" asp-route-lessonId="@Model.LessonId" asp-route-rollId="@Model.RollId" class="btn btn-success">Submit Roll</a>
+        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#cancel-roll-modal">Cancel</button>
         <div class="btn-group" role="group">
             <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Send Notification
@@ -38,7 +39,7 @@
 <div>
     <dl class="row">
         <dt class="col-md-2">
-            <label asp-for="Roll.LessonId"></label>
+            <label asp-for="Roll.LessonId">Id</label>
         </dt>
         <dd class="col-md-10">
             <span>@Model.Roll.LessonId</span>
@@ -52,14 +53,14 @@
         </dd>
 
         <dt class="col-md-2">
-            <label asp-for="Roll.DueDate"></label>
+            <label asp-for="Roll.DueDate">Due Date</label>
         </dt>
         <dd class="col-md-10">
             <span>@Model.Roll.DueDate.ToShortDateString()</span>
         </dd>
 
         <dt class="col-md-2">
-            <label asp-for="Roll.SchoolName"></label>
+            <label asp-for="Roll.SchoolName">School</label>
         </dt>
         <dd class="col-md-10">
             <span>@Model.Roll.SchoolCode - @Model.Roll.SchoolName</span>
@@ -71,6 +72,16 @@
         <dd class="col-md-10">
             <span>@Model.Roll.Status.ToString()</span>
         </dd>
+
+        @if (Model.Roll.Status == LessonStatus.Active)
+        {
+            <dt class="col-md-2">
+                <label asp-for="Roll.NotificationCount">Notifications Sent</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Roll.NotificationCount</span>
+            </dd>
+        }
     </dl>
 </div>
 
@@ -83,21 +94,21 @@
     <div>
         <dl class="row">
             <dt class="col-md-2">
-                <label asp-for="Roll.ContactDetails"></label>
+                <label asp-for="Roll.ContactDetails">Submitted By</label>
             </dt>
             <dd class="col-md-10">
                 <span>@Model.Roll.ContactDetails.ContactName.DisplayName (@Model.Roll.ContactDetails.ContactEmail)</span>
             </dd>
 
             <dt class="col-md-2">
-                <label asp-for="Roll.DateDelivered"></label>
+                <label asp-for="Roll.DateDelivered">Date Delivered</label>
             </dt>
             <dd class="col-md-10">
                 <span>@Model.Roll.DateDelivered.Value.ToShortDateString()</span>
             </dd>
 
             <dt class="col-md-2">
-                <label asp-for="Roll.DateSubmitted"></label>
+                <label asp-for="Roll.DateSubmitted">Date Submitted</label>
             </dt>
             <dd class="col-md-10">
                 <span>@Model.Roll.DateSubmitted.Value</span>
@@ -136,3 +147,24 @@
         }
     </tbody>
 </table>
+
+<div class="modal fade" tabindex="-1" id="cancel-roll-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel Roll</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group col">
+                        <span class="control-label">Are you sure you want to cancel this roll?</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a asp-page-handler="Cancel" asp-area="Subject" asp-route-lessonId="@Model.LessonId" asp-route-rollId="@Model.RollId" class="btn btn-danger">Cancel Roll</a>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

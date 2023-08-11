@@ -398,6 +398,10 @@ public static class DomainErrors
             public static readonly Error RollCompleted = new(
                 "SciencePracs.Lesson.RollCompleted",
                 "Cannot cancel a lesson that has completed rolls");
+
+            public static readonly Error CannotEdit = new(
+                "SciencePracs.Lesson.CannotEdit",
+                "Cannot edit a lesson after a roll has been submitted");
         }
 
         public static class Roll
@@ -413,6 +417,10 @@ public static class DomainErrors
             public static readonly Error CannotCancelCompletedRoll = new(
                 "SciencePracs.Rolls.CannotCancelCompletedRolls",
                 "Cannot mark roll cancelled if it has already been submitted as marked");
+
+            public static readonly Error CannotReinstateRoll = new(
+                "SciencePracs.Rolls.CannotReinstateRoll",
+                "Cannot reinstate a roll that has not been cancelled");
 
             public static readonly Func<SciencePracRollId, Error> NotFound = id => new(
                 "SciencePracs.Rolls.NotFound",

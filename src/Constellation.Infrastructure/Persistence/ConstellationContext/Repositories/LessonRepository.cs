@@ -92,4 +92,6 @@ public class LessonRepository : ILessonRepository
             .SingleOrDefaultAsync(lesson => lesson.Id == LessonId, cancellationToken);
 
     public void Insert(SciencePracLesson lesson) => _context.Set<SciencePracLesson>().Add(lesson);
+
+    public void Delete(SciencePracLesson lesson) => _context.Set<SciencePracLesson>().Remove(lesson);
 }

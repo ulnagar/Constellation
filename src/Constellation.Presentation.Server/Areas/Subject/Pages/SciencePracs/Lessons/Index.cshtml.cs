@@ -22,6 +22,9 @@ public class IndexModel : BasePageModel
     [ViewData]
     public string ActivePage => "Lessons";
 
+    [BindProperty(SupportsGet = true)]
+    public FilterDto Filter { get; set; } = FilterDto.Current;
+
     public List<LessonSummaryResponse> Lessons { get; set; } = new();
 
     public async Task OnGet()
@@ -41,6 +44,23 @@ public class IndexModel : BasePageModel
             return;
         }
 
-        Lessons = lessonRequest.Value;
+        Lessons = Filter switch
+        {
+            FilterDto.All => lessonRequest.Value,
+            FilterDto.Overdue => lessonRequest.Value.Where(lesson => lesson.Overdue).ToList(),
+            FilterDto.Current => lessonRequest.Value.Where(lesson => lesson.Overdue || lesson.DueDate >= DateOnly.FromDateTime(DateTime.Today)).ToList(),
+            FilterDto.Future => lessonRequest.Value.Where(lesson => lesson.DueDate >= DateOnly.FromDateTime(DateTime.Today)).ToList(),
+            _ => lessonRequest.Value
+        };
+
+        Lessons = Lessons.OrderBy(lesson => lesson.DueDate).ToList();
+    }
+
+    public enum FilterDto
+    {
+        All,
+        Overdue,
+        Current,
+        Future
     }
 }

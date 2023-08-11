@@ -7,7 +7,9 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Shared;
+using Microsoft.Extensions.Primitives;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -18,17 +20,20 @@ internal sealed class GetLessonDetailsQueryHandler
 {
     private readonly ILessonRepository _lessonRepository;
     private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly ILogger _logger;
 
     public GetLessonDetailsQueryHandler(
         ILessonRepository lessonRepository,
         ICourseOfferingRepository offeringRepository,
+        ICourseRepository courseRepository,
         ISchoolRepository schoolRepository,
         ILogger logger)
     {
         _lessonRepository = lessonRepository;
         _offeringRepository = offeringRepository;
+        _courseRepository = courseRepository;
         _schoolRepository = schoolRepository;
         _logger = logger.ForContext<GetLessonDetailsQuery>();
     }
@@ -65,6 +70,8 @@ internal sealed class GetLessonDetailsQueryHandler
             if (school is null)
                 continue;
 
+            bool overdue = lesson.DueDate <= DateOnly.FromDateTime(DateTime.Today) && roll.Status == Core.Enums.LessonStatus.Active;
+
             LessonDetailsResponse.LessonRollSummary rollSummary = new(
                 roll.Id,
                 school.Code,
@@ -72,13 +79,21 @@ internal sealed class GetLessonDetailsQueryHandler
                 roll.Status,
                 roll.Attendance.Count(attendance => attendance.Present),
                 roll.Attendance.Count(),
-                roll.NotificationCount);
+                roll.NotificationCount,
+                overdue);
 
             rollSummaries.Add(rollSummary);
         }
 
+        Course course = await _courseRepository.GetByLessonId(lesson.Id, cancellationToken);
+
+        string courseName = $"{course?.Grade} {course?.Name}";
+        int courseId = course?.Id ?? 0;
+
         LessonDetailsResponse response = new(
             lesson.Id,
+            courseId,
+            courseName,
             lesson.Name,
             lesson.DueDate,
             offerings,

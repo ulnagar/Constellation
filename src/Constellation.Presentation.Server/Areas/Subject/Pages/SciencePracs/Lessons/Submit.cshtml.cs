@@ -40,7 +40,7 @@ public class SubmitModel : BasePageModel
     public DateOnly LessonDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
     [BindProperty]
-    public List<AttendanceRecord> Attendance { get; set; }
+    public List<AttendanceRecord> Attendance { get; set; } = new();
 
     [BindProperty]
     public string Comment { get; set; }

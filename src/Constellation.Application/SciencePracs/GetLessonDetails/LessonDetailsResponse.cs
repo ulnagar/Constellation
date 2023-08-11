@@ -7,6 +7,8 @@ using System.Collections.Generic;
 
 public sealed record LessonDetailsResponse(
     SciencePracLessonId LessonId,
+    int CourseId,
+    string CourseName,
     string Name,
     DateOnly DueDate,
     List<string> Offerings,
@@ -19,5 +21,6 @@ public sealed record LessonDetailsResponse(
         LessonStatus Status,
         int PresentStudents,
         int TotalStudents,
-        int NotificationCount);
+        int NotificationCount,
+        bool Overdue);
 }

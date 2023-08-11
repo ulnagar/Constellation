@@ -1,10 +1,13 @@
 ﻿namespace Constellation.Application.SciencePracs.GetLessonsFromCurrentYear;
 
 using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
+using Constellation.Core.Models;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Shared;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -14,13 +17,16 @@ internal sealed class GetLessonsFromCurrentYearQueryHandler
     : IQueryHandler<GetLessonsFromCurrentYearQuery, List<LessonSummaryResponse>>
 {
     private readonly ILessonRepository _lessonRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly ILogger _logger;
 
     public GetLessonsFromCurrentYearQueryHandler(
         ILessonRepository lessonRepository,
+        ICourseRepository courseRepository,
         ILogger logger)
     {
         _lessonRepository = lessonRepository;
+        _courseRepository = courseRepository;
         _logger = logger.ForContext<GetLessonsFromCurrentYearQuery>();
     }
 
@@ -32,12 +38,20 @@ internal sealed class GetLessonsFromCurrentYearQueryHandler
 
         foreach (SciencePracLesson lesson in lessons)
         {
+            Course course = await _courseRepository.GetByLessonId(lesson.Id, cancellationToken);
+
+            string courseName = $"{course?.Grade} {course?.Name}";
+
+            bool overdue = lesson.Rolls.Any(roll => roll.Status == Core.Enums.LessonStatus.Active) && lesson.DueDate < DateOnly.FromDateTime(DateTime.Today);
+
             LessonSummaryResponse summary = new(
                 lesson.Id,
+                courseName,
                 lesson.Name,
                 lesson.DueDate,
-                lesson.Rolls.Count(roll => roll.Status == Core.Enums.LessonStatus.Active),
-                lesson.Rolls.Count());
+                lesson.Rolls.Count(roll => roll.Status != Core.Enums.LessonStatus.Active),
+                lesson.Rolls.Count(),
+                overdue);
 
             response.Add(summary);
         }

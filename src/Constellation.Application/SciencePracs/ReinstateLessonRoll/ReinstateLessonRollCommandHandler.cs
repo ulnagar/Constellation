@@ -48,11 +48,11 @@ internal sealed class ReinstateLessonRollCommandHandler
             return Result.Failure(DomainErrors.SciencePracs.Roll.NotFound(request.RollId));
         }
 
-        if (roll.Status != Core.Enums.LessonStatus.Active)
+        if (roll.Status != Core.Enums.LessonStatus.Cancelled)
         {
-            _logger.Warning("Cannot cancel a roll that has already been submitted");
+            _logger.Warning("Cannot reinstate a roll that has not already been submitted");
 
-            return Result.Failure(DomainErrors.SciencePracs.Roll.CannotCancelCompletedRoll);
+            return Result.Failure(DomainErrors.SciencePracs.Roll.CannotReinstateRoll);
         }
 
         Result reinstateRequest = roll.ReinstateRoll();
@@ -65,6 +65,8 @@ internal sealed class ReinstateLessonRollCommandHandler
 
             return Result.Failure(reinstateRequest.Error);
         }
+
+        await _unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();
     }

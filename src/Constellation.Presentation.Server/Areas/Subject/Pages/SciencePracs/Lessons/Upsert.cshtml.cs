@@ -5,6 +5,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.SciencePracs.CreateLesson;
 using Constellation.Application.SciencePracs.GetLessonDetails;
 using Constellation.Application.SciencePracs.UpdateLesson;
+using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
@@ -17,11 +18,14 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 public class UpsertModel : BasePageModel
 {
     private readonly IMediator _mediator;
+    private readonly LinkGenerator _linkGenerator;
 
     public UpsertModel(
-        IMediator mediator)
+        IMediator mediator,
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
+        _linkGenerator = linkGenerator;
     }
 
     [ViewData]
@@ -47,6 +51,8 @@ public class UpsertModel : BasePageModel
 
         await BuildCourseSelectList();
 
+        DueDate = DateOnly.FromDateTime(DateTime.Today);
+
         if (Id.HasValue)
         {
             SciencePracLessonId lessonId = SciencePracLessonId.FromValue(Id.Value);
@@ -58,14 +64,24 @@ public class UpsertModel : BasePageModel
                 Error = new()
                 {
                     Error = lessonResponse.Error,
-                    RedirectPath = null
+                    RedirectPath = _linkGenerator.GetPathByPage("/SciencePracs/Lessons/Details", values: new { area = "Subject", id = Id })
                 };
 
                 return;
             }
 
+            if (lessonResponse.Value.Rolls.Any(roll => roll.Status == Core.Enums.LessonStatus.Completed))
+            {
+                Error = new()
+                {
+                    Error = DomainErrors.SciencePracs.Lesson.CannotEdit,
+                    RedirectPath = _linkGenerator.GetPathByPage("/SciencePracs/Lessons/Details", values: new { area = "Subject", id = Id })
+                };
+            }
+
             LessonName = lessonResponse.Value.Name;
             DueDate = lessonResponse.Value.DueDate;
+            CourseId = lessonResponse.Value.CourseId;
         }
     }
 
