@@ -41,6 +41,7 @@ public sealed class Name : ValueObject
     public string PreferredName { get; }
     public string LastName { get; }
     public string DisplayName => $"{(string.IsNullOrEmpty(PreferredName) ? FirstName : PreferredName)} {LastName}";
+    public string SortOrder => $"{LastName}, {(string.IsNullOrEmpty(PreferredName) ? FirstName : PreferredName)}";
 
     public override IEnumerable<object> GetAtomicValues()
     {

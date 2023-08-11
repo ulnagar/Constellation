@@ -1,0 +1,63 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Teachers.IndexModel
+
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAbsences);
+}
+
+<h2>Science Practical Teachers</h2>
+
+<div class="page-menu">
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="Upsert" asp-area="Subject" class="btn btn-info">Create</a>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>School</th>
+            <th>Email</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Contacts)
+        {
+            <tr>
+                <td>
+                    @if (item.SelfRegistered)
+                    {
+                        <i class="fal fa-flag"></i>
+                    }
+                </td>
+                <td>@item.ContactName.DisplayName</td>
+                <td>@item.SchoolName</td>
+                <td>@item.ContactEmail.Email</td>
+                <td>
+                    @if (canEditTest.Succeeded)
+                    {
+                        <div class="btn-group" role="group">
+                            <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                            <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                <a asp-page="Upsert" asp-area="Subject" asp-route-id="@item.Id" class="dropdown-item">Edit Contact</a>
+                                <a asp-action="AddAssignment" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.Id" class="dropdown-item">Add Role</a> <!-- Convert to Modal -->
+                                <a asp-action="DeleteAssignment" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.RoleId" class="dropdown-item">Remove Role</a> <!-- Convert to Modal for confirmation -->
+                                <div class="dropdown-divider"></div>
+                                <a asp-page="Audit" asp-area="Subject" asp-route-id="@item.Id" class="dropdown-item">Audit Account</a>
+                            </div>
+                        </div>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

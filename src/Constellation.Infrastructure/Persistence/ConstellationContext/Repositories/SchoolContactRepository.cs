@@ -66,6 +66,19 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                         role.Role == selectedRole))
                 .ToListAsync(cancellationToken);
 
+        public async Task<List<SchoolContact>> GetAllByRole(
+            string selectedRole,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<SchoolContact>()
+                .Include(contact => contact.Assignments.Where(role => !role.IsDeleted))
+                .ThenInclude(assignment => assignment.School)
+                .Where(contact => 
+                    contact.Assignments.Any(role =>
+                        !role.IsDeleted &&
+                        role.Role == selectedRole))
+                .ToListAsync(cancellationToken);
+
         private IQueryable<SchoolContact> Collection()
         {
             return _context.SchoolContacts

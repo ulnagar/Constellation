@@ -1,0 +1,9 @@
+﻿td:has(i) {
+    text-align: center;
+}
+
+i.fa-flag {
+    color: red;
+    font-size: 1.5rem;
+    line-height: 1.5;
+}
