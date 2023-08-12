@@ -9,6 +9,7 @@ using FluentValidation;
 using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
@@ -41,6 +42,8 @@ GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<IAppDbContext>();
 
+
+
 builder.Services.AddRazorPages();
 builder.Services.AddMvc()
     .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
@@ -48,6 +51,12 @@ builder.Services.AddMvc()
 builder.Services.AddDateOnlyTimeOnlyStringConverters();
 
 builder.Services.Replace(ServiceDescriptor.Singleton<IHtmlGenerator, CustomHtmlGenerator>());
+
+builder.Services.Configure<RazorViewEngineOptions>(options =>
+{
+    options.AreaPageViewLocationFormats.Add("/Pages/Shared/PartialViews/{0}/{0}" + RazorViewEngine.ViewExtension);
+    options.AreaPageViewLocationFormats.Add("/Pages/Shared/PartialViews/{1}/{1}" + RazorViewEngine.ViewExtension);
+});
 
 builder.WebHost.UseStaticWebAssets();
 

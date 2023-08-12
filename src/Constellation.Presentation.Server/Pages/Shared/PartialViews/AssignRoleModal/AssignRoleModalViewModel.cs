@@ -1,0 +1,13 @@
+﻿namespace Constellation.Presentation.Server.Pages.Shared.PartialViews.AssignRoleModal;
+
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+public class AssignRoleModalViewModel
+{
+    public string SchoolCode { get; set; }
+    public string RoleName { get; set; }
+    public int ContactId { get; set; }
+
+    public SelectList Roles { get; set; }
+    public SelectList Schools { get; set; }
+}

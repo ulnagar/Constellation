@@ -1,0 +1,33 @@
+﻿@model AssignRoleModalViewModel
+
+<form asp-page-handler="CreateAssignment" asp-page="/SciencePracs/Teachers/Index" asp-area="Subject" method="post">
+    <div class="modal-header">
+        <h5 class="modal-title">Assign Role</h5>
+    </div>
+    <div class="modal-body">
+        <div class="form-group row">
+            @Html.HiddenFor(model => model.ContactId)
+            <label asp-for="SchoolCode" class="col-md-2">School</label>
+            <div class="col-md-6">
+                <select asp-for="SchoolCode" asp-items="@Model.Schools" class="combo" style="width:100%">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="RoleName" class="col-md-2">Role</label>
+            <div class="col-md-6">
+                <select asp-for="RoleName" asp-items="@Model.Roles" class="combo-with-tag" style="width:100%">
+                    <option value="-- Select or Enter --"></option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Assign Role</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>
+
+

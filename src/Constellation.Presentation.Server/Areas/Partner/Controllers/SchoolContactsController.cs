@@ -3,6 +3,7 @@ using Constellation.Application.Features.Partners.SchoolContacts.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Partner.Models;
@@ -139,12 +140,10 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> _AddAssignment(Contacts_AssignmentViewModel viewModel)
         {
-            await _mediator.Send(new CreateNewAssignmentForSchoolContactCommand
-            {
-                ContactId = viewModel.ContactRole.SchoolContactId,
-                SchoolCode = viewModel.ContactRole.SchoolCode,
-                Position = viewModel.ContactRole.Role
-            });
+            await _mediator.Send(new CreateContactRoleAssignmentCommand(
+                viewModel.ContactRole.SchoolContactId,
+                viewModel.ContactRole.SchoolCode,
+                viewModel.ContactRole.Role));
 
             if (viewModel.ReturnUrl == null)
                 return Redirect(Request.GetTypedHeaders().Referer.ToString());

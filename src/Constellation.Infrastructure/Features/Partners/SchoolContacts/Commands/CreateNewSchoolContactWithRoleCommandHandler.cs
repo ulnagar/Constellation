@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Commands;
 
 using Constellation.Application.Features.Partners.SchoolContacts.Commands;
+using Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
 
 public class CreateNewSchoolContactWithRoleCommandHandler : IRequestHandler<CreateNewSchoolContactWithRoleCommand>
 {
@@ -22,12 +23,11 @@ public class CreateNewSchoolContactWithRoleCommandHandler : IRequestHandler<Crea
             SelfRegistered = request.SelfRegistered
         }, cancellationToken);
 
-        await _mediator.Send(new CreateNewAssignmentForSchoolContactCommand
-        {
-            ContactId = contactId,
-            SchoolCode = request.SchoolCode,
-            Position = request.Position
-        }, cancellationToken);
+        await _mediator.Send(new CreateContactRoleAssignmentCommand(
+            contactId,
+            request.SchoolCode,
+            request.Position),
+            cancellationToken);
 
         return Unit.Value;
     }

@@ -3,12 +3,15 @@ using Constellation.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Repositories
 {
     public interface ISchoolContactRoleRepository
     {
+        Task<bool> Exists(int ContactId, string SchoolCode, string Position, CancellationToken cancellationToken = default);
+
         Task<SchoolContactRole> WithDetails(int id);
         SchoolContactRole WithFilter(Expression<Func<SchoolContactRole, bool>> predicate);
         ICollection<SchoolContactRole> All();

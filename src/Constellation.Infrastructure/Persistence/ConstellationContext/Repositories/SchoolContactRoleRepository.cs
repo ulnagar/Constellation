@@ -20,6 +20,20 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             _context = context;
         }
 
+        public async Task<bool> Exists(
+            int ContactId,
+            string SchoolCode,
+            string Position,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<SchoolContactRole>()
+                .AnyAsync(role =>
+                    !role.IsDeleted &&
+                    role.SchoolContactId == ContactId &&
+                    role.SchoolCode == SchoolCode &&
+                    role.Role == Position,
+                cancellationToken);
+
         private IQueryable<SchoolContactRole> Collection()
         {
             return _context.SchoolContactRoles

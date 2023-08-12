@@ -1,4 +1,5 @@
 ﻿@page
+@using Constellation.Core.Models;
 @model Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Teachers.IndexModel
 
 @inject IAuthorizationService authService
@@ -48,8 +49,8 @@
                             <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
                             <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                                 <a asp-page="Upsert" asp-area="Subject" asp-route-id="@item.Id" class="dropdown-item">Edit Contact</a>
-                                <a asp-action="AddAssignment" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.Id" class="dropdown-item">Add Role</a> <!-- Convert to Modal -->
-                                <a asp-action="DeleteAssignment" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.RoleId" class="dropdown-item">Remove Role</a> <!-- Convert to Modal for confirmation -->
+                                <button data-contact-id="@item.Id" class="dropdown-item create-assignment-button">Add Role</button>
+                                <button data-role-id="@item.RoleId" data-name="@item.ContactName.DisplayName" data-role="@SchoolContactRole.SciencePrac" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
                                 <div class="dropdown-divider"></div>
                                 <a asp-page="Audit" asp-area="Subject" asp-route-id="@item.Id" class="dropdown-item">Audit Account</a>
                             </div>
@@ -61,3 +62,56 @@
     </tbody>
 </table>
 
+@Html.AntiForgeryToken()
+
+<div class="modal fade" id="page-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $('.delete-role-button').click(function (event) {
+            var roleId = $(this).data("roleId");
+            var name = $(this).data("name");
+            var role = $(this).data("role");
+            var school = $(this).data("school");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxDelete",
+                type: "POST",
+                data: { 
+                    roleId: roleId,
+                    name: name,
+                    role: role,
+                    school: school,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.create-assignment-button').click(function (event) {
+            var contactId = $(this).data("contactId");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxAssign",
+                type: "POST",
+                data: {
+                    contactId: contactId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+    </script>
+}

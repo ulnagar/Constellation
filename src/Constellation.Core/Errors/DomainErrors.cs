@@ -320,6 +320,13 @@ public static class DomainErrors
 
     public static class Partners
     {
+        public static class Contact
+        {
+            public static readonly Func<int, Error> NotFound = id => new(
+                "Partners.Contact.NotFound",
+                $"Could not find a School Contact with the Id {id}");
+        }
+
         public static class School
         {
             public static readonly Func<string, Error> NotFound = id => new(
