@@ -75,6 +75,9 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
             if (token.IsCancellationRequested)
                 return;
 
+            if (entry.Teacher.Contains(','))
+                entry.Teacher = null;
+
             var emailDto = new RollMarkingEmailDto();
 
             var offeringName = entry.ClassName.StartsWith("5") || entry.ClassName.StartsWith("6") ? entry.ClassName.PadLeft(7, '0') : entry.ClassName.PadLeft(6, '0');
