@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Absences;
 using Constellation.Application.Absences.GetAbsenceDetails;
 using Constellation.Application.Absences.SendAbsenceNotificationToParent;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,7 @@ public class DetailsModel : BasePageModel
 
         AbsenceId absenceId = AbsenceId.FromValue(Id);
 
-        var result = await _mediator.Send(new GetAbsenceDetailsQuery(absenceId), cancellationToken);
+        Result<AbsenceDetailsResponse> result = await _mediator.Send(new GetAbsenceDetailsQuery(absenceId), cancellationToken);
 
         if (result.IsFailure)
         {

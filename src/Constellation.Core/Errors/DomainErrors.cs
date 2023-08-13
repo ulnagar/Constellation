@@ -18,6 +18,13 @@ public static class DomainErrors
                 $"Could not find any absence with the id {id}");
         }
 
+        public static class Notification
+        {
+            public static readonly Func<AbsenceNotificationId, Error> NotFound = id => new(
+                "Absences.Notification.NotFound",
+                $"Could not find any absence notification with the Id {id}");
+        }
+
         public static class Report
         {
             public static readonly Error NoFilterSupplied = new(

@@ -3,6 +3,7 @@
 
 @using Constellation.Application.Extensions
 @using Constellation.Core.Models.Absences;
+@using Constellation.Core.Models.Identifiers;
 
 @inject IAuthorizationService authorizationService;
 
@@ -133,7 +134,16 @@
                         <tr>
                             <td>@item.Type.Value</td>
                             <td>@item.Recipients</td>
-                            <td>Click to view</td>
+                            <td>
+                                @if (item.Type == NotificationType.SMS)
+                                {
+                                    <span>@item.Message</span>
+                                }
+                                else
+                                {
+                                    <a asp-page="ViewEmail" asp-area="SchoolAdmin" asp-route-absenceGuid="@Model.Absence.AbsenceId" asp-route-notificationGuid="@item.NotificationId" target="_blank" class="btn btn-secondary">Click to view</a>
+                                }
+                            </td>
                             <td>@item.SentAt.ToShortDateString()</td>
                         </tr>
                     }
@@ -182,6 +192,22 @@
                     }
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="page-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Role</h5>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>
