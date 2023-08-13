@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Constellation.Application.Features.Partners.SchoolContacts.Commands;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.SchoolContacts.CreateContactWithRole;
 using Constellation.Application.Schools.UpsertSchool;
 using Constellation.Core.Models;
 
@@ -208,14 +208,15 @@ public class SchoolRegisterJob : ISchoolRegisterJob
                 // Does the email address appear in the SchoolContact list?
                 Console.WriteLine($" Adding new Principal: {csvSchool.PrincipalEmail}");
                 Console.WriteLine($" Linking Principal {csvSchool.PrincipalFirstName} {csvSchool.PrincipalLastName} with {csvSchool.Name}");
-                await _mediator.Send(new CreateNewSchoolContactWithRoleCommand
-                {
-                    FirstName = csvSchool.PrincipalFirstName,
-                    LastName = csvSchool.PrincipalLastName,
-                    EmailAddress = csvSchool.PrincipalEmail,
-                    SchoolCode = csvSchool.SchoolCode,
-                    Position = SchoolContactRole.Principal
-                }, token);
+                await _mediator.Send(new CreateContactWithRoleCommand(
+                    csvSchool.PrincipalFirstName,
+                    csvSchool.PrincipalLastName,
+                    csvSchool.PrincipalEmail,
+                    string.Empty,
+                    SchoolContactRole.Principal,
+                    csvSchool.SchoolCode,
+                    false),
+                    token);
             }
 
             await _unitOfWork.CompleteAsync(token);

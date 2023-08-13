@@ -1,9 +1,10 @@
 ﻿using Constellation.Application.DTOs;
-using Constellation.Application.Features.Partners.SchoolContacts.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.SchoolContacts.CreateContact;
 using Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
+using Constellation.Application.SchoolContacts.CreateContactWithRole;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Partner.Models;
@@ -204,24 +205,22 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             {
                 if (string.IsNullOrWhiteSpace(viewModel.ContactRole.SchoolCode))
                 {
-                    await _mediator.Send(new CreateNewSchoolContactCommand
-                    {
-                        FirstName = viewModel.Contact.FirstName,
-                        LastName = viewModel.Contact.LastName,
-                        PhoneNumber = viewModel.Contact.PhoneNumber,
-                        EmailAddress = viewModel.Contact.EmailAddress
-                    });
+                    await _mediator.Send(new CreateContactCommand(
+                        viewModel.Contact.FirstName,
+                        viewModel.Contact.LastName,
+                        viewModel.Contact.EmailAddress,
+                        viewModel.Contact.PhoneNumber,
+                        false));
                 } else
                 {
-                    await _mediator.Send(new CreateNewSchoolContactWithRoleCommand
-                    {
-                        FirstName = viewModel.Contact.FirstName,
-                        LastName = viewModel.Contact.LastName,
-                        PhoneNumber = viewModel.Contact.PhoneNumber,
-                        EmailAddress = viewModel.Contact.EmailAddress,
-                        SchoolCode = viewModel.ContactRole.SchoolCode,
-                        Position = viewModel.ContactRole.Role
-                    });
+                    await _mediator.Send(new CreateContactWithRoleCommand(
+                        viewModel.Contact.FirstName,
+                        viewModel.Contact.LastName,
+                        viewModel.Contact.EmailAddress,
+                        viewModel.Contact.PhoneNumber,
+                        viewModel.ContactRole.Role,
+                        viewModel.ContactRole.SchoolCode,
+                        false));
                 }
             }
             else

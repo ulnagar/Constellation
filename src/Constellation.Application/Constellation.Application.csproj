@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Features\Partners\SchoolContacts\Commands\" />
     <Folder Include="Features\Portal\School\Timetables\Models\" />
     <Folder Include="Features\StaffMembers\Queries\" />
     <Folder Include="Features\Subject\Courses\Models\" />

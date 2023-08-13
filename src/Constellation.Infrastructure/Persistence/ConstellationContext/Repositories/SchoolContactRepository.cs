@@ -15,6 +15,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             _context = context;
         }
 
+        public void Insert(SchoolContact contact) => _context.Set<SchoolContact>().Add(contact);
         public async Task<SchoolContact?> GetById(
             int contactId, 
             CancellationToken cancellationToken = default) =>

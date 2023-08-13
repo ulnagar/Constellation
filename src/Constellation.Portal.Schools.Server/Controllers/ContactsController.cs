@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
-using Constellation.Application.Features.Partners.SchoolContacts.Commands;
 using Constellation.Application.Features.Partners.SchoolContacts.Models;
 using Constellation.Application.Features.Partners.SchoolContacts.Queries;
 using Constellation.Application.Features.Portal.School.Contacts.Commands;
+using Constellation.Application.SchoolContacts.CreateContactWithRole;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,13 +42,11 @@ public class ContactsController : BaseAPIController
     }
 
     [HttpPost("new")]
-    public async Task Createnew([FromBody] CreateNewSchoolContactWithRoleCommand Command)
+    public async Task Createnew([FromBody] CreateContactWithRoleCommand Command)
     {
         var user = await GetCurrentUser();
 
         _logger.Information("Requested to create new School Contact by {user} with details {@details}", user.DisplayName, Command);
-
-        Command.SelfRegistered = true;
 
         await _mediator.Send(Command);
     }

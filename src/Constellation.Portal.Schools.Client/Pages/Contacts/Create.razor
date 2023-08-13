@@ -1,8 +1,8 @@
 ﻿@page "/Contacts/Create"
 
 @using Blazored.FluentValidation
-@using Constellation.Application.Features.Partners.SchoolContacts.Commands
-@using Constellation.Core.Models;
+@using Constellation.Core.Models
+@using Constellation.Application.SchoolContacts.CreateContactWithRole
 
 @attribute [Authorize]
 
@@ -13,42 +13,42 @@
     <h2>New School Contact</h2>
 
     <div class="form-horizontal">
-        <EditForm Model="Command" OnValidSubmit="SubmitResponse">
+        <EditForm OnValidSubmit="SubmitResponse">
             <FluentValidationValidator />
             <ValidationSummary />
 
             <div class="mb-3 row">
                 <label class="form-label col-md-2">First Name</label>
                 <div class="col-md-3">
-                    <InputText @bind-Value="Command.FirstName" class="form-control" />
+                    <InputText @bind-Value="FirstName" class="form-control" />
                 </div>
             </div>
 
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Last Name</label>
                 <div class="col-md-3">
-                    <InputText @bind-Value="Command.LastName" class="form-control" />
+                    <InputText @bind-Value="LastName" class="form-control" />
                 </div>
             </div>
 
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Phone Number</label>
                 <div class="col-md-3">
-                    <InputText @bind-Value="Command.PhoneNumber" class="form-control" />
+                    <InputText @bind-Value="PhoneNumber" class="form-control" />
                 </div>
             </div>
 
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Email Address</label>
                 <div class="col-md-3">
-                    <InputText @bind-Value="Command.EmailAddress" class="form-control" placeholder="john.smith1@det.nsw.edu.au" />
+                    <InputText @bind-Value="EmailAddress" class="form-control" placeholder="john.smith1@det.nsw.edu.au" />
                 </div>
             </div>
 
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Phone Number</label>
                 <div class="col-md-3">
-                    <select @bind="Command.Position" class="form-control">
+                    <select @bind="Position" class="form-control">
                         <option value="">-- Select --</option>
                         <option value="@SchoolContactRole.Principal">@SchoolContactRole.Principal</option>
                         <option value="@SchoolContactRole.Coordinator">@SchoolContactRole.Coordinator</option>
@@ -83,7 +83,12 @@
 
     private bool IsLoading { get; set; } = false;
 
-    public CreateNewSchoolContactWithRoleCommand Command { get; set; } = new();
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string PhoneNumber { get; set; }
+    public string EmailAddress { get; set; }
+    public string Position { get; set; }
+    public string SchoolCode { get; set; }
 
     protected override void OnParametersSet()
     {
@@ -103,8 +108,7 @@
             NavigationManager.NavigateTo("Contacts");
         }
 
-        Command = new();
-        Command.SchoolCode = SelectedSchool.Code;
+        SchoolCode = SelectedSchool.Code;
 
         IsLoading = false;
     }
@@ -115,7 +119,16 @@
     {
         IsLoading = true;
 
-        await Http.PostAsJsonAsync<CreateNewSchoolContactWithRoleCommand>($"api/Contacts/New", Command);
+        CreateContactWithRoleCommand command = new(
+            FirstName,
+            LastName,
+            EmailAddress,
+            PhoneNumber,
+            Position,
+            SchoolCode,
+            true);
+
+        await Http.PostAsJsonAsync<CreateContactWithRoleCommand>($"api/Contacts/New", command);
 
         IsLoading = false;
 

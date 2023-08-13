@@ -25,9 +25,17 @@
         <div class="form-group row">
             <label asp-for="RoleName" class="col-md-3">Role</label>
             <div class="col-md-9">
-                <select asp-for="RoleName" asp-items="@Model.Roles" class="combo-with-tag" style="width:100%">
-                    <option value="-- Select or Enter --"></option>
-                </select>
+                @if (string.IsNullOrWhiteSpace(Model.RoleName))
+                {
+                    <select asp-for="RoleName" asp-items="@Model.Roles" class="combo-with-tag" style="width:100%">
+                        <option value="-- Select or Enter --"></option>
+                    </select>
+                }
+                else
+                {
+                    @Html.HiddenFor(model => model.RoleName)
+                    @Model.RoleName
+                }
             </div>
         </div>
     </div>

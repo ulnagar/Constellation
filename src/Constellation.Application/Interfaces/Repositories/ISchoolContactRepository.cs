@@ -17,6 +17,7 @@ public interface ISchoolContactRepository
     Task<List<SchoolContact>> GetBySchoolAndRole(string schoolCode, string selectedRole, CancellationToken cancellationToken = default);
     Task<SchoolContact?> GetById(int contactId, CancellationToken cancellationToken = default);
     Task<List<SchoolContact>> GetAllByRole(string selectedRole, CancellationToken cancellationToken = default);
+    void Insert(SchoolContact schoolContact);
 
     SchoolContact WithDetails(int id);
     SchoolContact WithFilter(Expression<Func<SchoolContact, bool>> predicate);

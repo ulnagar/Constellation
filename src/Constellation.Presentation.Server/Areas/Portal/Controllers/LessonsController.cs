@@ -1,9 +1,8 @@
 ﻿using Constellation.Application.DTOs;
-using Constellation.Application.Features.Partners.SchoolContacts.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Enums;
+using Constellation.Application.SchoolContacts.CreateContactWithRole;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Portal.Models.Lessons;
 using Constellation.Presentation.Server.BaseModels;
@@ -11,9 +10,6 @@ using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Portal.Controllers
 {
@@ -167,15 +163,14 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
             }
             else
             {
-                await _mediator.Send(new CreateNewSchoolContactWithRoleCommand
-                {
-                    FirstName = vm.FirstName,
-                    LastName = vm.LastName,
-                    PhoneNumber = vm.PhoneNumber,
-                    EmailAddress = vm.EmailAddress,
-                    SchoolCode = vm.SchoolCode,
-                    Position = SchoolContactRole.SciencePrac
-                });
+                await _mediator.Send(new CreateContactWithRoleCommand(
+                    vm.FirstName,
+                    vm.LastName,
+                    vm.EmailAddress, 
+                    vm.PhoneNumber,
+                    SchoolContactRole.SciencePrac,
+                    vm.SchoolCode,
+                    false));
 
                 return RedirectToAction("AdminTeachers");
             }

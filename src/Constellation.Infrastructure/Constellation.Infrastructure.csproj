@@ -46,4 +46,8 @@
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="6.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Partners\SchoolContacts\Commands\" />
+  </ItemGroup>
+
 </Project>
