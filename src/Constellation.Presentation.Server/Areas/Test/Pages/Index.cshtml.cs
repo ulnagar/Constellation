@@ -18,17 +18,20 @@ public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly ISentralAwardSyncJob _awardSyncJob;
+    private readonly IRollMarkingReportJob _rollMarkingReportJob;
     private readonly AppDbContext _context;
     private readonly AppConfiguration _configuration;
 
     public IndexModel(
         IMediator mediator,
         ISentralAwardSyncJob awardSyncJob,
+        IRollMarkingReportJob rollMarkingReportJob,
         AppDbContext context,
         IOptions<AppConfiguration> configuration)
     {
         _mediator = mediator;
         _awardSyncJob = awardSyncJob;
+        _rollMarkingReportJob = rollMarkingReportJob;
         _context = context;
         _configuration = configuration.Value;
     }
@@ -51,48 +54,48 @@ public class IndexModel : BasePageModel
     {
         await GetClasses(_mediator);
 
-        var yearStart = new DateTime(2023, 1, 1);
+        //var yearStart = new DateTime(2023, 1, 1);
 
-        var teachers = await _context
-            .Set<Staff>()
-            .ToListAsync();
+        //var teachers = await _context
+        //    .Set<Staff>()
+        //    .ToListAsync();
 
-        var awards = await _context
-            .Set<StudentAward>()
-            .Where(award =>
-                award.AwardedOn > yearStart)
-            .ToListAsync();
+        //var awards = await _context
+        //    .Set<StudentAward>()
+        //    .Where(award =>
+        //        award.AwardedOn > yearStart)
+        //    .ToListAsync();
 
-        var groupedAwards = awards.GroupBy(entry => entry.StudentId);
+        //var groupedAwards = awards.GroupBy(entry => entry.StudentId);
 
-        foreach (var awardGroup in groupedAwards)
-        {
-            var student = await _context.Set<Student>().FirstOrDefaultAsync(entry => entry.StudentId == awardGroup.Key);
+        //foreach (var awardGroup in groupedAwards)
+        //{
+        //    var student = await _context.Set<Student>().FirstOrDefaultAsync(entry => entry.StudentId == awardGroup.Key);
 
-            foreach (var award in awardGroup)
-            {
-                var teacher = teachers.FirstOrDefault(entry => entry.StaffId == award.TeacherId);
+        //    foreach (var award in awardGroup)
+        //    {
+        //        var teacher = teachers.FirstOrDefault(entry => entry.StaffId == award.TeacherId);
 
-                var certificate = await _context.Set<StoredFile>().AnyAsync(entry => entry.LinkId == award.Id.ToString() && entry.LinkType == StoredFile.AwardCertificate);
+        //        var certificate = await _context.Set<StoredFile>().AnyAsync(entry => entry.LinkId == award.Id.ToString() && entry.LinkType == StoredFile.AwardCertificate);
 
-                Awards.Add(new()
-                {
-                    Id = award.Id,
-                    StudentName = student.DisplayName,
-                    StudentGrade = student.CurrentGrade,
-                    TeacherName = teacher?.DisplayName,
-                    Type = award.Type,
-                    Category = award.Category,
-                    AwardedOn = award.AwardedOn,
-                    HasCertificate = certificate
-                });
-            }
-        }
+        //        Awards.Add(new()
+        //        {
+        //            Id = award.Id,
+        //            StudentName = student.DisplayName,
+        //            StudentGrade = student.CurrentGrade,
+        //            TeacherName = teacher?.DisplayName,
+        //            Type = award.Type,
+        //            Category = award.Category,
+        //            AwardedOn = award.AwardedOn,
+        //            HasCertificate = certificate
+        //        });
+        //    }
+        //}
     }
 
     public async Task OnGetCheckAwards(CancellationToken cancellationToken = default)
     {
-        await _awardSyncJob.StartJob(Guid.NewGuid(), cancellationToken);
+        await _rollMarkingReportJob.StartJob(Guid.NewGuid(), cancellationToken);
     }
 
     public async Task<IActionResult> OnGetAttemptDownload(string id)

@@ -8,13 +8,13 @@ public class SentralGatewayConfiguration
 
     public string Username { get; set; }
     public string Password { get; set; }
-    public string Server { get; set; }
+    public string ServerUrl { get; set; }
     public ContactPreferenceOptions ContactPreference { get; set; }
     public Dictionary<string, string> XPaths { get; set; }
 
     public bool IsConfigured()
     {
-        if (string.IsNullOrWhiteSpace(Server))
+        if (string.IsNullOrWhiteSpace(ServerUrl))
             return false;
 
         if (string.IsNullOrWhiteSpace(Username))

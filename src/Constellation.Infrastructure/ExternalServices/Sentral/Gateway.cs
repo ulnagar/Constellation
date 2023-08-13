@@ -46,7 +46,7 @@ public partial class Gateway : ISentralGateway
 
     private async Task Login()
     {
-        var uri = $"{_settings.Server}/check_login";
+        var uri = $"{_settings.ServerUrl}/check_login";
 
         var request = new HttpRequestMessage();
         request.Headers.CacheControl = new CacheControlHeaderValue
@@ -158,7 +158,7 @@ public partial class Gateway : ISentralGateway
             return null;
         }
 
-        _studentListPage ??= await GetPageAsync($"{_settings.Server}/profiles/main/search?eduproq=&search=advanced&plan_type=plans");
+        _studentListPage ??= await GetPageAsync($"{_settings.ServerUrl}/profiles/main/search?eduproq=&search=advanced&plan_type=plans");
 
         if (_studentListPage == null)
             return null;
@@ -205,7 +205,7 @@ public partial class Gateway : ISentralGateway
         }
 
         HtmlNode reportTable = null;
-        var page = await GetPageAsync($"{_settings.Server}/profiles/students/{sentralStudentId}/academic-history");
+        var page = await GetPageAsync($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history");
 
         var dataList = new List<SentralReportDto>();
 
@@ -223,7 +223,7 @@ public partial class Gateway : ISentralGateway
             if (string.IsNullOrWhiteSpace(linkRef))
                 continue;
 
-            var reportPage = await GetPageAsync($"{_settings.Server}/profiles/students/{sentralStudentId}/academic-history?type=sreport&page=printed_report&reporting_period={linkRef}");
+            var reportPage = await GetPageAsync($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history?type=sreport&page=printed_report&reporting_period={linkRef}");
             reportTable = reportPage.DocumentNode.SelectSingleNode("//*[@id='layout-2col-content']/div/div/div[2]/table/tbody");
 
             if (reportTable != null)
@@ -295,7 +295,7 @@ public partial class Gateway : ISentralGateway
 
         await Login();
 
-        var response = await _client.PostAsync($"{_settings.Server}/profiles/students/{sentralStudentId}/academic-history?type=sreport&page=printed_report", formDataEncoded);
+        var response = await _client.PostAsync($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history?type=sreport&page=printed_report", formDataEncoded);
 
         return await response.Content.ReadAsByteArrayAsync();
     }
@@ -311,7 +311,7 @@ public partial class Gateway : ISentralGateway
 
         await Login();
 
-        var response = await _client.GetAsync($"{_settings.Server}/_common/lib/photo?type=student&id={studentId}&w=250&h=250");
+        var response = await _client.GetAsync($"{_settings.ServerUrl}/_common/lib/photo?type=student&id={studentId}&w=250&h=250");
 
         return await response.Content.ReadAsByteArrayAsync();
     }
@@ -325,7 +325,7 @@ public partial class Gateway : ISentralGateway
             return null;
         }
 
-        var page = await GetPageAsync($"{_settings.Server}/admin/datasync/students?year={grade}&type=active");
+        var page = await GetPageAsync($"{_settings.ServerUrl}/admin/datasync/students?year={grade}&type=active");
 
         if (page == null)
             return null;
@@ -372,7 +372,7 @@ public partial class Gateway : ISentralGateway
             return new List<SentralPeriodAbsenceDto>();
         }
 
-        var page = await GetPageAsync($"{_settings.Server}/attendancepxp/administration/student?id={sentralStudentId}");
+        var page = await GetPageAsync($"{_settings.ServerUrl}/attendancepxp/administration/student?id={sentralStudentId}");
 
         if (page == null)
             return new List<SentralPeriodAbsenceDto>();
@@ -503,7 +503,7 @@ public partial class Gateway : ISentralGateway
             return new List<SentralPeriodAbsenceDto>();
         }
 
-        var page = await GetPageAsync($"{_settings.Server}/attendance/administration/student/{sentralStudentId}?term={term}");
+        var page = await GetPageAsync($"{_settings.ServerUrl}/attendance/administration/student/{sentralStudentId}?term={term}");
 
         if (page == null)
             return new List<SentralPeriodAbsenceDto>();
@@ -621,7 +621,7 @@ public partial class Gateway : ISentralGateway
             return new List<DateOnly>();
         }
 
-        var page = await GetPageAsync($"{_settings.Server}/admin/settings/school/calendar/{year}/month");
+        var page = await GetPageAsync($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/month");
 
         if (page == null)
             return new List<DateOnly>();
@@ -669,7 +669,7 @@ public partial class Gateway : ISentralGateway
 
         var validDates = new List<ValidAttendenceReportDate>();
 
-        var page = await GetPageAsync($"{_settings.Server}/admin/settings/school/calendar/{year}/term");
+        var page = await GetPageAsync($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term");
 
         if (page == null)
             return validDates;
@@ -789,7 +789,7 @@ public partial class Gateway : ISentralGateway
         if (string.IsNullOrWhiteSpace(sentralStudentId))
             return result;
 
-        var page = await GetPageAsync($"{_settings.Server}/profiles/students/{sentralStudentId}/family");
+        var page = await GetPageAsync($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/family");
 
         if (page == null)
             return result;
@@ -870,8 +870,8 @@ public partial class Gateway : ISentralGateway
 
         var sentralDate = date.ToString("yyyy-MM-dd");
 
-        var primaryPage = await GetPageAsync($"{_settings.Server}/attendancepxp/period/administration/roll_report?campus_id={1}&range=single_day&date={sentralDate}&export=1");
-        var secondaryPage = await GetPageAsync($"{_settings.Server}/attendancepxp/period/administration/roll_report?campus_id={2}&range=single_day&date={sentralDate}&export=1");
+        var primaryPage = await GetPageAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id={1}&range=single_day&date={sentralDate}&export=1");
+        var secondaryPage = await GetPageAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id={2}&range=single_day&date={sentralDate}&export=1");
 
         if (primaryPage == null || secondaryPage == null)
             return new List<RollMarkReportDto>();
@@ -892,7 +892,7 @@ public partial class Gateway : ISentralGateway
 
         foreach (var entry in primaryList)
         {
-            var splitString = entry.Split(',');
+            var splitString = Regex.Split(entry, "[,]{1}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
             if (splitString[0] == "\"Date\"" || splitString.Length != 7)
                 continue;
             list.Add(new RollMarkReportDto
@@ -940,9 +940,9 @@ public partial class Gateway : ISentralGateway
 
         var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
 
-        var familiesPage = await GetPageAsync($"{_settings.Server}/enquiry/export/view_export?name=families&format=csv&headings=1&action=Download");
-        var emailPage = await GetPageAsync($"{_settings.Server}/enquiry/export/view_export?name=email&inputs[only_eldest]=no&inputs[addresses]=all&format=csv&headings=1&action=Download");
-        var linkPage = await GetPageAsync($"{_settings.Server}/enquiry/export/view_export?name=advstudent&inputs%5Bclass%5D=&inputs%5Broll_class%5D=&format=csv&headings=1&action=Download");
+        var familiesPage = await GetPageAsync($"{_settings.ServerUrl}/enquiry/export/view_export?name=families&format=csv&headings=1&action=Download");
+        var emailPage = await GetPageAsync($"{_settings.ServerUrl}/enquiry/export/view_export?name=email&inputs[only_eldest]=no&inputs[addresses]=all&format=csv&headings=1&action=Download");
+        var linkPage = await GetPageAsync($"{_settings.ServerUrl}/enquiry/export/view_export?name=advstudent&inputs%5Bclass%5D=&inputs%5Broll_class%5D=&format=csv&headings=1&action=Download");
 
         if (familiesPage == null || emailPage == null || linkPage == null)
             return data;
@@ -1101,7 +1101,7 @@ public partial class Gateway : ISentralGateway
             new KeyValuePair<string, string>("action", "exportStudentAwards")
         };
 
-        var report = await PostPageAsync($"{_settings.Server}/wellbeing/awards/export", payload);
+        var report = await PostPageAsync($"{_settings.ServerUrl}/wellbeing/awards/export", payload);
 
         if (report == null)
             return data;
@@ -1147,7 +1147,7 @@ public partial class Gateway : ISentralGateway
             return data;
         }
 
-        var page = await GetPageAsync($"{_settings.Server}/wellbeing/students/incidents?id={sentralStudentId}&category=1&year={calYear}");
+        var page = await GetPageAsync($"{_settings.ServerUrl}/wellbeing/students/incidents?id={sentralStudentId}&category=1&year={calYear}");
 
         var awardsList = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "WellbeingStudentAwardsList").Value);
 
@@ -1231,7 +1231,7 @@ public partial class Gateway : ISentralGateway
         // Get the Issue Id first
         // https://admin.aurora.dec.nsw.gov.au/wellbeing/letters/print?letter_type=incident&id=30133&student_id=1868
 
-        var previewPage = await GetPageAsync($"{_settings.Server}/wellbeing/letters/print?letter_type=incident&id={incidentId}&student_id={sentralStudentId}");
+        var previewPage = await GetPageAsync($"{_settings.ServerUrl}/wellbeing/letters/print?letter_type=incident&id={incidentId}&student_id={sentralStudentId}");
 
         var inputs = previewPage.DocumentNode.SelectNodes("//input[@name='selected_issues[]']");
 
@@ -1256,7 +1256,7 @@ public partial class Gateway : ISentralGateway
 
         var formDataEncoded = new FormUrlEncodedContent(formData);
 
-        var response = await _client.PostAsync($"{_settings.Server}/wellbeing/letters/print", formDataEncoded);
+        var response = await _client.PostAsync($"{_settings.ServerUrl}/wellbeing/letters/print", formDataEncoded);
 
         if (response.StatusCode != HttpStatusCode.OK)
         {
@@ -1266,7 +1266,7 @@ public partial class Gateway : ISentralGateway
 
         var code = await response.Content.ReadAsStringAsync();
 
-        var document = await _client.GetAsync($"{_settings.Server}/jasperreports/createReport?format=pdf&key={code}");
+        var document = await _client.GetAsync($"{_settings.ServerUrl}/jasperreports/createReport?format=pdf&key={code}");
 
         if (document.StatusCode != HttpStatusCode.OK)
         {

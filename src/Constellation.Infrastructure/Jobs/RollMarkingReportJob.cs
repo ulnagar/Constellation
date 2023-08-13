@@ -37,7 +37,9 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
 
     public async Task StartJob(Guid jobId, CancellationToken token)
     {
-        var date = DateOnly.FromDateTime(DateTime.Today);
+        //var date = DateOnly.FromDateTime(DateTime.Today);
+
+        var date = new DateOnly(2023, 8, 14);
 
         if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
             return;
@@ -97,6 +99,8 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
                     .First()
                     .Select(entry => entry.Teacher)
                     .First();
+
+                entry.Teacher = teacher.DisplayName;
             }
             else if (!string.IsNullOrWhiteSpace(entry.Teacher))
             {
