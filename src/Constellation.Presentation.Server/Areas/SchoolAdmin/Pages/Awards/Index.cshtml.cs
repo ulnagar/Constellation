@@ -4,10 +4,13 @@ using Constellation.Application.Awards.GetAllAwards;
 using Constellation.Application.Awards.GetAwardCertificate;
 using Constellation.Application.Awards.GetRecentAwards;
 using Constellation.Application.Awards.Models;
+using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Server.Helpers.Attributes;
+using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +20,16 @@ public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly IRecurringJobManager _jobManager;
 
     public IndexModel(
         IMediator mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        IRecurringJobManager jobManager)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _jobManager = jobManager;
     }
 
     public enum FilterDto
@@ -88,5 +94,12 @@ public class IndexModel : BasePageModel
         }
 
         return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.Name);
+    }
+
+    public IActionResult OnGetRefreshAwards()
+    {
+       _jobManager.Trigger(nameof(ISentralAwardSyncJob));
+
+        return RedirectToPage("/Awards/Index", new { area = "SchoolAdmin" });
     }
 }
