@@ -49,7 +49,7 @@
                             <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
                             <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                                 <a asp-page="Upsert" asp-area="Subject" asp-route-id="@item.Id" class="dropdown-item">Edit Contact</a>
-                                <button data-contact-id="@item.Id" class="dropdown-item create-assignment-button">Add Role</button>
+                                <button data-contact-id="@item.Id" data-name="@item.ContactName.DisplayName" class="dropdown-item create-assignment-button">Add Role</button>
                                 <button data-role-id="@item.RoleId" data-name="@item.ContactName.DisplayName" data-role="@SchoolContactRole.SciencePrac" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
                                 <div class="dropdown-divider"></div>
                                 <a asp-page="Audit" asp-area="Subject" asp-route-id="@item.Id" class="dropdown-item">Audit Account</a>
@@ -99,18 +99,29 @@
 
         $('.create-assignment-button').click(function (event) {
             var contactId = $(this).data("contactId");
+            var name = $(this).data("name");
             var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
 
             $.ajax({
                 url: "?handler=AjaxAssign",
                 type: "POST",
                 data: {
+                    name: name,
                     contactId: contactId,
                     __RequestVerificationToken: xsrfHeader
                 }
             }).done(function (data) {
                 $('#page-modal .modal-content').html(data);
                 $('#page-modal').modal('show');
+
+                // Activate any comboboxes
+                $("#page-modal .combo").select2({ theme: 'bootstrap' });
+
+                // Activate any comboboxes with free-text entry
+                $("#page-modal .combo-with-tag").select2({
+                    theme: 'bootstrap',
+                    tags: true
+                });
             });
         });
     </script>

@@ -71,7 +71,9 @@ public class IndexModel : BasePageModel
         return Partial("DeleteRoleModal", viewModel);
     }
 
-    public async Task<IActionResult> OnPostAjaxAssign(int contactId)
+    public async Task<IActionResult> OnPostAjaxAssign(
+        int contactId,
+        string name)
     {
         AssignRoleModalViewModel viewModel = new();
 
@@ -81,6 +83,7 @@ public class IndexModel : BasePageModel
         viewModel.Schools = new SelectList(schoolsRequest.Value, "Code", "Name");
         viewModel.Roles = new SelectList(rolesRequest.Value);
         viewModel.ContactId = contactId;
+        viewModel.ContactName = name;
 
         return Partial("AssignRoleModal", viewModel);
     }

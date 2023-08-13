@@ -10,4 +10,5 @@ public class AssignRoleModalViewModel
 
     public SelectList Roles { get; set; }
     public SelectList Schools { get; set; }
+    public string ContactName { get; set; }
 }
