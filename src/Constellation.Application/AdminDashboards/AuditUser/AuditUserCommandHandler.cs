@@ -2,6 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
@@ -14,17 +15,20 @@ internal sealed class AuditUserCommandHandler
     : ICommandHandler<AuditUserCommand>
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly RoleManager<AppRole> _roleManager;
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolContactRepository _schoolContactRepository;
     private readonly IFamilyRepository _studentFamilyRepository;
 
     public AuditUserCommandHandler(
         UserManager<AppUser> userManager,
+        RoleManager<AppRole> roleManager,
         IStaffRepository staffRepository,
         ISchoolContactRepository schoolContactRepository,
         IFamilyRepository studentFamilyRepository)
     {
         _userManager = userManager;
+        _roleManager = roleManager;
         _staffRepository = staffRepository;
         _schoolContactRepository = schoolContactRepository;
         _studentFamilyRepository = studentFamilyRepository;
@@ -63,6 +67,8 @@ internal sealed class AuditUserCommandHandler
         {
             user.IsSchoolContact = true;
             user.SchoolContactId = contact.Id;
+
+            await _userManager.AddToRoleAsync(user, AuthRoles.LessonsUser);
         }
 
         var family = await _studentFamilyRepository.DoesEmailBelongToParentOrFamily(user.Email, cancellationToken);
