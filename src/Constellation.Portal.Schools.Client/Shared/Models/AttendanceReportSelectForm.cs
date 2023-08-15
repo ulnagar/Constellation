@@ -7,5 +7,5 @@ public class AttendanceReportSelectForm
     [Required]
     public List<string> Students { get; set; } = new();
     [Required]
-    public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    public DateTime StartDate { get; set; } = DateTime.Today;
 }

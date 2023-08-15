@@ -5,9 +5,9 @@ using Constellation.Core.ValueObjects;
 using System;
 
 public sealed record SchoolAbsenceDetailsResponse(
-    Name StudentName,
+    string StudentName,
     string ClassName,
     AbsenceId AbsenceId,
-    DateOnly AbsenceDate,
+    DateTime AbsenceDate,
     string PeriodName,
     string AbsenceTimeframe);

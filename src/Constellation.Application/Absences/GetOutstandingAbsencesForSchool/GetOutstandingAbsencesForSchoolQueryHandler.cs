@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -77,7 +78,7 @@ internal sealed class GetOutstandingAbsencesForSchoolQueryHandler
                     nameRequest.Value.DisplayName,
                     student.CurrentGrade,
                     absence.Type.Value,
-                    absence.Date,
+                    absence.Date.ToDateTime(TimeOnly.MinValue),
                     absence.PeriodName,
                     absence.PeriodTimeframe,
                     absence.AbsenceLength,

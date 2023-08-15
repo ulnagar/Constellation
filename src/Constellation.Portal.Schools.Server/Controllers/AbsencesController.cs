@@ -66,9 +66,27 @@ public class AbsencesController : BaseAPIController
     }
 
     [HttpPost("Whole/{absenceId:guid}/Explain")]
-    public async Task ExplainWholeAbsence([FromQuery] Guid AbsenceId, [FromBody] CreateAbsenceResponseFromSchoolCommand Command)
+    public async Task ExplainWholeAbsence(Guid absenceId, AbsencesExplainFormModel Form)
     {
         var user = await GetCurrentUser();
+
+        if (absenceId != Form.AbsenceId)
+        {
+            // Something is wrong here!
+            _logger
+                .ForContext("Route AbsenceId", absenceId)
+                .ForContext(nameof(AbsencesExplainFormModel), Form, true)
+                .Warning("Route AbsenceId does not match Form AbsenceId");
+
+            return;
+        }
+
+        AbsenceId AbsenceId = AbsenceId.FromValue(Form.AbsenceId);
+
+        CreateAbsenceResponseFromSchoolCommand Command = new(
+            AbsenceId,
+            Form.Comment,
+            user.Email);
 
         _logger.Information("Requested to explain absence by user {user} with details {@absence}", user.DisplayName, Command);
 
@@ -93,30 +111,93 @@ public class AbsencesController : BaseAPIController
         return request.Value;
     }
 
-    [HttpPost("Partial/{responseId:guid}/Verify")]
-    public async Task VerifyPartialAbsence([FromQuery] Guid ResponseId, [FromBody] VerifyStudentExplanationCommand Command)
+    [HttpPost("Partial/{absenceId:guid}/Response/{responseId:guid}/Verify")]
+    public async Task VerifyPartialAbsence(Guid absenceId, Guid responseId, AbsencesVerifyFormModel Form)
     {
         var user = await GetCurrentUser();
 
-        _logger.Information("Requested to verify absence explanation by user {user} with details {@absence}", user.DisplayName, Command);
+        if (absenceId != Form.AbsenceId)
+        {
+            // Something is wrong here!
+            _logger
+                .ForContext("Route AbsenceId", absenceId)
+                .ForContext(nameof(AbsencesVerifyFormModel), Form, true)
+                .Warning("Route AbsenceId does not match Form AbsenceId");
 
-        await _mediator.Send(Command);
+            return;
+        }
+
+        if (responseId != Form.ResponseId)
+        {
+            // Something is wrong here!
+            _logger
+                .ForContext("Route ResponseId", responseId)
+                .ForContext(nameof(AbsencesVerifyFormModel), Form, true)
+                .Warning("Route ResponseId does not match Form ResponseId");
+
+            return;
+        }
+
+        AbsenceId AbsenceId = AbsenceId.FromValue(absenceId);
+        AbsenceResponseId ResponseId = AbsenceResponseId.FromValue(responseId);
+
+        VerifyStudentExplanationCommand command = new(
+            AbsenceId,
+            ResponseId,
+            Form.Username ?? user.Email,
+            Form.Comment);
+
+        _logger.Information("Requested to verify absence explanation by user {user} with details {@absence}", user.DisplayName, command);
+
+        await _mediator.Send(command);
     }
 
-    [HttpPost("Partial/{responseId:guid}/Reject")]
-    public async Task RejectPartialAbsence([FromQuery] Guid ResponseId, [FromBody] RejectStudentExplanationCommand Command)
+    [HttpPost("Partial/{absenceId:guid}/Response/{responseId:guid}/Reject")]
+    public async Task RejectPartialAbsence(Guid absenceId, Guid responseId, AbsencesVerifyFormModel Form)
     {
         var user = await GetCurrentUser();
 
-        _logger.Information("Requested to reject absence explanation by user {user} with details {@absence}", user.DisplayName, Command);
+        if (absenceId != Form.AbsenceId)
+        {
+            // Something is wrong here!
+            _logger
+                .ForContext("Route AbsenceId", absenceId)
+                .ForContext(nameof(AbsencesVerifyFormModel), Form, true)
+                .Warning("Route AbsenceId does not match Form AbsenceId");
 
-        await _mediator.Send(Command);
+            return;
+        }
+
+        if (responseId != Form.ResponseId)
+        {
+            // Something is wrong here!
+            _logger
+                .ForContext("Route ResponseId", responseId)
+                .ForContext(nameof(AbsencesVerifyFormModel), Form, true)
+                .Warning("Route ResponseId does not match Form ResponseId");
+
+            return;
+        }
+
+        AbsenceId AbsenceId = AbsenceId.FromValue(absenceId);
+        AbsenceResponseId ResponseId = AbsenceResponseId.FromValue(responseId);
+
+        RejectStudentExplanationCommand command = new(
+            AbsenceId,
+            ResponseId,
+            Form.Username ?? user.Email,
+            Form.Comment);
+
+        _logger.Information("Requested to reject absence explanation by user {user} with details {@absence}", user.DisplayName, command);
+
+        await _mediator.Send(command);
     }
 
     [HttpPost("Report")]
     public async Task<IActionResult> GenerateAttendanceReports([FromBody] AttendanceReportSelectForm Request, CancellationToken cancellationToken = default)
     {
-        var endDate = Request.StartDate.AddDays(12);
+        var startDate = DateOnly.FromDateTime(Request.StartDate);
+        var endDate = startDate.AddDays(12);
 
         if (Request.Students.Count > 1)
         {
@@ -125,7 +206,7 @@ public class AbsencesController : BaseAPIController
             // We need to loop each student id and collate the report into a zip file.
             foreach (string studentId in Request.Students)
             {
-                Result<StoredFile> reportRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(studentId, Request.StartDate, endDate), cancellationToken);
+                Result<StoredFile> reportRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(studentId, startDate, endDate), cancellationToken);
                 
                 if (reportRequest.IsSuccess)
                     reports.Add(reportRequest.Value);
@@ -151,7 +232,7 @@ public class AbsencesController : BaseAPIController
         else
         {
             // We only have one student, so just download that file.
-            Result<StoredFile> fileRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(Request.Students.First(), Request.StartDate, endDate), cancellationToken);
+            Result<StoredFile> fileRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(Request.Students.First(), startDate, endDate), cancellationToken);
 
             if (fileRequest.IsFailure)
                 return BadRequest();

@@ -87,7 +87,7 @@
                     <td>
                         @if (AbsencesType == AbsenceCategory.UnverifiedPartials)
                         {
-                            <button class="btn btn-info btn-show-hover" @onclick="() => GoToPartialVerification(entry.AbsenceResponseId.Value)">Verify</button>
+                            <button class="btn btn-info btn-show-hover" @onclick="() => GoToPartialVerification(entry.AbsenceId.Value, entry.AbsenceResponseId.Value)">Verify</button>
                         }
                         @if (AbsencesType == AbsenceCategory.UnexplainedWholes)
                         {
@@ -183,9 +183,9 @@
             .ToList();
     }
 
-    private void GoToPartialVerification(Guid responseId)
+    private void GoToPartialVerification(Guid absenceId, Guid responseId)
     {
-        NavigationManager.NavigateTo($"Absences/Partial/{responseId}/Verify");
+        NavigationManager.NavigateTo($"Absences/Partial/{absenceId}/Response/{responseId}/Verify");
     }
 
     private void GoToWholeExplanation(Guid absenceId)

@@ -42,7 +42,7 @@
                     <h5>
                         @foreach (var student in SelectedStudents)
                         {
-                            <span class="badge badge-info no-select" @onclick="() => RemoveStudent(student)"> @student.Name </span>
+                            <span class="badge bg-info no-select" @onclick="() => RemoveStudent(student)"> @student.Name </span>
                         }
                     </h5>
                 </div>

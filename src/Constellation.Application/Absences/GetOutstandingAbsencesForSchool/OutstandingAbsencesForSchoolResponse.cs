@@ -11,7 +11,7 @@ public sealed record OutstandingAbsencesForSchoolResponse(
     string StudentName,
     Grade StudentGrade,
     string AbsenceType,
-    DateOnly AbsenceDate,
+    DateTime AbsenceDate,
     string PeriodName,
     string PeriodTimeframe,
     int AbsenceLength,

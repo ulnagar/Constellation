@@ -7,6 +7,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -55,10 +56,10 @@ internal sealed class GetAbsenceDetailsForSchoolQueryHandler
         var offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         var entry = new SchoolAbsenceDetailsResponse(
-            nameRequest.Value,
+            nameRequest.Value.DisplayName,
             offering?.Name,
             absence.Id,
-            absence.Date,
+            absence.Date.ToDateTime(TimeOnly.MinValue),
             absence.PeriodName,
             absence.AbsenceTimeframe);
 

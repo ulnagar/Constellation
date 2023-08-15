@@ -4,6 +4,7 @@
 @using Constellation.Application.Absences.RejectStudentExplanation;
 @using Constellation.Application.Absences.VerifyStudenExplanation;
 @using Constellation.Core.Models.Identifiers;
+@using Constellation.Portal.Schools.Client.Shared.Models;
 
 @attribute [Authorize]
 
@@ -123,13 +124,15 @@
 
         AbsenceResponseId responseId = AbsenceResponseId.FromValue(ResponseId);
 
-        var command = new VerifyStudentExplanationCommand(
-            Response.AbsenceId,
-            responseId,
-            authState.User.Identity.Name,
-            Comment);
+        var command = new AbsencesVerifyFormModel()
+        {
+            AbsenceId = Response.AbsenceId.Value,
+            ResponseId = responseId.Value,
+            Username = authState.User.Identity.Name,
+            Comment = Comment
+        };
 
-        await Http.PostAsJsonAsync<VerifyStudentExplanationCommand>($"api/Absences/Partial/{ResponseId}/Verify", command);
+        await Http.PostAsJsonAsync<AbsencesVerifyFormModel>($"api/Absences/Partial/{AbsenceId}/Response/{ResponseId}/Verify", command);
 
         NavigationManager.NavigateTo("Absences");
 
@@ -152,13 +155,15 @@
 
         AbsenceResponseId responseId = AbsenceResponseId.FromValue(ResponseId);
 
-        var command = new RejectStudentExplanationCommand(
-            Response.AbsenceId,
-            responseId,
-            authState.User.Identity.Name,
-            Comment);
+        var command = new AbsencesVerifyFormModel()
+        {
+            AbsenceId = Response.AbsenceId.Value,
+            ResponseId = responseId.Value,
+            Username = authState.User.Identity.Name,
+            Comment = Comment
+        };
 
-        await Http.PostAsJsonAsync<RejectStudentExplanationCommand>($"api/Absences/Partial/{ResponseId}/Reject", command);
+        await Http.PostAsJsonAsync<AbsencesVerifyFormModel>($"api/Absences/Partial/{AbsenceId}/Response/{ResponseId}/Reject", command);
 
         NavigationManager.NavigateTo("Absences");
 
