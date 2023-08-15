@@ -8,7 +8,7 @@ using System.Collections.Generic;
 public sealed record SubmitRollCommand(
     SciencePracLessonId LessonId,
     SciencePracRollId RollId,
-    DateOnly LessonDate,
+    DateTime LessonDate,
     string Comment,
     List<string> PresentStudents,
     List<string> AbsentStudents)

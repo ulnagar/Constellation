@@ -12,8 +12,8 @@ public sealed class ScienceLessonRollSummary
     public Grade LessonGrade { get; set; }
     public string Grade => $"Year {(int)LessonGrade:D2}";
     public string LessonCourseName { get; set; }
-    public DateOnly LessonDueDate { get; set; }
+    public DateTime LessonDueDate { get; set; }
     public bool IsSubmitted { get; set; }
-    public bool IsOverdue => LessonDueDate < DateOnly.FromDateTime(DateTime.Now) && !IsSubmitted;
+    public bool IsOverdue => LessonDueDate < DateTime.Today && !IsSubmitted;
     public string Statistics { get; set; }
 }

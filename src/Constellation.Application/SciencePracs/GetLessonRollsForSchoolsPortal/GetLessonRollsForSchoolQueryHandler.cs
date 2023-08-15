@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Shared;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -55,7 +56,7 @@ internal sealed class GetLessonRollsForSchoolQueryHandler
                 Id = roll.Id,
                 LessonId = lesson.Id,
                 LessonName = lesson.Name,
-                LessonDueDate = lesson.DueDate,
+                LessonDueDate = lesson.DueDate.ToDateTime(TimeOnly.MinValue),
                 IsSubmitted = roll.Status == Core.Enums.LessonStatus.Completed,
                 LessonGrade = course.Grade,
                 LessonCourseName = course.Name,

@@ -107,7 +107,7 @@
 
             MarkedRoll = await Http.GetFromJsonAsync<ScienceLessonRollDetails>($"api/Rolls/Details/{RollId}?lessonId={LessonId}");
 
-            if (MarkedRoll.LessonDate > DateOnly.FromDateTime(DateTime.Today.AddDays(-14)))
+            if (MarkedRoll.LessonDate > DateTime.Today.AddDays(-14))
             {
                 Editable = true;
             }

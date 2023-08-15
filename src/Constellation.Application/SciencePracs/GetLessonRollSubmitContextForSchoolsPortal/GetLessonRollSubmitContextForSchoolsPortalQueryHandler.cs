@@ -59,8 +59,8 @@ internal sealed class GetLessonRollSubmitContextForSchoolsPortalQueryHandler
             Id = roll.Id,
             LessonId = lesson.Id,
             LessonName = lesson.Name,
-            LessonDueDate = lesson.DueDate,
-            LessonDate = roll.LessonDate.HasValue ? roll.LessonDate.Value : DateOnly.FromDateTime(DateTime.Today),
+            LessonDueDate = lesson.DueDate.ToDateTime(TimeOnly.MinValue),
+            LessonDate = roll.LessonDate.HasValue ? roll.LessonDate.Value.ToDateTime(TimeOnly.MinValue) : DateTime.Today,
             Comment = roll.Comment
         };
 

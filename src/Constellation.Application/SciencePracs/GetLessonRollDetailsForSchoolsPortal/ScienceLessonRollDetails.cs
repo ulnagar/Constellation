@@ -9,8 +9,8 @@ public class ScienceLessonRollDetails
     public SciencePracRollId Id { get; set; }
     public SciencePracLessonId LessonId { get; set; }
     public string LessonName { get; set; }
-    public DateOnly LessonDueDate { get; set; }
-    public DateOnly? LessonDate { get; set; }
+    public DateTime LessonDueDate { get; set; }
+    public DateTime? LessonDate { get; set; }
     public string SchoolContactFirstName { get; set; }
     public string SchoolContactLastName { get; set; }
     public string SchoolContactName => $"{SchoolContactFirstName} {SchoolContactLastName}";

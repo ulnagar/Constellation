@@ -9,6 +9,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Shared;
 using Serilog;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,8 +59,8 @@ internal sealed class GetLessonRollDetailsForSchoolsPortalQueryHandler
             Id = roll.Id,
             LessonId = lesson.Id,
             LessonName = lesson.Name,
-            LessonDueDate = lesson.DueDate,
-            LessonDate = roll.LessonDate,
+            LessonDueDate = lesson.DueDate.ToDateTime(TimeOnly.MinValue),
+            LessonDate = roll.LessonDate.HasValue ? roll.LessonDate.Value.ToDateTime(TimeOnly.MinValue) : null,
             Comment = roll.Comment
         };
 

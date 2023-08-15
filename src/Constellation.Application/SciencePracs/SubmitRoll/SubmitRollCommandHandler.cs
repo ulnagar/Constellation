@@ -8,6 +8,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Shared;
 using Serilog;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -56,7 +57,7 @@ internal sealed class SubmitRollCommandHandler
             roll.Id,
             0,
             _currentUserService.UserName,
-            request.LessonDate,
+            DateOnly.FromDateTime(request.LessonDate),
             request.Comment,
             request.PresentStudents,
             request.AbsentStudents);

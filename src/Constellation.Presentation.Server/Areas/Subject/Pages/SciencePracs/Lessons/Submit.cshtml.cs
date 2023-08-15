@@ -117,7 +117,7 @@ public class SubmitModel : BasePageModel
         SubmitRollCommand command = new(
             sciencePracLessonId,
             sciencePracRollId,
-            LessonDate,
+            LessonDate.ToDateTime(TimeOnly.MinValue),
             Comment,
             Attendance.Where(entry => entry.Present).Select(entry => entry.StudentId).ToList(),
             Attendance.Where(entry => !entry.Present).Select(entry => entry.StudentId).ToList());

@@ -18,13 +18,13 @@ public class ScienceLessonRollForSubmit
     [DataType(DataType.Date)]
     [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     [Display(Name = DisplayNameDefaults.DueDate)]
-    public DateOnly LessonDueDate { get; set; }
+    public DateTime LessonDueDate { get; set; }
 
     [Required]
     [DataType(DataType.Date)]
     [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     [Display(Name = DisplayNameDefaults.SubmittedDate)]
-    public DateOnly LessonDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    public DateTime LessonDate { get; set; } = DateTime.Today;
 
     public string Comment { get; set; }
 
