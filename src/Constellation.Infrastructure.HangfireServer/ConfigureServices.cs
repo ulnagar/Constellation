@@ -13,7 +13,7 @@ public static class DependencyInjection
 	{
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-        services.AddHangfireServerInfrastructureComponents(config, environment);
+        services.AddInfrastructure(config, environment);
 
         services.AddIdentity<AppUser, AppRole>()
             .AddEntityFrameworkStores<AppDbContext>();

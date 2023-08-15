@@ -23,4 +23,8 @@ builder.Services.AddBlazoredModal();
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-AU");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-AU");
 
+// Allow System.Text.Json to deserialize DateOnly and TimeOnly objects
+builder.Services
+    .AddJsonOptions(options => options.UseDateOnlyTimeOnlyStringConverters());
+
 await builder.Build().RunAsync();

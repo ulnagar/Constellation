@@ -70,7 +70,7 @@ public class LoginModel : PageModel
             {
                 Input.Email = Input.Email.Replace("~", "");
 
-                await _mediator.Send(new UpdateUserSchoolsClaimCommand { EmailAddress = Input.Email });
+                //await _mediator.Send(new UpdateUserSchoolsClaimCommand { EmailAddress = Input.Email });
                 
                 var bypassUser = await _userManager.FindByEmailAsync(Input.Email);
 

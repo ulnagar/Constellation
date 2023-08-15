@@ -74,9 +74,9 @@ internal sealed class GetOutstandingAbsencesForSchoolQueryHandler
 
                 var entry = new OutstandingAbsencesForSchoolResponse(
                     absence.Id,
-                    nameRequest.Value,
+                    nameRequest.Value.DisplayName,
                     student.CurrentGrade,
-                    absence.Type,
+                    absence.Type.Value,
                     absence.Date,
                     absence.PeriodName,
                     absence.PeriodTimeframe,

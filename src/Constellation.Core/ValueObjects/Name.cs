@@ -4,6 +4,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 public sealed class Name : ValueObject
 {

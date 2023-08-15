@@ -8,9 +8,9 @@ using System;
 
 public sealed record OutstandingAbsencesForSchoolResponse(
     AbsenceId AbsenceId,
-    Name StudentName,
+    string StudentName,
     Grade StudentGrade,
-    AbsenceType AbsenceType,
+    string AbsenceType,
     DateOnly AbsenceDate,
     string PeriodName,
     string PeriodTimeframe,

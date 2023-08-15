@@ -1,13 +1,15 @@
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
+using Constellation.Infrastructure.Identity.Authorization;
+using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
+using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Presentation.Server.Helpers.HtmlGenerator;
 using Constellation.Presentation.Server.Infrastructure;
 using Constellation.Presentation.Server.Services;
-using FluentValidation;
 using Hangfire;
 using Hangfire.SqlServer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -20,12 +22,49 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 LoggingConfiguration.SetupLogging(builder.Configuration, Serilog.Events.LogEventLevel.Debug);
 
-// Add services to the container.
-builder.Services.AddStaffPortalInfrastructureComponents(builder.Configuration, builder.Environment);
+// Add infrastructure services
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
+// Configuration Authentication and Authorization
+builder.Services.AddIdentity<AppUser, AppRole>()
+            .AddClaimsPrincipalFactory<StaffUserIdClaimsFactory>()
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+
+builder.Services.AddTransient<UserClaimsPrincipalFactory<AppUser, AppRole>, StaffUserIdClaimsFactory>();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequiredUniqueChars = 1;
+    options.User.RequireUniqueEmail = true;
+});
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = "Constellation.Staff.Identity";
+    options.ExpireTimeSpan = TimeSpan.FromHours(7);
+    options.LoginPath = new PathString("/Admin/Login");
+    options.LogoutPath = new PathString("/Admin/Logout");
+});
+
+builder.Services.AddAuthorization(opt => opt.AddApplicationPolicies());
+
+builder.Services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByRoute>();
+builder.Services.AddScoped<IAuthorizationHandler, HasRequiredMandatoryTrainingModulePermissions>();
+builder.Services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByResource>();
+builder.Services.AddScoped<IAuthorizationHandler, IsCurrentTeacherAddedToTutorial>();
+builder.Services.AddScoped<IAuthorizationHandler, HasRequiredGroupTutorialModulePermissions>();
+
+// Register Current User Service
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
+// Register Hangfire
 builder.Services.AddHangfire((provider, configuration) => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
     .UseSimpleAssemblyNameTypeSerializer()
@@ -39,10 +78,6 @@ builder.Services.AddHangfire((provider, configuration) => configuration
         DisableGlobalLocks = true
     }));
 GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
-
-builder.Services.AddValidatorsFromAssemblyContaining<IAppDbContext>();
-
-
 
 builder.Services.AddRazorPages();
 builder.Services.AddMvc()
