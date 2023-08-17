@@ -11,4 +11,10 @@ public class ResponseVerificationStatus : StringEnumeration<ResponseVerification
 
     public ResponseVerificationStatus(string value, string name)
         : base(value, name) { }
+
+    public override string ToString() =>
+        Value.ToString();
+
+    public static implicit operator string(ResponseVerificationStatus status) => 
+        status is null ? string.Empty : status.ToString();
 }

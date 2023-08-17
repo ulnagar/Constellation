@@ -1,7 +1,6 @@
 ﻿@page "/Attendance/Absences/"
 
 @using Constellation.Application.Absences.GetAbsencesForFamily;
-@using Constellation.Core.Shared;
 
 @inject HttpClient Http
 @inject IJSRuntime JS
@@ -136,7 +135,7 @@
 </Loader>
 
 @code {
-    [CascadingParameter] private Task<AuthenticationState> authenticationStateTask { get; set; }
+        [CascadingParameter] private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     private bool ShowLoader { get; set; } = false;
 
@@ -156,12 +155,9 @@
 
         try
         {
-            Result<List<AbsenceForFamilyResponse>> absenceRequest = await Http.GetFromJsonAsync<Result<List<AbsenceForFamilyResponse>>>($"Attendance");
+            List<AbsenceForFamilyResponse> absenceRequest = await Http.GetFromJsonAsync<List<AbsenceForFamilyResponse>>($"Attendance");
 
-            if (absenceRequest.IsSuccess)
-            {
-                AbsencesList = absenceRequest.Value;
-            }
+            AbsencesList = absenceRequest;
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -195,49 +191,34 @@
             case AbsenceCategory.UnexplainedPartials:
                 FilteredAbsences = AbsencesList
                     .Where(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.UnexplainedPartial)
-                    .OrderBy(absence => absence.AbsenceDate)
-                    .ThenBy(absence => absence.StudentGrade)
-                    .ThenBy(absence => absence.StudentName.LastName)
-                    .ThenBy(absence => absence.StudentName.FirstName)
                     .ToList();
                 break;
             case AbsenceCategory.UnexplainedWholes:
                 FilteredAbsences = AbsencesList
                     .Where(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.UnexplainedWhole)
-                    .OrderBy(absence => absence.AbsenceDate)
-                    .ThenBy(absence => absence.StudentGrade)
-                    .ThenBy(absence => absence.StudentName.LastName)
-                    .ThenBy(absence => absence.StudentName.FirstName)
                     .ToList();
                 break;
             case AbsenceCategory.UnverifiedPartials:
                 FilteredAbsences = AbsencesList
                     .Where(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.UnverifiedPartial)
-                    .OrderBy(absence => absence.AbsenceDate)
-                    .ThenBy(absence => absence.StudentGrade)
-                    .ThenBy(absence => absence.StudentName.LastName)
-                    .ThenBy(absence => absence.StudentName.FirstName)
                     .ToList();
                 break;
             case AbsenceCategory.ExplainedWholes:
                 FilteredAbsences = AbsencesList
                     .Where(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.ExplainedWhole)
-                    .OrderBy(absence => absence.AbsenceDate)
-                    .ThenBy(absence => absence.StudentGrade)
-                    .ThenBy(absence => absence.StudentName.LastName)
-                    .ThenBy(absence => absence.StudentName.FirstName)
                     .ToList();
                 break;
             case AbsenceCategory.VerifiedPartials:
                 FilteredAbsences = AbsencesList
                     .Where(absence => absence.Status == AbsenceForFamilyResponse.AbsenceStatus.VerifiedPartial)
-                    .OrderBy(absence => absence.AbsenceDate)
-                    .ThenBy(absence => absence.StudentGrade)
-                    .ThenBy(absence => absence.StudentName.LastName)
-                    .ThenBy(absence => absence.StudentName.FirstName)
                     .ToList();
                 break;
         }
+
+        FilteredAbsences = FilteredAbsences
+            .OrderBy(absence => absence.AbsenceDate)
+            .ThenBy(absence => absence.StudentGrade)
+            .ToList();
 
         await JS.InvokeVoidAsync("collapseAccordion");
     }

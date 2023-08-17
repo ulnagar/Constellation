@@ -9,10 +9,10 @@ using System;
 public sealed record AbsenceForFamilyResponse(
     AbsenceId Id,
     string StudentId,
-    Name StudentName,
+    string StudentName,
     Grade StudentGrade,
-    AbsenceType AbsenceType,
-    DateOnly AbsenceDate,
+    string AbsenceType,
+    DateTime AbsenceDate,
     string PeriodName,
     string PeriodTimeframe,
     int AbsenceLength,
@@ -20,7 +20,7 @@ public sealed record AbsenceForFamilyResponse(
     string AbsenceReason,
     string? OfferingName,
     string? Explanation,
-    ResponseVerificationStatus? VerificationStatus,
+    string? VerificationStatus,
     bool IsExplained,
     AbsenceForFamilyResponse.AbsenceStatus Status,
     bool CanParentExplainAbsence)

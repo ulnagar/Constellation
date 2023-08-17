@@ -7,6 +7,7 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -66,21 +67,20 @@ internal sealed class GetAbsencesForFamilyQueryHandler
                 }
                 else
                 {
-                    if (response is null)
-                        status = AbsenceForFamilyResponse.AbsenceStatus.UnexplainedPartial;
-                    else if (response.VerificationStatus == ResponseVerificationStatus.Verified)
-                        status = AbsenceForFamilyResponse.AbsenceStatus.VerifiedPartial;
-                    else
-                        status = AbsenceForFamilyResponse.AbsenceStatus.UnverifiedPartial;
+                    status = 
+                        response is null ? AbsenceForFamilyResponse.AbsenceStatus.UnexplainedPartial :
+                        response.VerificationStatus == ResponseVerificationStatus.NotRequired ? AbsenceForFamilyResponse.AbsenceStatus.VerifiedPartial :
+                        response.VerificationStatus == ResponseVerificationStatus.Verified ? AbsenceForFamilyResponse.AbsenceStatus.VerifiedPartial :
+                            AbsenceForFamilyResponse.AbsenceStatus.UnverifiedPartial;
                 }
 
                 var entry = new AbsenceForFamilyResponse(
                     absence.Id,
                     student.StudentId,
-                    nameRequest.Value,
+                    nameRequest.Value.DisplayName,
                     student.CurrentGrade,
-                    absence.Type,
-                    absence.Date,
+                    absence.Type.Value,
+                    absence.Date.ToDateTime(TimeOnly.MinValue),
                     absence.PeriodName,
                     absence.PeriodTimeframe,
                     absence.AbsenceLength,

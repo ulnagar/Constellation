@@ -8,10 +8,10 @@ namespace Constellation.Application.Absences.GetAbsenceDetailsForParent;
 
 public sealed record ParentAbsenceDetailsResponse(
     AbsenceId Id,
-    Name Student,
+    string Student,
     Grade Grade,
-    AbsenceType Type,
-    DateOnly Date,
+    string Type,
+    DateTime Date,
     string PeriodName,
     string PeriodTimeframe,
     int AbsenceLength,
@@ -19,7 +19,7 @@ public sealed record ParentAbsenceDetailsResponse(
     string AbsenceReason,
     string OfferingName,
     string Reason,
-    ResponseVerificationStatus VerificationStatus,
+    string VerificationStatus,
     string ValidatedBy,
     bool Explained,
     bool CanBeExplainedByParent);

@@ -8,6 +8,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Shared;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -80,7 +81,7 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
             student.GetName(),
             student.CurrentGrade,
             absence.Type,
-            absence.Date,
+            absence.Date.ToDateTime(TimeOnly.MinValue),
             absence.PeriodName,
             absence.PeriodTimeframe,
             absence.AbsenceLength,
@@ -89,7 +90,7 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
             offering.Name,
             response?.Explanation,
             response?.VerificationStatus,
-            response?.Verifier,
+            response is null ? null : response.VerificationStatus == ResponseVerificationStatus.NotRequired ? response.From : response.Verifier,
             absence.Explained,
             studentsOfParent.GetValueOrDefault(student.StudentId));
 

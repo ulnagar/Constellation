@@ -9,4 +9,7 @@ public class AbsenceType : StringEnumeration<AbsenceType>
 
     public AbsenceType(string value, string name) 
         : base(value, name) { }
+
+    public static implicit operator string(AbsenceType value) =>
+        value is null ? string.Empty : value.Name.ToString();
 }

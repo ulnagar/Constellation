@@ -55,4 +55,7 @@ public sealed class Name : ValueObject
     {
         return DisplayName;
     }
+
+    public static implicit operator string(Name name) =>
+        name is null ? string.Empty : name.ToString();
 }

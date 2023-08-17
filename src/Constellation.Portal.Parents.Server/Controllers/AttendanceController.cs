@@ -28,13 +28,20 @@ public class AttendanceController : BaseAPIController
     }
 
     [HttpGet]
-    public async Task<Result<List<AbsenceForFamilyResponse>>> Get()
+    public async Task<List<AbsenceForFamilyResponse>> Get()
     {
         AppUser user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve attendance data for parent {name}", user.UserName);
 
-        return await _mediator.Send(new GetAbsencesForFamilyQuery(user.Email));
+        var request = await _mediator.Send(new GetAbsencesForFamilyQuery(user.Email));
+
+        if (request.IsFailure)
+        {
+            return new List<AbsenceForFamilyResponse>();
+        }
+
+        return request.Value;
     }
 
     [HttpGet("Details/{id:guid}")]
@@ -75,7 +82,7 @@ public class AttendanceController : BaseAPIController
     }
 
     [HttpGet("Reports/Dates")]
-    public async Task<IList<ValidAttendenceReportDate>> GetReportDates()
+    public async Task<List<ValidAttendenceReportDate>> GetReportDates()
     {
         var request = await _mediator.Send(new GetValidAttendenceReportDatesQuery());
 
