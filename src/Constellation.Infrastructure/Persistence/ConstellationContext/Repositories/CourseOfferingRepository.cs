@@ -103,7 +103,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             int DayNumber,
             CancellationToken cancellationToken = default) =>
             GetCurrentEnrolmentsFromStudentForDate(studentId, AbsenceDate.ToDateTime(TimeOnly.MinValue), DayNumber, cancellationToken);
-    
+
+        public async Task<List<CourseOffering>> GetByStudentId(
+            string studentId, 
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<Enrolment>()
+                .Where(enrolment => enrolment.StudentId == studentId &&
+                    !enrolment.IsDeleted)
+            .Select(enrolment => enrolment.Offering)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
         public CourseOffering WithDetails(int id)
         {
             return Collection()

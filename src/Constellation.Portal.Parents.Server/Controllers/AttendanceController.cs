@@ -105,7 +105,7 @@ public class AttendanceController : BaseAPIController
         }
 
         // Create file as stream
-        Result<StoredFile> fileRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(request.StudentId, request.StartDate, request.EndDate), cancellationToken);
+        Result<StoredFile> fileRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(request.StudentId, DateOnly.FromDateTime(request.StartDate), DateOnly.FromDateTime(request.EndDate)), cancellationToken);
 
         if (fileRequest.IsFailure)
         {

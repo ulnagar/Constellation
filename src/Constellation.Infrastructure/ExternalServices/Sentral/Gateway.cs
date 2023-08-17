@@ -730,8 +730,8 @@ public partial class Gateway : ISentralGateway
 
                         validDates.Add(new ValidAttendenceReportDate(
                             TermName,
-                            startDate,
-                            endDate,
+                            startDate.ToDateTime(TimeOnly.MinValue),
+                            endDate.ToDateTime(TimeOnly.MinValue),
                             $"{TermName} {WeekName}"));
                     }
                     else
@@ -762,8 +762,8 @@ public partial class Gateway : ISentralGateway
 
                         validDates.Add(new ValidAttendenceReportDate(
                             TermName,
-                            startDate,
-                            endDate,
+                            startDate.ToDateTime(TimeOnly.MinValue),
+                            endDate.ToDateTime(TimeOnly.MinValue),
                             $"{TermName} {WeekName}"));
 
                         row++;

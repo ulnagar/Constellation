@@ -30,7 +30,7 @@ public class ReportsController : BaseAPIController
 
 		var user = await GetCurrentUser();
 
-		_logger.LogInformation("Requested to retrieve contacts for student {studentId} by user {user}", studentId, user.UserName);
+		_logger.LogInformation("Requested to retrieve reports for student {studentId} by user {user}", studentId, user.UserName);
 
 		var result = await _mediator.Send(new GetAcademicReportListQuery(studentId));
 

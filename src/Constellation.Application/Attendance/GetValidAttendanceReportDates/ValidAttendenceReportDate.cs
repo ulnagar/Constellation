@@ -4,6 +4,6 @@ using System;
 
 public sealed record ValidAttendenceReportDate(
     string TermGroup,
-    DateOnly StartDate,
-    DateOnly EndDate,
+    DateTime StartDate,
+    DateTime EndDate,
     string Description);

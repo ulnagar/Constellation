@@ -15,6 +15,14 @@ public interface ICourseOfferingRepository
     Task<List<CourseOffering>> GetByCourseId(int courseId, CancellationToken cancellationToken = default);
     Task<List<CourseOffering>> GetCurrentEnrolmentsFromStudentForDate(string studentId, DateTime AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
     Task<List<CourseOffering>> GetCurrentEnrolmentsFromStudentForDate(string studentId, DateOnly AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Get all current Course Offerings that a student is enrolled in
+    /// </summary>
+    /// <param name="studentId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<List<CourseOffering>> GetByStudentId(string studentId, CancellationToken cancellationToken = default);
 
     CourseOffering WithDetails(int id);
     CourseOffering WithFilter(Expression<Func<CourseOffering, bool>> predicate);

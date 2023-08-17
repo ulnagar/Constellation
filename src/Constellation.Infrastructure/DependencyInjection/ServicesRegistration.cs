@@ -1,10 +1,12 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection;
 
 using Constellation.Application.Common.Behaviours;
+using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Infrastructure.ExternalServices.AdobeConnect;
 using Constellation.Infrastructure.Idempotence;
 using Constellation.Infrastructure.Jobs;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
@@ -44,6 +46,10 @@ public static class ServicesRegistration
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(BusinessValidationBehaviour<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));
+
+        // Add IOptions
+        services.AddOptions<AppConfiguration>();
+        services.Configure<AppConfiguration>(configuration.GetSection(AppConfiguration.Section));
 
         // Add Constellation Context
 

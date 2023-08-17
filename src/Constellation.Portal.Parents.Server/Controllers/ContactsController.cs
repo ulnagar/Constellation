@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Portal.Parents.Server.Controllers;
 
-using Constellation.Application.Features.Contacts.Queries;
+using Constellation.Application.Contacts.GetContactListForParentPortal;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,19 +17,26 @@ public class ContactsController : BaseAPIController
 	}
 
 	[HttpGet("All/{studentId}")]
-	public async Task<ICollection<StudentSupportContact>> GetAllContacts([FromRoute] string studentId)
+	public async Task<List<StudentSupportContactResponse>> GetAllContacts([FromRoute] string studentId)
 	{
 		var authorised = await HasAuthorizedAccessToStudent(_mediator, studentId);
 
 		if (!authorised)
 		{
-			return new List<StudentSupportContact>();
+			return new List<StudentSupportContactResponse>();
 		}
 
 		var user = await GetCurrentUser();
 
 		_logger.LogInformation("Requested to retrieve contacts for student {studentId} by user {user}", studentId, user.UserName);
 
-		return await _mediator.Send(new GetStudentSupportContactsQuery { StudentId = studentId });
+		var request = await _mediator.Send(new GetContactListForParentPortalQuery(studentId));
+
+        if (request.IsFailure)
+        {
+            return new List<StudentSupportContactResponse>();
+        }
+
+        return request.Value;
 	}
 }

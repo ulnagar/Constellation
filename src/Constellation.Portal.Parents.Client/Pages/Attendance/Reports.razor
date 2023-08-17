@@ -67,7 +67,7 @@
                         <div class="accordion-body">
                             @foreach (var entry in term)
                             {
-                                var disabled = entry.EndDate > DateOnly.FromDateTime(DateTime.Today);
+                                var disabled = entry.EndDate > DateTime.Today;
 
                                 <div class="w-auto p-3 ms-3 me-3 mb-2 shadow position-relative @(disabled ? "disabled" : "")">
                                     <div class="row d-flex align-items-center">

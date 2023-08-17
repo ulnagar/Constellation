@@ -1,5 +1,5 @@
 ﻿@page "/Contacts/"
-@using Constellation.Application.Features.Contacts.Queries
+@using Constellation.Application.Contacts.GetContactListForParentPortal
 @using Constellation.Application.Features.Partners.Students.Queries
 
 @inject HttpClient Http
@@ -71,7 +71,7 @@
 @code {
     public List<StudentOfParent> Students { get; set; } = new();
     public StudentOfParent SelectedStudent { get; set; } = new();
-    public List<StudentSupportContact> Contacts { get; set; } = new();
+    public List<StudentSupportContactResponse> Contacts { get; set; } = new();
 
     public bool ShowLoader = false;
     public bool SelectingStudent = false;
@@ -104,7 +104,7 @@
     {
         try
         {
-            Contacts = await Http.GetFromJsonAsync<List<StudentSupportContact>>($"Contacts/All/{SelectedStudent.StudentId}");
+            Contacts = await Http.GetFromJsonAsync<List<StudentSupportContactResponse>>($"Contacts/All/{SelectedStudent.StudentId}");
         }
         catch (AccessTokenNotAvailableException exception)
         {
