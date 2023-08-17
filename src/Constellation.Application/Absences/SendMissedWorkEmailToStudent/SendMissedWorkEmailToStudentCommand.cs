@@ -5,5 +5,7 @@ using System;
 
 public sealed record SendMissedWorkEmailToStudentCommand(
     Guid JobId,
-    string StudentId)
+    string StudentId,
+    int OfferingId,
+    DateOnly AbsenceDate)
     : ICommand;

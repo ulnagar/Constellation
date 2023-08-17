@@ -124,14 +124,20 @@ public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
                 }
 
                 // If there was any whole absence found for yesterday, send the missed work email to student and parents
-                if (absences.Any(absence => 
-                    absence.Date == DateOnly.FromDateTime(DateTime.Today.AddDays(-1)) && 
-                    absence.Type == AbsenceType.Whole))
+                List<Absence> yesterdaysAbsences = absences
+                    .Where(absence =>
+                        absence.Date == DateOnly.FromDateTime(DateTime.Today.AddDays(-1)) &&
+                        absence.Type == AbsenceType.Whole)
+                    .ToList();
+
+                foreach (Absence absence in yesterdaysAbsences)
                 {
                     // Send missed work generic email
                     await _mediator.Send(new SendMissedWorkEmailToStudentCommand(
                         jobId, 
-                        student.StudentId),
+                        student.StudentId,
+                        absence.OfferingId,
+                        absence.Date),
                         cancellationToken);
                 }
                 

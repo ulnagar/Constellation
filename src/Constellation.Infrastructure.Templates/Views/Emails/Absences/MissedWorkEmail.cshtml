@@ -1,0 +1,16 @@
+@using Constellation.Infrastructure.Templates.Views.Emails.Absences
+@model MissedWorkEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Dear @Model.StudentName,</p>
+<p>Our records indicate that you were absence from your @Model.Subject class @Model.ClassName on @Model.AbsenceDate.ToLongDateString()</p>
+<p>To ensure that you remain on track with your peers, please go to the Term Planner for this subject, watch the recording of the lesson and then complete any work you have missed.</p>
+<p>If you have any questions or need further assistance, please contact your classroom teacher.</p>

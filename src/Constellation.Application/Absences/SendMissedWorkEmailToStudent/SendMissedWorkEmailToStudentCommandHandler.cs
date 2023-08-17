@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Absences.SendMissedWorkEmailToStudent;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
@@ -11,10 +10,8 @@ using Constellation.Core.Models.Families;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,17 +20,23 @@ internal sealed class SendMissedWorkEmailToStudentCommandHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IFamilyRepository _familyRepository;
+    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
     public SendMissedWorkEmailToStudentCommandHandler(
         IStudentRepository studentRepository,
         IFamilyRepository familyRepository,
+        ICourseOfferingRepository offeringRepository,
+        ICourseRepository courseRepository,
         IEmailService emailService,
         ILogger logger)
     {
         _studentRepository = studentRepository;
         _familyRepository = familyRepository;
+        _offeringRepository = offeringRepository;
+        _courseRepository = courseRepository;
         _emailService = emailService;
         _logger = logger.ForContext<SendMissedWorkEmailToStudentCommand>();
     }
@@ -93,7 +96,16 @@ internal sealed class SendMissedWorkEmailToStudentCommandHandler
                 recipients.Add(result.Value);
         }
 
-        await _emailService.SendMissedWorkEmail(student, recipients, cancellationToken);
+        CourseOffering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
+        Course course = offering is not null ? await _courseRepository.GetById(offering.CourseId, cancellationToken) : null;
+
+        await _emailService.SendMissedWorkEmail(
+            student, 
+            course is not null ? course.Name : string.Empty,
+            offering is not null ? offering.Name : string.Empty,
+            request.AbsenceDate,
+            recipients,
+            cancellationToken);
 
         return Result.Success();
     }

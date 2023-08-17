@@ -33,14 +33,15 @@ public interface IEmailService
     Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(List<AbsenceEntry> absences, Student student, List<EmailRecipient> emailAddresses, CancellationToken cancellationToken = default);
     Task<EmailDtos.SentEmail> SendParentWholeAbsenceDigest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> emailAddresses, CancellationToken cancellationToken = default);
     Task<EmailDtos.SentEmail> SendStudentPartialAbsenceExplanationRequest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
+    
     /// <summary>
-    /// Send an email to a student and their registered residential parents requesting they catch up on missed work for the day
+    /// Send an email to a student requesting they catch up on missed work for the day
     /// </summary>
     /// <param name="student"></param>
     /// <param name="recipients"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task SendMissedWorkEmail(Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
+    Task SendMissedWorkEmail(Student student, string subjectName, string className, DateOnly absenceDate, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
 
 
     // Attendance Emails

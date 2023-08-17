@@ -373,10 +373,27 @@ public class Service : IEmailService
 
     public async Task SendMissedWorkEmail(
         Student student, 
+        string subjectName,
+        string className,
+        DateOnly absenceDate,
         List<EmailRecipient> recipients, 
         CancellationToken cancellationToken = default)
     {
-        //TODO
+        var viewModel = new MissedWorkEmailViewModel
+        {
+            Preheader = "",
+            SenderName = _configuration.Absences.AbsenceCoordinatorName,
+            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
+            Title = "[Aurora College] Missed Classwork Notification",
+            StudentName = student.DisplayName,
+            Subject = subjectName,
+            ClassName = className,
+            AbsenceDate = absenceDate
+        };
+
+        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/MissedWorkEmail.cshtml", viewModel);
+
+        await _emailSender.Send(recipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, cancellationToken);
     }
 
 
