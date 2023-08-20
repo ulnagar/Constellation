@@ -55,6 +55,6 @@ public class StudentExplanationModel : PageModel
 
         await _mediator.Send(new CreateAbsenceResponseFromStudentCommand(absenceId, StudentId, Reason), cancellationToken);
 
-        return RedirectToPage("/Absences/Students", new { area = "Portal", studentId = Absence.StudentId });
+        return RedirectToPage("/Absences/Students", new { area = "Portal", studentId = StudentId });
     }
 }
