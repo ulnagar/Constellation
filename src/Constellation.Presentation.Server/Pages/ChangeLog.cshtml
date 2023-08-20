@@ -28,7 +28,56 @@
 
 <h1>Constellation Changelog</h1>
 
-<h3>Current version: Release V1.9 (Build @version)</h3>
+<h3>Current version: Release V.11 (Build @version)</h3>
+
+<div class="changelog">
+    <ul>
+        <li>Parents Portal
+            <ul>
+                <li>Contacts section
+                    <ul>
+                        <li>Updated Contacts section to include current Counsellors details</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Constellation Web
+            <ul>
+                <li>Absences section
+                    <ul>
+                        <li>Refactor Absences models to use Aggregate design pattern</li>
+                        <li>Allow enabling and disabling Absence scanning per type per student</li>
+                        <li>Remove missed work section</li>
+                    </ul>
+                </li>
+                <li>Science Pracs section
+                    <ul>
+                        <li>Refactor Science Prac models to use Aggregate design pattern</li>
+                        <li>Consolidate coordinator pages for Science Pracs into School Admin area</li>
+                        <li>Update Lesson reminder emails to escalate based on number of previous emails sent rather than how overdue the roll is</li>
+                    </ul>
+                </li>
+                <li>Awards section
+                    <ul>
+                        <li>Add button to allow Awards administrator to force resync of awards data from Sentral</li>
+                        <li>Add award nomination section for special end-of-year awards</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Constellation Infrastructure
+            <ul>
+                <li>Jobs (Recurring scheduled tasks)
+                    <ul>
+                        <li>Update the Roll Marking Report job to ignore teacher where multiple are included in the scan, and instead pull the teacher from the database</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<h3>Previous version: Release V1.10 (Build 2307.20)</h3>
 
 <div class="changelog">
     <ul>
