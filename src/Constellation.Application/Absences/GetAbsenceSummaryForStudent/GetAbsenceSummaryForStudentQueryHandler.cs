@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,6 +34,9 @@ internal sealed class GetAbsenceSummaryForStudentQueryHandler
 
         foreach (var absence in absences)
         {
+            if (absence.Responses.Any())
+                continue;
+
             var offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
             if (offering is null) 
