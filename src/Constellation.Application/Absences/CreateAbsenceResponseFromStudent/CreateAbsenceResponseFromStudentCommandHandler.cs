@@ -51,6 +51,8 @@ internal sealed class CreateAbsenceResponseFromStudentCommandHandler
             return result;
         }
 
+        await _unitOfWork.CompleteAsync(cancellationToken);
+
         return Result.Success();
     }
 }
