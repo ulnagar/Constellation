@@ -38,6 +38,7 @@ public class StudentExplanationModel : PageModel
             throw new InvalidDataException(absenceRequest.Error.Message);
 
         StudentId = absenceRequest.Value.StudentId;
+        Absence = absenceRequest.Value;
 
         return Page();
     }
