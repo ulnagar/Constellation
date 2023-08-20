@@ -549,7 +549,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                         aa.PartialType == absence.PartialType);
 
                 if (lastAttemptWebAttendAbsencesCount == 1)
-                    return webAttendAbsences.FirstOrDefault(aa =>
+                    return bestGuessWebAttendAbsences.FirstOrDefault(aa =>
                         aa.Period.Contains(absence.Period) &&
                         aa.PartialType == absence.PartialType);
             }
