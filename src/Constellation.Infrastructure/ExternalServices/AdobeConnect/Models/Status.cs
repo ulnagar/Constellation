@@ -2,7 +2,7 @@
 
 using System.Xml.Serialization;
 
-internal class Status
+public class Status
 {
     [XmlAttribute("code")]
     public string Code { get; set; }

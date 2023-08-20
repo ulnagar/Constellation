@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-internal class FolderLookup : ResponseDto
+public class FolderLookup : ResponseDto
 {
     [XmlArray("scos"), XmlArrayItem("sco")]
     public List<Folder> Scos { get; set; }

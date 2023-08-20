@@ -2,7 +2,7 @@
 
 using System.Xml.Serialization;
 
-internal class StatusInvalid
+public class StatusInvalid
 {
     [XmlAttribute("field")]
     public string Field { get; set; }

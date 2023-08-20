@@ -2,7 +2,7 @@
 
 using System.Xml.Serialization;
 
-internal class RoomCreation : ResponseDto
+public class RoomCreation : ResponseDto
 {
     [XmlElement("sco")]
     public RoomSco Sco { get; set; }

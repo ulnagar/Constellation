@@ -2,7 +2,7 @@
 
 using System.Xml.Serialization;
 
-internal class MeetingSession
+public class MeetingSession
 {
     [XmlAttribute("sco-id")]
     public string ScoId { get; set; }

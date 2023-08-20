@@ -3,7 +3,7 @@
 using System.Xml.Serialization;
 
 [XmlRoot("results")]
-internal class ResponseDto
+public class ResponseDto
 {
     [XmlElement("status")]
     public Status Status { get; set; }

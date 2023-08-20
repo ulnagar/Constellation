@@ -2,7 +2,7 @@
 
 using System.Xml.Serialization;
 
-internal class RoomSco
+public class RoomSco
 {
     [XmlAttribute("sco-id")]
     public string ScoId { get; set; }

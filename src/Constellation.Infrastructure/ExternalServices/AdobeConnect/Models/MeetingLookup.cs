@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-internal class MeetingLookup : ResponseDto
+public class MeetingLookup : ResponseDto
 {
     [XmlArray("expanded-scos"), XmlArrayItem("sco")]
     public List<MeetingRoom> Rooms { get; set; }

@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-internal class SessionLookup : ResponseDto
+public class SessionLookup : ResponseDto
 {
     [XmlArray("report-meeting-sessions"), XmlArrayItem("row")]
     public List<MeetingSession> Sessions { get; set; }

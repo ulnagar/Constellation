@@ -2,7 +2,7 @@
 
 using System.Xml.Serialization;
 
-internal class Principal
+public class Principal
 {
     [XmlAttribute("principal-id")]
     public string PrincipalId { get; set; }

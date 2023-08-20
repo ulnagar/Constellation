@@ -2,7 +2,7 @@
 
 using System.Xml.Serialization;
 
-internal class Folder
+public class Folder
 {
     [XmlAttribute("sco-id")]
     public string ScoId { get; set; }
