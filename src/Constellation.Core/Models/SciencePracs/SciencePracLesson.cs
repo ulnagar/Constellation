@@ -77,7 +77,7 @@ public sealed class SciencePracLesson : AggregateRoot
         }
 
         Result attempt = roll.MarkRoll(
-            schoolContactId,
+            schoolContactId == 0 ? null : schoolContactId,
             submittedBy,
             lessonDate,
             comment,

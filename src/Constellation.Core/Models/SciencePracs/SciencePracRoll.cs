@@ -38,7 +38,7 @@ public sealed class SciencePracRoll
     public int NotificationCount { get; private set; }
 
     internal Result MarkRoll(
-        int schoolContactId,
+        int? schoolContactId,
         string submittedBy,
         DateOnly lessonDate,
         string comment,
@@ -71,7 +71,9 @@ public sealed class SciencePracRoll
         if (_attendance.Count(entry => entry.Present) == 0 && string.IsNullOrWhiteSpace(comment))
             return Result.Failure(DomainErrors.SciencePracs.Roll.CommentRequiredNonePresent);
 
-        SchoolContactId = schoolContactId;
+        if (schoolContactId is not null)
+            SchoolContactId = schoolContactId;
+        
         SubmittedBy = submittedBy;
         LessonDate = lessonDate;
         Comment = comment;
