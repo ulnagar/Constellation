@@ -63,6 +63,13 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
             return;
         }
 
+        if (response.Type == ResponseType.System)
+        {
+            _logger.Information("{action}: Response is of type System and no notification required.", nameof(AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin));
+
+            return;
+        }
+
         CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         if (offering is null)
