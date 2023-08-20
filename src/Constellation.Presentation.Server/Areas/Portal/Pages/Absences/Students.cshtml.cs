@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences;
 
 using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
+using Constellation.Application.Students.GetStudentById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -32,6 +33,14 @@ public class StudentsModel : PageModel
     {
         if (string.IsNullOrWhiteSpace(StudentId))
             throw new ArgumentOutOfRangeException(nameof(StudentId));
+
+        // Get Student details
+        var studentRequest = await _mediator.Send(new GetStudentByIdQuery(StudentId), cancellationToken);
+
+        if (studentRequest.IsFailure)
+            throw new InvalidDataException(studentRequest.Error.Message);
+
+        StudentName = studentRequest.Value.DisplayName;
 
         // Get all absences for this student from this year.
         var absencesRequest = await _mediator.Send(new GetAbsenceSummaryForStudentQuery(StudentId), cancellationToken);
