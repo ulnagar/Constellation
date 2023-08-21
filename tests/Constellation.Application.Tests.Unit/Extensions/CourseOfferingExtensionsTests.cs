@@ -1,5 +1,5 @@
 ﻿using Constellation.Application.Extensions;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects;
 
 namespace Constellation.Application.Tests.Unit.Extensions;
 
