@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models;
 
 using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Subjects;
 using System;
 using System.Collections.Generic;
 

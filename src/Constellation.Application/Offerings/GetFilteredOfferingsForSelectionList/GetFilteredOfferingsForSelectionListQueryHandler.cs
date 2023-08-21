@@ -3,7 +3,7 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;

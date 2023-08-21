@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Assignments;
 
-using Constellation.Core.Models;
 using Constellation.Core.Models.Assignments;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Subjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

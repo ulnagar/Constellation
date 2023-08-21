@@ -8,6 +8,7 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Subjects;
 using Serilog;
 using System.Linq;
 using System.Threading;

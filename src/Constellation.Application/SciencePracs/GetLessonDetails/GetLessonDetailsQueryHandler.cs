@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Microsoft.Extensions.Primitives;
 using Serilog;

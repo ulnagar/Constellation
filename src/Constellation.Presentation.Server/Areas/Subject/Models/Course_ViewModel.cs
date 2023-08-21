@@ -1,6 +1,7 @@
 ﻿using Constellation.Application.Features.Faculties.Models;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects;
 using Constellation.Presentation.Server.BaseModels;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models;
+﻿namespace Constellation.Core.Models.Subjects;
 
 using Constellation.Core.Enums;
 using System;

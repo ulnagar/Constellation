@@ -1,7 +1,7 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects;
 using Constellation.Infrastructure.DependencyInjection;
 using System.Threading.Tasks;
 
