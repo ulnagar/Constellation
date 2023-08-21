@@ -51,10 +51,14 @@ internal sealed class CreateTrainingCompletionCommandHandler
                 (record.CompletedDate.HasValue) ? record.CompletedDate.Value : record.CreatedAt)
             .FirstOrDefault();
 
-        if (record is not null &&
-            (!request.NotRequired) ? record.CompletedDate.Value == request.CompletedDate :
-            (request.NotRequired && record.NotRequired) ? true : false)
-            return Result.Failure(DomainErrors.MandatoryTraining.Completion.AlreadyExists);
+        if (record is not null)
+        {
+            if ((request.NotRequired && record.NotRequired) ||
+                (!request.NotRequired && record.CompletedDate.Value == request.CompletedDate))
+            {
+                return Result.Failure(DomainErrors.MandatoryTraining.Completion.AlreadyExists);
+            }
+        }
 
         TrainingCompletion recordEntity = TrainingCompletion.Create(
             new TrainingCompletionId(),
@@ -85,6 +89,7 @@ internal sealed class CreateTrainingCompletionCommandHandler
         };
 
         recordEntity.LinkStoredFile(fileEntity);
+        module.AddCompletion(recordEntity);
         await _unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();
