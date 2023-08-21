@@ -181,12 +181,17 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 
                     foreach (var student in record.Attendance)
                     {
-                        var studentEntry = await _unitOfWork.Students.GetById(student.StudentId);
+                        var enrolledStudent = viewModel.Students.Where(enrolledStudent => enrolledStudent.StudentId == student.StudentId).FirstOrDefault();
+
+                        if (enrolledStudent is null)
+                        {
+                            continue;
+                        }
 
                         entry.Students.Add(new()
                         {
                             SchoolName = school.Name,
-                            Name = studentEntry.DisplayName,
+                            Name = enrolledStudent.Name,
                             Status = record.Status,
                             Comment = record.Comment,
                             WasPresent = student.Present
@@ -194,7 +199,8 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
                     }
                 }
 
-                viewModel.Lessons.Add(entry);
+                if (entry.Students.Any())
+                    viewModel.Lessons.Add(entry);
             }
             
             return View(viewModel);

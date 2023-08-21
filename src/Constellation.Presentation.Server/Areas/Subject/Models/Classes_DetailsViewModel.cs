@@ -58,8 +58,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
                     IsCurrent = offering.StartDate <= DateTime.Now && offering.EndDate >= DateTime.Now
                 };
 
-                viewModel.MinPerFN = offering.Sessions.Where(session => !session.IsDeleted).Sum(session => session.Period.EndTime.Subtract(session.Period.StartTime).Minutes);
-                viewModel.MinPerFN = offering.Sessions.Where(session => !session.IsDeleted).Sum(session => session.Period.EndTime.Subtract(session.Period.StartTime).Hours * 60);
+                viewModel.MinPerFN = (int)offering.Sessions.Where(session => !session.IsDeleted).Sum(session => session.Period.EndTime.Subtract(session.Period.StartTime).TotalMinutes);
 
                 return viewModel;
             }

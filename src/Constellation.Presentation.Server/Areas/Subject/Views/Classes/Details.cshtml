@@ -241,8 +241,8 @@
                     @foreach (var lesson in Model.Lessons.OrderBy(l => l.DueDate))
                     {
                         <tr>
-                            <td>@Html.DisplayFor(model => lesson.DueDate, "ShortDate")</td>
-                            <td>@Html.DisplayFor(model => lesson.Name)</td>
+                            <td>@lesson.DueDate.ToShortDateString()</td>
+                            <td>@lesson.Name</td>
                             <td>@lesson.Students.Count(student => student.WasPresent) / @lesson.Students.Count()</td>
                             <td><button type="button" data-toggle="modal" data-target="#modal-container-@lesson.Id" class="btn btn-info btn-sm btn-show-hover">View details</button></td>
                         </tr>
@@ -262,7 +262,7 @@
                                 <div class="row">
                                     <div class="col-md-12 heading">
                                         @lesson.Name<br />
-                                        <span class="subheading">Date Due: @Html.DisplayFor(model => lesson.DueDate, "ShortDate")</span>
+                                        <span class="subheading">Date Due: @lesson.DueDate.ToShortDateString()</span>
                                     </div>
                                 </div>
                                 <div class="row">
