@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Constellation.Core.Models
+namespace Constellation.Core.Models.Subjects
 {
     public class CourseOffering
     {
@@ -26,15 +26,15 @@ namespace Constellation.Core.Models
             EndDate = endDate;
         }
 
-        public int Id { get;  set; }
-        public string Name { get;  set; }
-        public int CourseId { get;  set; }
-        public Course Course { get;  set; }
-        public DateTime StartDate { get;  set; }
-        public DateTime EndDate { get;  set; }
-        public ICollection<Enrolment> Enrolments { get;  set; }
-        public ICollection<OfferingSession> Sessions { get;  set; }
-        public ICollection<OfferingResource> Resources { get;  set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int CourseId { get; set; }
+        public Course Course { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public ICollection<Enrolment> Enrolments { get; set; }
+        public ICollection<OfferingSession> Sessions { get; set; }
+        public ICollection<OfferingResource> Resources { get; set; }
         public ICollection<Absence> Absences { get; set; }
     }
 }

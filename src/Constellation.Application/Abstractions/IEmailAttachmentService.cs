@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Abstractions;
 
 using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects;
 using System.Collections.Generic;
 using System.Net.Mail;
 using System.Threading;

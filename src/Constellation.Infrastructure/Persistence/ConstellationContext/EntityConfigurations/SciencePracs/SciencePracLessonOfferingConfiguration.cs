@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.SciencePracs;
 
-using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
