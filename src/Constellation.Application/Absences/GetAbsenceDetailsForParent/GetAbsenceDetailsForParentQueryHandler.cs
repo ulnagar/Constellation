@@ -66,7 +66,7 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
             return Result.Failure<ParentAbsenceDetailsResponse>(DomainErrors.Partners.Student.NotFound(absence.StudentId));
         }
 
-        CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         if (offering is null)
         {

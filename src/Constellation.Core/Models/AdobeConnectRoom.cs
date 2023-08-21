@@ -8,7 +8,7 @@ namespace Constellation.Core.Models
     {
         public AdobeConnectRoom()
         {
-            OfferingSessions = new List<OfferingSession>();
+            OfferingSessions = new List<Session>();
         }
 
         public string ScoId { get; set; }
@@ -17,6 +17,6 @@ namespace Constellation.Core.Models
         public bool IsDeleted { get; set; }
         public DateTime? DateDeleted { get; set; }
         public bool Protected { get; set; }
-        public ICollection<OfferingSession> OfferingSessions { get; set; }
+        public ICollection<Session> OfferingSessions { get; set; }
     }
 }

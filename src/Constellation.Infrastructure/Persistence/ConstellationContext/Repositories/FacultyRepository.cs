@@ -29,7 +29,7 @@ internal sealed class FacultyRepository : IFacultyRepository
         CancellationToken cancellationToken = default)
     {
         Guid? facultyId = await _dbContext
-            .Set<CourseOffering>()
+            .Set<Offering>()
             .Where(offering => offering.Id == offeringId)
             .Select(offering => offering.Course.FacultyId)
             .FirstOrDefaultAsync(cancellationToken);

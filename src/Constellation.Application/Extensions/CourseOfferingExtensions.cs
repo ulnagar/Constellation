@@ -11,7 +11,7 @@ namespace Constellation.Application.Extensions
         /// </summary>
         /// <param name="offering"></param>
         /// <returns>bool</returns>
-        public static bool IsCurrent(this CourseOffering offering)
+        public static bool IsCurrent(this Offering offering)
         {
             if (offering.Sessions.All(s => s.IsDeleted))
                 return false;

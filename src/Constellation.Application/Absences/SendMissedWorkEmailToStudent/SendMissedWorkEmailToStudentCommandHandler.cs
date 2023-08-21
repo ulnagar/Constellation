@@ -97,7 +97,7 @@ internal sealed class SendMissedWorkEmailToStudentCommandHandler
                 recipients.Add(result.Value);
         }
 
-        CourseOffering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
+        Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
         Course course = offering is not null ? await _courseRepository.GetById(offering.CourseId, cancellationToken) : null;
 
         await _emailService.SendMissedWorkEmail(

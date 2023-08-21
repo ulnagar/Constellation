@@ -26,7 +26,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
             public ICollection<string> Teachers { get; set; }
             public int MinPerFN { get; set; }
 
-            public static OfferingDto ConvertFromOffering(CourseOffering offering)
+            public static OfferingDto ConvertFromOffering(Offering offering)
             {
                 var viewModel = new OfferingDto
                 {

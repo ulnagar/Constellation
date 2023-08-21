@@ -54,7 +54,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
             public bool IsCurrent { get; set; }
             public bool IsFuture { get; set; }
 
-            public static OfferingDto ConvertFromOffering(CourseOffering offering)
+            public static OfferingDto ConvertFromOffering(Offering offering)
             {
                 var viewModel = new OfferingDto
                 {

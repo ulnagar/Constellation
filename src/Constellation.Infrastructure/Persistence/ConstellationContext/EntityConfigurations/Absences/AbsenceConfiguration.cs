@@ -53,7 +53,7 @@ public class AbsenceConfiguration : IEntityTypeConfiguration<Absence>
             .HasForeignKey(absence => absence.StudentId);
 
         builder
-            .HasOne<CourseOffering>()
+            .HasOne<Offering>()
             .WithMany()
             .HasForeignKey(absence => absence.OfferingId);
 

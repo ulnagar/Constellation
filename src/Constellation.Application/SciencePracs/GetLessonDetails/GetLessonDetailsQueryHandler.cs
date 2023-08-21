@@ -54,7 +54,7 @@ internal sealed class GetLessonDetailsQueryHandler
 
         foreach (SciencePracLessonOffering entry in lesson.Offerings)
         {
-            CourseOffering offering = await _offeringRepository.GetById(entry.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(entry.OfferingId, cancellationToken);
 
             if (offering is null)
                 continue;

@@ -32,7 +32,7 @@ namespace Constellation.Core.Models
     public abstract class OfferingMSTeamOperation : MSTeamOperation
     {
         public int OfferingId { get; set; }
-        public CourseOffering Offering { get; set; }
+        public Offering Offering { get; set; }
     }
 
     public class StudentMSTeamOperation : OfferingMSTeamOperation

@@ -61,7 +61,7 @@ internal sealed class CreateAwardNominationCommandHandler
         {
             Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
 
-            CourseOffering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
 
             nomination = new AcademicExcellenceNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name);
         }
@@ -70,7 +70,7 @@ internal sealed class CreateAwardNominationCommandHandler
         {
             Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
 
-            CourseOffering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
 
             nomination = new AcademicAchievementNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name);
         }

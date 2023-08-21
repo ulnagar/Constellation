@@ -39,7 +39,7 @@ internal sealed class ConvertAbsenceToAbsenceEntryCommandHandler
             return Result.Failure<AbsenceEntry>(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
         }
 
-        CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         if (offering is null)
         {

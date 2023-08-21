@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations
 {
-    public class OfferingSessionConfiguration : IEntityTypeConfiguration<OfferingSession>
+    public class OfferingSessionConfiguration : IEntityTypeConfiguration<Session>
     {
-        public void Configure(EntityTypeBuilder<OfferingSession> builder)
+        public void Configure(EntityTypeBuilder<Session> builder)
         {
             builder.HasKey(s => s.Id);
 

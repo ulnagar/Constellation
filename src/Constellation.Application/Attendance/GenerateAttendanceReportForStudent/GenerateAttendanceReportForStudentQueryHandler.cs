@@ -111,12 +111,12 @@ public class GenerateAttendanceReportForStudentQueryHandler
 
         foreach (DateOnly date in reportableDates)
         {
-            List<OfferingSession> sessions = await _sessionRepository.GetAllForStudentAndDayDuringTime(student.StudentId, date.GetDayNumber(), date, cancellationToken);
+            List<Session> sessions = await _sessionRepository.GetAllForStudentAndDayDuringTime(student.StudentId, date.GetDayNumber(), date, cancellationToken);
             List<AttendanceDateDetail.SessionWithOffering> sessionDetails = new();
 
-            foreach (IGrouping<int, OfferingSession> offeringSessions in sessions.GroupBy(s => s.OfferingId))
+            foreach (IGrouping<int, Session> offeringSessions in sessions.GroupBy(s => s.OfferingId))
             {
-                CourseOffering offering = await _offeringRepository.GetById(offeringSessions.Key, cancellationToken);
+                Offering offering = await _offeringRepository.GetById(offeringSessions.Key, cancellationToken);
                 Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 
                 List<TimetablePeriod> periods = await _periodRepository.GetForOfferingOnDay(offeringSessions.Key, date, date.GetDayNumber(), cancellationToken);

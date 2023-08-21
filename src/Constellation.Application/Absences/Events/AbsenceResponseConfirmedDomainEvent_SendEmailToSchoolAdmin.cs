@@ -63,7 +63,7 @@ internal sealed class AbsenceResponseConfirmedDomainEvent_SendEmailToSchoolAdmin
             return;
         }
 
-        CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         if (offering is null)
         {

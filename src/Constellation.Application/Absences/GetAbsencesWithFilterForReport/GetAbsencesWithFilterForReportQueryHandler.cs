@@ -73,7 +73,7 @@ internal sealed class GetAbsencesWithFilterForReportQueryHandler
             if (studentName is null)
                 continue;
 
-            CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
             string offeringName = offering?.Name;
 

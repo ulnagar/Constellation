@@ -27,7 +27,7 @@ public class SciencePracLessonOfferingConfiguration : IEntityTypeConfiguration<S
                 value => SciencePracLessonId.FromValue(value));
 
         builder
-            .HasOne<CourseOffering>()
+            .HasOne<Offering>()
             .WithMany()
             .HasForeignKey(entity => entity.OfferingId);
     }

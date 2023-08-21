@@ -24,7 +24,7 @@ internal sealed class ClassCoverConfiguration : IEntityTypeConfiguration<ClassCo
                 value => ClassCoverId.FromValue(value));
 
         builder
-            .HasOne<CourseOffering>()
+            .HasOne<Offering>()
             .WithMany()
             .HasForeignKey(cover => cover.OfferingId)
             .OnDelete(DeleteBehavior.Restrict);

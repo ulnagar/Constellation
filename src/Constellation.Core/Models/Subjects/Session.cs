@@ -2,11 +2,11 @@
 
 using System;
 
-public class OfferingSession
+public class Session
 {
     public int Id { get; set; }
     public int OfferingId { get; set; }
-    public CourseOffering Offering { get; set; }
+    public Offering Offering { get; set; }
     public string StaffId { get; set; }
     public Staff Teacher { get; set; }
     public int PeriodId { get; set; }

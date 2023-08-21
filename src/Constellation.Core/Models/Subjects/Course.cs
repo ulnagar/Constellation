@@ -13,5 +13,5 @@ public class Course
     public Guid FacultyId { get; set; }
     public virtual Faculty Faculty { get; set; }
     public decimal FullTimeEquivalentValue { get; set; }
-    public List<CourseOffering> Offerings { get; set; } = new();
+    public List<Offering> Offerings { get; set; } = new();
 }

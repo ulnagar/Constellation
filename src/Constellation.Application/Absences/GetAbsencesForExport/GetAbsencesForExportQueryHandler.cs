@@ -72,7 +72,7 @@ internal sealed class GetAbsencesForExportQueryHandler
 
             School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
 
-            CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
             var entry = new AbsenceExportResponse(
                 student.GetName(),

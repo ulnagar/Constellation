@@ -9,7 +9,7 @@ public abstract class Resource
     public ResourceId Id { get; protected set; }
     public ResourceType Type { get; protected set; }
     public int OfferingId { get; protected set; }
-    public virtual CourseOffering Offering { get; protected set; }
+    public virtual Offering Offering { get; protected set; }
     public string ResourceId { get; protected set; }
     public string Name { get; protected set; }
     public string Url { get; protected set; }

@@ -25,14 +25,14 @@ public interface IAppDbContext
     DbSet<Enrolment> Enrolments { get; set; }
     DbSet<JobActivation> JobActivations { get; set; }
     DbSet<MSTeamOperation> MSTeamOperations { get; set; }
-    DbSet<CourseOffering> Offerings { get; set; }
+    DbSet<Offering> Offerings { get; set; }
     DbSet<StudentPartialAbsence> PartialAbsences { get; set; }
     DbSet<TimetablePeriod> Periods { get; set; }
     DbSet<AdobeConnectRoom> Rooms { get; set; }
     DbSet<SchoolContactRole> SchoolContactRoles { get; set; }
     DbSet<SchoolContact> SchoolContacts { get; set; }
     DbSet<School> Schools { get; set; }
-    DbSet<OfferingSession> Sessions { get; set; }
+    DbSet<Session> Sessions { get; set; }
     DbSet<Staff> Staff { get; set; }
     DbSet<Student> Students { get; set; }
     DbSet<StudentWholeAbsence> WholeAbsences { get; set; }

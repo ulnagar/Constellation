@@ -7,8 +7,8 @@ namespace Constellation.Application.Interfaces.Services
 {
     public interface ISessionService
     {
-        Task<ServiceOperationResult<OfferingSession>> CreateSession(SessionDto sessionResource);
-        Task<ServiceOperationResult<OfferingSession>> UpdateSession(int id, SessionDto sessionResource);
+        Task<ServiceOperationResult<Session>> CreateSession(SessionDto sessionResource);
+        Task<ServiceOperationResult<Session>> UpdateSession(int id, SessionDto sessionResource);
         Task RemoveSession(int id);
 
         Task<ServiceOperationResult<TimetablePeriod>> CreatePeriod(PeriodDto periodResource);

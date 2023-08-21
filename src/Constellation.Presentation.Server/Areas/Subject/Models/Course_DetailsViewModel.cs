@@ -42,7 +42,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
             public bool IsFuture { get; set; }
             public DateTime EndDate { get; set; }
 
-            public static OfferingDto ConvertFromOffering(CourseOffering offering)
+            public static OfferingDto ConvertFromOffering(Offering offering)
             {
                 var viewModel = new OfferingDto
                 {

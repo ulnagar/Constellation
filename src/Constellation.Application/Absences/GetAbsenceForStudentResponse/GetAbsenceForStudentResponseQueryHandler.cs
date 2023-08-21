@@ -67,7 +67,7 @@ internal sealed class GetAbsenceForStudentResponseQueryHandler
             return Result.Failure<AbsenceForStudentResponse>(new("ValueObjects.Name.NotCreated", "Could not create name object"));
         }
 
-        CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         if (offering is null)
         {

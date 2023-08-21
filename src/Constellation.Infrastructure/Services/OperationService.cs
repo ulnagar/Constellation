@@ -718,7 +718,7 @@ namespace Constellation.Infrastructure.Services
             return Task.CompletedTask;
         }
 
-        public async Task EnrolStudentInCanvasCourse(Student student, CourseOffering offering, DateTime? scheduledFor = null)
+        public async Task EnrolStudentInCanvasCourse(Student student, Offering offering, DateTime? scheduledFor = null)
         {
             var operation = new ModifyEnrolmentCanvasOperation()
             {
@@ -735,7 +735,7 @@ namespace Constellation.Infrastructure.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        public Task EnrolStaffInCanvasCourse(Staff staff, CourseOffering offering, DateTime? scheduledFor = null)
+        public Task EnrolStaffInCanvasCourse(Staff staff, Offering offering, DateTime? scheduledFor = null)
         {
             var operation = new ModifyEnrolmentCanvasOperation()
             {
@@ -753,7 +753,7 @@ namespace Constellation.Infrastructure.Services
             return Task.CompletedTask;
         }
 
-        public Task UnenrolStudentFromCanvasCourse(Student student, CourseOffering offering, DateTime? scheduledFor = null)
+        public Task UnenrolStudentFromCanvasCourse(Student student, Offering offering, DateTime? scheduledFor = null)
         {
             var operation = new ModifyEnrolmentCanvasOperation()
             {
@@ -770,7 +770,7 @@ namespace Constellation.Infrastructure.Services
             return Task.CompletedTask;
         }
 
-        public Task UnenrolStaffFromCanvasCourse(Staff staff, CourseOffering offering, DateTime? scheduledFor = null)
+        public Task UnenrolStaffFromCanvasCourse(Staff staff, Offering offering, DateTime? scheduledFor = null)
         {
             var operation = new ModifyEnrolmentCanvasOperation()
             {

@@ -69,7 +69,7 @@ public class StaffRepository : IStaffRepository
         CancellationToken cancellationToken = default)
     {
         var teachers = await _context
-            .Set<OfferingSession>()
+            .Set<Session>()
             .Where(session => session.OfferingId == offeringId && !session.IsDeleted)
             .Select(session => session.Teacher)
             .ToListAsync(cancellationToken);
@@ -107,7 +107,7 @@ public class StaffRepository : IStaffRepository
         CancellationToken cancellationToken = default)
     {
         Guid? facultyId = await _context
-            .Set<CourseOffering>()
+            .Set<Offering>()
             .Where(offering => offering.Id == offeringId)
             .Select(offering => offering.Course.FacultyId)
             .FirstOrDefaultAsync(cancellationToken);
