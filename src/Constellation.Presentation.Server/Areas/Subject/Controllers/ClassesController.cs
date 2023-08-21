@@ -6,7 +6,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.Areas.Subject.Models;
 using Constellation.Presentation.Server.BaseModels;

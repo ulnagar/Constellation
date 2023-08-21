@@ -6,6 +6,7 @@ using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Stocktake;
+using Constellation.Core.Models.Subjects;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ContextExtensions;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ContextSets;
 using Duende.IdentityServer.EntityFramework.Options;

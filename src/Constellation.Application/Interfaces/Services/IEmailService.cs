@@ -9,6 +9,7 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.ValueObjects;
 using System;
 using System.Collections.Generic;

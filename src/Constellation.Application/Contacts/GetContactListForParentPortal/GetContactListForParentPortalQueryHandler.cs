@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Microsoft.Extensions.Options;
 using Serilog;

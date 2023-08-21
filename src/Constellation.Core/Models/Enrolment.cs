@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Constellation.Core.Models.Subjects;
+using System;
 
 namespace Constellation.Core.Models
 {
