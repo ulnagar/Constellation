@@ -1,5 +1,5 @@
 ﻿using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects;
 using Constellation.Presentation.Server.BaseModels;
 
 namespace Constellation.Presentation.Server.Areas.Subject.Models

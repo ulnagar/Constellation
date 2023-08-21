@@ -11,6 +11,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Microsoft.Extensions.Options;

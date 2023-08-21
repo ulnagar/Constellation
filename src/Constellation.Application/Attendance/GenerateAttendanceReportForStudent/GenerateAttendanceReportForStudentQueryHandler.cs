@@ -8,6 +8,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using System;
 using System.Collections.Generic;

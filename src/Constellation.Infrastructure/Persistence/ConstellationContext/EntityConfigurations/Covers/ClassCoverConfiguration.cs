@@ -1,8 +1,8 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Covers;
 
-using Constellation.Core.Models;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
