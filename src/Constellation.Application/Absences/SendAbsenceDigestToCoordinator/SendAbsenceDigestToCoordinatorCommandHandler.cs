@@ -86,6 +86,21 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
                 return Result.Failure(DomainErrors.Partners.School.NotFound(student.SchoolCode));
             }
 
+            if (recipients.Count() == 0) 
+            {
+                Result<EmailRecipient> result = EmailRecipient.Create(school.Name, school.EmailAddress);
+
+                if (result.IsSuccess)
+                    recipients.Add(result.Value);
+            }
+
+            if (recipients.Count() == 0)
+            {
+                _logger.Warning("{jobId}: No recipients could be found or created: {school}", request.JobId, school);
+
+                return Result.Failure(DomainErrors.Partners.Contact.NotFound(0));
+            }
+
             List<AbsenceEntry> absenceEntries = new();
 
             foreach (Absence absence in digestAbsences)
@@ -107,7 +122,11 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
             EmailDtos.SentEmail message = await _emailService.SendCoordinatorWholeAbsenceDigest(absenceEntries, student, school, recipients, cancellationToken);
 
             if (message == null)
-                return Result.Failure(Error.None);
+            {
+                _logger.Warning("{jobId}: Email failed to send: {@message}", request.JobId, message);
+
+                return Result.Failure(new("MailSender", "Unknown Error"));
+            }
 
             string emails = string.Join(", ", recipients.Select(entry => entry.Email));
             foreach (var absence in digestAbsences)

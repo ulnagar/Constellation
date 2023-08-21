@@ -24,6 +24,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
     private readonly IStudentRepository _studentRepository;
     private readonly ISchoolContactRepository _contactRepository;
     private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly ISchoolRepository _schoolRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
@@ -32,6 +33,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
         IStudentRepository studentRepository,
         ISchoolContactRepository contactRepository,
         ICourseOfferingRepository offeringRepository,
+        ISchoolRepository schoolRepository,
         IEmailService emailService,
         ILogger logger)
     {
@@ -39,6 +41,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
         _studentRepository = studentRepository;
         _contactRepository = contactRepository;
         _offeringRepository = offeringRepository;
+        _schoolRepository = schoolRepository;
         _emailService = emailService;
         _logger = logger.ForContext<PendingVerificationResponseCreatedDomainEvent>();
     }
@@ -84,6 +87,30 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
 
             if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))
                 recipients.Add(result.Value);
+        }
+
+        School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
+
+        if (school is null)
+        {
+            _logger.Warning("Could not find School with Id {id}", student.SchoolCode);
+
+            return;
+        }
+
+        if (recipients.Count() == 0)
+        {
+            Result<EmailRecipient> result = EmailRecipient.Create(school.Name, school.EmailAddress);
+
+            if (result.IsSuccess)
+                recipients.Add(result.Value);
+        }
+
+        if (recipients.Count() == 0)
+        {
+            _logger.Warning("No recipients could be found or created: {school}", school);
+
+            return;
         }
 
         CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
