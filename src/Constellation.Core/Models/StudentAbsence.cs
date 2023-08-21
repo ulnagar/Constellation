@@ -20,7 +20,7 @@ namespace Constellation.Core.Models
         public string StudentId { get; set; }
         public Student Student { get; set; }
         public int OfferingId { get; set; }
-        public CourseOffering Offering { get; set; }
+        public Offering Offering { get; set; }
         public DateTime Date { get; set; }
         public string PeriodName { get; set; }
         public string PeriodTimeframe { get; set; }
@@ -81,7 +81,7 @@ namespace Constellation.Core.Models
         public string StudentId { get; set; }
         public Student Student { get; set; }
         public int OfferingId { get; set; }
-        public CourseOffering Offering { get; set; }
+        public Offering Offering { get; set; }
         public DateTime Date { get; set; }
         public string PeriodName { get; set; }
         public string PeriodTimeframe { get; set; }

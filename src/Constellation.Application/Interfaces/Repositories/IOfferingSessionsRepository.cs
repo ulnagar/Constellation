@@ -11,25 +11,25 @@ using System.Threading.Tasks;
 
 public interface IOfferingSessionsRepository
 {
-    Task<List<OfferingSession>> GetByOfferingId(int offeringId, CancellationToken cancellationToken = default);
+    Task<List<Session>> GetByOfferingId(int offeringId, CancellationToken cancellationToken = default);
     Task<List<string>> GetTimetableByOfferingId(int offeringId, CancellationToken cancellationToken = default);
-    Task<List<OfferingSession>> GetAllForStudentAndDayDuringTime(string studentId, int day, DateOnly date, CancellationToken cancellationToken = default);
+    Task<List<Session>> GetAllForStudentAndDayDuringTime(string studentId, int day, DateOnly date, CancellationToken cancellationToken = default);
 
-    OfferingSession WithDetails(int id);
-    OfferingSession WithFilter(Expression<Func<OfferingSession, bool>> predicate);
-    ICollection<OfferingSession> All();
-    ICollection<OfferingSession> AllWithFilter(Expression<Func<OfferingSession, bool>> predicate);
-    ICollection<OfferingSession> AllForOffering(int id);
-    ICollection<OfferingSession> AllForPeriod(int id);
-    ICollection<OfferingSession> AllFromFaculty(Faculty faculty);
-    ICollection<OfferingSession> AllFromGrade(Grade grade);
-    ICollection<OfferingSession> AllForOfferingAndTeacher(int offeringId, string staffId);
-    ICollection<OfferingSession> AllForOfferingAndRoom(int offeringId, string roomId);
-    Task<ICollection<OfferingSession>> ForOfferingAndDay(int offeringId, int day);
-    Task<ICollection<OfferingSession>> ForOfferingAndPeriod(int offeringId, int periodId);
-    Task<OfferingSession> ForExistCheckAsync(int sessionId);
+    Session WithDetails(int id);
+    Session WithFilter(Expression<Func<Session, bool>> predicate);
+    ICollection<Session> All();
+    ICollection<Session> AllWithFilter(Expression<Func<Session, bool>> predicate);
+    ICollection<Session> AllForOffering(int id);
+    ICollection<Session> AllForPeriod(int id);
+    ICollection<Session> AllFromFaculty(Faculty faculty);
+    ICollection<Session> AllFromGrade(Grade grade);
+    ICollection<Session> AllForOfferingAndTeacher(int offeringId, string staffId);
+    ICollection<Session> AllForOfferingAndRoom(int offeringId, string roomId);
+    Task<ICollection<Session>> ForOfferingAndDay(int offeringId, int day);
+    Task<ICollection<Session>> ForOfferingAndPeriod(int offeringId, int periodId);
+    Task<Session> ForExistCheckAsync(int sessionId);
     Task<bool> AnyForOffering(int offeringId);
     Task<bool> AnyForOfferingAndTeacher(int offeringId, string staffId);
     Task<bool> AnyForOfferingAndRoom(int offeringId, string roomId);
-    Task<OfferingSession> ForEditAsync(int sessionId);
+    Task<Session> ForEditAsync(int sessionId);
 }

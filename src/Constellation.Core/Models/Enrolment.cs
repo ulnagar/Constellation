@@ -15,7 +15,7 @@ namespace Constellation.Core.Models
         public string StudentId { get; set; }
         public Student Student { get; set; }
         public int OfferingId { get; set; }
-        public CourseOffering Offering { get; set; }
+        public Offering Offering { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime? DateCreated { get; set; }
         public DateTime? DateDeleted { get; set; }

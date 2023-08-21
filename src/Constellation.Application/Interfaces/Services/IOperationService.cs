@@ -45,10 +45,10 @@ namespace Constellation.Application.Interfaces.Services
 
         Task CreateCanvasUserFromStudent(Student student);
         Task CreateCanvasUserFromStaff(Staff staff);
-        Task EnrolStudentInCanvasCourse(Student student, CourseOffering offering, DateTime? scheduledFor = null);
-        Task EnrolStaffInCanvasCourse(Staff staff, CourseOffering offering, DateTime? scheduledFor = null);
-        Task UnenrolStudentFromCanvasCourse(Student student, CourseOffering offering, DateTime? scheduledFor = null);
-        Task UnenrolStaffFromCanvasCourse(Staff staff, CourseOffering offering, DateTime? scheduledFor = null);
+        Task EnrolStudentInCanvasCourse(Student student, Offering offering, DateTime? scheduledFor = null);
+        Task EnrolStaffInCanvasCourse(Staff staff, Offering offering, DateTime? scheduledFor = null);
+        Task UnenrolStudentFromCanvasCourse(Student student, Offering offering, DateTime? scheduledFor = null);
+        Task UnenrolStaffFromCanvasCourse(Staff staff, Offering offering, DateTime? scheduledFor = null);
         Task DisableCanvasUser(string UserId);
     }
 }

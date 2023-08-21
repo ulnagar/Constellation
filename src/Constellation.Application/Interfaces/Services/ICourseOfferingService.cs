@@ -11,8 +11,8 @@ namespace Constellation.Application.Interfaces.Services
         Task<ServiceOperationResult<Course>> UpdateCourse(CourseDto courseResource);
         Task RemoveCourse(int id);
 
-        Task<ServiceOperationResult<CourseOffering>> CreateOffering(CourseOfferingDto offeringResource);
-        Task<ServiceOperationResult<CourseOffering>> UpdateOffering(CourseOfferingDto offeringResource);
+        Task<ServiceOperationResult<Offering>> CreateOffering(CourseOfferingDto offeringResource);
+        Task<ServiceOperationResult<Offering>> UpdateOffering(CourseOfferingDto offeringResource);
         Task RemoveOffering(int id);
     }
 }

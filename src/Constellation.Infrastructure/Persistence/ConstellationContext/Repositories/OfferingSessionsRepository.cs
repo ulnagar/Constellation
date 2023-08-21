@@ -16,7 +16,7 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
         _context = context;
     }
 
-    public async Task<List<OfferingSession>> GetAllForStudentAndDayDuringTime(
+    public async Task<List<Session>> GetAllForStudentAndDayDuringTime(
         string studentId,
         int day,
         DateOnly date,
@@ -25,7 +25,7 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
         DateTime dateTime = date.ToDateTime(TimeOnly.MinValue);
 
         return await _context
-            .Set<OfferingSession>()
+            .Set<Session>()
             .Where(session =>
                 session.Offering.StartDate <= dateTime &&
                 session.Offering.EndDate >= dateTime &&
@@ -40,7 +40,7 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
             .ToListAsync(cancellationToken);
     }
 
-    private IQueryable<OfferingSession> Collection()
+    private IQueryable<Session> Collection()
     {
         return _context.Sessions
             .Include(s => s.Offering)
@@ -50,11 +50,11 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
             .Include(s => s.Teacher);
     }
 
-    public async Task<List<OfferingSession>> GetByOfferingId(
+    public async Task<List<Session>> GetByOfferingId(
         int offeringId,
         CancellationToken cancellationToken = default) =>
         await _context
-            .Set<OfferingSession>()
+            .Set<Session>()
             .Include(session => session.Period)
             .Where(session => 
                 session.OfferingId == offeringId && 
@@ -65,7 +65,7 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
         int offeringId,
         CancellationToken cancellationToken = default) =>
         await _context
-            .Set<OfferingSession>()
+            .Set<Session>()
             .Where(session => 
                 session.OfferingId == offeringId &&
                 !session.IsDeleted)
@@ -73,33 +73,33 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
             .Distinct()
             .ToListAsync(cancellationToken);
 
-    public OfferingSession WithDetails(int id)
+    public Session WithDetails(int id)
     {
         return Collection()
             .SingleOrDefault(d => d.Id == id);
     }
 
-    public OfferingSession WithFilter(Expression<Func<OfferingSession, bool>> predicate)
+    public Session WithFilter(Expression<Func<Session, bool>> predicate)
     {
         return Collection()
             .FirstOrDefault(predicate);
     }
 
-    public ICollection<OfferingSession> All()
+    public ICollection<Session> All()
     {
         return Collection()
             .Where(s => !s.IsDeleted)
             .ToList();
     }
 
-    public ICollection<OfferingSession> AllWithFilter(Expression<Func<OfferingSession, bool>> predicate)
+    public ICollection<Session> AllWithFilter(Expression<Func<Session, bool>> predicate)
     {
         return Collection()
             .Where(predicate)
             .ToList();
     }
 
-    public ICollection<OfferingSession> AllForOfferingAndRoom(int offeringId, string roomId)
+    public ICollection<Session> AllForOfferingAndRoom(int offeringId, string roomId)
     {
         return Collection()
             .Where(s => !s.IsDeleted)
@@ -107,7 +107,7 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
             .ToList();
     }
 
-    public ICollection<OfferingSession> AllForOfferingAndTeacher(int offeringId, string staffId)
+    public ICollection<Session> AllForOfferingAndTeacher(int offeringId, string staffId)
     {
         return Collection()
             .Where(s => !s.IsDeleted && s.OfferingId == offeringId && s.StaffId == staffId)
@@ -132,7 +132,7 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
             .AnyAsync(session => !session.IsDeleted && session.OfferingId == offeringId && session.RoomId == roomId);
     }
 
-    public ICollection<OfferingSession> AllForOffering(int id)
+    public ICollection<Session> AllForOffering(int id)
     {
         return Collection()
             .Where(s => s.OfferingId == id)
@@ -140,7 +140,7 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
             .ToList();
     }
 
-    public ICollection<OfferingSession> AllForPeriod(int id)
+    public ICollection<Session> AllForPeriod(int id)
     {
         return Collection()
             .Where(s => s.PeriodId == id)
@@ -148,7 +148,7 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
             .ToList();
     }
 
-    public ICollection<OfferingSession> AllFromFaculty(Faculty faculty)
+    public ICollection<Session> AllFromFaculty(Faculty faculty)
     {
         return Collection()
             .Where(s => s.Offering.Course.Faculty == faculty)
@@ -156,7 +156,7 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
             .ToList();
     }
 
-    public ICollection<OfferingSession> AllFromGrade(Grade grade)
+    public ICollection<Session> AllFromGrade(Grade grade)
     {
         return Collection()
             .Where(s => s.Offering.Course.Grade == grade)
@@ -164,7 +164,7 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
             .ToList();
     }
 
-    public async Task<ICollection<OfferingSession>> ForOfferingAndDay(int offeringId, int day)
+    public async Task<ICollection<Session>> ForOfferingAndDay(int offeringId, int day)
     {
         return await _context.Sessions
             .Include(s => s.Offering)
@@ -175,20 +175,20 @@ public class OfferingSessionsRepository : IOfferingSessionsRepository
 
     
 
-    public async Task<ICollection<OfferingSession>> ForOfferingAndPeriod(int offeringId, int periodId)
+    public async Task<ICollection<Session>> ForOfferingAndPeriod(int offeringId, int periodId)
     {
         return await _context.Sessions
             .Where(session => !session.IsDeleted && session.PeriodId == periodId && session.OfferingId == offeringId)
             .ToListAsync();
     }
 
-    public async Task<OfferingSession> ForExistCheckAsync(int sessionId)
+    public async Task<Session> ForExistCheckAsync(int sessionId)
     {
         return await _context.Sessions
             .SingleOrDefaultAsync(session => session.Id == sessionId);
     }
 
-    public async Task<OfferingSession> ForEditAsync(int sessionId)
+    public async Task<Session> ForEditAsync(int sessionId)
     {
         return await _context.Sessions
             .SingleOrDefaultAsync(session => session.Id == sessionId);

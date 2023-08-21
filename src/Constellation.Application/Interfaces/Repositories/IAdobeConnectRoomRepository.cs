@@ -16,7 +16,7 @@ namespace Constellation.Application.Interfaces.Repositories
         Task<AdobeConnectRoom> GetForExistCheck(string id);
         ICollection<AdobeConnectRoom> All();
         ICollection<AdobeConnectRoom> AllWithFilter(Expression<Func<AdobeConnectRoom, bool>> predicate);
-        ICollection<AdobeConnectRoom> AllFromSession(OfferingSession session);
+        ICollection<AdobeConnectRoom> AllFromSession(Session session);
         ICollection<AdobeConnectRoom> AllActive();
         ICollection<AdobeConnectRoom> AllWithSession();
         ICollection<AdobeConnectRoom> AllWithActiveSession();

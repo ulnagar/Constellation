@@ -10,7 +10,7 @@ public class CourseOfferingExtensionsTests
     public void IsCurrent_ShouldReturnFalse_IfSessionsIsNull()
     {
         // Arrange
-        var sut = new CourseOffering
+        var sut = new Offering
         {
             StartDate = DateTime.Today.AddDays(-1),
             EndDate = DateTime.Today.AddDays(1)
@@ -27,8 +27,8 @@ public class CourseOfferingExtensionsTests
     public void IsCurrent_ShouldReturnFalse_IfAllSessionsAreDeleted()
     {
         // Arrange
-        var sut = new CourseOffering();
-        var session = new OfferingSession
+        var sut = new Offering();
+        var session = new Session
         {
             IsDeleted = true
         };
@@ -46,13 +46,13 @@ public class CourseOfferingExtensionsTests
     public void IsCurrent_ShouldReturnTrue_IfStartDateIsInThePastAndEndDateIsInTheFuture()
     {
         // Arrange
-        var sut = new CourseOffering
+        var sut = new Offering
         {
             StartDate = DateTime.Today.AddDays(-1),
             EndDate = DateTime.Today.AddDays(1)
         };
 
-        var session = new OfferingSession
+        var session = new Session
         {
             IsDeleted = false
         };
@@ -70,13 +70,13 @@ public class CourseOfferingExtensionsTests
     public void IsCurrent_ShouldReturnTrue_IfStartDateIsTodayAndEndDateIsInTheFuture()
     {
         // Arrange
-        var sut = new CourseOffering
+        var sut = new Offering
         {
             StartDate = DateTime.Today,
             EndDate = DateTime.Today.AddDays(1)
         };
 
-        var session = new OfferingSession
+        var session = new Session
         {
             IsDeleted = false
         };
@@ -94,13 +94,13 @@ public class CourseOfferingExtensionsTests
     public void IsCurrent_ShouldReturnTrue_IfStartDateIsInThePastAndEndDateIsToday()
     {
         // Arrange
-        var sut = new CourseOffering
+        var sut = new Offering
         {
             StartDate = DateTime.Today.AddDays(-1),
             EndDate = DateTime.Today
         };
 
-        var session = new OfferingSession
+        var session = new Session
         {
             IsDeleted = false
         };
@@ -118,13 +118,13 @@ public class CourseOfferingExtensionsTests
     public void IsCurrent_ShouldReturnTrue_IfStartDateIsTodayAndEndDateIsToday()
     {
         // Arrange
-        var sut = new CourseOffering
+        var sut = new Offering
         {
             StartDate = DateTime.Today,
             EndDate = DateTime.Today
         };
 
-        var session = new OfferingSession
+        var session = new Session
         {
             IsDeleted = false
         };

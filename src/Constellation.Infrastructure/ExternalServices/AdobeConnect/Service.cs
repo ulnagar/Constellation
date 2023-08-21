@@ -43,7 +43,7 @@ namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
             _mediator = mediator;
         }
 
-        public async Task<string> CreateRoom(CourseOffering offering)
+        public async Task<string> CreateRoom(Offering offering)
         {
             var zeroFillGrade = ((int)offering.Course.Grade).ToString();
             if (zeroFillGrade.Length == 1)

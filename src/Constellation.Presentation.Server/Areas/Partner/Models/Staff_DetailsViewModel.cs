@@ -62,7 +62,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
             [Display(Name = DisplayNameDefaults.CourseName)]
             public string CourseName { get; set; }
 
-            public static OfferingDto ConvertFromOffering(CourseOffering offering)
+            public static OfferingDto ConvertFromOffering(Offering offering)
             {
                 var viewModel = new OfferingDto
                 {
@@ -84,7 +84,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
             public string RoomName { get; set; }
             public int Duration { get; set; }
 
-            public static SessionDto ConvertFromSession(OfferingSession session)
+            public static SessionDto ConvertFromSession(Session session)
             {
                 var viewModel = new SessionDto
                 {

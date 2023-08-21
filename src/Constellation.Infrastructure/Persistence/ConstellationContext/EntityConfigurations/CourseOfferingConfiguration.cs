@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations
 {
-    public class CourseOfferingConfiguration : IEntityTypeConfiguration<CourseOffering>
+    public class CourseOfferingConfiguration : IEntityTypeConfiguration<Offering>
     {
-        public void Configure(EntityTypeBuilder<CourseOffering> builder)
+        public void Configure(EntityTypeBuilder<Offering> builder)
         {
             builder.HasKey(o => o.Id);
 

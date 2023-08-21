@@ -98,9 +98,9 @@ internal sealed class GetContactListForParentPortalQueryHandler
         response.Add(StudentSupportContactResponse.GetSupport);
 
         // Add class teachers
-        List<CourseOffering> offerings = await _offeringRepository.GetByStudentId(request.StudentId, cancellationToken);
+        List<Offering> offerings = await _offeringRepository.GetByStudentId(request.StudentId, cancellationToken);
 
-        foreach (CourseOffering offering in offerings)
+        foreach (Offering offering in offerings)
         {
             List<Staff> members = await _staffRepository.GetPrimaryTeachersForOffering(offering.Id, cancellationToken);
 

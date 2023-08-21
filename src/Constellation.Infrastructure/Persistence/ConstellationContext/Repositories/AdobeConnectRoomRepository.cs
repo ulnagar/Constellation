@@ -75,7 +75,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToList();
         }
 
-        public ICollection<AdobeConnectRoom> AllFromSession(OfferingSession session)
+        public ICollection<AdobeConnectRoom> AllFromSession(Session session)
         {
             return Collection()
                 .Where(r => r.OfferingSessions.Contains(session))

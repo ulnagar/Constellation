@@ -22,10 +22,10 @@ namespace Constellation.Infrastructure.Services
             _operationService = operationService;
         }
 
-        public async Task<ServiceOperationResult<OfferingSession>> CreateSession(SessionDto sessionResource)
+        public async Task<ServiceOperationResult<Session>> CreateSession(SessionDto sessionResource)
         {
             // Set up return object
-            var result = new ServiceOperationResult<OfferingSession>();
+            var result = new ServiceOperationResult<Session>();
 
             // Validate entries
             var checkSession = await _unitOfWork.OfferingSessions.ForExistCheckAsync(sessionResource.Id);
@@ -97,7 +97,7 @@ namespace Constellation.Infrastructure.Services
             }
 
             // Create new entity
-            var session = new OfferingSession
+            var session = new Session
             {
                 OfferingId = sessionResource.OfferingId,
                 StaffId = sessionResource.StaffId,
@@ -133,10 +133,10 @@ namespace Constellation.Infrastructure.Services
             return result;
         }
 
-        public async Task<ServiceOperationResult<OfferingSession>> UpdateSession(int id, SessionDto sessionResource)
+        public async Task<ServiceOperationResult<Session>> UpdateSession(int id, SessionDto sessionResource)
         {
             // Set up return object
-            var result = new ServiceOperationResult<OfferingSession>();
+            var result = new ServiceOperationResult<Session>();
 
             // Validate entries
             var session = await _unitOfWork.OfferingSessions.ForEditAsync(sessionResource.Id);

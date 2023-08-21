@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 public interface ICourseOfferingRepository
 {
-    Task<CourseOffering?> GetById(int offeringId, CancellationToken cancellationToken = default);
-    Task<List<CourseOffering>> GetAllActive(CancellationToken cancellationToken = default);
-    Task<List<CourseOffering>> GetByCourseId(int courseId, CancellationToken cancellationToken = default);
-    Task<List<CourseOffering>> GetCurrentEnrolmentsFromStudentForDate(string studentId, DateTime AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
-    Task<List<CourseOffering>> GetCurrentEnrolmentsFromStudentForDate(string studentId, DateOnly AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
+    Task<Offering?> GetById(int offeringId, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetAllActive(CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetByCourseId(int courseId, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(string studentId, DateTime AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(string studentId, DateOnly AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Get all current Course Offerings that a student is enrolled in
@@ -23,36 +23,36 @@ public interface ICourseOfferingRepository
     /// <param name="studentId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<List<CourseOffering>> GetByStudentId(string studentId, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetByStudentId(string studentId, CancellationToken cancellationToken = default);
 
-    CourseOffering WithDetails(int id);
-    CourseOffering WithFilter(Expression<Func<CourseOffering, bool>> predicate);
-    Task<CourseOffering> GetForExistCheck(int id);
-    ICollection<CourseOffering> All();
-    ICollection<CourseOffering> AllWithFilter(Expression<Func<CourseOffering, bool>> predicate);
-    ICollection<CourseOffering> AllCurrentOfferings();
-    ICollection<CourseOffering> AllFutureOfferings();
-    ICollection<CourseOffering> AllPastOfferings();
-    ICollection<CourseOffering> AllFromFaculty(Faculty faculty);
-    ICollection<CourseOffering> AllFromGrade(Grade grade);
-    ICollection<CourseOffering> AllForStudent(string id);
-    ICollection<CourseOffering> AllCurrentAndFutureForStudent(string id);
-    ICollection<CourseOffering> AllCurrentForStudent(string id);
-    ICollection<CourseOffering> AllForTeacher(string id);
+    Offering WithDetails(int id);
+    Offering WithFilter(Expression<Func<Offering, bool>> predicate);
+    Task<Offering> GetForExistCheck(int id);
+    ICollection<Offering> All();
+    ICollection<Offering> AllWithFilter(Expression<Func<Offering, bool>> predicate);
+    ICollection<Offering> AllCurrentOfferings();
+    ICollection<Offering> AllFutureOfferings();
+    ICollection<Offering> AllPastOfferings();
+    ICollection<Offering> AllFromFaculty(Faculty faculty);
+    ICollection<Offering> AllFromGrade(Grade grade);
+    ICollection<Offering> AllForStudent(string id);
+    ICollection<Offering> AllCurrentAndFutureForStudent(string id);
+    ICollection<Offering> AllCurrentForStudent(string id);
+    ICollection<Offering> AllForTeacher(string id);
     ICollection<Staff> AllClassTeachers(int id);
-    Task<ICollection<CourseOffering>> ForSelectionAsync();
-    Task<ICollection<CourseOffering>> FromGradeForBulkEnrolAsync(Grade grade);
-    Task<CourseOffering> ForEnrolmentAsync(int id);
-    Task<ICollection<CourseOffering>> AllForTeacherAsync(string id);
-    Task<ICollection<CourseOffering>> ForListAsync(Expression<Func<CourseOffering, bool>> predicate);
-    Task<CourseOffering> ForDetailDisplayAsync(int id);
-    Task<CourseOffering> ForEditAsync(int id);
-    Task<CourseOffering> ForSessionEditAsync(int id);
-    Task<CourseOffering> ForRollCreationAsync(int id);
-    Task<CourseOffering> ForCoverCreationAsync(int id);
+    Task<ICollection<Offering>> ForSelectionAsync();
+    Task<ICollection<Offering>> FromGradeForBulkEnrolAsync(Grade grade);
+    Task<Offering> ForEnrolmentAsync(int id);
+    Task<ICollection<Offering>> AllForTeacherAsync(string id);
+    Task<ICollection<Offering>> ForListAsync(Expression<Func<Offering, bool>> predicate);
+    Task<Offering> ForDetailDisplayAsync(int id);
+    Task<Offering> ForEditAsync(int id);
+    Task<Offering> ForSessionEditAsync(int id);
+    Task<Offering> ForRollCreationAsync(int id);
+    Task<Offering> ForCoverCreationAsync(int id);
     Task<ICollection<Staff>> AllTeachersForCoverCreationAsync(int id);
-    Task<CourseOffering> ForSessionCreationAsync(int id);
+    Task<Offering> ForSessionCreationAsync(int id);
     Task<bool> AnyWithId(int id);
-    Task<ICollection<CourseOffering>> ForTeacherAndDates(string staffId, ICollection<int> dates);
-    Task<CourseOffering> GetFromYearAndName(int year, string name);
+    Task<ICollection<Offering>> ForTeacherAndDates(string staffId, ICollection<int> dates);
+    Task<Offering> GetFromYearAndName(int year, string name);
 }

@@ -4,15 +4,15 @@ using Constellation.Core.Models.Absences;
 using System;
 using System.Collections.Generic;
 
-public class CourseOffering
+public class Offering
 {
     private readonly List<Resource> _resources = new();
 
-    public CourseOffering()
+    public Offering()
     {
     }
 
-    public CourseOffering(int courseId, DateTime startDate, DateTime endDate)
+    public Offering(int courseId, DateTime startDate, DateTime endDate)
     {
         CourseId = courseId;
         StartDate = startDate;
@@ -26,7 +26,7 @@ public class CourseOffering
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public List<Enrolment> Enrolments { get; set; } = new();
-    public List<OfferingSession> Sessions { get; set; } = new();
+    public List<Session> Sessions { get; set; } = new();
     public IReadOnlyList<Resource> Resources => _resources;
     public List<Absence> Absences { get; set; } = new();
 }

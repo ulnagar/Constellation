@@ -64,7 +64,7 @@ internal sealed class GetAbsenceResponseDetailsForSchoolQueryHandler
             return Result.Failure<SchoolAbsenceResponseDetailsResponse>(DomainErrors.Partners.Student.NotFound(absence.StudentId));
         }
 
-        CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         SchoolAbsenceResponseDetailsResponse entry = new(
             student.GetName().DisplayName,

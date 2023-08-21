@@ -36,8 +36,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public DbSet<Student> Students { get; set; }
         public DbSet<Staff> Staff { get; set; }
         public DbSet<Course> Courses { get; set; }
-        public DbSet<CourseOffering> Offerings { get; set; }
-        public DbSet<OfferingSession> Sessions { get; set; }
+        public DbSet<Offering> Offerings { get; set; }
+        public DbSet<Session> Sessions { get; set; }
         public DbSet<TimetablePeriod> Periods { get; set; }
         public DbSet<AdobeConnectRoom> Rooms { get; set; }
         public DbSet<Enrolment> Enrolments { get; set; }

@@ -90,14 +90,14 @@ namespace Constellation.Infrastructure.Services
             _unitOfWork.Remove(course);
         }
 
-        public async Task<ServiceOperationResult<CourseOffering>> CreateOffering(CourseOfferingDto offeringResource)
+        public async Task<ServiceOperationResult<Offering>> CreateOffering(CourseOfferingDto offeringResource)
         {
             // Set up return object
-            var result = new ServiceOperationResult<CourseOffering>();
+            var result = new ServiceOperationResult<Offering>();
 
             if (!await _unitOfWork.CourseOfferings.AnyWithId(offeringResource.Id))
             {
-                var offering = new CourseOffering
+                var offering = new Offering
                 {
                     Name = offeringResource.Name,
                     CourseId = offeringResource.CourseId,
@@ -119,10 +119,10 @@ namespace Constellation.Infrastructure.Services
             return result;
         }
 
-        public async Task<ServiceOperationResult<CourseOffering>> UpdateOffering(CourseOfferingDto offeringResource)
+        public async Task<ServiceOperationResult<Offering>> UpdateOffering(CourseOfferingDto offeringResource)
         {
             // Set up return object
-            var result = new ServiceOperationResult<CourseOffering>();
+            var result = new ServiceOperationResult<Offering>();
 
             // Validate entries
             var offering = await _unitOfWork.CourseOfferings.ForEditAsync(offeringResource.Id);

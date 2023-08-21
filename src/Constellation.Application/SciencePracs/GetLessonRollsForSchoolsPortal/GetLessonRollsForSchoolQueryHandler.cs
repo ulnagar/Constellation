@@ -44,7 +44,7 @@ internal sealed class GetLessonRollsForSchoolQueryHandler
 
             int offeringId = lesson.Offerings.First().OfferingId;
 
-            CourseOffering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
             Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 

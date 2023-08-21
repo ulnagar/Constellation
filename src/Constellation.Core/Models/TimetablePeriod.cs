@@ -9,7 +9,7 @@ namespace Constellation.Core.Models
     {
         public TimetablePeriod()
         {
-            OfferingSessions = new List<OfferingSession>();
+            OfferingSessions = new List<Session>();
         }
 
         public int Id { get; set; }
@@ -22,7 +22,7 @@ namespace Constellation.Core.Models
         public string Type { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime? DateDeleted { get; set; }
-        public ICollection<OfferingSession> OfferingSessions { get; set; }
+        public ICollection<Session> OfferingSessions { get; set; }
         public int Duration => GetDuration();
 
         private int GetDuration()

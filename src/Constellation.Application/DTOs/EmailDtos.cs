@@ -32,7 +32,7 @@ public partial class EmailDtos
             public AbsenceType AbsenceType { get; set; }
             public string AbsenceTimeframe { get; set; }
 
-            public AbsenceDto(Absence absence, Response response, CourseOffering offering)
+            public AbsenceDto(Absence absence, Response response, Offering offering)
             {
                 ReportedBy = "UNKNOWN SOURCE";
 

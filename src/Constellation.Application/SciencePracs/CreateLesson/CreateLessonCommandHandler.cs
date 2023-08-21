@@ -36,7 +36,7 @@ internal sealed class CreateLessonCommandHandler
 
     public async Task<Result> Handle(CreateLessonCommand request, CancellationToken cancellationToken)
     {
-        List<CourseOffering> offerings = await _courseOfferingRepository.GetByCourseId(request.CourseId, cancellationToken);
+        List<Offering> offerings = await _courseOfferingRepository.GetByCourseId(request.CourseId, cancellationToken);
 
         offerings = offerings.Where(offering => offering.IsCurrent()).ToList();
 

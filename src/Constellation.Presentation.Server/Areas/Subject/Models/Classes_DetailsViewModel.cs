@@ -45,7 +45,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
             public ICollection<string> RoomLinks { get; set; }
             public int MinPerFN { get; set; }
 
-            public static OfferingDto ConvertFromOffering(CourseOffering offering)
+            public static OfferingDto ConvertFromOffering(Offering offering)
             {
                 var viewModel = new OfferingDto
                 {
@@ -97,7 +97,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
             public string RoomLink { get; set; }
             public int Duration { get; set; }
 
-            public static SessionDto ConvertFromSession(OfferingSession session)
+            public static SessionDto ConvertFromSession(Session session)
             {
                 var viewModel = new SessionDto
                 {

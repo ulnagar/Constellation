@@ -21,7 +21,7 @@ internal sealed class EmailAttachmentService : IEmailAttachmentService
         _pdfService = pdfService;
     }
 
-    public async Task<Attachment> GenerateClassRollDocument(CourseOffering offering, List<Student> students, CancellationToken cancellationToken = default)
+    public async Task<Attachment> GenerateClassRollDocument(Offering offering, List<Student> students, CancellationToken cancellationToken = default)
     {
         var model = new CoverRollViewModel();
         model.ClassName = offering.Name;
@@ -43,7 +43,7 @@ internal sealed class EmailAttachmentService : IEmailAttachmentService
         return rollAttachment;
     }
 
-    public async Task<Attachment> GenerateClassTimetableDocument(CourseOffering offering, List<OfferingSession> offeringSessions, List<TimetablePeriod> relevantPeriods, CancellationToken cancellationToken = default)
+    public async Task<Attachment> GenerateClassTimetableDocument(Offering offering, List<Session> offeringSessions, List<TimetablePeriod> relevantPeriods, CancellationToken cancellationToken = default)
     {
         var timetableData = new ClassTimetableDataDto
         {

@@ -247,7 +247,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
                 return View("Update", viewModel);
             }
 
-            CourseOffering offering;
+            Offering offering;
 
             if (viewModel.IsNew)
             {

@@ -31,13 +31,13 @@ internal sealed class GetFilteredOfferingsForSelectionListQueryHandler
 
         foreach (int courseId in request.CourseIds)
         {
-            List<CourseOffering> offerings = await _offeringRepository.GetByCourseId(courseId, cancellationToken);
+            List<Offering> offerings = await _offeringRepository.GetByCourseId(courseId, cancellationToken);
 
             offerings = offerings
                 .Where(offering => offering.IsCurrent())
                 .ToList();
 
-            foreach (CourseOffering offering in offerings)
+            foreach (Offering offering in offerings)
             {
                 if (response.Any(entry => entry.Id == offering.Id))
                     continue;

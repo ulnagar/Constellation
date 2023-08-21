@@ -55,7 +55,7 @@ public class LessonRepository : ILessonRepository
         CancellationToken cancellationToken = default)
     {
         var offeringIds = await _context
-            .Set<CourseOffering>()
+            .Set<Offering>()
             .Where(offering => offering.CourseId == CourseId)
             .Select(offering => offering.Id)
             .ToListAsync(cancellationToken);

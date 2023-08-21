@@ -9,6 +9,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
         public string StudentId { get; set; }
         public ICollection<int> SelectedClasses { get; set; }
 
-        public ICollection<CourseOffering> OfferingList { get; set; }
+        public ICollection<Offering> OfferingList { get; set; }
     }
 }

@@ -165,14 +165,14 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
             int cycleDay = group.Key.GetDayNumber();
 
             // Get all enrolments for this student that were active on that date using the day of the cycle we identified above
-            List<CourseOffering> enrolledOfferings = await _offeringRepository
+            List<Offering> enrolledOfferings = await _offeringRepository
                 .GetCurrentEnrolmentsFromStudentForDate(
                     student.StudentId, 
                     group.Key, 
                     cycleDay, 
                     cancellationToken);
             
-            foreach (CourseOffering enrolledOffering in enrolledOfferings)
+            foreach (Offering enrolledOffering in enrolledOfferings)
             {
                 if (cancellationToken.IsCancellationRequested)
                     return returnAbsences;

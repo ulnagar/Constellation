@@ -27,7 +27,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             int dayNumber,
             CancellationToken cancellationToken = default) =>
             await _context
-                .Set<OfferingSession>()
+                .Set<Session>()
                 .Where(session => session.OfferingId == offeringId &&
                     // session was created before the absence date
                     session.DateCreated < absenceDate &&

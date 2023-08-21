@@ -50,7 +50,7 @@ internal sealed class SciencePracLessonCreatedDomainEvent_CreateRolls
 
         foreach (SciencePracLessonOffering record in lesson.Offerings)
         {
-            CourseOffering offering = await _offeringRepository.GetById(record.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(record.OfferingId, cancellationToken);
 
             if (offering is null)
                 continue;

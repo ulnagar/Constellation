@@ -49,7 +49,7 @@ internal sealed class ConvertResponseToAbsenceExplanationCommandHandler
             return Result.Failure<AbsenceExplanation>(DomainErrors.Absences.Response.NotFound(request.ResponseId));
         }
 
-        CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         if (offering is null)
         {
