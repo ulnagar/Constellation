@@ -5,7 +5,6 @@ using Constellation.Application.Absences.ConvertResponseToAbsenceExplanation;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
@@ -29,7 +28,7 @@ public interface IEmailService
     // Absence Emails
     Task SendAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail);
     Task<EmailDtos.SentEmail> SendCoordinatorPartialAbsenceVerificationRequest(List<AbsenceExplanation> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
-    Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
+    Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(List<AbsenceEntry> absences, Student student, School school, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
     Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(List<AbsenceEntry> absences, Student student, List<EmailRecipient> emailAddresses, CancellationToken cancellationToken = default);
     Task<EmailDtos.SentEmail> SendParentWholeAbsenceDigest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> emailAddresses, CancellationToken cancellationToken = default);
     Task<EmailDtos.SentEmail> SendStudentPartialAbsenceExplanationRequest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);

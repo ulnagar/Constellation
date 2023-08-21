@@ -327,6 +327,7 @@ public class Service : IEmailService
     public async Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(
         List<AbsenceEntry> absences, 
         Student student,
+        School school,
         List<EmailRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
@@ -340,7 +341,7 @@ public class Service : IEmailService
             SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
             Title = "Absence Explanation Request",
             StudentName = student.DisplayName,
-            SchoolName = student.School.Name,
+            SchoolName = school.Name,
             Absences = absences
         };
 

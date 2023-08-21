@@ -24,6 +24,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
     private readonly IAbsenceRepository _absenceRepository;
     private readonly ISchoolContactRepository _schoolContactRepository;
     private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly ISchoolRepository _schoolRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
@@ -32,6 +33,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
         IAbsenceRepository absenceRepository,
         ISchoolContactRepository schoolContactRepository,
         ICourseOfferingRepository offeringRepository,
+        ISchoolRepository schoolRepository,
         IEmailService emailService,
         ILogger logger)
     {
@@ -39,6 +41,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
         _absenceRepository = absenceRepository;
         _schoolContactRepository = schoolContactRepository;
         _offeringRepository = offeringRepository;
+        _schoolRepository = schoolRepository;
         _emailService = emailService;
         _logger = logger.ForContext<SendAbsenceDigestToCoordinatorCommand>();
     }
@@ -74,6 +77,15 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
                     recipients.Add(result.Value);
             }
 
+            School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
+
+            if (school is null)
+            {
+                _logger.Warning("{jobId}: Could not find School with Id {id}", request.JobId, student.SchoolCode);
+
+                return Result.Failure(DomainErrors.Partners.School.NotFound(student.SchoolCode));
+            }
+
             List<AbsenceEntry> absenceEntries = new();
 
             foreach (Absence absence in digestAbsences)
@@ -92,7 +104,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
                     absence.AbsenceTimeframe));
             }
 
-            EmailDtos.SentEmail message = await _emailService.SendCoordinatorWholeAbsenceDigest(absenceEntries, student, recipients, cancellationToken);
+            EmailDtos.SentEmail message = await _emailService.SendCoordinatorWholeAbsenceDigest(absenceEntries, student, school, recipients, cancellationToken);
 
             if (message == null)
                 return Result.Failure(Error.None);
