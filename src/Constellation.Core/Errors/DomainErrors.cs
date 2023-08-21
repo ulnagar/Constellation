@@ -1,4 +1,5 @@
-﻿using Constellation.Core.Models.Identifiers;
+﻿using Constellation.Core.Enums;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using System;
 
@@ -503,6 +504,21 @@ public static class DomainErrors
             public static readonly Error LastNameEmpty = new Error(
                 "ValueObjects.Name.LastNameEmpty",
                 "Last Name must not be empty.");
+        }
+
+        public static class OfferingName
+        {
+            public static readonly Func<Grade, Error> InvalidGrade = grade => new(
+                "ValueObjects.OfferingName.InvalidGrade",
+                $"Invalid grade supplied: {grade.ToString()}");
+
+            public static readonly Func<string, Error> InvalidCourseCode = code => new(
+                "ValueObjects.OfferingName.InvalidCourseCode",
+                $"Invalid course code supplied: {code}");
+
+            public static readonly Func<string, Error> InvalidTutorialInitials = initials => new(
+                "ValueObjects.OfferingName.InvalidTutorialInitials",
+                $"Invalid initals supplied for tutorial class: {initials}");
         }
 
         public static class PhoneNumber
