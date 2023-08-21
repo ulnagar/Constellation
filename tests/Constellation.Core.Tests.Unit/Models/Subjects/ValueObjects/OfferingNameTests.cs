@@ -1,15 +1,9 @@
-﻿namespace Constellation.Core.Tests.Unit.Models.Subjects;
+﻿namespace Constellation.Core.Tests.Unit.Models.Subjects.ValueObjects;
 
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
-using Constellation.Core.Models.Assignments;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.ValueObjects;
 using Constellation.Core.Shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 public class OfferingNameTests
 {
@@ -18,17 +12,16 @@ public class OfferingNameTests
     public void Create_ShouldReturnSuccess_WhenClassValuesAreValid()
     {
         // Arrange
-        var course = new Course() 
-        { 
+        var course = new Course()
+        {
             Id = 1,
             Code = "ENG",
-            Grade = Enums.Grade.Y07,
+            Grade = Grade.Y07,
             Name = "English"
         };
 
         // Act
         var sut = OfferingName.Create(
-            Enums.Grade.Y07,
             course,
             "P",
             '1');
@@ -46,13 +39,12 @@ public class OfferingNameTests
         {
             Id = 1,
             Code = "TUT",
-            Grade = Enums.Grade.Y07,
+            Grade = Grade.Y07,
             Name = "Tutorials"
         };
 
         // Act
         var sut = OfferingName.Create(
-            Enums.Grade.Y07,
             course,
             "MG");
 
@@ -62,20 +54,18 @@ public class OfferingNameTests
     }
 
     [Fact]
-    public void Create_ShouldReturnFailure_WhenClassGradeIsInvalid()
+    public void Create_ShouldReturnFailure_WhenClassCourseGradeIsInvalid()
     {
         // Arrange
         var course = new Course()
         {
             Id = 1,
             Code = "ENG",
-            Grade = Enums.Grade.Y07,
             Name = "English"
         };
 
         // Act
         var sut = OfferingName.Create(
-            0,
             course,
             "P",
             '1');
@@ -87,20 +77,18 @@ public class OfferingNameTests
     }
 
     [Fact]
-    public void Create_ShouldReturnFailure_WhenTutorialGradeIsInvalid()
+    public void Create_ShouldReturnFailure_WhenTutorialCourseGradeIsInvalid()
     {
         // Arrange
         var course = new Course()
         {
             Id = 1,
             Code = "TUT",
-            Grade = Enums.Grade.Y07,
             Name = "Tutorial"
         };
 
         // Act
         var sut = OfferingName.Create(
-            0,
             course,
             "MG");
 
@@ -117,13 +105,12 @@ public class OfferingNameTests
         var course = new Course()
         {
             Id = 1,
-            Grade = Enums.Grade.Y07,
+            Grade = Grade.Y07,
             Name = "English"
         };
 
         // Act
         var sut = OfferingName.Create(
-            Enums.Grade.Y07,
             course,
             "P",
             '1');
@@ -141,13 +128,12 @@ public class OfferingNameTests
         var course = new Course()
         {
             Id = 1,
-            Grade = Enums.Grade.Y07,
+            Grade = Grade.Y07,
             Name = "English"
         };
 
         // Act
         var sut = OfferingName.Create(
-            Enums.Grade.Y07,
             course,
             "MG");
 
@@ -170,11 +156,11 @@ public class OfferingNameTests
         // Arrange
         var course = new Course()
         {
+            Grade = grade,
             Code = code
         };
 
         var sut = OfferingName.Create(
-            grade,
             course,
             line,
             sequence);
@@ -200,11 +186,11 @@ public class OfferingNameTests
         // Arrange
         var course = new Course()
         {
+            Grade = grade,
             Code = code
         };
 
         var sut = OfferingName.Create(
-            grade,
             course,
             initials);
 
@@ -213,5 +199,55 @@ public class OfferingNameTests
 
         // Assert
         result.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("07ENGP1", "07", "ENG", "P", '1')]
+    [InlineData("08MATG4", "08", "MAT", "G", '4')]
+    [InlineData("09SCIPA", "09", "SCI", "P", 'A')]
+    [InlineData("10ENGG1", "10", "ENG", "G", '1')]
+    [InlineData("11MXX41", "11", "MXX", "4", '1')]
+    [InlineData("12SCX23", "12", "SCX", "2", '3')]
+    [InlineData("05STEA1", "05", "STE", "A", '1')]
+    [InlineData("06YDMC1", "06", "YDM", "C", '1')]
+    public void FromValue_ShouldReturnValidObject_WhenClassNameIsValid(string className, string grade, string course, string line, char sequence)
+    {
+        // Arrange
+
+
+        // Act
+        var sut = OfferingName.FromValue(className);
+
+        // Assert
+        sut.Should().NotBeNull();
+        sut.Grade.Should().Be(grade);
+        sut.Course.Should().Be(course);
+        sut.Line.Should().Be(line);
+        sut.Sequence.Should().Be(sequence);
+    }
+
+    [Theory]
+
+    [InlineData("07TUTMG", "07", "TUT", "MG")]
+    [InlineData("08TUTKR", "08", "TUT", "KR")]
+    [InlineData("09TUTNE", "09", "TUT", "NE")]
+    [InlineData("10TUTLS", "10", "TUT", "LS")]
+    [InlineData("11TUTPU", "11", "TUT", "PU")]
+    [InlineData("12TUTMU", "12", "TUT", "MU")]
+    [InlineData("05TUTLW", "05", "TUT", "LW")]
+    [InlineData("06TUTKP", "06", "TUT", "KP")]
+    public void FromValue_ShouldReturnValidObject_WhenTutorialNameIsValid(string className, string grade, string course, string initials)
+    {
+        // Arrange
+
+
+        // Act
+        var sut = OfferingName.FromValue(className);
+
+        // Assert
+        sut.Should().NotBeNull();
+        sut.Grade.Should().Be(grade);
+        sut.Course.Should().Be(course);
+        sut.Initials.Should().Be(initials);
     }
 }
