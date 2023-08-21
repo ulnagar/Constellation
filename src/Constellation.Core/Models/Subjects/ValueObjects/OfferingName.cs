@@ -1,9 +1,11 @@
-﻿namespace Constellation.Core.Models.Subjects;
+﻿namespace Constellation.Core.Models.Subjects.ValueObjects;
 
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
+using System;
 using System.Collections.Generic;
 
 public sealed class OfferingName : ValueObject
@@ -21,9 +23,9 @@ public sealed class OfferingName : ValueObject
     }
 
     private OfferingName(
-    string grade,
-    string course,
-    string initials)
+        string grade,
+        string course,
+        string initials)
     {
         Grade = grade;
         Course = course;
@@ -31,16 +33,15 @@ public sealed class OfferingName : ValueObject
     }
 
     public static Result<OfferingName> Create(
-        Grade grade,
         Course course,
         string line,
         char sequence)
     {
-        var gradeAsString = ((int)grade).ToString().PadLeft(2, '0');
+        var gradeAsString = ((int)course.Grade).ToString().PadLeft(2, '0');
 
-        if (gradeAsString.Length != 2 || gradeAsString == "00") 
+        if (gradeAsString.Length != 2 || gradeAsString == "00")
         {
-            return Result.Failure<OfferingName>(DomainErrors.ValueObjects.OfferingName.InvalidGrade(grade));
+            return Result.Failure<OfferingName>(DomainErrors.ValueObjects.OfferingName.InvalidGrade(course.Grade));
         }
 
         var courseCode = course?.Code?.ToUpper();
@@ -58,15 +59,14 @@ public sealed class OfferingName : ValueObject
     }
 
     public static Result<OfferingName> Create(
-        Grade grade,
         Course course,
         string initials)
     {
-        var gradeAsString = ((int)grade).ToString().PadLeft(2, '0');
+        var gradeAsString = ((int)course.Grade).ToString().PadLeft(2, '0');
 
         if (gradeAsString.Length != 2 || gradeAsString == "00")
         {
-            return Result.Failure<OfferingName>(DomainErrors.ValueObjects.OfferingName.InvalidGrade(grade));
+            return Result.Failure<OfferingName>(DomainErrors.ValueObjects.OfferingName.InvalidGrade(course.Grade));
         }
 
         var courseCode = course?.Code?.ToUpper();
@@ -85,6 +85,38 @@ public sealed class OfferingName : ValueObject
             gradeAsString,
             courseCode,
             initials);
+    }
+
+    public static OfferingName FromValue(string value)
+    {
+        if (value is null ||
+            string.IsNullOrWhiteSpace(value) ||
+            value.Length != 7)
+            return null;
+
+        var grade = value[..2];
+        var courseCode = value[2..5];
+        
+        if (courseCode.ToUpper() == "TUT")
+        {
+            var initials = value[5..];
+
+            return new OfferingName(
+                grade,
+                courseCode,
+                initials);
+        } 
+        else
+        {
+            var line = value[5..6];
+            char sequence = Convert.ToChar(value[6..]);
+
+            return new OfferingName(
+                grade,
+                courseCode,
+                line,
+                sequence);
+        }
     }
 
     public string Grade { get; }

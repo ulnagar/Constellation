@@ -41,7 +41,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public DbSet<TimetablePeriod> Periods { get; set; }
         public DbSet<AdobeConnectRoom> Rooms { get; set; }
         public DbSet<Enrolment> Enrolments { get; set; }
-        public DbSet<OfferingResource> OfferingResources { get; set; }
         public DbSet<Device> Devices { get; set; }
         public DbSet<DeviceNotes> DeviceNotes { get; set; }
         public DbSet<DeviceAllocation> DeviceAllocations { get; set; }
