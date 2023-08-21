@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Constellation.Core.Models
+namespace Constellation.Core.Models.Subjects
 {
     public class OfferingSession
     {

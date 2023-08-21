@@ -12,6 +12,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Subjects;
 using Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
 using Microsoft.Extensions.Options;
 using Serilog.Context;

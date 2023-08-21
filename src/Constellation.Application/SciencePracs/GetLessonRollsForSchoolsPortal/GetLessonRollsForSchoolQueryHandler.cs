@@ -3,8 +3,8 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
-using Constellation.Core.Models;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using System;
 using System.Collections.Generic;
