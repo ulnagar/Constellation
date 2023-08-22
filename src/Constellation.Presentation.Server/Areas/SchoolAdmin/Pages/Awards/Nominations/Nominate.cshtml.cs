@@ -9,6 +9,7 @@ using Constellation.Application.Offerings.GetFilteredOfferingsForSelectionList;
 using Constellation.Application.Students.GetFilteredStudentsForSelectionList;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Constellation.Presentation.Server.BaseModels;
@@ -46,7 +47,7 @@ public class NominateModel : BasePageModel
     [BindProperty]
     public int CourseId { get; set; }
     [BindProperty]
-    public int OfferingId { get; set; }
+    public Guid OfferingId { get; set; }
     [BindProperty]
     public Phase CurrentStep { get; set; }
     [BindProperty]
@@ -128,11 +129,13 @@ public class NominateModel : BasePageModel
             return Page();
         }
 
+        OfferingId offeringId = Constellation.Core.Models.Subjects.Identifiers.OfferingId.FromValue(OfferingId);
+
         CreateAwardNominationCommand command = new(
             AwardNominationPeriodId.FromValue(PeriodId),
             AwardType.FromValue(Type),
             CourseId,
-            OfferingId,
+            offeringId,
             StudentId);
 
         Result response = await _mediator.Send(command);
@@ -246,9 +249,11 @@ public class NominateModel : BasePageModel
             Offerings = new SelectList(offeringRequest.Value, "Id", "Name", OfferingId);
         }
 
-        if (CurrentStep == Phase.StudentSelection && OfferingId > 0)
+        if (CurrentStep == Phase.StudentSelection && OfferingId != new Guid())
         {
-            Result<List<StudentForSelectionList>> studentsRequest = await _mediator.Send(new GetFilteredStudentsForSelectionListQuery(periodRequest.Value.IncludedGrades, new List<int> { OfferingId }, new List<int>()));
+            OfferingId offeringId = Constellation.Core.Models.Subjects.Identifiers.OfferingId.FromValue(OfferingId);
+
+            Result<List<StudentForSelectionList>> studentsRequest = await _mediator.Send(new GetFilteredStudentsForSelectionListQuery(periodRequest.Value.IncludedGrades, new List<OfferingId> { offeringId }, new List<int>()));
 
             if (studentsRequest.IsFailure)
             {
@@ -265,7 +270,7 @@ public class NominateModel : BasePageModel
         }
         else if (CurrentStep == Phase.StudentSelection && CourseId > 0)
         {
-            Result<List<StudentForSelectionList>> studentsRequest = await _mediator.Send(new GetFilteredStudentsForSelectionListQuery(new List<Grade>(), new List<int>(), new List<int> { CourseId } ));
+            Result<List<StudentForSelectionList>> studentsRequest = await _mediator.Send(new GetFilteredStudentsForSelectionListQuery(new List<Grade>(), new List<OfferingId>(), new List<int> { CourseId } ));
 
             if (studentsRequest.IsFailure)
             {
@@ -282,7 +287,7 @@ public class NominateModel : BasePageModel
         }
         else if (CurrentStep == Phase.StudentSelection)
         {
-            Result<List<StudentForSelectionList>> studentsRequest = await _mediator.Send(new GetFilteredStudentsForSelectionListQuery(periodRequest.Value.IncludedGrades, new List<int>(), new List<int>()));
+            Result<List<StudentForSelectionList>> studentsRequest = await _mediator.Send(new GetFilteredStudentsForSelectionListQuery(periodRequest.Value.IncludedGrades, new List<OfferingId>(), new List<int>()));
 
             if (studentsRequest.IsFailure)
             {
@@ -334,7 +339,7 @@ public class NominateModel : BasePageModel
         {
             if ((Type == AwardType.AcademicExcellence.Value ||
                 Type == AwardType.AcademicAchievement.Value) &&
-                OfferingId == 0)
+                OfferingId == new Guid())
             {
                 ModelState.AddModelError("OfferingId", "You must select a valid class");
             }

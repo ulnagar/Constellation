@@ -4,6 +4,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -57,7 +58,7 @@ public class StaffRepository : IStaffRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Staff>> GetCurrentTeachersForOffering(
-        int offeringId,
+        OfferingId offeringId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Staff>()
@@ -65,7 +66,7 @@ public class StaffRepository : IStaffRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Staff>> GetPrimaryTeachersForOffering(
-        int offeringId,
+        OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
         var teachers = await _context
@@ -103,7 +104,7 @@ public class StaffRepository : IStaffRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Staff>> GetFacultyHeadTeachersForOffering(
-        int offeringId, 
+        OfferingId offeringId, 
         CancellationToken cancellationToken = default)
     {
         Guid? facultyId = await _context

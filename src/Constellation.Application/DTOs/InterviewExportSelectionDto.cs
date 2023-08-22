@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Constellation.Core.Models.Subjects.Identifiers;
+using System.Collections.Generic;
 
 namespace Constellation.Application.DTOs
 {
@@ -7,11 +8,11 @@ namespace Constellation.Application.DTOs
         public InterviewExportSelectionDto()
         {
             Grades = new List<int>();
-            ClassList = new List<int>();
+            ClassList = new List<OfferingId>();
         }
 
         public ICollection<int> Grades { get; set; }
-        public ICollection<int> ClassList { get; set; }        
+        public ICollection<OfferingId> ClassList { get; set; }        
         public bool PerFamily { get; set; }
         public bool ResidentialFamilyOnly { get; set; }
     }

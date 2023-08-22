@@ -3,6 +3,7 @@ using Constellation.Core.Models.Casuals;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 
 namespace Constellation.Core.Models
@@ -31,7 +32,7 @@ namespace Constellation.Core.Models
 
     public abstract class OfferingMSTeamOperation : MSTeamOperation
     {
-        public int OfferingId { get; set; }
+        public OfferingId OfferingId { get; set; }
         public Offering Offering { get; set; }
     }
 

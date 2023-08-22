@@ -1,4 +1,5 @@
 ﻿using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.Collections.Generic;
@@ -68,6 +69,23 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
                 .WithMany()
                 .HasForeignKey(operation => operation.TutorialId)
                 .OnDelete(DeleteBehavior.NoAction);
+        }
+    }
+
+    public class OfferingMSTeamOperationConfiguration : IEntityTypeConfiguration<OfferingMSTeamOperation>
+    {
+        public void Configure(EntityTypeBuilder<OfferingMSTeamOperation> builder)
+        {
+            builder.HasOne(operation => operation.Offering)
+                .WithMany()
+                .HasForeignKey(operation => operation.OfferingId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder
+                .Property(a => a.OfferingId)
+                .HasConversion(
+                    id => id.Value,
+                    value => OfferingId.FromValue(value));
         }
     }
 }

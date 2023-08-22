@@ -2,12 +2,9 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
 {
@@ -43,7 +40,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         }
 
         public async Task<Offering?> GetById(
-            int offeringId, 
+            OfferingId offeringId, 
             CancellationToken cancellationToken = default) =>
             await _context
                 .Set<Offering>()
@@ -116,7 +113,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             .Distinct()
             .ToListAsync(cancellationToken);
 
-        public Offering WithDetails(int id)
+        public Offering WithDetails(OfferingId id)
         {
             return Collection()
                 .SingleOrDefault(d => d.Id == id);
@@ -128,7 +125,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .FirstOrDefault(predicate);
         }
 
-        public async Task<Offering> GetForExistCheck(int id)
+        public async Task<Offering> GetForExistCheck(OfferingId id)
         {
             return await _context.Offerings
                 .Include(offering => offering.Sessions) // Required for CoverService and EnrolmentService to create operations
@@ -244,7 +241,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToListAsync();
         }
 
-        public ICollection<Staff> AllClassTeachers(int id)
+        public ICollection<Staff> AllClassTeachers(OfferingId id)
         {
             var sessions = _context.Sessions
                 .Include(s => s.Teacher)
@@ -273,7 +270,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToListAsync();
         }
 
-        public async Task<Offering> ForEnrolmentAsync(int id)
+        public async Task<Offering> ForEnrolmentAsync(OfferingId id)
         {
             return await _context.Offerings
                 .Include(offering => offering.Sessions)
@@ -293,7 +290,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToListAsync();
         }
 
-        public async Task<Offering> ForDetailDisplayAsync(int id)
+        public async Task<Offering> ForDetailDisplayAsync(OfferingId id)
         {
             return await _context.Offerings
                 .Include(offering => offering.Course)
@@ -309,20 +306,20 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .SingleOrDefaultAsync(offering => offering.Id == id);
         }
 
-        public async Task<Offering> ForEditAsync(int id)
+        public async Task<Offering> ForEditAsync(OfferingId id)
         {
             return await _context.Offerings
                 .SingleOrDefaultAsync(offering => offering.Id == id);
         }
 
-        public async Task<Offering> ForSessionEditAsync(int id)
+        public async Task<Offering> ForSessionEditAsync(OfferingId id)
         {
             return await _context.Offerings
                 .Include(offering => offering.Sessions)
                 .SingleOrDefaultAsync(offering => offering.Id == id);
         }
 
-        public async Task<Offering> ForRollCreationAsync(int id)
+        public async Task<Offering> ForRollCreationAsync(OfferingId id)
         {
             return await _context.Offerings
                 .Include(offering => offering.Enrolments)
@@ -331,7 +328,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .SingleOrDefaultAsync(offering => offering.Id == id);
         }
 
-        public async Task<Offering> ForCoverCreationAsync(int id)
+        public async Task<Offering> ForCoverCreationAsync(OfferingId id)
         {
             return await _context.Offerings
                 .Include(offering => offering.Sessions)
@@ -345,7 +342,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .SingleOrDefaultAsync(offering => offering.Id == id);
         }
 
-        public async Task<ICollection<Staff>> AllTeachersForCoverCreationAsync(int id)
+        public async Task<ICollection<Staff>> AllTeachersForCoverCreationAsync(OfferingId id)
         {
             var offering = await _context.Offerings
                 .Include(offering => offering.Sessions)
@@ -357,7 +354,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             return teachers.ToList();
         }
 
-        public async Task<Offering> ForSessionCreationAsync(int id)
+        public async Task<Offering> ForSessionCreationAsync(OfferingId id)
         {
             return await _context.Offerings
                 .Include(offering => offering.Enrolments)
@@ -365,7 +362,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .SingleOrDefaultAsync(offering => offering.Id == id);
         }
 
-        public async Task<bool> AnyWithId(int id)
+        public async Task<bool> AnyWithId(OfferingId id)
         {
             return await _context.Offerings
                 .AnyAsync(offering => offering.Id == id);

@@ -5,6 +5,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -67,7 +68,7 @@ public class LessonRepository : ILessonRepository
     }
 
     public async Task<List<SciencePracLesson>> GetAllForOffering(
-        int OfferingId, 
+        OfferingId OfferingId, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SciencePracLesson>()

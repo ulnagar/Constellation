@@ -8,7 +8,7 @@ public abstract class Resource
 {
     public ResourceId Id { get; protected set; }
     public ResourceType Type { get; protected set; }
-    public int OfferingId { get; protected set; }
+    public OfferingId OfferingId { get; protected set; }
     public virtual Offering Offering { get; protected set; }
     public string ResourceId { get; protected set; }
     public string Name { get; protected set; }
@@ -17,8 +17,10 @@ public abstract class Resource
 
 public sealed class AdobeConnectRoomResource : Resource
 {
+    private AdobeConnectRoomResource() { } // Required by EF Core
+
     public AdobeConnectRoomResource(
-        int offeringId,
+        OfferingId offeringId,
         string scoId,
         string name,
         string url)
@@ -36,8 +38,10 @@ public sealed class AdobeConnectRoomResource : Resource
 
 public sealed class MicrosoftTeamResource : Resource
 {
+    private MicrosoftTeamResource() { } // Required by EF Core
+
     public MicrosoftTeamResource(
-        int offeringId,
+        OfferingId offeringId,
         Guid teamGroupId,
         string name,
         string url)
@@ -55,8 +59,10 @@ public sealed class MicrosoftTeamResource : Resource
 
 public sealed class CanvasCourseResource : Resource
 {
+    private CanvasCourseResource() { } // Required by EF Core
+
     public CanvasCourseResource(
-        int offeringId,
+        OfferingId offeringId,
         string canvasCourseId,
         string name,
         string url)

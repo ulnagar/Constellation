@@ -1,6 +1,7 @@
 ﻿
 using Constellation.Application.DTOs;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Services
@@ -13,6 +14,6 @@ namespace Constellation.Application.Interfaces.Services
 
         Task<ServiceOperationResult<Offering>> CreateOffering(CourseOfferingDto offeringResource);
         Task<ServiceOperationResult<Offering>> UpdateOffering(CourseOfferingDto offeringResource);
-        Task RemoveOffering(int id);
+        Task RemoveOffering(OfferingId id);
     }
 }

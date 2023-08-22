@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 
 public sealed record AttendanceAbsenceDetail(
     DateOnly Date,
-    int OfferingId,
+    OfferingId OfferingId,
     TimeOnly StartTime,
     AbsenceType Type,
     string AbsenceTimeframe,

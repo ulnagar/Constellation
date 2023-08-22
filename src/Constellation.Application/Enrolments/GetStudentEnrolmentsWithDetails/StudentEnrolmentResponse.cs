@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.Enrolments.GetStudentEnrolmentsWithDetails;
 
+using Constellation.Core.Models.Subjects.Identifiers;
 using System.Collections.Generic;
 
 public sealed record StudentEnrolmentResponse(
-    int OfferingId,
+    OfferingId OfferingId,
     string OfferingName,
     string CourseName,
     List<string> Teachers,

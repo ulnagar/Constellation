@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.Helpers;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
@@ -34,7 +35,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Models
     {
         public int PeriodId { get; set; }
         public string PeriodName { get; set; }
-        public int ClassId { get; set; }
+        public OfferingId ClassId { get; set; }
         public string ClassName { get; set; }
         public string RoomSco { get; set; }
     }

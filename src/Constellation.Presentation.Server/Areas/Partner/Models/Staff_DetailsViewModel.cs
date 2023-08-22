@@ -2,6 +2,7 @@
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.TeacherAddFaculty;
 using System.ComponentModel.DataAnnotations;
@@ -57,7 +58,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
 
         public class OfferingDto
         {
-            public int Id { get; set; }
+            public OfferingId Id { get; set; }
             public string Name { get; set; }
             [Display(Name = DisplayNameDefaults.CourseName)]
             public string CourseName { get; set; }

@@ -2,6 +2,7 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.DependencyInjection;
 using System.Threading.Tasks;
 
@@ -150,7 +151,7 @@ namespace Constellation.Infrastructure.Services
             return result;
         }
 
-        public async Task RemoveOffering(int id)
+        public async Task RemoveOffering(OfferingId id)
         {
             // Validate entries
             var offering = await  _unitOfWork.CourseOfferings.ForEditAsync(id);

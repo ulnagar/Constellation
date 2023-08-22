@@ -4,6 +4,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Connections.Features;
 using System;
@@ -191,7 +192,7 @@ namespace Constellation.Infrastructure.Services
             operation.IsDeleted = true;
         }
 
-        public async Task CreateStudentMSTeamMemberAccess(string studentId, int offeringId, DateTime schedule)
+        public async Task CreateStudentMSTeamMemberAccess(string studentId, OfferingId offeringId, DateTime schedule)
         {
             // Validate entries
             var student = await _unitOfWork.Students.GetForExistCheck(studentId);
@@ -213,7 +214,7 @@ namespace Constellation.Infrastructure.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        public async Task CreateTeacherMSTeamMemberAccess(string staffId, int offeringId, DateTime scheduled, Guid? coverId)
+        public async Task CreateTeacherMSTeamMemberAccess(string staffId, OfferingId offeringId, DateTime scheduled, Guid? coverId)
         {
             // Validate entries
             var staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
@@ -238,7 +239,7 @@ namespace Constellation.Infrastructure.Services
             _unitOfWork.Add(operation);
         }
 
-        public async Task CreateTeacherMSTeamOwnerAccess(string staffId, int offeringId, DateTime scheduled, Guid? coverId)
+        public async Task CreateTeacherMSTeamOwnerAccess(string staffId, OfferingId offeringId, DateTime scheduled, Guid? coverId)
         {
             // Validate entries
             var staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
@@ -263,7 +264,7 @@ namespace Constellation.Infrastructure.Services
             _unitOfWork.Add(operation);
         }
 
-        public async Task CreateClassroomMSTeam(int offeringId, DateTime scheduled)
+        public async Task CreateClassroomMSTeam(OfferingId offeringId, DateTime scheduled)
         {
             // Validate entries
             var checkOffering = await _unitOfWork.CourseOfferings.GetForExistCheck(offeringId);
@@ -469,7 +470,7 @@ namespace Constellation.Infrastructure.Services
             }
         }
 
-        public async Task RemoveStudentMSTeamAccess(string studentId, int offeringId, DateTime schedule)
+        public async Task RemoveStudentMSTeamAccess(string studentId, OfferingId offeringId, DateTime schedule)
         {
             // Validate entries
             var student = await _unitOfWork.Students.GetForExistCheck(studentId);
@@ -490,7 +491,7 @@ namespace Constellation.Infrastructure.Services
             _unitOfWork.Add(operation);
         }
 
-        public async Task RemoveTeacherMSTeamAccess(string staffId, int offeringId, DateTime scheduled, Guid? coverId)
+        public async Task RemoveTeacherMSTeamAccess(string staffId, OfferingId offeringId, DateTime scheduled, Guid? coverId)
         {
             // Validate entries
             var staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);

@@ -9,6 +9,7 @@ using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using System;
 using System.Collections.Generic;
@@ -114,7 +115,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
             List<Session> sessions = await _sessionRepository.GetAllForStudentAndDayDuringTime(student.StudentId, date.GetDayNumber(), date, cancellationToken);
             List<AttendanceDateDetail.SessionWithOffering> sessionDetails = new();
 
-            foreach (IGrouping<int, Session> offeringSessions in sessions.GroupBy(s => s.OfferingId))
+            foreach (IGrouping<OfferingId, Session> offeringSessions in sessions.GroupBy(s => s.OfferingId))
             {
                 Offering offering = await _offeringRepository.GetById(offeringSessions.Key, cancellationToken);
                 Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);

@@ -7,6 +7,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
@@ -235,9 +236,14 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Unenrol(string id, int classId)
+        public async Task<IActionResult> Unenrol(string id, Guid classId)
         {
-            await _studentService.UnenrolStudentFromClass(id, classId);
+            OfferingId offeringId = OfferingId.FromValue(classId);
+
+            if (offeringId is null)
+                return RedirectToAction("Details", new { id });
+
+            await _studentService.UnenrolStudentFromClass(id, offeringId);
             await _unitOfWork.CompleteAsync();
 
             return RedirectToAction("Details", new { id });
@@ -273,8 +279,10 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             if (student != null)
             {
-                foreach (var offeringId in viewModel.SelectedClasses)
+                foreach (var classId in viewModel.SelectedClasses)
                 {
+                    OfferingId offeringId = OfferingId.FromValue(classId);
+
                     var offering = await _unitOfWork.CourseOfferings.ForEnrolmentAsync(offeringId);
 
                     if (offering == null)
@@ -290,7 +298,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Enrol(string id, int classId)
+        public async Task<IActionResult> Enrol(string id, Guid classId)
         {
             var student = await _unitOfWork.Students.ForEditAsync(id);
 
@@ -299,14 +307,16 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 return RedirectToAction("Index");
             }
 
-            var offering = await _unitOfWork.CourseOfferings.ForEnrolmentAsync(classId);
+            OfferingId offeringId = OfferingId.FromValue(classId);
+
+            var offering = await _unitOfWork.CourseOfferings.ForEnrolmentAsync(offeringId);
 
             if (offering == null)
             {
                 return RedirectToAction("Index");
             }
 
-            if (!student.Enrolments.Any(e => e.OfferingId == classId && !e.IsDeleted))
+            if (!student.Enrolments.Any(e => e.OfferingId == offeringId && !e.IsDeleted))
             {
                 await _studentService.EnrolStudentInClass(student.StudentId, offering.Id);
             }

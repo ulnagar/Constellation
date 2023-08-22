@@ -2,6 +2,7 @@
 using Constellation.Core.Models;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.ValueObjects;
 
 namespace Constellation.Application.Tests.Unit.Extensions;
@@ -14,7 +15,7 @@ public class ClassCoverExtensionsTests
         // Arrange
         var sut = ClassCover.Create(
             new ClassCoverId(Guid.NewGuid()),
-            1,
+            OfferingId.FromValue(Guid.NewGuid()),
             DateOnly.MinValue,
             DateOnly.MaxValue,
             CoverTeacherType.Staff,
@@ -35,7 +36,7 @@ public class ClassCoverExtensionsTests
         // Arrange
         var sut = ClassCover.Create(
             new ClassCoverId(Guid.NewGuid()),
-            1,
+            OfferingId.FromValue(Guid.NewGuid()),
             DateOnly.MinValue,
             DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
             CoverTeacherType.Staff,
@@ -54,7 +55,7 @@ public class ClassCoverExtensionsTests
         // Arrange
         var sut = ClassCover.Create(
             new ClassCoverId(Guid.NewGuid()),
-            1,
+            OfferingId.FromValue(Guid.NewGuid()),
             DateOnly.MinValue,
             DateOnly.FromDateTime(DateTime.Today),
             CoverTeacherType.Staff,
@@ -73,7 +74,7 @@ public class ClassCoverExtensionsTests
         // Arrange
         var sut = ClassCover.Create(
             new ClassCoverId(Guid.NewGuid()),
-            1,
+            OfferingId.FromValue(Guid.NewGuid()),
             DateOnly.MinValue,
             DateOnly.FromDateTime(DateTime.Today.AddDays(2)),
             CoverTeacherType.Staff,
@@ -92,7 +93,7 @@ public class ClassCoverExtensionsTests
         // Arrange
         var sut = ClassCover.Create(
             new ClassCoverId(Guid.NewGuid()),
-            1,
+            OfferingId.FromValue(Guid.NewGuid()),
             DateOnly.FromDateTime(DateTime.Today.AddDays(1)),
             DateOnly.FromDateTime(DateTime.Today.AddDays(3)),
             CoverTeacherType.Staff,
@@ -111,7 +112,7 @@ public class ClassCoverExtensionsTests
         // Arrange
         var sut = ClassCover.Create(
             new ClassCoverId(Guid.NewGuid()),
-            1,
+            OfferingId.FromValue(Guid.NewGuid()),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.MaxValue,
             CoverTeacherType.Staff,
@@ -130,7 +131,7 @@ public class ClassCoverExtensionsTests
         // Arrange
         var sut = ClassCover.Create(
             new ClassCoverId(Guid.NewGuid()),
-            1,
+            OfferingId.FromValue(Guid.NewGuid()),
             DateOnly.MinValue,
             DateOnly.MaxValue,
             CoverTeacherType.Staff,
@@ -149,7 +150,7 @@ public class ClassCoverExtensionsTests
         // Arrange
         var sut = ClassCover.Create(
             new ClassCoverId(Guid.NewGuid()),
-            1,
+            OfferingId.FromValue(Guid.NewGuid()),
             DateOnly.FromDateTime(DateTime.Today.AddDays(2)),
             DateOnly.MaxValue,
             CoverTeacherType.Staff,
@@ -168,7 +169,7 @@ public class ClassCoverExtensionsTests
         // Arrange
         var sut = ClassCover.Create(
             new ClassCoverId(Guid.NewGuid()),
-            1,
+            OfferingId.FromValue(Guid.NewGuid()),
             DateOnly.MinValue,
             DateOnly.MaxValue,
             CoverTeacherType.Staff,
@@ -189,7 +190,7 @@ public class ClassCoverExtensionsTests
         // Arrange
         var sut = ClassCover.Create(
             new ClassCoverId(Guid.NewGuid()),
-            1,
+            OfferingId.FromValue(Guid.NewGuid()),
             DateOnly.MinValue,
             DateOnly.MaxValue,
             CoverTeacherType.Staff,
@@ -208,7 +209,7 @@ public class ClassCoverExtensionsTests
         // Arrange
         var sut = ClassCover.Create(
             new ClassCoverId(Guid.NewGuid()),
-            1,
+            OfferingId.FromValue(Guid.NewGuid()),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.MaxValue,
             CoverTeacherType.Staff,

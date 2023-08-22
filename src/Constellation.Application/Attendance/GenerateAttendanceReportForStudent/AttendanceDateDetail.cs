@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.Collections.Generic;
 
@@ -13,5 +14,5 @@ public sealed record AttendanceDateDetail(
         string PeriodTimeframe,
         string OfferingName,
         string CourseName,
-        int OfferingId);
+        OfferingId OfferingId);
 }

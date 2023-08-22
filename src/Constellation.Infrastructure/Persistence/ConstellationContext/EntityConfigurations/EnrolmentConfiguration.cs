@@ -1,4 +1,5 @@
 ﻿using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,6 +16,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
             builder.HasOne(e => e.Offering)
                 .WithMany(o => o.Enrolments)
                 .HasForeignKey(e => e.OfferingId);
+
+            builder
+                .Property(enrolment => enrolment.OfferingId)
+                .HasConversion(
+                    id => id.Value,
+                    value => OfferingId.FromValue(value));
         }
     }
 }

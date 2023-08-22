@@ -1,6 +1,7 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -33,7 +34,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         }
 
         public async Task<List<AdobeConnectRoom>> GetByOfferingId(
-            int offeringId,
+            OfferingId offeringId,
             CancellationToken cancellationToken = default) =>
             await _context
                 .Set<AdobeConnectRoom>()
@@ -103,7 +104,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToList();
         }
 
-        public ICollection<AdobeConnectRoom> AllForOffering(int offeringId)
+        public ICollection<AdobeConnectRoom> AllForOffering(OfferingId offeringId)
         {
             return Collection()
                 .Where(r => r.OfferingSessions.Any(s => s.OfferingId == offeringId))

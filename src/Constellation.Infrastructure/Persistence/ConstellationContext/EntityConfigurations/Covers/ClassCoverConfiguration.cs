@@ -3,6 +3,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,12 @@ internal sealed class ClassCoverConfiguration : IEntityTypeConfiguration<ClassCo
             .HasConversion(
                 coverId => coverId.Value,
                 value => ClassCoverId.FromValue(value));
+
+        builder
+            .Property(cover => cover.OfferingId)
+            .HasConversion(
+                id => id.Value,
+                value => OfferingId.FromValue(value));
 
         builder
             .HasOne<Offering>()

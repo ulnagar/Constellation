@@ -3,6 +3,7 @@
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System;
@@ -20,7 +21,7 @@ public sealed class SciencePracLesson : AggregateRoot
     private SciencePracLesson(
         string name,
         DateOnly dueDate,
-        List<int> offerings,
+        List<OfferingId> offerings,
         bool doNotGenerateRolls)
     {
         Id = new();
@@ -29,7 +30,7 @@ public sealed class SciencePracLesson : AggregateRoot
         DueDate = dueDate;
         DoNotGenerateRolls = doNotGenerateRolls;
 
-        foreach (int offering in offerings)
+        foreach (OfferingId offering in offerings)
             AddOffering(offering);
 
         RaiseDomainEvent(new SciencePracLessonCreatedDomainEvent(new(), Id));
@@ -45,7 +46,7 @@ public sealed class SciencePracLesson : AggregateRoot
     public static Result<SciencePracLesson> Create(
         string name,
         DateOnly dueDate,
-        List<int> offerings,
+        List<OfferingId> offerings,
         bool doNotGenerateRolls)
     {
         if (dueDate < DateOnly.FromDateTime(DateTime.Today))
@@ -92,7 +93,7 @@ public sealed class SciencePracLesson : AggregateRoot
         return Result.Success();
     }
 
-    public void AddOffering(int offering)
+    public void AddOffering(OfferingId offering)
     {
         if (_offerings.Any(entry => entry.OfferingId == offering))
             return;

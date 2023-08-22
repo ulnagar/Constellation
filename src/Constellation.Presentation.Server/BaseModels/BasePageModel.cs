@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Server.BaseModels;
 
 using Constellation.Application.Features.Home.Queries;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Models.Subjects.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
@@ -10,12 +11,12 @@ using System.Threading.Tasks;
 
 public class BasePageModel : PageModel, IBaseModel
 {
-    public IDictionary<string, int> Classes { get; set; }
+    public IDictionary<string, OfferingId> Classes { get; set; }
     public ErrorDisplay? Error { get; set; }
 
     public BasePageModel()
     {
-        Classes = new Dictionary<string, int>();
+        Classes = new Dictionary<string, OfferingId>();
     }
 
     public async Task GetClasses(IUnitOfWork unitOfWork)

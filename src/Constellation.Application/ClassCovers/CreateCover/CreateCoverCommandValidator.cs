@@ -2,6 +2,7 @@
 
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Models.Subjects.Identifiers;
 using FluentValidation;
 using System;
 using System.Threading;
@@ -33,7 +34,7 @@ public class CreateCoverCommandValidator : AbstractValidator<CreateCoverCommand>
                 .WithMessage("Cannot create a cover that has already ended!");
     }
 
-    private async Task<bool> BeCurrentOffering(int OfferingId, CancellationToken cancellationToken)
+    private async Task<bool> BeCurrentOffering(OfferingId OfferingId, CancellationToken cancellationToken)
     {
         var offering = await _offeringRepository.GetForExistCheck(OfferingId);
 

@@ -10,6 +10,7 @@ using Constellation.Application.Schools.Models;
 using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
 using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Shared.Models;
 using MediatR;
@@ -59,8 +60,10 @@ public class ReportModel : BasePageModel
 
     public async Task<IActionResult> OnPostExport(CancellationToken cancellationToken)
     {
+        List<OfferingId> offeringIds = Filter.Offerings.Select(id => OfferingId.FromValue(id)).ToList();
+
         var file = await _mediator.Send(new ExportAbsencesReportCommand(
-                Filter.Offerings,
+                offeringIds,
                 Filter.Grades,
                 Filter.Schools,
                 Filter.Students),
@@ -149,9 +152,11 @@ public class ReportModel : BasePageModel
 
         StudentsList = studentsRequest.Value;
 
+        List<OfferingId> offeringIds = Filter.Offerings.Select(id => OfferingId.FromValue(id)).ToList();
+
         var absenceRequest = await _mediator.Send(
             new GetAbsencesWithFilterForReportQuery(
-                    Filter.Offerings,
+                    offeringIds,
                     Filter.Grades,
                     Filter.Schools,
                     Filter.Students),
@@ -181,7 +186,7 @@ public class ReportModel : BasePageModel
 
     public class FilterDefinition
     {
-        public List<int> Offerings { get; set; } = new();
+        public List<Guid> Offerings { get; set; } = new();
         public List<Grade> Grades { get; set; } = new();
         public List<string> Schools { get; set; } = new();
         public List<string> Students { get; set; } = new();
