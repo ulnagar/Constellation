@@ -4,6 +4,7 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects.Identifiers;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -62,7 +63,7 @@ public class StudentRepository : IStudentRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Student>> GetCurrentEnrolmentsForOffering(
-        int offeringId,
+        OfferingId offeringId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
@@ -78,7 +79,7 @@ public class StudentRepository : IStudentRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Student>> GetCurrentEnrolmentsForOfferingWithSchool(
-        int offeringId,
+        OfferingId offeringId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
@@ -110,7 +111,7 @@ public class StudentRepository : IStudentRepository
             .AnyAsync(student => student.StudentId == studentId && !student.IsDeleted, cancellationToken);
 
     public async Task<List<Student>> GetFilteredStudents(
-        List<int> OfferingIds,
+        List<OfferingId> OfferingIds,
         List<Grade> Grades,
         List<string> SchoolCodes,
         CancellationToken cancellationToken = default)

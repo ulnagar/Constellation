@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Awards;
 
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.ValueObjects;
 using System;
@@ -64,7 +65,7 @@ public sealed class AcademicExcellenceNomination : Nomination
         string studentId,
         int courseId,
         string courseName,
-        int offeringId,
+        OfferingId offeringId,
         string className)
     {
         Id = new();
@@ -80,7 +81,7 @@ public sealed class AcademicExcellenceNomination : Nomination
 
     public int CourseId { get; private set; }
     public string CourseName { get; private set; }
-    public int OfferingId { get; private set; }
+    public OfferingId OfferingId { get; private set; }
     public string ClassName { get; private set; }
 
     public void UpdateCourseName(string courseName) => CourseName = courseName;
@@ -98,7 +99,7 @@ public sealed class AcademicAchievementNomination : Nomination
         string studentId,
         int courseId,
         string courseName,
-        int offeringId,
+        OfferingId offeringId,
         string className)
     {
         Id = new();
@@ -114,7 +115,7 @@ public sealed class AcademicAchievementNomination : Nomination
 
     public int CourseId { get; private set; }
     public string CourseName { get; private set; }
-    public int OfferingId { get; private set; }
+    public OfferingId OfferingId { get; private set; }
     public string ClassName { get; private set; }
 
     public void UpdateCourseName(string courseName) => CourseName = courseName;

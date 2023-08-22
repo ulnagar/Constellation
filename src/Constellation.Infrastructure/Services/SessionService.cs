@@ -4,9 +4,6 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
 using Constellation.Infrastructure.DependencyInjection;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Services
 {
@@ -147,25 +144,29 @@ namespace Constellation.Infrastructure.Services
                 return result;
             }
 
-            if (sessionResource.OfferingId != 0)
+            if (sessionResource.OfferingId is null)
             {
-                var checkOffering = await _unitOfWork.CourseOfferings.GetForExistCheck(sessionResource.OfferingId);
-                if (checkOffering == null)
-                {
-                    result.Success = false;
-                    result.Errors.Add($"An offering with that Id could not be found!");
-                    return result;
-                }
-
-                if (checkOffering.EndDate < DateTime.Now)
-                {
-                    result.Success = false;
-                    result.Errors.Add($"The selected offering has already expired!");
-                    return result;
-                }
-
-                session.OfferingId = sessionResource.OfferingId;
+                result.Success = false;
+                result.Errors.Add("An offering must be provided");
+                return result;
             }
+            
+            var checkOffering = await _unitOfWork.CourseOfferings.GetForExistCheck(sessionResource.OfferingId);
+            if (checkOffering == null)
+            {
+                result.Success = false;
+                result.Errors.Add($"An offering with that Id could not be found!");
+                return result;
+            }
+
+            if (checkOffering.EndDate < DateTime.Now)
+            {
+                result.Success = false;
+                result.Errors.Add($"The selected offering has already expired!");
+                return result;
+            }
+
+            session.OfferingId = sessionResource.OfferingId;
 
             if (!string.IsNullOrWhiteSpace(sessionResource.StaffId))
             {

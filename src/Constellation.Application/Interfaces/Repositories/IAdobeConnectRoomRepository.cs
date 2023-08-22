@@ -1,5 +1,6 @@
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -10,7 +11,7 @@ namespace Constellation.Application.Interfaces.Repositories
 {
     public interface IAdobeConnectRoomRepository
     {
-        Task<List<AdobeConnectRoom>> GetByOfferingId(int offeringId, CancellationToken cancellationToken = default);
+        Task<List<AdobeConnectRoom>> GetByOfferingId(OfferingId offeringId, CancellationToken cancellationToken = default);
         AdobeConnectRoom WithDetails(string id);
         AdobeConnectRoom WithFilter(Expression<Func<AdobeConnectRoom, bool>> predicate);
         Task<AdobeConnectRoom> GetForExistCheck(string id);
@@ -20,7 +21,7 @@ namespace Constellation.Application.Interfaces.Repositories
         ICollection<AdobeConnectRoom> AllActive();
         ICollection<AdobeConnectRoom> AllWithSession();
         ICollection<AdobeConnectRoom> AllWithActiveSession();
-        ICollection<AdobeConnectRoom> AllForOffering(int offeringId);
+        ICollection<AdobeConnectRoom> AllForOffering(OfferingId offeringId);
         Task<ICollection<AdobeConnectRoom>> ForSelectionAsync();
     }
 }

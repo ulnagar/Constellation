@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Models.Subjects.Identifiers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -9,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace Constellation.Application.Features.Home.Queries;
 
-public record GetUsersClassesQuery : IRequest<Dictionary<string, int>>
+public record GetUsersClassesQuery : IRequest<Dictionary<string, OfferingId>>
 {
     public string Username { get; set; }
 }
 
-public class GetUsersClassesQueryHandler : IRequestHandler<GetUsersClassesQuery, Dictionary<string, int>>
+public class GetUsersClassesQueryHandler : IRequestHandler<GetUsersClassesQuery, Dictionary<string, OfferingId>>
 {
     private readonly IAppDbContext _context;
 
@@ -23,9 +24,9 @@ public class GetUsersClassesQueryHandler : IRequestHandler<GetUsersClassesQuery,
         _context = context;
     }
 
-    public async Task<Dictionary<string, int>> Handle(GetUsersClassesQuery request, CancellationToken cancellationToken)
+    public async Task<Dictionary<string, OfferingId>> Handle(GetUsersClassesQuery request, CancellationToken cancellationToken)
     {
-        var classes = new Dictionary<string, int>();
+        var classes = new Dictionary<string, OfferingId>();
 
         var teacher = await _context.Staff
                 .FirstOrDefaultAsync(member => request.Username.Contains(member.PortalUsername));

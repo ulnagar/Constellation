@@ -13,11 +13,9 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Subjects;
-using Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.Extensions.Options;
 using Serilog.Context;
-using System.Configuration;
-using System.Drawing;
 using System.Threading;
 
 public class AbsenceProcessingJob : IAbsenceProcessingJob
@@ -643,8 +641,8 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
 
     private async Task<Absence> ProcessPartialAbsence(
         SentralPeriodAbsenceDto absence, 
-        List<SentralPeriodAbsenceDto> webAttendAbsences, 
-        int courseEnrolmentId, 
+        List<SentralPeriodAbsenceDto> webAttendAbsences,
+        OfferingId courseEnrolmentId, 
         List<TimetablePeriod> periodGroup,
         CancellationToken cancellationToken)
     {
@@ -728,8 +726,8 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
 
     private async Task<Absence> ProcessWholeAbsence(
         List<SentralPeriodAbsenceDto> absencesToProcess, 
-        List<SentralPeriodAbsenceDto> webAttendAbsences, 
-        int courseEnrolmentId, 
+        List<SentralPeriodAbsenceDto> webAttendAbsences,
+        OfferingId courseEnrolmentId, 
         List<TimetablePeriod> periodGroup, 
         int totalAbsenceTime, 
         CancellationToken cancellationToken)
@@ -887,7 +885,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
     private Absence CreateAbsence(
         List<SentralPeriodAbsenceDto> absencesToProcess, 
         SentralPeriodAbsenceDto? attendanceAbsence,
-        int courseEnrolmentId, 
+        OfferingId courseEnrolmentId, 
         AbsenceType type, 
         AbsenceReason reason, 
         List<TimetablePeriod> periodGroup)

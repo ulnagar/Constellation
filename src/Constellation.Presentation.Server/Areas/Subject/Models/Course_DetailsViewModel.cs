@@ -1,5 +1,6 @@
 ﻿using Constellation.Core.Enums;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 
 namespace Constellation.Presentation.Server.Areas.Subject.Models
@@ -35,7 +36,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
 
         public class OfferingDto
         {
-            public int Id { get; set; }
+            public OfferingId Id { get; set; }
             public string Name { get; set; }
             public ICollection<string> Teachers { get; set; }
             public bool IsCurrent { get; set; }

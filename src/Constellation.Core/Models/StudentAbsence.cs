@@ -1,5 +1,6 @@
 ﻿using Constellation.Core.Enums;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace Constellation.Core.Models
         public Guid Id { get; set; }
         public string StudentId { get; set; }
         public Student Student { get; set; }
-        public int OfferingId { get; set; }
+        public OfferingId OfferingId { get; set; }
         public Offering Offering { get; set; }
         public DateTime Date { get; set; }
         public string PeriodName { get; set; }
@@ -80,7 +81,7 @@ namespace Constellation.Core.Models
         public Guid Id { get; set; }
         public string StudentId { get; set; }
         public Student Student { get; set; }
-        public int OfferingId { get; set; }
+        public OfferingId OfferingId { get; set; }
         public Offering Offering { get; set; }
         public DateTime Date { get; set; }
         public string PeriodName { get; set; }

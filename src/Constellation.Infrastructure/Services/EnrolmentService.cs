@@ -2,6 +2,7 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.DependencyInjection;
 using System;
 using System.Linq;
@@ -24,7 +25,7 @@ namespace Constellation.Infrastructure.Services
             _operationService = operationService;
         }
 
-        public async Task CreateEnrolment(string studentId, int offeringId, DateTime dateCreated)
+        public async Task CreateEnrolment(string studentId, OfferingId offeringId, DateTime dateCreated)
         {
             //Validate entries
             var student = await _unitOfWork.Students.ForEditAsync(studentId);

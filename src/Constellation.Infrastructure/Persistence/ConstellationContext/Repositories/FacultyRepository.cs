@@ -3,6 +3,7 @@
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class FacultyRepository : IFacultyRepository
@@ -25,7 +26,7 @@ internal sealed class FacultyRepository : IFacultyRepository
             .ToListAsync(cancellationToken);
 
     public async Task<Faculty?> GetByOfferingId(
-        int offeringId,
+        OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
         Guid? facultyId = await _dbContext

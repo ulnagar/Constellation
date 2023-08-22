@@ -5,6 +5,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Casuals;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
@@ -65,7 +66,7 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<List<string>> GetCurrentCoveringTeachersForOffering(
-        int offeringId,
+        OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
         List<string> returnData = new();
@@ -114,8 +115,8 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<ClassCover>> GetAllForDateAndOfferingId(
-        DateOnly coverDate, 
-        int offeringId, 
+        DateOnly coverDate,
+        OfferingId offeringId, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<ClassCover>()

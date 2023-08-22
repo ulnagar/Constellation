@@ -2,6 +2,7 @@
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using System;
 using System.Collections.Generic;
@@ -49,7 +50,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
 
         public class OfferingDto
         {
-            public int Id { get; set; }
+            public OfferingId Id { get; set; }
             public string Name { get; set; }
             public bool IsCurrent { get; set; }
             public bool IsFuture { get; set; }

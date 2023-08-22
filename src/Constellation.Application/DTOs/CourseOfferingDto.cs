@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.Helpers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -6,7 +7,7 @@ namespace Constellation.Application.DTOs
 {
     public class CourseOfferingDto
     {
-        public int Id { get; set; }
+        public OfferingId Id { get; set; }
         [Required]
         public string Name { get; set; }
         [Required]

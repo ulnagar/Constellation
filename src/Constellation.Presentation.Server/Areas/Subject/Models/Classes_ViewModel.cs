@@ -1,4 +1,5 @@
 ﻿using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
 
         public class OfferingDto
         {
-            public int Id { get; set; }
+            public OfferingId Id { get; set; }
             public string Name { get; set; }
             public string CourseName { get; set; }
             public DateTime EndDate { get; set; }

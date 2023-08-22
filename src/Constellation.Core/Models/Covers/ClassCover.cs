@@ -2,6 +2,7 @@
 
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.ValueObjects;
 using System;
@@ -10,7 +11,7 @@ public sealed class ClassCover : AggregateRoot, IAuditableEntity
 {
     private ClassCover(
         ClassCoverId id,
-        int offeringId,
+        OfferingId offeringId,
         DateOnly startDate,
         DateOnly endDate,
         CoverTeacherType teacherType,
@@ -25,7 +26,7 @@ public sealed class ClassCover : AggregateRoot, IAuditableEntity
     }
 
     public ClassCoverId Id { get; private set; }
-    public int OfferingId { get; private set; }
+    public OfferingId OfferingId { get; private set; }
     public DateOnly StartDate { get; private set; }
     public DateOnly EndDate { get; private set; }
     public CoverTeacherType TeacherType {get; private set;}
@@ -40,7 +41,7 @@ public sealed class ClassCover : AggregateRoot, IAuditableEntity
 
     public static ClassCover Create(
         ClassCoverId id,
-        int offeringId,
+        OfferingId offeringId,
         DateOnly startDate,
         DateOnly endDate,
         CoverTeacherType teacherType,

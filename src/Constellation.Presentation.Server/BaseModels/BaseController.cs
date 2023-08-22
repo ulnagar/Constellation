@@ -2,6 +2,7 @@
 
 using Constellation.Application.Features.Home.Queries;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Models.Subjects.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,7 +34,7 @@ public class BaseController : Controller
         viewModel.Classes = await GetClasses();
     }
 
-    protected async Task<IDictionary<string, int>> GetClasses()
+    protected async Task<IDictionary<string, OfferingId>> GetClasses()
     {
         if (_mediator is not null)
         {
@@ -45,24 +46,24 @@ public class BaseController : Controller
             return await GetClassesWithUoW();
         }
 
-        return new Dictionary<string, int>();
+        return new Dictionary<string, OfferingId>();
     }
 
-    private async Task<IDictionary<string, int>> GetClassesWithMediator()
+    private async Task<IDictionary<string, OfferingId>> GetClassesWithMediator()
     {
         var username = User.Identity?.Name;
 
         if (username is null)
         {
-            return new Dictionary<string, int>();
+            return new Dictionary<string, OfferingId>();
         }
 
         return await _mediator.Send(new GetUsersClassesQuery { Username = username });
     }
 
-    private async Task<IDictionary<string, int>> GetClassesWithUoW()
+    private async Task<IDictionary<string, OfferingId>> GetClassesWithUoW()
     {
-        var result = new Dictionary<string, int>();
+        var result = new Dictionary<string, OfferingId>();
 
         var username = User.Identity.Name;
         var teacher = await _unitOfWork.Staff.FromEmailForExistCheck(username);

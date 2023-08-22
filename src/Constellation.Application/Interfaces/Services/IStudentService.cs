@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.Threading.Tasks;
 
@@ -12,7 +13,7 @@ namespace Constellation.Application.Interfaces.Services
         Task RemoveStudent(string studentId);
         Task ReinstateStudent(string studentId);
 
-        Task EnrolStudentInClass(string studentId, int offeringId);
-        Task UnenrolStudentFromClass(string studentId, int offeringId);
+        Task EnrolStudentInClass(string studentId, OfferingId offeringId);
+        Task UnenrolStudentFromClass(string studentId, OfferingId offeringId);
     }
 }

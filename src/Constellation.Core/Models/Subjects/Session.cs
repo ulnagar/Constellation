@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Core.Models.Subjects;
 
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 
 public class Session
 {
     public int Id { get; set; }
-    public int OfferingId { get; set; }
+    public OfferingId OfferingId { get; set; }
     public Offering Offering { get; set; }
     public string StaffId { get; set; }
     public Staff Teacher { get; set; }

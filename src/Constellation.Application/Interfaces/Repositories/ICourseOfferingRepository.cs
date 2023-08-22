@@ -3,6 +3,7 @@ namespace Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 public interface ICourseOfferingRepository
 {
-    Task<Offering?> GetById(int offeringId, CancellationToken cancellationToken = default);
+    Task<Offering?> GetById(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<Offering>> GetByCourseId(int courseId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(string studentId, DateTime AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
@@ -25,9 +26,9 @@ public interface ICourseOfferingRepository
     /// <returns></returns>
     Task<List<Offering>> GetByStudentId(string studentId, CancellationToken cancellationToken = default);
 
-    Offering WithDetails(int id);
+    Offering WithDetails(OfferingId id);
     Offering WithFilter(Expression<Func<Offering, bool>> predicate);
-    Task<Offering> GetForExistCheck(int id);
+    Task<Offering> GetForExistCheck(OfferingId id);
     ICollection<Offering> All();
     ICollection<Offering> AllWithFilter(Expression<Func<Offering, bool>> predicate);
     ICollection<Offering> AllCurrentOfferings();
@@ -39,20 +40,20 @@ public interface ICourseOfferingRepository
     ICollection<Offering> AllCurrentAndFutureForStudent(string id);
     ICollection<Offering> AllCurrentForStudent(string id);
     ICollection<Offering> AllForTeacher(string id);
-    ICollection<Staff> AllClassTeachers(int id);
+    ICollection<Staff> AllClassTeachers(OfferingId id);
     Task<ICollection<Offering>> ForSelectionAsync();
     Task<ICollection<Offering>> FromGradeForBulkEnrolAsync(Grade grade);
-    Task<Offering> ForEnrolmentAsync(int id);
+    Task<Offering> ForEnrolmentAsync(OfferingId id);
     Task<ICollection<Offering>> AllForTeacherAsync(string id);
     Task<ICollection<Offering>> ForListAsync(Expression<Func<Offering, bool>> predicate);
-    Task<Offering> ForDetailDisplayAsync(int id);
-    Task<Offering> ForEditAsync(int id);
-    Task<Offering> ForSessionEditAsync(int id);
-    Task<Offering> ForRollCreationAsync(int id);
-    Task<Offering> ForCoverCreationAsync(int id);
-    Task<ICollection<Staff>> AllTeachersForCoverCreationAsync(int id);
-    Task<Offering> ForSessionCreationAsync(int id);
-    Task<bool> AnyWithId(int id);
+    Task<Offering> ForDetailDisplayAsync(OfferingId id);
+    Task<Offering> ForEditAsync(OfferingId id);
+    Task<Offering> ForSessionEditAsync(OfferingId id);
+    Task<Offering> ForRollCreationAsync(OfferingId id);
+    Task<Offering> ForCoverCreationAsync(OfferingId id);
+    Task<ICollection<Staff>> AllTeachersForCoverCreationAsync(OfferingId id);
+    Task<Offering> ForSessionCreationAsync(OfferingId id);
+    Task<bool> AnyWithId(OfferingId id);
     Task<ICollection<Offering>> ForTeacherAndDates(string staffId, ICollection<int> dates);
     Task<Offering> GetFromYearAndName(int year, string name);
 }

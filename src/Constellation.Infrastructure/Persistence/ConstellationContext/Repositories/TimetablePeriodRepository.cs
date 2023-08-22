@@ -1,6 +1,7 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -22,7 +23,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         }
 
         public async Task<List<TimetablePeriod>> GetForOfferingOnDay(
-            int offeringId,
+            OfferingId offeringId,
             DateTime absenceDate,
             int dayNumber,
             CancellationToken cancellationToken = default) =>
@@ -41,7 +42,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
         // Method is not async as we are passing the async task to another method
         public Task<List<TimetablePeriod>> GetForOfferingOnDay(
-            int offeringId,
+            OfferingId offeringId,
             DateOnly absenceDate,
             int dayNumber,
             CancellationToken cancellationToken = default) =>
@@ -60,7 +61,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
         public async Task<List<TimetablePeriod>> GetByDayAndOfferingId(
             int dayNumber,
-            int offeringId,
+            OfferingId offeringId,
             CancellationToken cancellationToken = default) =>
             await _context
                 .Set<TimetablePeriod>()

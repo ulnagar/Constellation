@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Subjects;
 
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.Collections.Generic;
 
@@ -19,7 +20,7 @@ public class Offering
         EndDate = endDate;
     }
 
-    public int Id { get; set; }
+    public OfferingId Id { get; set; }
     public string Name { get; set; }
     public int CourseId { get; set; }
     public Course Course { get; set; }

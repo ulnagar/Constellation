@@ -4,6 +4,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.DependencyInjection;
 
 namespace Constellation.Infrastructure.Services
@@ -59,7 +60,7 @@ namespace Constellation.Infrastructure.Services
             return result;
         }
 
-        public async Task EnrolStudentInClass(string studentId, int offeringId)
+        public async Task EnrolStudentInClass(string studentId, OfferingId offeringId)
         {
             if (!await _unitOfWork.Students.AnyWithId(studentId))
                 return;
@@ -119,7 +120,7 @@ namespace Constellation.Infrastructure.Services
             student.DateDeleted = DateTime.Now;
         }
 
-        public async Task UnenrolStudentFromClass(string studentId, int offeringId)
+        public async Task UnenrolStudentFromClass(string studentId, OfferingId offeringId)
         {
             // Validate entries
             var student = await _unitOfWork.Students.ForBulkUnenrolAsync(studentId);

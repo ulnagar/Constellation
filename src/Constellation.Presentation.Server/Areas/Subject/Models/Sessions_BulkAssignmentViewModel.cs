@@ -1,4 +1,5 @@
 ﻿using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
             ValidPeriods = new List<TimetablePeriod>();
         }
 
-        public int OfferingId { get; set; }
+        public OfferingId OfferingId { get; set; }
         public IEnumerable<int> Periods { get; set; }
         public string TeacherId { get; set; }
         public string RoomId { get; set; }

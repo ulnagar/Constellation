@@ -3,6 +3,7 @@
 using Constellation.Application.DTOs;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,12 +17,12 @@ public interface IStudentRepository
     Task<Student?> GetWithSchoolById(string studentId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentStudentsWithSchool(CancellationToken cancellationToken = default);
     Task<List<Student>> GetListFromIds(List<string> studentIds, CancellationToken cancellationToken = default);
-    Task<List<Student>> GetCurrentEnrolmentsForOffering(int offeringId, CancellationToken cancellationToken = default);
+    Task<List<Student>> GetCurrentEnrolmentsForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentEnrolmentsForCourse(int courseId, CancellationToken cancellationToken = default);
-    Task<List<Student>> GetCurrentEnrolmentsForOfferingWithSchool(int offeringId, CancellationToken cancellationToken = default);
+    Task<List<Student>> GetCurrentEnrolmentsForOfferingWithSchool(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentStudentsWithFamilyMemberships(CancellationToken cancellationToken = default);
     Task<bool> IsValidStudentId(string studentId, CancellationToken cancellationToken = default);
-    Task<List<Student>> GetFilteredStudents(List<int> OfferingIds, List<Grade> Grades, List<string> SchoolCodes, CancellationToken cancellationToken = default);
+    Task<List<Student>> GetFilteredStudents(List<OfferingId> OfferingIds, List<Grade> Grades, List<string> SchoolCodes, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentStudentsFromSchool(string SchoolCode, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentStudentFromGrade(Grade grade, CancellationToken cancellationToken = default);
 

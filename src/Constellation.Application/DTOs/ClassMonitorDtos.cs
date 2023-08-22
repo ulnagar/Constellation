@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Constellation.Core.Models.Subjects.Identifiers;
+using System;
 using System.Collections.Generic;
 
 namespace Constellation.Application.DTOs
@@ -35,7 +36,7 @@ namespace Constellation.Application.DTOs
             public const string StudentsPresent = " status-students";
             public const string TeachersPresent = " status-teachers";
 
-            public int Id { get; set; }
+            public OfferingId Id { get; set; }
             public string Name { get; set; }
             public DateTime StartDate { get; set; }
             public DateTime EndDate { get; set; }

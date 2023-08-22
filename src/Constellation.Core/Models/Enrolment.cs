@@ -1,4 +1,5 @@
 ﻿using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 
 namespace Constellation.Core.Models
@@ -14,7 +15,7 @@ namespace Constellation.Core.Models
         public int Id { get; set; }
         public string StudentId { get; set; }
         public Student Student { get; set; }
-        public int OfferingId { get; set; }
+        public OfferingId OfferingId { get; set; }
         public Offering Offering { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime? DateCreated { get; set; }

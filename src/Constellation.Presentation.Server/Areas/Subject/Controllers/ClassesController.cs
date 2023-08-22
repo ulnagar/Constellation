@@ -7,6 +7,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.Areas.Subject.Models;
 using Constellation.Presentation.Server.BaseModels;
@@ -129,14 +130,16 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             return View("Index", viewModel);
         }
 
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(Guid id)
         { 
-            if (id == 0)
+            if (id == new Guid())
             {
                 return RedirectToAction("Index");
             }
 
-            var offering = await _unitOfWork.CourseOfferings.ForDetailDisplayAsync(id);
+            OfferingId offeringId = OfferingId.FromValue(id);
+
+            var offering = await _unitOfWork.CourseOfferings.ForDetailDisplayAsync(offeringId);
 
             if (offering == null)
             {
@@ -207,14 +210,16 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Update(int id)
+        public async Task<IActionResult> Update(Guid id)
         {
-            if (id == 0)
+            if (id == new Guid())
             {
                 return RedirectToAction("Index");
             }
 
-            var offering = await _unitOfWork.CourseOfferings.ForEditAsync(id);
+            OfferingId offeringId = OfferingId.FromValue(id);
+
+            var offering = await _unitOfWork.CourseOfferings.ForEditAsync(offeringId);
 
             var courseList = await _unitOfWork.Courses.ForSelectionAsync();
 
@@ -321,20 +326,22 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> Map(int id)
+        public async Task<IActionResult> Map(Guid id)
         {
             var vm = await CreateViewModel<School_MapViewModel>();
 
-            var offering = await _unitOfWork.CourseOfferings.ForEditAsync(id);
+            OfferingId offeringId = OfferingId.FromValue(id);
+
+            var offering = await _unitOfWork.CourseOfferings.ForEditAsync(offeringId);
 
             var schoolCodes = await _context.Enrolments
-                .Where(enrolment => enrolment.OfferingId == id && !enrolment.IsDeleted)
+                .Where(enrolment => enrolment.OfferingId == offeringId && !enrolment.IsDeleted)
                 .Select(enrolment => enrolment.Student.SchoolCode)
                 .Distinct()
                 .ToListAsync();
 
             var teacherCodes = await _context.Sessions
-                .Where(session => session.OfferingId == id && !session.IsDeleted)
+                .Where(session => session.OfferingId == offeringId && !session.IsDeleted)
                 .Select(session => session.Teacher.SchoolCode)
                 .Distinct()
                 .ToListAsync();
@@ -349,7 +356,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Enrol(string id, int classId)
+        public async Task<IActionResult> Enrol(string id, Guid classId)
         {
             var student = await _unitOfWork.Students.ForBulkUnenrolAsync(id);
 
@@ -358,9 +365,11 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
                 return RedirectToAction("Index");
             }
 
-            if (!student.Enrolments.Any(e => e.OfferingId == classId && !e.IsDeleted))
+            OfferingId offeringId = OfferingId.FromValue(classId);
+
+            if (!student.Enrolments.Any(e => e.OfferingId == offeringId && !e.IsDeleted))
             {
-                await _studentService.EnrolStudentInClass(student.StudentId, classId);
+                await _studentService.EnrolStudentInClass(student.StudentId, offeringId);
                 await _unitOfWork.CompleteAsync();
             }
 
@@ -368,13 +377,15 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Unenrol(string id, int classId, string returnPage)
+        public async Task<IActionResult> Unenrol(string id, Guid classId, string returnPage)
         {
             var student = await _unitOfWork.Students.ForBulkUnenrolAsync(id);
 
-            foreach (var enrolment in student.Enrolments.Where(e => e.OfferingId == classId && !e.IsDeleted))
+            OfferingId offeringId = OfferingId.FromValue(classId);
+
+            foreach (var enrolment in student.Enrolments.Where(e => e.OfferingId == offeringId && !e.IsDeleted))
             {
-                await _studentService.UnenrolStudentFromClass(student.StudentId, classId);
+                await _studentService.UnenrolStudentFromClass(student.StudentId, offeringId);
             }
 
             await _unitOfWork.CompleteAsync();

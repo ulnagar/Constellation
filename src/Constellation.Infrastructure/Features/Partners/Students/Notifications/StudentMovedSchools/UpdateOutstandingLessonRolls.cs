@@ -7,6 +7,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects.Identifiers;
 using MediatR;
 using Serilog;
 using System;
@@ -41,7 +42,7 @@ public class UpdateOutstandingLessonRolls
 
         Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken); 
 
-        List<int> offeringIds = student.Enrolments
+        List<OfferingId> offeringIds = student.Enrolments
             .Where(enrolment => !enrolment.IsDeleted)
             .Select(enrolments => enrolments.OfferingId)
             .Distinct()

@@ -2,6 +2,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -33,7 +34,7 @@ public class EnrolmentRepository : IEnrolmentRepository
     }
 
     public async Task<List<Enrolment>> GetCurrentByOfferingId(
-        int offeringId,
+        OfferingId offeringId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Enrolment>()
@@ -74,7 +75,7 @@ public class EnrolmentRepository : IEnrolmentRepository
             .ToList();
     }
 
-    public ICollection<Enrolment> AllFromOffering(int id)
+    public ICollection<Enrolment> AllFromOffering(OfferingId id)
     {
         return Collection()
             .Where(e => e.OfferingId == id && e.IsDeleted == false)
@@ -105,7 +106,7 @@ public class EnrolmentRepository : IEnrolmentRepository
             .SingleOrDefaultAsync(enrolment => enrolment.Id == id);
     }
 
-    public async Task<bool> AnyForStudentAndOffering(string studentId, int offeringId)
+    public async Task<bool> AnyForStudentAndOffering(string studentId, OfferingId offeringId)
     {
         return await _context.Enrolments
             .AnyAsync(enrolment => !enrolment.IsDeleted && enrolment.StudentId == studentId && enrolment.OfferingId == offeringId);

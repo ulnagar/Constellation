@@ -2,6 +2,7 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.Areas.Subject.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -51,15 +52,18 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> AddBulkSession(int id)
+        public async Task<IActionResult> AddBulkSession(Guid id)
         {
             var viewModel = await CreateViewModel<Sessions_BulkAssignmentViewModel>();
 
-            if (id == 0)
+            if (id == new Guid())
             {
                 return null;
             }
-            var offering = await _unitOfWork.CourseOfferings.ForSessionEditAsync(id);
+
+            OfferingId offeringId = OfferingId.FromValue(id);
+
+            var offering = await _unitOfWork.CourseOfferings.ForSessionEditAsync(offeringId);
 
             if (offering == null)
             {
@@ -69,7 +73,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             var staff = await _unitOfWork.Staff.ForSelectionAsync();
             var rooms = await _unitOfWork.AdobeConnectRooms.ForSelectionAsync();
 
-            viewModel.OfferingId = id;
+            viewModel.OfferingId = offeringId;
             viewModel.OfferingName = offering.Name;
             viewModel.Periods = offering.Sessions.Where(s => !s.IsDeleted).Select(s => s.PeriodId).ToList();
             viewModel.ValidPeriods = await _unitOfWork.Periods.ForSelectionAsync();
@@ -138,14 +142,16 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> BulkRemoveSession(int id)
+        public async Task<IActionResult> BulkRemoveSession(Guid id)
         {
-            if (id == 0)
+            if (id == new Guid())
             {
                 return RedirectToAction("Index", "Classes", new { area = "Subject" });
             }
 
-            var offering = await _unitOfWork.CourseOfferings.ForSessionEditAsync(id);
+            OfferingId offeringId = OfferingId.FromValue(id);
+
+            var offering = await _unitOfWork.CourseOfferings.ForSessionEditAsync(offeringId);
 
             if (offering == null)
             {
@@ -159,7 +165,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 
             await _unitOfWork.CompleteAsync();
 
-            return RedirectToAction("Details", "Classes", new { area = "Subject", id = offering.Id });
+            return RedirectToAction("Details", "Classes", new { area = "Subject", id = offering.Id.Value });
         }
     }
 }

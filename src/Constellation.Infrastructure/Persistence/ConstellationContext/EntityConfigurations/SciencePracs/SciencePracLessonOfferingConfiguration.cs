@@ -3,6 +3,7 @@
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -30,5 +31,11 @@ public class SciencePracLessonOfferingConfiguration : IEntityTypeConfiguration<S
             .HasOne<Offering>()
             .WithMany()
             .HasForeignKey(entity => entity.OfferingId);
+
+        builder
+            .Property(entity => entity.OfferingId)
+            .HasConversion(
+                id => id.Value,
+                value => OfferingId.FromValue(value));
     }
 }

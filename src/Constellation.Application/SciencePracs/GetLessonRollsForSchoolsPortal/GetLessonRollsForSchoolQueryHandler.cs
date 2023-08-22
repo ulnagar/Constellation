@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using System;
 using System.Collections.Generic;
@@ -42,7 +43,7 @@ internal sealed class GetLessonRollsForSchoolQueryHandler
             if (roll is null)
                 continue;
 
-            int offeringId = lesson.Offerings.First().OfferingId;
+            OfferingId offeringId = lesson.Offerings.First().OfferingId;
 
             Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
