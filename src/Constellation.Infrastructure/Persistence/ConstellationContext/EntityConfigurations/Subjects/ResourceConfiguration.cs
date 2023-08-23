@@ -10,7 +10,7 @@ internal sealed class ResourceConfiguration : IEntityTypeConfiguration<Resource>
 {
     public void Configure(EntityTypeBuilder<Resource> builder)
     {
-        builder.ToTable("Subjects_Resource");
+        builder.ToTable("Subjects_Resources");
 
         builder
             .HasKey(resource => resource.Id);
@@ -28,9 +28,10 @@ internal sealed class ResourceConfiguration : IEntityTypeConfiguration<Resource>
                 value => ResourceType.FromValue(value));
 
         builder
-            .HasOne(resource => resource.Offering)
-            .WithMany()
-            .HasForeignKey(resource => resource.OfferingId);
+            .Property(resource => resource.OfferingId)
+            .HasConversion(
+                id => id.Value,
+                value => OfferingId.FromValue(value));
 
         builder
             .HasDiscriminator(resource => resource.Type)

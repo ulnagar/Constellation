@@ -11,14 +11,18 @@ public class CourseConfiguration : IEntityTypeConfiguration<Course>
         builder.ToTable("Subjects_Courses");
 
         builder
-            .HasKey(c => c.Id);
+            .HasKey(course => course.Id);
 
         builder
-            .HasMany(c => c.Offerings)
-            .WithOne(o => o.Course);
+            .HasMany(course => course.Offerings)
+            .WithOne(offering => offering.Course);
 
         builder
-            .Property(c => c.FullTimeEquivalentValue)
+            .Navigation(course => course.Offerings)
+            .AutoInclude();
+
+        builder
+            .Property(course => course.FullTimeEquivalentValue)
             .HasPrecision(4, 3);
 
         builder
@@ -26,5 +30,13 @@ public class CourseConfiguration : IEntityTypeConfiguration<Course>
             .WithMany()
             .HasForeignKey(course => course.FacultyId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .Property(course => course.Code)
+            .HasMaxLength(3)
+            .IsRequired();
+
+        builder
+            .HasIndex(course => course.Code);
     }
 }

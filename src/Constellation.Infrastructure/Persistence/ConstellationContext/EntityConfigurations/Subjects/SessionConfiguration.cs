@@ -1,6 +1,7 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Subjects;
 
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,28 +12,34 @@ public class SessionConfiguration : IEntityTypeConfiguration<Session>
         builder.ToTable("Subjects_Sessions");
 
         builder
-            .HasKey(s => s.Id);
+            .HasKey(session => session.Id);
 
         builder
-            .HasOne(s => s.Offering)
-            .WithMany(o => o.Sessions)
-            .HasForeignKey(s => s.OfferingId);
+            .HasOne(session => session.Offering)
+            .WithMany(offering => offering.Sessions)
+            .HasForeignKey(session => session.OfferingId);
 
         builder
-            .HasOne(s => s.Teacher)
-            .WithMany(t => t.CourseSessions)
-            .HasForeignKey(s => s.StaffId)
+            .Property(session => session.OfferingId)
+            .HasConversion(
+                id => id.Value,
+                value => OfferingId.FromValue(value));
+
+        builder
+            .HasOne(session => session.Teacher)
+            .WithMany(teacher => teacher.CourseSessions)
+            .HasForeignKey(session => session.StaffId)
             .OnDelete(DeleteBehavior.NoAction);
 
         builder
-            .HasOne(s => s.Room)
-            .WithMany(r => r.OfferingSessions)
-            .HasForeignKey(s => s.RoomId)
+            .HasOne(session => session.Room)
+            .WithMany(room => room.OfferingSessions)
+            .HasForeignKey(session => session.RoomId)
             .OnDelete(DeleteBehavior.NoAction);
 
         builder
-            .HasOne(s => s.Period)
-            .WithMany(p => p.OfferingSessions)
-            .HasForeignKey(s => s.PeriodId);
+            .HasOne(session => session.Period)
+            .WithMany(period => period.OfferingSessions)
+            .HasForeignKey(session => session.PeriodId);
     }
 }
