@@ -17,14 +17,14 @@ internal sealed class CreateAwardNominationCommandHandler
 {
     private readonly IAwardNominationRepository _nominationRepository;
     private readonly ICourseRepository _courseRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public CreateAwardNominationCommandHandler(
         IAwardNominationRepository nominationRepository,
         ICourseRepository courseRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {

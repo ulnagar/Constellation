@@ -24,7 +24,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
     private readonly ISchoolContactRepository _schoolContactRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
@@ -33,7 +33,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
         ISchoolContactRepository schoolContactRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ISchoolRepository schoolRepository,
         IEmailService emailService,
         ILogger logger)

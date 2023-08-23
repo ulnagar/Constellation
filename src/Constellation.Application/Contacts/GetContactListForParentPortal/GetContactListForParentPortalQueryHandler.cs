@@ -18,14 +18,14 @@ internal sealed class GetContactListForParentPortalQueryHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
     private readonly AppConfiguration _configuration;
 
     public GetContactListForParentPortalQueryHandler(
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IOptions<AppConfiguration> configuration,
         ILogger logger)
     {

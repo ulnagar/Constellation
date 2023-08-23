@@ -18,13 +18,13 @@ internal sealed class CreateLessonCommandHandler
     : ICommandHandler<CreateLessonCommand>
 {
     private readonly ILessonRepository _lessonRepository;
-    private readonly ICourseOfferingRepository _courseOfferingRepository;
+    private readonly IOfferingRepository _courseOfferingRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public CreateLessonCommandHandler(
         ILessonRepository lessonRepository,
-        ICourseOfferingRepository courseOfferingRepository,
+        IOfferingRepository courseOfferingRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -38,7 +38,7 @@ internal sealed class CreateLessonCommandHandler
     {
         List<Offering> offerings = await _courseOfferingRepository.GetByCourseId(request.CourseId, cancellationToken);
 
-        offerings = offerings.Where(offering => offering.IsCurrent()).ToList();
+        offerings = offerings.Where(offering => offering.IsCurrent).ToList();
 
         if (offerings.Count == 0)
         {

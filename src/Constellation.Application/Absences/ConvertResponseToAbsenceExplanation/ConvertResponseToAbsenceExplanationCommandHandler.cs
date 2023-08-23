@@ -16,12 +16,12 @@ internal sealed class ConvertResponseToAbsenceExplanationCommandHandler
     : ICommandHandler<ConvertResponseToAbsenceExplanationCommand, AbsenceExplanation>
 {
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public ConvertResponseToAbsenceExplanationCommandHandler(
         IAbsenceRepository absenceRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;

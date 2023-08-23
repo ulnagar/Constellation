@@ -25,7 +25,7 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IFamilyRepository _familyRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
@@ -33,7 +33,7 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
         IFamilyRepository familyRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IEmailService emailService,
         ILogger logger)
     {

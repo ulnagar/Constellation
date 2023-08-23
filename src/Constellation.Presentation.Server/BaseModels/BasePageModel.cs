@@ -2,7 +2,6 @@
 namespace Constellation.Presentation.Server.BaseModels;
 
 using Constellation.Application.Features.Home.Queries;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Subjects.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -19,7 +18,7 @@ public class BasePageModel : PageModel, IBaseModel
         Classes = new Dictionary<string, OfferingId>();
     }
 
-    public async Task GetClasses(IUnitOfWork unitOfWork)
+    public async Task GetClasses(IMediator mediator)
     {
         var username = User.Identity?.Name;
 
@@ -28,20 +27,10 @@ public class BasePageModel : PageModel, IBaseModel
             return;
         }
 
-        var teacher = await unitOfWork.Staff.FromEmailForExistCheck(username);
-
-        if (teacher != null)
-        {
-            var entries = unitOfWork.CourseOfferings.AllForTeacher(teacher.StaffId);
-
-            foreach (var entry in entries)
-            {
-                Classes.Add(entry.Name, entry.Id);
-            }
-        }
+        Classes = await mediator.Send(new GetUsersClassesQuery { Username = username });
     }
 
-    public async Task GetClasses(IMediator mediator)
+    public async Task GetClasses(ISender mediator)
     {
         var username = User.Identity?.Name;
 

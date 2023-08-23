@@ -29,7 +29,7 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IOfferingSessionsRepository _sessionRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IEmailService _emailService;
     private readonly IMediator _mediator;
@@ -45,7 +45,7 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
         IAbsenceRepository absenceRepository,
         IOfferingSessionsRepository sessionRepository,
         ITimetablePeriodRepository periodRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ICourseRepository courseRepository,
         IEmailService emailService,
         IMediator mediator,

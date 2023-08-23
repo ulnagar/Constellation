@@ -24,7 +24,7 @@ internal sealed class CoverCancelledDomainEvent_SendCoverCancelledEmailHandler
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IClassCoverRepository _classCoverRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ICasualRepository _casualRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
@@ -36,7 +36,7 @@ internal sealed class CoverCancelledDomainEvent_SendCoverCancelledEmailHandler
     public CoverCancelledDomainEvent_SendCoverCancelledEmailHandler(
         IUnitOfWork unitOfWork,
         IClassCoverRepository classCoverRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
         ICasualRepository casualRepository,
         ITimetablePeriodRepository periodRepository,

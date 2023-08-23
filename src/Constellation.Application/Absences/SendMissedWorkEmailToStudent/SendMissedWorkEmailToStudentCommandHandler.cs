@@ -21,7 +21,7 @@ internal sealed class SendMissedWorkEmailToStudentCommandHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IFamilyRepository _familyRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
@@ -29,7 +29,7 @@ internal sealed class SendMissedWorkEmailToStudentCommandHandler
     public SendMissedWorkEmailToStudentCommandHandler(
         IStudentRepository studentRepository,
         IFamilyRepository familyRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ICourseRepository courseRepository,
         IEmailService emailService,
         ILogger logger)

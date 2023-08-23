@@ -13,11 +13,11 @@ internal sealed class GetAbsenceSummaryForStudentQueryHandler
     : IQueryHandler<GetAbsenceSummaryForStudentQuery, List<StudentAbsenceSummaryResponse>>
 {
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
 
     public GetAbsenceSummaryForStudentQueryHandler(
         IAbsenceRepository absenceRepository,
-        ICourseOfferingRepository offeringRepository)
+        IOfferingRepository offeringRepository)
 	{
         _absenceRepository = absenceRepository;
         _offeringRepository = offeringRepository;

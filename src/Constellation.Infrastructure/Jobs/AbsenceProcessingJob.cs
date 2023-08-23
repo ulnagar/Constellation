@@ -23,7 +23,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
     private readonly ISentralGateway _sentralService;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
     private readonly IAbsenceRepository _absenceRepository;
 
@@ -34,7 +34,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
 
     public AbsenceProcessingJob(
         IOptions<AppConfiguration> configuration,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ITimetablePeriodRepository periodRepository,
         IAbsenceRepository absenceRepository,
         ISentralGateway sentralService,
@@ -641,7 +641,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
 
     private async Task<Absence> ProcessPartialAbsence(
         SentralPeriodAbsenceDto absence, 
-        List<SentralPeriodAbsenceDto> webAttendAbsences,
+        List<SentralPeriodAbsenceDto> webAttendAbsences, 
         OfferingId courseEnrolmentId, 
         List<TimetablePeriod> periodGroup,
         CancellationToken cancellationToken)
@@ -726,7 +726,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
 
     private async Task<Absence> ProcessWholeAbsence(
         List<SentralPeriodAbsenceDto> absencesToProcess, 
-        List<SentralPeriodAbsenceDto> webAttendAbsences,
+        List<SentralPeriodAbsenceDto> webAttendAbsences, 
         OfferingId courseEnrolmentId, 
         List<TimetablePeriod> periodGroup, 
         int totalAbsenceTime, 

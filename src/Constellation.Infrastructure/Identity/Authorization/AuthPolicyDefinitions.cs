@@ -70,6 +70,9 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanManageSciencePracs, policy =>
             policy.RequireRole(AuthRoles.LessonsEditor, AuthRoles.Admin));
 
+        options.AddPolicy(AuthPolicies.CanEditSubjects, policy =>
+            policy.RequireRole(AuthRoles.Editor, AuthRoles.Admin));
+
         return options;
     }
 }

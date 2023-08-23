@@ -15,6 +15,13 @@ internal sealed class FacultyRepository : IFacultyRepository
         _dbContext = dbContext;
     }
 
+    public async Task<Faculty> GetById(
+        Guid FacultyId,
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<Faculty>()
+            .FirstOrDefaultAsync(faculty => faculty.Id == FacultyId, cancellationToken);
+
     public async Task<List<Faculty>> GetCurrentForStaffMember(
         string staffId,
         CancellationToken cancellationToken = default) =>

@@ -11,15 +11,12 @@ public class UnitOfWork : IUnitOfWork
     public IAdobeConnectOperationsRepository AdobeConnectOperations { get; set; }
     public IAdobeConnectRoomRepository AdobeConnectRooms { get; set; }
     public IAppAccessTokenRepository AppAccessTokens { get; set; }
-    public ICourseOfferingRepository CourseOfferings { get; set; }
-    public ICourseRepository Courses { get; set; }
     public IDeviceAllocationRepository DeviceAllocations { get; set; }
     public IDeviceNotesRepository DeviceNotes { get; set; }
     public IDeviceRepository Devices { get; set; }
     public IEnrolmentRepository Enrolments { get; set; }
     public IIdentityRepository Identities { get; set; }
     public IMSTeamOperationsRepository MSTeamOperations { get; set; }
-    public IOfferingSessionsRepository OfferingSessions { get; set; }
     public ISchoolContactRepository SchoolContacts { get; set; }
     public ISchoolContactRoleRepository SchoolContactRoles { get; set; }
     public ISchoolRepository Schools { get; set; }
@@ -38,15 +35,12 @@ public class UnitOfWork : IUnitOfWork
         AdobeConnectOperations = new AdobeConnectOperationsRepository(context);
         AdobeConnectRooms = new AdobeConnectRoomRepository(context);
         AppAccessTokens = new AppAccessTokenRepository(context);
-        CourseOfferings = new CourseOfferingRepository(context);
-        Courses = new CourseRepository(context);
         DeviceAllocations = new DeviceAllocationRepository(context);
         DeviceNotes = new DeviceNotesRepository(context);
         Devices = new DeviceRepository(context);
         Enrolments = new EnrolmentRepository(context);
         Identities = new IdentityRepository(userManager);
         MSTeamOperations = new MSTeamOperationsRepository(context);
-        OfferingSessions = new OfferingSessionsRepository(context);
         SchoolContacts = new SchoolContactRepository(context);
         SchoolContactRoles = new SchoolContactRoleRepository(context);
         Schools = new SchoolRepository(context);

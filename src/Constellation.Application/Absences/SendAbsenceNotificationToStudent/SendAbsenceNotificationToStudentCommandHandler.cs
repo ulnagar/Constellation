@@ -23,14 +23,14 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
     public SendAbsenceNotificationToStudentCommandHandler(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IEmailService emailService,
         ILogger logger)
     {

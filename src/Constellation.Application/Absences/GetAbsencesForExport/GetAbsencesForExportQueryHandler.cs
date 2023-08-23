@@ -22,14 +22,14 @@ internal sealed class GetAbsencesForExportQueryHandler
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ISchoolRepository _schoolRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public GetAbsencesForExportQueryHandler(
         IAbsenceRepository absenceRepository,
         IStudentRepository studentRepository,
         ISchoolRepository schoolRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;

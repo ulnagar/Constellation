@@ -1,0 +1,99 @@
+﻿@page "{SelectedGrade=All}/{SelectedFaculty?}"
+@model Constellation.Presentation.Server.Areas.Subject.Pages.Offerings.IndexModel
+@using Constellation.Presentation.Server.Areas.Subject.Pages.Offerings
+@using Constellation.Application.Extensions
+
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPolicies.CanEditSubjects);
+}
+
+<h2>Offerings</h2>
+
+<div class="page-menu">
+    @{
+        var all_style = "btn-outline-secondary";
+        var active_style = all_style;
+        var inactive_style = all_style;
+        var future_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case IndexModel.FilterDto.All:
+                all_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Active:
+                active_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Inactive:
+                inactive_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Future:
+                future_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Active" class="btn @active_style">Active</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Inactive" class="btn @inactive_style">Inactive</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Future" class="btn @future_style">Future</a>
+    </div>
+
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">For Grade <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            @foreach (var grade in Model.Grades)
+            {
+                <a asp-page="Index" asp-route-selectedGrade="@grade" class="dropdown-item">@grade.AsName()</a>
+            }
+        </div>
+    </div>
+
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">For Faculty <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            @foreach (var faculty in Model.Faculties)
+            {
+                <a asp-page="Index" asp-route-selectedFaculty="@faculty" class="dropdown-item">@faculty</a>
+            }
+        </div>
+    </div>
+
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-action="Create" asp-controller="Classes" asp-area="Subject" class="btn btn-info">Create New</a>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Course</th>
+            <th>Scholastic Year</th>
+            <th>Teacher</th>
+            <th>Minutes per fortnight</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Offerings)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.CourseName</td>
+                <td>@item.EndDate.ToString("yyyy")</td>
+                <td>@Html.DisplayFor(modelItem => item.Teachers, "StringList")</td>
+                <td>@item.MinPerFN</td>
+                <td>
+                    <a asp-action="Details" asp-controller="Classes" asp-area="Subject" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

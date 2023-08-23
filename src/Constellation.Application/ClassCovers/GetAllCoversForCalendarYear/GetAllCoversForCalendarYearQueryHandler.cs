@@ -16,14 +16,14 @@ internal sealed class GetAllCoversForCalendarYearQueryHandler
     : IQueryHandler<GetAllCoversForCalendarYearQuery, List<CoversListResponse>>
 {
     private readonly IClassCoverRepository _classCoverRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ICasualRepository _casualRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolRepository _schoolRepository;
 
     public GetAllCoversForCalendarYearQueryHandler(
         IClassCoverRepository classCoverRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ICasualRepository casualRepository,
         IStaffRepository staffRepository,
         ISchoolRepository schoolRepository)

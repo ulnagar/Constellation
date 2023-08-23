@@ -1,9 +1,8 @@
-﻿using Constellation.Application.Extensions;
+﻿namespace Constellation.Core.Tests.Unit.Models.Subjects;
+
 using Constellation.Core.Models.Subjects;
 
-namespace Constellation.Application.Tests.Unit.Extensions;
-
-public class CourseOfferingExtensionsTests
+public class OfferingTests
 {
 
     [Fact]
@@ -12,12 +11,12 @@ public class CourseOfferingExtensionsTests
         // Arrange
         var sut = new Offering
         {
-            StartDate = DateTime.Today.AddDays(-1),
-            EndDate = DateTime.Today.AddDays(1)
+            StartDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
         };
 
         // Act
-        var result = sut.IsCurrent();
+        var result = sut.IsCurrent;
 
         // Assert
         result.Should().BeFalse();
@@ -36,7 +35,7 @@ public class CourseOfferingExtensionsTests
         sut.Sessions.Add(session);
 
         // Act
-        var result = sut.IsCurrent();
+        var result = sut.IsCurrent;
 
         // Assert
         result.Should().BeFalse();
@@ -48,8 +47,8 @@ public class CourseOfferingExtensionsTests
         // Arrange
         var sut = new Offering
         {
-            StartDate = DateTime.Today.AddDays(-1),
-            EndDate = DateTime.Today.AddDays(1)
+            StartDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
         };
 
         var session = new Session
@@ -60,7 +59,7 @@ public class CourseOfferingExtensionsTests
         sut.Sessions.Add(session);
 
         // Act
-        var result = sut.IsCurrent();
+        var result = sut.IsCurrent;
 
         // Assert
         result.Should().BeTrue();
@@ -72,8 +71,8 @@ public class CourseOfferingExtensionsTests
         // Arrange
         var sut = new Offering
         {
-            StartDate = DateTime.Today,
-            EndDate = DateTime.Today.AddDays(1)
+            StartDate = DateOnly.FromDateTime(DateTime.Today),
+            EndDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
         };
 
         var session = new Session
@@ -84,7 +83,7 @@ public class CourseOfferingExtensionsTests
         sut.Sessions.Add(session);
 
         // Act
-        var result = sut.IsCurrent();
+        var result = sut.IsCurrent;
 
         // Assert
         result.Should().BeTrue();
@@ -96,8 +95,8 @@ public class CourseOfferingExtensionsTests
         // Arrange
         var sut = new Offering
         {
-            StartDate = DateTime.Today.AddDays(-1),
-            EndDate = DateTime.Today
+            StartDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.Today)
         };
 
         var session = new Session
@@ -108,7 +107,7 @@ public class CourseOfferingExtensionsTests
         sut.Sessions.Add(session);
 
         // Act
-        var result = sut.IsCurrent();
+        var result = sut.IsCurrent;
 
         // Assert
         result.Should().BeTrue();
@@ -120,8 +119,8 @@ public class CourseOfferingExtensionsTests
         // Arrange
         var sut = new Offering
         {
-            StartDate = DateTime.Today,
-            EndDate = DateTime.Today
+            StartDate = DateOnly.FromDateTime(DateTime.Today),
+            EndDate = DateOnly.FromDateTime(DateTime.Today)
         };
 
         var session = new Session
@@ -132,7 +131,7 @@ public class CourseOfferingExtensionsTests
         sut.Sessions.Add(session);
 
         // Act
-        var result = sut.IsCurrent();
+        var result = sut.IsCurrent;
 
         // Assert
         result.Should().BeTrue();

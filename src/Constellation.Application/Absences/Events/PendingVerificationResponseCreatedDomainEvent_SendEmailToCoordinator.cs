@@ -24,7 +24,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ISchoolContactRepository _contactRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
@@ -33,7 +33,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
         IAbsenceRepository absenceRepository,
         IStudentRepository studentRepository,
         ISchoolContactRepository contactRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ISchoolRepository schoolRepository,
         IEmailService emailService,
         ILogger logger)
