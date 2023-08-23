@@ -3,11 +3,7 @@ using Constellation.Application.Features.Portal.School.Assignments.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Test.Pages
 {
@@ -16,10 +12,9 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages
         private readonly IMediator _mediator;
         private readonly IUnitOfWork _unitOfWork;
 
-        public SubmitModel(IMediator mediator, IUnitOfWork unitOfWork)
+        public SubmitModel(IMediator mediator)
         {
             _mediator = mediator;
-            _unitOfWork = unitOfWork;
             Files = new List<FileDto>();
         }
 
@@ -47,7 +42,7 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages
                 Files.Add(entry);
             }
 
-            await GetClasses(_unitOfWork);
+            await GetClasses(_mediator);
             return Page();
         }
 

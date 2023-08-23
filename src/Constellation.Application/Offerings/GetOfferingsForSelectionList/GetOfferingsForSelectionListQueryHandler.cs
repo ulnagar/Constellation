@@ -11,10 +11,10 @@ using System.Threading.Tasks;
 internal sealed class GetOfferingsForSelectionListQueryHandler
     : IQueryHandler<GetOfferingsForSelectionListQuery, List<OfferingSelectionListResponse>>
 {
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
 
     public GetOfferingsForSelectionListQueryHandler(
-        ICourseOfferingRepository offeringRepository)
+        IOfferingRepository offeringRepository)
     {
         _offeringRepository = offeringRepository;
     }

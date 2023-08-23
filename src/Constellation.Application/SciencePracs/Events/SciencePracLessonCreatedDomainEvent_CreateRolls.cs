@@ -17,14 +17,14 @@ internal sealed class SciencePracLessonCreatedDomainEvent_CreateRolls
     : IDomainEventHandler<SciencePracLessonCreatedDomainEvent>
 {
     private readonly ILessonRepository _lessonRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public SciencePracLessonCreatedDomainEvent_CreateRolls(
         ILessonRepository lessonRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IStudentRepository studentRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)

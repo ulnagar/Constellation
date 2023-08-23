@@ -24,7 +24,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_SendCoverUpdatedEm
     : IDomainEventHandler<CoverStartAndEndDatesChangedDomainEvent>
 {
     private readonly IClassCoverRepository _classCoverRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ICasualRepository _casualRepository;
     private readonly IStudentRepository _studentRepository;
@@ -38,7 +38,7 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_SendCoverUpdatedEm
 
     public CoverStartAndEndDatesChangedDomainEvent_SendCoverUpdatedEmailHandler(
         IClassCoverRepository classCoverRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
         ICasualRepository casualRepository,
         IStudentRepository studentRepository,

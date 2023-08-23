@@ -15,14 +15,14 @@ internal sealed class GetCoverWithDetailsQueryHandler
     : IQueryHandler<GetCoverWithDetailsQuery, CoverWithDetailsResponse>
 {
     private readonly IClassCoverRepository _classCoverRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ICasualRepository _casualRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolRepository _schoolRepository;
 
     public GetCoverWithDetailsQueryHandler(
         IClassCoverRepository classCoverRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ICasualRepository casualRepository,
         IStaffRepository staffRepository,
         ISchoolRepository schoolRepository)

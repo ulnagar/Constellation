@@ -8,15 +8,12 @@ public interface IUnitOfWork
     IAdobeConnectOperationsRepository AdobeConnectOperations { get; set; }
     IAdobeConnectRoomRepository AdobeConnectRooms { get; set; }
     IAppAccessTokenRepository AppAccessTokens { get; set; }
-    ICourseOfferingRepository CourseOfferings { get; set; }
-    ICourseRepository Courses { get; set; }
     IDeviceAllocationRepository DeviceAllocations { get; set; }
     IDeviceNotesRepository DeviceNotes { get; set; }
     IDeviceRepository Devices { get; set; }
     IEnrolmentRepository Enrolments { get; set; }
     IIdentityRepository Identities { get; set; }
     IMSTeamOperationsRepository MSTeamOperations { get; set; }
-    IOfferingSessionsRepository OfferingSessions { get; set; }
     ISchoolContactRepository SchoolContacts { get; set; }
     ISchoolContactRoleRepository SchoolContactRoles { get; set; }
     ISchoolRepository Schools { get; set; }

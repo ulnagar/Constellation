@@ -17,7 +17,7 @@ internal sealed class AssignmentAttemptSubmittedDomainEvent_UploadSubmissionToCa
     : IDomainEventHandler<AssignmentAttemptSubmittedDomainEvent>
 {
     private readonly IAssignmentRepository _assignmentRepository;
-    private readonly ICourseOfferingRepository _courseOfferingRepository;
+    private readonly IOfferingRepository _courseOfferingRepository;
     private readonly IStoredFileRepository _storedFileRepository;
     private readonly ICanvasGateway _canvasGateway;
     private readonly IEmailService _emailService;
@@ -25,7 +25,7 @@ internal sealed class AssignmentAttemptSubmittedDomainEvent_UploadSubmissionToCa
 
     public AssignmentAttemptSubmittedDomainEvent_UploadSubmissionToCanvas(
         IAssignmentRepository assignmentRepository,
-        ICourseOfferingRepository courseOfferingRepository,
+        IOfferingRepository courseOfferingRepository,
         IStoredFileRepository storedFileRepository,
         ICanvasGateway canvasGateway,
         IEmailService emailService,
@@ -67,7 +67,7 @@ internal sealed class AssignmentAttemptSubmittedDomainEvent_UploadSubmissionToCa
             return;
         }
 
-        var offering = offerings.FirstOrDefault(offering => offering.IsCurrent());
+        var offering = offerings.FirstOrDefault(offering => offering.IsCurrent);
 
         if (offering is null)
         {

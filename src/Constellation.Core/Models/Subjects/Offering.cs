@@ -4,6 +4,8 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using static Constellation.Core.Errors.DomainErrors.Subjects;
 
 public class Offering
 {
@@ -13,7 +15,7 @@ public class Offering
     {
     }
 
-    public Offering(int courseId, DateTime startDate, DateTime endDate)
+    public Offering(int courseId, DateOnly startDate, DateOnly endDate)
     {
         CourseId = courseId;
         StartDate = startDate;
@@ -24,10 +26,24 @@ public class Offering
     public string Name { get; set; }
     public int CourseId { get; set; }
     public Course Course { get; set; }
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
+    public DateOnly StartDate { get; set; }
+    public DateOnly EndDate { get; set; }
     public List<Enrolment> Enrolments { get; set; } = new();
     public List<Session> Sessions { get; set; } = new();
     public IReadOnlyList<Resource> Resources => _resources;
     public List<Absence> Absences { get; set; } = new();
+    public bool IsCurrent => IsOfferingCurrent();
+
+    private bool IsOfferingCurrent()
+    {
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+        if (Sessions.All(s => s.IsDeleted))
+            return false;
+
+        if (StartDate <= today && EndDate >= today)
+            return true;
+
+        return false;
+    }
 }

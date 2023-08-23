@@ -22,14 +22,14 @@ internal sealed class ExportAbsencesReportCommandHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IExcelService _excelService;
 
     public ExportAbsencesReportCommandHandler(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ISchoolRepository schoolRepository,
         IExcelService excelService)
     {

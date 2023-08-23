@@ -28,6 +28,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
     [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class ClassesController : BaseController
     {
+        private readonly IOfferingRepository _offeringRepository;
         private readonly ILessonRepository _lessonRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICourseOfferingService _offeringService;
@@ -38,6 +39,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         private readonly IMediator _mediator;
 
         public ClassesController(
+            IOfferingRepository offeringRepository,
             ILessonRepository lessonRepository,
             IUnitOfWork unitOfWork, 
             ICourseOfferingService offeringService,
@@ -48,6 +50,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             IMediator mediator)
             : base(unitOfWork)
         {
+            _offeringRepository = offeringRepository;
             _lessonRepository = lessonRepository;
             _unitOfWork = unitOfWork;
             _offeringService = offeringService;
@@ -56,78 +59,6 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             _studentService = studentService;
             _context = context;
             _mediator = mediator;
-        }
-
-        // GET: Subject/Classes
-        public IActionResult Index()
-        {
-            return RedirectToAction("Active");
-        }
-
-        public async Task<IActionResult> All()
-        {
-            var offerings = await _unitOfWork.CourseOfferings.ForListAsync(offering => true);
-
-            var viewModel = await CreateViewModel<Classes_ViewModel>();
-            viewModel.Offerings = offerings.Select(Classes_ViewModel.OfferingDto.ConvertFromOffering).ToList();
-            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
-
-            return View("Index", viewModel);
-        }
-
-        public async Task<IActionResult> Active()
-        {
-            var offerings = await _unitOfWork.CourseOfferings.ForListAsync(offering => offering.Sessions.Any(session => !session.IsDeleted) && offering.EndDate >= DateTime.Now && offering.StartDate <= DateTime.Now);
-
-            var viewModel = await CreateViewModel<Classes_ViewModel>();
-            viewModel.Offerings = offerings.Select(Classes_ViewModel.OfferingDto.ConvertFromOffering).ToList();
-            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
-
-            return View("Index", viewModel);
-        }
-
-        public async Task<IActionResult> Inactive()
-        {
-            var offerings = await _unitOfWork.CourseOfferings.ForListAsync(offering => offering.EndDate < DateTime.Now);
-
-            var viewModel = await CreateViewModel<Classes_ViewModel>();
-            viewModel.Offerings = offerings.Select(Classes_ViewModel.OfferingDto.ConvertFromOffering).ToList();
-            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
-
-            return View("Index", viewModel);
-        }
-
-        public async Task<IActionResult> Upcoming()
-        {
-            var offerings = await _unitOfWork.CourseOfferings.ForListAsync(offering => offering.StartDate > DateTime.Now);
-
-            var viewModel = await CreateViewModel<Classes_ViewModel>();
-            viewModel.Offerings = offerings.Select(Classes_ViewModel.OfferingDto.ConvertFromOffering).ToList();
-            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
-
-            return View("Index", viewModel);
-        }
-
-        public async Task<IActionResult> FromGrade(Grade id)
-        {
-            var offerings = await _unitOfWork.CourseOfferings.ForListAsync(offering => offering.Course.Grade == id && offering.EndDate >= DateTime.Now);
-
-            var viewModel = await CreateViewModel<Classes_ViewModel>();
-            viewModel.Offerings = offerings.Select(Classes_ViewModel.OfferingDto.ConvertFromOffering).ToList();
-            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
-
-            return View("Index", viewModel);
-        }
-
-        public async Task<IActionResult> FromFaculty(Guid facultyId)
-        {
-            var offerings = await _unitOfWork.CourseOfferings.ForListAsync(offering => offering.Course.FacultyId == facultyId && offering.EndDate >= DateTime.Now);
-
-            var viewModel = await CreateViewModel<Classes_ViewModel>();
-            viewModel.Offerings = offerings.Select(Classes_ViewModel.OfferingDto.ConvertFromOffering).ToList();
-            viewModel.FacultyList = await _mediator.Send(new GetDictionaryOfFacultiesQuery());
-
-            return View("Index", viewModel);
         }
 
         public async Task<IActionResult> Details(Guid id)

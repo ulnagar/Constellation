@@ -17,13 +17,13 @@ internal sealed class GetOutstandingAbsencesForSchoolQueryHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public GetOutstandingAbsencesForSchoolQueryHandler(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _studentRepository = studentRepository;

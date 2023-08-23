@@ -25,7 +25,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IOfferingSessionsRepository _sessionRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
     private readonly IExportService _exportService;
@@ -35,7 +35,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
         IOfferingSessionsRepository sessionRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ICourseRepository courseRepository,
         ITimetablePeriodRepository periodRepository,
         IExportService exportService,

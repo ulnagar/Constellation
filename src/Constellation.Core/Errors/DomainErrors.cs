@@ -336,6 +336,13 @@ public static class DomainErrors
                 $"Could not find a School Contact with the Id {id}");
         }
 
+        public static class Faculty
+        {
+            public static readonly Func<Guid, Error> NotFound = id => new(
+                "Partners.Faculty.NotFound",
+                $"Could not find a Faculty with the Id {id}");
+        }
+
         public static class School
         {
             public static readonly Func<string, Error> NotFound = id => new(

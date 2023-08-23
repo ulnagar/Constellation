@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Offerings.GetFilteredOfferingsForSelectionList;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
@@ -14,11 +13,11 @@ using System.Threading.Tasks;
 internal sealed class GetFilteredOfferingsForSelectionListQueryHandler
     : IQueryHandler<GetFilteredOfferingsForSelectionListQuery, List<OfferingForSelectionList>>
 {
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public GetFilteredOfferingsForSelectionListQueryHandler(
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _offeringRepository = offeringRepository;
@@ -34,7 +33,7 @@ internal sealed class GetFilteredOfferingsForSelectionListQueryHandler
             List<Offering> offerings = await _offeringRepository.GetByCourseId(courseId, cancellationToken);
 
             offerings = offerings
-                .Where(offering => offering.IsCurrent())
+                .Where(offering => offering.IsCurrent)
                 .ToList();
 
             foreach (Offering offering in offerings)

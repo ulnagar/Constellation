@@ -19,7 +19,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
     : IDomainEventHandler<AbsenceResponseReceivedDomainEvent>
 {
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IEmailService _emailService;
@@ -28,7 +28,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
 
     public AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin(
         IAbsenceRepository absenceRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
         IEmailService emailService,

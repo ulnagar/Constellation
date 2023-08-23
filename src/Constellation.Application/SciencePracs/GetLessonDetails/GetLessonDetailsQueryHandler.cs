@@ -20,14 +20,14 @@ internal sealed class GetLessonDetailsQueryHandler
     : IQueryHandler<GetLessonDetailsQuery, LessonDetailsResponse>
 {
     private readonly ILessonRepository _lessonRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly ILogger _logger;
 
     public GetLessonDetailsQueryHandler(
         ILessonRepository lessonRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ICourseRepository courseRepository,
         ISchoolRepository schoolRepository,
         ILogger logger)

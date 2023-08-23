@@ -18,13 +18,13 @@ internal sealed class GetAbsenceForStudentResponseQueryHandler
 {
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IStudentRepository _studentRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public GetAbsenceForStudentResponseQueryHandler(
         IAbsenceRepository absenceRepository,
         IStudentRepository studentRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;

@@ -15,12 +15,12 @@ internal sealed class GetStudentsFromCourseAsDictionaryQueryHandler
     : IQueryHandler<GetStudentsFromCourseAsDictionaryQuery, Dictionary<string, string>>
 {
     private readonly IStudentRepository _studentRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
 
     public GetStudentsFromCourseAsDictionaryQueryHandler(
         IStudentRepository studentRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IEnrolmentRepository enrolmentRepository)
     {
         _studentRepository = studentRepository;

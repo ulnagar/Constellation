@@ -17,12 +17,12 @@ internal sealed class GetLessonRollsForSchoolQueryHandler
     : IQueryHandler<GetLessonRollsForSchoolQuery, List<ScienceLessonRollSummary>>
 {
     private readonly ILessonRepository _lessonRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
 
     public GetLessonRollsForSchoolQueryHandler(
         ILessonRepository lessonRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ICourseRepository courseRepository)
     {
         _lessonRepository = lessonRepository;
