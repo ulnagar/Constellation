@@ -21,21 +21,38 @@ public class OfferingConfiguration : IEntityTypeConfiguration<Offering>
                 value => OfferingId.FromValue(value));
 
         builder
-            .HasOne(o => o.Course)
-            .WithMany(c => c.Offerings)
-            .HasForeignKey(o => o.CourseId);
+            .HasOne(offering => offering.Course)
+            .WithMany(course => course.Offerings)
+            .HasForeignKey(offering => offering.CourseId);
 
         builder
-            .HasMany(o => o.Enrolments)
-            .WithOne(e => e.Offering);
+            .Navigation(offering => offering.Course)
+            .AutoInclude();
 
         builder
-            .HasMany(o => o.Sessions)
-            .WithOne(s => s.Offering);
+            .HasMany(offering => offering.Enrolments)
+            .WithOne(enrolment => enrolment.Offering);
+
+        builder
+            .HasMany(offering => offering.Sessions)
+            .WithOne(session => session.Offering);
+
+        builder
+            .Navigation(offering => offering.Sessions)
+            .AutoInclude();
 
         builder
             .HasMany(offering => offering.Absences)
             .WithOne()
             .HasForeignKey(absence => absence.OfferingId);
+
+        builder
+            .HasMany(offering => offering.Resources)
+            .WithOne(resource => resource.Offering)
+            .HasForeignKey(resource => resource.OfferingId);
+
+        builder
+            .Navigation(offering => offering.Resources)
+            .AutoInclude();
     }
 }
