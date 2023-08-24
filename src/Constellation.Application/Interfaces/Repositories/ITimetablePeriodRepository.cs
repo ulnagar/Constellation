@@ -15,6 +15,8 @@ public interface ITimetablePeriodRepository
     Task<List<TimetablePeriod>> GetAllFromTimetable(List<string> timetables, CancellationToken cancellationToken = default);
     Task<List<TimetablePeriod>> GetForOfferingOnDay(OfferingId offeringId, DateTime absenceDate, int DayNumber, CancellationToken cancellationToken = default);
     Task<List<TimetablePeriod>> GetForOfferingOnDay(OfferingId offeringId, DateOnly absenceDate, int DayNumber, CancellationToken cancellationToken = default);
+    Task<TimetablePeriod> GetById(int id, CancellationToken cancellationToken = default);
+
     TimetablePeriod WithDetails(int id);
     TimetablePeriod WithFilter(Expression<Func<TimetablePeriod, bool>> predicate);
     ICollection<TimetablePeriod> All();

@@ -2,7 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Families.Models;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Shared;

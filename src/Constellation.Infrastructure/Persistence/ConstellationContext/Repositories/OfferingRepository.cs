@@ -1,6 +1,7 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
@@ -64,6 +65,25 @@ public class OfferingRepository : IOfferingRepository
             .Set<Offering>()
             .Include(offering => offering.Sessions)
             .Where(offering => offering.CourseId == courseId)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Offering>> GetActiveByGrade(
+        Grade grade, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Offering>()
+            .Where(offering => 
+                offering.Course.Grade == grade &&
+                offering.IsCurrent)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Offering>> GetActiveByCourseId(
+        int courseId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Offering>()
+            .Include(offering => offering.Sessions)
+            .Where(offering => offering.CourseId == courseId && offering.IsCurrent)
             .ToListAsync(cancellationToken);
 
     public async Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(

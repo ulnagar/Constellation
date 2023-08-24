@@ -2,7 +2,7 @@
 using Constellation.Application.Features.API.Operations.Commands;
 using Constellation.Application.Features.API.Operations.Queries;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.Areas.API.Models;

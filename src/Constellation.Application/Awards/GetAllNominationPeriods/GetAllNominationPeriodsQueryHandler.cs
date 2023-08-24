@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Awards.GetAllNominationPeriods;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Shared;

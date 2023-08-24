@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Awards.GetAwardCertificate;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Shared;

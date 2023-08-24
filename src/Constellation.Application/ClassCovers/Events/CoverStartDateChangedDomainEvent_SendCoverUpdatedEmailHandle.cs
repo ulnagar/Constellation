@@ -4,7 +4,6 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
-using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +16,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Constellation.Application.Extensions;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Abstractions.Repositories;
 
 namespace Constellation.Application.ClassCovers.Events;
 

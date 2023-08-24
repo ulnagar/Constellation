@@ -1,8 +1,7 @@
 ﻿namespace Constellation.Application.Absences.ConvertResponseToAbsenceExplanation;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Subjects;

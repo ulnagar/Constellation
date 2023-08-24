@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Interceptors;
 
-using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Primitives;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;

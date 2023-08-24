@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.MandatoryTraining.GetCompletionRecordEditContext;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;

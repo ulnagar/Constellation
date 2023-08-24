@@ -5,7 +5,7 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.Templates.Views.Documents.Attendance;
 using System;

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
@@ -11,10 +12,14 @@ using System.Linq.Expressions;
 public class StaffRepository : IStaffRepository
 {
     private readonly AppDbContext _context;
+    private readonly IDateTimeProvider _dateTime;
 
-    public StaffRepository(AppDbContext context)
+    public StaffRepository(
+        AppDbContext context,
+        IDateTimeProvider dateTime)
     {
         _context = context;
+        _dateTime = dateTime;
     }
 
     private IQueryable<Staff> Collection()
@@ -256,7 +261,7 @@ public class StaffRepository : IStaffRepository
             .Where(
                 s =>
                     s.CourseSessions.Any(
-                        d => d.Offering.StartDate < DateTime.Now && d.Offering.EndDate > DateTime.Now))
+                        d => d.Offering.StartDate <= _dateTime.Today && d.Offering.EndDate >= _dateTime.Today))
             .ToList();
     }
 

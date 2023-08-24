@@ -2,6 +2,7 @@
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Subjects;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -166,7 +167,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
         public async Task<ICollection<string>> AHPSchoolCodes()
         {
-            return await _context.Courses
+            return await _context.Set<Course>()
                 .Where(course => course.Name == "AHPG STEM")
                 .SelectMany(course => course.Offerings)
                 .SelectMany(offering => offering.Enrolments)

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Features.API.Operations.Queries;
 
 using Constellation.Application.Features.API.Operations.Queries;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 
 public class GetTeamIdForOfferingQueryHandler : IRequestHandler<GetTeamIdForOfferingQuery, string>
 {

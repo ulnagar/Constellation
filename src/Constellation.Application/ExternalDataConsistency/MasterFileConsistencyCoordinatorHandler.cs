@@ -4,7 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;

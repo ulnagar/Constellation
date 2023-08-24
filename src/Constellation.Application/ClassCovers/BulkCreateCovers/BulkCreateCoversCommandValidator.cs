@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.ClassCovers.BulkCreateCovers;
 
-using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Subjects.Identifiers;
 using FluentValidation;
 using System;

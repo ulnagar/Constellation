@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Features.Faculties.Commands;
 
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using MediatR;
 using System.Threading;

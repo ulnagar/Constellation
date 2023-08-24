@@ -6,7 +6,7 @@ using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;

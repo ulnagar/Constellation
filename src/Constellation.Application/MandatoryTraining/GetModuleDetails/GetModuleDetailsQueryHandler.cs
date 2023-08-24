@@ -4,7 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.MandatoryTraining.Models;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;

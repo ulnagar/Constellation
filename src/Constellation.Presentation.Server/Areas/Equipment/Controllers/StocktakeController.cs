@@ -28,9 +28,11 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<RegisterSightedDeviceForStocktakeCommand> _validator;
 
-        public StocktakeController(IMediator mediator, IUnitOfWork unitOfWork,
+        public StocktakeController(
+            IMediator mediator, 
+            IUnitOfWork unitOfWork,
             IValidator<RegisterSightedDeviceForStocktakeCommand> validator)
-            : base(unitOfWork)
+            : base(mediator)
         {
             _mediator = mediator;
             _unitOfWork = unitOfWork;

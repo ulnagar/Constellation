@@ -2,7 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Models.Identity;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Microsoft.AspNetCore.Identity;
 using Serilog;

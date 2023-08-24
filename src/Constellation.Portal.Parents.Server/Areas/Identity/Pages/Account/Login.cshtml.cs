@@ -3,7 +3,7 @@
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using MediatR;

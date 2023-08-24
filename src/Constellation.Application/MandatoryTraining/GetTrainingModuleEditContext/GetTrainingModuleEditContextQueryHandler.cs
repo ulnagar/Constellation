@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.MandatoryTraining.GetTrainingModuleEditContext;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Shared;
 using System.Threading;
 using System.Threading.Tasks;

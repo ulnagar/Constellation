@@ -4,7 +4,7 @@ using Constellation.Application.Features.Faculties.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
@@ -48,7 +48,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             IStudentService studentService, 
             IAppDbContext context, 
             IMediator mediator)
-            : base(unitOfWork)
+            : base(mediator)
         {
             _offeringRepository = offeringRepository;
             _lessonRepository = lessonRepository;
@@ -61,84 +61,6 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             _mediator = mediator;
         }
 
-        public async Task<IActionResult> Details(Guid id)
-        { 
-            if (id == new Guid())
-            {
-                return RedirectToAction("Index");
-            }
-
-            OfferingId offeringId = OfferingId.FromValue(id);
-
-            var offering = await _unitOfWork.CourseOfferings.ForDetailDisplayAsync(offeringId);
-
-            if (offering == null)
-            {
-                return RedirectToAction("Index");
-            }
-
-            var periods = await _unitOfWork.Periods.ForSelectionAsync();
-            var staff = await _unitOfWork.Staff.ForSelectionAsync();
-            var rooms = await _unitOfWork.AdobeConnectRooms.ForSelectionAsync();
-            var students = await _unitOfWork.Students.ForSelectionListAsync();
-
-            var periodSource = periods.Select(period => new { period.Id, period.Name, Group = period.GetPeriodGroup() }).ToList();
-
-            var viewModel = await CreateViewModel<Classes_DetailsViewModel>();
-            viewModel.Class = Classes_DetailsViewModel.OfferingDto.ConvertFromOffering(offering);
-            viewModel.Students = offering.Enrolments.Where(enrol => !enrol.IsDeleted).Select(enrol => enrol.Student).Select(Classes_DetailsViewModel.StudentDto.ConvertFromStudent).ToList();
-            viewModel.Sessions = offering.Sessions.Where(session => !session.IsDeleted).Select(Classes_DetailsViewModel.SessionDto.ConvertFromSession).ToList();
-            viewModel.StudentList = new SelectList(students, "StudentId", "DisplayName", null, "CurrentGrade");
-            viewModel.AddSessionDto = new Sessions_AssignmentViewModel
-            {
-                OfferingId = offering.Id,
-                OfferingName = offering.Name,
-                PeriodList = new SelectList(periodSource, "Id", "Name", null, "Group"),
-                StaffList = new SelectList(staff.OrderBy(member => member.LastName), "StaffId", "DisplayName"),
-                RoomList = new SelectList(rooms, "ScoId", "Name")
-            };
-
-            var lessons = await _lessonRepository.GetAllForOffering(offering.Id);
-
-            foreach (var lesson in lessons)
-            {
-                var entry = new Classes_DetailsViewModel.LessonDto()
-                {
-                    Id = lesson.Id,
-                    Name = lesson.Name,
-                    DueDate = lesson.DueDate
-                };
-
-                foreach (var record in lesson.Rolls)
-                {
-                    var school = await _unitOfWork.Schools.GetById(record.SchoolCode);
-
-                    foreach (var student in record.Attendance)
-                    {
-                        var enrolledStudent = viewModel.Students.Where(enrolledStudent => enrolledStudent.StudentId == student.StudentId).FirstOrDefault();
-
-                        if (enrolledStudent is null)
-                        {
-                            continue;
-                        }
-
-                        entry.Students.Add(new()
-                        {
-                            SchoolName = school.Name,
-                            Name = enrolledStudent.Name,
-                            Status = record.Status,
-                            Comment = record.Comment,
-                            WasPresent = student.Present
-                        });
-                    }
-                }
-
-                if (entry.Students.Any())
-                    viewModel.Lessons.Add(entry);
-            }
-            
-            return View(viewModel);
-        }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
         public async Task<IActionResult> Update(Guid id)

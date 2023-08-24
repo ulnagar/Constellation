@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
 
-using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.MandatoryTraining.GenerateModuleReport;
 using Constellation.Application.MandatoryTraining.GetModuleDetails;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.MandatoryTraining.ReinstateTrainingModule;
 using Constellation.Application.MandatoryTraining.RetireTrainingModule;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.BaseModels;

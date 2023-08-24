@@ -2,9 +2,11 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Presentation.Server.Areas.Reports.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -14,12 +16,18 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
     [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class StudentsController : BaseController
     {
+        private readonly IOfferingRepository _offeringRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAdobeConnectService _adobeConnectService;
 
-        public StudentsController(IUnitOfWork unitOfWork, IAdobeConnectService adobeConnectService)
-            : base(unitOfWork)
+        public StudentsController(
+            IOfferingRepository offeringRepository,
+            IUnitOfWork unitOfWork, 
+            IAdobeConnectService adobeConnectService,
+            IMediator mediator)
+            : base(mediator)
         {
+            _offeringRepository = offeringRepository;
             _unitOfWork = unitOfWork;
             _adobeConnectService = adobeConnectService;
         }
@@ -151,7 +159,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
 
         public async Task<IActionResult> InterviewDetails()
         {
-            var offerings = await _unitOfWork.CourseOfferings.ForSelectionAsync();
+            var offerings = await _offeringRepository.GetAllActive();
 
             var viewModel = await CreateViewModel<Student_InterviewDetails_ViewModel>();
             viewModel.AllClasses = new SelectList(offerings, "Id", "Name");

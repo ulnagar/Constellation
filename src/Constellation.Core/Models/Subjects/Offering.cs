@@ -5,7 +5,6 @@ using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Constellation.Core.Errors.DomainErrors.Subjects;
 
 public class Offering
 {

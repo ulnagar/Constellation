@@ -5,6 +5,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.Areas.Subject.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq;
@@ -19,8 +20,11 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ISessionService _sessionService;
 
-        public PeriodsController(IUnitOfWork unitOfWork, ISessionService sessionService)
-            : base(unitOfWork)
+        public PeriodsController(
+            IUnitOfWork unitOfWork, 
+            ISessionService sessionService,
+            IMediator mediator)
+            : base(mediator)
         {
             _unitOfWork = unitOfWork;
             _sessionService = sessionService;

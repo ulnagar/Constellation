@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.MandatoryTraining.CreateTrainingCompletion;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
