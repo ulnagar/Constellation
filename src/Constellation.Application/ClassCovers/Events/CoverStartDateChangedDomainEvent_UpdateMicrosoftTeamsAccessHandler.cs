@@ -2,7 +2,6 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
@@ -12,6 +11,7 @@ using System.Linq;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Constellation.Core.Abstractions.Repositories;
 
 internal sealed class CoverStartDateChangedDomainEvent_UpdateMicrosoftTeamsAccessHandler
     : IDomainEventHandler<CoverStartDateChangedDomainEvent>

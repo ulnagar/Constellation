@@ -3,16 +3,11 @@ using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Comparators;
 using Constellation.Core.Models.Casuals;
-using Constellation.Core.Models.Covers;
-using Constellation.Core.ValueObjects;
+using Constellation.Core.Models.Subjects;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Services
 {
@@ -162,7 +157,7 @@ namespace Constellation.Infrastructure.Services
             using var scope = _scopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            var courses = await context.Offerings
+            var courses = await context.Set<Offering>()
                 .Include(course => course.Enrolments)
                 .ThenInclude(enrol => enrol.Student)
                 .Include(course => course.Sessions)
@@ -173,7 +168,7 @@ namespace Constellation.Infrastructure.Services
                 .AsNoTracking()
                 .ToListAsync();
 
-            foreach (var course in courses.Where(course => course.IsCurrent()))
+            foreach (var course in courses.Where(course => course.IsCurrent))
             {
                 var rooms = course.Sessions.Where(session => !session.IsDeleted).Select(session => session.Room).Distinct(new AdobeConnectRoomComparator()).ToList();
                 foreach (var room in rooms)
@@ -184,7 +179,7 @@ namespace Constellation.Infrastructure.Services
                         Name = course.Name,
                         StartDate = course.StartDate,
                         EndDate = course.EndDate,
-                        IsCurrent = course.IsCurrent(),
+                        IsCurrent = course.IsCurrent,
                         GradeName = $"Year {course.Course.Grade.ToString().Substring(1, 2)}",
                         GradeShortCode = course.Course.Grade.ToString(),
                         RoomScoId = room.ScoId,

@@ -3,7 +3,7 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Helpers;
 using Constellation.Application.MandatoryTraining.Models;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
 using System.Threading;

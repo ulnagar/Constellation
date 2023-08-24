@@ -3,6 +3,7 @@ using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
@@ -22,15 +23,21 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
     [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class StudentsController : BaseController
     {
+        private readonly IOfferingRepository _offeringRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStudentService _studentService;
         private readonly IOperationService _operationService;
         private readonly IMediator _mediator;
 
-        public StudentsController(IUnitOfWork unitOfWork, IStudentService studentService,
-            IOperationService operationService, IMediator mediator)
-            : base(unitOfWork)
+        public StudentsController(
+            IOfferingRepository offeringRepository,
+            IUnitOfWork unitOfWork, 
+            IStudentService studentService,
+            IOperationService operationService, 
+            IMediator mediator)
+            : base(mediator)
         {
+            _offeringRepository = offeringRepository;
             _unitOfWork = unitOfWork;
             _studentService = studentService;
             _operationService = operationService;
@@ -266,7 +273,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             var viewModel = await CreateViewModel<Student_BulkEnrolViewModel>();
             viewModel.StudentId = student.StudentId;
-            viewModel.OfferingList = await _unitOfWork.CourseOfferings.FromGradeForBulkEnrolAsync(student.CurrentGrade);
+            viewModel.OfferingList = await _offeringRepository.GetActiveByGrade(student.CurrentGrade);
 
             return View("BulkEnrol", viewModel);
         }
@@ -283,7 +290,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 {
                     OfferingId offeringId = OfferingId.FromValue(classId);
 
-                    var offering = await _unitOfWork.CourseOfferings.ForEnrolmentAsync(offeringId);
+                    var offering = await _offeringRepository.GetById(offeringId);
 
                     if (offering == null)
                         continue;
@@ -309,7 +316,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             OfferingId offeringId = OfferingId.FromValue(classId);
 
-            var offering = await _unitOfWork.CourseOfferings.ForEnrolmentAsync(offeringId);
+            var offering = await _offeringRepository.GetById(offeringId);
 
             if (offering == null)
             {

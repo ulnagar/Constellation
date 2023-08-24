@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Abstractions;
+﻿namespace Constellation.Core.Abstractions.Repositories;
 
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SciencePracs;

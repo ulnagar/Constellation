@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Abstractions;
+﻿namespace Constellation.Core.Abstractions.Repositories;
 
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Identifiers;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 public interface IStudentAwardRepository
 {
-    Task<StudentAward?> GetById(StudentAwardId awardId, CancellationToken cancellationToken = default);
+    Task<StudentAward> GetById(StudentAwardId awardId, CancellationToken cancellationToken = default);
     Task<List<StudentAward>> GetAll(CancellationToken cancellationToken = default);
     Task<List<StudentAward>> GetByStudentId(string studentId, CancellationToken cancellationToken = default);
     Task<List<StudentAward>> GetFromYear(int Year, CancellationToken cancellationToken = default);

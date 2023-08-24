@@ -21,7 +21,7 @@ public class AssignmentsController : BaseController
     public AssignmentsController(
         IUnitOfWork unitOfWork,
         IMediator mediator)
-        : base(unitOfWork)
+        : base(mediator)
     {
         _mediator = mediator;
     }

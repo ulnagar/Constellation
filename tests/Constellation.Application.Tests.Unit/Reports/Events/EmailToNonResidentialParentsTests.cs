@@ -3,7 +3,7 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Reports.Events;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;

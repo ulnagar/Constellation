@@ -26,10 +26,13 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         private readonly IOperationService _operationService;
         private readonly IMediator _mediator;
 
-        public SchoolContactsController(IUnitOfWork unitOfWork, IAuthService authService,
-            ISchoolContactService schoolContactService, IOperationService operationService,
+        public SchoolContactsController(
+            IUnitOfWork unitOfWork, 
+            IAuthService authService,
+            ISchoolContactService schoolContactService, 
+            IOperationService operationService,
             IMediator mediator)
-            : base(unitOfWork)
+            : base(mediator)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;

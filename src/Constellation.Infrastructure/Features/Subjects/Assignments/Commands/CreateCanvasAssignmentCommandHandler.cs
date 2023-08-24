@@ -1,7 +1,7 @@
 ﻿using Constellation.Application.Common.ValidationRules;
 using Constellation.Application.Features.Subject.Assignments.Commands;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Assignments;
 using Constellation.Core.Models.Identifiers;
 

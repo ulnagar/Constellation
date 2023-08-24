@@ -1,5 +1,7 @@
 ﻿#nullable enable
-namespace Constellation.Core.Abstractions;
+using Constellation;
+
+namespace Constellation.Core.Abstractions.Repositories;
 
 using Constellation.Core.Models;
 using System;

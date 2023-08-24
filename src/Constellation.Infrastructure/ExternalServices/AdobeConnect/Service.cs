@@ -4,7 +4,7 @@ using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;

@@ -4,7 +4,7 @@ using AutoMapper;
 using Constellation.Application.Common.Mapping;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using MediatR;
 using System.Collections.Generic;

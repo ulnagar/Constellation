@@ -18,18 +18,18 @@ namespace Constellation.Application.DTOs
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         [Display(Name=DisplayNameDefaults.DateStart)]
-        public DateTime StartDate { get; set; }
+        public DateOnly StartDate { get; set; }
 
         [Required]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         [DataType(DataType.Date)]
         [Display(Name=DisplayNameDefaults.DateEnd)]
-        public DateTime EndDate { get; set; }
+        public DateOnly EndDate { get; set; }
 
         public CourseOfferingDto()
         {
-            StartDate = DateTime.Now;
-            EndDate = new DateTime(DateTime.Now.Year, 12, 31);
+            StartDate = DateOnly.FromDateTime(DateTime.Today);
+            EndDate = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, 12, 31));
         }
     }
 }

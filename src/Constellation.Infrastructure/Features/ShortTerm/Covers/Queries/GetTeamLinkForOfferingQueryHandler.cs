@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Features.ShortTerm.Covers.Queries;
 
 using Constellation.Application.Features.ShortTerm.Covers.Queries;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 
 public class GetTeamLinkForOfferingQueryHandler : IRequestHandler<GetTeamLinkForOfferingQuery, string>
 {

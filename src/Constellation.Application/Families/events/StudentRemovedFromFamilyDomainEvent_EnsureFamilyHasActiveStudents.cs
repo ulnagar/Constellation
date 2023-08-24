@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Families.events;
 
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Families;
 using MediatR;

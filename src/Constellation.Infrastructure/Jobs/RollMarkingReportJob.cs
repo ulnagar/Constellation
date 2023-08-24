@@ -3,14 +3,16 @@
 using Constellation.Application.ClassCovers.GetCoversSummaryByDateAndOffering;
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Faculties.Queries;
+using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using MediatR;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,20 +21,33 @@ using System.Threading.Tasks;
 
 public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHangfireJob
 {
+    private readonly IOfferingRepository _offeringRepository;
+    private readonly IOfferingSessionsRepository _sessionsRepository;
+    private readonly IStaffRepository _staffRepository;
     private readonly ISentralGateway _sentralService;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IEmailService _emailService;
-    private readonly ILogger<IRollMarkingReportJob> _logger;
+    private readonly ILogger _logger;
     private readonly IMediator _mediator;
+    private readonly AppConfiguration _configuration;
 
-    public RollMarkingReportJob(ISentralGateway sentralService, IUnitOfWork unitOfWork, 
-        IEmailService emailService, ILogger<IRollMarkingReportJob> logger, IMediator mediator)
+    public RollMarkingReportJob(
+        IOfferingRepository offeringRepository,
+        IOfferingSessionsRepository sessionsRepository,
+        IStaffRepository staffRepository,
+        ISentralGateway sentralService, 
+        IEmailService emailService, 
+        ILogger logger, 
+        IMediator mediator,
+        IOptions<AppConfiguration> configuration)
     {
+        _offeringRepository = offeringRepository;
+        _sessionsRepository = sessionsRepository;
+        _staffRepository = staffRepository;
         _sentralService = sentralService;
-        _unitOfWork = unitOfWork;
         _emailService = emailService;
-        _logger = logger;
+        _logger = logger.ForContext<IRollMarkingReportJob>();
         _mediator = mediator;
+        _configuration = configuration.Value;
     }
 
     public async Task StartJob(Guid jobId, CancellationToken token)
@@ -42,23 +57,26 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
         if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
             return;
 
-        _logger.LogInformation("{id}: Checking Date: {date}", jobId, date.ToShortDateString());
+        _logger.Information("{id}: Checking Date: {date}", jobId, date.ToShortDateString());
         var entries = await _sentralService.GetRollMarkingReportAsync(date);
 
         var unsubmitted = entries.Where(entry => !entry.Submitted).ToList();
-        var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
+        var absenceSettings = _configuration.Absences;
         var recipients = new Dictionary<string, string>();
 
         if (!unsubmitted.Any())
         {
             var infoString = $"{date.ToShortDateString()} - No Unsubmitted Rolls found!";
 
-            _logger.LogInformation("{id}: {infoString}", jobId, infoString);
+            _logger.Information("{id}: {infoString}", jobId, infoString);
 
 
             recipients = new();
-            if (!recipients.Any(recipient => recipient.Value == absenceSettings.ForwardingEmailAbsenceCoordinator))
-                recipients.Add(absenceSettings.AbsenceCoordinatorName, absenceSettings.ForwardingEmailAbsenceCoordinator);
+            foreach (var entry in absenceSettings.ForwardAbsenceEmailsTo)
+            {
+                if (!recipients.Any(recipient => recipient.Value == entry))
+                    recipients.Add(absenceSettings.AbsenceCoordinatorName, entry);
+            }
 
             if (!recipients.Any(recipient => recipient.Value == "scott.new@det.nsw.edu.au"))
                 recipients.Add("Scott New", "scott.new@det.nsw.edu.au");
@@ -84,13 +102,13 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
             offeringName = offeringName.StartsWith("5") || offeringName.StartsWith("6") ? offeringName.PadLeft(8, '0') : offeringName;
             entry.ClassName = offeringName;
 
-            var offering = await _unitOfWork.CourseOfferings.GetFromYearAndName(date.Year, offeringName);
+            var offering = await _offeringRepository.GetFromYearAndName(date.Year, offeringName);
 
             Staff teacher = null;
 
             if (string.IsNullOrWhiteSpace(entry.Teacher) && offering is not null)
             {
-                var sessions = _unitOfWork.OfferingSessions.AllForOffering(offering.Id);
+                var sessions = await _sessionsRepository.GetByOfferingId(offering.Id);
                 teacher = sessions
                     .GroupBy(entry => entry.StaffId)
                     .OrderByDescending(entry => entry.Count())
@@ -102,7 +120,7 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
             }
             else if (!string.IsNullOrWhiteSpace(entry.Teacher))
             {
-                teacher = await _unitOfWork.Staff.GetFromName(entry.Teacher);
+                teacher = await _staffRepository.GetFromName(entry.Teacher);
             }
 
             var infoString = string.Empty;
@@ -148,7 +166,7 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
                 infoString += $" covered by {CoveredBy} ({CoverType})";
             }
 
-            _logger.LogInformation("{id}: {infoString}", jobId, infoString);
+            _logger.Information("{id}: {infoString}", jobId, infoString);
             emailDto.RollInformation = infoString;
             emailList.Add(emailDto);
         }
@@ -196,8 +214,11 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
             return;
         
         recipients = new();
-        if (!recipients.Any(recipient => recipient.Value == absenceSettings.ForwardingEmailAbsenceCoordinator))
-            recipients.Add(absenceSettings.AbsenceCoordinatorName, absenceSettings.ForwardingEmailAbsenceCoordinator);
+        foreach (var entry in absenceSettings.ForwardAbsenceEmailsTo)
+        {
+            if (!recipients.Any(recipient => recipient.Value == entry))
+                recipients.Add(absenceSettings.AbsenceCoordinatorName, entry);
+        }
 
         if (!recipients.Any(recipient => recipient.Value == "scott.new@det.nsw.edu.au"))
             recipients.Add("Scott New", "scott.new@det.nsw.edu.au");

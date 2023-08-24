@@ -3,6 +3,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -19,9 +20,12 @@ namespace Constellation.Presentation.Server.Areas.Utility.Controllers
         private readonly IExcelService _excelService;
         private readonly IExportService _exportService;
 
-        public ExcelExportController(IUnitOfWork unitOfWork, IExcelService excelService,
-            IExportService exportService)
-            :base(unitOfWork)
+        public ExcelExportController(
+            IUnitOfWork unitOfWork,
+            IExcelService excelService,
+            IExportService exportService,
+            IMediator mediator)
+            :base(mediator)
         {
             _unitOfWork = unitOfWork;
             _excelService = excelService;

@@ -22,6 +22,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             _context = context;
         }
 
+        public async Task<TimetablePeriod> GetById(
+            int id,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<TimetablePeriod>()
+                .SingleOrDefaultAsync(period => period.Id == id, cancellationToken);
+
         public async Task<List<TimetablePeriod>> GetForOfferingOnDay(
             OfferingId offeringId,
             DateTime absenceDate,

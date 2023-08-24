@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace Constellation.Presentation.Server.BaseModels;
 
-using Constellation.Application.Features.Home.Queries;
+using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
 using Constellation.Core.Models.Subjects.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -27,7 +27,14 @@ public class BasePageModel : PageModel, IBaseModel
             return;
         }
 
-        Classes = await mediator.Send(new GetUsersClassesQuery { Username = username });
+        var query = await mediator.Send(new GetCurrentOfferingsForTeacherQuery(username));
+
+        if (query.IsFailure)
+        {
+            return;
+        }
+
+        Classes = query.Value;
     }
 
     public async Task GetClasses(ISender mediator)
@@ -39,6 +46,13 @@ public class BasePageModel : PageModel, IBaseModel
             return;
         }
 
-        Classes = await mediator.Send(new GetUsersClassesQuery { Username = username });
+        var query = await mediator.Send(new GetCurrentOfferingsForTeacherQuery(username));
+
+        if (query.IsFailure)
+        {
+            return;
+        }
+
+        Classes = query.Value;
     }
 }

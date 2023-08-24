@@ -39,9 +39,9 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
             public OfferingId Id { get; set; }
             public string Name { get; set; }
             public string CourseName { get; set; }
-            public DateTime EndDate { get; set; }
+            public DateOnly EndDate { get; set; }
             public bool IsCurrent { get; set; }
-            public DateTime StartDate { get; set; }
+            public DateOnly StartDate { get; set; }
             public decimal FTECalculation { get; set; }
             public ICollection<string> RoomLinks { get; set; }
             public int MinPerFN { get; set; }
@@ -57,7 +57,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Models
                     StartDate = offering.StartDate,
                     FTECalculation = offering.Enrolments.Count(enrolment => !enrolment.IsDeleted) * offering.Course.FullTimeEquivalentValue,
                     RoomLinks = offering.Sessions.Where(session => !session.IsDeleted).Select(session => session.Room.UrlPath).Distinct().ToList(),
-                    IsCurrent = offering.StartDate <= DateTime.Now && offering.EndDate >= DateTime.Now
+                    IsCurrent = offering.IsCurrent
                 };
 
                 viewModel.MinPerFN = (int)offering.Sessions.Where(session => !session.IsDeleted).Sum(session => session.Period.EndTime.Subtract(session.Period.StartTime).TotalMinutes);

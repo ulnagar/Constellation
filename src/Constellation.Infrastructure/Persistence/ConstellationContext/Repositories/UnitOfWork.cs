@@ -2,6 +2,7 @@
 
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
+using Constellation.Core.Abstractions.Clock;
 using Microsoft.AspNetCore.Identity;
 
 public class UnitOfWork : IUnitOfWork
@@ -28,25 +29,28 @@ public class UnitOfWork : IUnitOfWork
     public IJobActivationRepository JobActivations { get; set; }
 
 
-    public UnitOfWork(AppDbContext context, UserManager<AppUser> userManager)
+    public UnitOfWork(
+        AppDbContext context, 
+        UserManager<AppUser> userManager,
+        IDateTimeProvider dateTime)
     {
         _context = context;
 
         AdobeConnectOperations = new AdobeConnectOperationsRepository(context);
-        AdobeConnectRooms = new AdobeConnectRoomRepository(context);
+        AdobeConnectRooms = new AdobeConnectRoomRepository(context, dateTime);
         AppAccessTokens = new AppAccessTokenRepository(context);
         DeviceAllocations = new DeviceAllocationRepository(context);
         DeviceNotes = new DeviceNotesRepository(context);
         Devices = new DeviceRepository(context);
-        Enrolments = new EnrolmentRepository(context);
+        Enrolments = new EnrolmentRepository(context, dateTime);
         Identities = new IdentityRepository(userManager);
         MSTeamOperations = new MSTeamOperationsRepository(context);
         SchoolContacts = new SchoolContactRepository(context);
         SchoolContactRoles = new SchoolContactRoleRepository(context);
         Schools = new SchoolRepository(context);
         Settings = new SettingRepository(context);
-        Staff = new StaffRepository(context);
-        Students = new StudentRepository(context);
+        Staff = new StaffRepository(context, dateTime);
+        Students = new StudentRepository(context, dateTime);
         Periods = new TimetablePeriodRepository(context);
         CanvasOperations = new CanvasOperationsRepository(context);
         JobActivations = new JobActivationRepository(context);

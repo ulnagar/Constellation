@@ -2,7 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.DTOs;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using System.Linq;

@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Microsoft.EntityFrameworkCore;
 

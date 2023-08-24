@@ -1,6 +1,6 @@
 ﻿using Constellation.Application.Features.Partners.Students.Notifications;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;
 
 namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.StudentWithdrawn

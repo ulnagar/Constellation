@@ -5,7 +5,7 @@ using Constellation.Application.Features.Auth.Command;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Families;
 using Constellation.Infrastructure.DependencyInjection;

@@ -4,6 +4,7 @@ using Constellation.Application.Features.StaffMembers.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -22,17 +23,22 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         private readonly IAuthService _authService;
         private readonly IStaffService _staffService;
         private readonly IOperationService _operationsService;
+        private readonly IDateTimeProvider _dateTime;
         private readonly IMediator _mediator;
 
-        public StaffController(IUnitOfWork unitOfWork, IAuthService authService,
-            IStaffService staffService, IOperationService operationsService, 
+        public StaffController(IUnitOfWork unitOfWork,
+            IAuthService authService,
+            IStaffService staffService, 
+            IOperationService operationsService, 
+            IDateTimeProvider dateTime,
             IMediator mediator)
-            : base(unitOfWork)
+            : base(mediator)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;
             _staffService = staffService;
             _operationsService = operationsService;
+            _dateTime = dateTime;
             _mediator = mediator;
         }
 
@@ -215,8 +221,8 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             // Build the master form view model
             var viewModel = await CreateViewModel<Staff_DetailsViewModel>();
             viewModel.Staff = Staff_DetailsViewModel.StaffDto.ConvertFromStaff(staff);
-            viewModel.Offerings = staff.CourseSessions.Where(session => !session.IsDeleted && session.Offering.EndDate >= DateTime.Now).Select(session => session.Offering).Distinct().Select(Staff_DetailsViewModel.OfferingDto.ConvertFromOffering).ToList();
-            viewModel.Sessions = staff.CourseSessions.Where(session => !session.IsDeleted && session.Offering.EndDate >= DateTime.Now).Select(Staff_DetailsViewModel.SessionDto.ConvertFromSession).ToList();
+            viewModel.Offerings = staff.CourseSessions.Where(session => !session.IsDeleted && session.Offering.EndDate >= _dateTime.Today).Select(session => session.Offering).Distinct().Select(Staff_DetailsViewModel.OfferingDto.ConvertFromOffering).ToList();
+            viewModel.Sessions = staff.CourseSessions.Where(session => !session.IsDeleted && session.Offering.EndDate >= _dateTime.Today).Select(Staff_DetailsViewModel.SessionDto.ConvertFromSession).ToList();
             viewModel.SchoolStaff = staff.School.StaffAssignments.Where(role => !role.IsDeleted).Select(Staff_DetailsViewModel.ContactDto.ConvertFromRoleAssignment).ToList();
             viewModel.Faculties = staff.Faculties.Where(membership => !membership.IsDeleted).Select(Staff_DetailsViewModel.FacultyDto.ConvertFromFacultyMembership).ToList();
 

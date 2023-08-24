@@ -12,6 +12,7 @@ namespace Constellation.Application.Interfaces.Repositories
     public interface IAdobeConnectRoomRepository
     {
         Task<List<AdobeConnectRoom>> GetByOfferingId(OfferingId offeringId, CancellationToken cancellationToken = default);
+        Task<AdobeConnectRoom> GetById(string Id, CancellationToken cancellationToken = default);
         AdobeConnectRoom WithDetails(string id);
         AdobeConnectRoom WithFilter(Expression<Func<AdobeConnectRoom, bool>> predicate);
         Task<AdobeConnectRoom> GetForExistCheck(string id);

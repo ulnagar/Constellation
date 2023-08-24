@@ -24,9 +24,11 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         private readonly ISchoolService _schoolService;
         private readonly IMediator _mediator;
 
-        public SchoolsController(IUnitOfWork unitOfWork, ISchoolService schoolService,
+        public SchoolsController(
+            IUnitOfWork unitOfWork, 
+            ISchoolService schoolService,
             IMediator mediator)
-            : base(unitOfWork)
+            : base(mediator)
         {
             _unitOfWork = unitOfWork;
             _schoolService = schoolService;

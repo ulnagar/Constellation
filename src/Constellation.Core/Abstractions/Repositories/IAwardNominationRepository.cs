@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Abstractions;
+﻿namespace Constellation.Core.Abstractions.Repositories;
 
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Identifiers;
@@ -10,6 +10,6 @@ public interface IAwardNominationRepository
 {
     Task<List<NominationPeriod>> GetAll(CancellationToken cancellationToken = default);
     Task<List<NominationPeriod>> GetCurrentAndFuture(CancellationToken cancellationToken = default);
-    Task<NominationPeriod?> GetById(AwardNominationPeriodId periodId, CancellationToken cancellationToken = default);
+    Task<NominationPeriod> GetById(AwardNominationPeriodId periodId, CancellationToken cancellationToken = default);
     void Insert(NominationPeriod period);
 }

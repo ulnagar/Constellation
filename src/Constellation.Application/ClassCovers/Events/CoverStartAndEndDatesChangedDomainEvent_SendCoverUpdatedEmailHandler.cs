@@ -4,7 +4,6 @@ using Constellation.Application.Abstractions;
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
@@ -19,6 +18,7 @@ using Serilog;
 using System.Linq;
 using Constellation.Application.Extensions;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Abstractions.Repositories;
 
 internal sealed class CoverStartAndEndDatesChangedDomainEvent_SendCoverUpdatedEmailHandler
     : IDomainEventHandler<CoverStartAndEndDatesChangedDomainEvent>

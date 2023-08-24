@@ -1,11 +1,12 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection;
 
+using Constellation.Application.Clock;
 using Constellation.Application.Common.Behaviours;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Infrastructure.ExternalServices.AdobeConnect;
 using Constellation.Infrastructure.Idempotence;
 using Constellation.Infrastructure.Jobs;

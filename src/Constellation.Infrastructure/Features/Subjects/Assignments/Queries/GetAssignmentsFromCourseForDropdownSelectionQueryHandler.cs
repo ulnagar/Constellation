@@ -6,35 +6,34 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Features.Subject.Assignments.Models;
 using Constellation.Application.Features.Subject.Assignments.Queries;
 using Constellation.Application.Interfaces.Gateways;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Assignments;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 
 public class GetAssignmentsFromCourseForDropdownSelectionQueryHandler : IRequestHandler<GetAssignmentsFromCourseForDropdownSelectionQuery, ValidateableResponse<ICollection<AssignmentFromCourseForDropdownSelection>>>
 {
+    private readonly IOfferingRepository _offeringRepository;
     private readonly AppDbContext _context;
     private readonly ICanvasGateway _canvasGateway;
     private readonly IMapper _mapper;
 
-    public GetAssignmentsFromCourseForDropdownSelectionQueryHandler(AppDbContext context, IMapper mapper)
+    public GetAssignmentsFromCourseForDropdownSelectionQueryHandler(
+        IOfferingRepository offeringRepository,
+        AppDbContext context, 
+        ICanvasGateway canvasGateway, 
+        IMapper mapper)
     {
-        _context = context;
-        _mapper = mapper;
-    }
-
-    public GetAssignmentsFromCourseForDropdownSelectionQueryHandler(AppDbContext context, ICanvasGateway canvasGateway, IMapper mapper)
-    {
+        _offeringRepository = offeringRepository;
         _context = context;
         _canvasGateway = canvasGateway;
         _mapper = mapper;
     }
     public async Task<ValidateableResponse<ICollection<AssignmentFromCourseForDropdownSelection>>> Handle(GetAssignmentsFromCourseForDropdownSelectionQuery request, CancellationToken cancellationToken)
     {
-        if (_canvasGateway is null)
-            return new ValidateableResponse<ICollection<AssignmentFromCourseForDropdownSelection>>(new List<AssignmentFromCourseForDropdownSelection>(), new List<string> { "Canvas Gateway is not added to this application" });
+        var offerings = await _offeringRepository.GetActiveByCourseId(request.CourseId, cancellationToken);
 
-        var offering = await _context.Offerings
-            .FirstOrDefaultAsync(offering => offering.CourseId == request.CourseId && offering.EndDate >= DateTime.Now, cancellationToken);
+        var offering = offerings.FirstOrDefault();
 
         if (offering == null)
             return new ValidateableResponse<ICollection<AssignmentFromCourseForDropdownSelection>>(new List<AssignmentFromCourseForDropdownSelection>(), new List<string> { "Could not find a valid offering for this course!" });

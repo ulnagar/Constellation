@@ -1,6 +1,6 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SciencePracs;

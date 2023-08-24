@@ -1,10 +1,11 @@
 ﻿using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.Areas.Admin.Models;
 using Constellation.Presentation.Server.BaseModels;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Constellation.Presentation.Server.Areas.Admin.Controllers
@@ -16,18 +17,21 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
         private readonly IAdobeConnectService _adobeConnectService;
         private readonly IOperationService _operationService;
         private readonly ICasualRepository _casualRepository;
+        private readonly IMediator _mediator;
 
         public ActionsController(
             IUnitOfWork unitOfWork,
             IAdobeConnectService adobeConnectService,
             IOperationService operationService,
-            ICasualRepository casualRepository)
-            : base(unitOfWork)
+            ICasualRepository casualRepository,
+            IMediator mediator)
+            : base(mediator)
         {
             _unitOfWork = unitOfWork;
             _adobeConnectService = adobeConnectService;
             _operationService = operationService;
             _casualRepository = casualRepository;
+            _mediator = mediator;
         }
 
         public async Task<IActionResult> Index()

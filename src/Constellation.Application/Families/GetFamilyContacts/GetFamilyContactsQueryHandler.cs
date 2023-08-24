@@ -5,7 +5,7 @@ using Constellation.Application.Extensions;
 using Constellation.Application.Families.GetFamilyContactsForStudent;
 using Constellation.Application.Families.Models;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;

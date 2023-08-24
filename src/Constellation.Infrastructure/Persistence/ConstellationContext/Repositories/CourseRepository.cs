@@ -2,6 +2,7 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SciencePracs;
@@ -12,10 +13,14 @@ using System.Linq.Expressions;
 public class CourseRepository : ICourseRepository
 {
     private readonly AppDbContext _context;
+    private readonly IDateTimeProvider _dateTime;
 
-    public CourseRepository(AppDbContext context)
+    public CourseRepository(
+        AppDbContext context,
+        IDateTimeProvider dateTime)
     {
         _context = context;
+        _dateTime = dateTime;
     }
 
     public async Task<Course?> GetById(
@@ -52,7 +57,7 @@ public class CourseRepository : ICourseRepository
 
     private IQueryable<Course> Collection()
     {
-        return _context.Courses
+        return _context.Set<Course>()
             .Include(course => course.Offerings)
                 .ThenInclude(offering => offering.Enrolments)
                     .ThenInclude(enrolment => enrolment.Student)
@@ -112,14 +117,14 @@ public class CourseRepository : ICourseRepository
     public ICollection<Course> AllWithActiveOfferings()
     {
         return Collection()
-            .Where(c => c.Offerings.Any(o => o.EndDate > DateTime.Now))
+            .Where(c => c.Offerings.Any(o => o.EndDate >= _dateTime.Today))
             .ToList();
     }
 
     public ICollection<Course> AllWithoutActiveOfferings()
     {
         return Collection()
-            .Where(c => !c.Offerings.Any(o => o.EndDate > DateTime.Now))
+            .Where(c => !c.Offerings.Any(o => o.EndDate >= _dateTime.Today))
             .ToList();
     }
 
@@ -145,14 +150,14 @@ public class CourseRepository : ICourseRepository
 
     public async Task<Course> WithOfferingsForLessonsPortal(int courseId)
     {
-        return await _context.Courses
+        return await _context.Set<Course>()
             .Include(course => course.Offerings)
             .SingleOrDefaultAsync(course => course.Id == courseId);
     }
 
     public async Task<ICollection<Course>> ForListAsync(Expression<Func<Course, bool>> predicate)
     {
-        return await _context.Courses
+        return await _context.Set<Course>()
             .Include(course => course.Offerings)
             .Include(course => course.Faculty)
             .Where(predicate)
@@ -161,7 +166,7 @@ public class CourseRepository : ICourseRepository
 
     public async Task<Course> ForDetailDisplayAsync(int id)
     {
-        return await _context.Courses
+        return await _context.Set<Course>()
             .Include(course => course.Faculty)
                 .ThenInclude(faculty => faculty.Members.Where(member => member.Role == FacultyMembershipRole.Manager && !member.IsDeleted))
                     .ThenInclude(member => member.Staff)
@@ -175,13 +180,13 @@ public class CourseRepository : ICourseRepository
 
     public async Task<Course> ForEditAsync(int id)
     {
-        return await _context.Courses
+        return await _context.Set<Course>()
             .SingleOrDefaultAsync(course => course.Id == id);
     }
 
     public async Task<ICollection<Course>> ForSelectionAsync()
     {
-        return await _context.Courses
+        return await _context.Set<Course>()
             .Include(course => course.Faculty)
             .OrderBy(course => course.Grade)
             .ThenBy(course => course.Name)
@@ -190,7 +195,7 @@ public class CourseRepository : ICourseRepository
 
     public async Task<bool> AnyWithId(int id)
     {
-        return await _context.Courses
+        return await _context.Set<Course>()
             .AnyAsync(course => course.Id == id);
     }
 }

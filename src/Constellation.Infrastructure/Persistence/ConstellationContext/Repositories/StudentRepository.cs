@@ -2,6 +2,7 @@
 
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects.Identifiers;
@@ -12,10 +13,14 @@ using System.Linq.Expressions;
 public class StudentRepository : IStudentRepository
 {
     private readonly AppDbContext _context;
+    private readonly IDateTimeProvider _dateTime;
 
-    public StudentRepository(AppDbContext context)
+    public StudentRepository(
+        AppDbContext context,
+        IDateTimeProvider dateTime)
     {
         _context = context;
+        _dateTime = dateTime;
     }
 
     public async Task<Student?> GetById(
@@ -268,7 +273,7 @@ public class StudentRepository : IStudentRepository
             .ToListAsync();
 
         return students
-            .Where(student => student.Enrolments.Any(enrol => enrol.Offering.CourseId == courseId && enrol.Offering.EndDate >= DateTime.Today))
+            .Where(student => student.Enrolments.Any(enrol => enrol.Offering.CourseId == courseId && enrol.Offering.EndDate >= _dateTime.Today))
             .ToList();
     }
 

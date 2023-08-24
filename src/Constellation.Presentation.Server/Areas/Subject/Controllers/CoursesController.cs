@@ -21,9 +21,11 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         private readonly ICourseOfferingService _offeringService;
         private readonly IMediator _mediator;
 
-        public CoursesController(IUnitOfWork unitOfWork, ICourseOfferingService offeringService,
+        public CoursesController(
+            IUnitOfWork unitOfWork, 
+            ICourseOfferingService offeringService,
             IMediator mediator)
-            : base(unitOfWork)
+            : base(mediator)
         {
             _unitOfWork = unitOfWork;
             _offeringService = offeringService;
