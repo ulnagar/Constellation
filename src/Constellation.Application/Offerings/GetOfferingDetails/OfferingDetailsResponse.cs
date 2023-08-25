@@ -19,7 +19,8 @@ public sealed record OfferingDetailsResponse(
     bool IsCurrent,
     List<OfferingDetailsResponse.StudentSummary> Students,
     List<OfferingDetailsResponse.SessionSummary> Sessions,
-    List<OfferingDetailsResponse.LessonSummary> Lessons)
+    List<OfferingDetailsResponse.LessonSummary> Lessons,
+    int FTETotal)
 {
     public sealed record StudentSummary(
         string StudentId,

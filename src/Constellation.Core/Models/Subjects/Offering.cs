@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Subjects;
 
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Enrolment;
 using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.Collections.Generic;

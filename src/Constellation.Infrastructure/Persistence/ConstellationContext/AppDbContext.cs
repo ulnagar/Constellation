@@ -3,6 +3,7 @@ using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Awards;
+using Constellation.Core.Models.Enrolment;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Stocktake;
@@ -35,6 +36,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public DbSet<SchoolContactRole> SchoolContactRoles { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<Staff> Staff { get; set; }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<Offering> Offerings { get; set; }
+        public DbSet<Session> Sessions { get; set; }
         public DbSet<TimetablePeriod> Periods { get; set; }
         public DbSet<AdobeConnectRoom> Rooms { get; set; }
         public DbSet<Enrolment> Enrolments { get; set; }

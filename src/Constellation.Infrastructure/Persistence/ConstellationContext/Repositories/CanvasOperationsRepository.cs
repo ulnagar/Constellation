@@ -49,4 +49,7 @@ public class CanvasOperationsRepository : ICanvasOperationsRepository
         return await _context.CanvasOperations
             .FirstOrDefaultAsync(predicate);
     }
+
+    public void Insert(CanvasOperation operation) =>
+        _context.Set<CanvasOperation>().Add(operation);
 }

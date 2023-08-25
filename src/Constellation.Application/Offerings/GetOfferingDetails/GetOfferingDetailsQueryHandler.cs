@@ -147,6 +147,8 @@ internal sealed class GetOfferingDetailsQueryHandler
             }
         }
 
+        int fteTotal = (int)(students.Count() * offering.Course.FullTimeEquivalentValue);
+
         OfferingDetailsResponse response = new(
             offering.Id,
             OfferingName.FromValue(offering.Name),
@@ -158,7 +160,8 @@ internal sealed class GetOfferingDetailsQueryHandler
             offering.IsCurrent,
             students,
             sessions,
-            lessons);
+            lessons,
+            fteTotal);
 
         return response;
     }
