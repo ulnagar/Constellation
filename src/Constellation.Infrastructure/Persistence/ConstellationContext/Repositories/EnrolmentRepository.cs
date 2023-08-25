@@ -1,8 +1,7 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Enrolment;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -10,29 +9,29 @@ using System.Linq.Expressions;
 public class EnrolmentRepository : IEnrolmentRepository
 {
     private readonly AppDbContext _context;
-    private readonly IDateTimeProvider _dateTime;
 
-    public EnrolmentRepository(
-        AppDbContext context,
-        IDateTimeProvider dateTime)
+    public EnrolmentRepository(AppDbContext context)
     {
         _context = context;
-        _dateTime = dateTime;
     }
 
     public async Task<List<Enrolment>> GetCurrentByStudentId(
         string studentId,
-        CancellationToken cancellationToken = default) =>
-        await _context
+        CancellationToken cancellationToken = default)
+    {
+        var today = DateTime.Today;
+
+        return await _context
             .Set<Enrolment>()
             .Include(enrol => enrol.Offering)
             .ThenInclude(offering => offering.Course)
             .Where(enrol =>
                 enrol.StudentId == studentId &&
                 !enrol.IsDeleted &&
-                enrol.Offering.EndDate >= _dateTime.Today &&
-                enrol.Offering.StartDate <= _dateTime.Today)
+                enrol.Offering.EndDate >= today &&
+                enrol.Offering.StartDate <= today)
             .ToListAsync(cancellationToken);
+    }
 
     public async Task<List<Enrolment>> GetCurrentByOfferingId(
         OfferingId offeringId,

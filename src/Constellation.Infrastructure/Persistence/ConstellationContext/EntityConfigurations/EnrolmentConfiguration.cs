@@ -1,4 +1,4 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Core.Models.Enrolment;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
