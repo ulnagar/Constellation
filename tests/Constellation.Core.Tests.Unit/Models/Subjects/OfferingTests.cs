@@ -27,12 +27,12 @@ public class OfferingTests
     {
         // Arrange
         var sut = new Offering();
-        var session = new Session
-        {
-            IsDeleted = true
-        };
+        sut.AddSession(
+            "1",
+            1,
+            "1");
 
-        sut.Sessions.Add(session);
+        sut.DeleteAllSessions();
 
         // Act
         var result = sut.IsCurrent;
@@ -51,12 +51,10 @@ public class OfferingTests
             EndDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
         };
 
-        var session = new Session
-        {
-            IsDeleted = false
-        };
-
-        sut.Sessions.Add(session);
+        sut.AddSession(
+            "1",
+            1,
+            "1");
 
         // Act
         var result = sut.IsCurrent;
@@ -75,12 +73,10 @@ public class OfferingTests
             EndDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
         };
 
-        var session = new Session
-        {
-            IsDeleted = false
-        };
-
-        sut.Sessions.Add(session);
+        sut.AddSession(
+            "1",
+            1,
+            "1");
 
         // Act
         var result = sut.IsCurrent;
@@ -99,12 +95,10 @@ public class OfferingTests
             EndDate = DateOnly.FromDateTime(DateTime.Today)
         };
 
-        var session = new Session
-        {
-            IsDeleted = false
-        };
-
-        sut.Sessions.Add(session);
+        sut.AddSession(
+            "1",
+            1,
+            "1");
 
         // Act
         var result = sut.IsCurrent;
@@ -123,12 +117,10 @@ public class OfferingTests
             EndDate = DateOnly.FromDateTime(DateTime.Today)
         };
 
-        var session = new Session
-        {
-            IsDeleted = false
-        };
-
-        sut.Sessions.Add(session);
+        sut.AddSession(
+            "1",
+            1,
+            "1");
 
         // Act
         var result = sut.IsCurrent;

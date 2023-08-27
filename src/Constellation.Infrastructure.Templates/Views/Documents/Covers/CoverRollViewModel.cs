@@ -1,4 +1,4 @@
-﻿using Constellation.Core.Models.Enrolment;
+﻿using Constellation.Core.Models.Enrolments;
 using System.Collections.Generic;
 
 namespace Constellation.Infrastructure.Templates.Views.Documents.Covers

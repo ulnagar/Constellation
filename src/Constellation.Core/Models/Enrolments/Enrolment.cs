@@ -1,8 +1,8 @@
-﻿namespace Constellation.Core.Models.Enrolment;
+﻿namespace Constellation.Core.Models.Enrolments;
 
-using Constellation.Core.Models.Enrolment.Errors;
-using Constellation.Core.Models.Enrolment.Events;
-using Constellation.Core.Models.Enrolment.Identifiers;
+using Constellation.Core.Models.Enrolments.Errors;
+using Constellation.Core.Models.Enrolments.Events;
+using Constellation.Core.Models.Enrolments.Identifiers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Primitives;

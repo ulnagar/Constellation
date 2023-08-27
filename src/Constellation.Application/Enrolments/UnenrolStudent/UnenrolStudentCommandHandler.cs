@@ -5,7 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Enrolment;
+using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;

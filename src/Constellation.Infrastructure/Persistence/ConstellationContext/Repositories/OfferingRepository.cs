@@ -2,7 +2,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Enrolment;
+using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;

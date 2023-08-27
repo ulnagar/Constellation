@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.Enrolment.Identifiers;
+﻿namespace Constellation.Core.Models.Enrolments.Identifiers;
 
 using System;
 

@@ -1,7 +1,7 @@
-﻿namespace Constellation.Core.Models.Enrolment.Events;
+﻿namespace Constellation.Core.Models.Enrolments.Events;
 
 using Constellation.Core.DomainEvents;
-using Constellation.Core.Models.Enrolment.Identifiers;
+using Constellation.Core.Models.Enrolments.Identifiers;
 using Constellation.Core.Models.Identifiers;
 
 public sealed record EnrolmentCreatedDomainEvent(

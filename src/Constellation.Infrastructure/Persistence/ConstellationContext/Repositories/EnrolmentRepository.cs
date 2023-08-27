@@ -1,7 +1,7 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models.Enrolment;
+using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
