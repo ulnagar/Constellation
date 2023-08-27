@@ -119,6 +119,11 @@ public sealed class SciencePracRoll
             studentId));
     }
 
+
+    /// <summary>
+    /// Do not use. Does not delete record and throws NRE for the Attendance (as RollId is null)
+    /// </summary>
+    /// <param name="studentId"></param>
     public void RemoveStudent(string studentId)
     {
         SciencePracAttendance record = _attendance.FirstOrDefault(entry => entry.StudentId == studentId);

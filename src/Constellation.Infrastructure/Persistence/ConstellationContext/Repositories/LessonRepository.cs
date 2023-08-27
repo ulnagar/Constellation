@@ -94,4 +94,6 @@ public class LessonRepository : ILessonRepository
     public void Insert(SciencePracLesson lesson) => _context.Set<SciencePracLesson>().Add(lesson);
 
     public void Delete(SciencePracLesson lesson) => _context.Set<SciencePracLesson>().Remove(lesson);
+
+    public void Delete(SciencePracAttendance attendance) => _context.Set<SciencePracAttendance>().Remove(attendance);
 }

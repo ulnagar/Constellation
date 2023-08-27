@@ -53,7 +53,10 @@ public class RemoveOutstandingLessonRolls
                 lesson.Cancel();
             }
 
-            roll.RemoveStudent(notification.StudentId);
+            SciencePracAttendance attendance = roll.Attendance.First(roll => roll.StudentId == notification.StudentId);
+            _lessonRepository.Delete(attendance);
+
+            //roll.RemoveStudent(notification.StudentId);
             _logger.Information("Removed student from lesson {lessonName}", lesson.Name);
         }
 

@@ -17,4 +17,5 @@ public interface ILessonRepository
     Task<SciencePracLesson> GetById(SciencePracLessonId LessonId, CancellationToken cancellationToken = default);
     void Insert(SciencePracLesson lesson);
     void Delete(SciencePracLesson lesson);
+    void Delete(SciencePracAttendance attendance);
 }
