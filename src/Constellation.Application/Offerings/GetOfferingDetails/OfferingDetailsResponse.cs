@@ -20,7 +20,8 @@ public sealed record OfferingDetailsResponse(
     List<OfferingDetailsResponse.StudentSummary> Students,
     List<OfferingDetailsResponse.SessionSummary> Sessions,
     List<OfferingDetailsResponse.LessonSummary> Lessons,
-    int FTETotal)
+    int FTETotal,
+    int Duration)
 {
     public sealed record StudentSummary(
         string StudentId,

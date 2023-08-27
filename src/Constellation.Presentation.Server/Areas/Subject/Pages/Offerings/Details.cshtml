@@ -1,5 +1,8 @@
-﻿@page
+﻿@page "{Id:guid}"
 @model Constellation.Presentation.Server.Areas.Subject.Pages.Offerings.DetailsModel
+
+@using Constellation.Application.Helpers;
+@using Constellation.Core.Enums;
 
 @inject IAuthorizationService authService
 
@@ -131,11 +134,11 @@
         <div id="sessions" class="tab-pane">
             <h3>Active Sessions</h3>
 
-            @if (authorised)
+            @if (canEditTest.Succeeded)
             {
-                <button type="button" data-toggle="modal" data-target="#addSession" class="btn btn-info btn-sm">Assign a new session</button>
-                <a asp-action="AddBulkSession" asp-controller="Sessions" asp-area="Subject" asp-route-id="@Model.Class.Id" class="btn btn-sm btn-warning">Bulk Add Sessions</a>
-                <a asp-action="BulkRemoveSession" asp-controller="Sessions" asp-area="Subject" asp-route-id="@Model.Class.Id" class="btn btn-sm btn-danger">Bulk Remove Sessions</a>
+                <button type="button" data-toggle="modal" data-target="#addSession" class="btn btn-success btn-sm">Assign a new session</button>
+                <a asp-page="AddSessions" asp-area="Subject" asp-route-id="@Model.Id" class="btn btn-sm btn-success">Bulk Add Sessions</a>
+                <button data-course-name="@Model.Offering.CourseName" data-offering-name="@Model.Offering.Name" class="btn btn-sm btn-danger btn-show-hover remove-all-sessions-button">Remove All Sessions</button>
             }
 
             <table class="table-striped table-hover data-table">
@@ -150,18 +153,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Sessions)
+                    @foreach (var item in Model.Offering.Sessions)
                     {
                         <tr>
-                            <td>@Html.DisplayFor(model => item.Period, "Period")</td>
-                            <td>@Html.DisplayFor(model => item.Teacher)</td>
-                            <td>@Html.DisplayFor(model => item.RoomName)</td>
+                            <td>@item.PeriodName</td>
+                            <td>@item.Teacher</td>
+                            <td>@item.RoomName</td>
                             <td><a class="btn btn-sm btn-success btn-show-hover" href="@item.RoomLink" target="_blank">Open Room</a></td>
-                            <td>@Html.DisplayFor(model => item.Period, "Duration")</td>
+                            <td>@item.Duration</td>
                             <td>
-                                @if (authorised)
+                                @if (canEditTest.Succeeded)
                                 {
-                                    <a asp-action="RemoveSession" asp-controller="Sessions" asp-area="Subject" asp-route-id="@item.Id" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                                    <button data-session-period="@item.PeriodName" data-teacher-name="@item.Teacher" data-course-name="@Model.Offering.CourseName" data-offering-name="@Model.Offering.Name" data-session-id="@item.SessionId" class="btn btn-sm btn-danger btn-show-hover remove-session-button">Remove</button>
                                 }
                             </td>
                         </tr>
@@ -170,13 +173,13 @@
                 <tfoot>
                     <tr>
                         <th colspan="4" class="text-right">Total Minutes per Cycle:</th>
-                        <th colspan="1">@Model.Class.MinPerFN</th>
+                        <th colspan="1">@Model.Offering.Duration</th>
                         <th></th>
                     </tr>
                 </tfoot>
             </table>
         </div>
-
+        
         <div id="pracLessons" class="tab-pane">
             <h3>Practical Lessons</h3>
 
@@ -190,21 +193,23 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var lesson in Model.Lessons.OrderBy(l => l.DueDate))
+                    @foreach (var lesson in Model.Offering.Lessons.OrderBy(l => l.DueDate))
                     {
                         <tr>
                             <td>@lesson.DueDate.ToShortDateString()</td>
                             <td>@lesson.Name</td>
                             <td>@lesson.Students.Count(student => student.WasPresent) / @lesson.Students.Count()</td>
-                            <td><button type="button" data-toggle="modal" data-target="#modal-container-@lesson.Id" class="btn btn-info btn-sm btn-show-hover">View details</button></td>
+                            <td>
+                                <button type="button" data-toggle="modal" data-target="#modal-container-@lesson.LessonId.Value" class="btn btn-info btn-sm btn-show-hover">View details</button>
+                            </td>
                         </tr>
                     }
                 </tbody>
             </table>
 
-            @foreach (var lesson in Model.Lessons.OrderBy(l => l.DueDate))
+            @foreach (var lesson in Model.Offering.Lessons.OrderBy(l => l.DueDate))
             {
-                <div id="modal-container-@lesson.Id" class="modal lesson-modal" role="dialog">
+                <div id="modal-container-@lesson.LessonId.Value" class="modal lesson-modal" role="dialog">
                     <div class="modal-dialog mw-45">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -283,6 +288,8 @@
     </div>
 </div>
 
+@Html.AntiForgeryToken()
+
 <div class="modal fade" tabindex="-1" id="page-modal">
     <div class="modal-dialog">
         <div id="modal-content" class="modal-content">
@@ -309,6 +316,50 @@
                 data: {
                     studentId: studentId,
                     studentName: studentName,
+                    courseName: courseName,
+                    offeringName: offeringName,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.remove-session-button').click(function (event) {
+            var sessionPeriod = $(this).data("sessionPeriod");
+            var teacherName = $(this).data("teacherName");
+            var courseName = $(this).data("courseName");
+            var offeringName = $(this).data("offeringName");
+            var sessionId = $(this).data("sessionId");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxRemoveSession",
+                type: "POST",
+                data: {
+                    sessionPeriod: sessionPeriod,
+                    teacherName: teacherName,
+                    courseName: courseName,
+                    offeringName: offeringName,
+                    sessionId: sessionId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.remove-all-sessions-button').click(function (event) {
+            var courseName = $(this).data("courseName");
+            var offeringName = $(this).data("offeringName");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxRemoveAllSessions",
+                type: "POST",
+                data: {
                     courseName: courseName,
                     offeringName: offeringName,
                     __RequestVerificationToken: xsrfHeader

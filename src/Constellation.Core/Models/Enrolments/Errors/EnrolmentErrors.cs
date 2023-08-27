@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.Enrolment.Errors;
+﻿namespace Constellation.Core.Models.Enrolments.Errors;
 
 using Constellation.Core.Shared;
 

@@ -148,6 +148,7 @@ internal sealed class GetOfferingDetailsQueryHandler
         }
 
         int fteTotal = (int)(students.Count() * offering.Course.FullTimeEquivalentValue);
+        int duration = sessions.Sum(session => session.Duration);
 
         OfferingDetailsResponse response = new(
             offering.Id,
@@ -161,7 +162,8 @@ internal sealed class GetOfferingDetailsQueryHandler
             students,
             sessions,
             lessons,
-            fteTotal);
+            fteTotal,
+            duration);
 
         return response;
     }
