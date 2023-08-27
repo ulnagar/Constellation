@@ -37,9 +37,7 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
 
     public async Task StartJob(Guid jobId, CancellationToken token)
     {
-        //var date = DateOnly.FromDateTime(DateTime.Today);
-
-        var date = new DateOnly(2023, 8, 14);
+        var date = DateOnly.FromDateTime(DateTime.Today);
 
         if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
             return;
