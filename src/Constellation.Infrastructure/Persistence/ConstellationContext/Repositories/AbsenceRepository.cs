@@ -111,19 +111,21 @@ public class AbsenceRepository : IAbsenceRepository
         CancellationToken cancellationToken = default)
     {
         DateTime seenBefore = DateTime.Today.AddDays(-(ageInWeeks * 7));
+        DateOnly startOfYear = new DateOnly(DateTime.Today.Year, 1, 1);
 
         return await _context
             .Set<Absence>()
             .Include(absence => absence.Responses)
             .Include(absence => absence.Notifications)
             .Where(absence =>
+                absence.Date > startOfYear &&
                 absence.StudentId == studentId &&
                 !absence.Explained &&
                 absence.Type == AbsenceType.Whole &&
                 absence.FirstSeen < seenBefore)
             .ToListAsync(cancellationToken);
     }
-        
+
     public async Task<List<Absence>> GetForStudentFromDateRange(
         string studentId, 
         DateOnly startDate, 
