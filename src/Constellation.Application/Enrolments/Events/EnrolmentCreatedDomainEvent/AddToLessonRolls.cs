@@ -1,0 +1,95 @@
+﻿namespace Constellation.Application.Enrolments.Events.EnrolmentCreatedDomainEvent;
+
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Errors;
+using Constellation.Core.Models;
+using Constellation.Core.Models.Enrolments.Events;
+using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Shared;
+using Serilog;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+internal sealed class AddToLessonRolls
+    : IDomainEventHandler<EnrolmentCreatedDomainEvent>
+{
+    private readonly IStudentRepository _studentRepository;
+    private readonly ILessonRepository _lessonRepository;
+    private readonly IDateTimeProvider _dateTime;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger _logger;
+
+    public AddToLessonRolls(
+        IStudentRepository studentRepository,
+        ILessonRepository lessonRepository,
+        IDateTimeProvider dateTime,
+        IUnitOfWork unitOfWork,
+        ILogger logger)
+    {
+        _studentRepository = studentRepository;
+        _lessonRepository = lessonRepository;
+        _dateTime = dateTime;
+        _unitOfWork = unitOfWork;
+        _logger = logger.ForContext<EnrolmentCreatedDomainEvent>();
+    }
+
+    public async Task Handle(EnrolmentCreatedDomainEvent notification, CancellationToken cancellationToken)
+    {
+        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+
+        if (student is null)
+        {
+            _logger
+                .ForContext(nameof(EnrolmentCreatedDomainEvent), notification, true)
+                .ForContext(nameof(Error), DomainErrors.Partners.Student.NotFound(notification.StudentId))
+                .Error("Failed to complete the event handler");
+
+            return;
+        }
+
+        List<SciencePracLesson> lessons = await _lessonRepository.GetAllForOffering(notification.OfferingId);
+
+        lessons = lessons
+            .Where(lesson =>
+                lesson.DueDate >= _dateTime.Today)
+            .ToList();
+
+        List<SciencePracRoll> rolls = lessons
+            .SelectMany(lesson =>
+                lesson.Rolls.Where(roll =>
+                    roll.SchoolCode == student.SchoolCode))
+            .ToList();
+
+        foreach (SciencePracRoll roll in rolls)
+        {
+            if (roll.Attendance.Any(attendance => attendance.StudentId == student.StudentId))
+                continue;
+
+            roll.AddStudent(student.StudentId);
+        }
+
+        List<SciencePracLesson> newRollsRequired = lessons
+            .Where(lesson =>
+                lesson.Rolls.All(roll =>
+                    roll.SchoolCode != student.SchoolCode))
+            .ToList();
+
+        foreach (SciencePracLesson lesson in newRollsRequired)
+        {
+            SciencePracRoll roll = new(
+                lesson.Id,
+                student.SchoolCode);
+
+            roll.AddStudent(student.StudentId);
+
+            lesson.AddRoll(roll);
+        }
+
+        await _unitOfWork.CompleteAsync(cancellationToken);
+    }
+}

@@ -1,18 +1,23 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Enrolments;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 public class EnrolmentRepository : IEnrolmentRepository
 {
     private readonly AppDbContext _context;
+    private readonly IDateTimeProvider _dateTime;
 
-    public EnrolmentRepository(AppDbContext context)
+    public EnrolmentRepository(
+        AppDbContext context,
+        IDateTimeProvider dateTime)
     {
         _context = context;
+        _dateTime = dateTime;
     }
 
     public async Task<List<Enrolment>> GetCurrentByStudentId(
@@ -20,16 +25,20 @@ public class EnrolmentRepository : IEnrolmentRepository
         CancellationToken cancellationToken = default)
     {
         var today = DateTime.Today;
+        List<OfferingId> currentOfferings = await _context
+            .Set<Offering>()
+            .Where(offering =>
+                offering.StartDate <= _dateTime.Today &&
+                offering.EndDate >= _dateTime.Today)
+            .Select(offering => offering.Id)
+            .ToListAsync(cancellationToken);
 
         return await _context
             .Set<Enrolment>()
-            .Include(enrol => enrol.Offering)
-            .ThenInclude(offering => offering.Course)
             .Where(enrol =>
                 enrol.StudentId == studentId &&
                 !enrol.IsDeleted &&
-                enrol.Offering.EndDate >= today &&
-                enrol.Offering.StartDate <= today)
+                currentOfferings.Contains(enrol.OfferingId))
             .ToListAsync(cancellationToken);
     }
 
@@ -40,20 +49,4 @@ public class EnrolmentRepository : IEnrolmentRepository
             .Set<Enrolment>()
             .Where(enrol => enrol.OfferingId == offeringId && !enrol.IsDeleted)
             .ToListAsync(cancellationToken);
-
-    public async Task<Enrolment> ForEditing(int id)
-    {
-        return await _context.Enrolments
-            .Include(enrolment => enrolment.Student)
-            .Include(enrolment => enrolment.Offering)
-            .ThenInclude(offering => offering.Sessions)
-            .ThenInclude(session => session.Room)
-            .SingleOrDefaultAsync(enrolment => enrolment.Id == id);
-    }
-
-    public async Task<bool> AnyForStudentAndOffering(string studentId, OfferingId offeringId)
-    {
-        return await _context.Enrolments
-            .AnyAsync(enrolment => !enrolment.IsDeleted && enrolment.StudentId == studentId && enrolment.OfferingId == offeringId);
-    }
 }

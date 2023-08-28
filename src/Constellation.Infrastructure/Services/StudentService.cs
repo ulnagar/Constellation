@@ -10,18 +10,16 @@ using Constellation.Infrastructure.DependencyInjection;
 namespace Constellation.Infrastructure.Services
 {
     // Reviewed for ASYNC operations
-    public class StudentService : IStudentService, IScopedService
+    public class StudentService : IStudentService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMediator _mediator;
-        private readonly IEnrolmentService _enrolService;
         private readonly IDeviceService _deviceService;
 
-        public StudentService(IUnitOfWork unitOfWork, IEnrolmentService enrolmentService,
+        public StudentService(IUnitOfWork unitOfWork,
             IDeviceService deviceService, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
-            _enrolService = enrolmentService;
             _deviceService = deviceService;
             _mediator = mediator;
         }
@@ -58,14 +56,6 @@ namespace Constellation.Infrastructure.Services
             result.Entity = student;
 
             return result;
-        }
-
-        public async Task EnrolStudentInClass(string studentId, OfferingId offeringId)
-        {
-            if (!await _unitOfWork.Students.AnyWithId(studentId))
-                return;
-
-            await _enrolService.CreateEnrolment(studentId, offeringId, DateTime.Now);
         }
 
         public async Task ReinstateStudent(string studentId)

@@ -38,7 +38,7 @@ public class Enrolment : AggregateRoot, IAuditableEntity
     {
         Enrolment entry = new(studentId, offeringId);
 
-        entry.RaiseDomainEvent(new EnrolmentCreatedDomainEvent(new DomainEventId(), entry.Id));
+        entry.RaiseDomainEvent(new EnrolmentCreatedDomainEvent(new DomainEventId(), entry.Id, studentId, offeringId));
 
         return entry;
     }
