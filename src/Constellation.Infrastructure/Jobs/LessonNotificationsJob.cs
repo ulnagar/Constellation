@@ -78,7 +78,7 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
 
         List<School> schools = await _schoolRepository.GetWithCurrentStudents(cancellationToken);
 
-        foreach (School school in schools)
+        foreach (School school in schools.OrderBy(school => school.Name))
         {
             List<SciencePracLesson> lessons = await _lessonRepository.GetAllForSchool(school.Code, cancellationToken);
 
@@ -230,7 +230,6 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
                     Lessons = secondWarning,
                     Recipients = sptRecipients
                         .Concat(accRecipients)
-                        .Concat(new List<EmailRecipient> { schoolResult.Value })
                         .Distinct()
                         .ToList()
                 };
@@ -261,7 +260,6 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
                     Recipients = sptRecipients
                         .Concat(accRecipients)
                         .Concat(new List<EmailRecipient> { schoolResult.Value })
-                        .Concat(principalRecipients)
                         .Distinct()
                         .ToList()
                 };
