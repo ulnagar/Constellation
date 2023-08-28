@@ -96,44 +96,6 @@ namespace Constellation.Infrastructure.Services
             student.DateDeleted = null;
         }
 
-        public async Task RemoveStudent(string studentId)
-        {
-            // Validate entries
-            var student = await _unitOfWork.Students.ForDeletion(studentId);
-
-            if (student == null)
-                return;
-
-            // Remove all current student enrolments
-            foreach (var enrol in student.Enrolments.Where(e => !e.IsDeleted))
-            {
-                await UnenrolStudentFromClass(student.StudentId, enrol.OfferingId);
-            }
-
-            // Unassign devices
-            foreach (var device in student.Devices.Where(d => d.IsDeleted == false))
-            {
-                await _deviceService.DeallocateDevice(device.SerialNumber);
-            }
-
-            student.IsDeleted = true;
-            student.DateDeleted = DateTime.Now;
-        }
-
-        public async Task UnenrolStudentFromClass(string studentId, OfferingId offeringId)
-        {
-            // Validate entries
-            var student = await _unitOfWork.Students.ForBulkUnenrolAsync(studentId);
-
-            if (student == null)
-                return;
-
-            foreach (var enrolment in student.Enrolments.Where(e => e.OfferingId == offeringId && !e.IsDeleted))
-            {
-                await _enrolService.RemoveEnrolment(enrolment.Id);
-            }
-        }
-
         public async Task<ServiceOperationResult<Student>> UpdateStudent(string studentId, StudentDto studentResource)
         {
             // Set up return object

@@ -10,10 +10,8 @@ namespace Constellation.Application.Interfaces.Services
     {
         Task<ServiceOperationResult<Student>> CreateStudent(StudentDto studentResource);
         Task<ServiceOperationResult<Student>> UpdateStudent(string studentId, StudentDto studentResource);
-        Task RemoveStudent(string studentId);
         Task ReinstateStudent(string studentId);
 
         Task EnrolStudentInClass(string studentId, OfferingId offeringId);
-        Task UnenrolStudentFromClass(string studentId, OfferingId offeringId);
     }
 }

@@ -19,17 +19,20 @@ internal sealed class GetAllOfferingSummariesQueryHandler
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
+    private readonly ITimetablePeriodRepository _periodRepository;
     private readonly ILogger _logger;
 
     public GetAllOfferingSummariesQueryHandler(
         IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
+        ITimetablePeriodRepository periodRepository,
         ILogger logger)
     {
         _offeringRepository = offeringRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
+        _periodRepository = periodRepository;
         _logger = logger.ForContext<GetAllOfferingSummariesQuery>();
     }
 

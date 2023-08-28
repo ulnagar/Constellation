@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 public interface ITimetablePeriodRepository
 {
+    Task<double> TotalDurationForCollectionOfPeriods(List<int> PeriodIds, CancellationToken cancellationToken = default);
     Task<List<TimetablePeriod>> GetByDayAndOfferingId(int dayNumber, OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<TimetablePeriod>> GetAll(CancellationToken cancellationToken = default);
     Task<List<TimetablePeriod>> GetAllFromTimetable(List<string> timetables, CancellationToken cancellationToken = default);
@@ -17,13 +18,7 @@ public interface ITimetablePeriodRepository
     Task<List<TimetablePeriod>> GetForOfferingOnDay(OfferingId offeringId, DateOnly absenceDate, int DayNumber, CancellationToken cancellationToken = default);
     Task<TimetablePeriod> GetById(int id, CancellationToken cancellationToken = default);
 
-    TimetablePeriod WithDetails(int id);
-    TimetablePeriod WithFilter(Expression<Func<TimetablePeriod, bool>> predicate);
-    ICollection<TimetablePeriod> All();
-    ICollection<TimetablePeriod> AllWithFilter(Expression<Func<TimetablePeriod, bool>> predicate);
     ICollection<TimetablePeriod> AllFromDay(int day);
-    ICollection<TimetablePeriod> AllActive();
-    ICollection<TimetablePeriod> AllForStudent(string studentId);
     Task<ICollection<TimetablePeriod>> ForSelectionAsync();
     Task<ICollection<TimetablePeriod>> ForGraphicalDisplayAsync();
     Task<TimetablePeriod> ForEditAsync(int id);

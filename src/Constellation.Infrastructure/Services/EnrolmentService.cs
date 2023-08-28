@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.DependencyInjection;
 
@@ -43,12 +44,9 @@ public class EnrolmentService : IEnrolmentService, IScopedService
         if (await _unitOfWork.Enrolments.AnyForStudentAndOffering(studentId, offeringId))
             return;
 
-        var enrolment = new Enrolment()
-        {
-            StudentId = studentId,
-            OfferingId = offeringId,
-            DateCreated = dateCreated
-        };
+        var enrolment = Enrolment.Create(
+            studentId,
+            offeringId);
 
         _unitOfWork.Add(enrolment);
 
@@ -73,36 +71,5 @@ public class EnrolmentService : IEnrolmentService, IScopedService
         }
 
         await _unitOfWork.CompleteAsync();
-
-    }
-
-    public async Task RemoveEnrolment(int enrolmentId)
-    {
-        var enrolment = await _unitOfWork.Enrolments.ForEditing(enrolmentId);
-
-        // Is this a valid enrolment?
-        if (enrolment == null)
-            return;
-
-        // Has this already been deleted?
-        if (enrolment.IsDeleted)
-            return;
-
-        // Is this a current offering?
-        if (enrolment.Offering.IsCurrent)
-        {
-            // Remove the student from future rolls that are unsubmitted
-            await _lessonService.RemoveStudentFromFutureRollsForCourse(enrolment.StudentId, enrolment.OfferingId);
-
-            // Call OperationService.RemoveStudentAdobeConnectAccess(Student, Offering)
-            foreach (var room in enrolment.Offering.Sessions.Where(s => !s.IsDeleted).Select(s => s.Room).Distinct().ToList())
-                await _operationService.RemoveStudentAdobeConnectAccess(enrolment.Student.StudentId, room.ScoId, _dateTime.Now);
-
-            await _operationService.RemoveStudentMSTeamAccess(enrolment.Student.StudentId, enrolment.Offering.Id, _dateTime.Now);
-            await _operationService.UnenrolStudentFromCanvasCourse(enrolment.Student, enrolment.Offering);
-        }
-
-        enrolment.IsDeleted = true;
-        enrolment.DateDeleted = _dateTime.Now;
     }
 }

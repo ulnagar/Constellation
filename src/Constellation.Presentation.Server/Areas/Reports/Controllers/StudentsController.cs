@@ -59,10 +59,12 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
 
                 foreach (var enrolment in enrolments)
                 {
-                    if (enrolment.Student.Gender == "M")
+                    var student = students.First(student => student.StudentId == enrolment.StudentId);
+
+                    if (student.Gender == "M")
                         gradeEntry.MaleEnrolmentFTE += enrolment.Offering.Course.FullTimeEquivalentValue;
 
-                    if (enrolment.Student.Gender == "F")
+                    if (student.Gender == "F")
                         gradeEntry.FemaleEnrolmentFTE += enrolment.Offering.Course.FullTimeEquivalentValue;
                 }
 

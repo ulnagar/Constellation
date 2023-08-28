@@ -62,7 +62,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
                 return RedirectToAction("Index");
             }
 
-            var period = _unitOfWork.Periods.WithDetails(id);
+            var period = await _unitOfWork.Periods.GetById(id);
 
             if (period == null)
             {
