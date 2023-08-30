@@ -168,7 +168,7 @@ public sealed class UniversalAchieverNomination : Nomination
         Id = new();
         PeriodId = periodId;
         StudentId = studentId;
-        AwardType = AwardType.PrincipalsAward;
+        AwardType = AwardType.UniversalAchiever;
     }
 
     public override string ToString() => $"{AwardType.ToString()}";
