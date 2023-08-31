@@ -56,7 +56,7 @@ internal sealed class ExportAwardNominationsCommandHandler
 
         List<AwardNominationExportDto> exportDtos = new();
 
-        var groupedNominations = period.Nominations.GroupBy(nomination => nomination.StudentId);
+        var groupedNominations = period.Nominations.Where(nomination => !nomination.IsDeleted).GroupBy(nomination => nomination.StudentId);
 
         foreach (var student in groupedNominations)
         {
