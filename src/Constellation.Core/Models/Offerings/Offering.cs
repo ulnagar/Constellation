@@ -1,17 +1,17 @@
-﻿namespace Constellation.Core.Models.Subjects;
+﻿namespace Constellation.Core.Models.Offerings;
 
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Subjects.Events;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Events;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class Offering : AggregateRoot
+public sealed class Offering : AggregateRoot
 {
     private readonly List<Resource> _resources = new();
     private readonly List<Session> _sessions = new();
@@ -30,7 +30,6 @@ public class Offering : AggregateRoot
     public OfferingId Id { get; set; }
     public string Name { get; set; }
     public int CourseId { get; set; }
-    public Course Course { get; set; }
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }
     public List<Enrolment> Enrolments { get; set; } = new();

@@ -3,7 +3,7 @@
 using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
 using Constellation.Application.Features.Portal.School.Timetables.Queries;
-using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Offerings;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 

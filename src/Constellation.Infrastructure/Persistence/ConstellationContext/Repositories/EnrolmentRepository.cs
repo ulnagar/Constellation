@@ -3,8 +3,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Enrolments;
-using Constellation.Core.Models.Subjects;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 public class EnrolmentRepository : IEnrolmentRepository

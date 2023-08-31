@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.Subjects.ValueObjects;
+﻿namespace Constellation.Core.Models.Offerings.ValueObjects;
 
 using Constellation.Core.Primitives;
 using System.Collections.Generic;

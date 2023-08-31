@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 using System;
 using System.Collections.Generic;
 

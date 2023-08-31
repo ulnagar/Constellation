@@ -1,8 +1,8 @@
-﻿namespace Constellation.Core.Models.Subjects.Events;
+﻿namespace Constellation.Core.Models.Offerings.Events;
 
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 using System.Collections.Generic;
 
 public sealed record AllSessionsDeletedDomainEvent(

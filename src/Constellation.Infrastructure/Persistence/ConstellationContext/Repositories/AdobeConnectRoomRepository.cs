@@ -3,8 +3,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Subjects;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

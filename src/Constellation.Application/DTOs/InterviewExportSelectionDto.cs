@@ -1,4 +1,4 @@
-﻿using Constellation.Core.Models.Subjects.Identifiers;
+﻿using Constellation.Core.Models.Offerings.Identifiers;
 using System.Collections.Generic;
 
 namespace Constellation.Application.DTOs

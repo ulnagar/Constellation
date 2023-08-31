@@ -1,5 +1,5 @@
 ﻿using Constellation.Core.Models;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 

@@ -3,7 +3,7 @@
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Enrolments.Identifiers;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 
 public sealed record EnrolmentCreatedDomainEvent(
     DomainEventId Id,

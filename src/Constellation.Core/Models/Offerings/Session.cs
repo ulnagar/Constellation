@@ -1,11 +1,11 @@
-﻿namespace Constellation.Core.Models.Subjects;
+﻿namespace Constellation.Core.Models.Offerings;
 
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System;
 
-public class Session : IAuditableEntity
+public sealed class Session : IAuditableEntity
 {
     internal Session(
         OfferingId offeringId,

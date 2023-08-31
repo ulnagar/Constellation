@@ -6,7 +6,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Offerings;
 using Constellation.Infrastructure.DependencyInjection;
 
 public class SessionService : ISessionService, IScopedService

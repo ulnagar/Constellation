@@ -1,6 +1,6 @@
 ﻿using Constellation.Core.Enums;
-using Constellation.Core.Models.Subjects;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq;

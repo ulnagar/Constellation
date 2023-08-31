@@ -1,6 +1,6 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Offerings;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Services

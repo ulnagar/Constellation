@@ -1,7 +1,5 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Subjects.Identifiers;
-using System;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Services

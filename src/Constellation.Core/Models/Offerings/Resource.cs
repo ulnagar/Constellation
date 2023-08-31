@@ -1,7 +1,7 @@
-﻿namespace Constellation.Core.Models.Subjects;
+﻿namespace Constellation.Core.Models.Offerings;
 
-using Constellation.Core.Models.Subjects.Identifiers;
-using Constellation.Core.Models.Subjects.ValueObjects;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using System;
 
 public abstract class Resource

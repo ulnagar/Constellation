@@ -5,6 +5,7 @@ using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Enrolments;
+using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Stocktake;
 using Constellation.Core.Models.Subjects;
 using Microsoft.EntityFrameworkCore;

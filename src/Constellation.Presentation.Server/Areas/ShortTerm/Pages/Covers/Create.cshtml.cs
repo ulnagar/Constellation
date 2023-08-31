@@ -6,7 +6,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetOfferingsForSelectionList;
 using Constellation.Application.StaffMembers.GetStaffForSelectionList;
 using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.ValueObjects;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Shared.Models;

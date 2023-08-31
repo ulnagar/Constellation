@@ -4,7 +4,7 @@ using Constellation.Application.Abstractions;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Offerings;
 using Constellation.Infrastructure.Templates.Views.Documents.Covers;
 using System.Net.Mail;
 

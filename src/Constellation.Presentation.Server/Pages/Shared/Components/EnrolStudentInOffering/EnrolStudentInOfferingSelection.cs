@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Server.Pages.Shared.Components.FamilyAddStudent;
 
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 
 public class EnrolStudentInOfferingSelection
 {

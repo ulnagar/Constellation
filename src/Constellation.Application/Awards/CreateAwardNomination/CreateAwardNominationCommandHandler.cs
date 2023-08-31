@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Awards;
+using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;

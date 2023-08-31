@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Server.Pages.Shared.PartialViews.DeleteRoleModal;
 
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 
 internal sealed record UnenrolStudentModalViewModel(
     OfferingId OfferingId,

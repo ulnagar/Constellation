@@ -2,7 +2,7 @@
 using Constellation.Core.Models;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.ValueObjects;
 
 namespace Constellation.Application.Tests.Unit.Extensions;

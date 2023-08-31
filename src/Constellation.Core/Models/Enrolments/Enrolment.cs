@@ -4,7 +4,7 @@ using Constellation.Core.Models.Enrolments.Errors;
 using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.Enrolments.Identifiers;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System;

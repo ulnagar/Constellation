@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.Subjects.Identifiers;
+﻿namespace Constellation.Core.Models.Offerings.Identifiers;
 
 using System;
 

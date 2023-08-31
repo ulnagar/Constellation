@@ -3,7 +3,7 @@ using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Comparators;
 using Constellation.Core.Models.Casuals;
-using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Offerings;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;

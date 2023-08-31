@@ -15,11 +15,7 @@ public class CourseConfiguration : IEntityTypeConfiguration<Course>
 
         builder
             .HasMany(course => course.Offerings)
-            .WithOne(offering => offering.Course);
-
-        builder
-            .Navigation(course => course.Offerings)
-            .AutoInclude();
+            .WithOne();
 
         builder
             .Property(course => course.FullTimeEquivalentValue)

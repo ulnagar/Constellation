@@ -1,8 +1,8 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Subjects;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Offerings;
 
-using Constellation.Core.Models.Subjects;
-using Constellation.Core.Models.Subjects.Identifiers;
-using Constellation.Core.Models.Subjects.ValueObjects;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

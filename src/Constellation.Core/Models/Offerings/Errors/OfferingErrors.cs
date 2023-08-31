@@ -1,6 +1,6 @@
-﻿namespace Constellation.Core.Models.Subjects.Errors;
+﻿namespace Constellation.Core.Models.Offerings.Errors;
 
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using System;
 

@@ -1,4 +1,4 @@
-﻿using Constellation.Core.Models.Subjects;
+﻿using Constellation.Core.Models.Offerings;
 using System;
 using System.Collections.Generic;
 using System.Reflection;

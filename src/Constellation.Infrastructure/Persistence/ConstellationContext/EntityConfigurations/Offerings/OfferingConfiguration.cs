@@ -1,7 +1,8 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Subjects;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Offerings;
 
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -21,17 +22,13 @@ public class OfferingConfiguration : IEntityTypeConfiguration<Offering>
                 value => OfferingId.FromValue(value));
 
         builder
-            .HasOne(offering => offering.Course)
+            .HasOne<Course>()
             .WithMany(course => course.Offerings)
             .HasForeignKey(offering => offering.CourseId);
 
         builder
-            .Navigation(offering => offering.Course)
-            .AutoInclude();
-
-        builder
             .HasMany(offering => offering.Enrolments)
-            .WithOne(enrolment => enrolment.Offering);
+            .WithOne();
 
         builder
             .HasMany(offering => offering.Sessions)

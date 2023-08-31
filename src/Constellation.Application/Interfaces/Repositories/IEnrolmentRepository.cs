@@ -1,7 +1,7 @@
 namespace Constellation.Application.Interfaces.Repositories;
 
 using Constellation.Core.Models.Enrolments;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

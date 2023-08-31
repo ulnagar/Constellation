@@ -8,7 +8,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Offerings;
 using Constellation.Infrastructure.DependencyInjection;
 
 namespace Constellation.Infrastructure.ExternalServices.AdobeConnect

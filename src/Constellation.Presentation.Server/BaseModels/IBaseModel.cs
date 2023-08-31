@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Server.BaseModels;
 
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 
 public interface IBaseModel
 {

@@ -1,7 +1,8 @@
-namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Subjects;
+namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Offerings;
 
-using Constellation.Core.Models.Subjects;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -26,19 +27,19 @@ public class SessionConfiguration : IEntityTypeConfiguration<Session>
                 value => OfferingId.FromValue(value));
 
         builder
-            .HasOne(session => session.Teacher)
+            .HasOne<Staff>()
             .WithMany(teacher => teacher.CourseSessions)
             .HasForeignKey(session => session.StaffId)
             .OnDelete(DeleteBehavior.NoAction);
 
         builder
-            .HasOne(session => session.Room)
+            .HasOne<AdobeConnectRoom>()
             .WithMany(room => room.OfferingSessions)
             .HasForeignKey(session => session.RoomId)
             .OnDelete(DeleteBehavior.NoAction);
 
         builder
-            .HasOne(session => session.Period)
+            .HasOne<TimetablePeriod>()
             .WithMany(period => period.OfferingSessions)
             .HasForeignKey(session => session.PeriodId);
     }

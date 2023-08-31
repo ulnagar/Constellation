@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.Subjects.ValueObjects;
+﻿namespace Constellation.Core.Models.Offerings.ValueObjects;
 
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
@@ -96,7 +96,7 @@ public sealed class OfferingName : ValueObject
 
         var grade = value[..2];
         var courseCode = value[2..5];
-        
+
         if (courseCode.ToUpper() == "TUT")
         {
             var initials = value[5..];
@@ -105,7 +105,7 @@ public sealed class OfferingName : ValueObject
                 grade,
                 courseCode,
                 initials);
-        } 
+        }
         else
         {
             var line = value[5..6];

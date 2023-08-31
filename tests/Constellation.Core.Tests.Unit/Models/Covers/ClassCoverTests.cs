@@ -1,7 +1,7 @@
 ﻿using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 
 namespace Constellation.Core.Tests.Unit.Models.Covers;
 
