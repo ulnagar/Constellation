@@ -38,7 +38,7 @@ internal sealed class RemoveAllSessionsCommandHandler
             return Result.Failure(OfferingErrors.NotFound(request.OfferingId));
         }
 
-        offering.DeleteAllSessions();
+        offering.RemoveAllSessions();
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

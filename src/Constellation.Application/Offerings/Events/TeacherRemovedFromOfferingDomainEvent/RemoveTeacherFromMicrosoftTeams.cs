@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Offerings.Events.AllSessionsDeletedDomainEvent;
+﻿namespace Constellation.Application.Offerings.Events.TeacherRemovedFromOfferingDomainEvent;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
@@ -9,13 +9,15 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Serilog;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class RemoveTeachersFromMicrosoftTeams
-    : IDomainEventHandler<AllSessionsDeletedDomainEvent>
+internal sealed class RemoveTeacherFromMicrosoftTeams
+    : IDomainEventHandler<TeacherRemovedFromOfferingDomainEvent>
 {
     private readonly IOfferingRepository _offeringRepository;
     private readonly IMSTeamOperationsRepository _operationsRepository;
@@ -23,7 +25,7 @@ internal sealed class RemoveTeachersFromMicrosoftTeams
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
-    public RemoveTeachersFromMicrosoftTeams(
+    public RemoveTeacherFromMicrosoftTeams(
         IOfferingRepository offeringRepository,
         IMSTeamOperationsRepository operationsRepository,
         IDateTimeProvider dateTime,
@@ -34,29 +36,41 @@ internal sealed class RemoveTeachersFromMicrosoftTeams
         _operationsRepository = operationsRepository;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
-        _logger = logger.ForContext<AllSessionsDeletedDomainEvent>();
+        _logger = logger.ForContext<TeacherRemovedFromOfferingDomainEvent>();
     }
 
-    public async Task Handle(AllSessionsDeletedDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(TeacherRemovedFromOfferingDomainEvent notification, CancellationToken cancellationToken)
     {
         Offering offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
 
         if (offering is null)
         {
             _logger
-                .ForContext(nameof(SessionDeletedDomainEvent), notification, true)
+                .ForContext(nameof(TeacherRemovedFromOfferingDomainEvent), notification, true)
                 .ForContext(nameof(Error), OfferingErrors.NotFound(notification.OfferingId))
                 .Error("Failed to complete the event handler");
 
             return;
         }
 
-        foreach (string staffId in notification.StaffIds)
+        TeacherAssignment assignment = offering.Teachers.FirstOrDefault(assignment => assignment.Id == notification.AssignmentId);
+
+        if (assignment is null)
         {
-            TeacherMSTeamOperation operation = new()
+            _logger
+                .ForContext(nameof(TeacherRemovedFromOfferingDomainEvent), notification, true)
+                .ForContext(nameof(Error), TeacherAssignmentErrors.NotFound(notification.AssignmentId))
+                .Error("Failed to complete the event handler");
+
+            return;
+        }
+
+        foreach (Resource resource in offering.Resources.Where(resource => resource.Type == ResourceType.MicrosoftTeam))
+        {
+            TeacherAssignmentMSTeamOperation operation = new()
             {
-                OfferingId = offering.Id,
-                StaffId = staffId,
+                TeamName = resource.ResourceId,
+                StaffId = assignment.StaffId,
                 Action = MSTeamOperationAction.Remove,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                 DateScheduled = _dateTime.Now

@@ -10,7 +10,7 @@ public class SessionConfiguration : IEntityTypeConfiguration<Session>
 {
     public void Configure(EntityTypeBuilder<Session> builder)
     {
-        builder.ToTable("Subjects_Sessions");
+        builder.ToTable("Offerings_Sessions");
 
         builder
             .HasKey(session => session.Id);
@@ -25,18 +25,6 @@ public class SessionConfiguration : IEntityTypeConfiguration<Session>
             .HasConversion(
                 id => id.Value,
                 value => OfferingId.FromValue(value));
-
-        builder
-            .HasOne<Staff>()
-            .WithMany(teacher => teacher.CourseSessions)
-            .HasForeignKey(session => session.StaffId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        builder
-            .HasOne<AdobeConnectRoom>()
-            .WithMany(room => room.OfferingSessions)
-            .HasForeignKey(session => session.RoomId)
-            .OnDelete(DeleteBehavior.NoAction);
 
         builder
             .HasOne<TimetablePeriod>()

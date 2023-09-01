@@ -2,7 +2,6 @@
 using Constellation.Core.Models.Offerings.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Collections.Generic;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations
 {
@@ -17,7 +16,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
                 .HasValue<GroupMSTeamOperation>("Group")
                 .HasValue<StudentEnrolledMSTeamOperation>("StudentEnrolled")
                 .HasValue<TeacherEmployedMSTeamOperation>("TeacherEmployed")
-                .HasValue<ContactAddedMSTeamOperation>("ContactAdded");
+                .HasValue<ContactAddedMSTeamOperation>("ContactAdded")
+                .HasValue<TeacherAssignmentMSTeamOperation>("TeacherAssigned")
+                .HasValue<StudentOfferingMSTeamOperation>("StudentOffering");
         }
     }
 
@@ -86,6 +87,38 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
                 .HasConversion(
                     id => id.Value,
                     value => OfferingId.FromValue(value));
+        }
+    }
+
+    public class TeacherAssignmentMSTeamOperationConfiguration : IEntityTypeConfiguration<TeacherAssignmentMSTeamOperation>
+    {
+        public void Configure(EntityTypeBuilder<TeacherAssignmentMSTeamOperation> builder)
+        {
+            builder
+                .Property(operation => operation.StaffId)
+                .HasColumnName(nameof(TeacherAssignmentMSTeamOperation.StaffId));
+
+            builder
+                .HasOne<Staff>()
+                .WithMany()
+                .HasForeignKey(operation => operation.StaffId)
+                .OnDelete(DeleteBehavior.NoAction);
+        }
+    }
+
+    public class StudentOfferingMSTeamOperationConfiguration : IEntityTypeConfiguration<StudentOfferingMSTeamOperation>
+    {
+        public void Configure(EntityTypeBuilder<StudentOfferingMSTeamOperation> builder)
+        {
+            builder
+                .Property(operation => operation.StudentId)
+                .HasColumnName(nameof(StudentOfferingMSTeamOperation.StudentId));
+
+            builder
+                .HasOne<Student>()
+                .WithMany()
+                .HasForeignKey(operation => operation.StudentId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

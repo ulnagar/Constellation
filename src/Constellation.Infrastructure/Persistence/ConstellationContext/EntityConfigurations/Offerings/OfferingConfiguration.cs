@@ -1,5 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Offerings;
 
+using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects;
@@ -10,7 +12,7 @@ public class OfferingConfiguration : IEntityTypeConfiguration<Offering>
 {
     public void Configure(EntityTypeBuilder<Offering> builder)
     {
-        builder.ToTable("Subjects_Offerings");
+        builder.ToTable("Offerings_Offerings");
 
         builder
             .HasKey(offering => offering.Id);
@@ -27,7 +29,7 @@ public class OfferingConfiguration : IEntityTypeConfiguration<Offering>
             .HasForeignKey(offering => offering.CourseId);
 
         builder
-            .HasMany(offering => offering.Enrolments)
+            .HasMany<Enrolment>()
             .WithOne();
 
         builder
@@ -39,7 +41,7 @@ public class OfferingConfiguration : IEntityTypeConfiguration<Offering>
             .AutoInclude();
 
         builder
-            .HasMany(offering => offering.Absences)
+            .HasMany<Absence>()
             .WithOne()
             .HasForeignKey(absence => absence.OfferingId);
 
@@ -51,5 +53,10 @@ public class OfferingConfiguration : IEntityTypeConfiguration<Offering>
         builder
             .Navigation(offering => offering.Resources)
             .AutoInclude();
+
+        builder
+            .HasMany(offering => offering.Teachers)
+            .WithOne(assignment => assignment.Offering)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

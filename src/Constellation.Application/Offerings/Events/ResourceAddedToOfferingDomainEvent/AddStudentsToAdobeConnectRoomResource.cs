@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Offerings.Events.AllSessionsDeletedDomainEvent;
+﻿namespace Constellation.Application.Offerings.Events.ResourceAddedToOfferingDomainEvent;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
@@ -10,6 +10,7 @@ using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -17,8 +18,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class RemoveStudentsFromAdobeConnect
-    : IDomainEventHandler<AllSessionsDeletedDomainEvent>
+internal sealed class AddStudentsToAdobeConnectRoomResource
+    : IDomainEventHandler<ResourceAddedToOfferingDomainEvent>
 {
     private readonly IOfferingRepository _offeringRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
@@ -27,7 +28,7 @@ internal sealed class RemoveStudentsFromAdobeConnect
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
-    public RemoveStudentsFromAdobeConnect(
+    public AddStudentsToAdobeConnectRoomResource(
         IOfferingRepository offeringRepository,
         IEnrolmentRepository enrolmentRepository,
         IAdobeConnectOperationsRepository operationsRepository,
@@ -40,41 +41,50 @@ internal sealed class RemoveStudentsFromAdobeConnect
         _operationsRepository = operationsRepository;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
-        _logger = logger.ForContext<AllSessionsDeletedDomainEvent>();
+        _logger = logger;
     }
 
-    public async Task Handle(AllSessionsDeletedDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(ResourceAddedToOfferingDomainEvent notification, CancellationToken cancellationToken)
     {
+        if (notification.ResourceType != ResourceType.AdobeConnectRoom)
+            return;
+
         Offering offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
 
         if (offering is null)
         {
             _logger
-                .ForContext(nameof(SessionDeletedDomainEvent), notification, true)
+                .ForContext(nameof(TeacherAddedToOfferingDomainEvent), notification, true)
                 .ForContext(nameof(Error), OfferingErrors.NotFound(notification.OfferingId))
                 .Error("Failed to complete the event handler");
 
             return;
         }
 
+        AdobeConnectRoomResource resource = offering.Resources.FirstOrDefault(resource => resource.Id == notification.ResourceId) as AdobeConnectRoomResource;
+
+        if (resource is null)
+        {
+            _logger
+                .ForContext(nameof(TeacherAddedToOfferingDomainEvent), notification, true)
+                .ForContext(nameof(Error), ResourceErrors.NotFound(notification.ResourceId))
+            .Error("Failed to complete the event handler");
+            return;
+        }
+
         List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByOfferingId(offering.Id, cancellationToken);
 
-        List<string> studentIds = enrolments.Select(enrolment => enrolment.StudentId).ToList();
-
-        foreach (string roomId in notification.RoomIds)
+        foreach (Enrolment enrolment in enrolments)
         {
-            foreach (string studentId in studentIds)
+            StudentAdobeConnectOperation operation = new()
             {
-                StudentAdobeConnectOperation operation = new()
-                {
-                    ScoId = roomId,
-                    StudentId = studentId,
-                    Action = AdobeConnectOperationAction.Remove,
-                    DateScheduled = _dateTime.Now
-                };
+                ScoId = resource.ScoId,
+                StudentId = enrolment.StudentId,
+                Action = AdobeConnectOperationAction.Add,
+                DateScheduled = _dateTime.Now
+            };
 
-                _operationsRepository.Insert(operation);
-            }
+            _operationsRepository.Insert(operation);
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);

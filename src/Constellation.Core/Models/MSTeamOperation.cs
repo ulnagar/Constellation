@@ -87,4 +87,14 @@ namespace Constellation.Core.Models
         public GroupTutorialId TutorialId { get; set; }
         public GroupTutorial GroupTutorial { get; set; }
     }
+
+    public sealed class TeacherAssignmentMSTeamOperation : EventMSTeamOperation
+    {
+        public string StaffId { get; set; }
+    }
+
+    public sealed class StudentOfferingMSTeamOperation : EventMSTeamOperation
+    {
+        public string StudentId { get; set; }
+    }
 }

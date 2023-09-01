@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Offerings.Events.SessionDeletedDomainEvent;
+﻿namespace Constellation.Application.Offerings.Events.ResourceAddedToOfferingDomainEvent;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
@@ -10,6 +10,7 @@ using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -17,8 +18,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class RemoveStudentsFromMicrosoftTeams
-    : IDomainEventHandler<SessionDeletedDomainEvent>
+internal sealed class AddStudentsToMicrosoftTeamResource
+    : IDomainEventHandler<ResourceAddedToOfferingDomainEvent>
 {
     private readonly IOfferingRepository _offeringRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
@@ -27,7 +28,7 @@ internal sealed class RemoveStudentsFromMicrosoftTeams
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
-    public RemoveStudentsFromMicrosoftTeams(
+    public AddStudentsToMicrosoftTeamResource(
         IOfferingRepository offeringRepository,
         IEnrolmentRepository enrolmentRepository,
         IMSTeamOperationsRepository operationsRepository,
@@ -40,57 +41,49 @@ internal sealed class RemoveStudentsFromMicrosoftTeams
         _operationsRepository = operationsRepository;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
-        _logger = logger.ForContext<SessionDeletedDomainEvent>();
+        _logger = logger.ForContext<ResourceAddedToOfferingDomainEvent>();
     }
 
-    public async Task Handle(SessionDeletedDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(ResourceAddedToOfferingDomainEvent notification, CancellationToken cancellationToken)
     {
+        if (notification.ResourceType != ResourceType.MicrosoftTeam)
+            return;
+
         Offering offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
 
         if (offering is null)
         {
             _logger
-                .ForContext(nameof(SessionDeletedDomainEvent), notification, true)
+                .ForContext(nameof(TeacherAddedToOfferingDomainEvent), notification, true)
                 .ForContext(nameof(Error), OfferingErrors.NotFound(notification.OfferingId))
                 .Error("Failed to complete the event handler");
 
             return;
         }
 
-        Session session = offering.Sessions.FirstOrDefault(session => session.Id == notification.SessionId);
+        MicrosoftTeamResource resource = offering.Resources.FirstOrDefault(resource => resource.Id == notification.ResourceId) as MicrosoftTeamResource;
 
-        if (session is null)
+        if (resource is null)
         {
             _logger
-                .ForContext(nameof(SessionDeletedDomainEvent), notification, true)
-                .ForContext(nameof(Error), SessionErrors.NotFound(notification.SessionId))
+                .ForContext(nameof(TeacherAddedToOfferingDomainEvent), notification, true)
+                .ForContext(nameof(Error), ResourceErrors.NotFound(notification.ResourceId))
                 .Error("Failed to complete the event handler");
 
             return;
         }
 
-        int otherSessions = offering.Sessions.Count(innerSession => !innerSession.IsDeleted);
-
-        if (otherSessions > 0)
-        {
-            _logger
-                .ForContext(nameof(SessionDeletedDomainEvent), notification, true)
-                .Error("Another non-deleted session exists. Do not process event handler.");
-        }
-
         List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByOfferingId(offering.Id, cancellationToken);
 
-        List<string> studentIds = enrolments.Select(enrolment => enrolment.StudentId).ToList();
-
-        foreach (string studentId in studentIds)
+        foreach (Enrolment enrolment in enrolments)
         {
-            StudentMSTeamOperation operation = new()
+            StudentOfferingMSTeamOperation operation = new()
             {
-                StudentId = studentId,
-                OfferingId = offering.Id,
-                DateScheduled = _dateTime.Now,
-                Action = MSTeamOperationAction.Remove,
-                PermissionLevel = MSTeamOperationPermissionLevel.Member
+                TeamName = resource.TeamName,
+                StudentId = enrolment.StudentId,
+                Action = MSTeamOperationAction.Add,
+                PermissionLevel = MSTeamOperationPermissionLevel.Member,
+                DateScheduled = _dateTime.Now
             };
 
             _operationsRepository.Insert(operation);

@@ -10,7 +10,7 @@ internal sealed class ResourceConfiguration : IEntityTypeConfiguration<Resource>
 {
     public void Configure(EntityTypeBuilder<Resource> builder)
     {
-        builder.ToTable("Subjects_Resources");
+        builder.ToTable("Offerings_Resources");
 
         builder
             .HasKey(resource => resource.Id);

@@ -48,7 +48,7 @@ internal sealed class RemoveSessionCommandHandler
             return Result.Failure(SessionErrors.NotFound(request.SessionId));
         }
 
-        offering.DeleteSession(session.Id);
+        offering.RemoveSession(session.Id);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

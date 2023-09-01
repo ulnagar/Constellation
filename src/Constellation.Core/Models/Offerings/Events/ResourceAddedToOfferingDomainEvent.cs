@@ -3,9 +3,11 @@
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.ValueObjects;
 
-public sealed record SessionDeletedDomainEvent(
+public sealed record ResourceAddedToOfferingDomainEvent(
     DomainEventId Id,
     OfferingId OfferingId,
-    SessionId SessionId)
+    ResourceId ResourceId,
+    ResourceType ResourceType)
     : DomainEvent(Id);

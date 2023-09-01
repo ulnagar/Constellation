@@ -3,10 +3,13 @@
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Primitives;
+using Constellation.Core.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +18,7 @@ public sealed class Offering : AggregateRoot
 {
     private readonly List<Resource> _resources = new();
     private readonly List<Session> _sessions = new();
+    private readonly List<TeacherAssignment> _teachers = new();
 
     public Offering()
     {
@@ -32,10 +36,9 @@ public sealed class Offering : AggregateRoot
     public int CourseId { get; set; }
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }
-    public List<Enrolment> Enrolments { get; set; } = new();
     public IReadOnlyList<Session> Sessions => _sessions;
     public IReadOnlyList<Resource> Resources => _resources;
-    public List<Absence> Absences { get; set; } = new();
+    public IReadOnlyList<TeacherAssignment> Teachers => _teachers;
     public bool IsCurrent => IsOfferingCurrent();
 
     private bool IsOfferingCurrent()
@@ -51,23 +54,67 @@ public sealed class Offering : AggregateRoot
         return false;
     }
 
-    public void AddSession(
+    public void AddTeacher(
         string staffId,
-        int periodId,
-        string roomId)
+        AssignmentType type)
     {
-        // TODO: Add validation and Domain Event
+        if (_teachers.Any(assignment => 
+            assignment.StaffId == staffId && 
+            assignment.Type == type && 
+            !assignment.IsDeleted))
+            return;
+
+        TeacherAssignment assignment = new TeacherAssignment(
+            Id, 
+            staffId, 
+            type);
+
+        _teachers.Add(assignment);
+
+        if (_teachers.Count(assignment =>
+            assignment.StaffId == staffId &&
+            !assignment.IsDeleted) > 1)
+            return;
+
+        RaiseDomainEvent(new TeacherAddedToOfferingDomainEvent(new(), Id, assignment.Id));
+    }
+
+    public void RemoveTeacher(
+        string staffId,
+        AssignmentType type)
+    {
+        TeacherAssignment assignment = _teachers.FirstOrDefault(assignment =>
+            assignment.StaffId == staffId &&
+            assignment.Type == type &&
+            !assignment.IsDeleted);
+
+        if (assignment is null)
+            return;
+
+        assignment.Delete();
+
+        if (_teachers.Any(assignment =>
+            assignment.StaffId == staffId &&
+            !assignment.IsDeleted))
+            return;
+
+        RaiseDomainEvent(new TeacherRemovedFromOfferingDomainEvent(new(), Id, assignment.Id));
+    }
+
+    public void AddSession(
+        int periodId)
+    {
+        if (_sessions.Any(session => session.PeriodId == periodId && !session.IsDeleted))
+            return;
 
         Session session = new Session(
             Id,
-            staffId,
-            periodId,
-            roomId);
+            periodId);
 
         _sessions.Add(session);
     }
 
-    public void DeleteSession(int sessionId)
+    public void RemoveSession(SessionId sessionId)
     {
         Session session = _sessions.FirstOrDefault(session => session.Id == sessionId);
 
@@ -75,28 +122,42 @@ public sealed class Offering : AggregateRoot
             return;
 
         session.Delete();
-
-        RaiseDomainEvent(new SessionDeletedDomainEvent(new DomainEventId(), Id, sessionId));
     }
 
-    public void DeleteAllSessions()
+    public void RemoveAllSessions()
     {
-        List<string> staffIds = new();
-        List<string> roomIds = new();
-
         foreach (Session session in _sessions)
         {
             if (session.IsDeleted) continue;
 
-            staffIds.Add(session.StaffId);
-            roomIds.Add(session.RoomId);
-
             session.Delete();
         }
+    }
 
-        staffIds = staffIds.Distinct().ToList();
-        roomIds = roomIds.Distinct().ToList();
+    public Result AddResource(
+        ResourceType type,
+        string resourceId,
+        string name,
+        string url)
+    {
+        if (_resources.Any(resource => resource.Type == type && resource.ResourceId == resourceId))
+            return Result.Success();
 
-        RaiseDomainEvent(new AllSessionsDeletedDomainEvent(new DomainEventId(), Id, staffIds, roomIds));
+        Resource resource = type.Value switch
+        {
+            "Adobe Connect Room" => new AdobeConnectRoomResource(Id, url, name, resourceId),
+            "Microsoft Team" => new MicrosoftTeamResource(Id, url, name, resourceId),
+            "Canvas Course" => new CanvasCourseResource(Id, url, name, resourceId),
+            _ => null
+        };
+
+        if (resource is null)
+            return Result.Failure(ResourceErrors.InvalidType(type.Value));
+
+        _resources.Add(resource);
+
+        RaiseDomainEvent(new ResourceAddedToOfferingDomainEvent(new(), Id, resource.Id, resource.Type));
+
+        return Result.Success();
     }
 }

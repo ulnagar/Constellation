@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Offerings.Events.AllSessionsDeletedDomainEvent;
+﻿namespace Constellation.Application.Offerings.Events.TeacherAddedToOfferingDomainEvent;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
@@ -8,13 +8,15 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Serilog;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class RemoveTeachersFromCanvas
-    : IDomainEventHandler<AllSessionsDeletedDomainEvent>
+internal sealed class AddTeacherToCanvasCourse
+    : IDomainEventHandler<TeacherAddedToOfferingDomainEvent>
 {
     private readonly IOfferingRepository _offeringRepository;
     private readonly ICanvasOperationsRepository _operationsRepository;
@@ -22,7 +24,7 @@ internal sealed class RemoveTeachersFromCanvas
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
-    public RemoveTeachersFromCanvas(
+    public AddTeacherToCanvasCourse(
         IOfferingRepository offeringRepository,
         ICanvasOperationsRepository operationsRepository,
         IDateTimeProvider dateTime,
@@ -33,30 +35,43 @@ internal sealed class RemoveTeachersFromCanvas
         _operationsRepository = operationsRepository;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
-        _logger = logger.ForContext<AllSessionsDeletedDomainEvent>();
+        _logger = logger.ForContext<TeacherAddedToOfferingDomainEvent>();
     }
 
-    public async Task Handle(AllSessionsDeletedDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(TeacherAddedToOfferingDomainEvent notification, CancellationToken cancellationToken)
     {
         Offering offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
 
         if (offering is null)
         {
             _logger
-                .ForContext(nameof(SessionDeletedDomainEvent), notification, true)
+                .ForContext(nameof(TeacherAddedToOfferingDomainEvent), notification, true)
                 .ForContext(nameof(Error), OfferingErrors.NotFound(notification.OfferingId))
                 .Error("Failed to complete the event handler");
 
             return;
         }
 
-        foreach (string staffId in notification.StaffIds)
+        TeacherAssignment assignment = offering.Teachers.FirstOrDefault(assignment => assignment.Id == notification.AssignmentId);
+
+        if (assignment is null)
+        {
+            _logger
+                .ForContext(nameof(TeacherAddedToOfferingDomainEvent), notification, true)
+                .ForContext(nameof(Error), TeacherAssignmentErrors.NotFound(notification.AssignmentId))
+                .Error("Failed to complete the event handler");
+
+            return;
+        }
+
+        foreach (Resource resource in offering.Resources.Where(resource => resource.Type == ResourceType.CanvasCourse))
         {
             ModifyEnrolmentCanvasOperation operation = new()
             {
-                UserId = staffId,
-                CourseId = $"{offering.EndDate.Year}-{offering.Name.Substring(0, offering.Name.Length - 1)}",
-                Action = CanvasOperation.EnrolmentAction.Remove,
+                UserId = assignment.StaffId,
+                //CourseId = $"{offering.EndDate.Year}-{offering.Name.Substring(0, offering.Name.Length - 2)}",
+                CourseId = resource.ResourceId,
+                Action = CanvasOperation.EnrolmentAction.Add,
                 ScheduledFor = _dateTime.Now
             };
 

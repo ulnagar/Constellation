@@ -19,7 +19,7 @@ public sealed class AdobeConnectRoomResource : Resource
 {
     private AdobeConnectRoomResource() { } // Required by EF Core
 
-    public AdobeConnectRoomResource(
+    internal AdobeConnectRoomResource(
         OfferingId offeringId,
         string scoId,
         string name,
@@ -40,28 +40,28 @@ public sealed class MicrosoftTeamResource : Resource
 {
     private MicrosoftTeamResource() { } // Required by EF Core
 
-    public MicrosoftTeamResource(
+    internal MicrosoftTeamResource(
         OfferingId offeringId,
-        Guid teamGroupId,
+        string teamName,
         string name,
         string url)
     {
         Id = new();
         Type = ResourceType.MicrosoftTeam;
         OfferingId = offeringId;
-        ResourceId = teamGroupId.ToString();
+        ResourceId = teamName; // Should be name of the Team so that the ID can be searched in the database
         Name = name;
         Url = url;
     }
 
-    public Guid GroupId => new Guid(ResourceId);
+    public string TeamName => ResourceId;
 }
 
 public sealed class CanvasCourseResource : Resource
 {
     private CanvasCourseResource() { } // Required by EF Core
 
-    public CanvasCourseResource(
+    internal CanvasCourseResource(
         OfferingId offeringId,
         string canvasCourseId,
         string name,

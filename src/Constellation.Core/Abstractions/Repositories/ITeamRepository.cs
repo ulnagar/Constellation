@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using Constellation;
 
 namespace Constellation.Core.Abstractions.Repositories;
 
@@ -13,6 +12,7 @@ public interface ITeamRepository
 {
     Task<List<Team>> GetAll(CancellationToken cancellationToken = default);
     Task<Team?> GetById(Guid teamId, CancellationToken cancellationToken = default);
+    Task<Team?> GetByName(string Name, CancellationToken cancellationToken = default);
     Task<Guid?> GetIdByOffering(string offeringName, string offeringYear, CancellationToken cancellationToken = default);
     Task<string?> GetLinkById(Guid teamId, CancellationToken cancellationToken = default);
     Task<string?> GetLinkByOffering(string offeringName, string offeringYear, CancellationToken cancellationToken = default);

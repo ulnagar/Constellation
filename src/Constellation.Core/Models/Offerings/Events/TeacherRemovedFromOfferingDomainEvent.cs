@@ -4,8 +4,8 @@ using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 
-public sealed record SessionDeletedDomainEvent(
+public sealed record TeacherRemovedFromOfferingDomainEvent(
     DomainEventId Id,
     OfferingId OfferingId,
-    SessionId SessionId)
+    Offerings.Identifiers.AssignmentId AssignmentId)
     : DomainEvent(Id);
