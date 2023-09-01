@@ -5,6 +5,7 @@ using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects;
+using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -22,6 +23,14 @@ public class OfferingConfiguration : IEntityTypeConfiguration<Offering>
             .HasConversion(
                 id => id.Value,
                 value => OfferingId.FromValue(value));
+
+        builder
+            .Property(offering => offering.StartDate)
+            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+
+        builder
+            .Property(offering => offering.EndDate)
+            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .HasOne<Course>()

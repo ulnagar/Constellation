@@ -54,7 +54,7 @@ internal sealed class AddStudentsToMicrosoftTeamResource
         if (offering is null)
         {
             _logger
-                .ForContext(nameof(TeacherAddedToOfferingDomainEvent), notification, true)
+                .ForContext(nameof(ResourceAddedToOfferingDomainEvent), notification, true)
                 .ForContext(nameof(Error), OfferingErrors.NotFound(notification.OfferingId))
                 .Error("Failed to complete the event handler");
 
@@ -66,7 +66,7 @@ internal sealed class AddStudentsToMicrosoftTeamResource
         if (resource is null)
         {
             _logger
-                .ForContext(nameof(TeacherAddedToOfferingDomainEvent), notification, true)
+                .ForContext(nameof(ResourceAddedToOfferingDomainEvent), notification, true)
                 .ForContext(nameof(Error), ResourceErrors.NotFound(notification.ResourceId))
                 .Error("Failed to complete the event handler");
 

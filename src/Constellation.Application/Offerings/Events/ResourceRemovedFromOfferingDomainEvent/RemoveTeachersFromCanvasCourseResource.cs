@@ -1,10 +1,9 @@
-﻿namespace Constellation.Application.Offerings.Events.ResourceAddedToOfferingDomainEvent;
+﻿namespace Constellation.Application.Offerings.Events.ResourceRemovedFromOfferingDomainEvent;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
@@ -14,24 +13,23 @@ using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class AddTeachersToMicrosoftTeamResource
-    : IDomainEventHandler<ResourceAddedToOfferingDomainEvent>
+internal sealed class RemoveTeachersFromCanvasCourseResource
+    : IDomainEventHandler<ResourceRemovedFromOfferingDomainEvent>
 {
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly IMSTeamOperationsRepository _operationsRepository;
+    private readonly ICanvasOperationsRepository _operationsRepository;
     private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
-    public AddTeachersToMicrosoftTeamResource(
+    public RemoveTeachersFromCanvasCourseResource(
         IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
-        IMSTeamOperationsRepository operationsRepository,
+        ICanvasOperationsRepository operationsRepository,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogger logger)
@@ -41,12 +39,12 @@ internal sealed class AddTeachersToMicrosoftTeamResource
         _operationsRepository = operationsRepository;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
-        _logger = logger.ForContext<ResourceAddedToOfferingDomainEvent>();
+        _logger = logger.ForContext<ResourceRemovedFromOfferingDomainEvent>();
     }
 
-    public async Task Handle(ResourceAddedToOfferingDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(ResourceRemovedFromOfferingDomainEvent notification, CancellationToken cancellationToken)
     {
-        if (notification.ResourceType != ResourceType.MicrosoftTeam)
+        if (notification.Resource.Type != ResourceType.CanvasCourse)
             return;
 
         Offering offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
@@ -54,24 +52,14 @@ internal sealed class AddTeachersToMicrosoftTeamResource
         if (offering is null)
         {
             _logger
-                .ForContext(nameof(ResourceAddedToOfferingDomainEvent), notification, true)
+                .ForContext(nameof(ResourceRemovedFromOfferingDomainEvent), notification, true)
                 .ForContext(nameof(Error), OfferingErrors.NotFound(notification.OfferingId))
                 .Error("Failed to complete the event handler");
 
             return;
         }
 
-        MicrosoftTeamResource resource = offering.Resources.FirstOrDefault(resource => resource.Id == notification.ResourceId) as MicrosoftTeamResource;
-
-        if (resource is null)
-        {
-            _logger
-                .ForContext(nameof(ResourceAddedToOfferingDomainEvent), notification, true)
-                .ForContext(nameof(Error), ResourceErrors.NotFound(notification.ResourceId))
-                .Error("Failed to complete the event handler");
-
-            return;
-        }
+        CanvasCourseResource resource = notification.Resource as CanvasCourseResource;
 
         List<string> staffIds = offering.Teachers.Where(assignment => !assignment.IsDeleted).Select(assignment => assignment.StaffId).ToList();
 
@@ -79,13 +67,13 @@ internal sealed class AddTeachersToMicrosoftTeamResource
 
         foreach (Staff staffMember in staffMembers)
         {
-            TeacherAssignmentMSTeamOperation operation = new()
+            ModifyEnrolmentCanvasOperation operation = new()
             {
-                TeamName = resource.TeamName,
-                StaffId = staffMember.StaffId,
-                Action = MSTeamOperationAction.Add,
-                PermissionLevel = MSTeamOperationPermissionLevel.Owner,
-                DateScheduled = _dateTime.Now
+                UserId = staffMember.StaffId,
+                //CourseId = $"{offering.EndDate.Year}-{offering.Name.Substring(0, offering.Name.Length - 2)}",
+                CourseId = resource.CourseId,
+                Action = CanvasOperation.EnrolmentAction.Remove,
+                ScheduledFor = _dateTime.Now
             };
 
             _operationsRepository.Insert(operation);

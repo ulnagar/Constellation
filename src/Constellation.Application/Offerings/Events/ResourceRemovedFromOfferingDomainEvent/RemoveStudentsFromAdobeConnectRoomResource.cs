@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Offerings.Events.ResourceAddedToOfferingDomainEvent;
+﻿namespace Constellation.Application.Offerings.Events.ResourceRemovedFromOfferingDomainEvent;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
@@ -14,12 +14,11 @@ using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class AddStudentsToAdobeConnectRoomResource
-    : IDomainEventHandler<ResourceAddedToOfferingDomainEvent>
+internal sealed class RemoveStudentsFromAdobeConnectRoomResource
+    : IDomainEventHandler<ResourceRemovedFromOfferingDomainEvent>
 {
     private readonly IOfferingRepository _offeringRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
@@ -28,7 +27,7 @@ internal sealed class AddStudentsToAdobeConnectRoomResource
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
-    public AddStudentsToAdobeConnectRoomResource(
+    public RemoveStudentsFromAdobeConnectRoomResource(
         IOfferingRepository offeringRepository,
         IEnrolmentRepository enrolmentRepository,
         IAdobeConnectOperationsRepository operationsRepository,
@@ -41,12 +40,12 @@ internal sealed class AddStudentsToAdobeConnectRoomResource
         _operationsRepository = operationsRepository;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
-        _logger = logger.ForContext<ResourceAddedToOfferingDomainEvent>();
+        _logger = logger.ForContext<ResourceRemovedFromOfferingDomainEvent>();
     }
 
-    public async Task Handle(ResourceAddedToOfferingDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(ResourceRemovedFromOfferingDomainEvent notification, CancellationToken cancellationToken)
     {
-        if (notification.ResourceType != ResourceType.AdobeConnectRoom)
+        if (notification.Resource.Type != ResourceType.AdobeConnectRoom)
             return;
 
         Offering offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
@@ -54,23 +53,14 @@ internal sealed class AddStudentsToAdobeConnectRoomResource
         if (offering is null)
         {
             _logger
-                .ForContext(nameof(ResourceAddedToOfferingDomainEvent), notification, true)
+                .ForContext(nameof(ResourceRemovedFromOfferingDomainEvent), notification, true)
                 .ForContext(nameof(Error), OfferingErrors.NotFound(notification.OfferingId))
                 .Error("Failed to complete the event handler");
 
             return;
         }
 
-        AdobeConnectRoomResource resource = offering.Resources.FirstOrDefault(resource => resource.Id == notification.ResourceId) as AdobeConnectRoomResource;
-
-        if (resource is null)
-        {
-            _logger
-                .ForContext(nameof(ResourceAddedToOfferingDomainEvent), notification, true)
-                .ForContext(nameof(Error), ResourceErrors.NotFound(notification.ResourceId))
-            .Error("Failed to complete the event handler");
-            return;
-        }
+        AdobeConnectRoomResource resource = notification.Resource as AdobeConnectRoomResource;
 
         List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByOfferingId(offering.Id, cancellationToken);
 
@@ -80,7 +70,7 @@ internal sealed class AddStudentsToAdobeConnectRoomResource
             {
                 ScoId = resource.ScoId,
                 StudentId = enrolment.StudentId,
-                Action = AdobeConnectOperationAction.Add,
+                Action = AdobeConnectOperationAction.Remove,
                 DateScheduled = _dateTime.Now
             };
 

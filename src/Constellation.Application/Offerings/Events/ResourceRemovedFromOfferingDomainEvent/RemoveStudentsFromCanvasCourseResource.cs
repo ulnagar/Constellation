@@ -1,10 +1,9 @@
-﻿namespace Constellation.Application.Offerings.Events.ResourceAddedToOfferingDomainEvent;
+﻿namespace Constellation.Application.Offerings.Events.ResourceRemovedFromOfferingDomainEvent;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
@@ -14,24 +13,23 @@ using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class AddStudentsToAdobeConnectRoomResource
-    : IDomainEventHandler<ResourceAddedToOfferingDomainEvent>
+internal sealed class RemoveStudentsFromCanvasCourseResource
+    : IDomainEventHandler<ResourceRemovedFromOfferingDomainEvent>
 {
     private readonly IOfferingRepository _offeringRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
-    private readonly IAdobeConnectOperationsRepository _operationsRepository;
+    private readonly ICanvasOperationsRepository _operationsRepository;
     private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
-    public AddStudentsToAdobeConnectRoomResource(
+    public RemoveStudentsFromCanvasCourseResource(
         IOfferingRepository offeringRepository,
         IEnrolmentRepository enrolmentRepository,
-        IAdobeConnectOperationsRepository operationsRepository,
+        ICanvasOperationsRepository operationsRepository,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogger logger)
@@ -41,12 +39,12 @@ internal sealed class AddStudentsToAdobeConnectRoomResource
         _operationsRepository = operationsRepository;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
-        _logger = logger.ForContext<ResourceAddedToOfferingDomainEvent>();
+        _logger = logger.ForContext<ResourceRemovedFromOfferingDomainEvent>();
     }
 
-    public async Task Handle(ResourceAddedToOfferingDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(ResourceRemovedFromOfferingDomainEvent notification, CancellationToken cancellationToken)
     {
-        if (notification.ResourceType != ResourceType.AdobeConnectRoom)
+        if (notification.Resource.Type != ResourceType.CanvasCourse)
             return;
 
         Offering offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
@@ -54,34 +52,25 @@ internal sealed class AddStudentsToAdobeConnectRoomResource
         if (offering is null)
         {
             _logger
-                .ForContext(nameof(ResourceAddedToOfferingDomainEvent), notification, true)
+                .ForContext(nameof(ResourceRemovedFromOfferingDomainEvent), notification, true)
                 .ForContext(nameof(Error), OfferingErrors.NotFound(notification.OfferingId))
                 .Error("Failed to complete the event handler");
 
             return;
         }
 
-        AdobeConnectRoomResource resource = offering.Resources.FirstOrDefault(resource => resource.Id == notification.ResourceId) as AdobeConnectRoomResource;
-
-        if (resource is null)
-        {
-            _logger
-                .ForContext(nameof(ResourceAddedToOfferingDomainEvent), notification, true)
-                .ForContext(nameof(Error), ResourceErrors.NotFound(notification.ResourceId))
-            .Error("Failed to complete the event handler");
-            return;
-        }
+        CanvasCourseResource resource = notification.Resource as CanvasCourseResource;
 
         List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByOfferingId(offering.Id, cancellationToken);
 
         foreach (Enrolment enrolment in enrolments)
         {
-            StudentAdobeConnectOperation operation = new()
+            ModifyEnrolmentCanvasOperation operation = new()
             {
-                ScoId = resource.ScoId,
-                StudentId = enrolment.StudentId,
-                Action = AdobeConnectOperationAction.Add,
-                DateScheduled = _dateTime.Now
+                UserId = enrolment.StudentId,
+                CourseId = resource.CourseId,
+                Action = CanvasOperation.EnrolmentAction.Remove,
+                ScheduledFor = _dateTime.Now
             };
 
             _operationsRepository.Insert(operation);

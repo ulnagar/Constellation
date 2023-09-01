@@ -1,13 +1,8 @@
 ﻿namespace Constellation.Core.Models.Offerings;
-
-using Constellation.Core.Models.Absences;
-using Constellation.Core.Models.Enrolments;
-using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
-using Constellation.Core.Models.Subjects;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System;
@@ -157,6 +152,22 @@ public sealed class Offering : AggregateRoot
         _resources.Add(resource);
 
         RaiseDomainEvent(new ResourceAddedToOfferingDomainEvent(new(), Id, resource.Id, resource.Type));
+
+        return Result.Success();
+    }
+
+    public Result RemoveResource(
+        ResourceId resourceId)
+    {
+        Resource resource = _resources.FirstOrDefault(resource =>
+            resource.Id == resourceId);
+
+        if (resource is null)
+            return Result.Failure(ResourceErrors.NotFound(resourceId));
+
+        RaiseDomainEvent(new ResourceRemovedFromOfferingDomainEvent(new(), Id, resource));
+
+        _resources.Remove(resource);
 
         return Result.Success();
     }
