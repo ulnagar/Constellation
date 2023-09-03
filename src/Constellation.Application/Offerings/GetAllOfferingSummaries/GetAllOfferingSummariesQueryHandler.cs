@@ -3,9 +3,9 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -18,6 +18,7 @@ internal sealed class GetAllOfferingSummariesQueryHandler
 {
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly IFacultyRepository _facultyRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
     private readonly ILogger _logger;
@@ -25,12 +26,14 @@ internal sealed class GetAllOfferingSummariesQueryHandler
     public GetAllOfferingSummariesQueryHandler(
         IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
+        ICourseRepository courseRepository,
         IFacultyRepository facultyRepository,
         ITimetablePeriodRepository periodRepository,
         ILogger logger)
     {
         _offeringRepository = offeringRepository;
         _staffRepository = staffRepository;
+        _courseRepository = courseRepository;
         _facultyRepository = facultyRepository;
         _periodRepository = periodRepository;
         _logger = logger.ForContext<GetAllOfferingSummariesQuery>();
@@ -50,18 +53,32 @@ internal sealed class GetAllOfferingSummariesQueryHandler
             List<string> teacherNames = teachers.Select(teacher => teacher.DisplayName).ToList();
 
             // Calculate minPerFn
-            int minPerFN = (int)offering.Sessions
+            List<int> periodIds = offering.Sessions
                 .Where(session => !session.IsDeleted)
-                .Sum(session => session.Period.EndTime.Subtract(session.Period.StartTime).TotalMinutes);
+                .Select(session => session.PeriodId)
+                .ToList();
+
+            double minPerFn = await _periodRepository.TotalDurationForCollectionOfPeriods(periodIds, cancellationToken);
+
+            Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+
+            if (course is null)
+            {
+                _logger
+                    .ForContext(nameof(Offering), offering, true)
+                    .Warning("Could not find Offering with Id {id}", offering.CourseId);
+
+                continue;
+            }
 
             // Get Faculty
-            Faculty faculty = await _facultyRepository.GetById(offering.Course.FacultyId, cancellationToken);
+            Faculty faculty = await _facultyRepository.GetById(course.FacultyId, cancellationToken);
 
             if (faculty is null)
             {
                 _logger
-                    .ForContext(nameof(Offering), offering, true)
-                    .Warning("Could not find Faculty with Id {id}", offering.Course.FacultyId);
+                    .ForContext(nameof(Course), course, true)
+                    .Warning("Could not find Faculty with Id {id}", course.FacultyId);
 
                 continue;
             }
@@ -69,12 +86,12 @@ internal sealed class GetAllOfferingSummariesQueryHandler
             OfferingSummaryResponse entry = new(
                 offering.Id,
                 offering.Name,
-                offering.Course.Name,
+                course.Name,
                 offering.EndDate,
                 teacherNames,
-                minPerFN,
+                (int)minPerFn,
                 faculty.Name,
-                offering.Course.Grade,
+                course.Grade,
                 offering.IsCurrent);
 
             response.Add(entry);

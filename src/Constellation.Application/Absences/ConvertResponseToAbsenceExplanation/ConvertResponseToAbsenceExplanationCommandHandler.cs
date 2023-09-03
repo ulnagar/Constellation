@@ -5,6 +5,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Linq;
@@ -54,7 +55,7 @@ internal sealed class ConvertResponseToAbsenceExplanationCommandHandler
         {
             _logger.Warning("Could not find offering with Id {id}", absence.OfferingId);
 
-            return Result.Failure<AbsenceExplanation>(DomainErrors.Subjects.Offering.NotFound(absence.OfferingId));
+            return Result.Failure<AbsenceExplanation>(OfferingErrors.NotFound(absence.OfferingId));
         }
 
         string timeframe = string.Empty;

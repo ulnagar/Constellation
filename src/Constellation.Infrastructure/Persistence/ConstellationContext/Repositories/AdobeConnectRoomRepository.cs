@@ -24,14 +24,15 @@ public class AdobeConnectRoomRepository : IAdobeConnectRoomRepository
     private IQueryable<AdobeConnectRoom> Collection()
     {
         return _context.Rooms
-            .Include(r => r.OfferingSessions)
-                .ThenInclude(session => session.Offering)
-            .Include(r => r.OfferingSessions)
-                .ThenInclude(session => session.Period)
-            .Include(r => r.OfferingSessions)
-                .ThenInclude(session => session.Teacher)
             .OrderBy(r => r.Name);
     }
+
+    public async Task<List<AdobeConnectRoom>> GetAll(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AdobeConnectRoom>()
+            .Where(room => !room.IsDeleted)
+            .ToListAsync(cancellationToken);
 
     public async Task<List<AdobeConnectRoom>> GetByOfferingId(
         OfferingId offeringId,

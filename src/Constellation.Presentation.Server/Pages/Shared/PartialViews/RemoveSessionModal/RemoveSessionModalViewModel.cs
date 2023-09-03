@@ -4,8 +4,7 @@ using Constellation.Core.Models.Offerings.Identifiers;
 
 internal sealed record RemoveSessionModalViewModel(
     OfferingId OfferingId,
-    int SessionId,
+    SessionId SessionId,
     string SessionName,
-    string TeacherName,
     string CourseName,
     string OfferingName);

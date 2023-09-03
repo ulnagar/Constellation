@@ -2,15 +2,22 @@ namespace Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
 
 using Constellation.Application.Enrolments.UnenrolStudent;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Offerings.AddTeacherToOffering;
 using Constellation.Application.Offerings.GetOfferingDetails;
 using Constellation.Application.Offerings.RemoveAllSessions;
+using Constellation.Application.Offerings.RemoveResourceFromOffering;
 using Constellation.Application.Offerings.RemoveSession;
+using Constellation.Application.Offerings.RemoveTeacherFromOffering;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Server.Pages.Shared.Components.AddTeacherToOffering;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.DeleteRoleModal;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveAllSessionsModal;
+using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveResourceFromOfferingModal;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveSessionModal;
+using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveTeacherFromOfferingModal;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -94,18 +101,17 @@ public class DetailsModel : BasePageModel
 
     public IActionResult OnPostAjaxRemoveSession(
         string sessionPeriod,
-        int sessionId,
-        string teacherName,
+        Guid sessionId,
         string courseName,
         string offeringName)
     {
         OfferingId offeringId = OfferingId.FromValue(Id);
+        SessionId SessionId = SessionId.FromValue(sessionId);
 
         RemoveSessionModalViewModel viewModel = new(
             offeringId,
-            sessionId,
+            SessionId,
             sessionPeriod,
-            teacherName,
             courseName,
             offeringName);
 
@@ -113,11 +119,12 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetRemoveSession(
-        int sessionId)
+        Guid sessionId)
     {
         OfferingId offeringId = OfferingId.FromValue(Id);
+        SessionId SessionId = SessionId.FromValue(sessionId);
 
-        Result request = await _sender.Send(new RemoveSessionCommand(sessionId, offeringId));
+        Result request = await _sender.Send(new RemoveSessionCommand(offeringId, SessionId));
 
         if (request.IsFailure)
         {
@@ -152,6 +159,113 @@ public class DetailsModel : BasePageModel
         OfferingId offeringId = OfferingId.FromValue(Id);
 
         Result request = await _sender.Send(new RemoveAllSessionsCommand(offeringId));
+
+        if (request.IsFailure)
+        {
+            Error = new()
+            {
+                Error = request.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAddTeacher(
+        AddTeacherToOfferingSelection viewModel)
+    {
+        OfferingId offeringId = OfferingId.FromValue(Id);
+
+        AssignmentType type = AssignmentType.FromValue(viewModel.AssignmentType);
+
+        Result request = await _sender.Send(new AddTeacherToOfferingCommand(offeringId, viewModel.StaffId, type));
+
+        if (request.IsFailure)
+        {
+            Error = new()
+            {
+                Error = request.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public IActionResult OnPostAjaxRemoveTeacher(
+        string teacherName,
+        string assignmentType,
+        string courseName,
+        string offeringName)
+    {
+        OfferingId offeringId = OfferingId.FromValue(Id);
+
+        RemoveTeacherFromOfferingModalViewModel viewModel = new(
+            offeringId,
+            teacherName,
+            assignmentType,
+            courseName,
+            offeringName);
+
+        return Partial("RemoveTeacherFromOfferingModal", viewModel);
+    }
+
+    public async Task<IActionResult> OnGetRemoveTeacher(
+        string staffId,
+        string assignmentType)
+    {
+        OfferingId offeringId = OfferingId.FromValue(Id);
+        AssignmentType teacherAssignmentType = AssignmentType.FromValue(assignmentType);
+
+        Result request = await _sender.Send(new RemoveTeacherFromOfferingCommand(offeringId, staffId, teacherAssignmentType));
+
+        if (request.IsFailure)
+        {
+            Error = new()
+            {
+                Error = request.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public IActionResult OnPostAjaxRemoveResource(
+        string courseName,
+        string offeringName,
+        string resourceName,
+        string resourceType,
+        Guid resourceId)
+    {
+        OfferingId offeringId = OfferingId.FromValue(Id);
+        ResourceId id = ResourceId.FromValue(resourceId);
+
+        RemoveResourceFromOfferingModalViewModel viewModel = new(
+            offeringId,
+            id,
+            resourceName,
+            resourceType,
+            courseName,
+            offeringName);
+
+        return Partial("RemoveResourceFromOfferingModal", viewModel);
+    }
+
+    public async Task<IActionResult> OnGetRemoveResource(
+        Guid resourceId)
+    {
+        OfferingId offeringId = OfferingId.FromValue(Id);
+        ResourceId id = ResourceId.FromValue(resourceId);
+
+        Result request = await _sender.Send(new RemoveResourceFromOfferingCommand(offeringId, id));
 
         if (request.IsFailure)
         {

@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Server.Pages.Shared.Components.FamilyAddStudent;
+﻿namespace Constellation.Presentation.Server.Pages.Shared.Components.EnrolStudentInOffering;
 
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;

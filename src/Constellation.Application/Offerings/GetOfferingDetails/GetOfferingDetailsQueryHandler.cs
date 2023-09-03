@@ -3,11 +3,13 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -19,6 +21,7 @@ internal sealed class GetOfferingDetailsQueryHandler
     : IQueryHandler<GetOfferingDetailsQuery, OfferingDetailsResponse>
 {
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly ILessonRepository _lessonRepository;
@@ -29,6 +32,7 @@ internal sealed class GetOfferingDetailsQueryHandler
 
     public GetOfferingDetailsQueryHandler(
         IOfferingRepository offeringRepository,
+        ICourseRepository courseRepository,
         IStudentRepository studentRepository,
         ISchoolRepository schoolRepository,
         ILessonRepository lessonRepository,
@@ -38,6 +42,7 @@ internal sealed class GetOfferingDetailsQueryHandler
         ILogger logger)
     {
         _offeringRepository = offeringRepository;
+        _courseRepository = courseRepository;
         _studentRepository = studentRepository;
         _schoolRepository = schoolRepository;
         _lessonRepository = lessonRepository;
@@ -56,6 +61,15 @@ internal sealed class GetOfferingDetailsQueryHandler
             _logger.Warning("Could not find Offering with Id {id}", request.Id);
 
             return Result.Failure<OfferingDetailsResponse>(OfferingErrors.NotFound(request.Id));
+        }
+
+        Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+
+        if (course is null)
+        {
+            _logger.Warning("Could not find Course with Id {id}", offering.CourseId);
+
+            return Result.Failure<OfferingDetailsResponse>(DomainErrors.Subjects.Course.NotFound(offering.CourseId));
         }
 
         List<OfferingDetailsResponse.StudentSummary> students = new();
@@ -88,33 +102,45 @@ internal sealed class GetOfferingDetailsQueryHandler
                 continue;
             }
 
-            Staff teacher = await _staffRepository.GetById(session.StaffId, cancellationToken);
-
-            if (teacher is null)
-            {
-                _logger.Warning("Could not find Staff with Id {id}", session.StaffId);
-
-                continue;
-            }
-
-            AdobeConnectRoom room = await _roomRepository.GetById(session.RoomId, cancellationToken);
-
-            if (room is null)
-            {
-                _logger.Warning("Could not find Adobe Connect Room with Id {id}", session.RoomId);
-
-                continue;
-            }
-
             sessions.Add(new(
                 session.Id,
                 session.PeriodId,
                 period.ToString(),
                 $"{period.Timetable}{period.Day}{period.Period}",
-                teacher.DisplayName,
-                room.Name,
-                room.UrlPath,
                 period.Duration));
+        }
+
+        List<OfferingDetailsResponse.TeacherSummary> teachers = new();
+
+        foreach (TeacherAssignment assignment in offering.Teachers)
+        {
+            if (assignment.IsDeleted)
+                continue;
+
+            Staff teacher = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
+
+            if (teacher is null)
+            {
+                _logger.Warning("Could not find Staff with Id {id}", assignment.StaffId);
+
+                continue;
+            }
+
+            teachers.Add(new(
+                teacher.StaffId,
+                teacher.GetName(),
+                assignment.Type));
+        }
+
+        List<OfferingDetailsResponse.ResourceSummary> resources = new();
+
+        foreach (Resource resource in offering.Resources)
+        {
+            resources.Add(new(
+                resource.Id,
+                resource.Type,
+                resource.Name,
+                resource.Url));
         }
 
         List<OfferingDetailsResponse.LessonSummary> lessons = new();
@@ -147,21 +173,23 @@ internal sealed class GetOfferingDetailsQueryHandler
             }
         }
 
-        int fteTotal = (int)(students.Count() * offering.Course.FullTimeEquivalentValue);
+        int fteTotal = (int)(students.Count() * course.FullTimeEquivalentValue);
         int duration = sessions.Sum(session => session.Duration);
 
         OfferingDetailsResponse response = new(
             offering.Id,
             OfferingName.FromValue(offering.Name),
             offering.CourseId,
-            offering.Course.Name,
-            offering.Course.Grade,
+            course.Name,
+            course.Grade,
             offering.StartDate,
             offering.EndDate,
             offering.IsCurrent,
             students,
             sessions,
             lessons,
+            teachers,
+            resources,
             fteTotal,
             duration);
 

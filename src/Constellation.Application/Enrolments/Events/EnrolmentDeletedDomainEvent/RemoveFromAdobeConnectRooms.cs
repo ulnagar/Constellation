@@ -10,6 +10,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -72,8 +73,10 @@ internal sealed class RemoveFromAdobeConnectRooms
             return;
         }
 
-        List<string> roomIds = offering.Sessions
-            .Select(session => session.RoomId)
+        List<string> roomIds = offering.Resources
+            .Where(resource => resource.Type == ResourceType.AdobeConnectRoom)
+            .Select(resource => resource as AdobeConnectRoomResource)
+            .Select(resource => resource.ScoId)
             .Distinct()
             .ToList();
 

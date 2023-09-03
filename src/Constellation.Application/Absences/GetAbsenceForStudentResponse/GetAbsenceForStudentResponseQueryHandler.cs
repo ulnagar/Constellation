@@ -7,6 +7,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
@@ -73,7 +74,7 @@ internal sealed class GetAbsenceForStudentResponseQueryHandler
         {
             _logger.Warning("Could not find offering with Id {id}", absence.OfferingId);
 
-            return Result.Failure<AbsenceForStudentResponse>(DomainErrors.Subjects.Offering.NotFound(absence.OfferingId));
+            return Result.Failure<AbsenceForStudentResponse>(OfferingErrors.NotFound(absence.OfferingId));
         }
 
         AbsenceForStudentResponse result = new(

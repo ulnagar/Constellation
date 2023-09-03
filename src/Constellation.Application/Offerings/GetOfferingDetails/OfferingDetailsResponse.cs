@@ -20,6 +20,8 @@ public sealed record OfferingDetailsResponse(
     List<OfferingDetailsResponse.StudentSummary> Students,
     List<OfferingDetailsResponse.SessionSummary> Sessions,
     List<OfferingDetailsResponse.LessonSummary> Lessons,
+    List<OfferingDetailsResponse.TeacherSummary> Teachers,
+    List<OfferingDetailsResponse.ResourceSummary> Resources,
     int FTETotal,
     int Duration)
 {
@@ -32,14 +34,22 @@ public sealed record OfferingDetailsResponse(
         string SchoolName);
 
     public sealed record SessionSummary(
-        int SessionId,
+        SessionId SessionId,
         int PeriodId,
         string PeriodName,
         string PeriodSortName,
-        string Teacher,
-        string RoomName,
-        string RoomLink,
         int Duration);
+
+    public sealed record TeacherSummary(
+        string StaffId,
+        Name Name,
+        AssignmentType Type);
+
+    public sealed record ResourceSummary(
+        ResourceId ResourceId,
+        ResourceType Type,
+        string Name,
+        string Url);
 
     public sealed record LessonSummary(
         SciencePracLessonId LessonId,

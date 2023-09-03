@@ -1,0 +1,153 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.Subject.Pages.Offerings.ResourceModel
+
+@using Constellation.Core.Models.Offerings.ValueObjects;
+@using Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
+
+@{
+}
+
+<h2>Add Resource</h2>
+
+<div class="page-menu">
+
+</div>
+
+<hr />
+
+
+<form method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+
+        <input type="hidden" id="CurrentStep" name="CurrentStep" value="@Model.CurrentStep" />
+        @for (int i = 0; i < Model.PreviousSteps.Count; i++)
+        {
+            @Html.HiddenFor(model => model.PreviousSteps[i])
+        }
+
+        <div class="form-group row">
+            <label asp-for="Type" class="col-md-2">Resource Type</label>
+            <div class="col-md-8">
+                <select asp-for="Type" class="form-control combo custom-select">
+                    <option selected="selected" value=""> -- Please Select -- </option>
+                    <option value="@ResourceType.AdobeConnectRoom.Value">@ResourceType.AdobeConnectRoom.Value</option>
+                    <option value="@ResourceType.CanvasCourse.Value">@ResourceType.CanvasCourse.Value</option>
+                    <option value="@ResourceType.MicrosoftTeam.Value">@ResourceType.MicrosoftTeam.Value</option>
+                </select>
+                <span asp-validation-for="Type" class="text-danger"></span>
+            </div>
+        </div>
+
+        @if (Model.CurrentStep == ResourceModel.Phase.AdobeConnectRoomSelection)
+        {
+            <div id="RoomSelect" class="form-group row">
+                <label asp-for="ScoId" class="col-md-2">Adobe Connect Room</label>
+                <div class="col-md-8">
+                    <select asp-for="ScoId" asp-items="@Model.Rooms" class="form-control combo">
+                        <option value="">-- Select --</option>
+                    </select>
+                    <span asp-validation-for="ScoId" class="text-danger"></span>
+                </div>
+            </div>
+        }
+
+        @if (Model.PreviousSteps.Contains(ResourceModel.Phase.AdobeConnectRoomSelection))
+        {
+            <div id="RoomSelect" class="form-group row">
+                <label asp-for="ScoId" class="col-md-2">Adobe Connect Room</label>
+                <div class="col-md-8">
+                    <select asp-for="ScoId" asp-items="@Model.Rooms" class="form-control combo" readonly="readonly">
+                        <option value="">-- Select --</option>
+                    </select>
+                    <span asp-validation-for="ScoId" class="text-danger"></span>
+                </div>
+            </div>
+        }
+
+        @if (Model.CurrentStep == ResourceModel.Phase.MicrosoftTeamsSelection)
+        {
+            <div id="TeamSelect" class="form-group row">
+                <label asp-for="TeamName" class="col-md-2">Microsoft Team</label>
+                <div class="col-md-5">
+                    <select asp-for="TeamName" asp-items="@Model.Teams" class="form-control combo">
+                        <option value="">-- Select --</option>
+                    </select>
+                    <span asp-validation-for="TeamName" class="text-danger"></span>
+                </div>
+            </div>
+        }
+
+        @if (Model.PreviousSteps.Contains(ResourceModel.Phase.MicrosoftTeamsSelection))
+        {
+            <div id="TeamSelect" class="form-group row">
+                <label asp-for="TeamName" class="col-md-2">Microsoft Team</label>
+                <div class="col-md-5">
+                    <select asp-for="TeamName" asp-items="@Model.Teams" class="form-control combo" readonly="readonly">
+                        <option value="">-- Select --</option>
+                    </select>
+                    <span asp-validation-for="TeamName" class="text-danger"></span>
+                </div>
+            </div>
+        }
+
+        @if (Model.CurrentStep == ResourceModel.Phase.CanvasCourseSelection)
+        {
+            <div class="form-group row">
+                <label asp-for="CanvasCourse" class="col-md-2">Canvas Course</label>
+                <div class="col-md-8">
+                    <input asp-for="CanvasCourse" class="form-control" />
+                    <span asp-validation-for="CanvasCourse" class="text-danger"></span>
+                </div>
+            </div>
+        }
+
+        @if (Model.PreviousSteps.Contains(ResourceModel.Phase.CanvasCourseSelection))
+        {
+            <div class="form-group row">
+                <label asp-for="CanvasCourse" class="col-md-2">Canvas Course</label>
+                <div class="col-md-8">
+                    <input asp-for="CanvasCourse" class="form-control" readonly="readonly" />
+                    <span asp-validation-for="CanvasCourse" class="text-danger"></span>
+                </div>
+            </div>
+        }
+
+        @if (Model.CurrentStep == ResourceModel.Phase.DataEntry)
+        {
+            <div class="form-group row">
+                <label asp-for="Name" class="col-md-2"></label>
+                <div class="col-md-8">
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label asp-for="Link" class="col-md-2"></label>
+                <div class="col-md-8">
+                    <input asp-for="Link" class="form-control" />
+                    <span asp-validation-for="Link" class="text-danger"></span>
+                </div>
+            </div>
+        }
+
+        @if (Model.CurrentStep != ResourceModel.Phase.DataEntry)
+        {
+            <div class="form-group">
+                <div class="col-md-3">
+                    <input type="submit" value="Next" class="btn btn-primary btn-block btn-lg" />
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="form-group">
+                <div class="col-md-3">
+                    <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                </div>
+            </div>
+        }
+
+    </div>
+</form>

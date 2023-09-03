@@ -69,6 +69,24 @@
             </a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" href="#teachers" data-toggle="tab">
+                Teachers
+                @if (Model.Offering.Teachers.Any())
+                {
+                    <span class="badge">@Model.Offering.Teachers.Count()</span>
+                }
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#resources" data-toggle="tab">
+                Resources
+                @if (Model.Offering.Resources.Any())
+                {
+                    <span class="badge">@Model.Offering.Resources.Count()</span>
+                }
+            </a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" href="#sessions" data-toggle="tab">
                 Active periods
                 @if (Model.Offering.Sessions.Any())
@@ -131,6 +149,85 @@
             </table>
         </div>
 
+        <div id="teachers" class="tab-pane">
+            <h3>Teachers</h3>
+
+            @if (canEditTest.Succeeded)
+            {
+                <button data-toggle="modal" data-target="#addTeacherModal" class="btn btn-success">Add Teacher</button>
+            }
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Staff Id</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Offering.Teachers)
+                    {
+                        <tr>
+                            <td>@item.StaffId</td>
+                            <td>@item.Name.DisplayName</td>
+                            <td>@item.Type</td>
+                            <td>
+                                @if (canEditTest.Succeeded)
+                                {
+                                    <button data-course-name="@Model.Offering.CourseName" data-offering-name="@Model.Offering.Name" data-teacher-name="@item.Name.DisplayName" data-assignment-type="@item.Type.Value" class="btn btn-sm btn-danger btn-show-hover remove-teacher-button">Remove</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="Resources" class="tab-pane">
+            <h3>Resources</h3>
+
+            @if (canEditTest.Succeeded)
+            {
+                <button data-toggle="modal" data-target="#addResourceModal" class="btn btn-success">Add Resource</button>
+            }
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Name</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Offering.Resources)
+                    {
+                        <tr>
+                            <td>@item.Type</td>
+                            <td>
+                                @if (string.IsNullOrWhiteSpace(item.Url))
+                                {
+                                    @item.Name
+                                }
+                                else
+                                {
+                                    <a href="@item.Url" target="_blank">@item.Name</a>
+                                }
+                            </td>
+                            <td>
+                                @if (canEditTest.Succeeded)
+                                {
+                                    <button data-resource-name="@item.Name" data-resource-type="@item.Type" data-course-name="@Model.Offering.CourseName" data-offering-name="@Model.Offering.Name" data-resource-id="@item.ResourceId.Value" class="btn btn-sm btn-danger btn-show-hover remove-resource-button">Remove</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
         <div id="sessions" class="tab-pane">
             <h3>Active Sessions</h3>
 
@@ -145,9 +242,6 @@
                 <thead>
                     <tr>
                         <th>Period</th>
-                        <th>Teacher</th>
-                        <th>Room</th>
-                        <th></th>
                         <th>Duration</th>
                         <th></th>
                     </tr>
@@ -157,14 +251,11 @@
                     {
                         <tr>
                             <td>@item.PeriodName</td>
-                            <td>@item.Teacher</td>
-                            <td>@item.RoomName</td>
-                            <td><a class="btn btn-sm btn-success btn-show-hover" href="@item.RoomLink" target="_blank">Open Room</a></td>
                             <td>@item.Duration</td>
                             <td>
                                 @if (canEditTest.Succeeded)
                                 {
-                                    <button data-session-period="@item.PeriodName" data-teacher-name="@item.Teacher" data-course-name="@Model.Offering.CourseName" data-offering-name="@Model.Offering.Name" data-session-id="@item.SessionId" class="btn btn-sm btn-danger btn-show-hover remove-session-button">Remove</button>
+                                    <button data-session-period="@item.PeriodName" data-course-name="@Model.Offering.CourseName" data-offering-name="@Model.Offering.Name" data-session-id="@item.SessionId.Value" class="btn btn-sm btn-danger btn-show-hover remove-session-button">Remove</button>
                                 }
                             </td>
                         </tr>
@@ -298,7 +389,8 @@
 </div>
 
 <vc:enrol-student-in-offering Id="@Model.Id"></vc:enrol-student-in-offering>
-
+<vc:add-teacher-to-offering Id="@Model.Id"></vc:add-teacher-to-offering>
+<vc:add-resource-to-offering Id="@Model.Id"></vc:add-resource-to-offering>
 
 @section scripts
 {
@@ -326,9 +418,56 @@
             });
         });
 
+        $('.remove-teacher-button').click(function (event) {
+            var courseName = $(this).data("courseName");
+            var offeringName = $(this).data("offeringName");
+            var teacherName = $(this).data("teacherName");
+            var assignmentType = $(this).data("assignmentType");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxRemoveTeacher",
+                type: "POST",
+                data: {
+                    courseName: courseName,
+                    offeringName: offeringName,
+                    teacherName: teacherName,
+                    assignmentType: assignmentType,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.remove-resource-button').click(function (event) {
+            var resourceName = $(this).data("resourceName");
+            var courseName = $(this).data("courseName");
+            var offeringName = $(this).data("offeringName");
+            var resourceType = $(this).data("resourceType");
+            var resourceId = $(this).data("resourceId");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxRemoveResource",
+                type: "POST",
+                data: {
+                    courseName: courseName,
+                    offeringName: offeringName,
+                    resourceName: resourceName,
+                    resourceType: resourceType,
+                    resourceId: resourceId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
         $('.remove-session-button').click(function (event) {
             var sessionPeriod = $(this).data("sessionPeriod");
-            var teacherName = $(this).data("teacherName");
             var courseName = $(this).data("courseName");
             var offeringName = $(this).data("offeringName");
             var sessionId = $(this).data("sessionId");
@@ -339,7 +478,6 @@
                 type: "POST",
                 data: {
                     sessionPeriod: sessionPeriod,
-                    teacherName: teacherName,
                     courseName: courseName,
                     offeringName: offeringName,
                     sessionId: sessionId,

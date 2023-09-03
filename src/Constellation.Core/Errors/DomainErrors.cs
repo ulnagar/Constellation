@@ -1,6 +1,5 @@
 ﻿using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using System;
 
@@ -466,13 +465,6 @@ public static class DomainErrors
             public static readonly Func<int, Error> NotFound = id => new(
                 "Subjects.Course.NotFound",
                 $"Could not find a course with the id {id}");
-        }
-
-        public static class Offering
-        {
-            public static readonly Func<OfferingId, Error> NotFound = id => new(
-                "Subjects.Offering.NotFound",
-                $"Could not find an offering with the id {id}");
         }
     }
 

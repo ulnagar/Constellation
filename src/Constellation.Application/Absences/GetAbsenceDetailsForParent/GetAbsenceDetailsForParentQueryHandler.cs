@@ -7,6 +7,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Shared;
 using Serilog;
 using System;
@@ -72,7 +73,7 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
         {
             _logger.Information("Could not find offering with Id {id} while retrieving absence {@absence}", absence.OfferingId, absence);
 
-            return Result.Failure<ParentAbsenceDetailsResponse>(DomainErrors.Subjects.Offering.NotFound(absence.OfferingId));
+            return Result.Failure<ParentAbsenceDetailsResponse>(OfferingErrors.NotFound(absence.OfferingId));
         }
 
         Response response = absence.GetExplainedResponse();
