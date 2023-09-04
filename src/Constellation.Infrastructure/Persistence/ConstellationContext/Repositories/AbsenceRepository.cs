@@ -109,7 +109,9 @@ public class AbsenceRepository : IAbsenceRepository
         int ageInWeeks,
         CancellationToken cancellationToken = default)
     {
-        DateTime seenBefore = DateTime.Today.AddDays(-(ageInWeeks * 7));
+        DateTime seenAfter = DateTime.Today.AddDays(-(ageInWeeks * 7));
+        DateTime seenBefore = DateTime.Today.AddDays(-(ageInWeeks - 1) * 7 - 1);
+
         DateOnly startOfYear = new DateOnly(DateTime.Today.Year, 1, 1);
 
         return await _context
@@ -117,11 +119,12 @@ public class AbsenceRepository : IAbsenceRepository
             .Include(absence => absence.Responses)
             .Include(absence => absence.Notifications)
             .Where(absence =>
-                absence.Date > startOfYear&&
+                absence.Date > startOfYear &&
                 absence.StudentId == studentId &&
                 !absence.Explained &&
                 absence.Type == AbsenceType.Whole &&
-                absence.FirstSeen < seenBefore)
+                absence.FirstSeen <= seenAfter &&
+                absence.FirstSeen >= seenBefore)
             .ToListAsync(cancellationToken);
     }
         
