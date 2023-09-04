@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Tests.Unit.Models.Subjects.ValueObjects;
+﻿namespace Constellation.Core.Tests.Unit.Models.Offerings.ValueObjects;
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.ValueObjects;
@@ -227,7 +227,6 @@ public class OfferingNameTests
     }
 
     [Theory]
-
     [InlineData("07TUTMG", "07", "TUT", "MG")]
     [InlineData("08TUTKR", "08", "TUT", "KR")]
     [InlineData("09TUTNE", "09", "TUT", "NE")]
@@ -249,5 +248,21 @@ public class OfferingNameTests
         sut.Grade.Should().Be(grade);
         sut.Course.Should().Be(course);
         sut.Initials.Should().Be(initials);
+    }
+
+    [Fact]
+    public void FromValue_ShouldReturnValidObject_WhenLegacyNameIsValid(string name)
+    {
+        // Arrange
+
+
+        // Act
+        var sut = OfferingName.FromValue("07ENG1");
+
+        // Assert
+        sut.Should().NotBeNull();
+        sut.Grade.Should().Be("07");
+        sut.Course.Should().Be("ENG");
+        sut.Sequence.Should().Be('1');
     }
 }

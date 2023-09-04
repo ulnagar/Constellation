@@ -1,5 +1,6 @@
-﻿namespace Constellation.Core.Tests.Unit.Models.Subjects;
+﻿namespace Constellation.Core.Tests.Unit.Models.Offerings;
 
+using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Subjects;
 
 public class OfferingTests
@@ -27,12 +28,9 @@ public class OfferingTests
     {
         // Arrange
         var sut = new Offering();
-        sut.AddSession(
-            "1",
-            1,
-            "1");
+        sut.AddSession(1);
 
-        sut.DeleteAllSessions();
+        sut.RemoveAllSessions();
 
         // Act
         var result = sut.IsCurrent;
@@ -51,10 +49,7 @@ public class OfferingTests
             EndDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
         };
 
-        sut.AddSession(
-            "1",
-            1,
-            "1");
+        sut.AddSession(1);
 
         // Act
         var result = sut.IsCurrent;
@@ -73,10 +68,7 @@ public class OfferingTests
             EndDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
         };
 
-        sut.AddSession(
-            "1",
-            1,
-            "1");
+        sut.AddSession(1);
 
         // Act
         var result = sut.IsCurrent;
@@ -95,10 +87,7 @@ public class OfferingTests
             EndDate = DateOnly.FromDateTime(DateTime.Today)
         };
 
-        sut.AddSession(
-            "1",
-            1,
-            "1");
+        sut.AddSession(1);
 
         // Act
         var result = sut.IsCurrent;
@@ -117,10 +106,7 @@ public class OfferingTests
             EndDate = DateOnly.FromDateTime(DateTime.Today)
         };
 
-        sut.AddSession(
-            "1",
-            1,
-            "1");
+        sut.AddSession(1);
 
         // Act
         var result = sut.IsCurrent;

@@ -32,6 +32,17 @@ public sealed class OfferingName : ValueObject
         Initials = initials;
     }
 
+    // For legacy values
+    private OfferingName(
+        string grade,
+        string course,
+        char sequence)
+    {
+        Grade = grade;
+        Course = course;
+        Sequence = sequence;
+    }
+
     public static Result<OfferingName> Create(
         Course course,
         string line,
@@ -90,8 +101,7 @@ public sealed class OfferingName : ValueObject
     public static OfferingName FromValue(string value)
     {
         if (value is null ||
-            string.IsNullOrWhiteSpace(value) ||
-            value.Length != 7)
+            string.IsNullOrWhiteSpace(value))
             return null;
 
         var grade = value[..2];
@@ -108,13 +118,22 @@ public sealed class OfferingName : ValueObject
         }
         else
         {
-            var line = value[5..6];
             char sequence = Convert.ToChar(value[6..]);
+
+            if (value.Length == 7) 
+            {
+                var line = value[5..6];
+
+                return new OfferingName(
+                    grade,
+                    courseCode,
+                    line,
+                    sequence);
+            }
 
             return new OfferingName(
                 grade,
                 courseCode,
-                line,
                 sequence);
         }
     }
@@ -136,6 +155,13 @@ public sealed class OfferingName : ValueObject
 
     public override string ToString()
     {
+        if (string.IsNullOrWhiteSpace(Line) && string.IsNullOrWhiteSpace(Initials))
+        {
+            // Detected legacy value
+
+            return $"{Grade}{Course}{Sequence}";
+        }
+
         if (!string.IsNullOrWhiteSpace(Initials))
             return $"{Grade}{Course}{Initials}";
 

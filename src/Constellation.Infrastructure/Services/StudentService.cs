@@ -4,8 +4,6 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Subjects.Identifiers;
-using Constellation.Infrastructure.DependencyInjection;
 
 namespace Constellation.Infrastructure.Services
 {
