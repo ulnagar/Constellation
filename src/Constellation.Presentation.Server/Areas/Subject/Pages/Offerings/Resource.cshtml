@@ -1,4 +1,4 @@
-﻿@page
+﻿@page "{Id:guid}/Resources/Add"
 @model Constellation.Presentation.Server.Areas.Subject.Pages.Offerings.ResourceModel
 
 @using Constellation.Core.Models.Offerings.ValueObjects;
@@ -10,11 +10,10 @@
 <h2>Add Resource</h2>
 
 <div class="page-menu">
-
+    <a asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@Model.Id" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />
-
 
 <form method="post">
     <div class="form-horizontal">
@@ -42,12 +41,12 @@
         @if (Model.CurrentStep == ResourceModel.Phase.AdobeConnectRoomSelection)
         {
             <div id="RoomSelect" class="form-group row">
-                <label asp-for="ScoId" class="col-md-2">Adobe Connect Room</label>
+                <label asp-for="ResourceId" class="col-md-2">Adobe Connect Room</label>
                 <div class="col-md-8">
-                    <select asp-for="ScoId" asp-items="@Model.Rooms" class="form-control combo">
+                    <select asp-for="ResourceId" asp-items="@(new SelectList(Model.Rooms, "ScoId", "Name"))" class="form-control combo">
                         <option value="">-- Select --</option>
                     </select>
-                    <span asp-validation-for="ScoId" class="text-danger"></span>
+                    <span asp-validation-for="ResourceId" class="text-danger"></span>
                 </div>
             </div>
         }
@@ -55,12 +54,12 @@
         @if (Model.PreviousSteps.Contains(ResourceModel.Phase.AdobeConnectRoomSelection))
         {
             <div id="RoomSelect" class="form-group row">
-                <label asp-for="ScoId" class="col-md-2">Adobe Connect Room</label>
+                <label asp-for="ResourceId" class="col-md-2">Adobe Connect Room</label>
                 <div class="col-md-8">
-                    <select asp-for="ScoId" asp-items="@Model.Rooms" class="form-control combo" readonly="readonly">
+                    <select asp-for="ResourceId" asp-items="@(new SelectList(Model.Rooms, "ScoId", "Name", Model.ScoId))" class="form-control combo" readonly="readonly">
                         <option value="">-- Select --</option>
                     </select>
-                    <span asp-validation-for="ScoId" class="text-danger"></span>
+                    <span asp-validation-for="ResourceId" class="text-danger"></span>
                 </div>
             </div>
         }
@@ -68,12 +67,12 @@
         @if (Model.CurrentStep == ResourceModel.Phase.MicrosoftTeamsSelection)
         {
             <div id="TeamSelect" class="form-group row">
-                <label asp-for="TeamName" class="col-md-2">Microsoft Team</label>
+                <label asp-for="ResourceId" class="col-md-2">Microsoft Team</label>
                 <div class="col-md-5">
-                    <select asp-for="TeamName" asp-items="@Model.Teams" class="form-control combo">
+                    <select asp-for="ResourceId" asp-items="@(new SelectList(Model.Teams, "Name", "Name"))" class="form-control combo">
                         <option value="">-- Select --</option>
                     </select>
-                    <span asp-validation-for="TeamName" class="text-danger"></span>
+                    <span asp-validation-for="ResourceId" class="text-danger"></span>
                 </div>
             </div>
         }
@@ -81,12 +80,12 @@
         @if (Model.PreviousSteps.Contains(ResourceModel.Phase.MicrosoftTeamsSelection))
         {
             <div id="TeamSelect" class="form-group row">
-                <label asp-for="TeamName" class="col-md-2">Microsoft Team</label>
+                <label asp-for="ResourceId" class="col-md-2">Microsoft Team</label>
                 <div class="col-md-5">
-                    <select asp-for="TeamName" asp-items="@Model.Teams" class="form-control combo" readonly="readonly">
+                    <select asp-for="ResourceId" asp-items="@(new SelectList(Model.Teams, "Name", "Name", Model.TeamName))" class="form-control combo" readonly="readonly">
                         <option value="">-- Select --</option>
                     </select>
-                    <span asp-validation-for="TeamName" class="text-danger"></span>
+                    <span asp-validation-for="ResourceId" class="text-danger"></span>
                 </div>
             </div>
         }
@@ -94,10 +93,10 @@
         @if (Model.CurrentStep == ResourceModel.Phase.CanvasCourseSelection)
         {
             <div class="form-group row">
-                <label asp-for="CanvasCourse" class="col-md-2">Canvas Course</label>
+                <label asp-for="ResourceId" class="col-md-2">Canvas Course</label>
                 <div class="col-md-8">
-                    <input asp-for="CanvasCourse" class="form-control" />
-                    <span asp-validation-for="CanvasCourse" class="text-danger"></span>
+                    <input asp-for="ResourceId" class="form-control" />
+                    <span asp-validation-for="ResourceId" class="text-danger"></span>
                 </div>
             </div>
         }
@@ -105,10 +104,10 @@
         @if (Model.PreviousSteps.Contains(ResourceModel.Phase.CanvasCourseSelection))
         {
             <div class="form-group row">
-                <label asp-for="CanvasCourse" class="col-md-2">Canvas Course</label>
+                <label asp-for="ResourceId" class="col-md-2">Canvas Course</label>
                 <div class="col-md-8">
-                    <input asp-for="CanvasCourse" class="form-control" readonly="readonly" />
-                    <span asp-validation-for="CanvasCourse" class="text-danger"></span>
+                    <input asp-for="ResourceId" class="form-control" readonly="readonly" />
+                    <span asp-validation-for="ResourceId" class="text-danger"></span>
                 </div>
             </div>
         }

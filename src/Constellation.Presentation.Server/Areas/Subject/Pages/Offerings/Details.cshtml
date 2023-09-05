@@ -190,7 +190,7 @@
 
             @if (canEditTest.Succeeded)
             {
-                <button data-toggle="modal" data-target="#addResourceModal" class="btn btn-success">Add Resource</button>
+                <a asp-page="/Offerings/Resource" asp-area="Subject" asp-route-id="@Model.Id" class="btn btn-success btn-sm">Add a Resource</a>
             }
 
             <table class="table-striped table-hover data-table">
@@ -390,7 +390,6 @@
 
 <vc:enrol-student-in-offering Id="@Model.Id"></vc:enrol-student-in-offering>
 <vc:add-teacher-to-offering Id="@Model.Id"></vc:add-teacher-to-offering>
-<vc:add-resource-to-offering Id="@Model.Id"></vc:add-resource-to-offering>
 
 @section scripts
 {

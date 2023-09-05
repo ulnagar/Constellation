@@ -1,12 +1,13 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
 
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Offerings.AddResourceToOffering;
 using Constellation.Application.Offerings.GetOfferingDetails;
 using Constellation.Application.Rooms.GetAllRooms;
 using Constellation.Application.Teams.GetAllTeams;
 using Constellation.Application.Teams.Models;
-using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
@@ -32,17 +33,14 @@ public class ResourceModel : BasePageModel
 
     [BindProperty]
     public Phase CurrentStep { get; set; }
+
     [BindProperty]
     public List<Phase> PreviousSteps { get; set; } = new();
 
     [BindProperty]
     public string Type { get; set; }
     [BindProperty]
-    public string ScoId { get; set; }
-    [BindProperty]
-    public string TeamName { get; set; }
-    [BindProperty]
-    public string CanvasCourse { get; set; }
+    public string ResourceId { get; set; }
     [BindProperty]
     public string Name { get; set; }
     [BindProperty]
@@ -55,7 +53,28 @@ public class ResourceModel : BasePageModel
     {
         await GetClasses(_mediator);
 
-        if (CurrentStep == Phase.AdobeConnectRoomSelection)
+        CurrentStep = Phase.StartEntry;
+    }
+
+    public async Task<IActionResult> OnPost()
+    {
+        await GetClasses(_mediator);
+
+        if (CurrentStep == Phase.StartEntry)
+        {
+            if (Type == ResourceType.AdobeConnectRoom.Value)
+                CurrentStep = Phase.AdobeConnectRoomSelection;
+
+            if (Type == ResourceType.MicrosoftTeam.Value)
+                CurrentStep = Phase.MicrosoftTeamsSelection;
+
+            if (Type == ResourceType.CanvasCourse.Value)
+                CurrentStep = Phase.CanvasCourseSelection;
+
+            PreviousSteps.Add(Phase.StartEntry);
+        }
+
+        if (CurrentStep == Phase.AdobeConnectRoomSelection || PreviousSteps.Contains(Phase.AdobeConnectRoomSelection))
         {
             Result<List<RoomResponse>> roomRequest = await _mediator.Send(new GetAllRoomsQuery());
 
@@ -67,13 +86,13 @@ public class ResourceModel : BasePageModel
                     RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
                 };
 
-                return;
+                return Page();
             }
 
             Rooms = roomRequest.Value;
         }
 
-        if (CurrentStep == Phase.MicrosoftTeamsSelection)
+        if (CurrentStep == Phase.MicrosoftTeamsSelection || PreviousSteps.Contains(Phase.MicrosoftTeamsSelection))
         {
             Result<List<TeamResource>> teamRequest = await _mediator.Send(new GetAllTeamsQuery());
 
@@ -85,7 +104,7 @@ public class ResourceModel : BasePageModel
                     RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
                 };
 
-                return;
+                return Page();
             }
 
             Teams = teamRequest.Value;
@@ -104,14 +123,43 @@ public class ResourceModel : BasePageModel
                     Error = offeringRequest.Error,
                     RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
                 };
-                return;
+
+                return Page();
             }
-            CanvasCourse = $"{offeringRequest.Value.EndDate.Year}-{offeringRequest.Value.Name.Grade}{offeringRequest.Value.Name.Course}";
+
+            ResourceId = $"{offeringRequest.Value.EndDate.Year}-{offeringRequest.Value.Name.Grade}{offeringRequest.Value.Name.Course}";
         }
+
+        if (CurrentStep == Phase.DataEntry)
+        {
+            // Send resource creation command
+            OfferingId offeringId = OfferingId.FromValue(Id);
+            ResourceType resourceType = ResourceType.FromValue(Type);
+
+            Result request = await _mediator.Send(new AddResourceToOfferingCommand(offeringId, resourceType, Name, Link, ResourceId));
+
+            if (request.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = request.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                };
+
+                return Page();
+            }
+
+            return RedirectToPage("/Offerings/Details", new { area = "Subject", Id = Id });
+        }
+
+        PreviousSteps.Add(CurrentStep);
+        CurrentStep = Phase.DataEntry;
+        return Page();
     }
 
     public enum Phase
     {
+        StartEntry,
         AdobeConnectRoomSelection,
         MicrosoftTeamsSelection,
         CanvasCourseSelection,
