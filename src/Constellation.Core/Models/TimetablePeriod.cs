@@ -1,4 +1,5 @@
-﻿using Constellation.Core.Models.Offerings;
+﻿using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings;
 using System;
 using System.Collections.Generic;
 using System.Reflection;

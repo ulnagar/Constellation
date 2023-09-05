@@ -208,51 +208,6 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             return View("Map", vm);
         }
 
-        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Enrol(string id, Guid classId)
-        {
-            var student = await _unitOfWork.Students.ForBulkUnenrolAsync(id);
 
-            if (student == null)
-            {
-                return RedirectToAction("Index");
-            }
-
-            OfferingId offeringId = OfferingId.FromValue(classId);
-
-            if (!student.Enrolments.Any(e => e.OfferingId == offeringId && !e.IsDeleted))
-            {
-                await _studentService.EnrolStudentInClass(student.StudentId, offeringId);
-                await _unitOfWork.CompleteAsync();
-            }
-
-            return RedirectToAction("Details", new { area = "Subject", id = classId });
-        }
-
-        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Unenrol(string id, Guid classId, string returnPage)
-        {
-            var student = await _unitOfWork.Students.ForBulkUnenrolAsync(id);
-
-            OfferingId offeringId = OfferingId.FromValue(classId);
-
-            foreach (var enrolment in student.Enrolments.Where(e => e.OfferingId == offeringId && !e.IsDeleted))
-            {
-                await _studentService.UnenrolStudentFromClass(student.StudentId, offeringId);
-            }
-
-            await _unitOfWork.CompleteAsync();
-
-            if (returnPage == "student")
-            {
-                return RedirectToAction("Details", "Students", new { area = "Partner", id });
-            }
-            else if (returnPage == "class")
-            {
-                return RedirectToAction("Details", "Classes", new { area = "Subject", id = classId });
-            }
-
-            return RedirectToAction("Details", new { id });
-        }
     }
 }

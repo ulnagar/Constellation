@@ -2,6 +2,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
 
 using Constellation.Application.Enrolments.UnenrolStudent;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Offerings.AddSessionToOffering;
 using Constellation.Application.Offerings.AddTeacherToOffering;
 using Constellation.Application.Offerings.GetOfferingDetails;
 using Constellation.Application.Offerings.RemoveAllSessions;
@@ -12,6 +13,7 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Server.Pages.Shared.Components.AddSessionToOffering;
 using Constellation.Presentation.Server.Pages.Shared.Components.AddTeacherToOffering;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.DeleteRoleModal;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveAllSessionsModal;
@@ -266,6 +268,27 @@ public class DetailsModel : BasePageModel
         ResourceId id = ResourceId.FromValue(resourceId);
 
         Result request = await _sender.Send(new RemoveResourceFromOfferingCommand(offeringId, id));
+
+        if (request.IsFailure)
+        {
+            Error = new()
+            {
+                Error = request.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAddSession(
+        AddSessionToOfferingSelection viewModel)
+    {
+        OfferingId offeringId = OfferingId.FromValue(Id);
+
+        Result request = await _sender.Send(new AddSessionToOfferingCommand(offeringId, viewModel.PeriodId));
 
         if (request.IsFailure)
         {
