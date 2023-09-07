@@ -16,6 +16,9 @@ public class OfferingRepository : IOfferingRepository
         _context = context;
     }
 
+    public void Insert(Offering offering) =>
+        _context.Set<Offering>().Add(offering);
+
     public async Task<Offering?> GetById(
         OfferingId offeringId, 
         CancellationToken cancellationToken = default) =>

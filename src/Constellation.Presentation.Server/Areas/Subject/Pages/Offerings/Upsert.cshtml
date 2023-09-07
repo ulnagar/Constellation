@@ -1,0 +1,87 @@
+﻿@page "{id?}"
+
+@model Constellation.Presentation.Server.Areas.Subject.Pages.Offerings.UpsertModel
+
+@{
+    var title = Model.Id.HasValue ? "Edit Offering" : "Create New Offering";
+}
+
+<h2>@title</h2>
+
+<div class="page-menu">
+    <a asp-page="/Offerings/Index" asp-area="Subject" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="form-group row">
+            <label asp-for="Name" class="col-md-2"></label>
+            <div class="col-md-5">
+                @if (Model.Id.HasValue)
+                {
+                    <span>@Model.Name</span>
+                }
+                else
+                {
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                }
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="CourseId" class="col-md-2">Course</label>
+            <div class="col-md-5">
+                @if (Model.Id.HasValue)
+                {
+                    <span>@Model.CourseName</span>
+                }
+                else
+                {
+                    <select asp-for="CourseId" asp-items="@Model.CourseList" class="form-control combo">
+                        <option value="">-- Select --</option>
+                    </select>
+                    <span asp-validation-for="CourseId" class="text-danger"></span>
+                }
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="StartDate" class="col-md-2">Start Date</label>
+            <div class="col-md-5">
+                <input asp-for="StartDate" class="form-control" />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="EndDate" class="col-md-2">End Date</label>
+            <div class="col-md-5">
+                <input asp-for="EndDate" class="form-control" />
+                <span asp-validation-for="EndDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-3">
+                @if (Model.Id.HasValue)
+                {
+                    <input asp-page-handler="Update" type="submit" value="Update" class="btn btn-primary btn-block btn-lg" />
+                }
+                else
+                {
+                    <input asp-page-handler="Create" type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                }
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

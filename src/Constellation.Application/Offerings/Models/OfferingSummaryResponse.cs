@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Offerings.GetAllOfferingSummaries;
+﻿namespace Constellation.Application.Offerings.Models;
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
@@ -9,6 +9,7 @@ public sealed record OfferingSummaryResponse(
     OfferingId Id,
     string Name,
     string CourseName,
+    DateOnly StartDate,
     DateOnly EndDate,
     List<string> Teachers,
     int MinPerFN,

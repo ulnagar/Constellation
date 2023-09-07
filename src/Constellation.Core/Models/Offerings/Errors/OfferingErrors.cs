@@ -13,4 +13,15 @@ public static class OfferingErrors
     public static readonly Func<OfferingId, Error> NotFound = id => new(
         "Offerings.Offering.NotFound",
         $"Could not find Offering with Id {id}");
+
+    public static class Validation
+    {
+        public static readonly Error StartDateAfterEndDate = new(
+            "Offerings.Offering.Validation.StartDate",
+            "Start Date cannot be after the End Date");
+
+        public static readonly Error EndDateInPast = new(
+            "Offerings.Offering.Validation.EndDate",
+            "End Date cannot be in the past");
+    }
 }

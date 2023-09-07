@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
 using Constellation.Application.Extensions;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetAllOfferingSummaries;
+using Constellation.Application.Offerings.Models;
 using Constellation.Core.Enums;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;

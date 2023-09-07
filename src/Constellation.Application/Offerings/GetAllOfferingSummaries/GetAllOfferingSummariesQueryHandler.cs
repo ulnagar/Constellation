@@ -2,6 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Offerings.Models;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
@@ -87,6 +88,7 @@ internal sealed class GetAllOfferingSummariesQueryHandler
                 offering.Id,
                 offering.Name,
                 course.Name,
+                offering.StartDate,
                 offering.EndDate,
                 teacherNames,
                 (int)minPerFn,

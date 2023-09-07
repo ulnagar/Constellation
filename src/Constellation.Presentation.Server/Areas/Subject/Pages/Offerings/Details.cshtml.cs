@@ -28,11 +28,14 @@ using Microsoft.AspNetCore.Mvc;
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _sender;
+    private readonly LinkGenerator _linkGenerator;
 
     public DetailsModel(
-        ISender sender)
+        ISender sender,
+        LinkGenerator linkGenerator)
     {
         _sender = sender;
+        _linkGenerator = linkGenerator;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -53,7 +56,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = query.Error,
-                RedirectPath = null
+                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Index", values: new { area = "Subject" })
             };
 
             return;
@@ -92,7 +95,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = null
+                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
             };
 
             return Page();
@@ -133,7 +136,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = null
+                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
             };
 
             return Page();
@@ -167,7 +170,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = null
+                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
             };
 
             return Page();
@@ -231,7 +234,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = null
+                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
             };
 
             return Page();
@@ -274,7 +277,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = null
+                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
             };
 
             return Page();

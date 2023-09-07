@@ -17,11 +17,11 @@ using Microsoft.AspNetCore.Mvc;
 [Authorize(Policy = AuthPolicies.CanEditSubjects)]
 public class ResourceModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
 
     public ResourceModel(
-        IMediator mediator,
+        ISender mediator,
         LinkGenerator linkGenerator)
     {
         _mediator = mediator;

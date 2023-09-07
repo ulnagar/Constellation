@@ -15,19 +15,22 @@ public sealed class Offering : AggregateRoot
     private readonly List<Session> _sessions = new();
     private readonly List<TeacherAssignment> _teachers = new();
 
-    public Offering()
-    {
-    }
+    private Offering() { }
 
-    public Offering(int courseId, DateOnly startDate, DateOnly endDate)
+    public Offering(
+        OfferingName name, 
+        int courseId, 
+        DateOnly startDate, 
+        DateOnly endDate)
     {
+        Name = name;
         CourseId = courseId;
         StartDate = startDate;
         EndDate = endDate;
     }
 
     public OfferingId Id { get; set; }
-    public string Name { get; set; }
+    public OfferingName Name { get; set; }
     public int CourseId { get; set; }
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }
@@ -47,6 +50,14 @@ public sealed class Offering : AggregateRoot
             return true;
 
         return false;
+    }
+
+    public void Update(
+        DateOnly startDate,
+        DateOnly endDate)
+    {
+        StartDate = startDate;
+        EndDate = endDate;
     }
 
     public void AddTeacher(

@@ -15,10 +15,10 @@
 <div class="page-menu">
     @if (canEditTest.Succeeded)
     {
-        <a asp-page="Upsert" asp-area="Subject" asp-route-id="@Model.Offering.Id" class="btn btn-warning">Edit</a>
+        <a asp-page="/Offerings/Upsert" asp-area="Subject" asp-route-id="@Model.Offering.Id.Value" class="btn btn-warning">Edit</a>
     }
 
-    <a asp-page="Index" asp-area="Subject" class="btn btn-danger btn-pull-right">Go Back</a>
+    <a asp-page="/Offerings/Index" asp-area="Subject" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />
