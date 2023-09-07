@@ -6,6 +6,8 @@ using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Serilog;
 using System;
 using System.Linq;
@@ -66,15 +68,20 @@ internal sealed class AssignmentAttemptSubmittedDomainEvent_UploadSubmissionToCa
             return;
         }
 
-        var offering = offerings.FirstOrDefault(offering => offering.IsCurrent);
+        var resources = offerings
+            .SelectMany(offering => offering.Resources)
+            .Where(resource => resource.Type == ResourceType.CanvasCourse)
+            .Select(resource => ((CanvasCourseResource)resource).CourseId)
+            .Distinct()
+            .ToList();
 
-        if (offering is null)
+        if (!resources.Any())
         {
-            _logger.Error("Could not find matching offering for submission {@submission} from list {@list}", submission, offerings);
+            _logger.Error("Could not find qualifying Canvas resource for submission {@submission} from list {@list}", submission, offerings);
             return;
         }
 
-        var canvasCourseId = $"{offering.EndDate.Year}-{offering.Name[..^1]}";
+        var canvasCourseId = resources.First();
 
         _logger.Information("Canvas Course Id identified as {id}", canvasCourseId);
 

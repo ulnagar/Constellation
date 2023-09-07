@@ -9,8 +9,11 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Serilog;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -66,15 +69,23 @@ internal class RemoveFromCanvas
             return;
         }
 
-        ModifyEnrolmentCanvasOperation operation = new()
-        {
-            UserId = student.StudentId,
-            CourseId = $"{offering.EndDate.Year}-{offering.Name.Substring(0, offering.Name.Length - 1)}",
-            Action = CanvasOperation.EnrolmentAction.Remove,
-            ScheduledFor = _dateTime.Now
-        };
+        List<CanvasCourseResource> resources = offering.Resources
+            .Where(resource => resource.Type == ResourceType.CanvasCourse)
+            .Select(resource => resource as CanvasCourseResource)
+            .ToList();
 
-        _operationRepository.Insert(operation);
+        foreach (CanvasCourseResource resource in resources)
+        {
+            ModifyEnrolmentCanvasOperation operation = new()
+            {
+                UserId = student.StudentId,
+                CourseId = resource.CourseId,
+                Action = CanvasOperation.EnrolmentAction.Remove,
+                ScheduledFor = _dateTime.Now
+            };
+
+            _operationRepository.Insert(operation);
+        }
 
         await _unitOfWork.CompleteAsync(cancellationToken);
     }
