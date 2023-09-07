@@ -127,7 +127,9 @@ public class ResourceModel : BasePageModel
                 return Page();
             }
 
-            ResourceId = $"{offeringRequest.Value.EndDate.Year}-{offeringRequest.Value.Name.Grade}{offeringRequest.Value.Name.Course}";
+            var course = await _mediator.Send(new GetCourse)
+
+            ResourceId = $"{offeringRequest.Value.EndDate.Year}-{offeringRequest.Value.CourseGrade}{offeringRequest.Value.CourseCode}";
         }
 
         if (CurrentStep == Phase.DataEntry)
