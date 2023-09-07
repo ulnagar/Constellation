@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
 
+using Constellation.Application.Courses.GetCourseSummary;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.AddResourceToOffering;
 using Constellation.Application.Offerings.GetOfferingDetails;
@@ -127,9 +128,24 @@ public class ResourceModel : BasePageModel
                 return Page();
             }
 
-            var course = await _mediator.Send(new GetCourse)
+            Result<CourseSummaryResponse> courseRequest = await _mediator.Send(new GetCourseSummaryQuery(offeringRequest.Value.CourseId));
 
-            ResourceId = $"{offeringRequest.Value.EndDate.Year}-{offeringRequest.Value.CourseGrade}{offeringRequest.Value.CourseCode}";
+            if (courseRequest.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = courseRequest.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+                };
+
+                return Page();
+            }
+
+            string Year = offeringRequest.Value.EndDate.Year.ToString();
+            string Grade = courseRequest.Value.Grade.ToString().PadLeft(2, '0');
+            string Code = (string.IsNullOrWhiteSpace(courseRequest.Value.Code) ? "XXX" : courseRequest.Value.Code);
+
+            ResourceId = $"{Year}-{Grade}{Code}";
         }
 
         if (CurrentStep == Phase.DataEntry)
