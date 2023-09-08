@@ -4,8 +4,12 @@ using Constellation.Application.Courses.GetCourseSummary;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.AddResourceToOffering;
 using Constellation.Application.Offerings.GetOfferingDetails;
+using Constellation.Application.Rooms.CreateRoom;
 using Constellation.Application.Rooms.GetAllRooms;
+using Constellation.Application.Rooms.GetRoomById;
+using Constellation.Application.Rooms.Models;
 using Constellation.Application.Teams.GetAllTeams;
+using Constellation.Application.Teams.GetTeamByName;
 using Constellation.Application.Teams.Models;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
@@ -45,7 +49,8 @@ public class ResourceModel : BasePageModel
     [BindProperty]
     public string Name { get; set; }
     [BindProperty]
-    public string Link { get; set; }
+    public bool CreateNew { get; set; }
+    public string ResourceName { get; set; }
 
     public List<RoomResponse> Rooms { get; set; } = new();
     public List<TeamResource> Teams { get; set; } = new();
@@ -91,6 +96,22 @@ public class ResourceModel : BasePageModel
             }
 
             Rooms = roomRequest.Value;
+
+            if (ResourceId is not null)
+            {
+                RoomResponse selectedRoom = Rooms.FirstOrDefault(room => room.ScoId == ResourceId);
+
+                if (selectedRoom is not null)
+                {
+                    ResourceName = selectedRoom.Name;
+                }
+            }
+
+            if (CurrentStep == Phase.AdobeConnectRoomSelection && (!string.IsNullOrWhiteSpace(ResourceId) || CreateNew))
+            {
+                PreviousSteps.Add(CurrentStep);
+                CurrentStep = Phase.DataEntry;
+            }
         }
 
         if (CurrentStep == Phase.MicrosoftTeamsSelection || PreviousSteps.Contains(Phase.MicrosoftTeamsSelection))
@@ -109,9 +130,20 @@ public class ResourceModel : BasePageModel
             }
 
             Teams = teamRequest.Value;
+
+            if (!string.IsNullOrWhiteSpace(ResourceId))
+            {
+                ResourceName = ResourceId;
+            }
+
+            if (CurrentStep == Phase.MicrosoftTeamsSelection && !string.IsNullOrWhiteSpace(ResourceId))
+            {
+                PreviousSteps.Add(CurrentStep);
+                CurrentStep = Phase.DataEntry;
+            }
         }
 
-        if (CurrentStep == Phase.CanvasCourseSelection)
+        if (CurrentStep == Phase.CanvasCourseSelection && string.IsNullOrWhiteSpace(ResourceId))
         {
             OfferingId offeringId = OfferingId.FromValue(Id);
 
@@ -147,32 +179,134 @@ public class ResourceModel : BasePageModel
 
             ResourceId = $"{Year}-{Grade}{Code}";
         }
-
-        if (CurrentStep == Phase.DataEntry)
+        else if (CurrentStep == Phase.CanvasCourseSelection)
         {
-            // Send resource creation command
-            OfferingId offeringId = OfferingId.FromValue(Id);
-            ResourceType resourceType = ResourceType.FromValue(Type);
-
-            Result request = await _mediator.Send(new AddResourceToOfferingCommand(offeringId, resourceType, Name, Link, ResourceId));
-
-            if (request.IsFailure)
-            {
-                Error = new()
-                {
-                    Error = request.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
-                };
-
-                return Page();
-            }
-
-            return RedirectToPage("/Offerings/Details", new { area = "Subject", Id = Id });
+            PreviousSteps.Add(CurrentStep);
+            CurrentStep = Phase.DataEntry;
         }
 
-        PreviousSteps.Add(CurrentStep);
-        CurrentStep = Phase.DataEntry;
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostFinalSubmit()
+    {
+        // Send resource creation command
+        OfferingId offeringId = OfferingId.FromValue(Id);
+        ResourceType resourceType = ResourceType.FromValue(Type);
+
+        if (CreateNew)
+        {
+            // Create the new item
+            // Create the resource record
+
+            if (resourceType == ResourceType.AdobeConnectRoom)
+            {
+                Result<RoomResponse> roomRequest = await _mediator.Send(new CreateRoomCommand(offeringId));
+
+                if (roomRequest.IsFailure)
+                {
+                    Error = new()
+                    {
+                        Error = roomRequest.Error,
+                        RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                    };
+
+                    return Page();
+                }
+
+                Result request = await _mediator.Send(new AddResourceToOfferingCommand(offeringId, resourceType, roomRequest.Value.Name, roomRequest.Value.UrlPath, roomRequest.Value.ScoId));
+
+                if (request.IsFailure)
+                {
+                    Error = new()
+                    {
+                        Error = request.Error,
+                        RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                    };
+
+                    return Page();
+                }
+            }
+        }
+
+        if (!CreateNew)
+        {
+            if (resourceType == ResourceType.AdobeConnectRoom)
+            {
+                Result<RoomResponse> roomRequest = await _mediator.Send(new GetRoomByIdQuery(ResourceId));
+
+                if (roomRequest.IsFailure)
+                {
+                    Error = new()
+                    {
+                        Error = roomRequest.Error,
+                        RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                    };
+
+                    return Page();
+                }
+
+                Result request = await _mediator.Send(new AddResourceToOfferingCommand(offeringId, resourceType, Name, roomRequest.Value.UrlPath, ResourceId));
+
+                if (request.IsFailure)
+                {
+                    Error = new()
+                    {
+                        Error = request.Error,
+                        RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                    };
+
+                    return Page();
+                }
+            }
+
+            if (resourceType == ResourceType.MicrosoftTeam)
+            {
+                Result<TeamResource> teamRequest = await _mediator.Send(new GetTeamByNameQuery(ResourceId));
+
+                if (teamRequest.IsFailure)
+                {
+                    Error = new()
+                    {
+                        Error = teamRequest.Error,
+                        RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                    };
+
+                    return Page();
+                }
+
+                Result request = await _mediator.Send(new AddResourceToOfferingCommand(offeringId, resourceType, Name, teamRequest.Value.Link, ResourceId));
+
+                if (request.IsFailure)
+                {
+                    Error = new()
+                    {
+                        Error = request.Error,
+                        RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                    };
+
+                    return Page();
+                }
+            }
+
+            if (resourceType == ResourceType.CanvasCourse)
+            {
+                Result request = await _mediator.Send(new AddResourceToOfferingCommand(offeringId, resourceType, Name, string.Empty, ResourceId));
+
+                if (request.IsFailure)
+                {
+                    Error = new()
+                    {
+                        Error = request.Error,
+                        RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                    };
+
+                    return Page();
+                }
+            }
+        }
+
+        return RedirectToPage("/Offerings/Details", new { area = "Subject", Id = Id });
     }
 
     public enum Phase

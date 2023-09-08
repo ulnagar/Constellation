@@ -2,6 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Rooms.Models;
 using Constellation.Core.Models;
 using Constellation.Core.Shared;
 using Serilog;

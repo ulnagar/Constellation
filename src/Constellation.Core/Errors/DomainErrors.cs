@@ -279,6 +279,17 @@ public static class DomainErrors
 
     public static class LinkedSystems
     {
+        public static class AdobeConnect
+        {
+            public static readonly Func<string, Error> RoomNotFound = id => new(
+                "LinkedSystems.AdobeConnect.RoomNotFound",
+                $"Could not find an Adobe Connect Room with the Id {id}");
+
+            public static readonly Error CannotCreate = new(
+                "LinkedSystems.AdobeConnect.CannotCreate",
+                "An error occured while waiting for Adobe Connect to create the room");
+        }
+
         public static class Sentral
         {
             public static readonly Func<string, Error> FamilyIdNotValid = id => new Error(
