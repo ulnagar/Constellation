@@ -18,11 +18,11 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
     public class PeriodsController : BaseController
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ISessionService _sessionService;
+        private readonly IPeriodService _sessionService;
 
         public PeriodsController(
             IUnitOfWork unitOfWork, 
-            ISessionService sessionService,
+            IPeriodService sessionService,
             IMediator mediator)
             : base(mediator)
         {

@@ -30,7 +30,6 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
     private readonly ICasualRepository _casualRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ITeamRepository _teamRepository;
-    private readonly IOfferingSessionsRepository _sessionRepository;
     private readonly UserManager<AppUser> _userManager;
     private readonly ITimetablePeriodRepository _periodRepository;
     private readonly IEmailAttachmentService _emailAttachmentService;
@@ -45,7 +44,6 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
         ICasualRepository casualRepository,
         IStudentRepository studentRepository,
         ITeamRepository teamRepository,
-        IOfferingSessionsRepository sessionRepository,
         UserManager<AppUser> userManager,
         ITimetablePeriodRepository periodRepository,
         IEmailAttachmentService emailAttachmentService,
@@ -58,7 +56,6 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
         _staffRepository = staffRepository;
         _casualRepository = casualRepository;
         _teamRepository = teamRepository;
-        _sessionRepository = sessionRepository;
         _userManager = userManager;
         _periodRepository = periodRepository;
         _emailAttachmentService = emailAttachmentService;
@@ -207,11 +204,10 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
         } 
         else
         {
-            var sessions = await _sessionRepository.GetByOfferingId(cover.OfferingId, cancellationToken);
-            var relevantTimetables = await _sessionRepository.GetTimetableByOfferingId(cover.OfferingId, cancellationToken);
+            var relevantTimetables = await _offeringRepository.GetTimetableByOfferingId(cover.OfferingId, cancellationToken);
             var relevantPeriods = await _periodRepository.GetAllFromTimetable(relevantTimetables, cancellationToken);
 
-            var timetableAttachment = await _emailAttachmentService.GenerateClassTimetableDocument(offering, sessions, relevantPeriods, cancellationToken);
+            var timetableAttachment = await _emailAttachmentService.GenerateClassTimetableDocument(offering, relevantPeriods, cancellationToken);
 
             attachments.Add(timetableAttachment);
         }

@@ -14,7 +14,6 @@ namespace Constellation.Application.Interfaces.Services
         Task<string> GetUserPrincipalId(string username);
         Task<ICollection<string>> GetSessionsForDate(string scoId, DateTime sessionDate);
         Task<ICollection<AdobeConnectSessionUserDetailDto>> GetSessionUserDetails(string scoId, string assetId);
-        Task<string> CreateRoom(Offering offering);
         Task<ServiceOperationResult<T>> ProcessOperation<T>(T operation) where T : AdobeConnectOperation;
         Task<ICollection<string>> GetCurrentSessionUsersAsync(string scoId, string assetId);
         Task<string> GetCurrentSessionAsync(string scoId);

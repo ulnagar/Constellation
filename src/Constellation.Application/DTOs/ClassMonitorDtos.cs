@@ -1,4 +1,5 @@
-﻿using Constellation.Core.Models.Offerings.Identifiers;
+﻿using Constellation.Core.Models.Enrolments.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 using System;
 using System.Collections.Generic;
 
@@ -62,7 +63,7 @@ namespace Constellation.Application.DTOs
 
         public class MonitorCourseEnrolment
         {
-            public int Id { get; set; }
+            public EnrolmentId Id { get; set; }
             public string StudentId { get; set; }
             public string StudentDisplayName { get; set; }
             public string StudentLastName { get; set; }
@@ -73,7 +74,7 @@ namespace Constellation.Application.DTOs
 
         public class MonitorCourseSession
         {
-            public int Id { get; set; }
+            public SessionId Id { get; set; }
             public int PeriodId { get; set; }
             public bool IsDeleted { get; set; }
         }

@@ -16,7 +16,9 @@ using System.Threading.Tasks;
 public class ExportService : IExportService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFamilyRepository _familyRepository;
     private readonly IRazorViewToStringRenderer _renderService;
@@ -24,14 +26,18 @@ public class ExportService : IExportService
 
     public ExportService(
         IUnitOfWork unitOfWork,
+        IOfferingRepository offeringRepository,
         IEnrolmentRepository enrolmentRepository,
+        ICourseRepository courseRepository,
         IStaffRepository staffRepository,
         IFamilyRepository familyRepository,
         IRazorViewToStringRenderer renderService,
         IPDFService pdfService)
     {
         _unitOfWork = unitOfWork;
+        _offeringRepository = offeringRepository;
         _enrolmentRepository = enrolmentRepository;
+        _courseRepository = courseRepository;
         _staffRepository = staffRepository;
         _familyRepository = familyRepository;
         _renderService = renderService;
@@ -64,7 +70,9 @@ public class ExportService : IExportService
             {
                 foreach (var enrolment in validEnrolments)
                 {
-                    var course = enrolment.Offering.Course;
+                    var course = await _courseRepository.GetByOfferingId(enrolment.OfferingId, cancellationToken);
+
+                    var offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
 
                     var teachers = await _staffRepository.GetPrimaryTeachersForOffering(enrolment.OfferingId, cancellationToken);
 
@@ -75,7 +83,7 @@ public class ExportService : IExportService
                             StudentId = student.StudentId,
                             StudentFirstName = student.FirstName,
                             StudentLastName = student.LastName,
-                            ClassCode = enrolment.Offering.Name,
+                            ClassCode = offering.Name,
                             ClassGrade = course.Grade.AsNumber(),
                             ClassName = course.Name,
                             TeacherCode = teacher.StaffId,

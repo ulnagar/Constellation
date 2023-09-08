@@ -10,6 +10,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Infrastructure.DependencyInjection;
 using MediatR;
 using Microsoft.Extensions.Options;
@@ -21,8 +22,8 @@ using System.Threading.Tasks;
 
 public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHangfireJob
 {
+    private readonly ICourseRepository _courseRepository;
     private readonly IOfferingRepository _offeringRepository;
-    private readonly IOfferingSessionsRepository _sessionsRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ISentralGateway _sentralService;
     private readonly IEmailService _emailService;
@@ -31,8 +32,8 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
     private readonly AppConfiguration _configuration;
 
     public RollMarkingReportJob(
+        ICourseRepository courseRepository,
         IOfferingRepository offeringRepository,
-        IOfferingSessionsRepository sessionsRepository,
         IStaffRepository staffRepository,
         ISentralGateway sentralService, 
         IEmailService emailService, 
@@ -40,8 +41,8 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
         IMediator mediator,
         IOptions<AppConfiguration> configuration)
     {
+        _courseRepository = courseRepository;
         _offeringRepository = offeringRepository;
-        _sessionsRepository = sessionsRepository;
         _staffRepository = staffRepository;
         _sentralService = sentralService;
         _emailService = emailService;
@@ -108,15 +109,20 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
 
             if (string.IsNullOrWhiteSpace(entry.Teacher) && offering is not null)
             {
-                var sessions = await _sessionsRepository.GetByOfferingId(offering.Id);
-                teacher = sessions
-                    .GroupBy(entry => entry.StaffId)
-                    .OrderByDescending(entry => entry.Count())
-                    .First()
-                    .Select(entry => entry.Teacher)
-                    .First();
+                var assignments = offering
+                    .Teachers
+                    .Where(assignment =>
+                        !assignment.IsDeleted &&
+                        assignment.Type == AssignmentType.ClassroomTeacher)
+                    .ToList();
 
-                entry.Teacher = teacher.DisplayName;
+                foreach (var assignment in assignments)
+                {
+                    teacher = await _staffRepository.GetById(assignment.StaffId, token);
+
+                    if (teacher is not null)
+                        entry.Teacher = teacher.DisplayName;
+                }
             }
             else if (!string.IsNullOrWhiteSpace(entry.Teacher))
             {
@@ -142,7 +148,8 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
 
             if (offering is not null)
             {
-                var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = offering.Course.FacultyId }, token);
+                var course = await _courseRepository.GetById(offering.CourseId, token);
+                var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = course.FacultyId }, token);
                 emailDto.HeadTeachers = headTeachers.ToDictionary(member => member.EmailAddress, member => member.DisplayName);
 
                 var coversRequest = await _mediator.Send(new GetCoversSummaryByDateAndOfferingQuery(date, offering.Id), token);

@@ -4,6 +4,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class FacultyRepository : IFacultyRepository
@@ -36,10 +37,16 @@ internal sealed class FacultyRepository : IFacultyRepository
         OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
-        Guid? facultyId = await _dbContext
+        int courseId = await _dbContext
             .Set<Offering>()
             .Where(offering => offering.Id == offeringId)
-            .Select(offering => offering.Course.FacultyId)
+            .Select(offering => offering.CourseId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        Guid? facultyId = await _dbContext
+            .Set<Course>()
+            .Where(course => course.Id == courseId)
+            .Select(course => course.FacultyId)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (facultyId is null)

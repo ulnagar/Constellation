@@ -4,6 +4,10 @@ using Constellation.Application.Features.API.Schools.Queries;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Enrolments;
+using Constellation.Core.Models.Offerings;
+using Constellation.Infrastructure.Persistence.ConstellationContext;
+using Duende.IdentityServer.Extensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -16,15 +20,15 @@ namespace Constellation.Infrastructure.Features.API.Schools.Queries
 {
     public class GetGraphDataForSchoolQueryHandler : IRequestHandler<GetGraphDataForSchoolQuery, GraphData>
     {
-        private readonly IAppDbContext _context;
+        private readonly AppDbContext _context;
         private readonly INetworkStatisticsGateway _gateway;
 
-        public GetGraphDataForSchoolQueryHandler(IAppDbContext _context)
+        public GetGraphDataForSchoolQueryHandler(AppDbContext _context)
         {
             this._context = _context;
         }
 
-        public GetGraphDataForSchoolQueryHandler(IAppDbContext context, INetworkStatisticsGateway gateway)
+        public GetGraphDataForSchoolQueryHandler(AppDbContext context, INetworkStatisticsGateway gateway)
         {
             _context = context;
             _gateway = gateway;
@@ -65,9 +69,26 @@ namespace Constellation.Infrastructure.Features.API.Schools.Queries
             // Get the periods for all students at this school
             foreach (var student in school.Students)
             {
-                var studentPeriods = await _context.Periods
-                    .Where(period => period.OfferingSessions.Any(session => !session.IsDeleted && session.Offering.Enrolments.Any(enrolment => !enrolment.IsDeleted && enrolment.StudentId == student.StudentId)))
-                    .ToListAsync();
+                var offeringIds = await _context
+                    .Set<Enrolment>()
+                    .Where(enrolment =>
+                        enrolment.StudentId == student.StudentId &&
+                        enrolment.IsDeleted)
+                    .Select(enrolment => enrolment.OfferingId)
+                    .ToListAsync(cancellationToken);
+
+                var periodIds = await _context
+                    .Set<Offering>()
+                    .Where(offering => offeringIds.Contains(offering.Id))
+                    .SelectMany(offering => offering.Sessions)
+                    .Where(session => !session.IsDeleted)
+                    .Select(session => session.PeriodId)
+                    .ToListAsync(cancellationToken);
+
+                var studentPeriods = await _context
+                    .Set<TimetablePeriod>()
+                    .Where(period => periodIds.Contains(period.Id))
+                    .ToListAsync(cancellationToken);
 
                 periods.AddRange(studentPeriods);
             }

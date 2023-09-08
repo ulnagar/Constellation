@@ -175,7 +175,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
                 if (cancellationToken.IsCancellationRequested)
                     return returnAbsences;
 
-                if (!enrolledOffering.Name.Contains(group.First().ClassName))
+                if (!enrolledOffering.Name.Value.Contains(group.First().ClassName))
                 {
                     // The PxP absence is for a different class than the courseEnrolment
                     // therefore it should not be processed here.

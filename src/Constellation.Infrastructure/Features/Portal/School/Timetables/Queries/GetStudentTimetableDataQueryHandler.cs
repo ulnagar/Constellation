@@ -3,7 +3,10 @@
 using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
 using Constellation.Application.Features.Portal.School.Timetables.Queries;
+using Constellation.Core.Models;
+using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,26 +36,39 @@ public class GetStudentTimetableDataQueryHandler : IRequestHandler<GetStudentTim
         record.StudentGrade = student.CurrentGrade.AsName();
         record.StudentSchool = student.School.Name;
 
-        var sessions = await _context.Set<Session>()
-            .Include(session => session.Period)
-            .Include(session => session.Teacher)
-            .Include(session => session.Offering)
-            .Where(session => session.Offering.Enrolments.Any(enrolment => enrolment.StudentId == request.StudentId && !enrolment.IsDeleted) && !session.IsDeleted)
+        var offeringIds = await _context
+            .Set<Enrolment>()
+            .Where(enrolment =>
+                enrolment.StudentId == student.StudentId &&
+                enrolment.IsDeleted)
+            .Select(enrolment => enrolment.OfferingId)
             .ToListAsync(cancellationToken);
 
-        if (sessions == null)
-            return record;
+        var offerings = await _context
+            .Set<Offering>()
+            .Where(offering => offeringIds.Contains(offering.Id))
+            .ToListAsync(cancellationToken);
 
-        var periods = await _context.Periods.ToListAsync(cancellationToken);
+        var periodIds = offerings
+            .SelectMany(offering => offering.Sessions)
+            .Where(session => !session.IsDeleted)
+            .Select(session => session.PeriodId)
+            .ToList();
 
-        // Find relevantPeriods
-        // Extrapolate relevantTimetables
-        // Collect all Period information for relevantTimetables
-        // Add class/session data for each Period
+        var periods = await _context
+            .Set<TimetablePeriod>()
+            .Where(period => periodIds.Contains(period.Id))
+            .ToListAsync(cancellationToken);
 
-        var relevantTimetables = sessions.Select(session => session.Period.Timetable).Distinct().ToList();
+        var relevantTimetables = periods
+            .Select(period => period.Timetable)
+            .Distinct()
+            .ToList();
 
-        var relevantPeriods = periods.Where(period => relevantTimetables.Contains(period.Timetable)).ToList();
+        var relevantPeriods = await _context
+            .Set<TimetablePeriod>()
+            .Where(period => relevantTimetables.Contains(period.Timetable))
+            .ToListAsync(cancellationToken);
 
         foreach (var period in relevantPeriods)
         {
@@ -70,11 +86,39 @@ public class GetStudentTimetableDataQueryHandler : IRequestHandler<GetStudentTim
                 Type = period.Type
             };
 
-            if (sessions.Any(session => session.PeriodId == period.Id))
+
+            if (periodIds.Contains(period.Id))
             {
-                var relevantSession = sessions.FirstOrDefault(session => session.PeriodId == period.Id);
-                entry.ClassName = relevantSession.Offering.Name;
-                entry.ClassTeacher = relevantSession.Teacher.DisplayName;
+                var offering = offerings
+                    .Where(offering =>
+                        offering.Sessions.Any(session =>
+                            session.PeriodId == period.Id))
+                    .FirstOrDefault();
+
+                if (offering is null)
+                    continue;
+
+                entry.ClassName = offering.Name;
+
+                List<TeacherAssignment> assignments = offering
+                    .Teachers
+                    .Where(assignment =>
+                        assignment.Type == AssignmentType.ClassroomTeacher &&
+                        !assignment.IsDeleted)
+                    .ToList();
+
+                foreach (TeacherAssignment assignment in assignments)
+                {
+                    Staff teacher = await _context
+                        .Set<Staff>()
+                        .Where(teacher => teacher.StaffId == assignment.StaffId)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                    if (teacher is null)
+                        continue;
+
+                    entry.ClassTeacher = teacher.DisplayName;
+                }
             }
 
             record.Timetables.Add(entry);

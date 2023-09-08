@@ -8,7 +8,10 @@ using Constellation.Application.Features.Subject.Assignments.Queries;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Assignments;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.EntityFrameworkCore;
 
 public class GetAssignmentsFromCourseForDropdownSelectionQueryHandler : IRequestHandler<GetAssignmentsFromCourseForDropdownSelectionQuery, ValidateableResponse<ICollection<AssignmentFromCourseForDropdownSelection>>>
@@ -38,11 +41,20 @@ public class GetAssignmentsFromCourseForDropdownSelectionQueryHandler : IRequest
         if (offering == null)
             return new ValidateableResponse<ICollection<AssignmentFromCourseForDropdownSelection>>(new List<AssignmentFromCourseForDropdownSelection>(), new List<string> { "Could not find a valid offering for this course!" });
 
-        var canvasCourseId = $"{offering.EndDate.Year}-{offering.Name.Substring(0, offering.Name.Length - 1)}";
+        var resources = offering
+            .Resources
+            .Where(resource => resource.Type == ResourceType.CanvasCourse)
+            .Select(resource => resource as CanvasCourseResource)
+            .ToList();
 
-        var assignments = await _canvasGateway.GetAllCourseAssignments(canvasCourseId);
+        List<AssignmentFromCourseForDropdownSelection> assignmentDtos = new();
 
-        var assignmentDtos = _mapper.Map<ICollection<CanvasAssignmentDto>, ICollection<AssignmentFromCourseForDropdownSelection>>(assignments);
+        foreach (var resource in resources)
+        {
+            var assignments = await _canvasGateway.GetAllCourseAssignments(resource.CourseId);
+
+            assignmentDtos.AddRange(_mapper.Map<ICollection<CanvasAssignmentDto>, ICollection<AssignmentFromCourseForDropdownSelection>>(assignments));
+        }
 
         foreach (var assignment in assignmentDtos)
             if (await _context.Set<CanvasAssignment>().AnyAsync(a => a.CanvasId == assignment.CanvasId))
