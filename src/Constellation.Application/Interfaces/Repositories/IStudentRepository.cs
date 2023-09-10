@@ -6,7 +6,6 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings.Identifiers;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,13 +42,8 @@ public interface IStudentRepository
         Task<Student?> GetAnyByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
 
     Task <Student> GetForExistCheck(string id);
-    Task<ICollection<Student>> AllWithAbsenceScanSettings();
-    Task<ICollection<Student>> AllActiveAsync();
-    Task<ICollection<Student>> AllEnrolledInCourse(int courseId);
-    Task<ICollection<Student>> ForPTOFile(Expression<Func<Student, bool>> predicate);
     Task<ICollection<Student>> AllActiveForFTECalculations();
     Task<ICollection<Student>> AllActiveForClassAuditAsync();
-    Task<Student> ForDetailDisplayAsync(string id);
     Task<ICollection<Student>> ForListAsync(Expression<Func<Student, bool>> predicate);
     Task<Student> ForEditAsync(string studentId);
     Task<Student> ForBulkUnenrolAsync(string studentId);
@@ -57,9 +51,5 @@ public interface IStudentRepository
     Task<Student> ForAttendanceQueryReport(string studentId);
     Task<List<Student>> ForInterviewsExportAsync(InterviewExportSelectionDto filter, CancellationToken cancellationToken = default);
     Task<bool> AnyWithId(string id);
-    Task<Student> ForDeletion(string id);
-    Task<ICollection<Student>> ForAttendanceReports();
     Task<ICollection<Student>> WithoutAdobeConnectDetailsForUpdate();
-    Task<ICollection<Student>> ForAbsenceScan(Grade grade);
-    Task<ICollection<Student>> ForTrackItSync();
 }

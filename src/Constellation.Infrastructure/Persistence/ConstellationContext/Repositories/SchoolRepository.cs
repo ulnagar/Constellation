@@ -36,8 +36,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Include(s => s.StaffAssignments)
                     .ThenInclude(assignment => assignment.SchoolContact)
                 .Include(s => s.Students)
-                    .ThenInclude(student => student.Enrolments)
-                        .ThenInclude(enrolment => enrolment.Offering);
+                    .ThenInclude(student => student.Enrolments);
         }
 
         public void Insert(School school) =>
@@ -165,17 +164,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .ToListAsync();
         }
 
-        public async Task<ICollection<string>> AHPSchoolCodes()
-        {
-            return await _context.Set<Course>()
-                .Where(course => course.Name == "AHPG STEM")
-                .SelectMany(course => course.Offerings)
-                .SelectMany(offering => offering.Enrolments)
-                .Select(enrolment => enrolment.Student)
-                .Select(student => student.SchoolCode)
-                .ToListAsync();
-        }
-
         public async Task<School> ForEditAsync(string id)
         {
             return await _context.Schools
@@ -187,7 +175,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             return await _context.Schools
                 .Include(school => school.Students)
                 .ThenInclude(student => student.Enrolments)
-                .ThenInclude(enrolment => enrolment.Offering)
                 .Include(school => school.Staff)
                 .ThenInclude(staff => staff.CourseSessions)
                 .ThenInclude(session => session.Offering)
