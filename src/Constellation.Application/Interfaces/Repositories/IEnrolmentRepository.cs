@@ -10,4 +10,5 @@ public interface IEnrolmentRepository
 {
     Task<List<Enrolment>> GetCurrentByStudentId(string studentId, CancellationToken cancellationToken = default);
     Task<List<Enrolment>> GetCurrentByOfferingId(OfferingId offeringId, CancellationToken cancellationToken = default);
+    void Insert(Enrolment enrolment);
 }

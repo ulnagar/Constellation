@@ -1,5 +1,6 @@
 ﻿using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using System;
 
@@ -55,7 +56,7 @@ public static class DomainErrors
     {
         public static class Assignment
         {
-            public static readonly Func<AssignmentId, Error> NotFound = id => new(
+            public static readonly Func<Models.Identifiers.AssignmentId, Error> NotFound = id => new(
                 "Assignments.Assignment.NotFound",
                 $"Could not find an assignment with the Id {id}");
 
@@ -170,6 +171,10 @@ public static class DomainErrors
             public static readonly Func<string, Error> NotFoundForStudent = id => new Error(
                 "Enrolments.Enrolment.NotFoundForStudent",
                 $"No enrolments could be found for student with Id {id}");
+
+            public static readonly Func<string, OfferingId, Error> AlreadyExists = (studentId, offeringId) => new(
+                "Enrolments.Enrolment.AlreadyExists",
+                $"A current enrolment already exists for student {studentId} and offering {offeringId}");
         }
     }
 

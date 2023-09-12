@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Tests.Unit.Models.Offerings;
 
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Subjects;
 
 public class OfferingTests
@@ -10,11 +11,14 @@ public class OfferingTests
     public void IsCurrent_ShouldReturnFalse_IfSessionsIsNull()
     {
         // Arrange
-        var sut = new Offering
-        {
-            StartDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
-            EndDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
-        };
+        var name = OfferingName.FromValue("07SCI1");
+
+        var sut = new Offering(
+            name.Value,
+            1,
+            DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddDays(1))
+        );
 
         // Act
         var result = sut.IsCurrent;
@@ -27,7 +31,15 @@ public class OfferingTests
     public void IsCurrent_ShouldReturnFalse_IfAllSessionsAreDeleted()
     {
         // Arrange
-        var sut = new Offering();
+        var name = OfferingName.FromValue("07SCI1");
+
+        var sut = new Offering(
+            name.Value,
+            1,
+            DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddDays(1))
+        );
+
         sut.AddSession(1);
 
         sut.RemoveAllSessions();
@@ -43,11 +55,14 @@ public class OfferingTests
     public void IsCurrent_ShouldReturnTrue_IfStartDateIsInThePastAndEndDateIsInTheFuture()
     {
         // Arrange
-        var sut = new Offering
-        {
-            StartDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
-            EndDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
-        };
+        var name = OfferingName.FromValue("07SCI1");
+
+        var sut = new Offering(
+            name.Value,
+            1,
+            DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
+            DateOnly.FromDateTime(DateTime.Today.AddDays(1))
+        );
 
         sut.AddSession(1);
 
@@ -62,11 +77,14 @@ public class OfferingTests
     public void IsCurrent_ShouldReturnTrue_IfStartDateIsTodayAndEndDateIsInTheFuture()
     {
         // Arrange
-        var sut = new Offering
-        {
-            StartDate = DateOnly.FromDateTime(DateTime.Today),
-            EndDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
-        };
+        var name = OfferingName.FromValue("07SCI1");
+
+        var sut = new Offering(
+            name.Value,
+            1,
+            DateOnly.FromDateTime(DateTime.Today),
+            DateOnly.FromDateTime(DateTime.Today.AddDays(1))
+        );
 
         sut.AddSession(1);
 
@@ -81,11 +99,14 @@ public class OfferingTests
     public void IsCurrent_ShouldReturnTrue_IfStartDateIsInThePastAndEndDateIsToday()
     {
         // Arrange
-        var sut = new Offering
-        {
-            StartDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
-            EndDate = DateOnly.FromDateTime(DateTime.Today)
-        };
+        var name = OfferingName.FromValue("07SCI1");
+
+        var sut = new Offering(
+            name.Value,
+            1,
+            DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
+            DateOnly.FromDateTime(DateTime.Today)
+        );
 
         sut.AddSession(1);
 
@@ -100,11 +121,14 @@ public class OfferingTests
     public void IsCurrent_ShouldReturnTrue_IfStartDateIsTodayAndEndDateIsToday()
     {
         // Arrange
-        var sut = new Offering
-        {
-            StartDate = DateOnly.FromDateTime(DateTime.Today),
-            EndDate = DateOnly.FromDateTime(DateTime.Today)
-        };
+        var name = OfferingName.FromValue("07SCI1");
+
+        var sut = new Offering(
+            name.Value,
+            1,
+            DateOnly.FromDateTime(DateTime.Today),
+            DateOnly.FromDateTime(DateTime.Today)
+        );
 
         sut.AddSession(1);
 

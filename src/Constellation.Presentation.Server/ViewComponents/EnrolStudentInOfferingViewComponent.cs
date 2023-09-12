@@ -4,7 +4,7 @@ using Constellation.Application.Offerings.GetOfferingDetails;
 using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Server.Pages.Shared.Components.FamilyAddStudent;
+using Constellation.Presentation.Server.Pages.Shared.Components.EnrolStudentInOffering;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

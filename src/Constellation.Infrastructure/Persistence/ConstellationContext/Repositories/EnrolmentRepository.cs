@@ -49,4 +49,7 @@ public class EnrolmentRepository : IEnrolmentRepository
             .Set<Enrolment>()
             .Where(enrol => enrol.OfferingId == offeringId && !enrol.IsDeleted)
             .ToListAsync(cancellationToken);
+
+    public void Insert(Enrolment enrolment) =>
+        _context.Set<Enrolment>().Add(enrolment);
 }

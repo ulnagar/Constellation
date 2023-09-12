@@ -1,4 +1,6 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Enrolments.EnrolStudent;
+using Constellation.Application.Enrolments.UnenrolStudent;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -234,10 +236,8 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             foreach (var enrolment in student.Enrolments.Where(e => !e.IsDeleted))
             {
-                await _studentService.UnenrolStudentFromClass(student.StudentId, enrolment.OfferingId);
+                await _mediator.Send(new UnenrolStudentCommand(student.StudentId, enrolment.OfferingId));
             }
-
-            await _unitOfWork.CompleteAsync();
 
             return RedirectToAction("Details", new { id });
         }
@@ -250,8 +250,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             if (offeringId is null)
                 return RedirectToAction("Details", new { id });
 
-            await _studentService.UnenrolStudentFromClass(id, offeringId);
-            await _unitOfWork.CompleteAsync();
+            await _mediator.Send(new UnenrolStudentCommand(id, offeringId));
 
             return RedirectToAction("Details", new { id });
         }
@@ -295,10 +294,8 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                     if (offering == null)
                         continue;
 
-                    await _studentService.EnrolStudentInClass(student.StudentId, offering.Id);
+                    await _mediator.Send(new EnrolStudentCommand(student.StudentId, offering.Id));
                 }
-
-                await _unitOfWork.CompleteAsync();
             }
 
             return RedirectToAction("Details", new { id = viewModel.StudentId });
@@ -325,7 +322,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             if (!student.Enrolments.Any(e => e.OfferingId == offeringId && !e.IsDeleted))
             {
-                await _studentService.EnrolStudentInClass(student.StudentId, offering.Id);
+                await _mediator.Send(new EnrolStudentCommand(student.StudentId, offering.Id));
             }
 
             return RedirectToAction("Details", new { id });
