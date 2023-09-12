@@ -5,6 +5,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class FacultyRepository : IFacultyRepository
@@ -37,7 +38,7 @@ internal sealed class FacultyRepository : IFacultyRepository
         OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
-        int courseId = await _dbContext
+        CourseId courseId = await _dbContext
             .Set<Offering>()
             .Where(offering => offering.Id == offeringId)
             .Select(offering => offering.CourseId)

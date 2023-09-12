@@ -7,6 +7,8 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Shared;
 using Constellation.Infrastructure.DependencyInjection;
 
 public class CourseOfferingService : ICourseOfferingService
@@ -32,18 +34,22 @@ public class CourseOfferingService : ICourseOfferingService
 
         if (!await _courseRepository.AnyWithId(courseResource.Id))
         {
-            var course = new Course
-            {
-                Name = courseResource.Name,
-                Grade = courseResource.Grade,
-                Faculty = courseResource.Faculty,
-                FullTimeEquivalentValue = courseResource.FullTimeEquivalentValue
-            };
+            Result<Course> request = Course.Create(
+                courseResource.Name,
+                courseResource.Code,
+                courseResource.Grade,
+                courseResource.FacultyId,
+                courseResource.FullTimeEquivalentValue);
 
-            _unitOfWork.Add(course);
+            if (request.IsSuccess)
+            {
+                _courseRepository.Insert(request.Value);
+
+                await _unitOfWork.CompleteAsync();
+            }
 
             result.Success = true;
-            result.Entity = course;
+            result.Entity = request.Value;
         }
         else
         {
@@ -64,19 +70,25 @@ public class CourseOfferingService : ICourseOfferingService
 
         if (course != null)
         {
-            if (!string.IsNullOrWhiteSpace(courseResource.Name))
-                course.Name = courseResource.Name;
+            Result request = course.Update(
+                courseResource.Name,
+                courseResource.Code,
+                courseResource.Grade,
+                courseResource.FacultyId,
+                courseResource.FullTimeEquivalentValue);
 
-            if (courseResource.Grade != 0)
-                course.Grade = courseResource.Grade;
+            if (request.IsFailure)
+            {
+                result.Success = false;
+                result.Errors.Add(request.Error.Message);
 
-            course.FacultyId = courseResource.FacultyId;
-
-            if (courseResource.FullTimeEquivalentValue != 0)
-                course.FullTimeEquivalentValue = courseResource.FullTimeEquivalentValue;
+                return result;
+            }
 
             result.Success = true;
             result.Entity = course;
+
+            await _unitOfWork.CompleteAsync();
         }
         else
         {
@@ -87,7 +99,7 @@ public class CourseOfferingService : ICourseOfferingService
         return result;
     }
 
-    public async Task RemoveCourse(int id)
+    public async Task RemoveCourse(CourseId id)
     {
         // Validate entries
         var course = await _courseRepository.ForEditAsync(id);

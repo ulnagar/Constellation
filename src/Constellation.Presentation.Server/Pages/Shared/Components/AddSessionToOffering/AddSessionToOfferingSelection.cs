@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Presentation.Server.Pages.Shared.Components.AddSessionToOffering;
 
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Org.BouncyCastle.Bcpg;
 

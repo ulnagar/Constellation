@@ -10,6 +10,8 @@ using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Errors;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Threading;
@@ -66,10 +68,10 @@ internal sealed class CreateOfferingCommandHandler
         {
             _logger
                 .ForContext(nameof(CreateOfferingCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Subjects.Course.NotFound(request.CourseId), true)
+                .ForContext(nameof(Error), CourseErrors.NotFound(request.CourseId), true)
                 .Warning("Failed to create Offering");
 
-            return Result.Failure<OfferingId>(DomainErrors.Subjects.Course.NotFound(request.CourseId));
+            return Result.Failure<OfferingId>(CourseErrors.NotFound(request.CourseId));
         }
 
         Result<OfferingName> name = OfferingName.FromValue(request.Name);

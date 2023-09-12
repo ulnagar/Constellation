@@ -10,6 +10,7 @@ using Constellation.Application.Students.GetFilteredStudentsForSelectionList;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Constellation.Presentation.Server.BaseModels;
@@ -129,7 +130,7 @@ public class NominateModel : BasePageModel
             return Page();
         }
 
-        OfferingId offeringId = Core.Models.Offerings.Identifiers.OfferingId.FromValue(OfferingId);
+        OfferingId offeringId = Core.Models.Subjects.Identifiers.OfferingId.FromValue(OfferingId);
 
         CreateAwardNominationCommand command = new(
             AwardNominationPeriodId.FromValue(PeriodId),
@@ -251,7 +252,7 @@ public class NominateModel : BasePageModel
 
         if (CurrentStep == Phase.StudentSelection && OfferingId != new Guid())
         {
-            OfferingId offeringId = Core.Models.Offerings.Identifiers.OfferingId.FromValue(OfferingId);
+            OfferingId offeringId = Core.Models.Subjects.Identifiers.OfferingId.FromValue(OfferingId);
 
             Result<List<StudentForSelectionList>> studentsRequest = await _mediator.Send(new GetFilteredStudentsForSelectionListQuery(periodRequest.Value.IncludedGrades, new List<OfferingId> { offeringId }, new List<int>()));
 

@@ -1,6 +1,7 @@
 ﻿using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using System;
 
@@ -467,20 +468,6 @@ public static class DomainErrors
             public static readonly Error MustBeCancelled = new(
                 "SciencePracs.Rolls.MustBeCancelled",
                 "Cannot reinstate roll that has not been cancelled");
-        }
-    }
-
-    public static class Subjects
-    {
-        public static class Course
-        {
-            public static readonly Func<int, Error> NoOfferings = id => new(
-                "Subjects.Course.NoOfferings",
-                $"Could not find any offerings related to course with id {id}");
-
-            public static readonly Func<int, Error> NotFound = id => new(
-                "Subjects.Course.NotFound",
-                $"Could not find a course with the id {id}");
         }
     }
 

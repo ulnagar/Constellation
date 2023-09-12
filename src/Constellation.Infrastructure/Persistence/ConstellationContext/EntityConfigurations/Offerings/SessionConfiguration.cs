@@ -3,6 +3,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

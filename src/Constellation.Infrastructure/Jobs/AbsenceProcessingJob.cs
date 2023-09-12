@@ -14,6 +14,7 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.Extensions.Options;
 using Serilog.Context;
 using System.Threading;

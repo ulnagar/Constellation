@@ -3,13 +3,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 public class CourseRepository : ICourseRepository
 {
@@ -25,7 +24,7 @@ public class CourseRepository : ICourseRepository
     }
 
     public async Task<Course?> GetById(
-        int courseId,
+        CourseId courseId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Course>()
@@ -64,13 +63,16 @@ public class CourseRepository : ICourseRepository
             .Where(course => course.Offerings.Any(offering => offering.Id == offeringId))
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<Course?> ForEditAsync(int id) =>
+    public async Task<Course?> ForEditAsync(CourseId id) =>
         await _context.Set<Course>()
             .SingleOrDefaultAsync(course => course.Id == id);
 
-    public async Task<bool> AnyWithId(int id)
+    public async Task<bool> AnyWithId(CourseId id)
     {
         return await _context.Set<Course>()
             .AnyAsync(course => course.Id == id);
     }
+
+    public void Insert(Course course) =>
+        _context.Set<Course>().Add(course);
 }

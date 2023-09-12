@@ -3,6 +3,7 @@
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Threading;

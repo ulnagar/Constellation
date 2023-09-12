@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.DependencyInjection;
 using System;
 using System.Linq;

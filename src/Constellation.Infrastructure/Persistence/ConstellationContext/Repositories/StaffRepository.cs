@@ -8,6 +8,7 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -104,7 +105,7 @@ public class StaffRepository : IStaffRepository
         OfferingId offeringId, 
         CancellationToken cancellationToken = default)
     {
-        List<int> courseIds = await _context
+        List<CourseId> courseIds = await _context
             .Set<Offering>()
             .Where(offering => offering.Id == offeringId)
             .Select(offering => offering.CourseId)

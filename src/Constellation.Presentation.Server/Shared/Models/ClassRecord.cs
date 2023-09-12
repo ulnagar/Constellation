@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Presentation.Server.Shared.Models;
 
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 
 public sealed record ClassRecord(
     OfferingId Id,

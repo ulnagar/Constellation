@@ -11,6 +11,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;

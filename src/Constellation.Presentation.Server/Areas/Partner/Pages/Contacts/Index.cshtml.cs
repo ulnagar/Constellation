@@ -9,6 +9,7 @@ using Constellation.Application.Schools.Models;
 using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Shared.Models;
 using MediatR;

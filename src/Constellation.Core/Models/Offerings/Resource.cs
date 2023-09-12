@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 
 public abstract class Resource

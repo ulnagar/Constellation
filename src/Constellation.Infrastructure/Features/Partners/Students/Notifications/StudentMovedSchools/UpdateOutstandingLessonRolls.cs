@@ -8,6 +8,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects.Identifiers;
 using MediatR;
 using Serilog;
 using System;

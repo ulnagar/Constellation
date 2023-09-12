@@ -3,6 +3,7 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.DTOs;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System.Collections.Generic;
 
 public sealed record GetOfferingLocationsAsMapLayersQuery(

@@ -7,6 +7,7 @@ using Constellation.Application.Offerings.GetOfferingSummary;
 using Constellation.Application.Offerings.Models;
 using Constellation.Application.Offerings.UpdateOffering;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;

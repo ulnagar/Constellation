@@ -3,6 +3,7 @@
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

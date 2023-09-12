@@ -10,6 +10,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.DependencyInjection;
 using System;
 using System.Threading.Tasks;

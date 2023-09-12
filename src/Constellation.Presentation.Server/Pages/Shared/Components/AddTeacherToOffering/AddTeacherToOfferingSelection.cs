@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Presentation.Server.Pages.Shared.Components.AddTeacherToOffering;
 
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.Identity.Client;
 
 public class AddTeacherToOfferingSelection

@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Server.BaseModels;
 
 using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;

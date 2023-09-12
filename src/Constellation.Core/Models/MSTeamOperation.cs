@@ -4,6 +4,7 @@ using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 
 namespace Constellation.Core.Models

@@ -11,6 +11,7 @@ using Constellation.Application.Offerings.RemoveSession;
 using Constellation.Application.Offerings.RemoveTeacherFromOffering;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.AddSessionToOffering;

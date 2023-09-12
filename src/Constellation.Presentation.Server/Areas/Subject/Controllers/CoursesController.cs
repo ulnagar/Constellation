@@ -170,8 +170,6 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
                 await _offeringService.UpdateCourse(viewModel.Course);
             }
 
-            await _unitOfWork.CompleteAsync();
-
             return RedirectToAction("Index");
         }
 

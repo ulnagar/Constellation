@@ -3,6 +3,7 @@
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System;
@@ -15,7 +16,7 @@ public class CanvasAssignment : AggregateRoot
 
     private CanvasAssignment(
         AssignmentId id, 
-        int courseId, 
+        CourseId courseId, 
         string name, 
         int canvasId, 
         DateTime dueDate, 
@@ -34,7 +35,7 @@ public class CanvasAssignment : AggregateRoot
     }
 
     public AssignmentId Id { get; private set; }
-    public int CourseId { get; private set; }
+    public CourseId CourseId { get; private set; }
     public string Name { get; private set; }
     public int CanvasId { get; private set; }
     public DateTime DueDate { get; private set; }
@@ -45,7 +46,7 @@ public class CanvasAssignment : AggregateRoot
 
     public static CanvasAssignment Create(
         AssignmentId id,
-        int courseId,
+        CourseId courseId,
         string name,
         int canvasId,
         DateTime dueDate,

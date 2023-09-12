@@ -9,7 +9,6 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
-using Microsoft.Extensions.Primitives;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -90,11 +89,10 @@ internal sealed class GetLessonDetailsQueryHandler
         Course course = await _courseRepository.GetByLessonId(lesson.Id, cancellationToken);
 
         string courseName = $"{course?.Grade} {course?.Name}";
-        int courseId = course?.Id ?? 0;
 
         LessonDetailsResponse response = new(
             lesson.Id,
-            courseId,
+            course?.Id,
             courseName,
             lesson.Name,
             lesson.DueDate,

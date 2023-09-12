@@ -2,6 +2,7 @@
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 
 namespace Constellation.Presentation.Server.Areas.Subject.Models

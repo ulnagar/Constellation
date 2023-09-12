@@ -5,6 +5,7 @@ using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,7 @@ internal sealed class GetAssignmentByIdQueryHandler
         var course = await _courseRepository.GetById(assignment.CourseId, cancellationToken);
 
         if (course is null)
-            return Result.Failure<AssignmentResponse>(DomainErrors.Subjects.Course.NotFound(assignment.CourseId));
+            return Result.Failure<AssignmentResponse>(CourseErrors.NotFound(assignment.CourseId));
 
         var courseName = $"Y{course.Grade.AsNumber()} {course.Name}";
 

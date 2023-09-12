@@ -3,6 +3,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.TeacherAddFaculty;
 using System.ComponentModel.DataAnnotations;

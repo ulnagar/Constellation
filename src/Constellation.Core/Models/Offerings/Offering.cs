@@ -3,6 +3,7 @@ using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System;
@@ -19,7 +20,7 @@ public sealed class Offering : AggregateRoot
 
     public Offering(
         OfferingName name, 
-        int courseId, 
+        CourseId courseId, 
         DateOnly startDate, 
         DateOnly endDate)
     {
@@ -31,7 +32,7 @@ public sealed class Offering : AggregateRoot
 
     public OfferingId Id { get; set; }
     public OfferingName Name { get; set; }
-    public int CourseId { get; set; }
+    public CourseId CourseId { get; set; }
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }
     public IReadOnlyList<Session> Sessions => _sessions;

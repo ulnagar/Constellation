@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.DTOs
 {
     using Constellation.Core.Models.Offerings.Identifiers;
+    using Constellation.Core.Models.Subjects.Identifiers;
 
     public class SessionDto
     {

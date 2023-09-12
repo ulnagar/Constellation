@@ -5,6 +5,7 @@ using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 public class EnrolmentRepository : IEnrolmentRepository

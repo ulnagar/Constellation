@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Application.Courses.GetCourseSummary;
 
 using Constellation.Application.Abstractions.Messaging;
+using Constellation.Core.Models.Subjects.Identifiers;
 
 public sealed record GetCourseSummaryQuery(
-    int CourseId)
+    CourseId CourseId)
     : IQuery<CourseSummaryResponse>;

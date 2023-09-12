@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Application.Courses.GetCourseSummary;
 
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 
 public sealed record CourseSummaryResponse(
-    int CourseId,
+    CourseId CourseId,
     string Name,
     string Code,
     Grade Grade,
