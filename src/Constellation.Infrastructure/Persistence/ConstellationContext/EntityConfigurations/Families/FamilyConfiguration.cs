@@ -24,7 +24,7 @@ public class FamilyConfiguration : IEntityTypeConfiguration<Family>
             .HasMany(family => family.Parents)
             .WithOne()
             .HasForeignKey(parent => parent.FamilyId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .Navigation(family => family.Parents)
@@ -34,7 +34,7 @@ public class FamilyConfiguration : IEntityTypeConfiguration<Family>
             .HasMany(family => family.Students)
             .WithOne()
             .HasForeignKey(family => family.FamilyId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .Navigation(family => family.Students)

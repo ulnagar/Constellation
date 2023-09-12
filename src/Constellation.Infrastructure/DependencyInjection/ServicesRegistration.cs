@@ -1,5 +1,6 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection;
 
+using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Common.Behaviours;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
@@ -93,7 +94,7 @@ public static class ServicesRegistration
                 .FromAssemblies(Constellation.Application.AssemblyReference.Assembly)
                 .RegisterHandlers(typeof(INotificationHandler<>)));
 
-        services.Decorate(typeof(INotificationHandler<>), typeof(IdempotentDomainEventHandler<>));
+        services.Decorate(typeof(IDomainEventHandler<>), typeof(IdempotentDomainEventHandler<>));
 
         // Add Hangfire Jobs
 

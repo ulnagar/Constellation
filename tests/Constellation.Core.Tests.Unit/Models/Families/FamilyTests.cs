@@ -558,7 +558,7 @@ public class FamilyTests
     }
 
     [Fact]
-    public void RemoveParent_ShouldReturnFailure_WhenParentDoesNotExist()
+    public void RemoveParent_ShouldReturnSuccessWithoutRaisingDomainEvent_WhenParentNotFound()
     {
         // Arrange
         var sut = Family.Create(
@@ -578,11 +578,12 @@ public class FamilyTests
             Parent.SentralReference.None);
 
         // Act
-        var result = sut.RemoveParent(parent.Value);
+        var result = sut.RemoveParent(parent.Value.Id);
+        var events = sut.GetDomainEvents();
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
+        events.Should().BeNullOrEmpty();
     }
 
     [Fact]
@@ -604,7 +605,7 @@ public class FamilyTests
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.RemoveParent(parent.Value);
+        var result = sut.RemoveParent(parent.Value.Id);
         var events = sut.GetDomainEvents();
 
         // Assert

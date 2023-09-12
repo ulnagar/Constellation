@@ -89,4 +89,10 @@ internal sealed class FamilyRepository : IFamilyRepository
 
     public void Insert(Family family) =>
         _context.Set<Family>().Add(family);
+
+    public void Remove(Parent parent) =>
+        _context.Set<Parent>().Remove(parent);
+
+    public void Remove(StudentFamilyMembership student) =>
+        _context.Set<StudentFamilyMembership>().Remove(student);
 }

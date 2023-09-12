@@ -2,14 +2,14 @@
 namespace Constellation.Core.Models.Families;
 
 using Constellation.Core.DomainEvents;
+using Constellation.Core.Errors;
+using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
-using Constellation.Core.ValueObjects;
 using Constellation.Core.Shared;
+using Constellation.Core.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Constellation.Core.Errors;
-using Constellation.Core.Models.Identifiers;
 
 public sealed class Family : AggregateRoot, IAuditableEntity
 {
@@ -176,16 +176,19 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         return existingParent;
     }
 
-    public Result RemoveParent(Parent parent)
+    public Result RemoveParent(
+        ParentId parentId)
     {
-        if (_parents.All(entry => entry.Id != parent.Id))
+        var existingParent = _parents.FirstOrDefault(entry => entry.Id == parentId);
+
+        if (existingParent is null)
         {
-            return Result.Failure(DomainErrors.Families.Parents.NotFoundInFamily(parent.Id, Id));
+            return Result.Success();
         }
 
-        _parents.Remove(parent);
+        _parents.Remove(existingParent);
 
-        RaiseDomainEvent(new ParentRemovedFromFamilyDomainEvent(new DomainEventId(), Id, parent.EmailAddress));
+        RaiseDomainEvent(new ParentRemovedFromFamilyDomainEvent(new DomainEventId(), Id, existingParent.EmailAddress));
 
         return Result.Success();
     }
@@ -241,14 +244,6 @@ public sealed class Family : AggregateRoot, IAuditableEntity
     {
         IsDeleted = true;
 
-        foreach (var parent in Parents)
-        {
-            RemoveParent(parent);
-        }
-
-        foreach (var student in Students)
-        {
-            RemoveStudent(student.StudentId);
-        }
+        RaiseDomainEvent(new FamilyDeletedDomainEvent(new DomainEventId(), Id));
     }
 }

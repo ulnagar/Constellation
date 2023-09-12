@@ -1,9 +1,11 @@
 ﻿namespace Constellation.Application.Families.events;
 
+using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Families;
+using Constellation.Core.Shared;
 using MediatR;
 using Serilog;
 using System;
@@ -14,7 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class StudentRemovedFromFamilyDomainEvent_EnsureFamilyHasActiveStudents
-    : INotificationHandler<StudentRemovedFromFamilyDomainEvent>
+    : IDomainEventHandler<StudentRemovedFromFamilyDomainEvent>
 {
     private readonly IFamilyRepository _familyRepository;
     private readonly IUnitOfWork _unitOfWork;

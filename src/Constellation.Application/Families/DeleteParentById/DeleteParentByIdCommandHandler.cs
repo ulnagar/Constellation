@@ -40,7 +40,7 @@ internal sealed class DeleteParentByIdCommandHandler
             return Result.Failure(DomainErrors.Families.Parents.NotFoundInFamily(request.ParentId, request.FamilyId));
         }
 
-        Result result = family.RemoveParent(parent);
+        Result result = family.RemoveParent(parent.Id);
 
         if (result.IsSuccess)
             await _unitOfWork.CompleteAsync(cancellationToken);

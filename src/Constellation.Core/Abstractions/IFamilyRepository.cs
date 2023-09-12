@@ -18,4 +18,6 @@ public interface IFamilyRepository
     Task<Dictionary<string, bool>> GetStudentIdsFromFamilyWithEmail(string email, CancellationToken cancellation = default);
     Task<int> CountOfParentsWithEmailAddress(string email, CancellationToken cancellationToken = default);
     void Insert(Family family);
+    void Remove(Parent parent);
+    void Remove(StudentFamilyMembership student);
 }

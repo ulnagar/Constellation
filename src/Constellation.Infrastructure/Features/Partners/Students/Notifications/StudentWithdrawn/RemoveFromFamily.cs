@@ -40,6 +40,8 @@ namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.
 
                 _logger.Warning("Student {studentId} removed from family {familyId}", notification.StudentId, family.Id);
             }
+
+            await _unitOfWork.CompleteAsync(cancellationToken);
         }
     }
 }
