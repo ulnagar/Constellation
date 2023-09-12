@@ -1,7 +1,5 @@
 ﻿using Constellation.Core.Models.Offerings;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
-using System.Collections.Generic;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Models
 {

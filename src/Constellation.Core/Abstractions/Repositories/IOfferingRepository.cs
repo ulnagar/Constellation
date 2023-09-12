@@ -30,4 +30,6 @@ public interface IOfferingRepository
     Task<Offering> GetFromYearAndName(int year, string name, CancellationToken cancellationToken = default);
 
     void Insert(Offering offering);
+
+    Task<List<string>> GetTimetableByOfferingId(OfferingId offeringId, CancellationToken cancellationToken = default);
 }

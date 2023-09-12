@@ -4,19 +4,22 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Constellation.Application.Features.Portal.School.Assignments.Models;
 using Constellation.Application.Features.Portal.School.Assignments.Queries;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Models.Enrolments;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Subjects;
+using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 
 public class GetCoursesForStudentQueryHandler : IRequestHandler<GetCoursesForStudentQuery, ICollection<StudentCourseForDropdownSelection>>
 {
     private readonly IDateTimeProvider _dateTime;
-    private readonly IAppDbContext _context;
+    private readonly AppDbContext _context;
     private readonly IMapper _mapper;
 
     public GetCoursesForStudentQueryHandler(
         IDateTimeProvider dateTime,
-        IAppDbContext context, 
+        AppDbContext context, 
         IMapper mapper)
     {
         _dateTime = dateTime;
@@ -25,14 +28,27 @@ public class GetCoursesForStudentQueryHandler : IRequestHandler<GetCoursesForStu
     }
     public async Task<ICollection<StudentCourseForDropdownSelection>> Handle(GetCoursesForStudentQuery request, CancellationToken cancellationToken)
     {
-        var courses = await _context.Enrolments
+        var offeringIds = await _context
+            .Set<Enrolment>()
             .Where(enrolment =>
                 enrolment.StudentId == request.StudentId &&
-                !enrolment.IsDeleted &&
-                enrolment.Offering.EndDate >= _dateTime.Today)
-            .Select(enrolment => enrolment.Offering.Course)
+                !enrolment.IsDeleted)
+            .Select(enrolment => enrolment.OfferingId)
+            .ToListAsync(cancellationToken);
+
+        var courseIds = await _context
+            .Set<Offering>()
+            .Where(offering => 
+                offeringIds.Contains(offering.Id) &&
+                offering.EndDate >= _dateTime.Today)
+            .Select(offering => offering.CourseId)
+            .ToListAsync(cancellationToken);
+
+        var courses = await _context
+            .Set<Course>()
+            .Where(course => courseIds.Contains(course.Id))
             .ProjectTo<StudentCourseForDropdownSelection>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return courses;
     }

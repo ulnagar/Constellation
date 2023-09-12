@@ -1,4 +1,6 @@
-﻿using Constellation.Application.Casuals.UpdateCasual;
+﻿namespace Constellation.Infrastructure.ExternalServices.AdobeConnect;
+
+using Constellation.Application.Casuals.UpdateCasual;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
@@ -8,339 +10,306 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Offerings;
-using Constellation.Infrastructure.DependencyInjection;
 
-namespace Constellation.Infrastructure.ExternalServices.AdobeConnect
+public class Service : IAdobeConnectService
 {
-    // Reviewed for ASYNC Operations
-    public class Service : IAdobeConnectService, IScopedService
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAdobeConnectGateway _adobeConnect;
+    private readonly IAdobeConnectRoomService _roomService;
+    private readonly IStudentService _studentService;
+    private readonly IStaffService _staffService;
+    private readonly ICasualRepository _casualRepository;
+    private readonly IMediator _mediator;
+
+    public Service(
+        IUnitOfWork unitOfWork,
+        IAdobeConnectGateway adobeConnectServer,
+        IAdobeConnectRoomService roomService,
+        IStudentService studentService,
+        IStaffService staffService,
+        ICasualRepository casualRepository,
+        IMediator mediator)
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IAdobeConnectGateway _adobeConnect;
-        private readonly IAdobeConnectRoomService _roomService;
-        private readonly IStudentService _studentService;
-        private readonly IStaffService _staffService;
-        private readonly ICasualRepository _casualRepository;
-        private readonly IMediator _mediator;
+        _unitOfWork = unitOfWork;
 
-        public Service(
-            IUnitOfWork unitOfWork,
-            IAdobeConnectGateway adobeConnectServer,
-            IAdobeConnectRoomService roomService,
-            IStudentService studentService,
-            IStaffService staffService,
-            ICasualRepository casualRepository,
-            IMediator mediator)
+        _adobeConnect = adobeConnectServer;
+        _roomService = roomService;
+        _studentService = studentService;
+        _staffService = staffService;
+        _casualRepository = casualRepository;
+        _mediator = mediator;
+    }
+
+    public Task<ICollection<string>> GetSessionsForDate(string scoId, DateTime sessionDate)
+    {
+        return _adobeConnect.GetSessionsForDate(scoId, sessionDate);
+    }
+
+    public Task<ICollection<AdobeConnectSessionUserDetailDto>> GetSessionUserDetails(string scoId, string assetId)
+    {
+        return _adobeConnect.GetSessionUserDetails(scoId, assetId);
+    }
+
+    public Task<string> GetUserPrincipalId(string username)
+    {
+        var indexLocation = username.IndexOf('@');
+
+        if (indexLocation > 0)
         {
-            _unitOfWork = unitOfWork;
-
-            _adobeConnect = adobeConnectServer;
-            _roomService = roomService;
-            _studentService = studentService;
-            _staffService = staffService;
-            _casualRepository = casualRepository;
-            _mediator = mediator;
+            username = username[..indexLocation];
         }
 
-        public async Task<string> CreateRoom(Offering offering)
+        return _adobeConnect.GetUserPrincipalId(username);
+    }
+
+    public async Task<IEnumerable<AdobeConnectRoomDto>> UpdateRooms(string folderSco)
+    {
+        var returnList = new List<AdobeConnectRoomDto>();
+
+        var response = await _adobeConnect.ListRooms(folderSco);
+
+        var databaseRooms = _unitOfWork.AdobeConnectRooms.AllActive().ToList();
+
+        var serverRoomSCO = response.Select(r => r.ScoId).ToList();
+        var databaseRoomSCO = databaseRooms.Select(r => r.ScoId).ToList();
+
+        var newRooms = serverRoomSCO.Except(databaseRoomSCO);
+        var deletedRooms = databaseRoomSCO.Except(serverRoomSCO);
+
+        foreach (var newRoomSco in newRooms)
         {
-            var zeroFillGrade = ((int)offering.Course.Grade).ToString();
-            if (zeroFillGrade.Length == 1)
+            var room = response.FirstOrDefault(r => r.ScoId == newRoomSco);
+
+            if (room == null)
+                continue;
+
+            if (_unitOfWork.AdobeConnectRooms.WithDetails(newRoomSco) != null)
+                continue;
+
+            returnList.Add(new AdobeConnectRoomDto
             {
-                zeroFillGrade = "0" + zeroFillGrade;
-            }
+                Action = "Add",
+                ScoId = room.ScoId,
+                Name = room.Name,
+                UrlPath = room.UrlPath
+            });
 
-            var resource = await _adobeConnect.CreateRoom(
-                name: "Aurora College - " + offering.EndDate.Year + " - " + offering.Name,
-                year: offering.EndDate.Year.ToString(),
-                grade: "Year " + zeroFillGrade,
-                dateStart: offering.StartDate.Year + "-" + offering.StartDate.Month.ToString().PadLeft(2, '0') + "-" + offering.StartDate.Day.ToString().PadLeft(2, '0'),
-                dateEnd: offering.EndDate.Year + "-" + offering.EndDate.Month.ToString().PadLeft(2, '0') + "-" + offering.EndDate.Day.ToString().PadLeft(2, '0'),
-                urlPath: "aurora-" + offering.EndDate.Year + "-" + offering.Name,
-                useTemplate: true,
-                faculty: offering.Course.Faculty.Name,
-                detectParentFolder: true,
-                parentFolder: ""
-            );
-
-            await _roomService.CreateRoom(resource);
-            await _unitOfWork.CompleteAsync();
-
-            return resource.ScoId;
+            await _roomService.CreateRoom(room);
         }
 
-        public Task<ICollection<string>> GetSessionsForDate(string scoId, DateTime sessionDate)
+        foreach (var deletedRoomSco in deletedRooms)
         {
-            return _adobeConnect.GetSessionsForDate(scoId, sessionDate);
-        }
+            var room = databaseRooms.FirstOrDefault(r => r.ScoId == deletedRoomSco);
 
-        public Task<ICollection<AdobeConnectSessionUserDetailDto>> GetSessionUserDetails(string scoId, string assetId)
-        {
-            return _adobeConnect.GetSessionUserDetails(scoId, assetId);
-        }
+            if (room == null)
+                continue;
 
-        public Task<string> GetUserPrincipalId(string username)
-        {
-            var indexLocation = username.IndexOf('@');
+            if (room.Protected)
+                continue;
 
-            if (indexLocation > 0)
+            returnList.Add(new AdobeConnectRoomDto
             {
-                username = username[..indexLocation];
-            }
+                Action = "Remove",
+                ScoId = room.ScoId,
+                Name = room.Name,
+                UrlPath = room.UrlPath
+            });
 
-            return _adobeConnect.GetUserPrincipalId(username);
+            await _roomService.RemoveRoom(room.ScoId);
         }
 
-        public async Task<IEnumerable<AdobeConnectRoomDto>> UpdateRooms(string folderSco)
+        await _unitOfWork.CompleteAsync();
+
+        return returnList;
+    }
+
+    public async Task<IEnumerable<AdobeConnectUserDetailDto>> UpdateUsers()
+    {
+        var returnList = new List<AdobeConnectUserDetailDto>();
+
+        var students = await _unitOfWork.Students.WithoutAdobeConnectDetailsForUpdate();
+
+        foreach (var student in students)
         {
-            var returnList = new List<AdobeConnectRoomDto>();
+            var acPID = await _adobeConnect.GetUserPrincipalId(student.PortalUsername);
 
-            var response = await _adobeConnect.ListRooms(folderSco);
-
-            var databaseRooms = _unitOfWork.AdobeConnectRooms.AllActive().ToList();
-
-            var serverRoomSCO = response.Select(r => r.ScoId).ToList();
-            var databaseRoomSCO = databaseRooms.Select(r => r.ScoId).ToList();
-
-            var newRooms = serverRoomSCO.Except(databaseRoomSCO);
-            var deletedRooms = databaseRoomSCO.Except(serverRoomSCO);
-
-            foreach (var newRoomSco in newRooms)
+            if (!string.IsNullOrWhiteSpace(acPID))
             {
-                var room = response.FirstOrDefault(r => r.ScoId == newRoomSco);
-
-                if (room == null)
-                    continue;
-
-                if (_unitOfWork.AdobeConnectRooms.WithDetails(newRoomSco) != null)
-                    continue;
-
-                returnList.Add(new AdobeConnectRoomDto
+                var studentResource = new StudentDto
                 {
-                    Action = "Add",
-                    ScoId = room.ScoId,
-                    Name = room.Name,
-                    UrlPath = room.UrlPath
-                });
+                    AdobeConnectPrincipalId = acPID
+                };
 
-                await _roomService.CreateRoom(room);
+                await _studentService.UpdateStudent(student.StudentId, studentResource);
+
+                returnList.Add(new AdobeConnectUserDetailDto { ScoId = acPID, UserId = student.StudentId, UserType = "Students", DisplayName = student.DisplayName });
             }
-
-            foreach (var deletedRoomSco in deletedRooms)
-            {
-                var room = databaseRooms.FirstOrDefault(r => r.ScoId == deletedRoomSco);
-
-                if (room == null)
-                    continue;
-
-                if (room.Protected)
-                    continue;
-
-                returnList.Add(new AdobeConnectRoomDto
-                {
-                    Action = "Remove",
-                    ScoId = room.ScoId,
-                    Name = room.Name,
-                    UrlPath = room.UrlPath
-                });
-
-                await _roomService.RemoveRoom(room.ScoId);
-            }
-
-            await _unitOfWork.CompleteAsync();
-
-            return returnList;
         }
 
-        public async Task<IEnumerable<AdobeConnectUserDetailDto>> UpdateUsers()
+        var teachers = _unitOfWork.Staff.AllWithoutAdobeConnectInfo();
+
+        foreach (var teacher in teachers)
         {
-            var returnList = new List<AdobeConnectUserDetailDto>();
+            var acPID = await _adobeConnect.GetUserPrincipalId(teacher.PortalUsername);
 
-            var students = await _unitOfWork.Students.WithoutAdobeConnectDetailsForUpdate();
-
-            foreach (var student in students)
+            if (!string.IsNullOrWhiteSpace(acPID))
             {
-                var acPID = await _adobeConnect.GetUserPrincipalId(student.PortalUsername);
-
-                if (!string.IsNullOrWhiteSpace(acPID))
+                var staffResource = new StaffDto
                 {
-                    var studentResource = new StudentDto
+                    AdobeConnectPrincipalId = acPID
+                };
+
+                await _staffService.UpdateStaffMember(teacher.StaffId, staffResource);
+
+                returnList.Add(new AdobeConnectUserDetailDto { ScoId = acPID, UserId = teacher.StaffId, UserType = "Staff", DisplayName = teacher.DisplayName });
+            }
+        }
+
+        var casuals = await _casualRepository.GetWithoutAdobeConnectId();
+
+        foreach (var casual in casuals)
+        {
+            var acPID = await _adobeConnect.GetUserPrincipalId(casual.EmailAddress);
+
+            if (!string.IsNullOrWhiteSpace(acPID))
+            {
+                var command = new UpdateCasualCommand(casual.Id, casual.FirstName, casual.LastName, casual.EmailAddress, casual.SchoolCode, acPID);
+
+                await _mediator.Send(command);
+
+                returnList.Add(new AdobeConnectUserDetailDto { ScoId = acPID, UserId = casual.Id.ToString(), UserType = "Casual", DisplayName = casual.DisplayName });
+            }
+        }
+
+        await _unitOfWork.CompleteAsync();
+
+        return returnList;
+    }
+
+    public async Task<ServiceOperationResult<T>> ProcessOperation<T>(T operation) where T : AdobeConnectOperation
+    {
+        var result = new ServiceOperationResult<T>
+        {
+            Success = false
+        };
+
+        result.Errors.Add($" Processing operation {operation.Id}");
+
+        var target = "room";
+        var principalId = "";
+        var accessLevel = typeof(T).Name == "StudentAdobeConnectOperation" ? AdobeConnectAccessLevel.Student : AdobeConnectAccessLevel.Teacher;
+        bool success = false;
+
+        switch (operation.GetType().Name)
+        {
+            case "StudentAdobeConnectOperation":
+                var sOperation = operation as StudentAdobeConnectOperation;
+                principalId = string.IsNullOrWhiteSpace(sOperation.PrincipalId) ? sOperation.Student.AdobeConnectPrincipalId : sOperation.PrincipalId;
+                result.Errors.Add($"  Attempting to {operation.Action} student {sOperation.Student.DisplayName} in room {sOperation.Room.Name}");
+                if (string.IsNullOrWhiteSpace(principalId))
+                {
+                    principalId = await GetUserPrincipalId(sOperation.Student.PortalUsername);
+
+                    if (string.IsNullOrWhiteSpace(principalId))
                     {
-                        AdobeConnectPrincipalId = acPID
-                    };
-
-                    await _studentService.UpdateStudent(student.StudentId, studentResource);
-
-                    returnList.Add(new AdobeConnectUserDetailDto { ScoId = acPID, UserId = student.StudentId, UserType = "Students", DisplayName = student.DisplayName });
+                        result.Errors.Add($"   Could not determine user PrincipalId while processing operation with Id {operation.Id}");
+                        return result;
+                    }
                 }
-            }
+                break;
 
-            var teachers = _unitOfWork.Staff.AllWithoutAdobeConnectInfo();
+            case "CasualAdobeConnectOperation":
+                var cOperation = operation as CasualAdobeConnectOperation;
 
-            foreach (var teacher in teachers)
-            {
-                var acPID = await _adobeConnect.GetUserPrincipalId(teacher.PortalUsername);
+                var casual = await _casualRepository.GetById(CasualId.FromValue(cOperation.CasualId));
 
-                if (!string.IsNullOrWhiteSpace(acPID))
+                principalId = string.IsNullOrWhiteSpace(cOperation.PrincipalId) ? casual.AdobeConnectId : cOperation.PrincipalId;
+                result.Errors.Add($"  Attempting to {operation.Action} casual teacher {casual.DisplayName} in room {cOperation.Room.Name}");
+                if (string.IsNullOrWhiteSpace(principalId))
                 {
-                    var staffResource = new StaffDto
+                    principalId = await GetUserPrincipalId(casual.EmailAddress);
+
+                    if (string.IsNullOrWhiteSpace(principalId))
                     {
-                        AdobeConnectPrincipalId = acPID
-                    };
-
-                    await _staffService.UpdateStaffMember(teacher.StaffId, staffResource);
-
-                    returnList.Add(new AdobeConnectUserDetailDto { ScoId = acPID, UserId = teacher.StaffId, UserType = "Staff", DisplayName = teacher.DisplayName });
+                        result.Errors.Add($"   Could not determine user PrincipalId while processing operation with Id {operation.Id}");
+                        return result;
+                    }
                 }
-            }
+                break;
 
-            var casuals = await _casualRepository.GetWithoutAdobeConnectId();
-
-            foreach (var casual in casuals)
-            {
-                var acPID = await _adobeConnect.GetUserPrincipalId(casual.EmailAddress);
-
-                if (!string.IsNullOrWhiteSpace(acPID))
+            case "TeacherAdobeConnectOperation":
+                var tOperation = operation as TeacherAdobeConnectOperation;
+                principalId = string.IsNullOrWhiteSpace(tOperation.PrincipalId) ? tOperation.Teacher.AdobeConnectPrincipalId : tOperation.PrincipalId;
+                result.Errors.Add($"  Attempting to {operation.Action} teacher {tOperation.Teacher.DisplayName} in room {tOperation.Room.Name}");
+                if (string.IsNullOrWhiteSpace(principalId))
                 {
-                    var command = new UpdateCasualCommand(casual.Id, casual.FirstName, casual.LastName, casual.EmailAddress, casual.SchoolCode, acPID);
+                    principalId = await GetUserPrincipalId(tOperation.Teacher.PortalUsername);
 
-                    await _mediator.Send(command);
-
-                    returnList.Add(new AdobeConnectUserDetailDto { ScoId = acPID, UserId = casual.Id.ToString(), UserType = "Casual", DisplayName = casual.DisplayName });
+                    if (string.IsNullOrWhiteSpace(principalId))
+                    {
+                        result.Errors.Add($"   Could not determine user PrincipalId while processing operation with Id {operation.Id}");
+                        return result;
+                    }
                 }
-            }
+                break;
+            case "TeacherAdobeConnectGroupOperation":
+                var tgOperation = operation as TeacherAdobeConnectGroupOperation;
+                target = "group";
+                principalId = string.IsNullOrWhiteSpace(tgOperation.PrincipalId) ? tgOperation.Teacher.AdobeConnectPrincipalId : tgOperation.PrincipalId;
+                result.Errors.Add($"  Attempting to {operation.Action} teacher {tgOperation.Teacher.DisplayName} in group {tgOperation.GroupName}");
+                if (string.IsNullOrWhiteSpace(principalId))
+                {
+                    principalId = await GetUserPrincipalId(tgOperation.Teacher.PortalUsername);
 
-            await _unitOfWork.CompleteAsync();
-
-            return returnList;
+                    if (string.IsNullOrWhiteSpace(principalId))
+                    {
+                        result.Errors.Add($"   Could not determine user PrincipalId while processing operation with Id {operation.Id}");
+                        return result;
+                    }
+                }
+                break;
         }
 
-        public async Task<ServiceOperationResult<T>> ProcessOperation<T>(T operation) where T : AdobeConnectOperation
+        switch (operation.Action)
         {
-            var result = new ServiceOperationResult<T>
-            {
-                Success = false
-            };
-
-            result.Errors.Add($" Processing operation {operation.Id}");
-
-            var target = "room";
-            var principalId = "";
-            var accessLevel = typeof(T).Name == "StudentAdobeConnectOperation" ? AdobeConnectAccessLevel.Student : AdobeConnectAccessLevel.Teacher;
-            bool success = false;
-
-            switch (operation.GetType().Name)
-            {
-                case "StudentAdobeConnectOperation":
-                    var sOperation = operation as StudentAdobeConnectOperation;
-                    principalId = string.IsNullOrWhiteSpace(sOperation.PrincipalId) ? sOperation.Student.AdobeConnectPrincipalId : sOperation.PrincipalId;
-                    result.Errors.Add($"  Attempting to {operation.Action} student {sOperation.Student.DisplayName} in room {sOperation.Room.Name}");
-                    if (string.IsNullOrWhiteSpace(principalId))
-                    {
-                        principalId = await GetUserPrincipalId(sOperation.Student.PortalUsername);
-
-                        if (string.IsNullOrWhiteSpace(principalId))
-                        {
-                            result.Errors.Add($"   Could not determine user PrincipalId while processing operation with Id {operation.Id}");
-                            return result;
-                        }
-                    }
-                    break;
-
-                case "CasualAdobeConnectOperation":
-                    var cOperation = operation as CasualAdobeConnectOperation;
-
-                    var casual = await _casualRepository.GetById(CasualId.FromValue(cOperation.CasualId));
-
-                    principalId = string.IsNullOrWhiteSpace(cOperation.PrincipalId) ? casual.AdobeConnectId : cOperation.PrincipalId;
-                    result.Errors.Add($"  Attempting to {operation.Action} casual teacher {casual.DisplayName} in room {cOperation.Room.Name}");
-                    if (string.IsNullOrWhiteSpace(principalId))
-                    {
-                        principalId = await GetUserPrincipalId(casual.EmailAddress);
-
-                        if (string.IsNullOrWhiteSpace(principalId))
-                        {
-                            result.Errors.Add($"   Could not determine user PrincipalId while processing operation with Id {operation.Id}");
-                            return result;
-                        }
-                    }
-                    break;
-
-                case "TeacherAdobeConnectOperation":
-                    var tOperation = operation as TeacherAdobeConnectOperation;
-                    principalId = string.IsNullOrWhiteSpace(tOperation.PrincipalId) ? tOperation.Teacher.AdobeConnectPrincipalId : tOperation.PrincipalId;
-                    result.Errors.Add($"  Attempting to {operation.Action} teacher {tOperation.Teacher.DisplayName} in room {tOperation.Room.Name}");
-                    if (string.IsNullOrWhiteSpace(principalId))
-                    {
-                        principalId = await GetUserPrincipalId(tOperation.Teacher.PortalUsername);
-
-                        if (string.IsNullOrWhiteSpace(principalId))
-                        {
-                            result.Errors.Add($"   Could not determine user PrincipalId while processing operation with Id {operation.Id}");
-                            return result;
-                        }
-                    }
-                    break;
-                case "TeacherAdobeConnectGroupOperation":
-                    var tgOperation = operation as TeacherAdobeConnectGroupOperation;
-                    target = "group";
-                    principalId = string.IsNullOrWhiteSpace(tgOperation.PrincipalId) ? tgOperation.Teacher.AdobeConnectPrincipalId : tgOperation.PrincipalId;
-                    result.Errors.Add($"  Attempting to {operation.Action} teacher {tgOperation.Teacher.DisplayName} in group {tgOperation.GroupName}");
-                    if (string.IsNullOrWhiteSpace(principalId))
-                    {
-                        principalId = await GetUserPrincipalId(tgOperation.Teacher.PortalUsername);
-
-                        if (string.IsNullOrWhiteSpace(principalId))
-                        {
-                            result.Errors.Add($"   Could not determine user PrincipalId while processing operation with Id {operation.Id}");
-                            return result;
-                        }
-                    }
-                    break;
-            }
-
-            switch (operation.Action)
-            {
-                case AdobeConnectOperationAction.Add:
-                    if (target == "room")
-                        success = await _adobeConnect.UserPermissionUpdate(principalId, operation.ScoId, accessLevel);
-                    if (target == "group")
-                        success = await _adobeConnect.GroupMembershipUpdate(principalId, operation.GroupSco, AdobeConnectAccessLevel.Teacher);
-                    break;
-                case AdobeConnectOperationAction.Remove:
-                    if (target == "room")
-                    {
-                        accessLevel = AdobeConnectAccessLevel.Remove;
-                        success = await _adobeConnect.UserPermissionUpdate(principalId, operation.ScoId, accessLevel);
-                    }
-                    if (target == "group")
-                        success = await _adobeConnect.GroupMembershipUpdate(principalId, operation.GroupSco, AdobeConnectAccessLevel.Remove);
-                    break;
-            }
-
-            if (success)
-            {
-                operation.IsCompleted = true;
-                result.Errors.Add($" Successfully processed operation.");
-                result.Success = true;
-                return result;
-            }
-            else
-            {
-                result.Errors.Add($" An error occured while processing operation with Id {operation.Id}");
-                return result;
-            }
+            case AdobeConnectOperationAction.Add:
+                if (target == "room")
+                    success = await _adobeConnect.UserPermissionUpdate(principalId, operation.ScoId, accessLevel);
+                if (target == "group")
+                    success = await _adobeConnect.GroupMembershipUpdate(principalId, operation.GroupSco, AdobeConnectAccessLevel.Teacher);
+                break;
+            case AdobeConnectOperationAction.Remove:
+                if (target == "room")
+                {
+                    accessLevel = AdobeConnectAccessLevel.Remove;
+                    success = await _adobeConnect.UserPermissionUpdate(principalId, operation.ScoId, accessLevel);
+                }
+                if (target == "group")
+                    success = await _adobeConnect.GroupMembershipUpdate(principalId, operation.GroupSco, AdobeConnectAccessLevel.Remove);
+                break;
         }
 
-        public Task<ICollection<string>> GetCurrentSessionUsersAsync(string scoId, string assetId)
+        if (success)
         {
-            return _adobeConnect.GetSessionUsers(scoId, assetId);
+            operation.IsCompleted = true;
+            result.Errors.Add($" Successfully processed operation.");
+            result.Success = true;
+            return result;
         }
-
-        public Task<string> GetCurrentSessionAsync(string scoId)
+        else
         {
-            return _adobeConnect.GetCurrentSession(scoId);
+            result.Errors.Add($" An error occured while processing operation with Id {operation.Id}");
+            return result;
         }
+    }
+
+    public Task<ICollection<string>> GetCurrentSessionUsersAsync(string scoId, string assetId)
+    {
+        return _adobeConnect.GetSessionUsers(scoId, assetId);
+    }
+
+    public Task<string> GetCurrentSessionAsync(string scoId)
+    {
+        return _adobeConnect.GetCurrentSession(scoId);
     }
 }

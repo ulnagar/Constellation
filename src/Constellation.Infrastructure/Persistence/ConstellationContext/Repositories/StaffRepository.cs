@@ -6,6 +6,8 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.Subjects;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -31,11 +33,6 @@ public class StaffRepository : IStaffRepository
             .Include(s => s.School)
             .Include(s => s.CourseSessions)
                 .ThenInclude(session => session.Offering)
-                    .ThenInclude(offering => offering.Course)
-            .Include(s => s.CourseSessions)
-                .ThenInclude(session => session.Period)
-            .Include(s => s.CourseSessions)
-                .ThenInclude(session => session.Room)
             .Include(staff => staff.Faculties)
                 .ThenInclude(member => member.Faculty);
     }
@@ -74,25 +71,20 @@ public class StaffRepository : IStaffRepository
         OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
-        var teachers = await _context
-            .Set<Session>()
-            .Where(session => session.OfferingId == offeringId && !session.IsDeleted)
-            .Select(session => session.Teacher)
+        List<string> staffIds = await _context
+            .Set<Offering>()
+            .Where(offering => offering.Id == offeringId)
+            .SelectMany(offering => offering.Teachers)
+            .Where(assignment =>
+                assignment.Type == AssignmentType.ClassroomTeacher &&
+                !assignment.IsDeleted)
+            .Select(assignment => assignment.StaffId)
             .ToListAsync(cancellationToken);
 
-        if (teachers.Count == 0)
-            return new List<Staff>();
-
-        var groupedTeachers = teachers
-            .GroupBy(teacher => teachers.Count(entry => entry == teacher))
-            .OrderByDescending(entry => entry.Key);
-
-        var maxSessions = groupedTeachers.First().Key;
-
-        return groupedTeachers
-            .Where(entry => entry.Key == maxSessions)
-            .Select(entry => entry.First())
-            .ToList();
+        return await _context
+            .Set<Staff>()
+            .Where(staff => staffIds.Contains(staff.StaffId))
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<List<Staff>> GetFacultyHeadTeachers(
@@ -112,23 +104,32 @@ public class StaffRepository : IStaffRepository
         OfferingId offeringId, 
         CancellationToken cancellationToken = default)
     {
-        Guid? facultyId = await _context
+        List<int> courseIds = await _context
             .Set<Offering>()
             .Where(offering => offering.Id == offeringId)
-            .Select(offering => offering.Course.FacultyId)
-            .FirstOrDefaultAsync(cancellationToken);
+            .Select(offering => offering.CourseId)
+            .ToListAsync(cancellationToken);
 
-        if (facultyId is null)
-        {
-            return null;
-        }
+        List<Guid> facultyIds = await _context
+            .Set<Course>()
+            .Where(course => courseIds.Contains(course.Id))
+            .Select(course => course.FacultyId)
+            .ToListAsync(cancellationToken);
+
+        List<string> staffIds = await _context
+            .Set<Faculty>()
+            .Where(faculty => facultyIds.Contains(faculty.Id))
+            .SelectMany(faculty => faculty.Members)
+            .Where(member => 
+                !member.IsDeleted &&
+                member.Role == FacultyMembershipRole.Manager)
+            .Select(member => member.StaffId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
 
         return await _context
             .Set<Staff>()
-            .Where(staff => staff.Faculties.Any(member => 
-                !member.IsDeleted && 
-                member.FacultyId == facultyId && 
-                member.Role == FacultyMembershipRole.Manager))
+            .Where(staff => staffIds.Contains(staff.StaffId))
             .ToListAsync(cancellationToken);
     }
 
@@ -323,11 +324,6 @@ public class StaffRepository : IStaffRepository
             .ThenInclude(role => role.SchoolContact)
             .Include(staff => staff.CourseSessions)
             .ThenInclude(session => session.Offering)
-            .ThenInclude(offering => offering.Course)
-            .Include(staff => staff.CourseSessions)
-            .ThenInclude(session => session.Period)
-            .Include(staff => staff.CourseSessions)
-            .ThenInclude(session => session.Room)
             .SingleOrDefaultAsync(staff => staff.StaffId == id);
     }
 

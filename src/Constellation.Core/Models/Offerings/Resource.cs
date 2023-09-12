@@ -72,7 +72,11 @@ public sealed class CanvasCourseResource : Resource
         OfferingId = offeringId;
         ResourceId = canvasCourseId;
         Name = name;
-        Url = url;
+
+        if (string.IsNullOrEmpty(url))
+            Url = $"https://aurora.instructure.com/courses/sis_course_id:{ResourceId}";
+        else
+            Url = url;
     }
 
     public string CourseId => ResourceId;

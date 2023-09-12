@@ -8,10 +8,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
     {
         public void Configure(EntityTypeBuilder<TimetablePeriod> builder)
         {
-            builder.HasKey(p => p.Id);
+            builder
+                .HasKey(p => p.Id);
 
-            builder.HasMany(p => p.OfferingSessions)
-                .WithOne(s => s.Period);
+            builder
+                .HasMany(p => p.OfferingSessions)
+                .WithOne();
         }
     }
 }

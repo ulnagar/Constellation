@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -17,7 +18,6 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
     private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly IOfferingSessionsRepository _sessionsRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
     private readonly ILogger _logger;
 
@@ -25,14 +25,12 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
         IEnrolmentRepository enrolmentRepository,
         IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
-        IOfferingSessionsRepository sessionsRepository,
         ITimetablePeriodRepository periodRepository,
         ILogger logger)
     {
         _enrolmentRepository = enrolmentRepository;
         _offeringRepository = offeringRepository;
         _staffRepository = staffRepository;
-        _sessionsRepository = sessionsRepository;
         _periodRepository = periodRepository;
         _logger = logger.ForContext<GetSessionDetailsForStudentQuery>();
     }
@@ -61,23 +59,16 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
                 continue;
             }
 
-            var teachers = await _staffRepository.GetPrimaryTeachersForOffering(enrolment.OfferingId, cancellationToken);
+            var assignments = offering
+                .Teachers
+                .Where(assignment => 
+                    assignment.Type == AssignmentType.ClassroomTeacher && 
+                    !assignment.IsDeleted)
+                .ToList();
 
-            if (teachers is null || !teachers.Any())
-            {
-                _logger.Warning("Could not find teacher for offering {offering}", offering.Name);
-            }
-
-            var sessions = await _sessionsRepository.GetByOfferingId(enrolment.OfferingId, cancellationToken);
-
-            if (sessions is null || !sessions.Any())
-            {
-                _logger.Warning("Could not find sessions for offering {offering}", offering.Name);
-
-                continue;
-            }
+            var teachers = await _staffRepository.GetListFromIds(assignments.Select(assignment => assignment.StaffId).ToList(), cancellationToken);
             
-            foreach (var session in sessions)
+            foreach (var session in offering.Sessions)
             {
                 var period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
 

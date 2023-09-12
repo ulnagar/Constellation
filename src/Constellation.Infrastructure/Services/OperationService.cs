@@ -9,6 +9,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Infrastructure.DependencyInjection;
 using System;
 using System.Threading.Tasks;
@@ -17,15 +18,18 @@ public class OperationService : IOperationService, IScopedService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly IDateTimeProvider _dateTime;
 
     public OperationService(
         IUnitOfWork unitOfWork,
         IOfferingRepository offeringRepository,
+        ICourseRepository courseRepository,
         IDateTimeProvider dateTime)
     {
         _unitOfWork = unitOfWork;
         _offeringRepository = offeringRepository;
+        _courseRepository = courseRepository;
         _dateTime = dateTime;
     }
 
@@ -274,17 +278,22 @@ public class OperationService : IOperationService, IScopedService
     public async Task CreateClassroomMSTeam(OfferingId offeringId, DateTime scheduled)
     {
         // Validate entries
-        var checkOffering = await _offeringRepository.GetById(offeringId);
+        var offering = await _offeringRepository.GetById(offeringId);
 
-        if (checkOffering == null)
+        if (offering is null)
+            return;
+
+        var course = await _courseRepository.GetById(offering.CourseId);
+
+        if (course is null)
             return;
 
         // Create Operation
         var operation = new GroupMSTeamOperation
         {
-            Faculty = checkOffering.Course.Faculty,
-            OfferingId = checkOffering.Id,
-            Offering = checkOffering,
+            FacultyId = course.FacultyId,
+            OfferingId = offering.Id,
+            Offering = offering,
             Action = MSTeamOperationAction.Add,
             PermissionLevel = MSTeamOperationPermissionLevel.Group,
             DateScheduled = scheduled
@@ -728,70 +737,107 @@ public class OperationService : IOperationService, IScopedService
 
     public async Task EnrolStudentInCanvasCourse(Student student, Offering offering, DateTime? scheduledFor = null)
     {
-        var operation = new ModifyEnrolmentCanvasOperation()
+        var resources = offering
+            .Resources
+            .Where(resource => resource.Type == ResourceType.CanvasCourse)
+            .Select(resource => resource as CanvasCourseResource)
+            .ToList();
+
+        foreach (var resource in resources)
         {
-            UserId = student.StudentId,
-            UserType = "Student",
-            CourseId = $"{offering.EndDate.Year}-{offering.Name.Substring(0, offering.Name.Length - 1)}",
-            Action = CanvasOperation.EnrolmentAction.Add
-        };
+            var operation = new ModifyEnrolmentCanvasOperation()
+            {
+                UserId = student.StudentId,
+                UserType = "Student",
+                CourseId = resource.CourseId,
+                Action = CanvasOperation.EnrolmentAction.Add
+            };
 
-        if (scheduledFor != null)
-            operation.ScheduledFor = scheduledFor.Value;
+            if (scheduledFor != null)
+                operation.ScheduledFor = scheduledFor.Value;
 
-        _unitOfWork.Add(operation);
+            _unitOfWork.Add(operation);
+        }
+
+
         await _unitOfWork.CompleteAsync();
     }
 
     public Task EnrolStaffInCanvasCourse(Staff staff, Offering offering, DateTime? scheduledFor = null)
     {
-        var operation = new ModifyEnrolmentCanvasOperation()
+        var resources = offering
+            .Resources
+            .Where(resource => resource.Type == ResourceType.CanvasCourse)
+            .Select(resource => resource as CanvasCourseResource)
+            .ToList();
+
+        foreach (var resource in resources)
         {
-            UserId = staff.StaffId,
-            UserType = "Teacher",
-            CourseId = $"{offering.EndDate.Year}-{offering.Name.Substring(0, offering.Name.Length - 1)}",
-            Action = CanvasOperation.EnrolmentAction.Add
-        };
+            var operation = new ModifyEnrolmentCanvasOperation()
+            {
+                UserId = staff.StaffId,
+                UserType = "Teacher",
+                CourseId = resource.CourseId,
+                Action = CanvasOperation.EnrolmentAction.Add
+            };
 
-        if (scheduledFor != null)
-            operation.ScheduledFor = scheduledFor.Value;
+            if (scheduledFor != null)
+                operation.ScheduledFor = scheduledFor.Value;
 
-        _unitOfWork.Add(operation);
+            _unitOfWork.Add(operation);
+        }
 
         return Task.CompletedTask;
     }
 
     public Task UnenrolStudentFromCanvasCourse(Student student, Offering offering, DateTime? scheduledFor = null)
     {
-        var operation = new ModifyEnrolmentCanvasOperation()
+        var resources = offering
+            .Resources
+            .Where(resource => resource.Type == ResourceType.CanvasCourse)
+            .Select(resource => resource as CanvasCourseResource)
+            .ToList();
+
+        foreach (var resource in resources)
         {
-            UserId = student.StudentId,
-            CourseId = $"{offering.EndDate.Year}-{offering.Name.Substring(0, offering.Name.Length - 1)}",
-            Action = CanvasOperation.EnrolmentAction.Remove
-        };
+            var operation = new ModifyEnrolmentCanvasOperation()
+            {
+                UserId = student.StudentId,
+                CourseId = resource.CourseId,
+                Action = CanvasOperation.EnrolmentAction.Remove
+            };
 
-        if (scheduledFor != null)
-            operation.ScheduledFor = scheduledFor.Value;
+            if (scheduledFor != null)
+                operation.ScheduledFor = scheduledFor.Value;
 
-        _unitOfWork.Add(operation);
+            _unitOfWork.Add(operation);
+        }
 
         return Task.CompletedTask;
     }
 
     public Task UnenrolStaffFromCanvasCourse(Staff staff, Offering offering, DateTime? scheduledFor = null)
     {
-        var operation = new ModifyEnrolmentCanvasOperation()
+        var resources = offering
+            .Resources
+            .Where(resource => resource.Type == ResourceType.CanvasCourse)
+            .Select(resource => resource as CanvasCourseResource)
+            .ToList();
+
+        foreach (var resource in resources)
         {
-            UserId = staff.StaffId,
-            CourseId = $"{offering.EndDate.Year}-{offering.Name.Substring(0, offering.Name.Length - 1)}",
-            Action = CanvasOperation.EnrolmentAction.Remove
-        };
+            var operation = new ModifyEnrolmentCanvasOperation()
+            {
+                UserId = staff.StaffId,
+                CourseId = resource.CourseId,
+                Action = CanvasOperation.EnrolmentAction.Remove
+            };
 
-        if (scheduledFor != null)
-            operation.ScheduledFor = scheduledFor.Value;
+            if (scheduledFor != null)
+                operation.ScheduledFor = scheduledFor.Value;
 
-        _unitOfWork.Add(operation);
-
+            _unitOfWork.Add(operation);
+        }
         return Task.CompletedTask;
     }
 

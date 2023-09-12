@@ -9,7 +9,6 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
-using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using System;
@@ -25,7 +24,6 @@ public class GenerateAttendanceReportForStudentQueryHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly IOfferingSessionsRepository _sessionRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
@@ -35,7 +33,6 @@ public class GenerateAttendanceReportForStudentQueryHandler
     public GenerateAttendanceReportForStudentQueryHandler(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
-        IOfferingSessionsRepository sessionRepository,
         IOfferingRepository offeringRepository,
         ICourseRepository courseRepository,
         ITimetablePeriodRepository periodRepository,
@@ -44,7 +41,6 @@ public class GenerateAttendanceReportForStudentQueryHandler
     {
         _studentRepository = studentRepository;
         _absenceRepository = absenceRepository;
-        _sessionRepository = sessionRepository;
         _offeringRepository = offeringRepository;
         _courseRepository = courseRepository;
         _periodRepository = periodRepository;
@@ -113,15 +109,14 @@ public class GenerateAttendanceReportForStudentQueryHandler
 
         foreach (DateOnly date in reportableDates)
         {
-            List<Session> sessions = await _sessionRepository.GetAllForStudentAndDayDuringTime(student.StudentId, date.GetDayNumber(), date, cancellationToken);
+            List<Offering> offerings = await _offeringRepository.GetCurrentEnrolmentsFromStudentForDate(student.StudentId, date, date.GetDayNumber(), cancellationToken);
             List<AttendanceDateDetail.SessionWithOffering> sessionDetails = new();
 
-            foreach (IGrouping<OfferingId, Session> offeringSessions in sessions.GroupBy(s => s.OfferingId))
+            foreach (Offering offering in offerings)
             {
-                Offering offering = await _offeringRepository.GetById(offeringSessions.Key, cancellationToken);
                 Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 
-                List<TimetablePeriod> periods = await _periodRepository.GetForOfferingOnDay(offeringSessions.Key, date, date.GetDayNumber(), cancellationToken);
+                List<TimetablePeriod> periods = await _periodRepository.GetForOfferingOnDay(offering.Id, date, date.GetDayNumber(), cancellationToken);
                 TimetablePeriod firstPeriod = periods.First(period => period.StartTime == periods.Min(p => p.StartTime));
                 TimetablePeriod lastPeriod = periods.First(period => period.EndTime == periods.Max(p => p.EndTime));
 
@@ -132,7 +127,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
                         $"{firstPeriod.StartTime.As12HourTime()} - {lastPeriod.EndTime.As12HourTime()}",
                         offering.Name,
                         course.Name,
-                        offeringSessions.Key));
+                        offering.Id));
                 }
                 else
                 {
@@ -141,7 +136,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
                         $"{firstPeriod.StartTime.As12HourTime()} - {lastPeriod.EndTime.As12HourTime()}",
                         offering.Name,
                         course.Name,
-                        offeringSessions.Key));
+                        offering.Id));
                 }
             }
 

@@ -2,9 +2,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
+using Constellation.Core.Models;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects;
 using Microsoft.EntityFrameworkCore;
 
 public class OfferingRepository : IOfferingRepository
@@ -24,7 +26,6 @@ public class OfferingRepository : IOfferingRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Offering>()
-            .Include(offering => offering.Enrolments)
             .Where(offering => offering.Id == offeringId)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -36,8 +37,7 @@ public class OfferingRepository : IOfferingRepository
                 offering.StartDate <= DateOnly.FromDateTime(DateTime.Today) &&
                 offering.EndDate >= DateOnly.FromDateTime(DateTime.Today) &&
                 offering.Sessions.Any(session => !session.IsDeleted))
-            .OrderBy(offering => offering.Course.Grade)
-            .ThenBy(offering => offering.Name)
+            .OrderBy(offering => offering.Name)
             .ToListAsync(cancellationToken);
 
     public async Task<List<Offering>> GetActiveForTeacher(
@@ -46,10 +46,9 @@ public class OfferingRepository : IOfferingRepository
         await _context
             .Set<Offering>()
             .Where(offering =>
-                offering.Sessions.Any(session =>
-                    session.StaffId == StaffId &&
-                    !session.IsDeleted &&
-                    session.Period.Type != "Other") &&
+                offering.Teachers.Any(teacher =>
+                    teacher.StaffId == StaffId &&
+                    !teacher.IsDeleted) &&
                 offering.StartDate <= DateOnly.FromDateTime(DateTime.Today) &&
                 offering.EndDate >= DateOnly.FromDateTime(DateTime.Today))
             .ToListAsync(cancellationToken);
@@ -74,10 +73,10 @@ public class OfferingRepository : IOfferingRepository
         Grade grade, 
         CancellationToken cancellationToken = default) =>
         await _context
-            .Set<Offering>()
-            .Where(offering => 
-                offering.Course.Grade == grade &&
-                offering.IsCurrent)
+            .Set<Course>()
+            .Where(course => course.Grade == grade)
+            .SelectMany(course => course.Offerings)
+            .Where(offering => offering.IsCurrent)
             .ToListAsync(cancellationToken);
 
     public async Task<List<Offering>> GetActiveByCourseId(
@@ -93,26 +92,43 @@ public class OfferingRepository : IOfferingRepository
         string studentId,
         DateTime AbsenceDate,
         int DayNumber,
-        CancellationToken cancellationToken = default) =>
-        await _context
+        CancellationToken cancellationToken = default)
+    {
+        List<int> periodIds = await _context
+            .Set<TimetablePeriod>()
+            .Where(period => period.Day == DayNumber)
+            .Select(period => period.Id)
+            .ToListAsync(cancellationToken);
+
+        List<OfferingId> offeringIds = await _context
             .Set<Enrolment>()
             .Where(enrolment => enrolment.StudentId == studentId &&
                 // enrolment was created before the absence date
-                enrolment.DateCreated < AbsenceDate &&
+                enrolment.CreatedAt < AbsenceDate &&
                 // enrolment is either still current (not deleted) OR was deleted after the absence date
-                (!enrolment.IsDeleted || enrolment.DateDeleted.Value.Date > AbsenceDate) &&
+                (!enrolment.IsDeleted || enrolment.DeletedAt.Date > AbsenceDate))
+            .Select(enrolment => enrolment.OfferingId)
+            .ToListAsync(cancellationToken);
+
+        List<Offering> offerings = await _context
+            .Set<Offering>()
+            .Where(offering =>
+                offeringIds.Contains(offering.Id) &&
                 // offering ends after the absence date
-                enrolment.Offering.EndDate > DateOnly.FromDateTime(AbsenceDate) &&
-                enrolment.Offering.Sessions.Any(session =>
+                offering.EndDate > DateOnly.FromDateTime(AbsenceDate) &&
+                offering.Sessions.Any(session =>
                     // session was created before the absence date
-                    session.DateCreated < AbsenceDate &&
+                    session.CreatedAt < AbsenceDate &&
                     // session is either still current (not deleted) OR was deleted after the absence date
-                    (!session.IsDeleted || session.DateDeleted.Value.Date > AbsenceDate) &&
+                    (!session.IsDeleted || session.DeletedAt.Date > AbsenceDate) &&
                     // session is for the same day as the absence
-                    session.Period.Day == DayNumber))
-            .Select(enrolment => enrolment.Offering)
+                    periodIds.Contains(session.PeriodId)))
             .Distinct()
             .ToListAsync(cancellationToken);
+
+        return offerings;
+    }
+
 
     // Method is not async as we are passing the task to another method
     public Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(
@@ -124,14 +140,22 @@ public class OfferingRepository : IOfferingRepository
 
     public async Task<List<Offering>> GetByStudentId(
         string studentId, 
-        CancellationToken cancellationToken = default) =>
-        await _context
+        CancellationToken cancellationToken = default)
+    {
+        List<OfferingId> offeringIds = await _context
             .Set<Enrolment>()
             .Where(enrolment => enrolment.StudentId == studentId &&
                 !enrolment.IsDeleted)
-        .Select(enrolment => enrolment.Offering)
-        .Distinct()
-        .ToListAsync(cancellationToken);
+            .Select(enrolment => enrolment.OfferingId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<Offering>()
+            .Where(offering => offeringIds.Contains(offering.Id))
+            .ToListAsync(cancellationToken);
+    }
+
 
     public async Task<Offering> GetFromYearAndName(
         int year, 
@@ -140,4 +164,24 @@ public class OfferingRepository : IOfferingRepository
         await _context
             .Set<Offering>()
             .SingleOrDefaultAsync(offering => offering.Name == name && offering.EndDate.Year == year, cancellationToken);
+
+    public async Task<List<string>> GetTimetableByOfferingId(
+        OfferingId offeringId,
+        CancellationToken cancellationToken = default)
+    {
+        List<int> periodIds = await _context
+            .Set<Offering>()
+            .Where(offering => offering.Id == offeringId)
+            .SelectMany(offering => offering.Sessions)
+            .Where(session => !session.IsDeleted)
+            .Select(session => session.PeriodId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<TimetablePeriod>()
+            .Where(period => periodIds.Contains(period.Id))
+            .Select(period => period.Timetable)
+            .ToListAsync(cancellationToken);
+    }
 }

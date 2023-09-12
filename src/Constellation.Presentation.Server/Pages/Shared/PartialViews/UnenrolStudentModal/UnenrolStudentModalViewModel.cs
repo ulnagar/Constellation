@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Server.Pages.Shared.PartialViews.DeleteRoleModal;
+﻿namespace Constellation.Presentation.Server.Pages.Shared.PartialViews.UnenrolStudentModal;
 
 using Constellation.Core.Models.Offerings.Identifiers;
 

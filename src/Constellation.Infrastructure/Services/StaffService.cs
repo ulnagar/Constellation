@@ -1,6 +1,7 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Offerings.RemoveTeacherFromAllOfferings;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
 using System;
@@ -12,13 +13,18 @@ namespace Constellation.Infrastructure.Services
     // Reviewed for ASYNC Operations
     public class StaffService : IStaffService, IScopedService
     {
+        private readonly ISender _mediator;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IOperationService _operationService;
-        private readonly ISessionService _sessionService;
+        private readonly IPeriodService _sessionService;
 
-        public StaffService(IUnitOfWork unitOfWork, ISessionService sessionService,
+        public StaffService(
+            ISender mediator,
+            IUnitOfWork unitOfWork, 
+            IPeriodService sessionService,
             IOperationService operationService)
         {
+            _mediator = mediator;
             _unitOfWork = unitOfWork;
             _sessionService = sessionService;
             _operationService = operationService;
@@ -76,11 +82,8 @@ namespace Constellation.Infrastructure.Services
             if (staff == null)
                 return;
 
-            // Remove any open sessions
-            foreach (var session in staff.CourseSessions.Where(s => !s.IsDeleted).ToList())
-            {
-                await _sessionService.RemoveSession(session.Id);
-            }
+            // Remove teacher from offerings
+            await _mediator.Send(new RemoveTeacherFromAllOfferingsCommand(staffId));
 
             // Process operations
             foreach (var operation in staff.AdobeConnectOperations.Where(a => !a.IsCompleted && !a.IsDeleted))
