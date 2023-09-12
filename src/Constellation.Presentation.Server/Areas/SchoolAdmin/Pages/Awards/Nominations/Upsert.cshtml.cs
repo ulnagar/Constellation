@@ -68,7 +68,7 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPost(CancellationToken cancellationToken = default)
     {
-        if (!Grades.Any())
+        if (!Id.HasValue && !Grades.Any())
             ModelState.AddModelError("Grades", "You must select at least one grade");
 
         if (!ModelState.IsValid) 
