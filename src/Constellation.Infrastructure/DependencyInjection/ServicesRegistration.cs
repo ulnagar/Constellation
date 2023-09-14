@@ -94,7 +94,7 @@ public static class ServicesRegistration
                 .FromAssemblies(Constellation.Application.AssemblyReference.Assembly)
                 .RegisterHandlers(typeof(INotificationHandler<>)));
 
-        services.Decorate(typeof(IDomainEventHandler<>), typeof(IdempotentDomainEventHandler<>));
+        services.Decorate(typeof(INotificationHandler<>), typeof(IdempotentDomainEventHandler<>));
 
         // Add Hangfire Jobs
 
