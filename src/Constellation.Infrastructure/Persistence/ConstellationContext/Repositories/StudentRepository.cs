@@ -78,7 +78,7 @@ public class StudentRepository : IStudentRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Student>> GetCurrentEnrolmentsForCourse(
-        int courseId,
+        CourseId courseId,
         CancellationToken cancellationToken = default)
     {
         List<OfferingId> offeringIds = await _context

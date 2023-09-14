@@ -15,9 +15,9 @@ public interface IOfferingRepository
     Task<List<Offering>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<Offering>> GetActiveForTeacher(string StaffId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetAll(CancellationToken cancellationToken = default);
-    Task<List<Offering>> GetActiveByCourseId(int courseId, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetActiveByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetActiveByGrade(Grade grade, CancellationToken cancellationToken = default);
-    Task<List<Offering>> GetByCourseId(int courseId, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(string studentId, DateTime AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(string studentId, DateOnly AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
 

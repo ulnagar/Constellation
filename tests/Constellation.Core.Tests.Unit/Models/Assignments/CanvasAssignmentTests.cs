@@ -12,7 +12,7 @@ public class CanvasAssignmentTests
         // Arrange
         var sut = CanvasAssignment.Create(
             new AssignmentId(),
-            1,
+            new(),
             "Test Assignment",
             1,
             DateTime.Today,
@@ -37,7 +37,7 @@ public class CanvasAssignmentTests
         // Arrange
         var sut = CanvasAssignment.Create(
             new AssignmentId(),
-            1,
+            new(),
             "Test Assignment",
             1,
             DateTime.Today,
@@ -66,7 +66,7 @@ public class CanvasAssignmentTests
         // Arrange
         var sut = CanvasAssignment.Create(
             new AssignmentId(),
-            1,
+            new(),
             "Test Assignment",
             1,
             DateTime.Today,
@@ -92,7 +92,7 @@ public class CanvasAssignmentTests
         // Arrange
         var sut = CanvasAssignment.Create(
             new AssignmentId(),
-            1,
+            new(),
             "Test Assignment",
             1,
             DateTime.Today,
@@ -124,7 +124,7 @@ public class CanvasAssignmentTests
         // Arrange
         var sut = CanvasAssignment.Create(
             new AssignmentId(),
-            1,
+            new(),
             "Test Assignment",
             1,
             DateTime.Today,

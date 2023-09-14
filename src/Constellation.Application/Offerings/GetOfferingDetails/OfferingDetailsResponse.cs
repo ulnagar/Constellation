@@ -12,7 +12,7 @@ using System.Collections.Generic;
 public sealed record OfferingDetailsResponse(
     OfferingId Id,
     OfferingName Name,
-    int CourseId,
+    CourseId CourseId,
     string CourseName,
     Grade CourseGrade,
     DateOnly StartDate,

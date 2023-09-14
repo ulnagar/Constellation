@@ -58,7 +58,7 @@ internal sealed class GetFilteredStudentsForSelectionListQueryHandler
 
         if (request.FromCourse.Count > 0)
         {
-            foreach (int courseId in request.FromCourse)
+            foreach (CourseId courseId in request.FromCourse)
             {
                 List<Student> courseStudents = await _studentRepository.GetCurrentEnrolmentsForCourse(courseId, cancellationToken);
 

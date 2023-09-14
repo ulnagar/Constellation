@@ -176,7 +176,7 @@
                             <td>
                                 @if (canEditTest.Succeeded)
                                 {
-                                    <button data-course-name="@Model.Offering.CourseName" data-offering-name="@Model.Offering.Name" data-teacher-name="@item.Name.DisplayName" data-assignment-type="@item.Type.Value" class="btn btn-sm btn-danger btn-show-hover remove-teacher-button">Remove</button>
+                                    <button data-course-name="@Model.Offering.CourseName" data-offering-name="@Model.Offering.Name" data-staff-id="@item.StaffId" data-teacher-name="@item.Name.DisplayName" data-assignment-type="@item.Type.Value" class="btn btn-sm btn-danger btn-show-hover remove-teacher-button">Remove</button>
                                 }
                             </td>
                         </tr>
@@ -421,6 +421,7 @@
         $('.remove-teacher-button').click(function (event) {
             var courseName = $(this).data("courseName");
             var offeringName = $(this).data("offeringName");
+            var staffId = $(this).data("staffId");
             var teacherName = $(this).data("teacherName");
             var assignmentType = $(this).data("assignmentType");
             var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
@@ -431,6 +432,7 @@
                 data: {
                     courseName: courseName,
                     offeringName: offeringName,
+                    staffId: staffId,
                     teacherName: teacherName,
                     assignmentType: assignmentType,
                     __RequestVerificationToken: xsrfHeader

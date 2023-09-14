@@ -21,6 +21,7 @@ using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveAllSessi
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveResourceFromOfferingModal;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveSessionModal;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveTeacherFromOfferingModal;
+using Constellation.Presentation.Server.Pages.Shared.PartialViews.UnenrolStudentModal;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -204,6 +205,7 @@ public class DetailsModel : BasePageModel
     }
 
     public IActionResult OnPostAjaxRemoveTeacher(
+        string staffId,
         string teacherName,
         string assignmentType,
         string courseName,
@@ -213,6 +215,7 @@ public class DetailsModel : BasePageModel
 
         RemoveTeacherFromOfferingModalViewModel viewModel = new(
             offeringId,
+            staffId,
             teacherName,
             assignmentType,
             courseName,

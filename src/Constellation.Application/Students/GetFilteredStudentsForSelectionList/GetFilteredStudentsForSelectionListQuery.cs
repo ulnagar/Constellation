@@ -13,5 +13,5 @@ using System.Threading.Tasks;
 public sealed record GetFilteredStudentsForSelectionListQuery(
     List<Grade> FromGrades,
     List<OfferingId> FromOffering,
-    List<int> FromCourse)
+    List<CourseId> FromCourse)
     : IQuery<List<StudentForSelectionList>>;

@@ -3,6 +3,7 @@
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Assignments;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal class AssignmentRepository : IAssignmentRepository
@@ -16,7 +17,7 @@ internal class AssignmentRepository : IAssignmentRepository
     }
 
     public async Task<List<CanvasAssignment>> GetByCourseId(
-        int courseId,
+        CourseId courseId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<CanvasAssignment>()

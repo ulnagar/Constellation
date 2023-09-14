@@ -2,7 +2,6 @@
 
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.ValueObjects;
-using Constellation.Core.Models.Subjects;
 
 public class OfferingTests
 {
@@ -15,7 +14,7 @@ public class OfferingTests
 
         var sut = new Offering(
             name.Value,
-            1,
+            new(),
             DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddDays(1))
         );
@@ -35,7 +34,7 @@ public class OfferingTests
 
         var sut = new Offering(
             name.Value,
-            1,
+            new(),
             DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddDays(1))
         );
@@ -59,7 +58,7 @@ public class OfferingTests
 
         var sut = new Offering(
             name.Value,
-            1,
+            new(),
             DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddDays(1))
         );
@@ -81,7 +80,7 @@ public class OfferingTests
 
         var sut = new Offering(
             name.Value,
-            1,
+            new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today.AddDays(1))
         );
@@ -103,7 +102,7 @@ public class OfferingTests
 
         var sut = new Offering(
             name.Value,
-            1,
+            new(),
             DateOnly.FromDateTime(DateTime.Today.AddDays(-1)),
             DateOnly.FromDateTime(DateTime.Today)
         );
@@ -125,7 +124,7 @@ public class OfferingTests
 
         var sut = new Offering(
             name.Value,
-            1,
+            new(),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
         );

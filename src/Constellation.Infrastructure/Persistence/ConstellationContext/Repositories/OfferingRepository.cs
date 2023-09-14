@@ -62,7 +62,7 @@ public class OfferingRepository : IOfferingRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Offering>> GetByCourseId(
-        int courseId,
+        CourseId courseId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Offering>()
@@ -81,7 +81,7 @@ public class OfferingRepository : IOfferingRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Offering>> GetActiveByCourseId(
-        int courseId,
+        CourseId courseId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Offering>()

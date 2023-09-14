@@ -3,13 +3,13 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -69,7 +69,7 @@ internal sealed class GetOfferingDetailsQueryHandler
         {
             _logger.Warning("Could not find Course with Id {id}", offering.CourseId);
 
-            return Result.Failure<OfferingDetailsResponse>(DomainErrors.Subjects.Course.NotFound(offering.CourseId));
+            return Result.Failure<OfferingDetailsResponse>(CourseErrors.NotFound(offering.CourseId));
         }
 
         List<OfferingDetailsResponse.StudentSummary> students = new();

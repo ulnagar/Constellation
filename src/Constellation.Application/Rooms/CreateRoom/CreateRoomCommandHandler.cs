@@ -11,6 +11,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Threading;
@@ -63,10 +64,10 @@ internal sealed class CreateRoomCommandHandler
         {
             _logger
                 .ForContext(nameof(CreateRoomCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Subjects.Course.NotFound(offering.CourseId), true)
+                .ForContext(nameof(Error), CourseErrors.NotFound(offering.CourseId), true)
                 .Warning("Failed to create new Adobe Connect Room");
 
-            return Result.Failure<RoomResponse>(DomainErrors.Subjects.Course.NotFound(offering.CourseId));
+            return Result.Failure<RoomResponse>(CourseErrors.NotFound(offering.CourseId));
         }
 
         Faculty faculty = await _facultyRepository.GetById(course.FacultyId, cancellationToken);

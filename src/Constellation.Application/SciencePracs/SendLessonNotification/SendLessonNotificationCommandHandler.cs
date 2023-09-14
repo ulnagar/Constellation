@@ -12,6 +12,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Microsoft.Extensions.Options;
@@ -103,7 +104,7 @@ internal sealed class SendLessonNotificationCommandHandler
         {
             _logger.Warning("Could not find a Course linked with the Lesson Id {id}", lesson.Id);
 
-            return Result.Failure(DomainErrors.Subjects.Course.NotFound(0));
+            return Result.Failure(CourseErrors.NoneFound);
         }
 
         string description = $"{course.Grade} {lesson.Name}";

@@ -37,7 +37,7 @@ public sealed class FirstInSubjectNomination : Nomination
     public FirstInSubjectNomination(
         AwardNominationPeriodId periodId,
         string studentId,
-        int courseId, 
+        CourseId courseId, 
         string courseName)
     {
         Id = new();
@@ -49,7 +49,7 @@ public sealed class FirstInSubjectNomination : Nomination
         CourseName = courseName;
     }
 
-    public int CourseId { get; private set; }
+    public CourseId CourseId { get; private set; }
     public string CourseName { get; private set; }
 
     public void UpdateCourseName(string courseName) => CourseName = courseName;
@@ -64,7 +64,7 @@ public sealed class AcademicExcellenceNomination : Nomination
     public AcademicExcellenceNomination(
         AwardNominationPeriodId periodId,
         string studentId,
-        int courseId,
+        CourseId courseId,
         string courseName,
         OfferingId offeringId,
         string className)
@@ -80,7 +80,7 @@ public sealed class AcademicExcellenceNomination : Nomination
         ClassName = className;
     }
 
-    public int CourseId { get; private set; }
+    public CourseId CourseId { get; private set; }
     public string CourseName { get; private set; }
     public OfferingId OfferingId { get; private set; }
     public string ClassName { get; private set; }
@@ -98,7 +98,7 @@ public sealed class AcademicAchievementNomination : Nomination
     public AcademicAchievementNomination(
         AwardNominationPeriodId periodId,
         string studentId,
-        int courseId,
+        CourseId courseId,
         string courseName,
         OfferingId offeringId,
         string className)
@@ -114,7 +114,7 @@ public sealed class AcademicAchievementNomination : Nomination
         ClassName = className;
     }
 
-    public int CourseId { get; private set; }
+    public CourseId CourseId { get; private set; }
     public string CourseName { get; private set; }
     public OfferingId OfferingId { get; private set; }
     public string ClassName { get; private set; }

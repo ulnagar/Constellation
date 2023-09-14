@@ -53,7 +53,7 @@ public class LessonRepository : ILessonRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<SciencePracLesson>> GetAllForCourse(
-        int CourseId,
+        CourseId CourseId,
         CancellationToken cancellationToken = default)
     {
         var offeringIds = await _context

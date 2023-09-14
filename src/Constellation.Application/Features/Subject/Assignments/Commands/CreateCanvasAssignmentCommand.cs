@@ -1,4 +1,5 @@
 ﻿using Constellation.Application.Common.ValidationRules;
+using Constellation.Core.Models.Subjects.Identifiers;
 using FluentValidation;
 using MediatR;
 using System;
@@ -8,7 +9,7 @@ namespace Constellation.Application.Features.Subject.Assignments.Commands
 {
     public class CreateCanvasAssignmentCommand : IRequest<ValidateableResponse>, IValidatable
     {
-        public int CourseId { get; set; }
+        public CourseId CourseId { get; set; }
         public string Name { get; set; }
         public int CanvasId { get; set; }
 

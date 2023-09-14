@@ -4,6 +4,7 @@ using Constellation.Application.Assignments.GetAssignmentsByCourse;
 using Constellation.Application.Assignments.UploadAssignmentSubmission;
 using Constellation.Application.Features.Portal.School.Assignments.Models;
 using Constellation.Application.Features.Portal.School.Assignments.Queries;
+using Constellation.Core.Models.Subjects.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,13 +33,15 @@ public class ExamsController : BaseAPIController
     }
 
     [HttpGet("{studentId}/{courseId}/Assignments")]
-    public async Task<List<CourseAssignmentResponse>> GetCourseAssignments([FromRoute] string studentId, [FromRoute] int courseId)
+    public async Task<List<CourseAssignmentResponse>> GetCourseAssignments([FromRoute] string studentId, [FromRoute] Guid courseId)
     {
         var user = await GetCurrentUser();
 
-        _logger.Information("Requested to get assignments for course {courseId} to upload exam by user {user}", courseId, user.DisplayName);
+        CourseId course = CourseId.FromValue(courseId);
 
-        var assignments = await _mediator.Send(new GetAssignmentsByCourseQuery(courseId, studentId));
+        _logger.Information("Requested to get assignments for course {courseId} to upload exam by user {user}", course, user.DisplayName);
+
+        var assignments = await _mediator.Send(new GetAssignmentsByCourseQuery(course, studentId));
 
         if (assignments.IsFailure)
         {

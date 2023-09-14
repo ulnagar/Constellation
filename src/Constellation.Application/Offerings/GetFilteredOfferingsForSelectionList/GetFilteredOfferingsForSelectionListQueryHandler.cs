@@ -3,6 +3,7 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ internal sealed class GetFilteredOfferingsForSelectionListQueryHandler
     {
         List<OfferingForSelectionList> response = new();
 
-        foreach (int courseId in request.CourseIds)
+        foreach (CourseId courseId in request.CourseIds)
         {
             List<Offering> offerings = await _offeringRepository.GetByCourseId(courseId, cancellationToken);
 

@@ -7,6 +7,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -44,7 +45,7 @@ internal sealed class CreateLessonCommandHandler
         {
             _logger.Warning("Could not find any offerings for course with Id {id}", request.CourseId);
 
-            return Result.Failure(DomainErrors.Subjects.Course.NoOfferings(request.CourseId));
+            return Result.Failure(CourseErrors.NoOfferings(request.CourseId));
         }
 
         Result<SciencePracLesson> lesson = SciencePracLesson.Create(

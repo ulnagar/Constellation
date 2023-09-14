@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 public static class CourseErrors
 {
-    public static Error CodeEmpty => new(
+    public static readonly Error CodeEmpty = new(
         "Subjects.Course.CodeEmpty",
         "A code must be supplied to create a Course");
 
-    public static Error CodeLengthInvalid => new(
+    public static readonly Error CodeLengthInvalid = new(
         "Subjects.Course.CodeLengthInvalid",
         "The length of the code supplied is invalid");
 
@@ -25,4 +25,8 @@ public static class CourseErrors
     public static readonly Func<CourseId, Error> NotFound = id => new(
         "Subjects.Course.NotFound",
         $"Could not find a course with the id {id}");
+
+    public static readonly Error NoneFound = new(
+        "Subjects.Course.NoneFound",
+        "No Courses could be found");
 }

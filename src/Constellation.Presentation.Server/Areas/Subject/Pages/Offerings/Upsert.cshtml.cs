@@ -36,7 +36,7 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     public string Name { get; set; }
     [BindProperty]
-    public int CourseId { get; set; }
+    public Guid CourseId { get; set; }
     public string CourseName { get; set; }
     [BindProperty]
     [DataType(DataType.Date)]
@@ -91,7 +91,9 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        Result<OfferingId> request = await _mediator.Send(new CreateOfferingCommand(Name, CourseId, StartDate, EndDate));
+        CourseId courseId = Core.Models.Subjects.Identifiers.CourseId.FromValue(CourseId);
+
+        Result<OfferingId> request = await _mediator.Send(new CreateOfferingCommand(Name, courseId, StartDate, EndDate));
 
         if (request.IsFailure)
         {
