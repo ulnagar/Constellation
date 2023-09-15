@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
 
 using Constellation.Application.Courses.GetCourseSummary;
+using Constellation.Application.Courses.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.AddResourceToOffering;
 using Constellation.Application.Offerings.GetOfferingDetails;

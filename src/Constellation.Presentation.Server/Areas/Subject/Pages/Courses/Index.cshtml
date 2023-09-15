@@ -1,4 +1,92 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Subject.Pages.Courses.IndexModel
+
+@using Constellation.Presentation.Server.Areas.Subject.Pages.Courses
+
+@inject IAuthorizationService authService
+
 @{
+    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPolicies.CanEditSubjects);
 }
+
+
+<h2>Course List</h2>
+
+<div>
+    @{
+        var all_style = "btn-outline-secondary";
+        var active_style = all_style;
+        var inactive_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case IndexModel.FilterDto.All:
+                all_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Active:
+                active_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Inactive:
+                inactive_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Active" class="btn @active_style">Active</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Inactive" class="btn @inactive_style">Inactive</a>
+    </div>
+
+    @if (canEditTest.Succeeded)
+    {
+        <div class="btn-group new-group" role="group">
+            <a asp-page="/Courses/Upsert" asp-area="Subject" class="btn btn-info">Create New</a>
+        </div>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Grade</th>
+            <th>Faculty</th>
+            <th>Classes</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in Model.Courses)
+        {
+            <tr>
+                <td>
+                    <span class="badge">@item.Offerings.Count(offering => offering.IsCurrent)</span>
+                </td>
+                <td>
+                    @item.Name
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Grade, "Grade")
+                </td>
+                <td>
+                    <span class="badge" style="background-color: @item.CourseFaculty.Colour; color: white">@item.CourseFaculty.Name</span>
+                </td>
+                <td>
+                    @foreach (var offering in item.Offerings.Where(offering => offering.IsCurrent))
+                    {
+                        <a asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@offering.OfferingId.Value" class="badge badge-primary">@offering.Name</a>
+                    }
+                </td>
+                <td>
+                    <a asp-page="/Courses/Details" asp-area="Subject" asp-route-id="@item.CourseId.Value" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>

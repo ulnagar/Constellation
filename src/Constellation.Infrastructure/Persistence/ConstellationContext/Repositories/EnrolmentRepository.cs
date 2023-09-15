@@ -51,6 +51,26 @@ public class EnrolmentRepository : IEnrolmentRepository
             .Where(enrol => enrol.OfferingId == offeringId && !enrol.IsDeleted)
             .ToListAsync(cancellationToken);
 
+    public async Task<int> GetCurrentCountByCourseId(
+        CourseId courseId, 
+        CancellationToken cancellationToken = default)
+    {
+        List<OfferingId> offeringIds = await _context
+            .Set<Offering>()
+            .Where(offering =>
+                offering.CourseId == courseId &&
+                offering.IsCurrent)
+            .Select(offering => offering.Id)
+            .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<Enrolment>()
+            .Where(enrolment =>
+                !enrolment.IsDeleted &&
+                offeringIds.Contains(enrolment.OfferingId))
+            .CountAsync(cancellationToken);
+    }
+
     public void Insert(Enrolment enrolment) =>
         _context.Set<Enrolment>().Add(enrolment);
 }

@@ -7,7 +7,6 @@ using Constellation.Application.SciencePracs.GetLessonDetails;
 using Constellation.Application.SciencePracs.UpdateLesson;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
@@ -40,7 +39,7 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     public DateOnly DueDate { get; set; }
     [BindProperty]
-    public Guid CourseId { get; set; }
+    public int CourseId { get; set; }
     [BindProperty]
     public bool DoNotGenerateRolls { get; set; }
 
@@ -82,7 +81,7 @@ public class UpsertModel : BasePageModel
 
             LessonName = lessonResponse.Value.Name;
             DueDate = lessonResponse.Value.DueDate;
-            CourseId = lessonResponse.Value.CourseId.Value;
+            CourseId = lessonResponse.Value.CourseId;
         }
     }
 
@@ -127,9 +126,7 @@ public class UpsertModel : BasePageModel
             return RedirectToPage("/SciencePracs/Lessons/Details", new { area = "Subject", id = Id.Value });
         }
 
-        CourseId courseId = Core.Models.Subjects.Identifiers.CourseId.FromValue(CourseId);
-
-        Result createRequest = await _mediator.Send(new CreateLessonCommand(LessonName, DueDate, courseId, DoNotGenerateRolls));
+        Result createRequest = await _mediator.Send(new CreateLessonCommand(LessonName, DueDate, CourseId, DoNotGenerateRolls));
 
         if (createRequest.IsFailure)
         {
@@ -149,7 +146,7 @@ public class UpsertModel : BasePageModel
 
     private async Task BuildCourseSelectList()
     {
-        Result<List<CourseSummaryResponse>> coursesResponse = await _mediator.Send(new GetCoursesForSelectionListQuery());
+        Result<List<CourseSelectListItemResponse>> coursesResponse = await _mediator.Send(new GetCoursesForSelectionListQuery());
 
         if (coursesResponse.IsFailure)
         {

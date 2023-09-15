@@ -6,7 +6,6 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
-using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -15,7 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 public class GetCoursesForSelectionListQueryHandler
-    : IQueryHandler<GetCoursesForSelectionListQuery, List<CourseSummaryResponse>>
+    : IQueryHandler<GetCoursesForSelectionListQuery, List<CourseSelectListItemResponse>>
 {
     private readonly ICourseRepository _courseRepository;
     private readonly IFacultyRepository _facultyRepository;
@@ -31,7 +30,7 @@ public class GetCoursesForSelectionListQueryHandler
         _logger = logger.ForContext<GetCoursesForSelectionListQuery>();
     }
 
-    public async Task<Result<List<CourseSummaryResponse>>> Handle(GetCoursesForSelectionListQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<CourseSelectListItemResponse>>> Handle(GetCoursesForSelectionListQuery request, CancellationToken cancellationToken)
     {
         List<Course> courses = await _courseRepository.GetAll(cancellationToken);
 
@@ -39,10 +38,10 @@ public class GetCoursesForSelectionListQueryHandler
         {
             _logger.Warning("Could not find any courses in the database");
 
-            return Result.Failure<List<CourseSummaryResponse>>(CourseErrors.NoneFound);
+            return Result.Failure<List<CourseSelectListItemResponse>>(DomainErrors.Subjects.Course.NotFound(0));
         }
 
-        List<CourseSummaryResponse> response = new();
+        List<CourseSelectListItemResponse> response = new();
 
         foreach (Course course in courses)
         {
@@ -55,7 +54,7 @@ public class GetCoursesForSelectionListQueryHandler
                     .Warning("Could not find faculty linked to course");
 
 
-            CourseSummaryResponse summary = new(
+            CourseSelectListItemResponse summary = new(
                 course.Id,
                 course.Name,
                 course.Grade,

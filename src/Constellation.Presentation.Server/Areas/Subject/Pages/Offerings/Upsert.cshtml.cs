@@ -36,7 +36,7 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     public string Name { get; set; }
     [BindProperty]
-    public Guid CourseId { get; set; }
+    public int CourseId { get; set; }
     public string CourseName { get; set; }
     [BindProperty]
     [DataType(DataType.Date)]
@@ -91,9 +91,7 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        CourseId courseId = Core.Models.Subjects.Identifiers.CourseId.FromValue(CourseId);
-
-        Result<OfferingId> request = await _mediator.Send(new CreateOfferingCommand(Name, courseId, StartDate, EndDate));
+        Result<OfferingId> request = await _mediator.Send(new CreateOfferingCommand(Name, CourseId, StartDate, EndDate));
 
         if (request.IsFailure)
         {
@@ -158,7 +156,7 @@ public class UpsertModel : BasePageModel
 
     private async Task BuildCourseSelectList()
     {
-        Result<List<CourseSummaryResponse>> coursesResponse = await _mediator.Send(new GetCoursesForSelectionListQuery());
+        Result<List<CourseSelectListItemResponse>> coursesResponse = await _mediator.Send(new GetCoursesForSelectionListQuery());
 
         if (coursesResponse.IsFailure)
         {

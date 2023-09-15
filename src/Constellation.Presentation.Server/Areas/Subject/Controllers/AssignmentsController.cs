@@ -31,7 +31,7 @@ public class AssignmentsController : BaseController
     {
         var viewModel = await CreateViewModel<CreateViewModel>();
         var courses = await _mediator.Send(new GetCoursesForSelectionListQuery());
-        viewModel.CoursesList = new SelectList(courses.Value, nameof(CourseSummaryResponse.Id), nameof(CourseSummaryResponse.DisplayName), null, nameof(CourseSummaryResponse.FacultyName));
+        viewModel.CoursesList = new SelectList(courses.Value, nameof(CourseSelectListItemResponse.Id), nameof(CourseSelectListItemResponse.DisplayName), null, nameof(CourseSelectListItemResponse.FacultyName));
 
         return View(viewModel);
     }
@@ -48,7 +48,7 @@ public class AssignmentsController : BaseController
         var canvasAssignments = await _mediator.Send(new GetAssignmentsFromCourseForDropdownSelectionQuery { CourseId = viewModel.Command.CourseId });
         if (!canvasAssignments.IsValidResponse)
         {
-            viewModel.CoursesList = new SelectList(courses.Value, nameof(CourseSummaryResponse.Id), nameof(CourseSummaryResponse.DisplayName), null, nameof(CourseSummaryResponse.FacultyName));
+            viewModel.CoursesList = new SelectList(courses.Value, nameof(CourseSelectListItemResponse.Id), nameof(CourseSelectListItemResponse.DisplayName), null, nameof(CourseSelectListItemResponse.FacultyName));
 
             foreach (var error in canvasAssignments.Errors)
                 ModelState.AddModelError("", error);
