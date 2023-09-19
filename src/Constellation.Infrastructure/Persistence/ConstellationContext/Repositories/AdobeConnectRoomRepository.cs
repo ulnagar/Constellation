@@ -5,9 +5,8 @@ using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
+using ResourceType = Core.Models.Offerings.ValueObjects.ResourceType;
 
 public class AdobeConnectRoomRepository : IAdobeConnectRoomRepository
 {
@@ -37,15 +36,23 @@ public class AdobeConnectRoomRepository : IAdobeConnectRoomRepository
 
     public async Task<List<AdobeConnectRoom>> GetByOfferingId(
         OfferingId offeringId,
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<AdobeConnectRoom>()
-            .Where(room => 
-                room.OfferingSessions.Any(session => 
-                    session.OfferingId == offeringId && 
-                    !session.IsDeleted))
+        CancellationToken cancellationToken = default)
+    {
+        List<string> scoIds = await _context
+            .Set<Offering>()
+            .Where(offering => offering.Id == offeringId)
+            .SelectMany(offering => offering.Resources)
+            .Where(resource => resource.Type == ResourceType.AdobeConnectRoom)
+            .Select(resource => resource as AdobeConnectRoomResource)
+            .Select(resource => resource.ScoId)
             .Distinct()
             .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<AdobeConnectRoom>()
+            .Where(room => scoIds.Contains(room.ScoId))
+            .ToListAsync(cancellationToken);
+    }
 
     public async Task<AdobeConnectRoom> GetById(
         string Id,
@@ -60,36 +67,10 @@ public class AdobeConnectRoomRepository : IAdobeConnectRoomRepository
             .SingleOrDefault(d => d.ScoId == id);
     }
 
-    public AdobeConnectRoom WithFilter(Expression<Func<AdobeConnectRoom, bool>> predicate)
-    {
-        return Collection()
-            .FirstOrDefault(predicate);
-    }
-
     public async Task<AdobeConnectRoom> GetForExistCheck(string id)
     {
         return await _context.Rooms
             .SingleOrDefaultAsync(room => room.ScoId == id);
-    }
-
-    public ICollection<AdobeConnectRoom> All()
-    {
-        return Collection()
-            .ToList();
-    }
-
-    public ICollection<AdobeConnectRoom> AllWithFilter(Expression<Func<AdobeConnectRoom, bool>> predicate)
-    {
-        return Collection()
-            .Where(predicate)
-            .ToList();
-    }
-
-    public ICollection<AdobeConnectRoom> AllFromSession(Session session)
-    {
-        return Collection()
-            .Where(r => r.OfferingSessions.Contains(session))
-            .ToList();
     }
 
     public ICollection<AdobeConnectRoom> AllActive()
@@ -97,34 +78,5 @@ public class AdobeConnectRoomRepository : IAdobeConnectRoomRepository
         return Collection()
             .Where(r => r.IsDeleted == false)
             .ToList();
-    }
-
-    public ICollection<AdobeConnectRoom> AllWithSession()
-    {
-        return Collection()
-            .Where(r => r.OfferingSessions.Any(o => o.IsDeleted == false))
-            .ToList();
-    }
-
-    public ICollection<AdobeConnectRoom> AllWithActiveSession()
-    {
-        return Collection()
-            .Where(r => r.OfferingSessions.Any(o => o.Offering.StartDate <= _dateTime.Today && o.Offering.EndDate >= _dateTime.Today && o.IsDeleted == false))
-            .ToList();
-    }
-
-    public ICollection<AdobeConnectRoom> AllForOffering(OfferingId offeringId)
-    {
-        return Collection()
-            .Where(r => r.OfferingSessions.Any(s => s.OfferingId == offeringId))
-            .ToList();
-    }
-
-    public async Task<ICollection<AdobeConnectRoom>> ForSelectionAsync()
-    {
-        return await _context.Rooms
-            .Where(room => !room.IsDeleted)
-            .OrderBy(room => room.Name)
-            .ToListAsync();
     }
 }

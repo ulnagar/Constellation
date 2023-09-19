@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
@@ -15,14 +14,11 @@ using System.Linq.Expressions;
 public class StaffRepository : IStaffRepository
 {
     private readonly AppDbContext _context;
-    private readonly IDateTimeProvider _dateTime;
 
     public StaffRepository(
-        AppDbContext context,
-        IDateTimeProvider dateTime)
+        AppDbContext context)
     {
         _context = context;
-        _dateTime = dateTime;
     }
 
     private IQueryable<Staff> Collection()
@@ -32,8 +28,6 @@ public class StaffRepository : IStaffRepository
                 .ThenInclude(operation => operation.Room)
             .Include(s => s.AdobeConnectGroupOperations)
             .Include(s => s.School)
-            .Include(s => s.CourseSessions)
-                .ThenInclude(session => session.Offering)
             .Include(staff => staff.Faculties)
                 .ThenInclude(member => member.Faculty);
     }
@@ -62,11 +56,21 @@ public class StaffRepository : IStaffRepository
 
     public async Task<List<Staff>> GetCurrentTeachersForOffering(
         OfferingId offeringId,
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<Staff>()
-            .Where(teacher => teacher.CourseSessions.Any(session => session.OfferingId == offeringId && !session.IsDeleted))
+        CancellationToken cancellationToken = default)
+    {
+        List<string> staffIds = await _context
+            .Set<Offering>()
+            .Where(offering => offering.Id == offeringId)
+            .SelectMany(offering => offering.Teachers)
+            .Where(assignment => !assignment.IsDeleted)
+            .Select(assignment => assignment.StaffId)
             .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<Staff>()
+            .Where(staff => staffIds.Contains(staff.StaffId))
+            .ToListAsync(cancellationToken);
+    }
 
     public async Task<List<Staff>> GetPrimaryTeachersForOffering(
         OfferingId offeringId,
@@ -175,96 +179,10 @@ public class StaffRepository : IStaffRepository
             .SingleOrDefault(d => d.StaffId == id);
     }
 
-    public Staff WithFilter(Expression<Func<Staff, bool>> predicate)
-    {
-        return Collection()
-            .FirstOrDefault(predicate);
-    }
-
     public async Task<Staff> GetForExistCheck(string id)
     {
         return await _context.Staff
             .SingleOrDefaultAsync(staff => staff.StaffId == id);
-    }
-
-    public async Task<Staff> WithFilterAsync(Expression<Func<Staff, bool>> predicate)
-    {
-        return await Collection()
-            .FirstOrDefaultAsync(predicate);
-    }
-
-    public ICollection<Staff> All()
-    {
-        return Collection()
-            .ToList();
-    }
-
-    public ICollection<Staff> AllWithFilter(Expression<Func<Staff, bool>> predicate)
-    {
-        return Collection()
-            .Where(predicate)
-            .ToList();
-    }
-
-    public async Task<ICollection<Staff>> AllActiveAsync()
-    {
-        return await _context.Staff
-            .Include(staff => staff.Faculties)
-            .ThenInclude(member => member.Faculty)
-            .Where(s => !s.IsDeleted)
-            .OrderBy(s => s.LastName)
-            .ToListAsync();
-    }
-
-    public ICollection<Staff> AllActive()
-    {
-        return Collection()
-            .Where(s => !s.IsDeleted)
-            .OrderBy(s => s.LastName)
-            .ToList();
-    }
-
-    public ICollection<Staff> AllInactive()
-    {
-        return Collection()
-            .Where(s => s.IsDeleted)
-            .OrderBy(s => s.LastName)
-            .ToList();
-    }
-
-    public ICollection<Staff> AllFromSchool(string code)
-    {
-        return Collection()
-            .Where(s => s.SchoolCode == code)
-            .OrderBy(s => s.LastName)
-            .ToList();
-    }
-
-    public ICollection<Staff> AllActiveFromSchool(string code)
-    {
-        return Collection()
-            .Where(s => !s.IsDeleted && s.SchoolCode == code)
-            .OrderBy(s => s.LastName)
-            .ToList();
-    }
-
-    public ICollection<Staff> AllFromFaculty(Guid facultyId)
-    {
-        return _context.Staff
-            .Where(staff => staff.Faculties.Any(member => member.FacultyId == facultyId && !member.IsDeleted))
-            .OrderBy(staff => staff.LastName)
-            .ToList();
-    }
-
-    public ICollection<Staff> AllWithActiveClasses()
-    {
-        return Collection()
-            .Where(s => s.IsDeleted == false)
-            .Where(
-                s =>
-                    s.CourseSessions.Any(
-                        d => d.Offering.StartDate <= _dateTime.Today && d.Offering.EndDate >= _dateTime.Today))
-            .ToList();
     }
 
     public ICollection<Staff> AllWithoutAdobeConnectInfo()
@@ -323,18 +241,9 @@ public class StaffRepository : IStaffRepository
             .Include(staff => staff.School)
             .ThenInclude(school => school.StaffAssignments)
             .ThenInclude(role => role.SchoolContact)
-            .Include(staff => staff.CourseSessions)
-            .ThenInclude(session => session.Offering)
             .SingleOrDefaultAsync(staff => staff.StaffId == id);
     }
-
-    public async Task<ICollection<Staff>> ForSelectionAsync()
-    {
-        return await _context.Staff
-            .Where(staff => !staff.IsDeleted)
-            .ToListAsync();
-    }
-
+    
     public async Task<Staff> ForEditAsync(string id)
     {
         return await _context.Staff
@@ -351,7 +260,6 @@ public class StaffRepository : IStaffRepository
     {
         return await _context.Staff
             .Include(staff => staff.Faculties)
-            .Include(staff => staff.CourseSessions)
             .Include(staff => staff.AdobeConnectGroupOperations)
             .SingleOrDefaultAsync(staff => staff.StaffId == id);
     }

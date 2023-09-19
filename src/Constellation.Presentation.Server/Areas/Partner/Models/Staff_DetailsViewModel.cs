@@ -1,9 +1,7 @@
 ﻿using Constellation.Application.Helpers;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.TeacherAddFaculty;
 using System.ComponentModel.DataAnnotations;
@@ -63,43 +61,15 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
             public string Name { get; set; }
             [Display(Name = DisplayNameDefaults.CourseName)]
             public string CourseName { get; set; }
-
-            public static OfferingDto ConvertFromOffering(Offering offering)
-            {
-                var viewModel = new OfferingDto
-                {
-                    Id = offering.Id,
-                    Name = offering.Name,
-                    CourseName = offering.Course.Name
-                };
-
-                return viewModel;
-            }
         }
 
         public class SessionDto
         {
-            public TimetablePeriod Period { get; set; }
+            public string Period { get; set; }
             [Display(Name = DisplayNameDefaults.ClassName)]
             public string ClassName { get; set; }
             [Display(Name = DisplayNameDefaults.RoomName)]
-            public string RoomName { get; set; }
             public int Duration { get; set; }
-
-            public static SessionDto ConvertFromSession(Session session)
-            {
-                var viewModel = new SessionDto
-                {
-                    Period = session.Period,
-                    ClassName = session.Offering.Name,
-                    RoomName = session.Room.Name
-                };
-
-                viewModel.Duration = session.Period.EndTime.Subtract(session.Period.StartTime).Minutes;
-                viewModel.Duration += session.Period.EndTime.Subtract(session.Period.StartTime).Hours * 60;
-
-                return viewModel;
-            }
         }
 
         public class ContactDto

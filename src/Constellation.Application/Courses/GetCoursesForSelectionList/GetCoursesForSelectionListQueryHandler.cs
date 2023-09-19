@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -38,7 +39,7 @@ public class GetCoursesForSelectionListQueryHandler
         {
             _logger.Warning("Could not find any courses in the database");
 
-            return Result.Failure<List<CourseSelectListItemResponse>>(DomainErrors.Subjects.Course.NotFound(0));
+            return Result.Failure<List<CourseSelectListItemResponse>>(CourseErrors.NoneFound);
         }
 
         List<CourseSelectListItemResponse> response = new();

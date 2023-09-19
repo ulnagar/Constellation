@@ -1,10 +1,14 @@
-﻿using Constellation.Application.DTOs;
+﻿using Constellation.Application.Courses.GetCourseSummary;
+using Constellation.Application.DTOs;
 using Constellation.Application.Features.Faculties.Queries;
 using Constellation.Application.Features.StaffMembers.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
+using Constellation.Application.Offerings.GetSessionListForTeacher;
 using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Models.Offerings;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -218,11 +222,39 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 return RedirectToAction("Index");
             }
 
+            List<Staff_DetailsViewModel.OfferingDto> offeringResponse = new();
+
+            var offerings = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(id));
+
+            foreach (var entry in offerings.Value)
+            {
+                offeringResponse.Add(new()
+                {
+                    Id = entry.OfferingId,
+                    Name = entry.OfferingName,
+                    CourseName = entry.CourseName
+                });
+            }
+
+            List<Staff_DetailsViewModel.SessionDto> sessionResponse = new();
+
+            var sessions = await _mediator.Send(new GetSessionListForTeacherQuery(id));
+
+            foreach (var entry in sessions.Value)
+            {
+                sessionResponse.Add(new()
+                {
+                    Period = entry.PeriodName,
+                    ClassName = entry.OfferingName,
+                    Duration = (int)entry.Duration
+                });
+            }
+
             // Build the master form view model
             var viewModel = await CreateViewModel<Staff_DetailsViewModel>();
             viewModel.Staff = Staff_DetailsViewModel.StaffDto.ConvertFromStaff(staff);
-            viewModel.Offerings = staff.CourseSessions.Where(session => !session.IsDeleted && session.Offering.EndDate >= _dateTime.Today).Select(session => session.Offering).Distinct().Select(Staff_DetailsViewModel.OfferingDto.ConvertFromOffering).ToList();
-            viewModel.Sessions = staff.CourseSessions.Where(session => !session.IsDeleted && session.Offering.EndDate >= _dateTime.Today).Select(Staff_DetailsViewModel.SessionDto.ConvertFromSession).ToList();
+            viewModel.Offerings = offeringResponse;
+            viewModel.Sessions = sessionResponse;
             viewModel.SchoolStaff = staff.School.StaffAssignments.Where(role => !role.IsDeleted).Select(Staff_DetailsViewModel.ContactDto.ConvertFromRoleAssignment).ToList();
             viewModel.Faculties = staff.Faculties.Where(membership => !membership.IsDeleted).Select(Staff_DetailsViewModel.FacultyDto.ConvertFromFacultyMembership).ToList();
 

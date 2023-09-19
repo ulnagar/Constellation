@@ -30,16 +30,23 @@ public class BaseController : Controller
 
     protected async Task<IDictionary<string, OfferingId>> GetClasses()
     {
+        Dictionary<string, OfferingId> response = new();
+
         var username = User.Identity?.Name;
 
         if (username is null)
             return new Dictionary<string, OfferingId>();
 
-        var query = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(username));
+        var query = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(null, username));
 
         if (query.IsFailure)
-            return new Dictionary<string, OfferingId>();
+            return response;
 
-        return query.Value;
+        foreach (var entry in query.Value)
+        {
+            response.Add(entry.OfferingName, entry.OfferingId);
+        }
+
+        return response;
     }
 }

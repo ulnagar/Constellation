@@ -14,9 +14,5 @@ public class AdobeConnectRoomConfiguration : IEntityTypeConfiguration<AdobeConne
         builder
             .Property(r => r.ScoId)
             .ValueGeneratedNever();
-
-        builder
-            .HasMany(r => r.OfferingSessions)
-            .WithOne();
     }
 }

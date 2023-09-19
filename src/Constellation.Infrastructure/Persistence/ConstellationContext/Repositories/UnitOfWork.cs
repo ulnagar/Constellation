@@ -49,7 +49,7 @@ public class UnitOfWork : IUnitOfWork
         SchoolContactRoles = new SchoolContactRoleRepository(context);
         Schools = new SchoolRepository(context);
         Settings = new SettingRepository(context);
-        Staff = new StaffRepository(context, dateTime);
+        Staff = new StaffRepository(context);
         Students = new StudentRepository(context, dateTime);
         Periods = new TimetablePeriodRepository(context);
         CanvasOperations = new CanvasOperationsRepository(context);

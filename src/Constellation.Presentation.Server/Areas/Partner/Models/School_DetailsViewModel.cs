@@ -1,11 +1,8 @@
-﻿using Constellation.Application.DTOs;
-using Constellation.Application.Helpers;
+﻿using Constellation.Application.Helpers;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.BaseModels;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Models
 {
@@ -109,57 +106,20 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
 
         public class StudentDto
         {
-            public StudentDto()
-            {
-                Enrolments = new List<string>();
-            }
-
             [Display(Name=DisplayNameDefaults.StudentId)]
             public string StudentId { get; set; }
             public string Gender { get; set; }
             public string Name { get; set; }
             public Grade Grade { get; set; }
-            public ICollection<string> Enrolments { get; set; }
-
-            public static StudentDto ConvertFromStudent(Student student)
-            {
-                var viewModel = new StudentDto
-                {
-                    StudentId = student.StudentId,
-                    Gender = student.Gender,
-                    Name = student.DisplayName,
-                    Grade = student.CurrentGrade,
-                    Enrolments = student.Enrolments.Where(enrol => !enrol.IsDeleted).Select(enrol => enrol.Offering.Name).ToList()
-                };
-
-                return viewModel;
-            }
+            public List<string> Enrolments { get; set; } = new();
         }
 
         public class StaffDto
         {
-            public StaffDto()
-            {
-                Courses = new List<string>();
-            }
-
             public string Id { get; set; }
             public string Name { get; set; }
             public List<string> Faculty { get; set; } = new();
-            public ICollection<string> Courses { get; set; }
-
-            public static StaffDto ConvertFromStaff(Staff staff)
-            {
-                var viewModel = new StaffDto
-                {
-                    Id = staff.StaffId,
-                    Name = staff.DisplayName,
-                    Faculty = staff.Faculties.Where(member => !member.IsDeleted).Select(member => member.Faculty.Name).ToList(),
-                    Courses = staff.CourseSessions.Where(session => !session.IsDeleted).Select(session => session.Offering.Name).Distinct().ToList()
-                };
-
-                return viewModel;
-            }
+            public List<string> Courses { get; set; } = new();
         }
     }
 }

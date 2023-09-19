@@ -195,9 +195,8 @@
                     @foreach (var item in Model.Sessions)
                     {
                         <tr>
-                            <td>@Html.DisplayFor(model => item.Period, "Period")</td>
+                            <td>@item.Period</td>
                             <td>@Html.DisplayFor(model => item.ClassName)</td>
-                            <td>@Html.DisplayFor(model => item.RoomName)</td>
                             <td>@Html.DisplayFor(model => item.Duration)</td>
                         </tr>
                     }

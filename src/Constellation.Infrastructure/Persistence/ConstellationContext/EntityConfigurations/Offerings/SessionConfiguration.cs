@@ -3,7 +3,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,6 +14,12 @@ public class SessionConfiguration : IEntityTypeConfiguration<Session>
 
         builder
             .HasKey(session => session.Id);
+
+        builder
+            .Property(session => session.Id)
+            .HasConversion(
+                id => id.Value,
+                value => SessionId.FromValue(value));
 
         builder
             .HasOne(session => session.Offering)

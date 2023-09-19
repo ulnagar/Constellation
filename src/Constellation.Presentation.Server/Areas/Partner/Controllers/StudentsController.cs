@@ -1,17 +1,14 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Enrolments.EnrolStudent;
 using Constellation.Application.Enrolments.UnenrolStudent;
-using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Offerings.GetOfferingsForBulkEnrol;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
@@ -273,7 +270,12 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             var viewModel = await CreateViewModel<Student_BulkEnrolViewModel>();
             viewModel.StudentId = student.StudentId;
-            viewModel.OfferingList = await _offeringRepository.GetActiveByGrade(student.CurrentGrade);
+
+            var offerings = await _mediator.Send(new GetOfferingsForBulkEnrolQuery(student.CurrentGrade));
+
+            
+
+            viewModel.OfferingList = offerings.Value;
 
             return View("BulkEnrol", viewModel);
         }

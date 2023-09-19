@@ -1,4 +1,4 @@
-﻿using Constellation.Core.Models.Offerings;
+﻿using Constellation.Application.Offerings.GetOfferingsForBulkEnrol;
 using Constellation.Presentation.Server.BaseModels;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Models
@@ -8,6 +8,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
         public string StudentId { get; set; }
         public ICollection<Guid> SelectedClasses { get; set; }
 
-        public ICollection<Offering> OfferingList { get; set; }
+        public List<BulkEnrolOfferingResponse> OfferingList { get; set; } = new();
     }
 }

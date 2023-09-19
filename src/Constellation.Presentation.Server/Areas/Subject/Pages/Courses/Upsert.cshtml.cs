@@ -1,11 +1,12 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.Courses;
 
+using Constellation.Application.Courses.CreateCourse;
 using Constellation.Application.Courses.GetCourseSummary;
 using Constellation.Application.Courses.Models;
+using Constellation.Application.Courses.UpdateCourse;
 using Constellation.Application.Faculties.GetFacultiesForSelectionList;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
@@ -86,11 +87,120 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPostCreate()
     {
+        if (!ModelState.IsValid)
+        {
+            Result<List<FacultySummaryResponse>> facultyRequest = await _mediator.Send(new GetFacultiesForSelectionListQuery());
 
+            if (facultyRequest.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = facultyRequest.Error,
+                    RedirectPath = null
+                };
+
+                return Page();
+            }
+
+            Faculties = facultyRequest.Value;
+
+            return Page();
+        }
+
+        Result request = await _mediator.Send(new CreateCourseCommand(
+            Name,
+            Code,
+            Grade,
+            FacultyId,
+            FTEValue));
+
+        if (request.IsFailure)
+        {
+            Error = new()
+            {
+                Error = request.Error,
+                RedirectPath = null
+            };
+
+            Result<List<FacultySummaryResponse>> facultyRequest = await _mediator.Send(new GetFacultiesForSelectionListQuery());
+
+            if (facultyRequest.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = facultyRequest.Error,
+                    RedirectPath = null
+                };
+
+                return Page();
+            }
+
+            Faculties = facultyRequest.Value;
+
+            return Page();
+        }
+
+        return RedirectToPage("/Courses/Index", new { area = "Subject" });
     }
 
     public async Task<IActionResult> OnPostUpdate()
     {
+        if(!ModelState.IsValid)
+        {
+            Result<List<FacultySummaryResponse>> facultyRequest = await _mediator.Send(new GetFacultiesForSelectionListQuery());
 
+            if (facultyRequest.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = facultyRequest.Error,
+                    RedirectPath = null
+                };
+
+                return Page();
+            }
+
+            Faculties = facultyRequest.Value;
+
+            return Page();
+        }
+
+        CourseId courseId = CourseId.FromValue(Id.Value);
+
+        Result request = await _mediator.Send(new UpdateCourseCommand(
+            courseId,
+            Name,
+            Code,
+            Grade,
+            FacultyId,
+            FTEValue));
+
+        if (request.IsFailure)
+        {
+            Error = new()
+            {
+                Error = request.Error,
+                RedirectPath = null
+            };
+
+            Result<List<FacultySummaryResponse>> facultyRequest = await _mediator.Send(new GetFacultiesForSelectionListQuery());
+
+            if (facultyRequest.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = facultyRequest.Error,
+                    RedirectPath = null
+                };
+
+                return Page();
+            }
+
+            Faculties = facultyRequest.Value;
+
+            return Page();
+        }
+
+        return RedirectToPage("/Courses/Index", new { area = "Subject" });
     }
 }

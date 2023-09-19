@@ -3,6 +3,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SciencePracs;
@@ -72,6 +73,14 @@ public class CourseRepository : ICourseRepository
         return await _context.Set<Course>()
             .AnyAsync(course => course.Id == id);
     }
+
+    public async Task<List<Course>> GetByGrade(
+        Grade grade, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Course>()
+            .Where(course => course.Grade == grade)
+            .ToListAsync(cancellationToken);
 
     public void Insert(Course course) =>
         _context.Set<Course>().Add(course);

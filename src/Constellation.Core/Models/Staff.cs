@@ -23,7 +23,6 @@ public class Staff
     public string DisplayName => FirstName + " " + LastName;
     public string EmailAddress => PortalUsername + "@det.nsw.edu.au";
     public bool IsShared { get; set; }
-    public virtual List<Session> CourseSessions { get; set; } = new();
     public virtual List<TeacherAdobeConnectOperation> AdobeConnectOperations { get; set; } = new();
     public virtual List<TeacherAdobeConnectGroupOperation> AdobeConnectGroupOperations { get; set; } = new();
     public virtual List<TeacherMSTeamOperation> MSTeamOperations { get; set; } = new();

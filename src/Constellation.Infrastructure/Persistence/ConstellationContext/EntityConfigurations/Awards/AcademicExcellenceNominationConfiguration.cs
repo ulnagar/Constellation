@@ -13,7 +13,10 @@ internal sealed class AcademicExcellenceNominationConfiguration
     {
         builder
             .Property(nomination => nomination.CourseId)
-            .HasColumnName(nameof(AcademicExcellenceNomination.CourseId));
+            .HasColumnName(nameof(AcademicExcellenceNomination.CourseId))
+            .HasConversion(
+                id => id.Value,
+                value => CourseId.FromValue(value));
 
         builder
             .Property(nomination => nomination.CourseName)

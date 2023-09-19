@@ -31,8 +31,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         {
             return _context.Schools
                 .Include(s => s.Staff)
-                    .ThenInclude(staff => staff.CourseSessions)
-                        .ThenInclude(session => session.Offering)
                 .Include(s => s.StaffAssignments)
                     .ThenInclude(assignment => assignment.SchoolContact)
                 .Include(s => s.Students)
@@ -176,8 +174,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Include(school => school.Students)
                 .ThenInclude(student => student.Enrolments)
                 .Include(school => school.Staff)
-                .ThenInclude(staff => staff.CourseSessions)
-                .ThenInclude(session => session.Offering)
                 .Include(school => school.Staff)
                 .ThenInclude(staff => staff.Faculties)
                 .ThenInclude(member => member.Faculty)

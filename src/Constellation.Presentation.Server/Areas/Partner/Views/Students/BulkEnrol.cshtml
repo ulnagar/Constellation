@@ -2,7 +2,7 @@
 @model Student_BulkEnrolViewModel
 
 @{
-    var groupedOfferings = Model.OfferingList.GroupBy(offering => offering.Course.FacultyId);
+    var groupedOfferings = Model.OfferingList.GroupBy(offering => offering.FacultyName);
 }
 
 <h2>Enrol in Multiple Classes</h2>
@@ -22,10 +22,10 @@
             @foreach (var group in groupedOfferings)
             {
                 <div class="col-md-3">
-                    @foreach (var offering in group.OrderBy(e => e.EndDate).ThenBy(e => e.Name))
+                    @foreach (var offering in group.OrderBy(e => e.Name))
                     {
                         <div>
-                            <input type="checkbox" name="SelectedClasses" value="@offering.Id"/>@offering.Name (@offering.EndDate.Year)
+                            <input type="checkbox" name="SelectedClasses" value="@offering.OfferingId.Value"/>@offering.Name
                         </div>
                     }
                 </div>

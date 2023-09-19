@@ -8,15 +8,6 @@
 <div class="row">
     <h3>Attendance</h3>
 </div>
-<div class="row margin-top-5">
-    <div class="col-md-8">
-        <h4>Student Attendance Query</h4>
-        View Adobe Connect attendance reports for a particular student on a particular day
-    </div>
-    <div class="col-md-4">
-        @Html.ActionLink("Go", "AttendanceQuerySelection", "Students", null, new {@class="btn btn-secondary"})
-    </div>
-</div>
 
 <div class="row margin-top-5">
     <div class="col-md-8">
@@ -24,7 +15,7 @@
         View total Full Time Equivalent figures by grade
     </div>
     <div class="col-md-4">
-        @Html.ActionLink("Go", "FTEBreakdown", "Students", null, new { @class = "btn btn-secondary" })
+        <a asp-action="FTEBreakdown" asp-controller="Students" asp-area="Reports" class="btn btn-secondary">Go</a>
     </div>
 </div>
 

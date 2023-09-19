@@ -22,7 +22,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
             public string Gender { get; set; }
             public Grade Grade { get; set; }
             public string SchoolName { get; set; }
-            public IList<string> CurrentEnrolments { get; set; }
+            public List<string> CurrentEnrolments { get; set; }
 
             public static StudentDto ConvertFromStudent(Student student)
             {
@@ -32,8 +32,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
                     Name = student.DisplayName,
                     Gender = student.Gender,
                     Grade = student.CurrentGrade,
-                    SchoolName = student.School.Name,
-                    CurrentEnrolments = student.Enrolments.Where(enrol => !enrol.IsDeleted).Select(enrol => enrol.Offering.Name).ToList()
+                    SchoolName = student.School.Name
                 };
 
                 return viewModel;

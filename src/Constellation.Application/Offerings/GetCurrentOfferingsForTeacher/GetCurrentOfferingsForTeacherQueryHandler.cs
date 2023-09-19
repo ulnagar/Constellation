@@ -5,43 +5,95 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 public class GetCurrentOfferingsForTeacherQueryHandler 
-    : IQueryHandler<GetCurrentOfferingsForTeacherQuery, Dictionary<string, OfferingId>>
+    : IQueryHandler<GetCurrentOfferingsForTeacherQuery, List<TeacherOfferingResponse>>
 {
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
+    private readonly ICourseRepository _courseRepository;
 
     public GetCurrentOfferingsForTeacherQueryHandler(
         IOfferingRepository offeringRepository,
-        IStaffRepository staffRepository)
+        IStaffRepository staffRepository,
+        ICourseRepository courseRepository)
     {
         _offeringRepository = offeringRepository;
         _staffRepository = staffRepository;
+        _courseRepository = courseRepository;
     }
 
-    public async Task<Result<Dictionary<string, OfferingId>>> Handle(GetCurrentOfferingsForTeacherQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<TeacherOfferingResponse>>> Handle(GetCurrentOfferingsForTeacherQuery request, CancellationToken cancellationToken)
     {
-        Dictionary<string, OfferingId> response = new();
+        List<TeacherOfferingResponse> response = new();
 
-        Staff teacher = await _staffRepository.GetCurrentByEmailAddress(request.Username, cancellationToken);
-
-        if (teacher is not null)
+        if (!string.IsNullOrWhiteSpace(request.StaffId))
         {
-            List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(teacher.StaffId, cancellationToken);
+            Staff teacher = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
-            foreach (Offering offering in offerings)
+            if (teacher is not null)
             {
-                response.Add(offering.Name, offering.Id);
+                List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(teacher.StaffId, cancellationToken);
+
+                foreach (Offering offering in offerings)
+                {
+                    TeacherAssignment assignment = offering.Teachers.FirstOrDefault(entry => entry.StaffId == teacher.StaffId);
+
+                    if (assignment is null)
+                        continue;
+
+                    Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+
+                    if (course is null)
+                        continue;
+
+                    response.Add(new(
+                        offering.Id,
+                        offering.Name,
+                        course.Name,
+                        assignment.Type));
+                }
             }
+
+            return response;
+        }
+        else if (!string.IsNullOrWhiteSpace(request.EmailAddress))
+        {
+            Staff teacher = await _staffRepository.GetCurrentByEmailAddress(request.EmailAddress, cancellationToken);
+
+            if (teacher is not null)
+            {
+                List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(teacher.StaffId, cancellationToken);
+
+                foreach (Offering offering in offerings)
+                {
+                    TeacherAssignment assignment = offering.Teachers.FirstOrDefault(entry => entry.StaffId == teacher.StaffId);
+
+                    if (assignment is null)
+                        continue;
+
+                    Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+
+                    if (course is null)
+                        continue;
+
+                    response.Add(new(
+                        offering.Id,
+                        offering.Name,
+                        course.Name,
+                        assignment.Type));
+                }
+            }
+
+            return response;
         }
 
-        return response;
+        return Result.Failure<List<TeacherOfferingResponse>>(new("LocalError", "Could not determine Offerings for Teacher"));
     }
 }
