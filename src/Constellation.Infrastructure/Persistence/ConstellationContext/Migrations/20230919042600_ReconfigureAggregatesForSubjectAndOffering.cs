@@ -92,39 +92,54 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
             // move all staff in the sessions table to separate records in the teachers table
             migrationBuilder.Sql(
                 @"INSERT INTO [dbo].[Offerings_Teachers]
-	                ([Id]
-	                ,[OfferingId]
-	                ,[StaffId]
-	                ,[Type]
-	                ,[CreatedBy]
-	                ,[CreatedAt]
-	                ,[ModifiedBy]
-	                ,[ModifiedAt]
-	                ,[DeletedBy]
-	                ,[DeletedAt]
-	                ,[IsDeleted])
-                SELECT
-                 Id = NEWID(),
-                 OfferingId,
-                 StaffId,
-                 Type = CASE
-	                WHEN (SELECT [Type] From [Periods] AS P WHERE [PeriodId] = p.[Id]) = 'OTHER' THEN 'Tutorial Teacher'
-	                ELSE 'Classroom Teacher'
-	                END,
-                 CreatedBy = 'System',
-                 CreatedAt = DateCreated,
-                 ModifiedBy = null,
-                 ModifiedAt = cast('0001-01-01' as datetime2),
-                 DeletedBy = CASE
-	                WHEN IsDeleted = 0 THEN null
-	                WHEN IsDeleted = 1 THEN 'System'
-	                END,
-                 DeletedAt = CASE
-	                WHEN IsDeleted = 0 THEN cast('0001-01-01' as datetime2)
-	                WHEN IsDeleted = 1 THEN DateDeleted
-	                END,
-                 IsDeleted
-                FROM [dbo].[Subjects_Sessions];");
+	([Id],
+	 [OfferingId],
+	 [StaffId],
+	 [Type],
+	 [CreatedBy],
+	 [CreatedAt],
+	 [ModifiedBy],
+	 [ModifiedAt],
+	 [DeletedBy],
+	 [DeletedAt],
+	 [IsDeleted])
+SELECT
+	 NEWID() as Id,
+	 t.OfferingId,
+	 t.StaffId,
+	 CASE
+		WHEN (SELECT [Type] From [Periods] AS P WHERE t.[PeriodId] = p.[Id]) = 'OTHER' THEN 'Tutorial Teacher'
+		ELSE 'Classroom Teacher'
+		END as Type,
+	 CreatedBy = 'System',
+	 CreatedAt = t.DateCreated,
+	 ModifiedBy = null,
+	 ModifiedAt = cast('0001-01-01' as datetime2),
+	 DeletedBy = CASE
+		WHEN t.IsDeleted = 0 THEN null
+		WHEN t.IsDeleted = 1 THEN 'System'
+		END,
+	 DeletedAt = CASE
+		WHEN t.IsDeleted = 0 THEN cast('0001-01-01' as datetime2)
+		WHEN t.IsDeleted = 1 THEN t.DateDeleted
+		END,
+	 t.IsDeleted
+FROM [dbo].[Offerings_Sessions] t
+WHERE 
+	(SELECT COUNT(Id)
+	FROM [dbo].[Offerings_Sessions] j
+	WHERE
+		t.Id < j.Id and
+		t.OfferingId = j.OfferingId and
+		t.StaffId = j.StaffId and
+		CASE
+			WHEN (SELECT [Type] From [Periods] AS P WHERE j.[PeriodId] = p.[Id]) = 'OTHER' THEN 'Tutorial Teacher'
+			ELSE 'Classroom Teacher'
+			END =
+		CASE
+			WHEN (SELECT [Type] From [Periods] AS P WHERE t.[PeriodId] = p.[Id]) = 'OTHER' THEN 'Tutorial Teacher'
+			ELSE 'Classroom Teacher'
+			END) = 0");
 
             migrationBuilder.RenameColumn(
                 name: "Id",

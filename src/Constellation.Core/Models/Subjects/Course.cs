@@ -8,7 +8,6 @@ using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 
 public sealed class Course : AggregateRoot
 {
