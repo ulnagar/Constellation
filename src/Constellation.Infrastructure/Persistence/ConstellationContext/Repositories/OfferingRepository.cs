@@ -8,15 +8,20 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Abstractions.Clock;
 using Microsoft.EntityFrameworkCore;
 
 public class OfferingRepository : IOfferingRepository
 {
     private readonly AppDbContext _context;
+    private readonly IDateTimeProvider _dateTime;
 
-    public OfferingRepository(AppDbContext context)
+    public OfferingRepository(
+        AppDbContext context,
+        IDateTimeProvider dateTime)
     {
         _context = context;
+        _dateTime = dateTime;
     }
 
     public void Insert(Offering offering) =>
@@ -50,8 +55,8 @@ public class OfferingRepository : IOfferingRepository
                 offering.Teachers.Any(teacher =>
                     teacher.StaffId == StaffId &&
                     !teacher.IsDeleted) &&
-                offering.StartDate <= DateOnly.FromDateTime(DateTime.Today) &&
-                offering.EndDate >= DateOnly.FromDateTime(DateTime.Today))
+                offering.StartDate <= _dateTime.Today &&
+                offering.EndDate >= _dateTime.Today)
             .ToListAsync(cancellationToken);
 
     public async Task<List<Offering>> GetAll(
