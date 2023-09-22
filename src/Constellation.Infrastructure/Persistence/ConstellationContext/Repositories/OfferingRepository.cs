@@ -72,7 +72,6 @@ public class OfferingRepository : IOfferingRepository
         await _context
             .Set<Offering>()
             .Where(offering => offering.CourseId == courseId)
-            .AsSplitQuery()
             .ToListAsync(cancellationToken);
 
     public async Task<List<Offering>> GetActiveByGrade(

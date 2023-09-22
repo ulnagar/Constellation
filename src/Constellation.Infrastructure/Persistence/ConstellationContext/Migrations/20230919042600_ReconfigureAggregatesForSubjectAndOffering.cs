@@ -130,18 +130,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "Subjects_Sessions",
                 newName: "Offerings_Sessions");
 
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_Offerings_Sessions",
-                table: "Offerings_Sessions",
-                column: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Offerings_Sessions_Offerings_Offerings_OfferingId",
-                table: "Offerings_Sessions",
-                column: "OfferingId",
-                principalTable: "Offerings_Offerings",
-                principalColumn: "Id");
-
             migrationBuilder.RenameTable(
                 name: "Subjects_Resources",
                 newName: "Offerings_Resources");
@@ -453,6 +441,43 @@ WHERE
                 name: "xId",
                 table: "Subjects_Courses");
 
+            // Update Sessions table
+            migrationBuilder.RenameColumn(
+                name: "Id",
+                table: "Offerings_Sessions",
+                newName: "xId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "Id",
+                table: "Offerings_Sessions",
+                type: "uniqueidentifier",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[Offerings_Sessions]
+                    SET [Id] = NEWID()
+                    WHERE 1 = 1;");
+
+            migrationBuilder.AlterColumn<Guid>(
+                name: "Id",
+                table: "Offerings_Sessions",
+                nullable: false);
+
+            migrationBuilder.DropColumn(
+                name: "xId",
+                table: "Offerings_Sessions");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Offerings_Sessions",
+                table: "Offerings_Sessions",
+                column: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Offerings_Sessions_Offerings_Offerings_OfferingId",
+                table: "Offerings_Sessions",
+                column: "OfferingId",
+                principalTable: "Offerings_Offerings",
+                principalColumn: "Id");
 
             // Update Enrolments table
             migrationBuilder.DropPrimaryKey(
