@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
 
+using Application.Enrolments.EnrolStudent;
 using Constellation.Application.Enrolments.UnenrolStudent;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.AddSessionToOffering;
@@ -11,12 +12,10 @@ using Constellation.Application.Offerings.RemoveSession;
 using Constellation.Application.Offerings.RemoveTeacherFromOffering;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.AddSessionToOffering;
 using Constellation.Presentation.Server.Pages.Shared.Components.AddTeacherToOffering;
-using Constellation.Presentation.Server.Pages.Shared.PartialViews.DeleteRoleModal;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveAllSessionsModal;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveResourceFromOfferingModal;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveSessionModal;
@@ -25,6 +24,7 @@ using Constellation.Presentation.Server.Pages.Shared.PartialViews.UnenrolStudent
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Server.Pages.Shared.Components.EnrolStudentInOffering;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
@@ -189,6 +189,27 @@ public class DetailsModel : BasePageModel
         AssignmentType type = AssignmentType.FromValue(viewModel.AssignmentType);
 
         Result request = await _sender.Send(new AddTeacherToOfferingCommand(offeringId, viewModel.StaffId, type));
+
+        if (request.IsFailure)
+        {
+            Error = new()
+            {
+                Error = request.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostEnrolStudent(
+        EnrolStudentInOfferingSelection viewModel)
+    {
+        OfferingId offeringId = OfferingId.FromValue(Id);
+
+        Result request = await _sender.Send(new EnrolStudentCommand(viewModel.StudentId, offeringId));
 
         if (request.IsFailure)
         {

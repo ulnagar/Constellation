@@ -2,10 +2,8 @@ namespace Constellation.Application.Interfaces.Repositories;
 
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,4 +21,6 @@ public interface ITimetablePeriodRepository
     Task<ICollection<TimetablePeriod>> ForSelectionAsync();
     Task<ICollection<TimetablePeriod>> ForGraphicalDisplayAsync();
     Task<TimetablePeriod> ForEditAsync(int id);
+
+    Task<List<TimetablePeriod>> GetCurrent(CancellationToken cancellationToken = default);
 }

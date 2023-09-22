@@ -8,11 +8,6 @@ namespace Constellation.Core.Models
 {
     public class TimetablePeriod
     {
-        public TimetablePeriod()
-        {
-            OfferingSessions = new List<Session>();
-        }
-
         public int Id { get; set; }
         public string Timetable { get; set; }
         public int Day { get; set; }
@@ -23,20 +18,17 @@ namespace Constellation.Core.Models
         public string Type { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime? DateDeleted { get; set; }
-        public ICollection<Session> OfferingSessions { get; set; }
+        public List<Session> OfferingSessions { get; set; } = new();
         public int Duration => GetDuration();
 
-        private int GetDuration()
-        {
-            return (int)EndTime.Subtract(StartTime).TotalMinutes;
-        }
+        private int GetDuration() => (int)EndTime.Subtract(StartTime).TotalMinutes;
 
-        public override string ToString()
+        public string GroupName()
         {
-            var GridName = Timetable[..3].ToUpper();
+            string gridName = Timetable[..3].ToUpper();
 
-            var WeekNo = (Day - 1) / 5;
-            var WeekName = WeekNo switch
+            int weekNo = (Day - 1) / 5;
+            string weekName = weekNo switch
             {
                 0 => "Week A",
                 1 => "Week B",
@@ -45,8 +37,8 @@ namespace Constellation.Core.Models
                 _ => "",
             };
 
-            var DayNo = Day % 5;
-            var DayName = DayNo switch
+            int dayNo = Day % 5;
+            string dayName = dayNo switch
             {
                 1 => "Monday",
                 2 => "Tuesday",
@@ -56,7 +48,10 @@ namespace Constellation.Core.Models
                 _ => "",
             };
 
-            return $"{GridName} {WeekName} {DayName} - {Name}";
+            return $"{gridName} {weekName} {dayName}";
         }
+
+        public override string ToString() =>
+            $"{GroupName()} - {Name}";
     }
 }

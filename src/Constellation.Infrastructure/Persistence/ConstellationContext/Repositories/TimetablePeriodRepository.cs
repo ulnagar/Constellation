@@ -2,15 +2,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
-using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
-using static Constellation.Core.Errors.DomainErrors.ClassCovers;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
 {
@@ -52,7 +44,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                     sessions.Select(session => session.PeriodId).Contains(period.Id))
                 .ToListAsync(cancellationToken);
         }
-            
 
         // Method is not async as we are passing the async task to another method
         public Task<List<TimetablePeriod>> GetForOfferingOnDay(
@@ -61,6 +52,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             int dayNumber,
             CancellationToken cancellationToken = default) =>
             GetForOfferingOnDay(offeringId, absenceDate.ToDateTime(TimeOnly.MinValue), dayNumber, cancellationToken);
+
+        public async Task<List<TimetablePeriod>> GetCurrent(
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<TimetablePeriod>()
+                .Where(period => !period.IsDeleted)
+                .ToListAsync(cancellationToken);
 
         public async Task<double> TotalDurationForCollectionOfPeriods(
             List<int> PeriodIds,

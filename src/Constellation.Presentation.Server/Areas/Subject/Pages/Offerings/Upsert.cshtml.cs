@@ -46,7 +46,6 @@ public class UpsertModel : BasePageModel
     public DateOnly EndDate { get; set; }
     public SelectList CourseList { get; set; }
 
-
     public async Task OnGet()
     {
         await GetClasses(_mediator);
@@ -102,7 +101,7 @@ public class UpsertModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Index", values: new { area = "Subject"})
+                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Index", values: new { area = "Subject" })
             };
 
             return Page();

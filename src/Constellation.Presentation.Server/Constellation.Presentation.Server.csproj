@@ -15,11 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="Areas\Subject\Pages\Offerings\Upsert.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Areas\Subject\Pages\Offerings\Upsert.cshtml" />
     <None Include="wwwroot\css\login.css" />
   </ItemGroup>
 
@@ -48,14 +43,6 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\private\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Areas\Subject\Pages\Offerings\Upsert.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Areas\Subject\Pages\Offerings\Upsert.cshtml" />
   </ItemGroup>
 
 </Project>

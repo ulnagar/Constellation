@@ -34,7 +34,7 @@ internal sealed class GetAllPeriodsQueryHandler
             response.Add(new(
                 period.Id,
                 period.Name,
-                period.ToString()));
+                period.GroupName()));
         }
 
         return response;

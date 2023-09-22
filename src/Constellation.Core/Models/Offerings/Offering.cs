@@ -24,6 +24,7 @@ public sealed class Offering : AggregateRoot
         DateOnly startDate, 
         DateOnly endDate)
     {
+        Id = new();
         Name = name;
         CourseId = courseId;
         StartDate = startDate;
