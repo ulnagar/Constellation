@@ -28,4 +28,9 @@ public sealed class ResourceType : ValueObject
     {
         yield return Value;
     }
+
+    public override string ToString() => Value;
+
+    public static implicit operator string(ResourceType resourceType) =>
+        resourceType is null ? string.Empty : resourceType.ToString();
 }

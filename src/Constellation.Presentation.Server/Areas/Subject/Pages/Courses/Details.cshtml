@@ -103,7 +103,7 @@
                             <td>
                                 @foreach (var teacher in item.Teachers)
                                 {
-                                    <span class="badge badge-info mr-3">@teacher</span>
+                                    <a asp-action="Details" asp-controller="Staff" asp-area="Partner" asp-route-id="@teacher.StaffId"><span class="badge badge-info mr-3">@teacher.Name</span></a>
                                 }
                             </td>
                             <td>@item.EndDate.ToString("yyyy")</td>

@@ -23,7 +23,7 @@ public sealed record OfferingDetailsResponse(
     List<OfferingDetailsResponse.LessonSummary> Lessons,
     List<OfferingDetailsResponse.TeacherSummary> Teachers,
     List<OfferingDetailsResponse.ResourceSummary> Resources,
-    int FTETotal,
+    decimal FTETotal,
     int Duration)
 {
     public sealed record StudentSummary(

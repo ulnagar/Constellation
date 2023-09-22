@@ -173,7 +173,7 @@ internal sealed class GetOfferingDetailsQueryHandler
             }
         }
 
-        int fteTotal = (int)(students.Count() * course.FullTimeEquivalentValue);
+        decimal fteTotal = (students.Count() * course.FullTimeEquivalentValue);
         int duration = sessions.Sum(session => session.Duration);
         
         Result<OfferingName> offeringName = OfferingName.FromValue(offering.Name);

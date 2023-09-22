@@ -6,6 +6,7 @@ using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 public class EnrolmentRepository : IEnrolmentRepository
@@ -59,7 +60,8 @@ public class EnrolmentRepository : IEnrolmentRepository
             .Set<Offering>()
             .Where(offering =>
                 offering.CourseId == courseId &&
-                offering.IsCurrent)
+                (offering.Sessions.Any(session => !session.IsDeleted) ||
+                (offering.StartDate <= _dateTime.Today && offering.EndDate >= _dateTime.Today)))
             .Select(offering => offering.Id)
             .ToListAsync(cancellationToken);
 
@@ -79,7 +81,8 @@ public class EnrolmentRepository : IEnrolmentRepository
             .Set<Offering>()
             .Where(offering =>
                 offering.CourseId == courseId &&
-                offering.IsCurrent)
+                (offering.Sessions.Any(session => !session.IsDeleted) ||
+                (offering.StartDate <= _dateTime.Today && offering.EndDate >= _dateTime.Today)))
             .Select(offering => offering.Id)
             .ToListAsync(cancellationToken);
 

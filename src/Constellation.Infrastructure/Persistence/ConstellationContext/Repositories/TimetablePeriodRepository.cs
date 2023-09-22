@@ -64,11 +64,17 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
         public async Task<double> TotalDurationForCollectionOfPeriods(
             List<int> PeriodIds,
-            CancellationToken cancellationToken = default) =>
-            await _context
+            CancellationToken cancellationToken = default)
+        {
+            List<TimetablePeriod> periods = await _context
                 .Set<TimetablePeriod>()
                 .Where(period => PeriodIds.Contains(period.Id))
-                .SumAsync(period => period.EndTime.Subtract(period.StartTime).TotalMinutes, cancellationToken);
+                .ToListAsync(cancellationToken);
+    
+            return periods
+                .Sum(period => period.EndTime.Subtract(period.StartTime).TotalMinutes);
+        }
+
 
         public async Task<List<TimetablePeriod>> GetByDayAndOfferingId(
             int dayNumber,

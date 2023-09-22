@@ -152,9 +152,9 @@ public sealed class Offering : AggregateRoot
 
         Resource resource = type.Value switch
         {
-            "Adobe Connect Room" => new AdobeConnectRoomResource(Id, url, name, resourceId),
-            "Microsoft Team" => new MicrosoftTeamResource(Id, url, name, resourceId),
-            "Canvas Course" => new CanvasCourseResource(Id, url, name, resourceId),
+            "Adobe Connect Room" => new AdobeConnectRoomResource(Id, resourceId, name, url),
+            "Microsoft Team" => new MicrosoftTeamResource(Id, resourceId, name, url),
+            "Canvas Course" => new CanvasCourseResource(Id, resourceId, name, url),
             _ => null
         };
 

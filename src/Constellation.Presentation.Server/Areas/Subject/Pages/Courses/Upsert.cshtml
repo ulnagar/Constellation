@@ -48,11 +48,20 @@
         <div class="form-group row">
             <label asp-for="FacultyId" class="col-md-2">Faculty</label>
             <div class="col-md-5">
-                <select asp-for="FacultyId" asp-items="@(new SelectList(Model.Faculties, "Id", "Name", Model.FacultyId))" class="form-control combo">
-                    <option value="">-- Select --</option>
-                </select>
-                <span asp-validation-for="FacultyId" class="text-danger"></span>
+                @if (Model.Id.HasValue)
+                {
+                    <select asp-for="FacultyId" asp-items="@(new SelectList(Model.Faculties, "FacultyId", "Name", Model.FacultyId))" class="form-control combo">
+                        <option value="">-- Select --</option>
+                    </select>
                 }
+                else
+                {
+                    <select asp-for="FacultyId" asp-items="@(new SelectList(Model.Faculties, "FacultyId", "Name"))" class="form-control combo">
+                        <option value="">-- Select --</option>
+                    </select>
+                }
+                <span asp-validation-for="FacultyId" class="text-danger"></span>
+
             </div>
         </div>
 

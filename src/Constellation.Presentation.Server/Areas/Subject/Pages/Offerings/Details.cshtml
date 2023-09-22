@@ -43,14 +43,14 @@
             <label asp-for="Offering.StartDate">Active During</label>
         </dt>
         <dd class="col-md-10">
-            <span>@Model.Offering.StartDate.ToLongDateString() - @Model.Offering.EndDate.ToLongDateString()</span>
+            <span>@Model.Offering.StartDate.ToShortDateString() - @Model.Offering.EndDate.ToShortDateString()</span>
         </dd>
 
         <dt class="col-md-2">
             <label asp-for="Offering.FTETotal">FTE Total</label>
         </dt>
         <dd class="col-md-10">
-            <span>@Model.Offering.FTETotal</span>
+            <span>@Model.Offering.FTETotal.ToString("N3")</span>
         </dd>
     </dl>
 </div>
@@ -185,7 +185,7 @@
             </table>
         </div>
 
-        <div id="Resources" class="tab-pane">
+        <div id="resources" class="tab-pane">
             <h3>Resources</h3>
 
             @if (canEditTest.Succeeded)
@@ -263,9 +263,8 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th colspan="4" class="text-right">Total Minutes per Cycle:</th>
-                        <th colspan="1">@Model.Offering.Duration</th>
-                        <th></th>
+                        <th colspan="2" class="text-right">Total Minutes per Cycle:</th>
+                        <th>@Model.Offering.Duration</th>
                     </tr>
                 </tfoot>
             </table>

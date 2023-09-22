@@ -85,9 +85,8 @@ internal sealed class GetCourseDetailsQueryHandler
         {
             List<string> teacherIds = offering
                 .Teachers
-                .Where(assignment =>
-                    assignment.Type == AssignmentType.ClassroomTeacher &&
-                    !assignment.IsDeleted)
+                .Where(assignment => assignment.Type == AssignmentType.ClassroomTeacher)
+                .Where(assignment => !assignment.IsDeleted)
                 .Select(assignment => assignment.StaffId)
                 .ToList();
 

@@ -29,16 +29,16 @@ public class AddTeacherToOfferingViewComponent : ViewComponent
 
         Dictionary<string, string> staffList = new();
 
-        foreach (StaffSelectionListResponse staff in staffResult.Value)
+        foreach (StaffSelectionListResponse staff in staffResult.Value.OrderBy(staff => staff.LastName))
         {
             staffList.Add(staff.StaffId, $"{staff.FirstName} {staff.LastName}");
         }
 
         Dictionary<string, string> resourceList = new();
 
-        foreach (string entry in AssignmentType.ClassroomTeacher.GetAtomicValues())
+        foreach (AssignmentType entry in AssignmentType.Enumerations())
         {
-            resourceList.Add(entry, entry);
+            resourceList.Add(entry.Value, entry.Value);
         }
 
         var viewModel = new AddTeacherToOfferingSelection

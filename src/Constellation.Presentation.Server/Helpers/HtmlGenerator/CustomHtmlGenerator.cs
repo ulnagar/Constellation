@@ -66,8 +66,12 @@ public sealed class CustomHtmlGenerator : DefaultHtmlGenerator
     protected override TagBuilder GenerateInput(ViewContext viewContext, InputType inputType, ModelExplorer modelExplorer, string expression, object value, bool useViewData, bool isChecked, bool setId, bool isExplicitValue, string format, IDictionary<string, object> htmlAttributes) =>
         AddBootstrapValidationCssClasses(viewContext, expression, base.GenerateInput(viewContext, inputType, modelExplorer, expression, value, useViewData, isChecked, setId, isExplicitValue, format, htmlAttributes));
 
-    public override TagBuilder GenerateSelect(ViewContext viewContext, ModelExplorer modelExplorer, string optionLabel, string expression, IEnumerable<SelectListItem> selectList, ICollection<string> currentValues, bool allowMultiple, object htmlAttributes) =>
-        AddBootstrapValidationCssClasses(viewContext, expression, base.GenerateSelect(viewContext, modelExplorer, optionLabel, expression, selectList, currentValues, allowMultiple, htmlAttributes));
+    public override TagBuilder GenerateSelect(ViewContext viewContext, ModelExplorer modelExplorer, string optionLabel, string expression, IEnumerable<SelectListItem> selectList, ICollection<string> currentValues, bool allowMultiple, object htmlAttributes)
+    {
+        var baseUnit = base.GenerateSelect(viewContext, modelExplorer, optionLabel, expression, selectList, currentValues, allowMultiple, htmlAttributes);
+
+        return AddBootstrapValidationCssClasses(viewContext, expression, baseUnit);
+    }
 
     public override TagBuilder GenerateTextArea(ViewContext viewContext, ModelExplorer modelExplorer, string expression, int rows, int columns, object htmlAttributes) =>
         AddBootstrapValidationCssClasses(viewContext, expression, base.GenerateTextArea(viewContext, modelExplorer, expression, rows, columns, htmlAttributes));

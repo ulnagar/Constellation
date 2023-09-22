@@ -175,7 +175,7 @@ public class ResourceModel : BasePageModel
             }
 
             string Year = offeringRequest.Value.EndDate.Year.ToString();
-            string Grade = courseRequest.Value.Grade.ToString().PadLeft(2, '0');
+            string Grade = courseRequest.Value.Grade.ToString()[1..].PadLeft(2, '0');
             string Code = (string.IsNullOrWhiteSpace(courseRequest.Value.Code) ? "XXX" : courseRequest.Value.Code);
 
             ResourceId = $"{Year}-{Grade}{Code}";

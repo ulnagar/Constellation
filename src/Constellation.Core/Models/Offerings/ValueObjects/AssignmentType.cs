@@ -1,7 +1,10 @@
 ﻿namespace Constellation.Core.Models.Offerings.ValueObjects;
 
 using Constellation.Core.Primitives;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 public sealed class AssignmentType : ValueObject
 {
@@ -29,5 +32,28 @@ public sealed class AssignmentType : ValueObject
     public override IEnumerable<object> GetAtomicValues()
     {
         yield return Value;
+    }
+
+    public override string ToString() => Value;
+
+    public static implicit operator string(AssignmentType assignmentType) =>
+        assignmentType is null ? string.Empty : assignmentType.ToString();
+
+    public static IEnumerable<object> Enumerations()
+    {
+        var enumerationType = typeof(AssignmentType);
+
+        var fieldsForType = enumerationType
+            .GetFields(
+                BindingFlags.Public |
+                BindingFlags.Static |
+                BindingFlags.FlattenHierarchy)
+            .Where(fieldInfo =>
+                enumerationType.IsAssignableFrom(fieldInfo.FieldType))
+            .Select(fieldInfo =>
+                (AssignmentType)fieldInfo.GetValue(default)!);
+
+        foreach (var field in fieldsForType)
+            yield return field;
     }
 }
