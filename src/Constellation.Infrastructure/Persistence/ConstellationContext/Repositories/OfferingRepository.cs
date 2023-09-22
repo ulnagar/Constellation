@@ -71,8 +71,8 @@ public class OfferingRepository : IOfferingRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Offering>()
-            .Include(offering => offering.Sessions)
             .Where(offering => offering.CourseId == courseId)
+            .AsSplitQuery()
             .ToListAsync(cancellationToken);
 
     public async Task<List<Offering>> GetActiveByGrade(

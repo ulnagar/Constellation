@@ -21,7 +21,6 @@
     <div class="btn-group new-group" role="group">
         <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">Reports <span class="caret"></span></button>
         <div class="dropdown-menu">
-            <a asp-action="AttendanceQuerySelection" asp-controller="Students" asp-area="Partner" class="dropdown-item">Attendance Query</a>
             <a asp-page="/Absences/Audit" asp-area="SchoolAdmin" class="dropdown-item">Absence Settings Audit</a>
             <a asp-action="ClassAudit" asp-controller="Students" asp-area="Partner" class="dropdown-item">Class Audit</a>
         </div>
@@ -29,10 +28,6 @@
 
     @if (authorised)
     {
-        <div class="btn-group new-group" role="group">
-            <a asp-action="AbsenceSettings" asp-controller="Students" asp-area="Partner" class="btn btn-warning">Absence Settings</a>
-        </div>
-
         <div class="btn-group new-group" role="group">
             <a asp-action="Create" asp-controller="Students" asp-area="Partner" class="btn btn-info">Create New</a>
         </div>
@@ -67,7 +62,7 @@
                 <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
                 <td>@Html.DisplayFor(model => item.SchoolName)</td>
                 <td>
-                    @Html.ActionLink("More Info...", "Details", new {id = item.StudentId}, new {@class = "btn btn-sm btn-info btn-show-hover"})
+                    <a asp-page="/Students/Details" asp-area="Partner" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                 </td>
             </tr>
         }

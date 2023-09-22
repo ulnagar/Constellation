@@ -237,7 +237,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 await _mediator.Send(new UnenrolStudentCommand(student.StudentId, enrolment.OfferingId));
             }
 
-            return RedirectToAction("Details", new { id });
+            return RedirectToPage("/Students/Details", new { area = "Partner", id });
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
@@ -246,11 +246,11 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             OfferingId offeringId = OfferingId.FromValue(classId);
 
             if (offeringId is null)
-                return RedirectToAction("Details", new { id });
+                return RedirectToPage("/Students/Details", new { area = "Partner", id });
 
             await _mediator.Send(new UnenrolStudentCommand(id, offeringId));
 
-            return RedirectToAction("Details", new { id });
+            return RedirectToPage("/Students/Details", new { area = "Partner", id });
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
@@ -301,7 +301,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 }
             }
 
-            return RedirectToAction("Details", new { id = viewModel.StudentId });
+            return RedirectToPage("/Students/Details", new { area = "Partner", id = viewModel.StudentId });
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
@@ -328,7 +328,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 await _mediator.Send(new EnrolStudentCommand(student.StudentId, offering.Id));
             }
 
-            return RedirectToAction("Details", new { id });
+            return RedirectToPage("/Students/Details", new { area = "Partner", id });
         }
     }
 }

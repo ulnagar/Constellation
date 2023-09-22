@@ -27,9 +27,9 @@
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Subjects <span class="caret"></span></a>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" asp-area="Subject" asp-controller="Courses" asp-action="Index">Courses</a>
+                        <a class="dropdown-item" asp-area="Subject" asp-page="/Courses/Index">Courses</a>
                         <a class="dropdown-item" asp-area="Subject" asp-page="/Offerings/Index">Classes</a>
-                        <a class="dropdown-item" asp-area="Subject" asp-controller="Assignments" asp-action="Index">Assignments</a>
+                        <a class="dropdown-item" asp-area="Subject" asp-page="/Assignments/Index">Assignments</a>
                         <a class="dropdown-item" asp-area="Subject" asp-controller="Periods" asp-action="Index">Periods</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" asp-page="/SciencePracs/Lessons/Index" asp-area="Subject">Science Pracs</a>
@@ -41,8 +41,8 @@
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Class Covers <span class="caret"></span></a>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" asp-area="ShortTerm" asp-controller="Casuals" asp-action="Index">Casuals</a>
-                        <a class="dropdown-item" asp-area="ShortTerm" asp-controller="Covers" asp-action="Index">Covers</a>
+                        <a class="dropdown-item" asp-area="ShortTerm" asp-page="/Casuals/Index">Casuals</a>
+                        <a class="dropdown-item" asp-area="ShortTerm" asp-page="/Covers/Index">Covers</a>
                         <a class="dropdown-item" asp-area="Admin" asp-controller="Actions" asp-action="Index">Operations</a>
                     </div>
                 </li>
@@ -99,7 +99,7 @@
                         {
                             foreach (var entry in Model.Classes.OrderBy(x => x.Key))
                             {
-                                    <a class="dropdown-item" asp-area="Subject" asp-controller="Classes" asp-action="Details" asp-route-id="@entry.Value">@entry.Key</a>
+                                    <a class="dropdown-item" asp-area="Subject" asp-page="/Offerings/Details" asp-route-id="@entry.Value.Value">@entry.Key</a>
                             }
                         }
                     </div>

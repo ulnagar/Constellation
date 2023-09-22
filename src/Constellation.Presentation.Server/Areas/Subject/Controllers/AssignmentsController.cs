@@ -110,6 +110,6 @@ public class AssignmentsController : BaseController
             return View("Create_Step3", viewModel);
         }
 
-        return RedirectToAction("Index");
+        return RedirectToPage("/Assignments/Index");
     }
 }

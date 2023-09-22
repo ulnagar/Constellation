@@ -70,5 +70,9 @@ public class OfferingConfiguration : IEntityTypeConfiguration<Offering>
             .HasMany(offering => offering.Teachers)
             .WithOne(assignment => assignment.Offering)
             .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .Navigation(offering => offering.Teachers)
+            .AutoInclude();
     }
 }

@@ -41,7 +41,7 @@
                     }
                 </td>
                 <td>
-                    @Html.ActionLink("More Info...", "Details", new { id = item.StudentId }, new { @class = "btn btn-sm btn-info btn-show-hover" })
+                    <a asp-page="/Students/Details" asp-area="Partner" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                 </td>
             </tr>
         }

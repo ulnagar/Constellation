@@ -23,7 +23,8 @@ public class CourseConfiguration : IEntityTypeConfiguration<Course>
 
         builder
             .HasMany(course => course.Offerings)
-            .WithOne();
+            .WithOne()
+            .HasForeignKey(offering => offering.CourseId);
 
         builder
             .Property(course => course.FullTimeEquivalentValue)
