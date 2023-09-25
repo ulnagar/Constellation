@@ -1,26 +1,25 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
 
+using Application.Enrolments.EnrolMultipleStudentsInOffering;
+using Application.Enrolments.GetCurrentEnrolmentsForOffering;
 using Application.Models.Auth;
-using Application.Offerings.AddMultipleSessionsToOffering;
 using Application.Offerings.GetOfferingSummary;
-using Application.Offerings.GetSessionListForOffering;
 using Application.Offerings.Models;
-using Application.Periods.GetPeriodsForVisualSelection;
+using Application.Students.GetStudentsFromOfferingGrade;
 using BaseModels;
 using Core.Models.Offerings.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 
 [Authorize(Policy = AuthPolicies.CanEditSubjects)]
-public class AddSessionsModel : BasePageModel
+public class AddStudentsModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
 
-    public AddSessionsModel(
+    public AddStudentsModel(
         ISender mediator,
         LinkGenerator linkGenerator)
     {
@@ -34,11 +33,10 @@ public class AddSessionsModel : BasePageModel
     public string CourseName { get; set; }
     public string OfferingName { get; set; }
 
-    [BindProperty] 
-    public List<int> Periods { get; set; } = new();
-
-    public List<PeriodVisualSelectResponse> ValidPeriods { get; set; } = new();
-    public List<SessionListResponse> ExistingSessions { get; set; } = new();
+    [BindProperty]
+    public List<string> SelectedStudentIds { get; set; } = new();
+    public List<StudentFromGradeResponse> Students { get; set; } = new();
+    public List<EnrolmentResponse> ExistingEnrolments { get; set; } = new();
 
     public async Task OnGet()
     {
@@ -49,7 +47,7 @@ public class AddSessionsModel : BasePageModel
     {
         OfferingId offeringId = OfferingId.FromValue(Id);
 
-        Result request = await _mediator.Send(new AddMultipleSessionsToOfferingCommand(offeringId, Periods));
+        Result request = await _mediator.Send(new EnrolMultipleStudentsInOfferingCommand(offeringId, SelectedStudentIds));
 
         if (request.IsFailure)
         {
@@ -71,43 +69,39 @@ public class AddSessionsModel : BasePageModel
     {
         await GetClasses(_mediator);
 
-        Result<List<PeriodVisualSelectResponse>> periodRequest =
-            await _mediator.Send(new GetPeriodsForVisualSelectionQuery());
-
-        if (periodRequest.IsFailure)
-        {
-            Error = new()
-            {
-                Error = periodRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
-            };
-
-            return;
-        }
-
-        ValidPeriods = periodRequest.Value;
-
-        // Get current periods linked to Offering
-
         OfferingId offeringId = OfferingId.FromValue(Id);
 
-        Result<List<SessionListResponse>> sessionRequest =
-            await _mediator.Send(new GetSessionListForOfferingQuery(offeringId));
+        Result<List<EnrolmentResponse>> enrolmentRequest =
+            await _mediator.Send(new GetCurrentEnrolmentsForOfferingQuery(offeringId));
 
-        if (sessionRequest.IsFailure)
+        if (enrolmentRequest.IsFailure)
         {
             Error = new()
             {
-                Error = sessionRequest.Error,
+                Error = enrolmentRequest.Error,
                 RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
             };
 
             return;
         }
 
-        ExistingSessions = sessionRequest.Value;
+        ExistingEnrolments = enrolmentRequest.Value;
 
-        // Get CourseName and OfferingName
+        Result<List<StudentFromGradeResponse>> studentsRequest =
+            await _mediator.Send(new GetStudentsFromOfferingGradeQuery(offeringId));
+
+        if (studentsRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = studentsRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+            };
+
+            return;
+        }
+
+        Students = studentsRequest.Value;
 
         Result<OfferingSummaryResponse> offeringRequest =
             await _mediator.Send(new GetOfferingSummaryQuery(offeringId));

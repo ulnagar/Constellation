@@ -10,6 +10,7 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Abstractions.Clock;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,13 +22,16 @@ public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly IDateTimeProvider _dateTime;
 
     public UpsertModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        IDateTimeProvider dateTime)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _dateTime = dateTime;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -74,6 +78,9 @@ public class UpsertModel : BasePageModel
         }
         else
         {
+            StartDate = _dateTime.Today;
+            EndDate = _dateTime.LastDayOfYear;
+
             await BuildCourseSelectList();
         }
 

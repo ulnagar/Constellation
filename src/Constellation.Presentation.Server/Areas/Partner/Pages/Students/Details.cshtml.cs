@@ -8,6 +8,7 @@ using Constellation.Application.Families.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetSessionDetailsForStudent;
 using Constellation.Application.Students.GetStudentById;
+using Constellation.Application.Students.Models;
 using Constellation.Application.Students.ReinstateStudent;
 using Constellation.Application.Students.WithdrawStudent;
 using Constellation.Core.Errors;

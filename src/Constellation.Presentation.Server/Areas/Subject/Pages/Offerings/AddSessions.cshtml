@@ -3,24 +3,30 @@
 @model Constellation.Presentation.Server.Areas.Subject.Pages.Offerings.AddSessionsModel
 
 <h2>Add Multiple Sessions</h2>
-
-<div class="page-menu">
-    <a href="javascript:history.go(-1)" class="btn btn-danger btn-btn-pull-right">Go Back</a>
-</div>
-
-<hr />
-
 <form method="post">
-    <div class="row">
-        <span>Select periods for the @Model.CourseName offering @Model.OfferingName</span>
+    <div class="page-menu">
+        <input type="submit" value="Save" class="btn btn-primary" />
+
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
     </div>
+
+    <hr />
+
+    <div class="row">
+        <h4>Select periods for the @Model.CourseName offering @Model.OfferingName</h4>
+    </div>
+
     <div id="period_inputs"></div>
 </form>
 
 <div>
-    <div class="nav nav-pills" data-tabs="tabs">
+    <div class="nav nav-pills timetable-selector" data-tabs="tabs">
         @{
-            var timetables = Model.ValidPeriods.GroupBy(p => p.Timetable);
+            var timetables = Model.ValidPeriods
+                .OrderBy(period => period.Timetable)
+                .ThenBy(period => period.Day)
+                .GroupBy(period => period.Timetable);
+
             bool firstTab = true;
 
             foreach (var timetable in timetables)
@@ -106,7 +112,7 @@
                                                 length += period.EndTime.Subtract(period.StartTime).Hours * 60;
                                                 var lengthpx = (length * 1.25) + "px";
 
-                                                if (Model.Periods.Contains(period.PeriodId))
+                                                if (Model.ExistingSessions.Any(session => session.PeriodId == period.PeriodId))
                                                 {
                                                     <div class="blockLink pt_Selected_Elsewhere">
                                                         <div class="Timetable-Period Timetable-@period.Type" style="height: @lengthpx;" title="@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">

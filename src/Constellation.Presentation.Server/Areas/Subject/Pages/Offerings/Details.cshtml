@@ -113,6 +113,7 @@
             @if (canEditTest.Succeeded)
             {
                 <button data-toggle="modal" data-target="#addStudentModal" class="btn btn-success">Enrol Student</button>
+                <a asp-page="/Offerings/AddStudents" asp-area="Subject" asp-route-id="@Model.Id" class="btn btn-success">Bulk Enrol</a>
             }
 
             <table class="table-striped table-hover data-table">

@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Students.GetStudentById;
+﻿namespace Constellation.Application.Students.Models;
 
 using Constellation.Core.Enums;
 
