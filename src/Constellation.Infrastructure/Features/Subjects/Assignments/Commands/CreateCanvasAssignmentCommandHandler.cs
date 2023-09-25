@@ -1,11 +1,10 @@
-﻿using Constellation.Application.Common.ValidationRules;
+﻿namespace Constellation.Infrastructure.Features.Subjects.Assignments.Commands;
+
+using Constellation.Application.Common.ValidationRules;
 using Constellation.Application.Features.Subject.Assignments.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Assignments;
-using Constellation.Core.Models.Identifiers;
-
-namespace Constellation.Infrastructure.Features.Subjects.Assignments.Commands;
 
 public class CreateCanvasAssignmentCommandHandler : IRequestHandler<CreateCanvasAssignmentCommand, ValidateableResponse>
 {
@@ -23,7 +22,6 @@ public class CreateCanvasAssignmentCommandHandler : IRequestHandler<CreateCanvas
     public async Task<ValidateableResponse> Handle(CreateCanvasAssignmentCommand request, CancellationToken cancellationToken)
     {
         var record = CanvasAssignment.Create(
-            new AssignmentId(),
             request.CourseId,
             request.Name,
             request.CanvasId,

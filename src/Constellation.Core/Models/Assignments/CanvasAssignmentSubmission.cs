@@ -6,13 +6,12 @@ using System;
 public class CanvasAssignmentSubmission
 {
     private CanvasAssignmentSubmission(
-        AssignmentSubmissionId id,
         AssignmentId assignmentId,
         string studentId,
         DateTime submittedOn,
         int attempt)
     {
-        Id = id;
+        Id = new();
         AssignmentId = assignmentId;
         StudentId = studentId;
         SubmittedOn = submittedOn;
@@ -26,14 +25,12 @@ public class CanvasAssignmentSubmission
     public int Attempt { get; private set; }
 
     public static CanvasAssignmentSubmission Create(
-        AssignmentSubmissionId id,
         AssignmentId assignmentId,
         string studentId,
         DateTime submittedOn,
         int attempt)
     {
         CanvasAssignmentSubmission submission = new(
-            id,
             assignmentId,
             studentId,
             submittedOn,

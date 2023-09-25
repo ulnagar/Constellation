@@ -11,7 +11,6 @@ public class CanvasAssignmentTests
     {
         // Arrange
         var sut = CanvasAssignment.Create(
-            new AssignmentId(),
             new(),
             "Test Assignment",
             1,
@@ -22,7 +21,6 @@ public class CanvasAssignmentTests
 
         // Act
         var result = sut.AddSubmission(
-            new AssignmentSubmissionId(),
             "StudentId");
 
         // Assert
@@ -36,7 +34,6 @@ public class CanvasAssignmentTests
     {
         // Arrange
         var sut = CanvasAssignment.Create(
-            new AssignmentId(),
             new(),
             "Test Assignment",
             1,
@@ -46,12 +43,10 @@ public class CanvasAssignmentTests
             3);
 
         sut.AddSubmission(
-            new AssignmentSubmissionId(),
             "StudentId");
 
         // Act
         var result = sut.AddSubmission(
-            new AssignmentSubmissionId(),
             "StudentId");
 
         // Assert
@@ -65,7 +60,6 @@ public class CanvasAssignmentTests
     {
         // Arrange
         var sut = CanvasAssignment.Create(
-            new AssignmentId(),
             new(),
             "Test Assignment",
             1,
@@ -75,7 +69,6 @@ public class CanvasAssignmentTests
             3);
 
         sut.AddSubmission(
-            new AssignmentSubmissionId(),
             "StudentId");
 
         // Act
@@ -91,7 +84,6 @@ public class CanvasAssignmentTests
     {
         // Arrange
         var sut = CanvasAssignment.Create(
-            new AssignmentId(),
             new(),
             "Test Assignment",
             1,
@@ -101,7 +93,6 @@ public class CanvasAssignmentTests
             3);
 
         var submission = sut.AddSubmission(
-            new AssignmentSubmissionId(),
             "StudentId");
 
         var domainEvent = sut.GetDomainEvents().First();
@@ -123,7 +114,6 @@ public class CanvasAssignmentTests
     {
         // Arrange
         var sut = CanvasAssignment.Create(
-            new AssignmentId(),
             new(),
             "Test Assignment",
             1,
@@ -133,7 +123,6 @@ public class CanvasAssignmentTests
             3);
 
         var submission = sut.AddSubmission(
-            new AssignmentSubmissionId(),
             "StudentId");
 
         var domainEvent = sut.GetDomainEvents().First();

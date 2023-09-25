@@ -15,7 +15,6 @@ public class CanvasAssignment : AggregateRoot
     private readonly List<CanvasAssignmentSubmission> _submissions = new();
 
     private CanvasAssignment(
-        AssignmentId id, 
         CourseId courseId, 
         string name, 
         int canvasId, 
@@ -24,7 +23,7 @@ public class CanvasAssignment : AggregateRoot
         DateTime? unlockDate, 
         int allowedAttempts)
     {
-        Id = id;
+        Id = new();
         CourseId = courseId;
         Name = name;
         CanvasId = canvasId;
@@ -34,18 +33,19 @@ public class CanvasAssignment : AggregateRoot
         AllowedAttempts = allowedAttempts;
     }
 
-    public AssignmentId Id { get; private set; }
+    public AssignmentId Id { get; }
     public CourseId CourseId { get; private set; }
     public string Name { get; private set; }
     public int CanvasId { get; private set; }
     public DateTime DueDate { get; private set; }
     public DateTime? LockDate { get; private set; }
     public DateTime? UnlockDate { get; private set; }
+    public bool DelayForwarding { get; private set; }
+    public DateTime ForwardingDate { get; private set; }
     public int AllowedAttempts { get; private set; }
     public IReadOnlyCollection<CanvasAssignmentSubmission> Submissions => _submissions;
 
     public static CanvasAssignment Create(
-        AssignmentId id,
         CourseId courseId,
         string name,
         int canvasId,
@@ -55,7 +55,6 @@ public class CanvasAssignment : AggregateRoot
         int allowedAttempts)
     {
         CanvasAssignment entry = new(
-            id,
             courseId,
             name,
             canvasId,
@@ -68,7 +67,6 @@ public class CanvasAssignment : AggregateRoot
     }
 
     public Result<CanvasAssignmentSubmission> AddSubmission(
-        AssignmentSubmissionId submissionId,
         string studentId)
     {
         var existing = Submissions.Any(entry => entry.StudentId == studentId);
@@ -80,13 +78,13 @@ public class CanvasAssignment : AggregateRoot
         };
 
         var entry = CanvasAssignmentSubmission.Create(
-            submissionId,
             Id,
             studentId,
             DateTime.Now,
             attempt);
 
-        RaiseDomainEvent(new AssignmentAttemptSubmittedDomainEvent(new DomainEventId(), Id, submissionId));
+        if (!DelayForwarding || ForwardingDate <= DateTime.Today)
+            RaiseDomainEvent(new AssignmentAttemptSubmittedDomainEvent(new DomainEventId(), Id, entry.Id));
 
         _submissions.Add(entry);
 

@@ -5,7 +5,6 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using System;
 using System.Threading;
@@ -36,7 +35,6 @@ internal sealed class UploadAssignmentSubmissionCommandHandler
             return Result.Failure(DomainErrors.Assignments.Assignment.NotFound(request.AssignmentId));
 
         var submissionResult = assignment.AddSubmission(
-            new AssignmentSubmissionId(),
             request.StudentId);
 
         if (submissionResult.IsFailure)
