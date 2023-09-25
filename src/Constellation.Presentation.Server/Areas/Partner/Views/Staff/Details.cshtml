@@ -187,7 +187,6 @@
                     <tr>
                         <th>Period</th>
                         <th>Class</th>
-                        <th>Room</th>
                         <th>Duration</th>
                     </tr>
                 </thead>
@@ -196,8 +195,8 @@
                     {
                         <tr>
                             <td>@item.Period</td>
-                            <td>@Html.DisplayFor(model => item.ClassName)</td>
-                            <td>@Html.DisplayFor(model => item.Duration)</td>
+                            <td>@item.ClassName</td>
+                            <td>@item.Duration</td>
                         </tr>
                     }
                 </tbody>
@@ -212,6 +211,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Course</th>
+                        <th>Type</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -219,8 +219,9 @@
                     @foreach (var item in Model.Offerings)
                     {
                         <tr>
-                            <td>@Html.DisplayFor(model => item.Name)</td>
-                            <td>@Html.DisplayFor(model => item.CourseName)</td>
+                            <td>@item.Name</td>
+                            <td>@item.CourseName</td>
+                            <td>@item.AssignmentType</td>
                             <td>
                                 <a asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@item.Id.Value" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                             </td>

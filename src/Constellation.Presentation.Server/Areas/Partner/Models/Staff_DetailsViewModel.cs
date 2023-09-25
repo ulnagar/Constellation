@@ -8,6 +8,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Models
 {
+    using Core.Models.Offerings.ValueObjects;
+
     public class Staff_DetailsViewModel : BaseViewModel
     {
         public StaffDto Staff { get; set; }
@@ -61,6 +63,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
             public string Name { get; set; }
             [Display(Name = DisplayNameDefaults.CourseName)]
             public string CourseName { get; set; }
+            public AssignmentType AssignmentType { get; set; }
         }
 
         public class SessionDto

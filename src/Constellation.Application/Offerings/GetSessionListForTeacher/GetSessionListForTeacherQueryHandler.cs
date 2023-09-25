@@ -48,7 +48,7 @@ internal sealed class GetSessionListForTeacherQueryHandler
                 session.Offering.Name,
                 session.Id,
                 session.PeriodId,
-                period.GetPeriodDescriptor(),
+                period.ToString(),
                 period.Duration));
         }
 

@@ -232,7 +232,8 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 {
                     Id = entry.OfferingId,
                     Name = entry.OfferingName,
-                    CourseName = entry.CourseName
+                    CourseName = entry.CourseName,
+                    AssignmentType = entry.AssignmentType
                 });
             }
 
