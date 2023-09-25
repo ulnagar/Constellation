@@ -40,8 +40,8 @@ public class OfferingRepository : IOfferingRepository
         await _context
             .Set<Offering>()
             .Where(offering =>
-                offering.StartDate <= DateOnly.FromDateTime(DateTime.Today) &&
-                offering.EndDate >= DateOnly.FromDateTime(DateTime.Today) &&
+                offering.StartDate <= _dateTime.Today &&
+                offering.EndDate >= _dateTime.Today &&
                 offering.Sessions.Any(session => !session.IsDeleted))
             .OrderBy(offering => offering.Name)
             .ToListAsync(cancellationToken);
@@ -99,13 +99,15 @@ public class OfferingRepository : IOfferingRepository
 
     public async Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(
         string studentId,
-        DateTime AbsenceDate,
-        int DayNumber,
+        DateTime absenceDate,
+        int dayNumber,
         CancellationToken cancellationToken = default)
     {
+        DateOnly absenceDateOnly = DateOnly.FromDateTime(absenceDate);
+
         List<int> periodIds = await _context
             .Set<TimetablePeriod>()
-            .Where(period => period.Day == DayNumber)
+            .Where(period => period.Day == dayNumber)
             .Select(period => period.Id)
             .ToListAsync(cancellationToken);
 
@@ -113,9 +115,9 @@ public class OfferingRepository : IOfferingRepository
             .Set<Enrolment>()
             .Where(enrolment => enrolment.StudentId == studentId &&
                 // enrolment was created before the absence date
-                enrolment.CreatedAt < AbsenceDate &&
+                enrolment.CreatedAt < absenceDate &&
                 // enrolment is either still current (not deleted) OR was deleted after the absence date
-                (!enrolment.IsDeleted || enrolment.DeletedAt.Date > AbsenceDate))
+                (!enrolment.IsDeleted || enrolment.DeletedAt.Date > absenceDate))
             .Select(enrolment => enrolment.OfferingId)
             .ToListAsync(cancellationToken);
 
@@ -124,12 +126,12 @@ public class OfferingRepository : IOfferingRepository
             .Where(offering =>
                 offeringIds.Contains(offering.Id) &&
                 // offering ends after the absence date
-                offering.EndDate > DateOnly.FromDateTime(AbsenceDate) &&
+                offering.EndDate > absenceDateOnly &&
                 offering.Sessions.Any(session =>
                     // session was created before the absence date
-                    session.CreatedAt < AbsenceDate &&
+                    session.CreatedAt < absenceDate &&
                     // session is either still current (not deleted) OR was deleted after the absence date
-                    (!session.IsDeleted || session.DeletedAt.Date > AbsenceDate) &&
+                    (!session.IsDeleted || session.DeletedAt.Date > absenceDate) &&
                     // session is for the same day as the absence
                     periodIds.Contains(session.PeriodId)))
             .Distinct()
@@ -142,10 +144,10 @@ public class OfferingRepository : IOfferingRepository
     // Method is not async as we are passing the task to another method
     public Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(
         string studentId,
-        DateOnly AbsenceDate,
-        int DayNumber,
+        DateOnly absenceDate,
+        int dayNumber,
         CancellationToken cancellationToken = default) =>
-        GetCurrentEnrolmentsFromStudentForDate(studentId, AbsenceDate.ToDateTime(TimeOnly.MinValue), DayNumber, cancellationToken);
+        GetCurrentEnrolmentsFromStudentForDate(studentId, absenceDate.ToDateTime(TimeOnly.MinValue), dayNumber, cancellationToken);
 
     public async Task<List<Offering>> GetByStudentId(
         string studentId, 

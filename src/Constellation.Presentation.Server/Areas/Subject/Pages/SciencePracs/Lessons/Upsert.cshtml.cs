@@ -88,8 +88,6 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPostSubmit()
     {
-        SciencePracLessonId lessonId = SciencePracLessonId.FromValue(Id.Value);
-
         if (string.IsNullOrEmpty(LessonName))
         {
             ModelState.AddModelError("LessonName", "You must specify a name for the lesson.");
@@ -109,6 +107,8 @@ public class UpsertModel : BasePageModel
 
         if (Id.HasValue)
         {
+            SciencePracLessonId lessonId = SciencePracLessonId.FromValue(Id.Value);
+
             Result updateRequest = await _mediator.Send(new UpdateLessonCommand(lessonId, LessonName, DueDate));
 
             if (updateRequest.IsFailure)

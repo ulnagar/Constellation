@@ -1,4 +1,5 @@
 ﻿namespace Constellation.Core.Models.Offerings;
+
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.Identifiers;
@@ -62,7 +63,7 @@ public sealed class Offering : AggregateRoot
         EndDate = endDate;
     }
 
-    public void AddTeacher(
+    public Result AddTeacher(
         string staffId,
         AssignmentType type)
     {
@@ -70,7 +71,7 @@ public sealed class Offering : AggregateRoot
             assignment.StaffId == staffId && 
             assignment.Type == type && 
             !assignment.IsDeleted))
-            return;
+            return Result.Failure(OfferingErrors.AddTeacher.AlreadyExists);
 
         TeacherAssignment assignment = new TeacherAssignment(
             Id, 
@@ -80,14 +81,14 @@ public sealed class Offering : AggregateRoot
         _teachers.Add(assignment);
 
         if (_teachers.Count(assignment =>
-            assignment.StaffId == staffId &&
-            !assignment.IsDeleted) > 1)
-            return;
+                assignment.StaffId == staffId &&
+                !assignment.IsDeleted) == 1)
+            RaiseDomainEvent(new TeacherAddedToOfferingDomainEvent(new(), Id, assignment.Id));
 
-        RaiseDomainEvent(new TeacherAddedToOfferingDomainEvent(new(), Id, assignment.Id));
+        return Result.Success();
     }
 
-    public void RemoveTeacher(
+    public Result RemoveTeacher(
         string staffId,
         AssignmentType type)
     {
@@ -97,39 +98,43 @@ public sealed class Offering : AggregateRoot
             !assignment.IsDeleted);
 
         if (assignment is null)
-            return;
+            return Result.Failure(OfferingErrors.RemoveTeacher.NotFound);
 
         assignment.Delete();
 
-        if (_teachers.Any(assignment =>
+        if (_teachers.All(assignment =>
             assignment.StaffId == staffId &&
-            !assignment.IsDeleted))
-            return;
+            assignment.IsDeleted))
+            RaiseDomainEvent(new TeacherRemovedFromOfferingDomainEvent(new(), Id, assignment.Id));
 
-        RaiseDomainEvent(new TeacherRemovedFromOfferingDomainEvent(new(), Id, assignment.Id));
+        return Result.Success();
     }
 
-    public void AddSession(
+    public Result AddSession(
         int periodId)
     {
         if (_sessions.Any(session => session.PeriodId == periodId && !session.IsDeleted))
-            return;
+            return Result.Failure(OfferingErrors.AddSession.AlreadyExists);
 
         Session session = new Session(
             Id,
             periodId);
 
         _sessions.Add(session);
+
+        return Result.Success();
     }
 
-    public void RemoveSession(SessionId sessionId)
+    public Result RemoveSession(SessionId sessionId)
     {
         Session session = _sessions.FirstOrDefault(session => session.Id == sessionId);
 
         if (session is null)
-            return;
+            return Result.Failure(OfferingErrors.RemoveSession.NotFound);
 
         session.Delete();
+
+        return Result.Success();
     }
 
     public void RemoveAllSessions()
@@ -151,11 +156,11 @@ public sealed class Offering : AggregateRoot
         if (_resources.Any(resource => resource.Type == type && resource.ResourceId == resourceId))
             return Result.Success();
 
-        Resource resource = type.Value switch
+        Resource resource = type switch
         {
-            "Adobe Connect Room" => new AdobeConnectRoomResource(Id, resourceId, name, url),
-            "Microsoft Team" => new MicrosoftTeamResource(Id, resourceId, name, url),
-            "Canvas Course" => new CanvasCourseResource(Id, resourceId, name, url),
+            var _ when type == ResourceType.AdobeConnectRoom => new AdobeConnectRoomResource(Id, resourceId, name, url),
+            var _ when type == ResourceType.MicrosoftTeam => new MicrosoftTeamResource(Id, resourceId, name, url),
+            var _ when type == ResourceType.CanvasCourse => new CanvasCourseResource(Id, resourceId, name, url),
             _ => null
         };
 

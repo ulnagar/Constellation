@@ -44,9 +44,11 @@ public class UpsertModel : BasePageModel
     public string CourseName { get; set; }
     [BindProperty]
     [DataType(DataType.Date)]
+    [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy-MM-dd}")]
     public DateOnly StartDate { get; set; }
     [BindProperty]
     [DataType(DataType.Date)]
+    [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy-MM-dd}")]
     public DateOnly EndDate { get; set; }
     public SelectList CourseList { get; set; }
 

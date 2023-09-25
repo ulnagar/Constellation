@@ -34,8 +34,8 @@ public class CreateModel : BasePageModel
     [BindProperty]
     public string CoveringTeacherId { get; set; }
     [BindProperty]
-    [DataType(DataType.Date)]
     [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy-MM-dd}")]
+
     public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     [BindProperty]
     [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy-MM-dd}")]

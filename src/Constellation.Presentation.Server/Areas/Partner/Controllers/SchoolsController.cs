@@ -222,7 +222,11 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                     Gender = student.Gender,
                     Name = student.DisplayName,
                     Grade = student.CurrentGrade,
-                    Enrolments = enrolments.Value.Select(enrolment => enrolment.OfferingName).ToList()
+                    Enrolments = enrolments
+                        .Value
+                        .Select(enrolment => enrolment.OfferingName)
+                        .OrderBy(entry => entry)
+                        .ToList()
                 });
             }
             
@@ -247,7 +251,11 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                     Id = member.StaffId,
                     Name = member.DisplayName,
                     Faculty = faculties,
-                    Courses = courseList.Value.Select(course => course.OfferingName.Value).ToList() 
+                    Courses = courseList
+                        .Value
+                        .Select(course => course.OfferingName.Value)
+                        .OrderBy(entry => entry)
+                        .ToList() 
                 };
 
                 viewModel.Staff.Add(entry);

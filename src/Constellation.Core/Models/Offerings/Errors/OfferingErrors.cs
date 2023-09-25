@@ -25,4 +25,32 @@ public static class OfferingErrors
             "Offerings.Offering.Validation.EndDate",
             "End Date cannot be in the past");
     }
+
+    public static class AddTeacher
+    {
+        public static readonly Error AlreadyExists = new(
+            "Offerings.Offering.AddTeacher.AlreadyExists",
+            "A Teacher Assignment with those details already exists");
+    }
+
+    public static class RemoveTeacher
+    {
+        public static readonly Error NotFound = new(
+            "Offerings.Offering.RemoveTeacher.NotFound",
+            "A Teacher Assignment with those details could not be found");
+    }
+
+    public static class AddSession
+    {
+        public static readonly Error AlreadyExists = new(
+            "Offerings.Offering.AddSession.AlreadyExists",
+            "A Session with those details already exists");
+    }
+
+    public static class RemoveSession
+    {
+        public static readonly Error NotFound = new(
+            "Offerings.Offering.RemoveSession.NotFound",
+            "A Session with those details could not be found");
+    }
 }
