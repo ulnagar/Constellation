@@ -8,6 +8,7 @@ using Application.Models.Auth;
 using BaseModels;
 using Constellation.Application.Assignments.GetAssignmentsFromCourse;
 using Constellation.Application.Courses.GetCoursesForSelectionList;
+using Core.Errors;
 using Core.Models.Subjects.Identifiers;
 using Core.Shared;
 using MediatR;
@@ -47,15 +48,15 @@ public class CreateModel : BasePageModel
     public string Name { get; set; }
     [BindProperty]
     [DataType(DataType.DateTime)]
-    [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+    //[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     public DateTime DueDate { get; set; }
     [BindProperty]
     [DataType(DataType.DateTime)]
-    [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+    //[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     public DateTime? UnlockDate { get; set; }
     [BindProperty]
     [DataType(DataType.DateTime)]
-    [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+    //[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     public DateTime? LockDate { get; set; }
     [BindProperty]
     public int AllowedAttempts { get; set; }
@@ -178,6 +179,21 @@ public class CreateModel : BasePageModel
             ProgressPhase = Phase.SelectAssignment;
             return;
         }
+        
+        Result<CourseSummaryResponse> courseRequest = await _mediator.Send(new GetCourseSummaryQuery(courseId));
+
+        if (courseRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = courseRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Assignments/Index", values: new { area = "Subject" })
+            };
+
+            return;
+        }
+
+        CourseName = $"{courseRequest.Value.Grade.AsName()} {courseRequest.Value.Name}";
 
         Result<List<AssignmentFromCourseResponse>> canvasAssignmentsRequest = await _mediator.Send(new GetAssignmentsFromCourseQuery(courseId));
 
@@ -234,11 +250,23 @@ public class CreateModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
+            if (result is IValidationResult validationResult)
             {
-                Error = result.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Assignments/Index", values: new { area = "Subject" })
-            };
+                Error = new()
+                {
+                    Error = validationResult.Errors.First(),
+                    RedirectPath =
+                        _linkGenerator.GetPathByPage("/Assignments/Index", values: new { area = "Subject" })
+                };
+            }
+            else
+            {
+                Error = new()
+                {
+                    Error = result.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/Assignments/Index", values: new { area = "Subject" })
+                };
+            }
 
             return Page();
         }

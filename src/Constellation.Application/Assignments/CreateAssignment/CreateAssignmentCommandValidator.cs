@@ -19,6 +19,7 @@ public class CreateAssignmentCommandValidator : AbstractValidator<CreateAssignme
 
         RuleFor(command => command.LockDate)
             .GreaterThanOrEqualTo(command => command.UnlockDate)
+            .When(command => command.UnlockDate.HasValue)
             .WithMessage($"Lock Date must be after the Unlock Date!");
 
         RuleFor(command => command.ForwardDate)
