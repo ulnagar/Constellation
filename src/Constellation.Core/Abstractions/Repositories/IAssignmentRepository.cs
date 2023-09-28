@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 public interface IAssignmentRepository
 {
-
+    Task<CanvasAssignment?> GetByCanvasId(int CanvasAssignmentId, CancellationToken cancellationToken = default);
     Task<CanvasAssignment?> GetById(AssignmentId id, CancellationToken cancellationToken = default);
     Task<bool> IsValidAssignmentId(AssignmentId id, CancellationToken cancellationToken = default);
     Task<List<CanvasAssignment>> GetByCourseId(CourseId courseId, CancellationToken cancellationToken = default);

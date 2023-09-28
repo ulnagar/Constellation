@@ -28,10 +28,10 @@ public class RequestValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
 
         List<Error> errors = new();
 
-        foreach (var validator in _validators)
+        foreach (IValidator<TRequest> validator in _validators)
         {
-            var validationResult = await validator.ValidateAsync(request);
-            var validationErrors = validationResult.Errors
+            FluentValidation.Results.ValidationResult validationResult = await validator.ValidateAsync(request, cancellationToken);
+            IEnumerable<Error> validationErrors = validationResult.Errors
                 .Where(validationFailure => validationFailure is not null)
                 .Select(failure => new Error(
                     failure.PropertyName,
@@ -60,7 +60,7 @@ public class RequestValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
         object validationResult = typeof(ValidationResult<>)
             .GetGenericTypeDefinition()
             .MakeGenericType(typeof(TResult).GenericTypeArguments[0])
-            .GetMethod(nameof(ValidationResult.WithErrors))
+            .GetMethod(nameof(ValidationResult.WithErrors))!
             .Invoke(null, new object?[] { errors })!;
 
         return (TResult)validationResult;

@@ -16,6 +16,14 @@ internal class AssignmentRepository : IAssignmentRepository
         _context = context;
     }
 
+    public async Task<CanvasAssignment?> GetByCanvasId(
+        int CanvasAssignmentId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<CanvasAssignment>()
+            .Where(assignment => assignment.CanvasId == CanvasAssignmentId)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public async Task<List<CanvasAssignment>> GetByCourseId(
         CourseId courseId,
         CancellationToken cancellationToken = default) =>

@@ -1,0 +1,26 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Assignments
+@model AssignmentSubmissionUploadReceiptEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<h3>Assignment Submission Upload Receipt</h3>
+
+<p>This email confirms that Aurora College has received an upload with the following details:</p>
+
+<dl>
+    <dt>Student</dt>
+    <dd>@Model.StudentName</dd>
+    <dt>Subject</dt>
+    <dd>@Model.CourseName</dd>
+    <dt>Assignment</dt>
+    <dd>@Model.AssignmentName</dd>
+    <dt>Submitted On</dt>
+    <dd>@Model.SubmittedOn</dd>
+</dl>

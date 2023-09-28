@@ -71,6 +71,10 @@ public static class DomainErrors
             public static readonly Func<AssignmentSubmissionId, Error> NotFound = id => new(
                 "Assignments.Submission.NotFound",
                 $"Could not find any submission with the id {id}");
+
+            public static readonly Error UploadFailed = new(
+                "Assignments.Submission.UploadFailed",
+                "Assignment Submission could not be uploaded to Canvas server");
         }
     }
 
@@ -476,6 +480,16 @@ public static class DomainErrors
         public static readonly Error Unauthorised = new Error(
             "Permissions.Unauthorised",
             "You do not have the required permissions to perform this action");
+    }
+
+    public static class StoredFiles
+    {
+        public static class Assignments
+        {
+            public static readonly Func<string, Error> FileNotFound = id => new(
+                "StoredFiles.Assignments.FileNotFound",
+                $"Could not find file with Id {id}");
+        }
     }
 
     public static class ValueObjects

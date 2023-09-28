@@ -1,17 +1,20 @@
-﻿namespace Constellation.Infrastructure.Features.Subjects.Assignments.Commands;
+﻿namespace Constellation.Application.Assignments.CreateAssignment;
 
-using Constellation.Application.Common.ValidationRules;
-using Constellation.Application.Features.Subject.Assignments.Commands;
+using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Assignments;
+using Constellation.Core.Shared;
+using System.Threading;
+using System.Threading.Tasks;
 
-public class CreateCanvasAssignmentCommandHandler : IRequestHandler<CreateCanvasAssignmentCommand, ValidateableResponse>
+public class CreateAssignmentCommandHandler
+ : ICommandHandler<CreateAssignmentCommand>
 {
     private readonly IAssignmentRepository _assignmentRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CreateCanvasAssignmentCommandHandler(
+    public CreateAssignmentCommandHandler(
         IAssignmentRepository assignmentRepository,
         IUnitOfWork unitOfWork)
     {
@@ -19,21 +22,23 @@ public class CreateCanvasAssignmentCommandHandler : IRequestHandler<CreateCanvas
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<ValidateableResponse> Handle(CreateCanvasAssignmentCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(CreateAssignmentCommand request, CancellationToken cancellationToken)
     {
-        var record = CanvasAssignment.Create(
+        CanvasAssignment record = CanvasAssignment.Create(
             request.CourseId,
             request.Name,
-            request.CanvasId,
+            request.CanvasAssignmentId,
             request.DueDate,
             request.LockDate,
             request.UnlockDate,
+            request.DelayForwarding,
+            request.ForwardDate,
             request.AllowedAttempts);
 
         _assignmentRepository.Insert(record);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 
-        return new ValidateableResponse();
+        return Result.Success();
     }
 }

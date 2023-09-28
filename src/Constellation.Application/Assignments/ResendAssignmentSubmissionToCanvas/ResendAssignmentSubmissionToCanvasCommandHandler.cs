@@ -29,7 +29,7 @@ internal sealed class ResendAssignmentSubmissionToCanvasCommandHandler
         if (assignment is null)
             return Result.Failure(DomainErrors.Assignments.Assignment.NotFound(request.AssignmentId));
 
-        var result = assignment.ReuploadSubmissionToCanvas(request.SubmissionId);
+        var result = assignment.ReUploadSubmissionToCanvas(request.SubmissionId);
 
         if (result.IsSuccess)
             await _unitOfWork.CompleteAsync(cancellationToken);

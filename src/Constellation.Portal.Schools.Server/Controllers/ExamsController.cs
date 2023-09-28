@@ -58,6 +58,8 @@ public class ExamsController : BaseAPIController
 
         _logger.Information("Requested to get upload assignment with details {@details} to upload exam by user {user}", command, user.DisplayName);
 
+        command.SubmittedBy = user.Email;
+
         await _mediator.Send(command);
     }
 }

@@ -10,6 +10,8 @@ using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.ValueObjects;
+using Core.Models.Assignments;
+using Core.Models.Subjects;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -42,6 +44,9 @@ public interface IEmailService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task SendMissedWorkEmail(Student student, string subjectName, string className, DateOnly absenceDate, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
+
+    // Assignment Emails
+    Task<bool> SendAssignmentUploadReceipt(CanvasAssignment assignment, CanvasAssignmentSubmission submission, Course course, Student student, CancellationToken cancellationToken = default);
 
 
     // Attendance Emails

@@ -17,11 +17,14 @@ public class CanvasAssignmentTests
             DateTime.Today,
             DateTime.Today.AddMonths(1),
             DateTime.Today,
+            false,
+            null,
             3);
 
         // Act
         var result = sut.AddSubmission(
-            "StudentId");
+            "StudentId", 
+            "test@email.com");
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -40,14 +43,18 @@ public class CanvasAssignmentTests
             DateTime.Today,
             DateTime.Today.AddMonths(1),
             DateTime.Today,
+            false,
+            null,
             3);
 
         sut.AddSubmission(
-            "StudentId");
+            "StudentId", 
+            "test@email.com");
 
         // Act
         var result = sut.AddSubmission(
-            "StudentId");
+            "StudentId", 
+            "test@email.com");
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -66,10 +73,13 @@ public class CanvasAssignmentTests
             DateTime.Today,
             DateTime.Today.AddMonths(1),
             DateTime.Today,
+            false,
+            null,
             3);
 
         sut.AddSubmission(
-            "StudentId");
+            "StudentId",
+            "test@email.com");
 
         // Act
         var result = sut.GetDomainEvents();
@@ -80,7 +90,7 @@ public class CanvasAssignmentTests
     }
 
     [Fact]
-    public void ReuploadSubmissionToCanvas_ShouldReturnFailure_WhenSubmissionDoesNotPreviouslyExist()
+    public void ReUploadSubmissionToCanvas_ShouldReturnFailure_WhenSubmissionDoesNotPreviouslyExist()
     {
         // Arrange
         var sut = CanvasAssignment.Create(
@@ -90,17 +100,20 @@ public class CanvasAssignmentTests
             DateTime.Today,
             DateTime.Today.AddMonths(1),
             DateTime.Today,
+            false,
+            null,
             3);
 
         var submission = sut.AddSubmission(
-            "StudentId");
+            "StudentId",
+            "test@email.com");
 
         var domainEvent = sut.GetDomainEvents().First();
 
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.ReuploadSubmissionToCanvas(new AssignmentSubmissionId());
+        var result = sut.ReUploadSubmissionToCanvas(new AssignmentSubmissionId());
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -110,7 +123,7 @@ public class CanvasAssignmentTests
     }
 
     [Fact]
-    public void ReuploadSubmissionToCanvas_ShouldRaiseNewDomainEvent_WhenSubmissionPreviouslyExists()
+    public void ReUploadSubmissionToCanvas_ShouldRaiseNewDomainEvent_WhenSubmissionPreviouslyExists()
     {
         // Arrange
         var sut = CanvasAssignment.Create(
@@ -120,17 +133,20 @@ public class CanvasAssignmentTests
             DateTime.Today,
             DateTime.Today.AddMonths(1),
             DateTime.Today,
+            false,
+            null,
             3);
 
         var submission = sut.AddSubmission(
-            "StudentId");
+            "StudentId",
+            "test@email.com");
 
         var domainEvent = sut.GetDomainEvents().First();
 
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.ReuploadSubmissionToCanvas(submission.Value.Id);
+        var result = sut.ReUploadSubmissionToCanvas(submission.Value.Id);
         var events = sut.GetDomainEvents();
 
         // Assert

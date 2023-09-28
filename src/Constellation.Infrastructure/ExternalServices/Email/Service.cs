@@ -9,10 +9,12 @@ using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Assignments;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.Templates.Views.Emails.Absences;
 using Constellation.Infrastructure.Templates.Views.Emails.Auth;
@@ -22,9 +24,11 @@ using Constellation.Infrastructure.Templates.Views.Emails.Lessons;
 using Constellation.Infrastructure.Templates.Views.Emails.MandatoryTraining;
 using Constellation.Infrastructure.Templates.Views.Emails.Reports;
 using Constellation.Infrastructure.Templates.Views.Emails.RollMarking;
+using Core.Shared;
 using Microsoft.Extensions.Options;
 using System.Net.Mail;
 using System.Threading;
+using Templates.Views.Emails.Assignments;
 
 public class Service : IEmailService
 {
@@ -1153,5 +1157,42 @@ public class Service : IEmailService
         {
             await _emailSender.Send(new List<EmailRecipient> { recipient }, "noreply@aurora.nsw.edu.au", viewModel.Title, body, new List<Attachment> { attachment }, cancellationToken);
         }
+    }
+
+    public async Task<bool> SendAssignmentUploadReceipt(
+        CanvasAssignment assignment,
+        CanvasAssignmentSubmission submission,
+        Course course,
+        Student student,
+        CancellationToken cancellationToken = default)
+    {
+        AssignmentSubmissionUploadReceiptEmailViewModel viewModel = new()
+        {
+            Preheader = "",
+            SenderName = "",
+            SenderTitle = "",
+            Title = $"[Aurora College] Student Assignment Upload Receipt",
+            AssignmentName = assignment.Name,
+            CourseName = course.Name,
+            StudentName = student.GetName()?.DisplayName,
+            SubmittedOn = DateOnly.FromDateTime(submission.SubmittedOn)
+        };
+
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Assignments/AssignmentSubmissionUploadReceiptEmail.cshtml", viewModel);
+
+        List<EmailRecipient> recipients = new();
+
+        Result<EmailRecipient> recipient = EmailRecipient.Create(submission.SubmittedBy, submission.SubmittedBy);
+
+        if (recipient.IsFailure)
+        {
+            return false;
+        }
+
+        recipients.Add(recipient.Value);
+
+        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+
+        return true;
     }
 }

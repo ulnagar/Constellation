@@ -14,13 +14,18 @@ public class CanvasAssignment : AggregateRoot
 {
     private readonly List<CanvasAssignmentSubmission> _submissions = new();
 
+    // Required for EF Core
+    public CanvasAssignment() { }
+
     private CanvasAssignment(
         CourseId courseId, 
         string name, 
         int canvasId, 
         DateTime dueDate, 
         DateTime? lockDate, 
-        DateTime? unlockDate, 
+        DateTime? unlockDate,
+        bool delayForwarding,
+        DateOnly forwardingDate,
         int allowedAttempts)
     {
         Id = new();
@@ -30,6 +35,8 @@ public class CanvasAssignment : AggregateRoot
         DueDate = dueDate;
         LockDate = lockDate;
         UnlockDate = unlockDate;
+        DelayForwarding = delayForwarding;
+        ForwardingDate = forwardingDate;
         AllowedAttempts = allowedAttempts;
     }
 
@@ -41,7 +48,7 @@ public class CanvasAssignment : AggregateRoot
     public DateTime? LockDate { get; private set; }
     public DateTime? UnlockDate { get; private set; }
     public bool DelayForwarding { get; private set; }
-    public DateTime ForwardingDate { get; private set; }
+    public DateOnly ForwardingDate { get; private set; }
     public int AllowedAttempts { get; private set; }
     public IReadOnlyCollection<CanvasAssignmentSubmission> Submissions => _submissions;
 
@@ -52,6 +59,8 @@ public class CanvasAssignment : AggregateRoot
         DateTime dueDate,
         DateTime? lockDate,
         DateTime? unlockDate,
+        bool delayForwarding,
+        DateOnly? forwardingDate,
         int allowedAttempts)
     {
         CanvasAssignment entry = new(
@@ -61,40 +70,43 @@ public class CanvasAssignment : AggregateRoot
             dueDate,
             lockDate,
             unlockDate,
+            delayForwarding,
+            forwardingDate ?? DateOnly.MinValue,
             allowedAttempts);
 
         return entry;
     }
 
     public Result<CanvasAssignmentSubmission> AddSubmission(
-        string studentId)
+        string studentId,
+        string submittedBy)
     {
-        var existing = Submissions.Any(entry => entry.StudentId == studentId);
+        bool existing = Submissions.Any(entry => entry.StudentId == studentId);
 
-        var attempt = existing switch
+        int attempt = existing switch
         {
             true => Submissions.Where(entry => entry.StudentId == studentId).Max(entry => entry.Attempt) + 1,
             false => 1
         };
 
-        var entry = CanvasAssignmentSubmission.Create(
+        CanvasAssignmentSubmission entry = CanvasAssignmentSubmission.Create(
             Id,
             studentId,
+            submittedBy,
             DateTime.Now,
             attempt);
 
-        if (!DelayForwarding || ForwardingDate <= DateTime.Today)
-            RaiseDomainEvent(new AssignmentAttemptSubmittedDomainEvent(new DomainEventId(), Id, entry.Id));
+        RaiseDomainEvent(new AssignmentAttemptSubmittedDomainEvent(new DomainEventId(), Id, entry.Id));
 
         _submissions.Add(entry);
 
         return entry;
     }
 
-    public Result ReuploadSubmissionToCanvas(
+    public Result ReUploadSubmissionToCanvas(
         AssignmentSubmissionId submissionId)
     {
-        var submission = Submissions.FirstOrDefault(entry => entry.Id == submissionId);
+        CanvasAssignmentSubmission submission = Submissions.FirstOrDefault(entry => entry.Id == submissionId);
 
         if (submission is null)
             return Result.Failure(DomainErrors.Assignments.Submission.NotFound(submissionId));
