@@ -40,10 +40,8 @@ internal sealed class GetAssignmentsFromCourseQueryHandler
         List<AssignmentFromCourseResponse> response = new();
         
         List<Offering> offerings = await _offeringRepository.GetActiveByCourseId(request.CourseId, cancellationToken);
-
-        Offering offering = offerings.FirstOrDefault();
-
-        if (offering == null)
+        
+        if (offerings.Count == 0)
         {
             _logger
                 .ForContext(nameof(GetAssignmentsFromCourseQuery), request, true)
@@ -53,15 +51,17 @@ internal sealed class GetAssignmentsFromCourseQueryHandler
             return Result.Failure<List<AssignmentFromCourseResponse>>(OfferingErrors.NotFoundInCourse(request.CourseId));
         }
 
-        List<CanvasCourseResource> resources = offering
-            .Resources
+        List<string> canvasCourseIds = offerings
+            .SelectMany(offering => offering.Resources)
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
             .Select(resource => resource as CanvasCourseResource)
+            .Select(resource => resource.CourseId)
+            .Distinct()
             .ToList();
 
-        foreach (CanvasCourseResource resource in resources)
+        foreach (string courseId in canvasCourseIds)
         {
-            List<CanvasAssignmentDto> assignments = await _canvasGateway.GetAllCourseAssignments(resource.CourseId);
+            List<CanvasAssignmentDto> assignments = await _canvasGateway.GetAllCourseAssignments(courseId);
 
             foreach (CanvasAssignmentDto assignment in assignments)
             {

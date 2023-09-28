@@ -56,100 +56,97 @@
                     <span>@Model.CourseName</span>
                 </div>
             </div>
+
+            @if (Model.ProgressPhase == CreateModel.Phase.SelectAssignment)
+            {
+                <div class="form-group row">
+                    <label asp-for="CanvasAssignmentId" class="col-md-2">Assignment</label>
+                    <div class="col-md-3">
+                        @if (Model.Assignments.Count == 0)
+                        {
+                            <span>No Valid Assignments found!</span>
+                        } else
+                        {
+                            <select asp-for="CanvasAssignmentId" asp-items="Model.Assignments" class="form-control">
+                                <option value=""> -- Select Assignment -- </option>
+                            </select>
+                            <span asp-validation-for="CanvasAssignmentId" class="text-danger"></span>    
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="form-group row">
+                    <label asp-for="CanvasAssignmentId" class="col-md-2">Assignment</label>
+                    <div class="col-md-3">
+                        <input type="hidden" asp-for="CanvasAssignmentId" />
+                        <span>@Model.AssignmentName</span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label asp-for="Name" class="col-md-2">Assignment</label>
+                    <div class="col-md-3">
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label asp-for="DueDate" class="col-md-2">Due Date</label>
+                    <div class="col-md-3">
+                        <input asp-for="DueDate" class="form-control" readonly="readonly" />
+                        <span class="text-danger">If this value is incorrect, please update the Canvas Assignment and restart this process</span>
+                        <span asp-validation-for="DueDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label asp-for="UnlockDate" class="col-md-2">Unlock Date</label>
+                    <div class="col-md-3">
+                        <input asp-for="UnlockDate" class="form-control" readonly="readonly" />
+                        <span class="text-danger">If this value is incorrect, please update the Canvas Assignment and restart this process</span>
+                        <span asp-validation-for="UnlockDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label asp-for="LockDate" class="col-md-2">Lock Date</label>
+                    <div class="col-md-3">
+                        <input asp-for="LockDate" class="form-control" readonly="readonly" />
+                        <span class="text-danger">If this value is incorrect, please update the Canvas Assignment and restart this process</span>
+                        <span asp-validation-for="LockDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label asp-for="AllowedAttempts" class="col-md-2">Allowed Attempts</label>
+                    <div class="col-md-3">
+                        <input asp-for="AllowedAttempts" class="form-control" readonly="readonly" />
+                        <span class="text-danger">If this value is incorrect, please update the Canvas Assignment and restart this process</span>
+                        <span asp-validation-for="AllowedAttempts" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label asp-for="DelayForwarding" class="col-md-2">Delay Submission</label>
+                    <div class="col-md-3">
+                        <input asp-for="DelayForwarding" class="form-control" />
+                        <span asp-validation-for="DelayForwarding" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label asp-for="ForwardingDate" class="col-md-2">Forward to Canvas Date</label>
+                    <div class="col-md-3">
+                        <input asp-for="ForwardingDate" class="form-control" />
+                        <span asp-validation-for="ForwardingDate" class="text-danger"></span>
+                    </div>
+                </div>
+            }
         }
         
-        @if (Model.ProgressPhase == CreateModel.Phase.SelectAssignment)
-        {
-            <div class="form-group row">
-                <label asp-for="CanvasAssignmentId" class="col-md-2">Assignment</label>
-                <div class="col-md-3">
-                    @if (Model.Assignments.Count == 0)
-                    {
-                        <span>No Valid Assignments found!</span>
-                    } else
-                    {
-                        <select asp-for="CanvasAssignmentId" asp-items="Model.Assignments" class="form-control">
-                            <option value=""> -- Select Assignment -- </option>
-                        </select>
-                        <span asp-validation-for="CanvasAssignmentId" class="text-danger"></span>    
-                    }
-                </div>
-            </div>
-        }
-        else
-        {
-            <div class="form-group row">
-                <label asp-for="CanvasAssignmentId" class="col-md-2">Assignment</label>
-                <div class="col-md-3">
-                    <input type="hidden" asp-for="CanvasAssignmentId" />
-                    <span>@Model.AssignmentName</span>
-                </div>
-            </div>
-        }
-
-        @if (Model.ProgressPhase == CreateModel.Phase.EnterDetails)
-        {
-            <div class="form-group row">
-                <label asp-for="Name" class="col-md-2">Assignment</label>
-                <div class="col-md-3">
-                    <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label asp-for="DueDate" class="col-md-2">Due Date</label>
-                <div class="col-md-3">
-                    <input asp-for="DueDate" class="form-control" readonly="readonly" />
-                    <span class="text-danger">If this value is incorrect, please update the Canvas Assignment and restart this process</span>
-                    <span asp-validation-for="DueDate" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label asp-for="UnlockDate" class="col-md-2">Unlock Date</label>
-                <div class="col-md-3">
-                    <input asp-for="UnlockDate" class="form-control" readonly="readonly" />
-                    <span class="text-danger">If this value is incorrect, please update the Canvas Assignment and restart this process</span>
-                    <span asp-validation-for="UnlockDate" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label asp-for="LockDate" class="col-md-2">Lock Date</label>
-                <div class="col-md-3">
-                    <input asp-for="LockDate" class="form-control" readonly="readonly" />
-                    <span class="text-danger">If this value is incorrect, please update the Canvas Assignment and restart this process</span>
-                    <span asp-validation-for="LockDate" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label asp-for="AllowedAttempts" class="col-md-2">Allowed Attempts</label>
-                <div class="col-md-3">
-                    <input asp-for="AllowedAttempts" class="form-control" readonly="readonly" />
-                    <span class="text-danger">If this value is incorrect, please update the Canvas Assignment and restart this process</span>
-                    <span asp-validation-for="AllowedAttempts" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label asp-for="DelayForwarding" class="col-md-2">Delay Submission</label>
-                <div class="col-md-3">
-                    <input asp-for="DelayForwarding" class="form-control" />
-                    <span asp-validation-for="DelayForwarding" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label asp-for="ForwardingDate" class="col-md-2">Forward to Canvas Date</label>
-                <div class="col-md-3">
-                    <input asp-for="ForwardingDate" class="form-control" />
-                    <span asp-validation-for="ForwardingDate" class="text-danger"></span>
-                </div>
-            </div>
-        }
-
         <div class="form-group">
             <div class="col-md-offset-2 col-md-3">
                 @if (Model.ProgressPhase == CreateModel.Phase.SelectCourse)

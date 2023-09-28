@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Pages.Assignments;
 using Application.Assignments.CreateAssignment;
 using Application.Courses.GetCourseSummary;
 using Application.Courses.Models;
+using Application.Extensions;
 using Application.Models.Auth;
 using BaseModels;
 using Constellation.Application.Assignments.GetAssignmentsFromCourse;
@@ -135,6 +136,8 @@ public class CreateModel : BasePageModel
 
             return;
         }
+
+        CourseName = $"{courseRequest.Value.Grade.AsName()} {courseRequest.Value.Name}";
 
         Result<List<AssignmentFromCourseResponse>> canvasAssignmentsRequest = await _mediator.Send(new GetAssignmentsFromCourseQuery(courseId));
 

@@ -93,8 +93,9 @@ public class OfferingRepository : IOfferingRepository
             .Set<Offering>()
             .Include(offering => offering.Sessions)
             .Where(offering => offering.CourseId == courseId &&
-                (offering.Sessions.Any(session => !session.IsDeleted) ||
-                (offering.StartDate <= _dateTime.Today && offering.EndDate >= _dateTime.Today)))
+                offering.Sessions.Any(session => !session.IsDeleted) &&
+                offering.StartDate <= _dateTime.Today && 
+                offering.EndDate >= _dateTime.Today)
             .ToListAsync(cancellationToken);
 
     public async Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(
