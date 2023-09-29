@@ -1,124 +1,108 @@
+namespace Constellation.Presentation.Server.Areas.Admin.Pages;
+
+using Application.Interfaces.Services;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
 using Hangfire;
 using Hangfire.Common;
 using Hangfire.Storage;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Constellation.Presentation.Server.Areas.Admin.Pages
+[Authorize(Roles = AuthRoles.Admin)]
+public class HangfireDashboardModel : BasePageModel
 {
-    [Authorize(Roles = AuthRoles.Admin)]
-    public class HangfireDashboardModel : BasePageModel
+    private readonly IRecurringJobManager _jobManager;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public readonly List<JobDefinition> JobDefinitions = new();
+
+    public HangfireDashboardModel(
+        IRecurringJobManager jobManager,
+        IServiceScopeFactory serviceScopeFactory)
     {
-        private readonly IMediator _mediator;
-        private readonly IRecurringJobManager _jobManager;
-        private readonly IServiceScopeFactory _serviceScopeFactory;
+        _jobManager = jobManager;
+        _serviceScopeFactory = serviceScopeFactory;
 
-        public IDictionary<string, string> JobDefinitions { get; set; }
+        JobDefinitions.Add(new (typeof(IPermissionUpdateJob), nameof(IPermissionUpdateJob), "*/5 7-15 * * 1-5"));
+        JobDefinitions.Add(new (typeof(IClassMonitorJob), nameof(IClassMonitorJob), "* 7-15 * * 1-5"));
+        JobDefinitions.Add(new (typeof(ISchoolRegisterJob), nameof(ISchoolRegisterJob), "15 18 1 * *"));
+        JobDefinitions.Add(new (typeof(IUserManagerJob), nameof(IUserManagerJob), "0 6 1 * *"));
+        JobDefinitions.Add(new (typeof(IRollMarkingReportJob), nameof(IRollMarkingReportJob), "0 17 * * 1-5"));
+        JobDefinitions.Add(new (typeof(IAbsenceMonitorJob), nameof(IAbsenceMonitorJob), "0 11 * * 1-6"));
+        JobDefinitions.Add(new (typeof(ILessonNotificationsJob), nameof(ILessonNotificationsJob), "0 10 * * 1"));
+        JobDefinitions.Add(new (typeof(ITrackItSyncJob), nameof(ITrackItSyncJob), "30 17 * * *"));
+        JobDefinitions.Add(new (typeof(ISentralFamilyDetailsSyncJob), nameof(ISentralFamilyDetailsSyncJob), "0 9 * * 1-6"));
+        JobDefinitions.Add(new (typeof(IAttendanceReportJob), nameof(IAttendanceReportJob), "0 12 29 2 1"));
+        JobDefinitions.Add(new (typeof(ISentralPhotoSyncJob), nameof(ISentralPhotoSyncJob), "15 9 * * 1-6"));
+        JobDefinitions.Add(new (typeof(ISentralReportSyncJob), nameof(ISentralReportSyncJob), "* 18 * * 1-6"));
+        JobDefinitions.Add(new (typeof(ISentralAwardSyncJob), nameof(ISentralAwardSyncJob), "15 8 * * 1-6"));
+        JobDefinitions.Add(new (typeof(IMandatoryTrainingReminderJob), nameof(IMandatoryTrainingReminderJob), "0 12 * * 1"));    
+        JobDefinitions.Add(new (typeof(IProcessOutboxMessagesJob), nameof(IProcessOutboxMessagesJob), "* 2-22 * * *"));
+        JobDefinitions.Add(new (typeof(IGroupTutorialExpiryScanJob), nameof(IGroupTutorialExpiryScanJob), "0 7 * * 1-5"));
+        JobDefinitions.Add(new (typeof(IAssignmentSubmissionJob), nameof(IAssignmentSubmissionJob), "30 12 * * *"));
+    }
 
-        public HangfireDashboardModel(
-            IMediator mediator,
-            IRecurringJobManager jobManager,
-            IServiceScopeFactory serviceScopeFactory)
-        {
-            _mediator = mediator;
-            _jobManager = jobManager;
-            _serviceScopeFactory = serviceScopeFactory;
-            JobDefinitions = new Dictionary<string, string>
-            {
-                { nameof(IPermissionUpdateJob), "*/5 7-15 * * 1-5" },
-                { nameof(IClassMonitorJob), "* 7-15 * * 1-5" },
-                { nameof(ISchoolRegisterJob), "15 18 1 * *" },
-                { nameof(IUserManagerJob), "0 6 1 * *" },
-                { nameof(IRollMarkingReportJob), "0 17 * * 1-5" },
-                { nameof(IAbsenceMonitorJob), "0 11 * * 1-6" },
-                { nameof(ILessonNotificationsJob), "0 10 * * 1" },
-                { nameof(ITrackItSyncJob), "30 17 * * *" },
-                { nameof(ISentralFamilyDetailsSyncJob), "0 9 * * 1-6" },
-                { nameof(IAttendanceReportJob), "0 12 29 2 1" },
-                { nameof(ISentralPhotoSyncJob), "15 9 * * 1-6" },
-                { nameof(ISentralReportSyncJob), "* 18 * * 1-6" },
-                { nameof(ISentralAwardSyncJob), "15 8 * * 1-6" },
-                { nameof(IMandatoryTrainingReminderJob), "0 12 * * 1" },
-                { nameof(IProcessOutboxMessagesJob), "* 6-18 * * 1-5" },
-                { nameof(IGroupTutorialExpiryScanJob), "0 7 * * 1-5" }
-            };
-        }
+    public sealed record JobDefinition(
+        Type JobType,
+        string TypeName,
+        string TypeSchedule);
 
-        public void OnGet()
-        {
-        }
+    public void OnGet()
+    {
+    }
 
-        public void OnPostAddDefault()
-        {
-            foreach (var entry in JobDefinitions)
-                OnPostAddJob(entry.Key, entry.Value);
+    public void OnPostAddDefault()
+    {
+        foreach (JobDefinition entry in JobDefinitions)
+            OnPostAddJob(entry.TypeName, entry.TypeSchedule);
+    }
 
-            //_jobManager.AddOrUpdate<IJobDispatcherService<IPermissionUpdateJob>>(nameof(IPermissionUpdateJob), (job) => job.StartJob(CancellationToken.None), "*/5 7-15 * * 1-5", TimeZoneInfo.Local);
-            //_jobManager.AddOrUpdate<IJobDispatcherService<IClassMonitorJob>>(nameof(IClassMonitorJob), (job) => job.StartJob(CancellationToken.None), "* 7-15 * * 1-5", TimeZoneInfo.Local);
-            //_jobManager.AddOrUpdate<IJobDispatcherService<ISchoolRegisterJob>>(nameof(ISchoolRegisterJob), (job) => job.StartJob(CancellationToken.None), "15 18 1 * *", TimeZoneInfo.Local);
-            //_jobManager.AddOrUpdate<IJobDispatcherService<IUserManagerJob>>(nameof(IUserManagerJob), (job) => job.StartJob(CancellationToken.None), "0 6 1 * *", TimeZoneInfo.Local);
-            //_jobManager.AddOrUpdate<IJobDispatcherService<IRollMarkingReportJob>>(nameof(IRollMarkingReportJob), (job) => job.StartJob(CancellationToken.None), "0 17 * * 1-5", TimeZoneInfo.Local);
-            //_jobManager.AddOrUpdate<IJobDispatcherService<IAbsenceMonitorJob>>(nameof(IAbsenceMonitorJob), (job) => job.StartJob(CancellationToken.None), "0 11 * * 1-6", TimeZoneInfo.Local);
-            //_jobManager.AddOrUpdate<IJobDispatcherService<ILessonNotificationsJob>>(nameof(ILessonNotificationsJob), (job) => job.StartJob(CancellationToken.None), "0 10 * * 1", TimeZoneInfo.Local);
-            //_jobManager.AddOrUpdate<IJobDispatcherService<ITrackItSyncJob>>(nameof(ITrackItSyncJob), (job) => job.StartJob(CancellationToken.None), "30 17 * * *", TimeZoneInfo.Local);
-            //_jobManager.AddOrUpdate<IJobDispatcherService<ISentralFamilyDetailsSyncJob>>(nameof(ISentralFamilyDetailsSyncJob), (job) => job.StartJob(CancellationToken.None), "0 9 * * 1-6", TimeZoneInfo.Local);
-            //_jobManager.AddOrUpdate<IJobDispatcherService<IAttendanceReportJob>>(nameof(IAttendanceReportJob), (job) => job.StartJob(CancellationToken.None), "0 12 29 2 1", TimeZoneInfo.Local);
-            //_jobManager.AddOrUpdate<IJobDispatcherService<ISentralPhotoSyncJob>>(nameof(ISentralPhotoSyncJob), (job) => job.StartJob(CancellationToken.None), "15 9 * * 1-6", TimeZoneInfo.Local);
-            //_jobManager.AddOrUpdate<IJobDispatcherService<ISentralReportSyncJob>>(nameof(ISentralReportSyncJob), (job) => job.StartJob(CancellationToken.None), "* 18 * * 1-6", TimeZoneInfo.Local);
-        }
+    public void OnPostTriggerJob(string actionName) => _jobManager.Trigger(actionName);
 
-        public void OnPostTriggerJob(string actionName)
-        {
-            _jobManager.Trigger(actionName);
-        }
+    public async Task OnPostLocalTriggerJob(string actionName)
+    {
+        using IServiceScope scope = _serviceScopeFactory.CreateScope();
 
-        public async Task OnPostLocalTriggerJob(string actionName)
-        {
-            using var scope = _serviceScopeFactory.CreateScope();
-            var typeName = $"Constellation.Application.Interfaces.Jobs.{actionName}, Constellation.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
+        JobDefinition definition = JobDefinitions.FirstOrDefault(jobDefinition => jobDefinition.TypeName == actionName);
 
-            Type type = Type.GetType(typeName, false);
+        if (definition == null)
+            return;
 
-            IHangfireJob job = scope.ServiceProvider.GetService(type) as IHangfireJob;
+        IHangfireJob job = scope.ServiceProvider.GetService(definition.JobType) as IHangfireJob;
 
-            await job.StartJob(Guid.NewGuid(), default);
-        }
+        await job.StartJob(Guid.NewGuid(), default);
+    }
 
-        public void OnPostRemoveJob(string actionName)
-        {
-            _jobManager.RemoveIfExists(actionName);
-        }
+    public void OnPostRemoveJob(string actionName) => _jobManager.RemoveIfExists(actionName);
 
-        public bool GetJobStatus(string actionName)
-        {
-            var storage = JobStorage.Current.GetConnection();
+    public bool GetJobStatus(string actionName)
+    {
+        IStorageConnection storage = JobStorage.Current.GetConnection();
 
-            var job = storage
-                .GetRecurringJobs(new List<string> { actionName })
-                .FirstOrDefault();
+        RecurringJobDto job = storage
+            .GetRecurringJobs(new List<string> { actionName })
+            .FirstOrDefault();
 
-            if (job == null || job.Removed)
-                return false;
+        if (job == null || job.Removed)
+            return false;
 
-            return true;
-        }
+        return true;
+    }
 
-        public void OnPostAddJob(string actionName, string cronExpression)
-        {
-            var typeName = $"Constellation.Application.Interfaces.Services.IJobDispatcherService`1[[Constellation.Application.Interfaces.Jobs.{actionName}, Constellation.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Constellation.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
+    public void OnPostAddJob(string actionName, string cronExpression)
+    {
+        JobDefinition definition = JobDefinitions.FirstOrDefault(jobDefinition => jobDefinition.TypeName == actionName);
 
-            var type = Type.GetType(typeName);
+        if (definition == null)
+            return;
 
-            var job = new Job(type, type.GetMethod("StartJob"), CancellationToken.None);
+        Type dispatcherType = typeof(IJobDispatcherService<>);
+        
+        Type constructedType = dispatcherType.MakeGenericType(definition.JobType);
 
-            if (job != null)
-            {
-                _jobManager.AddOrUpdate(actionName, job, cronExpression, new RecurringJobOptions() { TimeZone = TimeZoneInfo.Local });
-            }
-        }
+        Job job = new Job(constructedType, constructedType.GetMethod("StartJob"), CancellationToken.None);
+
+        _jobManager.AddOrUpdate(actionName, job, cronExpression, new RecurringJobOptions() { TimeZone = TimeZoneInfo.Local });
     }
 }
