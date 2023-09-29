@@ -6,7 +6,7 @@ using Constellation.Application.Assignments.ResendAssignmentSubmissionToCanvas;
 using Constellation.Application.Assignments.UploadAssignmentSubmission;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.UploadAssignmentSubmission;
 using MediatR;

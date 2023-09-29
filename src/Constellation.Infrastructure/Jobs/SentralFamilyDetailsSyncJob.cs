@@ -17,7 +17,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob, IHangfireJob
+internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
 {
     private readonly ILogger _logger;
     private readonly IUnitOfWork _unitOfWork;

@@ -1,4 +1,5 @@
 ﻿using Constellation.Core.Enums;
+using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
@@ -57,7 +58,7 @@ public static class DomainErrors
     {
         public static class Assignment
         {
-            public static readonly Func<Models.Identifiers.AssignmentId, Error> NotFound = id => new(
+            public static readonly Func<Models.Assignments.Identifiers.AssignmentId, Error> NotFound = id => new(
                 "Assignments.Assignment.NotFound",
                 $"Could not find an assignment with the Id {id}");
 

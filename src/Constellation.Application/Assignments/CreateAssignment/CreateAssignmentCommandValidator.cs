@@ -26,5 +26,12 @@ public class CreateAssignmentCommandValidator : AbstractValidator<CreateAssignme
             .GreaterThanOrEqualTo(command => dateTime.Today)
             .When(command => command.DelayForwarding == true)
             .WithMessage($"Forward Date must be in the future");
+
+        RuleFor(command => command.ForwardDate)
+            .LessThan(command => DateOnly.FromDateTime(command.LockDate.Value))
+            .When(command =>
+                command.DelayForwarding == true &&
+                command.LockDate.HasValue)
+            .WithMessage($"Forwarding Date must be before the Lock Date");
     }
 }

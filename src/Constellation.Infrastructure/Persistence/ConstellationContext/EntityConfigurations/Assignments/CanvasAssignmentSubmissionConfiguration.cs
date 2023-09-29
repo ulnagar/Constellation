@@ -2,7 +2,7 @@
 
 using Constellation.Core.Models;
 using Constellation.Core.Models.Assignments;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Assignments.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

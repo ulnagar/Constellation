@@ -8,7 +8,7 @@ using Constellation.Application.SchoolContacts.CreateContactWithRole;
 using Constellation.Application.Schools.UpsertSchool;
 using Constellation.Core.Models;
 
-public class SchoolRegisterJob : ISchoolRegisterJob
+internal sealed class SchoolRegisterJob : ISchoolRegisterJob
 {
     private readonly IDoEDataSourcesGateway _doeGateway;
     private readonly IMediator _mediator;

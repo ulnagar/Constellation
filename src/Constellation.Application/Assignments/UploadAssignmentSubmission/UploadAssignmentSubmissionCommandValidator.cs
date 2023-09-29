@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Assignments.UploadAssignmentSubmission;
 
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Assignments.Identifiers;
+using Constellation.Core.Models.Assignments.Repositories;
 using FluentValidation;
 using System.Threading;
 using System.Threading.Tasks;

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Assignments.GetAssignmentById;
 
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.Collections.Generic;

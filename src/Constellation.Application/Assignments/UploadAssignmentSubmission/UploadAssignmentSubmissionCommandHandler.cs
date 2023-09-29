@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.Assignments;
 using System;

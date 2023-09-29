@@ -2,7 +2,6 @@
 
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Assignments;
-using Constellation.Core.Models.Identifiers;
 
 public class CanvasAssignmentTests
 {
@@ -87,72 +86,5 @@ public class CanvasAssignmentTests
         // Assert
         result.Should().HaveCount(1);
         result.First().Should().BeOfType<AssignmentAttemptSubmittedDomainEvent>();
-    }
-
-    [Fact]
-    public void ReUploadSubmissionToCanvas_ShouldReturnFailure_WhenSubmissionDoesNotPreviouslyExist()
-    {
-        // Arrange
-        var sut = CanvasAssignment.Create(
-            new(),
-            "Test Assignment",
-            1,
-            DateTime.Today,
-            DateTime.Today.AddMonths(1),
-            DateTime.Today,
-            false,
-            null,
-            3);
-
-        var submission = sut.AddSubmission(
-            "StudentId",
-            "test@email.com");
-
-        var domainEvent = sut.GetDomainEvents().First();
-
-        sut.ClearDomainEvents();
-
-        // Act
-        var result = sut.ReUploadSubmissionToCanvas(new AssignmentSubmissionId());
-        var events = sut.GetDomainEvents();
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.IsFailure.Should().BeTrue();
-        events.Should().HaveCount(0);
-    }
-
-    [Fact]
-    public void ReUploadSubmissionToCanvas_ShouldRaiseNewDomainEvent_WhenSubmissionPreviouslyExists()
-    {
-        // Arrange
-        var sut = CanvasAssignment.Create(
-            new(),
-            "Test Assignment",
-            1,
-            DateTime.Today,
-            DateTime.Today.AddMonths(1),
-            DateTime.Today,
-            false,
-            null,
-            3);
-
-        var submission = sut.AddSubmission(
-            "StudentId",
-            "test@email.com");
-
-        var domainEvent = sut.GetDomainEvents().First();
-
-        sut.ClearDomainEvents();
-
-        // Act
-        var result = sut.ReUploadSubmissionToCanvas(submission.Value.Id);
-        var events = sut.GetDomainEvents();
-
-        // Assert
-        result.IsSuccess.Should().BeTrue();
-        events.Should().HaveCount(1);
-        events.First().Should().BeOfType<AssignmentAttemptSubmittedDomainEvent>();
-        events.First().Id.Should().NotBeEquivalentTo(domainEvent.Id);
     }
 }

@@ -11,7 +11,6 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings.ValueObjects;
-using Constellation.Infrastructure.DependencyInjection;
 using MediatR;
 using Microsoft.Extensions.Options;
 using System;
@@ -20,7 +19,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHangfireJob
+internal sealed class RollMarkingReportJob : IRollMarkingReportJob
 {
     private readonly ICourseRepository _courseRepository;
     private readonly IOfferingRepository _offeringRepository;

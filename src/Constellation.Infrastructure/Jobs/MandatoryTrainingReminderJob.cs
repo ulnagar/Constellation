@@ -19,7 +19,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
+internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
 {
     private readonly AppConfiguration _configuration;
     private readonly ITrainingModuleRepository _trainingModuleRepository;

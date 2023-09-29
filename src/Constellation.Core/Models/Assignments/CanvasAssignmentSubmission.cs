@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Assignments;
 
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Assignments.Identifiers;
 using System;
 
 public class CanvasAssignmentSubmission
@@ -26,6 +26,7 @@ public class CanvasAssignmentSubmission
     public string SubmittedBy { get; private set; }
     public DateTime SubmittedOn { get; private set; }
     public int Attempt { get; private set; }
+    public bool Uploaded { get; private set; }
 
     public static CanvasAssignmentSubmission Create(
         AssignmentId assignmentId,
@@ -43,4 +44,6 @@ public class CanvasAssignmentSubmission
 
         return submission;
     }
+
+    internal void MarkUploaded() => Uploaded = true;
 }

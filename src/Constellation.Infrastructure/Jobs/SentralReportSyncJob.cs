@@ -13,15 +13,15 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class SentralReportSyncJob : ISentralReportSyncJob, IHangfireJob
+internal sealed class SentralReportSyncJob : ISentralReportSyncJob
 {
     private readonly IMediator _mediator;
-    private readonly Serilog.ILogger _logger;
+    private readonly ILogger _logger;
     private readonly ISentralGateway _gateway;
 
     public SentralReportSyncJob(
         IMediator mediator, 
-        Serilog.ILogger logger, 
+        ILogger logger, 
         ISentralGateway gateway)
     {
         _mediator = mediator;

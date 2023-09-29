@@ -3,9 +3,9 @@
 using Abstractions.Messaging;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Assignments;
+using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Core.DomainEvents;

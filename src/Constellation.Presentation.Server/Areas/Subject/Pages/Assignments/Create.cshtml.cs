@@ -8,7 +8,6 @@ using Application.Models.Auth;
 using BaseModels;
 using Constellation.Application.Assignments.GetAssignmentsFromCourse;
 using Constellation.Application.Courses.GetCoursesForSelectionList;
-using Core.Errors;
 using Core.Models.Subjects.Identifiers;
 using Core.Shared;
 using MediatR;
@@ -61,7 +60,7 @@ public class CreateModel : BasePageModel
     [BindProperty]
     public int AllowedAttempts { get; set; }
     [BindProperty]
-    public bool DelayForwarding { get; set; }
+    public bool DelayForwarding { get; set; } = true;
 
     [BindProperty]
     [DataType(DataType.Date)]
@@ -227,6 +226,9 @@ public class CreateModel : BasePageModel
         UnlockDate = assignment.UnlockDate;
         LockDate = assignment.LockDate;
         AllowedAttempts = assignment.AllowedAttempts;
+
+        if (LockDate.HasValue)
+            ForwardingDate = DateOnly.FromDateTime(LockDate.Value);
 
         ProgressPhase = Phase.EnterDetails;
     }

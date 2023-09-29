@@ -7,7 +7,7 @@ using Constellation.Infrastructure.Persistence.TrackItContext;
 using Constellation.Infrastructure.Persistence.TrackItContext.Models;
 using Microsoft.EntityFrameworkCore;
 
-public class TrackItSyncJob : ITrackItSyncJob, IHangfireJob
+internal sealed class TrackItSyncJob : ITrackItSyncJob
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;

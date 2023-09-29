@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Assignments.GetAssignmentsByCourse;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Shared;
 using System;
 using System.Collections.Generic;

@@ -2,6 +2,7 @@
 
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Primitives;
@@ -103,16 +104,12 @@ public class CanvasAssignment : AggregateRoot
         return entry;
     }
 
-    public Result ReUploadSubmissionToCanvas(
+    public void MarkSubmissionUploaded(
         AssignmentSubmissionId submissionId)
     {
         CanvasAssignmentSubmission submission = Submissions.FirstOrDefault(entry => entry.Id == submissionId);
 
-        if (submission is null)
-            return Result.Failure(DomainErrors.Assignments.Submission.NotFound(submissionId));
-
-        RaiseDomainEvent(new AssignmentAttemptSubmittedDomainEvent(new DomainEventId(), Id, submissionId));
-
-        return Result.Success();
+        if (submission is not null)
+            submission.MarkUploaded();
     }
 }

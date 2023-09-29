@@ -14,12 +14,11 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.Extensions.Options;
 using Serilog.Context;
 using System.Threading;
 
-public class AbsenceProcessingJob : IAbsenceProcessingJob
+internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
 {
     private readonly ISentralGateway _sentralService;
     private readonly IEmailService _emailService;
@@ -30,7 +29,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
 
     private Student _student;
     private List<DateOnly> _excludedDates = new(); 
-    private AppConfiguration _configuration;
+    private readonly AppConfiguration _configuration;
     private Guid JobId { get; set; }
 
     public AbsenceProcessingJob(

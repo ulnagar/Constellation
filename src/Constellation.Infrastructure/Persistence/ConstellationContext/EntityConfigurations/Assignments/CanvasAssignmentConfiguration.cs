@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Assignments;
 
 using Constellation.Core.Models.Assignments;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Models.Subjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -21,6 +21,10 @@ internal sealed class CanvasAssignmentConfiguration : IEntityTypeConfiguration<C
             .HasConversion(
                 id => id.Value,
                 value => AssignmentId.FromValue(value));
+
+        builder
+            .Navigation(assignment => assignment.Submissions)
+            .AutoInclude();
 
         builder
             .HasMany(assignment => assignment.Submissions)

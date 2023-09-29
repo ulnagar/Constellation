@@ -8,10 +8,12 @@ using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Presentation.Server.BaseModels;
+using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System;
 using System.Threading;
 
 public class IndexModel : BasePageModel
@@ -20,6 +22,7 @@ public class IndexModel : BasePageModel
     private readonly ISentralAwardSyncJob _awardSyncJob;
     private readonly IRollMarkingReportJob _rollMarkingReportJob;
     private readonly AppDbContext _context;
+    private readonly IBackgroundJobClient _jobClient;
     private readonly AppConfiguration _configuration;
 
     public IndexModel(
@@ -27,12 +30,14 @@ public class IndexModel : BasePageModel
         ISentralAwardSyncJob awardSyncJob,
         IRollMarkingReportJob rollMarkingReportJob,
         AppDbContext context,
-        IOptions<AppConfiguration> configuration)
+        IOptions<AppConfiguration> configuration,
+        IBackgroundJobClient jobClient)
     {
         _mediator = mediator;
         _awardSyncJob = awardSyncJob;
         _rollMarkingReportJob = rollMarkingReportJob;
         _context = context;
+        _jobClient = jobClient;
         _configuration = configuration.Value;
     }
 
@@ -53,7 +58,7 @@ public class IndexModel : BasePageModel
     public async Task OnGetAsync()
     {
         await GetClasses(_mediator);
-
+        
         //var yearStart = new DateTime(2023, 1, 1);
 
         //var teachers = await _context

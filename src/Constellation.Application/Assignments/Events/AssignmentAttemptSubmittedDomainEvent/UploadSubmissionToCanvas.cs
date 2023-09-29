@@ -1,19 +1,19 @@
 ﻿namespace Constellation.Application.Assignments.Events.AssignmentAttemptSubmittedDomainEvent;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Gateways;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
+using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Core.Abstractions.Clock;
 using Core.Errors;
-using Core.Models;
 using Core.Models.Assignments;
+using Core.Models.Assignments.Services;
 using Core.Models.Offerings.Errors;
 using Core.Models.Subjects.Errors;
 using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,27 +25,24 @@ internal sealed class UploadSubmissionToCanvas
 {
     private readonly IAssignmentRepository _assignmentRepository;
     private readonly IOfferingRepository _courseOfferingRepository;
-    private readonly IStoredFileRepository _storedFileRepository;
-    private readonly ICanvasGateway _canvasGateway;
-    private readonly IEmailService _emailService;
+    private readonly IAssignmentService _assignmentService;
     private readonly IDateTimeProvider _dateTime;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public UploadSubmissionToCanvas(
         IAssignmentRepository assignmentRepository,
         IOfferingRepository courseOfferingRepository,
-        IStoredFileRepository storedFileRepository,
-        ICanvasGateway canvasGateway,
-        IEmailService emailService,
+        IAssignmentService assignmentService,
         IDateTimeProvider dateTime,
+        IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _assignmentRepository = assignmentRepository;
         _courseOfferingRepository = courseOfferingRepository;
-        _storedFileRepository = storedFileRepository;
-        _canvasGateway = canvasGateway;
-        _emailService = emailService;
+        _assignmentService = assignmentService;
         _dateTime = dateTime;
+        _unitOfWork = unitOfWork;
         _logger = logger.ForContext<AssignmentAttemptSubmittedDomainEvent>();
     }
 
@@ -115,29 +112,11 @@ internal sealed class UploadSubmissionToCanvas
 
         string canvasCourseId = resources.First();
 
-        StoredFile file = await _storedFileRepository.GetAssignmentSubmissionByLinkId(submission.Id.Value.ToString(), cancellationToken);
-
-        if (file is null)
+        if (await _assignmentService.UploadSubmissionToCanvas(assignment, submission, canvasCourseId, cancellationToken))
         {
-            _logger
-                .ForContext(nameof(AssignmentAttemptSubmittedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.StoredFiles.Assignments.FileNotFound(submission.Id.Value.ToString()), true)
-                .Warning("Failed to upload Assignment Submission to Canvas");
-            return;
-        }
+            assignment.MarkSubmissionUploaded(submission.Id);
 
-        // Upload file to Canvas
-        // Include error checking/retry on failure
-        bool result = await _canvasGateway.UploadAssignmentSubmission(canvasCourseId, assignment.CanvasId, submission.StudentId, file);
-
-        if (!result)
-        {
-            _logger
-                .ForContext(nameof(AssignmentAttemptSubmittedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Assignments.Submission.UploadFailed)
-                .Error("Failed to upload Assignment Submission to Canvas");
-
-            await _emailService.SendAssignmentUploadFailedNotification(assignment.Name, assignment.Id, submission.StudentId, submission.Id, cancellationToken);
+            await _unitOfWork.CompleteAsync(cancellationToken);
         }
     }
 }

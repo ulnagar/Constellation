@@ -1,19 +1,23 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Assignments;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Assignments.Identifiers;
+using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Abstractions.Clock;
 using Microsoft.EntityFrameworkCore;
 
 internal class AssignmentRepository : IAssignmentRepository
 {
     private readonly AppDbContext _context;
+    private readonly IDateTimeProvider _dateTime;
 
     public AssignmentRepository(
-        AppDbContext context)
+        AppDbContext context,
+        IDateTimeProvider dateTime)
     {
         _context = context;
+        _dateTime = dateTime;
     }
 
     public async Task<CanvasAssignment?> GetByCanvasId(
@@ -29,7 +33,6 @@ internal class AssignmentRepository : IAssignmentRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<CanvasAssignment>()
-            .Include(assignment => assignment.Submissions)
             .Where(assignment => assignment.CourseId == courseId)
             .ToListAsync(cancellationToken);
 
@@ -38,7 +41,6 @@ internal class AssignmentRepository : IAssignmentRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<CanvasAssignment>()
-            .Include(assignment => assignment.Submissions)
             .FirstOrDefaultAsync(assignment => assignment.Id == id, cancellationToken);
 
     public void Insert(CanvasAssignment entity) =>
@@ -58,11 +60,18 @@ internal class AssignmentRepository : IAssignmentRepository
 
         return await _context
             .Set<CanvasAssignment>()
-            .Include(assignment => assignment.Submissions)
             .Where(assignment => 
                 (assignment.DueDate >= today || (!assignment.LockDate.HasValue || assignment.LockDate.Value > today)) &&
                 (!assignment.UnlockDate.HasValue || assignment.UnlockDate.Value <= today))
             .ToListAsync(cancellationToken);
     }
-        
+
+    public async Task<List<CanvasAssignment>> GetAllDueForUpload(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<CanvasAssignment>()
+            .Where(assignment => 
+                assignment.DelayForwarding &&
+                assignment.ForwardingDate == _dateTime.Today)
+            .ToListAsync(cancellationToken);
 }
