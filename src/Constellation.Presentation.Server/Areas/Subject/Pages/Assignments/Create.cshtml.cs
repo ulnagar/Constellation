@@ -30,6 +30,9 @@ public class CreateModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
+    [ViewData]
+    public string ActivePage => "Assignments";
+
     public Phase ProgressPhase { get; set; }
 
     public SelectList Courses { get; set; }

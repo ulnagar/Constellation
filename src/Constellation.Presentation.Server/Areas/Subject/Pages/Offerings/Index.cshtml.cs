@@ -22,6 +22,9 @@ public class IndexModel : BasePageModel
         _sender = sender;
     }
 
+    [ViewData]
+    public string ActivePage => "Offerings";
+
     [BindProperty(SupportsGet = true)]
     public FilterDto Filter { get; set; } = FilterDto.Active;
     [BindProperty(SupportsGet = true)]

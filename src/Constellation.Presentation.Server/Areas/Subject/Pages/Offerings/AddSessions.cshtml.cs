@@ -28,6 +28,9 @@ public class AddSessionsModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
+    [ViewData]
+    public string ActivePage => "Offerings";
+
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }
 

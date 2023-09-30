@@ -8,7 +8,28 @@
     <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
         <div class="sidebar-sticky pt-3">
             <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted">
-                <span class="w-100">Science Pracs</span>
+                <span class="w-100">Subjects</span>
+            </h4>
+            <ul class="nav flex-column mx-2">
+                <li class="nav-item">
+                    <a class="nav-link @(activePage == "Courses" ? "active" : "")" href="/Subject/Courses">
+                        Courses
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(activePage == "Offerings" ? "active" : "")" href="/Subject/Offerings">
+                        Offerings
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(activePage == "Assignments" ? "active" : "")" href="/Subject/Assignments">
+                        Assignments
+                    </a>
+                </li>
+            </ul>
+            
+            <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted">
+                <span class="w-100 mt-3">Science Pracs</span>
             </h4>
             <ul class="nav flex-column mx-2">
                 <li class="nav-item">
@@ -24,6 +45,17 @@
                 <li class="nav-item">
                     <a class="nav-link @(activePage == "Reports" ? "active" : "")" href="/Subject/SciencePracs/Reports">
                         Reports
+                    </a>
+                </li>
+            </ul>
+            
+            <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted">
+                <span class="w-100 mt-3">Group Tutorials</span>
+            </h4>
+            <ul class="nav flex-column mx-2">
+                <li class="nav-item">
+                    <a class="nav-link @(activePage == "Tutorials" ? "active" : "")" href="/Subject/GroupTutorials/Tutorials">
+                        Tutorials
                     </a>
                 </li>
             </ul>

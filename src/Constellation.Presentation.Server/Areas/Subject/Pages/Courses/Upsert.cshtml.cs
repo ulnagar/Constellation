@@ -25,6 +25,9 @@ public class UpsertModel : BasePageModel
         _mediator = mediator;
     }
 
+    [ViewData]
+    public string ActivePage => "Courses";
+
     [BindProperty(SupportsGet = true)]
     public Guid? Id { get; set; }
 
