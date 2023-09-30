@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
+using Application.Models.Identity;
 using Constellation.Application.Assignments.GetAssignmentsByCourse;
 using Constellation.Application.Assignments.UploadAssignmentSubmission;
-using Constellation.Application.Features.Portal.School.Assignments.Models;
-using Constellation.Application.Features.Portal.School.Assignments.Queries;
+using Constellation.Application.Courses.GetCoursesForStudent;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,27 +22,32 @@ public class ExamsController : BaseAPIController
     }
 
     [HttpGet("{studentId}/Courses")]
-    public async Task<List<StudentCourseForDropdownSelection>> GetStudentCourses([FromRoute] string studentId)
+    public async Task<List<StudentCourseResponse>> GetStudentCourses([FromRoute] string studentId)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.Information("Requested to get courses for student {studentId} to upload exam by user {user}", studentId, user.DisplayName);
 
-        var courses = await _mediator.Send(new GetCoursesForStudentQuery { StudentId = studentId });
+        Result<List<StudentCourseResponse>> coursesRequest = await _mediator.Send(new GetCoursesForStudentQuery(studentId));
 
-        return courses.ToList();
+        if (coursesRequest.IsFailure)
+        {
+            return new List<StudentCourseResponse>();
+        }
+
+        return coursesRequest.Value;
     }
 
     [HttpGet("{studentId}/{courseId}/Assignments")]
     public async Task<List<CourseAssignmentResponse>> GetCourseAssignments([FromRoute] string studentId, [FromRoute] Guid courseId)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         CourseId course = CourseId.FromValue(courseId);
 
         _logger.Information("Requested to get assignments for course {courseId} to upload exam by user {user}", course, user.DisplayName);
 
-        var assignments = await _mediator.Send(new GetAssignmentsByCourseQuery(course, studentId));
+        Result<List<CourseAssignmentResponse>>? assignments = await _mediator.Send(new GetAssignmentsByCourseQuery(course, studentId));
 
         if (assignments.IsFailure)
         {
@@ -52,14 +58,19 @@ public class ExamsController : BaseAPIController
     }
 
     [HttpPost("Upload")]
-    public async Task UploadAssignment([FromBody] UploadAssignmentSubmissionCommand command)
+    public async Task<bool> UploadAssignment([FromBody] UploadAssignmentSubmissionCommand command)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.Information("Requested to get upload assignment with details {@details} to upload exam by user {user}", command, user.DisplayName);
 
         command.SubmittedBy = user.Email;
 
-        await _mediator.Send(command);
+        Result request = await _mediator.Send(command);
+
+        if (request.IsFailure)
+            return false;
+
+        return true;
     }
 }

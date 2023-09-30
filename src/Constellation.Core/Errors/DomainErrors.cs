@@ -476,6 +476,13 @@ public static class DomainErrors
         }
     }
 
+    public static class Period
+    {
+        public static readonly Error NoneFoundForOffering = new(
+            "Periods.Period.NoneFoundForOffering",
+            "Could not find Periods attached to Offering");
+    }
+
     public static class Permissions
     {
         public static readonly Error Unauthorised = new Error(

@@ -1,7 +1,11 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
+using Application.Models.Identity;
+using Application.Timetables.GetStudentTimetableData;
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Portal.School.Timetables.Queries;
+using Core.Models;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,22 +24,35 @@ public class TimetablesController : BaseAPIController
     [HttpGet("ForStudent/{studentId}")]
     public async Task<StudentTimetableDataDto> GetForSchool([FromRoute] string studentId)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve Student Timetable for student {student} by user {user}", studentId, user.DisplayName);
 
-        return await _mediator.Send(new GetStudentTimetableDataQuery { StudentId = studentId });
+        Result<StudentTimetableDataDto> request = await _mediator.Send(new GetStudentTimetableDataQuery(studentId));
+
+        if (request.IsFailure)
+        {
+            return new StudentTimetableDataDto();
+        }
+
+        return request.Value;
     }
 
     [HttpPost("Download")]
     public async Task<IActionResult> DownloadReport([FromBody] string studentId)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.Information("Requested to download Student Timetable for student {student} by user {user}", studentId, user.DisplayName);
 
-        var data = await _mediator.Send(new GetStudentTimetableDataQuery { StudentId = studentId });
-        var file = await _mediator.Send(new GetStudentTimetableExportQuery { Data = data });
+        Result<StudentTimetableDataDto>? request = await _mediator.Send(new GetStudentTimetableDataQuery(studentId));
+
+        if (request.IsFailure)
+        {
+            return BadRequest();
+        }
+
+        StoredFile? file = await _mediator.Send(new GetStudentTimetableExportQuery { Data = request.Value });
 
         return File(file.FileData, file.FileType, file.Name);
     }

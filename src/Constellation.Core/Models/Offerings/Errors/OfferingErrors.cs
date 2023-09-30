@@ -19,6 +19,10 @@ public static class OfferingErrors
         "Offerings.Offering.NotFoundInCourse",
         $"Could not find any Offering linked with Course with Id {id}");
 
+    public static readonly Func<string, Error> NotFoundForStudent = id => new(
+        "Offerings.Offering.NotFoundForStudent",
+        $"Could not find any Offering linked with Student with Id {id}");
+
     public static class Validation
     {
         public static readonly Error StartDateAfterEndDate = new(

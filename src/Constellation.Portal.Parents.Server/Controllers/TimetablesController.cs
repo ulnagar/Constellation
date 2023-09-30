@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Portal.Parents.Server.Controllers;
 
+using Application.Timetables.GetStudentTimetableData;
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Portal.School.Timetables.Queries;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,8 +29,15 @@ public class TimetablesController : BaseAPIController
 			return new StudentTimetableDataDto();
 		}
 
-		return await _mediator.Send(new GetStudentTimetableDataQuery { StudentId = studentId });
-	}
+		Result<StudentTimetableDataDto> request = await _mediator.Send(new GetStudentTimetableDataQuery(studentId));
+
+        if (request.IsFailure)
+        {
+            return new StudentTimetableDataDto();
+        }
+
+        return request.Value;
+    }
 
     [HttpPost("Download/{studentId}")]
     public async Task<IActionResult> GetAttendanceReport([FromRoute] string studentId)
@@ -41,10 +50,15 @@ public class TimetablesController : BaseAPIController
         }
 
         // Get Timetable Data first
-        var data = await _mediator.Send(new GetStudentTimetableDataQuery { StudentId = studentId });
+        var data = await _mediator.Send(new GetStudentTimetableDataQuery(studentId));
+
+        if (data.IsFailure)
+        {
+            return BadRequest();
+        }
 
         // We only have one student, so just download that file.
-        var file = await _mediator.Send(new GetStudentTimetableExportQuery { Data = data });
+        var file = await _mediator.Send(new GetStudentTimetableExportQuery { Data = data.Value });
 
         return File(file.FileData, file.FileType, file.Name);
     }

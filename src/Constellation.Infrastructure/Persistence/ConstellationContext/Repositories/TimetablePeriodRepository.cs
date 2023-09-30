@@ -101,6 +101,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Where(period => !period.IsDeleted && timetables.Contains(period.Timetable))
                 .ToListAsync(cancellationToken);
 
+        public async Task<List<TimetablePeriod>> GetListFromIds(
+            List<int> periodIds, 
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<TimetablePeriod>()
+                .Where(period => periodIds.Contains(period.Id))
+                .ToListAsync(cancellationToken);
+
         public ICollection<TimetablePeriod> AllFromDay(int day)
         {
             return _context.Set<TimetablePeriod>()

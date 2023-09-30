@@ -50,6 +50,13 @@ internal sealed class GetContactListForParentPortalQueryHandler
             return Result.Failure<List<StudentSupportContactResponse>>(DomainErrors.Partners.Student.NotFound(request.StudentId));
         }
 
+        if (_configuration.Contacts is null)
+        {
+            _logger.Warning("Could not load configuration data for Contacts");
+
+            return response;
+        }
+
         // Add Counsellor
         foreach (string staffId in _configuration.Contacts.CounsellorIds)
         {

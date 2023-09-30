@@ -24,13 +24,9 @@ public class UploadAssignmentSubmissionCommandValidator : AbstractValidator<Uplo
         RuleFor(command => command.File).NotNull();
     }
 
-    public async Task<bool> BeValidAssignmentId(AssignmentId assignmentId, CancellationToken cancellation = new CancellationToken())
-    {
-        return await _assignmentRepository.IsValidAssignmentId(assignmentId, cancellation);
-    }
+    public async Task<bool> BeValidAssignmentId(AssignmentId assignmentId, CancellationToken cancellation = new CancellationToken()) => 
+        await _assignmentRepository.IsValidAssignmentId(assignmentId, cancellation);
 
-    public async Task<bool> BeValidStudentId(string studentId, CancellationToken cancellation = new CancellationToken())
-    {
-        return await _studentRepository.IsValidStudentId(studentId, cancellation);
-    }
+    public async Task<bool> BeValidStudentId(string studentId, CancellationToken cancellation = new CancellationToken()) => 
+        await _studentRepository.IsValidStudentId(studentId, cancellation);
 }
