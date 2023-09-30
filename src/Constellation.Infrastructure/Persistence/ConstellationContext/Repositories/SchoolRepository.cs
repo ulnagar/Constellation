@@ -2,7 +2,6 @@
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Subjects;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -36,6 +35,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Include(s => s.Students)
                     .ThenInclude(student => student.Enrolments);
         }
+
+        public async Task<List<School>> GetListFromIds(
+            List<string> schoolCodes, 
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<School>()
+                .Where(school => schoolCodes.Contains(school.Code))
+                .ToListAsync(cancellationToken);
 
         public void Insert(School school) =>
             _context.Set<School>().Add(school);
