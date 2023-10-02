@@ -2,9 +2,9 @@
 
 using Constellation.Application.Features.Partners.Students.Notifications;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
 using MediatR;
 using Serilog;
 using System.Threading;

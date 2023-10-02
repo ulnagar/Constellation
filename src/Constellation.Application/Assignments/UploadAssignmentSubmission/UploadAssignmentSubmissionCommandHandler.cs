@@ -3,11 +3,11 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.Assignments;
+using Core.Models.Assignments.Errors;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,7 +34,7 @@ internal sealed class UploadAssignmentSubmissionCommandHandler
         CanvasAssignment assignment = await _assignmentRepository.GetById(request.AssignmentId, cancellationToken);
 
         if (assignment is null)
-            return Result.Failure(DomainErrors.Assignments.Assignment.NotFound(request.AssignmentId));
+            return Result.Failure(AssignmentErrors.NotFound(request.AssignmentId));
 
         Result<CanvasAssignmentSubmission> submissionResult = assignment.AddSubmission(
             request.StudentId,

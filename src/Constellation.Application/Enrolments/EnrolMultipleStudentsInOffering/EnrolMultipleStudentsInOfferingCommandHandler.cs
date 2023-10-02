@@ -2,7 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Offerings.Repositories;
 using Core.Errors;
 using Core.Models;
 using Core.Models.Enrolments;

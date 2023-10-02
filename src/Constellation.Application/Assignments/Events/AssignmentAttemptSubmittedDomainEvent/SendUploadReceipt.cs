@@ -10,6 +10,7 @@ using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Core.DomainEvents;
 using Core.Models;
+using Core.Models.Assignments.Errors;
 using Core.Models.Subjects;
 using Interfaces.Repositories;
 using Serilog;
@@ -51,7 +52,7 @@ internal sealed class SendUploadReceipt
         {
             _logger
                 .ForContext(nameof(AssignmentAttemptSubmittedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Assignments.Assignment.NotFound(notification.AssignmentId), true)
+                .ForContext(nameof(Error), AssignmentErrors.NotFound(notification.AssignmentId), true)
                 .Warning("Failed to send Assignment Submission receipt to uploader");
             return;
         }
@@ -72,7 +73,7 @@ internal sealed class SendUploadReceipt
         {
             _logger
                 .ForContext(nameof(AssignmentAttemptSubmittedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Assignments.Submission.NotFound(notification.SubmissionId), true)
+                .ForContext(nameof(Error), SubmissionErrors.NotFound(notification.SubmissionId), true)
                 .Warning("Failed to send Assignment Submission receipt to uploader");
 
             return;

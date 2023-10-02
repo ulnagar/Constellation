@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.Assignments.GetAssignmentsByCourse;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Assignments;
+using Core.Models.Assignments.Errors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,13 +26,13 @@ internal sealed class GetAssignmentsByCourseQueryHandler
     {
         List<CourseAssignmentResponse> result = new();
 
-        var assignments = await _assignmentRepository.GetByCourseId(request.CourseId, cancellationToken);
+        List<CanvasAssignment> assignments = await _assignmentRepository.GetByCourseId(request.CourseId, cancellationToken);
 
-        if (assignments is null)
-            return Result.Failure<List<CourseAssignmentResponse>>(DomainErrors.Assignments.Assignment.NotFoundByCourse(request.CourseId));
+        if (assignments.Count == 0)
+            return Result.Failure<List<CourseAssignmentResponse>>(AssignmentErrors.NotFoundByCourse(request.CourseId));
 
         // Only process assignments that the student hasn't already submitted the maximum number of attempts
-        var validAssignments = assignments
+        List<CanvasAssignment> validAssignments = assignments
             .Where(entry =>
                 (entry.AllowedAttempts <= 0 ||
                 entry.Submissions.Count(submission => submission.StudentId == request.StudentId) < entry.AllowedAttempts) &&

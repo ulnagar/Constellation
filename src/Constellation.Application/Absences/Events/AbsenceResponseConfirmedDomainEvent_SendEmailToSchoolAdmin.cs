@@ -9,6 +9,7 @@ using Constellation.Core.DomainEvents;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
 using Serilog;
 using System.Linq;
 using System.Threading;

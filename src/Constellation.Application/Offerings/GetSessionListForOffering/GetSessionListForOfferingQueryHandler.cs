@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Offerings.GetSessionListForOffering;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Offerings.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
 using Core.Shared;

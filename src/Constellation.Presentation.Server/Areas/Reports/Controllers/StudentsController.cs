@@ -1,6 +1,5 @@
 ﻿using Constellation.Application.Extensions;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Presentation.Server.Areas.Reports.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace Constellation.Presentation.Server.Areas.Reports.Controllers
 {
     using Application.Enrolments.GetFTETotalByGrade;
+    using Constellation.Core.Models.Offerings.Repositories;
     using Core.Shared;
 
     [Area("Reports")]

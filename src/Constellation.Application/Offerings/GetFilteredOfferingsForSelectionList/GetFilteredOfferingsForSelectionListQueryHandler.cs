@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Offerings.GetFilteredOfferingsForSelectionList;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Serilog;

@@ -3,9 +3,9 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Enrolments;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using System.Collections.Generic;

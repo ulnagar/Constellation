@@ -1,12 +1,11 @@
-﻿using Constellation.Core.Enums;
-using Constellation.Core.Models.Assignments.Identifiers;
+﻿namespace Constellation.Core.Errors;
+
+using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using System;
 
-namespace Constellation.Core.Errors;
 public static class DomainErrors
 {
     public static class Absences
@@ -51,35 +50,6 @@ public static class DomainErrors
             public static readonly Func<string, Error> NotFoundForStudent = id => new Error(
                 "Assets.Allocations.NotFoundForStudent",
                 $"Could not find any asset allocations for student {id}");
-        }
-    }
-
-    public static class Assignments
-    {
-        public static class Assignment
-        {
-            public static readonly Func<Models.Assignments.Identifiers.AssignmentId, Error> NotFound = id => new(
-                "Assignments.Assignment.NotFound",
-                $"Could not find an assignment with the Id {id}");
-
-            public static readonly Func<CourseId, Error> NotFoundByCourse = id => new(
-                "Assignments.Assignment.NotFoundByCourse",
-                $"Could not find any assignments linked to the course with id {id}");
-        }
-
-        public static class Submission
-        {
-            public static readonly Func<AssignmentSubmissionId, Error> NotFound = id => new(
-                "Assignments.Submission.NotFound",
-                $"Could not find any submission with the id {id}");
-
-            public static readonly Error UploadFailed = new(
-                "Assignments.Submission.UploadFailed",
-                "Assignment Submission could not be uploaded to Canvas server");
-
-            public static readonly Error AlreadyUploaded = new(
-                "Assignments.Submission.AlreadyUploaded",
-                "Assignment Submission has already been uploaded to Canvas server");
         }
     }
 
@@ -492,16 +462,6 @@ public static class DomainErrors
         public static readonly Error Unauthorised = new Error(
             "Permissions.Unauthorised",
             "You do not have the required permissions to perform this action");
-    }
-
-    public static class StoredFiles
-    {
-        public static class Assignments
-        {
-            public static readonly Func<string, Error> FileNotFound = id => new(
-                "StoredFiles.Assignments.FileNotFound",
-                $"Could not find file with Id {id}");
-        }
     }
 
     public static class ValueObjects

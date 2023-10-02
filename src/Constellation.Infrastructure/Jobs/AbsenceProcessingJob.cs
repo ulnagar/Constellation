@@ -13,6 +13,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Microsoft.Extensions.Options;
 using Serilog.Context;

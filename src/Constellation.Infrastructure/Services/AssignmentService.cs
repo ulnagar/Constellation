@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Core.Errors;
 using Core.Models;
 using Core.Models.Assignments;
+using Core.Models.Assignments.Errors;
 using Core.Models.Assignments.Services;
 using Core.Shared;
 using System.Threading.Tasks;
@@ -40,7 +41,7 @@ internal class AssignmentService : IAssignmentService
         if (file is null)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.StoredFiles.Assignments.FileNotFound(submission.Id.Value.ToString()), true)
+                .ForContext(nameof(Error), DomainErrors.Documents.AssignmentSubmission.NotFound(submission.Id.Value.ToString()), true)
                 .Warning("Failed to upload Assignment Submission to Canvas");
             return true;
         }
@@ -52,7 +53,7 @@ internal class AssignmentService : IAssignmentService
         if (!result)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Assignments.Submission.UploadFailed)
+                .ForContext(nameof(Error), SubmissionErrors.UploadFailed)
                 .Error("Failed to upload Assignment Submission to Canvas");
 
             await _emailService.SendAssignmentUploadFailedNotification(

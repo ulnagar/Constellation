@@ -6,6 +6,7 @@ using Constellation.Core.Models.Assignments;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Core.Abstractions.Repositories;

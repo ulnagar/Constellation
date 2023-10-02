@@ -7,6 +7,7 @@ using Constellation.Core.DomainEvents;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.SciencePracs;
 using Serilog;
 using System.Collections.Generic;

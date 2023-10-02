@@ -1,4 +1,4 @@
-namespace Constellation.Core.Abstractions.Repositories;
+namespace Constellation.Core.Models.Offerings.Repositories;
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings;

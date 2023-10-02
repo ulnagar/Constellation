@@ -1,14 +1,15 @@
 ﻿namespace Constellation.Application.Assignments.Events.AssignmentAttemptSubmittedDomainEvent;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Core.Abstractions.Clock;
 using Core.Errors;
 using Core.Models.Assignments;
+using Core.Models.Assignments.Errors;
 using Core.Models.Assignments.Services;
 using Core.Models.Offerings.Errors;
 using Core.Models.Subjects.Errors;
@@ -54,7 +55,7 @@ internal sealed class UploadSubmissionToCanvas
         {
             _logger
                 .ForContext(nameof(AssignmentAttemptSubmittedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Assignments.Assignment.NotFound(notification.AssignmentId), true)
+                .ForContext(nameof(Error), AssignmentErrors.NotFound(notification.AssignmentId), true)
                 .Warning("Failed to upload Assignment Submission to Canvas");
             return;
         }
@@ -75,7 +76,7 @@ internal sealed class UploadSubmissionToCanvas
         {
             _logger
                 .ForContext(nameof(AssignmentAttemptSubmittedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Assignments.Submission.NotFound(notification.SubmissionId), true)
+                .ForContext(nameof(Error), SubmissionErrors.NotFound(notification.SubmissionId), true)
                 .Warning("Failed to upload Assignment Submission to Canvas");
             
             return;
@@ -85,7 +86,7 @@ internal sealed class UploadSubmissionToCanvas
         {
             _logger
                 .ForContext(nameof(AssignmentAttemptSubmittedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Assignments.Submission.AlreadyUploaded, true)
+                .ForContext(nameof(Error), SubmissionErrors.AlreadyUploaded, true)
                 .Warning("Failed to upload Assignment Submission to Canvas");
 
             return;

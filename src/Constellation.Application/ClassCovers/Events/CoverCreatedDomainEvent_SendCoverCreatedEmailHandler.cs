@@ -10,6 +10,7 @@ using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Serilog;

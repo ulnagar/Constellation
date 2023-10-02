@@ -2,13 +2,13 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Models.Offerings.Errors;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
-using Core.Abstractions.Repositories;
 using Core.Models.Assignments;
+using Core.Models.Assignments.Errors;
 using Core.Models.Assignments.Services;
 using Core.Models.Offerings;
 using Core.Models.Offerings.ValueObjects;
@@ -49,10 +49,10 @@ internal sealed class ResendAssignmentSubmissionToCanvasCommandHandler
         {
             _logger
                 .ForContext(nameof(ResendAssignmentSubmissionToCanvasCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Assignments.Assignment.NotFound(request.AssignmentId), true)
+                .ForContext(nameof(Error), AssignmentErrors.NotFound(request.AssignmentId), true)
                 .Warning("Failed to upload Assignment Submission to Canvas");
             
-            return Result.Failure(DomainErrors.Assignments.Assignment.NotFound(request.AssignmentId));
+            return Result.Failure(AssignmentErrors.NotFound(request.AssignmentId));
         }
 
         List<Offering> offerings = await _offeringRepository.GetByCourseId(assignment.CourseId, cancellationToken);
@@ -92,10 +92,10 @@ internal sealed class ResendAssignmentSubmissionToCanvasCommandHandler
         {
             _logger
                 .ForContext(nameof(ResendAssignmentSubmissionToCanvasCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Assignments.Submission.NotFound(request.SubmissionId), true)
+                .ForContext(nameof(Error), SubmissionErrors.NotFound(request.SubmissionId), true)
                 .Warning("Failed to upload Assignment Submission to Canvas");
 
-            return Result.Failure(DomainErrors.Assignments.Submission.NotFound(request.SubmissionId));
+            return Result.Failure(SubmissionErrors.NotFound(request.SubmissionId));
         }
 
         bool result = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, canvasCourseId, cancellationToken);
@@ -104,10 +104,10 @@ internal sealed class ResendAssignmentSubmissionToCanvasCommandHandler
         {
             _logger
                 .ForContext(nameof(ResendAssignmentSubmissionToCanvasCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Assignments.Submission.UploadFailed, true)
+                .ForContext(nameof(Error), SubmissionErrors.UploadFailed, true)
                 .Warning("Failed to upload Assignment Submission to Canvas");
 
-            return Result.Failure(DomainErrors.Assignments.Submission.UploadFailed);
+            return Result.Failure(SubmissionErrors.UploadFailed);
         }
 
         assignment.MarkSubmissionUploaded(submission.Id);

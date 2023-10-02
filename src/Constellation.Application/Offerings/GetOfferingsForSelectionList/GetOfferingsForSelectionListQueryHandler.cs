@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Offerings.GetOfferingsForSelectionList;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
 using System.Linq;

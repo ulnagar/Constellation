@@ -6,6 +6,9 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Shared;
+using Core.Models;
+using Core.Models.Assignments;
+using Core.Models.Assignments.Errors;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,22 +29,22 @@ internal sealed class GetAssignmentSubmissionFileQueryHandler
 
     public async Task<Result<FileDto>> Handle(GetAssignmentSubmissionFileQuery request, CancellationToken cancellationToken)
     {
-        var assignment = await _assignmentRepository.GetById(request.AssignmentId, cancellationToken);
+        CanvasAssignment assignment = await _assignmentRepository.GetById(request.AssignmentId, cancellationToken);
 
         if (assignment is null)
-            return Result.Failure<FileDto>(DomainErrors.Assignments.Assignment.NotFound(request.AssignmentId));
+            return Result.Failure<FileDto>(AssignmentErrors.NotFound(request.AssignmentId));
 
-        var submission = assignment.Submissions.FirstOrDefault(entry => entry.Id == request.SubmissionId);
+        CanvasAssignmentSubmission submission = assignment.Submissions.FirstOrDefault(entry => entry.Id == request.SubmissionId);
 
         if (submission is null)
-            return Result.Failure<FileDto>(DomainErrors.Assignments.Submission.NotFound(request.SubmissionId));
+            return Result.Failure<FileDto>(SubmissionErrors.NotFound(request.SubmissionId));
 
-        var file = await _storedFileRepository.GetAssignmentSubmissionByLinkId(submission.Id.ToString(), cancellationToken);
+        StoredFile file = await _storedFileRepository.GetAssignmentSubmissionByLinkId(submission.Id.ToString(), cancellationToken);
 
         if (file is null)
             return Result.Failure<FileDto>(DomainErrors.Documents.AssignmentSubmission.NotFound(submission.Id.ToString()));
 
-        var entry = new FileDto
+        FileDto entry = new()
         {
             FileData = file.FileData,
             FileType = file.FileType,

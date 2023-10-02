@@ -7,6 +7,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Infrastructure.Templates.Views.Documents.Attendance;
 using System;
 using System.Collections.Generic;

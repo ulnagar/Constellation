@@ -2,9 +2,11 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Errors;
 using Core.Models.Assignments;
+using Core.Models.Assignments.Errors;
 using Core.Models.Assignments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
@@ -51,10 +53,10 @@ internal sealed class GetAllAssignmentSubmissionFilesQueryHandler
         {
             _logger
                 .ForContext(nameof(GetAllAssignmentSubmissionFilesQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Assignments.Assignment.NotFound(request.AssignmentId), true)
+                .ForContext(nameof(Error), AssignmentErrors.NotFound(request.AssignmentId), true)
                 .Warning("Failed to retrieve Assignment Submission files for Student");
 
-            return Result.Failure<FileDto>(DomainErrors.Assignments.Assignment.NotFound(request.AssignmentId));
+            return Result.Failure<FileDto>(AssignmentErrors.NotFound(request.AssignmentId));
         }
 
         List<IGrouping<string, CanvasAssignmentSubmission>> submissions = assignment.Submissions.GroupBy(submission => submission.StudentId).ToList();
