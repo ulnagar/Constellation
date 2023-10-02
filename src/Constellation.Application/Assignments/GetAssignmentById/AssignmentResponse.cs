@@ -13,6 +13,8 @@ public sealed record AssignmentResponse(
     DateOnly DueDate,
     DateOnly? UnlockDate,
     DateOnly? LockDate,
+    bool DelayForwarding,
+    DateOnly ForwardingDate,
     int AllowedAttempts,
     List<AssignmentResponse.Submission> Submissions)
 {

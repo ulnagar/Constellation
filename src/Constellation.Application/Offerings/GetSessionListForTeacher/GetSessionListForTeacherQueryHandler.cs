@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Offerings.GetSessionListForTeacher;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
@@ -36,7 +35,12 @@ internal sealed class GetSessionListForTeacherQueryHandler
 
         List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(request.StaffId, cancellationToken);
 
-        foreach (Session session in offerings.SelectMany(offering => offering.Sessions).ToList())
+        List<Session> sessions = offerings
+            .SelectMany(offering => offering.Sessions)
+            .Where(session => !session.IsDeleted)
+            .ToList();
+
+        foreach (Session session in sessions)
         {
             TimetablePeriod period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
 
@@ -48,6 +52,7 @@ internal sealed class GetSessionListForTeacherQueryHandler
                 session.Offering.Name,
                 session.Id,
                 session.PeriodId,
+                period.SortOrder,
                 period.ToString(),
                 period.Duration));
         }

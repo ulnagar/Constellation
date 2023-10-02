@@ -28,7 +28,38 @@
 
 <h1>Constellation Changelog</h1>
 
-<h3>Current version: Release V.11 (Build @version)</h3>
+<h3>Current version: Release V.12 (Build @version)</h3>
+
+<div class="changelog">
+    <ul>
+        <li>Constellation Web
+            <ul>
+                <li>Subjects section
+                    <ul>
+                        <li>Refactor Course, and Offering models to use Aggregate design pattern</li>
+                        <li>Consolidate Subject pages into new layout</li>
+                        <li>Update Assignments to prevent automatic upload to Canvas by default</li>
+                        <li>Create daily scan for Assignment Submissions to upload to Canvas</li>
+                        <li>Provide option for teachers to download latest submission for each student in bulk</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Schools Portal
+            <ul>
+                <li>Exam Uploads
+                    <ul>
+                        <li>Provide feedback to users when the file selected for upload is too large</li>
+                        <li>Provide feedback to users when the file failed to upload successfully</li>
+                        <li>Provide an upload receipt to users via email when a file has been successfully uploaded</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<h3>Previous version: Release V1.11 (Build 2309.12)</h3>
 
 <div class="changelog">
     <ul>
@@ -140,7 +171,7 @@
                     <ul>
                         <li>Update assignments to use aggregate design pattern</li>
                         <li>Refactor uploading of assignment submissions to Canvas into outbox processor</li>
-                        <li>Add options for staff to upload and download student submissions from the assingment details view</li>
+                        <li>Add options for staff to upload and download student submissions from the assignment details view</li>
                     </ul>
                 </li>
                 <li>School Admin section

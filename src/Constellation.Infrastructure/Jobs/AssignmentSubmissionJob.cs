@@ -75,6 +75,11 @@ internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
 
             string canvasCourseId = resources.First();
 
+            List<CanvasAssignmentSubmission> validSubmissions = assignment
+                .Submissions
+                .Where(submission => !submission.Uploaded)
+                .ToList();
+
             foreach (CanvasAssignmentSubmission submission in assignment.Submissions)
             {
                 if (await _assignmentService.UploadSubmissionToCanvas(assignment, submission, canvasCourseId, cancellationToken))

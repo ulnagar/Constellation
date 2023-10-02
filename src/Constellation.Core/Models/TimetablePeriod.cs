@@ -1,8 +1,6 @@
-﻿using Constellation.Core.Models;
-using Constellation.Core.Models.Offerings;
+﻿using Constellation.Core.Models.Offerings;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace Constellation.Core.Models
 {
@@ -20,6 +18,8 @@ namespace Constellation.Core.Models
         public DateTime? DateDeleted { get; set; }
         public List<Session> OfferingSessions { get; set; } = new();
         public int Duration => GetDuration();
+
+        public string SortOrder => $"{Timetable[..1]}.{Day.ToString().PadLeft(2, '0')}.{Period.ToString().PadLeft(2, '0')}";
 
         private int GetDuration() => (int)EndTime.Subtract(StartTime).TotalMinutes;
 

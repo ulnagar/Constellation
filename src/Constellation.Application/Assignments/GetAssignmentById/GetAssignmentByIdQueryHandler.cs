@@ -69,6 +69,8 @@ internal sealed class GetAssignmentByIdQueryHandler
             DateOnly.FromDateTime(assignment.DueDate),
             (assignment.UnlockDate.HasValue ? DateOnly.FromDateTime(assignment.UnlockDate.Value) : null),
             (assignment.LockDate.HasValue ? DateOnly.FromDateTime(assignment.LockDate.Value) : null),
+            assignment.DelayForwarding,
+            assignment.ForwardingDate,
             assignment.AllowedAttempts,
             submissions);
 

@@ -81,6 +81,16 @@ internal sealed class UploadSubmissionToCanvas
             return;
         }
 
+        if (submission.Uploaded)
+        {
+            _logger
+                .ForContext(nameof(AssignmentAttemptSubmittedDomainEvent), notification, true)
+                .ForContext(nameof(Error), DomainErrors.Assignments.Submission.AlreadyUploaded, true)
+                .Warning("Failed to upload Assignment Submission to Canvas");
+
+            return;
+        }
+
         List<Offering> offerings = await _courseOfferingRepository.GetByCourseId(assignment.CourseId, cancellationToken);
 
         if (offerings is null)

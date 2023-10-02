@@ -1,5 +1,13 @@
 ﻿@page "{Id:Guid}"
+@using Constellation.Core.Abstractions.Clock
 @model Constellation.Presentation.Server.Areas.Subject.Pages.Assignments.DetailsModel
+
+@inject IDateTimeProvider _dateTime;
+
+@{
+    bool AllowForwarding = !Model.Assignment.DelayForwarding ||
+                           Model.Assignment.ForwardingDate <= _dateTime.Today;
+}
 
 <h2>Canvas Assignment</h2>
 
@@ -79,6 +87,8 @@
     <h3>Submissions</h3>
 
     <button class="btn btn-success" data-toggle="modal" data-target="#uploadAssignmentModal">Upload Assignment</button>
+
+    <a asp-page-handler="DownloadAll" class="btn btn-success">Download All</a>
         
     <table class="table-striped table-hover data-table">
         <thead>
@@ -101,7 +111,10 @@
                         <a asp-page-handler="Download" asp-route-submission="@item.SubmissionId.ToString()" class="btn btn-sm btn-success btn-show-hover">Download</a>
                     </td>
                     <td>
-                        <a asp-page-handler="Resubmit" asp-route-submission="@item.SubmissionId.ToString()" class="btn btn-sm btn-warning btn-show-hover">Resubmit to Canvas</a>
+                        @if (AllowForwarding)
+                        {
+                            <a asp-page-handler="Resubmit" asp-route-submission="@item.SubmissionId.ToString()" class="btn btn-sm btn-warning btn-show-hover">Resubmit to Canvas</a>
+                        }
                     </td>
                 </tr>
             }

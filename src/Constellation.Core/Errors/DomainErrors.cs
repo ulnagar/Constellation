@@ -76,6 +76,10 @@ public static class DomainErrors
             public static readonly Error UploadFailed = new(
                 "Assignments.Submission.UploadFailed",
                 "Assignment Submission could not be uploaded to Canvas server");
+
+            public static readonly Error AlreadyUploaded = new(
+                "Assignments.Submission.AlreadyUploaded",
+                "Assignment Submission has already been uploaded to Canvas server");
         }
     }
 

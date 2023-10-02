@@ -8,5 +8,6 @@ public sealed record TeacherSessionResponse(
     OfferingName OfferingName,
     SessionId SessionId,
     int PeriodId,
+    string PeriodSortOrder,
     string PeriodName,
     decimal Duration);

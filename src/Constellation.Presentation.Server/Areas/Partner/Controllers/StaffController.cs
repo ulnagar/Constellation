@@ -245,6 +245,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             {
                 sessionResponse.Add(new()
                 {
+                    PeriodSortOrder = entry.PeriodSortOrder,
                     Period = entry.PeriodName,
                     ClassName = entry.OfferingName,
                     Duration = (int)entry.Duration

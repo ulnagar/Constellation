@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.Assignments;
 
+using Application.Assignments.GetAllAssignmentSubmissionFiles;
 using Constellation.Application.Assignments.GetAssignmentById;
 using Constellation.Application.Assignments.GetAssignmentSubmissionFile;
 using Constellation.Application.Assignments.ResendAssignmentSubmissionToCanvas;
@@ -9,6 +10,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.UploadAssignmentSubmission;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -57,6 +59,26 @@ public class DetailsModel : BasePageModel
         Assignment = request.Value;
 
         return Page();
+    }
+
+    public async Task<IActionResult> OnGetDownloadAll(CancellationToken cancellationToken)
+    {
+        AssignmentId assignmentId = AssignmentId.FromValue(Id);
+
+        Result<FileDto> fileRequest = await _mediator.Send(new GetAllAssignmentSubmissionFilesQuery(assignmentId), cancellationToken);
+
+        if (fileRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = fileRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Assignments/Index", values: new { area = "Subject" })
+            };
+
+            return Page();
+        }
+
+        return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
     }
 
     public async Task<IActionResult> OnGetResubmit(Guid submission, CancellationToken cancellationToken)

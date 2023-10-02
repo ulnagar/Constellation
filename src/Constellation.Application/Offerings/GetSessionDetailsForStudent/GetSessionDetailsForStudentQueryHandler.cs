@@ -68,7 +68,7 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
 
             var teachers = await _staffRepository.GetListFromIds(assignments.Select(assignment => assignment.StaffId).ToList(), cancellationToken);
             
-            foreach (var session in offering.Sessions)
+            foreach (var session in offering.Sessions.Where(session => !session.IsDeleted))
             {
                 var period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
 
@@ -80,6 +80,7 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
                 }
 
                 sessionList.Add(new(
+                    period.SortOrder,
                     period.ToString(),
                     offering.Name,
                     teachers?.Select(teacher => teacher.DisplayName).ToList(),

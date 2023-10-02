@@ -5,7 +5,6 @@
 
 @using Constellation.Application.Extensions;
 @using Constellation.Core.Models.Families;
-@using Constellation.Core.ValueObjects;
 
 @{
     var authorised = await authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
@@ -100,7 +99,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#sessions" data-toggle="tab" role="tab">
+            <a class="nav-link" href="#sessions" data-toggle="tab" role="tab" id="sessions-tab-button">
                 Active sessions
                 @if (Model.Sessions.Any())
                 {
@@ -136,49 +135,49 @@
 
             <table class="table table-striped table-hover data-table">
                 <thead>
-                    <tr>
-                        <th></th>
-                        <th></th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th></th>
-                    </tr>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th></th>
+                </tr>
                 </thead>
                 <tbody>
-                    @foreach (var entry in Model.FamilyContacts)
-                    {
-                        <tr>
-                            <td>
-                                @if (entry.IsResidentialContact)
-                                {
-                                    <i class="fal fa-house" />
-                                }
-                            </td>
-                            <td>
-                                @if (entry.ContactType == Parent.SentralReference.Father)
-                                {
-                                    <i class="fal fa-male" />
-                                }
+                @foreach (var entry in Model.FamilyContacts)
+                {
+                    <tr>
+                        <td>
+                            @if (entry.IsResidentialContact)
+                            {
+                                <i class="fal fa-house" />
+                            }
+                        </td>
+                        <td>
+                            @if (entry.ContactType == Parent.SentralReference.Father)
+                            {
+                                <i class="fal fa-male" />
+                            }
 
-                                @if (entry.ContactType == Parent.SentralReference.Mother)
-                                {
-                                    <i class="fal fa-female" />
-                                }
+                            @if (entry.ContactType == Parent.SentralReference.Mother)
+                            {
+                                <i class="fal fa-female" />
+                            }
 
-                                @if (entry.ContactType == Parent.SentralReference.Other)
-                                {
-                                    <i class="fal fa-house-leave" />
-                                }
-                            </td>
-                            <td>@entry.Name</td>
-                            <td>@entry.EmailAddress?.Email</td>
-                            <td>@entry.MobileNumber?.ToString()</td>
-                            <td>
-                                <a asp-page="/Families/Details" asp-area="Partner" asp-route-id="@entry.FamilyId.Value" class="btn btn-sm btn-warning btn-show-hover">Details</a>
-                            </td>
-                        </tr>
-                    }
+                            @if (entry.ContactType == Parent.SentralReference.Other)
+                            {
+                                <i class="fal fa-house-leave" />
+                            }
+                        </td>
+                        <td>@entry.Name</td>
+                        <td>@entry.EmailAddress?.Email</td>
+                        <td>@entry.MobileNumber?.ToString()</td>
+                        <td>
+                            <a asp-page="/Families/Details" asp-area="Partner" asp-route-id="@entry.FamilyId.Value" class="btn btn-sm btn-warning btn-show-hover">Details</a>
+                        </td>
+                    </tr>
+                }
                 </tbody>
             </table>
         </div>
@@ -194,33 +193,33 @@
 
             <table class="table-striped table-hover data-table">
                 <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Course</th>
-                        <th>Teacher</th>
-                        <th></th>
-                    </tr>
+                <tr>
+                    <th>Name</th>
+                    <th>Course</th>
+                    <th>Teacher</th>
+                    <th></th>
+                </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Enrolments)
-                    {
-                        <tr>
-                            <td>@item.OfferingName</td>
-                            <td>@item.CourseName</td>
-                            <td>
-                                @foreach (var teacher in item.Teachers)
-                                {
-                                    <span class="badge">@teacher</span>
-                                }
-                            </td>
-                            <td>
-                                @if (authorised.Succeeded)
-                                {
-                                    @Html.ActionLink("Remove", "Unenrol", "Students", new {area = "Partner", id = Model.Student.StudentId, classId = item.OfferingId}, new {@class = "btn btn-sm btn-danger btn-show-hover"})
-                                }
-                            </td>
-                        </tr>
-                    }
+                @foreach (var item in Model.Enrolments)
+                {
+                    <tr>
+                        <td>@item.OfferingName</td>
+                        <td>@item.CourseName</td>
+                        <td>
+                            @foreach (var teacher in item.Teachers)
+                            {
+                                <span class="badge">@teacher</span>
+                            }
+                        </td>
+                        <td>
+                            @if (authorised.Succeeded)
+                            {
+                                @Html.ActionLink("Remove", "Unenrol", "Students", new {area = "Partner", id = Model.Student.StudentId, classId = item.OfferingId}, new {@class = "btn btn-sm btn-danger btn-show-hover"})
+                            }
+                        </td>
+                    </tr>
+                }
                 </tbody>
             </table>
         </div>
@@ -228,36 +227,38 @@
         <div id="sessions" class="tab-pane">
             <h3>Current Sessions</h3>
 
-            <table class="table-striped table-hover data-table">
+            <table class="table-striped table-hover hidden-sort-data-table">
                 <thead>
-                    <tr>
-                        <th>Period</th>
-                        <th>Class</th>
-                        <th>Teacher</th>
-                        <th>Duration</th>
-                    </tr>
+                <tr>
+                    <th></th>
+                    <th>Period</th>
+                    <th>Class</th>
+                    <th>Teacher</th>
+                    <th>Duration</th>
+                </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Sessions)
-                    {
-                        <tr>
-                            <td>@item.PeriodName</td>
-                            <td>@item.OfferingName</td>
-                            <td>
-                                @foreach (var teacher in item.Teachers)
-                                {
-                                    <span class="badge">@teacher</span>
-                                }
-                            </td>
-                            <td>@item.Duration</td>
-                        </tr>
-                    }
+                @foreach (var item in Model.Sessions)
+                {
+                    <tr>
+                        <td>@item.PeriodSortOrder</td>
+                        <td>@item.PeriodName</td>
+                        <td>@item.OfferingName</td>
+                        <td>
+                            @foreach (var teacher in item.Teachers)
+                            {
+                                <span class="badge">@teacher</span>
+                            }
+                        </td>
+                        <td>@item.Duration</td>
+                    </tr>
+                }
                 </tbody>
                 <tfoot>
-                    <tr>
-                        <th colspan="3" class="text-right">Total Minutes per Cycle:</th>
-                        <th>@Model.MinPerFn</th>
-                    </tr>
+                <tr>
+                    <th colspan="4" class="text-right">Total Minutes per Cycle:</th>
+                    <th>@Model.MinPerFn</th>
+                </tr>
                 </tfoot>
             </table>
         </div>
@@ -267,34 +268,34 @@
 
             <table class="table-striped table-hover data-table">
                 <thead>
-                    <tr>
-                        <th>Make</th>
-                        <th>Serial Number</th>
-                        <th>Status</th>
-                        <th>Date Assigned</th>
-                        <th>Date Returned</th>
-                        <th></th>
-                    </tr>
+                <tr>
+                    <th>Make</th>
+                    <th>Serial Number</th>
+                    <th>Status</th>
+                    <th>Date Assigned</th>
+                    <th>Date Returned</th>
+                    <th></th>
+                </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Equipment)
-                    {
-                        <tr>
-                            <td>@item.Make</td>
-                            <td>@item.SerialNumber</td>
-                            <td>@item.Status</td>
-                            <td>@item.DateAllocated.ToShortDateString()</td>
-                            <td>
-                                @if (item.DateReturned.HasValue)
-                                {
-                                    item.DateReturned.Value.ToShortDateString();
-                                }
-                            </td>
-                            <td>
-                                @Html.ActionLink("More Info...", "Details", "Devices", new { area = "Equipment", id = item.SerialNumber }, new { @class = "btn btn-sm btn-info btn-show-hover" })
-                            </td>
-                        </tr>
-                    }
+                @foreach (var item in Model.Equipment)
+                {
+                    <tr>
+                        <td>@item.Make</td>
+                        <td>@item.SerialNumber</td>
+                        <td>@item.Status</td>
+                        <td>@item.DateAllocated.ToShortDateString()</td>
+                        <td>
+                            @if (item.DateReturned.HasValue)
+                            {
+                                item.DateReturned.Value.ToShortDateString();
+                            }
+                        </td>
+                        <td>
+                            @Html.ActionLink("More Info...", "Details", "Devices", new { area = "Equipment", id = item.SerialNumber }, new { @class = "btn btn-sm btn-info btn-show-hover" })
+                        </td>
+                    </tr>
+                }
                 </tbody>
             </table>
         </div>
@@ -304,38 +305,38 @@
 
             <table class="table-striped table-hover data-table">
                 <thead>
-                    <tr>
-                        <th>Explained</th>
-                        <th>Type</th>
-                        <th>Date</th>
-                        <th>Period</th>
-                        <th>Class</th>
-                        <th></th>
-                    </tr>
+                <tr>
+                    <th>Explained</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Period</th>
+                    <th>Class</th>
+                    <th></th>
+                </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Absences.OrderBy(a => a.AbsenceDate).ThenBy(a => a.Timeframe))
-                    {
-                        <tr>
-                            <td>
-                                @if (item.IsExplained)
-                                {
-                                    <i class="fal fa-comment-check" />
-                                }
-                                else
-                                {
-                                    <i class="fal fa-comment-times" />
-                                }
-                            </td>
-                            <td>@item.AbsenceType</td>
-                            <td>@item.AbsenceDate.ToShortDateString()</td>
-                            <td>@item.Timeframe (@item.PeriodName)</td>
-                            <td>@item.OfferingName</td>
-                            <td>
-                                <a asp-page="/Absences/Details" asp-area="SchoolAdmin" asp-route-Id="@item.AbsenceId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
-                            </td>
-                        </tr>
-                    }
+                @foreach (var item in Model.Absences.OrderBy(a => a.AbsenceDate).ThenBy(a => a.Timeframe))
+                {
+                    <tr>
+                        <td>
+                            @if (item.IsExplained)
+                            {
+                                <i class="fal fa-comment-check" />
+                            }
+                            else
+                            {
+                                <i class="fal fa-comment-times" />
+                            }
+                        </td>
+                        <td>@item.AbsenceType</td>
+                        <td>@item.AbsenceDate.ToShortDateString()</td>
+                        <td>@item.Timeframe (@item.PeriodName)</td>
+                        <td>@item.OfferingName</td>
+                        <td>
+                            <a asp-page="/Absences/Details" asp-area="SchoolAdmin" asp-route-Id="@item.AbsenceId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                        </td>
+                    </tr>
+                }
                 </tbody>
             </table>
         </div>

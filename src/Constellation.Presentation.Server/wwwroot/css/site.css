@@ -368,3 +368,14 @@ input.checkbox-toggle:checked:before {
 main {
     /* min-height: 100vh; */
 }
+
+
+/* Custom sort data table styles */
+table.hidden-sort-data-table {
+    width: 100% !important;
+}
+
+table.hidden-sort-data-table th {
+    width: unset !important;
+}
+

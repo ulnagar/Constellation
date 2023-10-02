@@ -68,6 +68,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
 
         public class SessionDto
         {
+            public string PeriodSortOrder { get; set; }
             public string Period { get; set; }
             [Display(Name = DisplayNameDefaults.ClassName)]
             public string ClassName { get; set; }

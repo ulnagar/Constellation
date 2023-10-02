@@ -182,18 +182,20 @@
         <div id="sessions" class="tab-pane">
             <h3>Scheduled Periods</h3>
 
-            <table class="table-striped table-hover data-table">
+            <table class="table-striped table-hover hidden-sort-data-table">
                 <thead>
-                    <tr>
-                        <th>Period</th>
-                        <th>Class</th>
-                        <th>Duration</th>
-                    </tr>
+                <tr>
+                    <th></th>
+                    <th>Period</th>
+                    <th>Class</th>
+                    <th>Duration</th>
+                </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model.Sessions)
                     {
                         <tr>
+                            <td>@item.PeriodSortOrder</td>
                             <td>@item.Period</td>
                             <td>@item.ClassName</td>
                             <td>@item.Duration</td>
