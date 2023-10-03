@@ -45,7 +45,18 @@ internal sealed class GetAllOfferingSummariesQueryHandler
     {
         List<OfferingSummaryResponse> response = new();
 
-        List<Offering> offerings = await _offeringRepository.GetAll(cancellationToken);
+        List<Offering> offerings = request.Filter switch
+        {
+            GetAllOfferingSummariesQuery.FilterEnum.All => await _offeringRepository.GetAll(cancellationToken),
+            GetAllOfferingSummariesQuery.FilterEnum.Active => await _offeringRepository.GetAllActive(cancellationToken),
+            GetAllOfferingSummariesQuery.FilterEnum.Future => await _offeringRepository.GetAllFuture(cancellationToken),
+            GetAllOfferingSummariesQuery.FilterEnum.Inactive => await _offeringRepository.GetAllInactive(cancellationToken),
+            _ => new List<Offering>()
+        };
+
+        List<Faculty> faculties = await _facultyRepository.GetAll(cancellationToken);
+
+        List<Course> courses = await _courseRepository.GetAll(cancellationToken);
 
         foreach (Offering offering in offerings)
         {
@@ -62,7 +73,7 @@ internal sealed class GetAllOfferingSummariesQueryHandler
 
             double minPerFn = await _periodRepository.TotalDurationForCollectionOfPeriods(periodIds, cancellationToken);
 
-            Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+            Course course = courses.FirstOrDefault(course => course.Id == offering.CourseId);
 
             if (course is null)
             {
@@ -74,7 +85,7 @@ internal sealed class GetAllOfferingSummariesQueryHandler
             }
 
             // Get Faculty
-            Faculty faculty = await _facultyRepository.GetById(course.FacultyId, cancellationToken);
+            Faculty faculty = faculties.FirstOrDefault(faculty => faculty.Id == course.FacultyId);
 
             if (faculty is null)
             {

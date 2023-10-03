@@ -1,6 +1,5 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
 
-using Constellation.Application.Extensions;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetAllOfferingSummaries;
 using Constellation.Application.Offerings.Models;
@@ -26,7 +25,7 @@ public class IndexModel : BasePageModel
     public string ActivePage => "Offerings";
 
     [BindProperty(SupportsGet = true)]
-    public FilterDto Filter { get; set; } = FilterDto.Active;
+    public GetAllOfferingSummariesQuery.FilterEnum Filter { get; set; } = GetAllOfferingSummariesQuery.FilterEnum.Active;
     [BindProperty(SupportsGet = true)]
     public GradeDto SelectedGrade { get; set; } = GradeDto.All;
     [BindProperty(SupportsGet = true)]
@@ -41,7 +40,7 @@ public class IndexModel : BasePageModel
     {
         await GetClasses(_sender);
 
-        Result<List<OfferingSummaryResponse>> request = await _sender.Send(new GetAllOfferingSummariesQuery());
+        Result<List<OfferingSummaryResponse>> request = await _sender.Send(new GetAllOfferingSummariesQuery { Filter = Filter });
 
         if (request.IsFailure)
         {
@@ -57,15 +56,6 @@ public class IndexModel : BasePageModel
         Offerings = request.Value;
         Grades = Offerings.Select(offering => offering.Grade).Distinct().ToList();
         Faculties = Offerings.Select(offering => offering.Faculty).Distinct().ToList();
-
-        Offerings = Filter switch
-        {
-            FilterDto.All => Offerings,
-            FilterDto.Active => Offerings.Where(offering => offering.IsActive).ToList(),
-            FilterDto.Inactive => Offerings.Where(offering => !offering.IsActive).ToList(),
-            FilterDto.Future => Offerings.Where(offering => !offering.IsActive && offering.EndDate > DateOnly.FromDateTime(DateTime.Today)).ToList(),
-            _ => Offerings
-        };
 
         Offerings = SelectedGrade switch
         {
@@ -94,13 +84,5 @@ public class IndexModel : BasePageModel
         Y10 = 10,
         Y11 = 11,
         Y12 = 12
-    }
-
-    public enum FilterDto
-    {
-        All,
-        Active,
-        Inactive,
-        Future
     }
 }

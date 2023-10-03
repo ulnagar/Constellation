@@ -13,6 +13,9 @@ public interface IOfferingRepository
 {
     Task<Offering> GetById(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetAllActive(CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetAllFuture(CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetAllInactive(CancellationToken cancellationToken = default);
+
     Task<List<Offering>> GetActiveForTeacher(string StaffId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Offering>> GetActiveByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
@@ -31,6 +34,7 @@ public interface IOfferingRepository
     Task<Offering> GetFromYearAndName(int year, string name, CancellationToken cancellationToken = default);
 
     void Insert(Offering offering);
+    void Remove(Resource resource);
 
     Task<List<string>> GetTimetableByOfferingId(OfferingId offeringId, CancellationToken cancellationToken = default);
 }

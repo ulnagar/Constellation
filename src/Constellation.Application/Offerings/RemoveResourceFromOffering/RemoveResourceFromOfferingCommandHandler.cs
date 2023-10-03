@@ -38,7 +38,7 @@ internal sealed class RemoveResourceFromOfferingCommandHandler
             return Result.Failure(OfferingErrors.NotFound(request.OfferingId));
         }
 
-        Result action = offering.RemoveResource(request.ResourceId);
+        Result<Resource> action = offering.RemoveResource(request.ResourceId);
 
         if (action.IsSuccess)
         {
@@ -46,6 +46,8 @@ internal sealed class RemoveResourceFromOfferingCommandHandler
 
             return Result.Failure(action.Error);
         }
+
+        _offeringRepository.Remove(action.Value);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

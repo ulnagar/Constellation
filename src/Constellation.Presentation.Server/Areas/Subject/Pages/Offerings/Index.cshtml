@@ -1,8 +1,7 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Subject.Pages.Offerings.IndexModel
 
-@using Constellation.Presentation.Server.Areas.Subject.Pages.Offerings
-@using Constellation.Application.Extensions
+@using Constellation.Application.Offerings.GetAllOfferingSummaries
 
 @inject IAuthorizationService authService
 
@@ -21,26 +20,26 @@
 
         switch (Model.Filter)
         {
-            case IndexModel.FilterDto.All:
+            case GetAllOfferingSummariesQuery.FilterEnum.All:
                 all_style = "btn-primary";
                 break;
-            case IndexModel.FilterDto.Active:
+            case GetAllOfferingSummariesQuery.FilterEnum.Active:
                 active_style = "btn-primary";
                 break;
-            case IndexModel.FilterDto.Inactive:
+            case GetAllOfferingSummariesQuery.FilterEnum.Inactive:
                 inactive_style = "btn-primary";
                 break;
-            case IndexModel.FilterDto.Future:
+            case GetAllOfferingSummariesQuery.FilterEnum.Future:
                 future_style = "btn-primary";
                 break;
         }
     }
 
     <div class="btn-group">
-        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
-        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Active" class="btn @active_style">Active</a>
-        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Inactive" class="btn @inactive_style">Inactive</a>
-        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Future" class="btn @future_style">Future</a>
+        <a asp-page="Index" asp-route-filter="@GetAllOfferingSummariesQuery.FilterEnum.All" class="btn @all_style">All</a>
+        <a asp-page="Index" asp-route-filter="@GetAllOfferingSummariesQuery.FilterEnum.Active" class="btn @active_style">Active</a>
+        <a asp-page="Index" asp-route-filter="@GetAllOfferingSummariesQuery.FilterEnum.Inactive" class="btn @inactive_style">Inactive</a>
+        <a asp-page="Index" asp-route-filter="@GetAllOfferingSummariesQuery.FilterEnum.Future" class="btn @future_style">Future</a>
     </div>
 
     <div class="btn-group" role="group">

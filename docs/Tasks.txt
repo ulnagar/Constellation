@@ -25,29 +25,11 @@ SCHOOL PORTAL:
 	Consolidate the server-side controllers that do not have much use (e.g. put the students and staff into the SCHOOL controller, etc.)
 	Refactor the exam submission flow to make it more wizard-like
 
-REFACTOR:
-	*Move the external connections to separate subfolders, including the gateway, configuration, and service.
-		e.g. \ExternalServices
-				\Sentral
-					SentralGateway
-					SentralGatewayConfiguration
-					SentralGatewayService
-	*Create separate public servicecollection extensions for each external service
-	Remove all direct usage of external services from mediator handlers and enforce service usage
-	 This doesn't solve the issue where Mediatr handlers would be automatically registered - would need
-	  to move each to a separate project for that
-	 Mediatr Handlers are all that are registered. The Command or Query itself can be in a shared project, 
-	  but there wouldn't be any handler to process.
-
-
 APP PERMISSIONS:
 	Implement generic permissions as per https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-6.0#use-a-handler-for-multiple-requirements
 	Permission Structure:
 	 SchoolContact = Portal.School.User
 	 Parent = Portal.Parent.User
-
-ADOBE CONNECT:
-	Remove direct link for Adobe Connect Room to Session, allowing a class to be created without a Connect Room.
 
 OPERATIONS:
 	Return more meaningful errors to log for troubleshooting
@@ -58,29 +40,17 @@ COVERS:
 LINK SHORTENER:
 	Provide interface for custom shortening of long URLs on custom domain
 
-MISSED CLASSWORK:
-	Periodic report for HTs on what hasn't been completed
-	Provide option to HT for cancellation/mark done of a notification without sending an email
-
 TRACKITSYNC JOB:
 	Convert to individual MEDIATR actions, to allow for calling immediately when relevant records change
 
 GRADES:
 	Migrate from ENUM to object
 
-HANGFIRE DASHBOARD:
-	Add TRIGGER NOW button for one-off job registration
-	*Add TRIGGER OUTSIDE HANGFIRE button for interactive sessions
-	Manage once-per-day job continuation
-
 SCHOOLS PORTAL LOGIN:
 	Return status from MEDIATR find user action, so that an error message can be displayed as appropriate when an inactive user is detected
 
 ATTENDANCE REPORT JOB:
 	Save generated files to database
-
-ABSENCES:
-	Externally explained absences created as Response records are being created every scan. Need to update detection so they are recognised as an explained absence.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 DONE
