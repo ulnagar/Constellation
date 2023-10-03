@@ -40,6 +40,11 @@ internal sealed class GetFamilyContactsForStudentQueryHandler
 
             var familyEmail = EmailAddress.Create(family.FamilyEmail);
 
+            if (familyEmail.IsFailure)
+            {
+                familyEmail = Result.Success(EmailAddress.None);
+            }
+
             contacts.Add(new(
                 isResidentialFamily,
                 Parent.SentralReference.Other,
@@ -48,7 +53,7 @@ internal sealed class GetFamilyContactsForStudentQueryHandler
                 null,
                 null,
                 family.Id,
-                null));
+                new()));
 
             foreach (var parent in family.Parents)
             {
@@ -63,7 +68,7 @@ internal sealed class GetFamilyContactsForStudentQueryHandler
                     (parentMobile.IsSuccess ? parentMobile.Value : null),
                     parent.Id,
                     family.Id,
-                    null));
+                    new()));
             }
         }
 

@@ -8,6 +8,8 @@ using System.ComponentModel.DataAnnotations;
 
 public sealed class EmailAddress : ValueObject
 {
+    public static EmailAddress None = new("");
+
     private EmailAddress(string email)
     {
         Email = email;

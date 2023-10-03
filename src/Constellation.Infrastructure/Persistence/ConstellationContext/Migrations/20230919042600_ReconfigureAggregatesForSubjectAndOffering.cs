@@ -308,13 +308,13 @@ WHERE
                 principalColumn: "Id");
 
             migrationBuilder.Sql(@"
-UPDATE [CONSTELLATION_DEV].[dbo].[Offerings_Sessions]
+UPDATE [dbo].[Offerings_Sessions]
 SET
 	IsDeleted = 1,
 	DeletedAt = CURRENT_TIMESTAMP, 
 	DeletedBy = 'System'
-FROM [CONSTELLATION_DEV].[dbo].[Offerings_Sessions] s
-	LEFT JOIN [CONSTELLATION_DEV].dbo.Periods p on s.PeriodId = p.Id
+FROM [dbo].[Offerings_Sessions] s
+	LEFT JOIN dbo.Periods p on s.PeriodId = p.Id
 WHERE
 	p.Type = 'Other' and 
 	s.IsDeleted = 0");
