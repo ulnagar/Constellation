@@ -54,11 +54,11 @@
       "destination": "wwwroot/lib/jquery-validation-unobtrusive/"
     },
     {
-      "library": "datatables.net@1.11.3",
+      "library": "datatables.net@1.13.6",
       "destination": "wwwroot/lib/datatables.net/"
     },
     {
-      "library": "datatables.net-dt@1.11.3",
+      "library": "datatables.net-dt@1.13.6",
       "destination": "wwwroot/lib/datatables.net-dt/"
     },
     {
@@ -66,7 +66,7 @@
       "destination": "wwwroot/lib/moment.js/"
     },
     {
-      "library": "datatables-plugins@1.11.3",
+      "library": "datatables-plugins@1.13.6",
       "destination": "wwwroot/lib/datatables-plugins/",
       "files": [
         "sorting/datetime-moment.js",

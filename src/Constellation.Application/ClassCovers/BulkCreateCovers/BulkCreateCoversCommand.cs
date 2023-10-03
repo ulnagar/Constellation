@@ -2,13 +2,15 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Models.Covers;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.ValueObjects;
 using System;
 using System.Collections.Generic;
 
 public sealed record BulkCreateCoversCommand(
     Guid Id,
-    List<int> OfferingId,
+    List<OfferingId> OfferingId,
     DateOnly StartDate,
     DateOnly EndDate,
     CoverTeacherType TeacherType,

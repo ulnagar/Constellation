@@ -3,6 +3,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Infrastructure.Templates.Views.Documents.Attendance;
 using Constellation.Presentation.Server.Areas.Utility.Models;
 using Constellation.Presentation.Server.BaseModels;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -21,9 +22,13 @@ namespace Constellation.Presentation.Server.Areas.Utility.Controllers
         private readonly IPDFService _pdfService;
         private readonly IExcelService _excelService;
 
-        public DocumentExportController(IUnitOfWork unitOfWork, IRazorViewToStringRenderer renderService,
-            IPDFService pdfService, IExcelService excelService)
-            : base(unitOfWork)
+        public DocumentExportController(
+            IUnitOfWork unitOfWork, 
+            IRazorViewToStringRenderer renderService,
+            IPDFService pdfService, 
+            IExcelService excelService,
+            IMediator mediator)
+            : base(mediator)
         {
             _renderService = renderService;
             _pdfService = pdfService;

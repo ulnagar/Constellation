@@ -7,6 +7,7 @@ using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Equipment.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
@@ -22,8 +23,11 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDeviceService _deviceService;
 
-        public DevicesController(IUnitOfWork unitOfWork, IDeviceService deviceService)
-            : base(unitOfWork)
+        public DevicesController(
+            IUnitOfWork unitOfWork, 
+            IDeviceService deviceService,
+            IMediator mediator)
+            : base(mediator)
         {
             _unitOfWork = unitOfWork;
             _deviceService = deviceService;

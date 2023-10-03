@@ -5,7 +5,7 @@ using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Identifiers;
@@ -13,9 +13,9 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class SentralAwardSyncJob : ISentralAwardSyncJob
+internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
 {
-    private readonly Serilog.ILogger _logger;
+    private readonly ILogger _logger;
     private readonly ISentralGateway _gateway;
     private readonly IStudentRepository _studentRepository;
     private readonly IStudentAwardRepository _awardRepository;
@@ -24,7 +24,7 @@ public class SentralAwardSyncJob : ISentralAwardSyncJob
     private readonly IUnitOfWork _unitOfWork;
 
     public SentralAwardSyncJob(
-        Serilog.ILogger logger,
+        ILogger logger,
         ISentralGateway gateway,
         IStudentRepository studentRepository,
         IStudentAwardRepository awardRepository,

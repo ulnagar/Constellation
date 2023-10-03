@@ -171,7 +171,7 @@
                         <td>@Html.DisplayFor(model => item.PhoneNumber, "PhoneNumber")</td>
                         <td>@Html.DisplayFor(model => item.Role)</td>
                         <td>
-                            @Html.ActionLink("Remove", "DeleteAssignment", "SchoolContact", new {id = item.Id}, new {@class = "btn btn-sm btn-warning btn-show-hover"})
+                            @Html.ActionLink("Remove", "DeleteAssignment", "SchoolContacts", new {id = item.Id}, new {@class = "btn btn-sm btn-warning btn-show-hover"})
                         </td>
                     </tr>
                 }
@@ -182,23 +182,23 @@
         <div id="sessions" class="tab-pane">
             <h3>Scheduled Periods</h3>
 
-            <table class="table-striped table-hover data-table">
+            <table class="table-striped table-hover hidden-sort-data-table">
                 <thead>
-                    <tr>
-                        <th>Period</th>
-                        <th>Class</th>
-                        <th>Room</th>
-                        <th>Duration</th>
-                    </tr>
+                <tr>
+                    <th></th>
+                    <th>Period</th>
+                    <th>Class</th>
+                    <th>Duration</th>
+                </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model.Sessions)
                     {
                         <tr>
-                            <td>@Html.DisplayFor(model => item.Period, "Period")</td>
-                            <td>@Html.DisplayFor(model => item.ClassName)</td>
-                            <td>@Html.DisplayFor(model => item.RoomName)</td>
-                            <td>@Html.DisplayFor(model => item.Duration)</td>
+                            <td>@item.PeriodSortOrder</td>
+                            <td>@item.Period</td>
+                            <td>@item.ClassName</td>
+                            <td>@item.Duration</td>
                         </tr>
                     }
                 </tbody>
@@ -213,6 +213,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Course</th>
+                        <th>Type</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -220,10 +221,11 @@
                     @foreach (var item in Model.Offerings)
                     {
                         <tr>
-                            <td>@Html.DisplayFor(model => item.Name)</td>
-                            <td>@Html.DisplayFor(model => item.CourseName)</td>
+                            <td>@item.Name</td>
+                            <td>@item.CourseName</td>
+                            <td>@item.AssignmentType</td>
                             <td>
-                                @Html.ActionLink("More Info...", "Details", "Classes", new {area = "Subject", id = item.Id}, new {@class = "btn btn-sm btn-info btn-show-hover"})
+                                <a asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@item.Id.Value" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                             </td>
                         </tr>
                     }

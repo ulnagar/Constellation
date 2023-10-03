@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.DomainEvents;
 
+using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Models.Identifiers;
 
 public sealed record AssignmentAttemptSubmittedDomainEvent(

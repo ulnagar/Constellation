@@ -7,35 +7,35 @@ using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
-using Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
 using Microsoft.Extensions.Options;
 using Serilog.Context;
-using System.Configuration;
-using System.Drawing;
 using System.Threading;
 
-public class AbsenceProcessingJob : IAbsenceProcessingJob
+internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
 {
     private readonly ISentralGateway _sentralService;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
     private readonly IAbsenceRepository _absenceRepository;
 
     private Student _student;
     private List<DateOnly> _excludedDates = new(); 
-    private AppConfiguration _configuration;
+    private readonly AppConfiguration _configuration;
     private Guid JobId { get; set; }
 
     public AbsenceProcessingJob(
         IOptions<AppConfiguration> configuration,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ITimetablePeriodRepository periodRepository,
         IAbsenceRepository absenceRepository,
         ISentralGateway sentralService,
@@ -164,19 +164,19 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
             int cycleDay = group.Key.GetDayNumber();
 
             // Get all enrolments for this student that were active on that date using the day of the cycle we identified above
-            List<CourseOffering> enrolledOfferings = await _offeringRepository
+            List<Offering> enrolledOfferings = await _offeringRepository
                 .GetCurrentEnrolmentsFromStudentForDate(
                     student.StudentId, 
                     group.Key, 
                     cycleDay, 
                     cancellationToken);
             
-            foreach (CourseOffering enrolledOffering in enrolledOfferings)
+            foreach (Offering enrolledOffering in enrolledOfferings)
             {
                 if (cancellationToken.IsCancellationRequested)
                     return returnAbsences;
 
-                if (!enrolledOffering.Name.Contains(group.First().ClassName))
+                if (!enrolledOffering.Name.Value.Contains(group.First().ClassName))
                 {
                     // The PxP absence is for a different class than the courseEnrolment
                     // therefore it should not be processed here.
@@ -643,7 +643,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
     private async Task<Absence> ProcessPartialAbsence(
         SentralPeriodAbsenceDto absence, 
         List<SentralPeriodAbsenceDto> webAttendAbsences, 
-        int courseEnrolmentId, 
+        OfferingId courseEnrolmentId, 
         List<TimetablePeriod> periodGroup,
         CancellationToken cancellationToken)
     {
@@ -728,7 +728,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
     private async Task<Absence> ProcessWholeAbsence(
         List<SentralPeriodAbsenceDto> absencesToProcess, 
         List<SentralPeriodAbsenceDto> webAttendAbsences, 
-        int courseEnrolmentId, 
+        OfferingId courseEnrolmentId, 
         List<TimetablePeriod> periodGroup, 
         int totalAbsenceTime, 
         CancellationToken cancellationToken)
@@ -886,7 +886,7 @@ public class AbsenceProcessingJob : IAbsenceProcessingJob
     private Absence CreateAbsence(
         List<SentralPeriodAbsenceDto> absencesToProcess, 
         SentralPeriodAbsenceDto? attendanceAbsence,
-        int courseEnrolmentId, 
+        OfferingId courseEnrolmentId, 
         AbsenceType type, 
         AbsenceReason reason, 
         List<TimetablePeriod> periodGroup)

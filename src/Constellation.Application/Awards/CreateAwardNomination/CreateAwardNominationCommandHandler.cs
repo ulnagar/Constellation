@@ -2,10 +2,12 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Awards;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
@@ -17,14 +19,14 @@ internal sealed class CreateAwardNominationCommandHandler
 {
     private readonly IAwardNominationRepository _nominationRepository;
     private readonly ICourseRepository _courseRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public CreateAwardNominationCommandHandler(
         IAwardNominationRepository nominationRepository,
         ICourseRepository courseRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -61,7 +63,7 @@ internal sealed class CreateAwardNominationCommandHandler
         {
             Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
 
-            CourseOffering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
 
             nomination = new AcademicExcellenceNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name);
         }
@@ -70,7 +72,7 @@ internal sealed class CreateAwardNominationCommandHandler
         {
             Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
 
-            CourseOffering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
 
             nomination = new AcademicAchievementNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name);
         }

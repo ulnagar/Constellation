@@ -4,10 +4,12 @@ using Constellation.Application.Absences.ConvertResponseToAbsenceExplanation;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using MediatR;
@@ -23,7 +25,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ISchoolContactRepository _contactRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
@@ -32,7 +34,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
         IAbsenceRepository absenceRepository,
         IStudentRepository studentRepository,
         ISchoolContactRepository contactRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ISchoolRepository schoolRepository,
         IEmailService emailService,
         ILogger logger)
@@ -113,7 +115,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             return;
         }
 
-        CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         if (offering is null)
         {

@@ -2,8 +2,9 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
@@ -16,13 +17,13 @@ internal sealed class GetAbsenceDetailsForSchoolQueryHandler
 {
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IStudentRepository _studentRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public GetAbsenceDetailsForSchoolQueryHandler(
         IAbsenceRepository absenceRepository,
         IStudentRepository studentRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;

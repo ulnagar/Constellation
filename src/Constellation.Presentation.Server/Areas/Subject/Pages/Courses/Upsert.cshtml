@@ -1,0 +1,93 @@
+﻿@page "{id:guid?}"
+@using Constellation.Core.Enums;
+@model Constellation.Presentation.Server.Areas.Subject.Pages.Courses.UpsertModel
+
+@{
+    var title = Model.Id.HasValue ? "Edit Course" : "Create New Course";
+}
+
+<h2>@title</h2>
+
+<div class="page-menu">
+    <a asp-page="/Courses/Index" asp-area="Subject" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="form-group row">
+            <label asp-for="Name" class="col-md-2"></label>
+            <div class="col-md-5">
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Code" class="col-md-2"></label>
+            <div class="col-md-5">
+                <input asp-for="Code" class="form-control" />
+                <span asp-validation-for="Code" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Grade" class="col-md-2"></label>
+            <div class="col-md-5">
+                <select asp-for="Grade" asp-items="@Html.GetEnumSelectList<Grade>()" class="form-control combo">
+                    <option value="">-- Select --</option>
+                </select>
+                <span asp-validation-for="Grade" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="FacultyId" class="col-md-2">Faculty</label>
+            <div class="col-md-5">
+                @if (Model.Id.HasValue)
+                {
+                    <select asp-for="FacultyId" asp-items="@(new SelectList(Model.Faculties, "FacultyId", "Name", Model.FacultyId))" class="form-control combo">
+                        <option value="">-- Select --</option>
+                    </select>
+                }
+                else
+                {
+                    <select asp-for="FacultyId" asp-items="@(new SelectList(Model.Faculties, "FacultyId", "Name"))" class="form-control combo">
+                        <option value="">-- Select --</option>
+                    </select>
+                }
+                <span asp-validation-for="FacultyId" class="text-danger"></span>
+
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="FTEValue" class="col-md-2"></label>
+            <div class="col-md-5">
+                <input asp-for="FTEValue" class="form-control" />
+                <span asp-validation-for="FTEValue" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-3">
+                @if (Model.Id.HasValue)
+                {
+                    <input asp-page-handler="Update" type="submit" value="Update" class="btn btn-primary btn-block btn-lg" />
+                }
+                else
+                {
+                    <input asp-page-handler="Create" type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                }
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -2,11 +2,12 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
-using Constellation.Core.Errors;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Assignments;
+using Core.Models.Assignments.Errors;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,19 +31,19 @@ internal sealed class UploadAssignmentSubmissionCommandHandler
 
     public async Task<Result> Handle(UploadAssignmentSubmissionCommand request, CancellationToken cancellationToken)
     {
-        var assignment = await _assignmentRepository.GetById(request.AssignmentId, cancellationToken);
+        CanvasAssignment assignment = await _assignmentRepository.GetById(request.AssignmentId, cancellationToken);
 
         if (assignment is null)
-            return Result.Failure(DomainErrors.Assignments.Assignment.NotFound(request.AssignmentId));
+            return Result.Failure(AssignmentErrors.NotFound(request.AssignmentId));
 
-        var submissionResult = assignment.AddSubmission(
-            new AssignmentSubmissionId(),
-            request.StudentId);
+        Result<CanvasAssignmentSubmission> submissionResult = assignment.AddSubmission(
+            request.StudentId,
+            request.SubmittedBy);
 
         if (submissionResult.IsFailure)
             return submissionResult;
 
-        var file = new StoredFile
+        StoredFile file = new()
         {
             LinkId = submissionResult.Value.Id.ToString(),
             LinkType = StoredFile.CanvasAssignmentSubmission,

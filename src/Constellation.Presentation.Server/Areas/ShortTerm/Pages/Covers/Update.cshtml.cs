@@ -8,6 +8,7 @@ using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.CanEditCovers)]
@@ -28,8 +29,12 @@ public class UpdateModel : BasePageModel
     public Guid Id { get; set; }
     public string OfferingName { get; set; }
     [BindProperty]
+    [DataType(DataType.Date)]
+    [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy-MM-dd}")]
     public DateOnly StartDate { get; set; }
     [BindProperty]
+    [DataType(DataType.Date)]
+    [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy-MM-dd}")]
     public DateOnly EndDate { get; set; }
     public string TeacherSchool { get; set; }
     public string TeacherName { get; set; }

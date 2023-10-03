@@ -4,6 +4,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.Areas.Admin.Models;
 using Constellation.Presentation.Server.BaseModels;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -16,8 +17,10 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public SettingsController(IUnitOfWork unitOfWork)
-            : base(unitOfWork)
+        public SettingsController(
+            IUnitOfWork unitOfWork,
+            IMediator mediator)
+            : base(mediator)
         {
             _unitOfWork = unitOfWork;
         }

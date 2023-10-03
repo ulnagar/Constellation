@@ -6,7 +6,7 @@ using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.Models;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
@@ -19,7 +19,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
+internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
 {
     private readonly AppConfiguration _configuration;
     private readonly ITrainingModuleRepository _trainingModuleRepository;

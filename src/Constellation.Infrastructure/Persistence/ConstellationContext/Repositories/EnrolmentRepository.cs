@@ -1,17 +1,25 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
+using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Models.Enrolments;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 public class EnrolmentRepository : IEnrolmentRepository
 {
     private readonly AppDbContext _context;
+    private readonly IDateTimeProvider _dateTime;
 
-    public EnrolmentRepository(AppDbContext context)
+    public EnrolmentRepository(
+        AppDbContext context,
+        IDateTimeProvider dateTime)
     {
         _context = context;
+        _dateTime = dateTime;
     }
 
     public async Task<List<Enrolment>> GetCurrentByStudentId(
@@ -19,95 +27,73 @@ public class EnrolmentRepository : IEnrolmentRepository
         CancellationToken cancellationToken = default)
     {
         var today = DateTime.Today;
+        List<OfferingId> currentOfferings = await _context
+            .Set<Offering>()
+            .Where(offering =>
+                offering.StartDate <= _dateTime.Today &&
+                offering.EndDate >= _dateTime.Today)
+            .Select(offering => offering.Id)
+            .ToListAsync(cancellationToken);
 
         return await _context
             .Set<Enrolment>()
-            .Include(enrol => enrol.Offering)
-            .ThenInclude(offering => offering.Course)
             .Where(enrol =>
                 enrol.StudentId == studentId &&
                 !enrol.IsDeleted &&
-                enrol.Offering.EndDate >= today &&
-                enrol.Offering.StartDate <= today)
+                currentOfferings.Contains(enrol.OfferingId))
             .ToListAsync(cancellationToken);
     }
 
     public async Task<List<Enrolment>> GetCurrentByOfferingId(
-        int offeringId,
+        OfferingId offeringId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Enrolment>()
             .Where(enrol => enrol.OfferingId == offeringId && !enrol.IsDeleted)
             .ToListAsync(cancellationToken);
 
-    private IQueryable<Enrolment> Collection()
+    public async Task<int> GetCurrentCountByCourseId(
+        CourseId courseId, 
+        CancellationToken cancellationToken = default)
     {
-        return _context.Enrolments
-            .Include(e => e.Offering)
-                .ThenInclude(offering => offering.Sessions)
-                    .ThenInclude(session => session.Room)
-            .Include(e => e.Student);
+        List<OfferingId> offeringIds = await _context
+            .Set<Offering>()
+            .Where(offering =>
+                offering.CourseId == courseId &&
+                (offering.Sessions.Any(session => !session.IsDeleted) ||
+                (offering.StartDate <= _dateTime.Today && offering.EndDate >= _dateTime.Today)))
+            .Select(offering => offering.Id)
+            .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<Enrolment>()
+            .Where(enrolment =>
+                !enrolment.IsDeleted &&
+                offeringIds.Contains(enrolment.OfferingId))
+            .CountAsync(cancellationToken);
     }
 
-    public Enrolment WithDetails(int id)
+    public async Task<List<Enrolment>> GetCurrentByCourseId(
+        CourseId courseId,
+        CancellationToken cancellationToken = default)
     {
-        return Collection()
-            .FirstOrDefault(e => e.Id == id);
+        List<OfferingId> offeringIds = await _context
+            .Set<Offering>()
+            .Where(offering =>
+                offering.CourseId == courseId &&
+                (offering.Sessions.Any(session => !session.IsDeleted) ||
+                (offering.StartDate <= _dateTime.Today && offering.EndDate >= _dateTime.Today)))
+            .Select(offering => offering.Id)
+            .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<Enrolment>()
+            .Where(enrolment =>
+                !enrolment.IsDeleted &&
+                offeringIds.Contains(enrolment.OfferingId))
+            .ToListAsync(cancellationToken);
     }
 
-    public Enrolment WithFilter(Expression<Func<Enrolment, bool>> predicate)
-    {
-        return Collection()
-            .FirstOrDefault(predicate);
-    }
-
-    public ICollection<Enrolment> All()
-    {
-        return Collection()
-            .ToList();
-    }
-
-    public ICollection<Enrolment> AllWithFilter(Expression<Func<Enrolment, bool>> predicate)
-    {
-        return Collection()
-            .Where(predicate)
-            .ToList();
-    }
-
-    public ICollection<Enrolment> AllFromOffering(int id)
-    {
-        return Collection()
-            .Where(e => e.OfferingId == id && e.IsDeleted == false)
-            .ToList();
-    }
-
-    public ICollection<Enrolment> CurrentForStudent(string id)
-    {
-        return Collection()
-            .Where(e => e.StudentId == id && e.IsDeleted == false)
-            .ToList();
-    }
-
-    public ICollection<Enrolment> AllForStudent(string id)
-    {
-        return Collection()
-            .Where(e => e.StudentId == id)
-            .ToList();
-    }
-
-    public async Task<Enrolment> ForEditing(int id)
-    {
-        return await _context.Enrolments
-            .Include(enrolment => enrolment.Student)
-            .Include(enrolment => enrolment.Offering)
-            .ThenInclude(offering => offering.Sessions)
-            .ThenInclude(session => session.Room)
-            .SingleOrDefaultAsync(enrolment => enrolment.Id == id);
-    }
-
-    public async Task<bool> AnyForStudentAndOffering(string studentId, int offeringId)
-    {
-        return await _context.Enrolments
-            .AnyAsync(enrolment => !enrolment.IsDeleted && enrolment.StudentId == studentId && enrolment.OfferingId == offeringId);
-    }
+    public void Insert(Enrolment enrolment) =>
+        _context.Set<Enrolment>().Add(enrolment);
 }

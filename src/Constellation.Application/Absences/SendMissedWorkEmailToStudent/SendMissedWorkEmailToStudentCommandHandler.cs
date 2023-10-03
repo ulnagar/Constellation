@@ -3,10 +3,13 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Families;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
@@ -20,7 +23,7 @@ internal sealed class SendMissedWorkEmailToStudentCommandHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IFamilyRepository _familyRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
@@ -28,7 +31,7 @@ internal sealed class SendMissedWorkEmailToStudentCommandHandler
     public SendMissedWorkEmailToStudentCommandHandler(
         IStudentRepository studentRepository,
         IFamilyRepository familyRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ICourseRepository courseRepository,
         IEmailService emailService,
         ILogger logger)
@@ -96,7 +99,7 @@ internal sealed class SendMissedWorkEmailToStudentCommandHandler
                 recipients.Add(result.Value);
         }
 
-        CourseOffering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
+        Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
         Course course = offering is not null ? await _courseRepository.GetById(offering.CourseId, cancellationToken) : null;
 
         await _emailService.SendMissedWorkEmail(

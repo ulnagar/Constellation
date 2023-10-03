@@ -3,6 +3,11 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -10,7 +15,8 @@ public class StaffRepository : IStaffRepository
 {
     private readonly AppDbContext _context;
 
-    public StaffRepository(AppDbContext context)
+    public StaffRepository(
+        AppDbContext context)
     {
         _context = context;
     }
@@ -22,13 +28,6 @@ public class StaffRepository : IStaffRepository
                 .ThenInclude(operation => operation.Room)
             .Include(s => s.AdobeConnectGroupOperations)
             .Include(s => s.School)
-            .Include(s => s.CourseSessions)
-                .ThenInclude(session => session.Offering)
-                    .ThenInclude(offering => offering.Course)
-            .Include(s => s.CourseSessions)
-                .ThenInclude(session => session.Period)
-            .Include(s => s.CourseSessions)
-                .ThenInclude(session => session.Room)
             .Include(staff => staff.Faculties)
                 .ThenInclude(member => member.Faculty);
     }
@@ -56,36 +55,41 @@ public class StaffRepository : IStaffRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Staff>> GetCurrentTeachersForOffering(
-        int offeringId,
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<Staff>()
-            .Where(teacher => teacher.CourseSessions.Any(session => session.OfferingId == offeringId && !session.IsDeleted))
-            .ToListAsync(cancellationToken);
-
-    public async Task<List<Staff>> GetPrimaryTeachersForOffering(
-        int offeringId,
+        OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
-        var teachers = await _context
-            .Set<OfferingSession>()
-            .Where(session => session.OfferingId == offeringId && !session.IsDeleted)
-            .Select(session => session.Teacher)
+        List<string> staffIds = await _context
+            .Set<Offering>()
+            .Where(offering => offering.Id == offeringId)
+            .SelectMany(offering => offering.Teachers)
+            .Where(assignment => !assignment.IsDeleted)
+            .Select(assignment => assignment.StaffId)
             .ToListAsync(cancellationToken);
 
-        if (teachers.Count == 0)
-            return new List<Staff>();
+        return await _context
+            .Set<Staff>()
+            .Where(staff => staffIds.Contains(staff.StaffId))
+            .ToListAsync(cancellationToken);
+    }
 
-        var groupedTeachers = teachers
-            .GroupBy(teacher => teachers.Count(entry => entry == teacher))
-            .OrderByDescending(entry => entry.Key);
+    public async Task<List<Staff>> GetPrimaryTeachersForOffering(
+        OfferingId offeringId,
+        CancellationToken cancellationToken = default)
+    {
+        List<string> staffIds = await _context
+            .Set<Offering>()
+            .Where(offering => offering.Id == offeringId)
+            .SelectMany(offering => offering.Teachers)
+            .Where(assignment =>
+                assignment.Type == AssignmentType.ClassroomTeacher &&
+                !assignment.IsDeleted)
+            .Select(assignment => assignment.StaffId)
+            .ToListAsync(cancellationToken);
 
-        var maxSessions = groupedTeachers.First().Key;
-
-        return groupedTeachers
-            .Where(entry => entry.Key == maxSessions)
-            .Select(entry => entry.First())
-            .ToList();
+        return await _context
+            .Set<Staff>()
+            .Where(staff => staffIds.Contains(staff.StaffId))
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<List<Staff>> GetFacultyHeadTeachers(
@@ -102,26 +106,35 @@ public class StaffRepository : IStaffRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Staff>> GetFacultyHeadTeachersForOffering(
-        int offeringId, 
+        OfferingId offeringId, 
         CancellationToken cancellationToken = default)
     {
-        Guid? facultyId = await _context
-            .Set<CourseOffering>()
+        List<CourseId> courseIds = await _context
+            .Set<Offering>()
             .Where(offering => offering.Id == offeringId)
-            .Select(offering => offering.Course.FacultyId)
-            .FirstOrDefaultAsync(cancellationToken);
+            .Select(offering => offering.CourseId)
+            .ToListAsync(cancellationToken);
 
-        if (facultyId is null)
-        {
-            return null;
-        }
+        List<Guid> facultyIds = await _context
+            .Set<Course>()
+            .Where(course => courseIds.Contains(course.Id))
+            .Select(course => course.FacultyId)
+            .ToListAsync(cancellationToken);
+
+        List<string> staffIds = await _context
+            .Set<Faculty>()
+            .Where(faculty => facultyIds.Contains(faculty.Id))
+            .SelectMany(faculty => faculty.Members)
+            .Where(member => 
+                !member.IsDeleted &&
+                member.Role == FacultyMembershipRole.Manager)
+            .Select(member => member.StaffId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
 
         return await _context
             .Set<Staff>()
-            .Where(staff => staff.Faculties.Any(member => 
-                !member.IsDeleted && 
-                member.FacultyId == facultyId && 
-                member.Role == FacultyMembershipRole.Manager))
+            .Where(staff => staffIds.Contains(staff.StaffId))
             .ToListAsync(cancellationToken);
     }
 
@@ -166,96 +179,10 @@ public class StaffRepository : IStaffRepository
             .SingleOrDefault(d => d.StaffId == id);
     }
 
-    public Staff WithFilter(Expression<Func<Staff, bool>> predicate)
-    {
-        return Collection()
-            .FirstOrDefault(predicate);
-    }
-
     public async Task<Staff> GetForExistCheck(string id)
     {
         return await _context.Staff
             .SingleOrDefaultAsync(staff => staff.StaffId == id);
-    }
-
-    public async Task<Staff> WithFilterAsync(Expression<Func<Staff, bool>> predicate)
-    {
-        return await Collection()
-            .FirstOrDefaultAsync(predicate);
-    }
-
-    public ICollection<Staff> All()
-    {
-        return Collection()
-            .ToList();
-    }
-
-    public ICollection<Staff> AllWithFilter(Expression<Func<Staff, bool>> predicate)
-    {
-        return Collection()
-            .Where(predicate)
-            .ToList();
-    }
-
-    public async Task<ICollection<Staff>> AllActiveAsync()
-    {
-        return await _context.Staff
-            .Include(staff => staff.Faculties)
-            .ThenInclude(member => member.Faculty)
-            .Where(s => !s.IsDeleted)
-            .OrderBy(s => s.LastName)
-            .ToListAsync();
-    }
-
-    public ICollection<Staff> AllActive()
-    {
-        return Collection()
-            .Where(s => !s.IsDeleted)
-            .OrderBy(s => s.LastName)
-            .ToList();
-    }
-
-    public ICollection<Staff> AllInactive()
-    {
-        return Collection()
-            .Where(s => s.IsDeleted)
-            .OrderBy(s => s.LastName)
-            .ToList();
-    }
-
-    public ICollection<Staff> AllFromSchool(string code)
-    {
-        return Collection()
-            .Where(s => s.SchoolCode == code)
-            .OrderBy(s => s.LastName)
-            .ToList();
-    }
-
-    public ICollection<Staff> AllActiveFromSchool(string code)
-    {
-        return Collection()
-            .Where(s => !s.IsDeleted && s.SchoolCode == code)
-            .OrderBy(s => s.LastName)
-            .ToList();
-    }
-
-    public ICollection<Staff> AllFromFaculty(Guid facultyId)
-    {
-        return _context.Staff
-            .Where(staff => staff.Faculties.Any(member => member.FacultyId == facultyId && !member.IsDeleted))
-            .OrderBy(staff => staff.LastName)
-            .ToList();
-    }
-
-    public ICollection<Staff> AllWithActiveClasses()
-    {
-        return Collection()
-            .Where(s => s.IsDeleted == false)
-            .Where(
-                s =>
-                    s.CourseSessions.Any(
-                        d => d.Offering.StartDate < DateTime.Now && d.Offering.EndDate > DateTime.Now))
-            .ToList();
     }
 
     public ICollection<Staff> AllWithoutAdobeConnectInfo()
@@ -314,23 +241,9 @@ public class StaffRepository : IStaffRepository
             .Include(staff => staff.School)
             .ThenInclude(school => school.StaffAssignments)
             .ThenInclude(role => role.SchoolContact)
-            .Include(staff => staff.CourseSessions)
-            .ThenInclude(session => session.Offering)
-            .ThenInclude(offering => offering.Course)
-            .Include(staff => staff.CourseSessions)
-            .ThenInclude(session => session.Period)
-            .Include(staff => staff.CourseSessions)
-            .ThenInclude(session => session.Room)
             .SingleOrDefaultAsync(staff => staff.StaffId == id);
     }
-
-    public async Task<ICollection<Staff>> ForSelectionAsync()
-    {
-        return await _context.Staff
-            .Where(staff => !staff.IsDeleted)
-            .ToListAsync();
-    }
-
+    
     public async Task<Staff> ForEditAsync(string id)
     {
         return await _context.Staff
@@ -347,7 +260,6 @@ public class StaffRepository : IStaffRepository
     {
         return await _context.Staff
             .Include(staff => staff.Faculties)
-            .Include(staff => staff.CourseSessions)
             .Include(staff => staff.AdobeConnectGroupOperations)
             .SingleOrDefaultAsync(staff => staff.StaffId == id);
     }

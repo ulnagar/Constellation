@@ -6,13 +6,15 @@ using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.Services;
+using Core.Abstractions.Clock;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -21,18 +23,17 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
+internal sealed class LessonNotificationsJob : ILessonNotificationsJob
 {
     private readonly ILessonRepository _lessonRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly ISchoolContactRepository _contactRepository;
     private readonly IEmailService _emailService;
+    private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
     private readonly AppConfiguration _configuration;
     private readonly ILogHandler<ILessonNotificationsJob> _logger;
-
-    private readonly DateOnly Today = DateOnly.FromDateTime(DateTime.Today);
 
     public LessonNotificationsJob(
         ILessonRepository lessonRepository,
@@ -41,6 +42,7 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
         ISchoolContactRepository contactRepository,
         IEmailService emailService,
         IOptions<AppConfiguration> configuration,
+        IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogHandler<ILessonNotificationsJob> logger)
     {
@@ -49,6 +51,7 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
         _courseRepository = courseRepository;
         _contactRepository = contactRepository;
         _emailService = emailService;
+        _dateTime = dateTime;
         _unitOfWork = unitOfWork;
         _configuration = configuration.Value;
         _logger = logger;
@@ -87,7 +90,7 @@ public class LessonNotificationsJob : ILessonNotificationsJob, IHangfireJob
                     lesson.Rolls.Any(roll =>
                         roll.SchoolCode == school.Code &&
                         roll.Status == LessonStatus.Active) &&
-                    lesson.DueDate < Today)
+                    lesson.DueDate < _dateTime.Today)
                 .ToList();
 
             if (lessons is null || lessons.Count == 0)

@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Awards;
 
 using Constellation.Core.Models.Awards;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,7 +13,10 @@ internal sealed class AcademicAchievementNominationConfiguration
     {
         builder
             .Property(nomination => nomination.CourseId)
-            .HasColumnName(nameof(AcademicAchievementNomination.CourseId));
+            .HasColumnName(nameof(AcademicAchievementNomination.CourseId))
+            .HasConversion(
+                id => id.Value,
+                value => CourseId.FromValue(value));
 
         builder
             .Property(nomination => nomination.CourseName)
@@ -19,7 +24,10 @@ internal sealed class AcademicAchievementNominationConfiguration
 
         builder
             .Property(nomination => nomination.OfferingId)
-            .HasColumnName(nameof(AcademicAchievementNomination.OfferingId));
+            .HasColumnName(nameof(AcademicAchievementNomination.OfferingId))
+            .HasConversion(
+                id => id.Value,
+                value => OfferingId.FromValue(value));
 
         builder
             .Property(nomination => nomination.ClassName)

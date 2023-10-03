@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Errors;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Threading;
@@ -15,12 +16,12 @@ internal sealed class ConvertAbsenceToAbsenceEntryCommandHandler
     : ICommandHandler<ConvertAbsenceToAbsenceEntryCommand, AbsenceEntry>
 {
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public ConvertAbsenceToAbsenceEntryCommandHandler(
         IAbsenceRepository absenceRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
@@ -39,13 +40,13 @@ internal sealed class ConvertAbsenceToAbsenceEntryCommandHandler
             return Result.Failure<AbsenceEntry>(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
         }
 
-        CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         if (offering is null)
         {
             _logger.Warning("Could not find offering with Id {id}", absence.OfferingId);
 
-            return Result.Failure<AbsenceEntry>(DomainErrors.Subjects.Offering.NotFound(absence.OfferingId));
+            return Result.Failure<AbsenceEntry>(OfferingErrors.NotFound(absence.OfferingId));
         }
 
         string timeframe = string.Empty;

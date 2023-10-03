@@ -3,24 +3,31 @@
 using Constellation.Application.Abstractions;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.StaffMembers.GetStaffById;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Shared;
 using Constellation.Infrastructure.Templates.Views.Documents.Covers;
 using System.Net.Mail;
 
 internal sealed class EmailAttachmentService : IEmailAttachmentService
 {
+    private readonly ISender _mediator;
     private readonly IRazorViewToStringRenderer _razorService;
     private readonly IPDFService _pdfService;
 
     public EmailAttachmentService(
+        ISender mediator,
         IRazorViewToStringRenderer razorService,
         IPDFService pdfService)
     {
+        _mediator = mediator;
         _razorService = razorService;
         _pdfService = pdfService;
     }
 
-    public async Task<Attachment> GenerateClassRollDocument(CourseOffering offering, List<Student> students, CancellationToken cancellationToken = default)
+    public async Task<Attachment> GenerateClassRollDocument(Offering offering, List<Student> students, CancellationToken cancellationToken = default)
     {
         var model = new CoverRollViewModel();
         model.ClassName = offering.Name;
@@ -42,7 +49,7 @@ internal sealed class EmailAttachmentService : IEmailAttachmentService
         return rollAttachment;
     }
 
-    public async Task<Attachment> GenerateClassTimetableDocument(CourseOffering offering, List<OfferingSession> offeringSessions, List<TimetablePeriod> relevantPeriods, CancellationToken cancellationToken = default)
+    public async Task<Attachment> GenerateClassTimetableDocument(Offering offering, List<TimetablePeriod> relevantPeriods, CancellationToken cancellationToken = default)
     {
         var timetableData = new ClassTimetableDataDto
         {
@@ -65,11 +72,26 @@ internal sealed class EmailAttachmentService : IEmailAttachmentService
                 Type = period.Type
             };
 
-            if (offeringSessions.Any(session => session.PeriodId == period.Id))
+            if (offering.Sessions.Any(session => session.PeriodId == period.Id))
             {
-                var relevantSession = offeringSessions.FirstOrDefault(session => session.PeriodId == period.Id);
-                entry.ClassName = relevantSession.Offering.Name;
-                entry.ClassTeacher = relevantSession.Teacher.DisplayName;
+                entry.ClassName = offering.Name;
+
+                List<TeacherAssignment> assignments = offering
+                    .Teachers
+                    .Where(assignment => 
+                        assignment.Type == AssignmentType.ClassroomTeacher && 
+                        !assignment.IsDeleted)
+                    .ToList();
+
+                foreach (TeacherAssignment assignment in assignments)
+                {
+                    Result<StaffResponse> teacher = await _mediator.Send(new GetStaffByIdQuery(assignment.StaffId), cancellationToken);
+
+                    if (teacher.IsFailure)
+                        continue;
+
+                    entry.ClassTeacher = teacher.Value.Name.DisplayName;
+                }
             }
 
             timetableData.Timetables.Add(entry);

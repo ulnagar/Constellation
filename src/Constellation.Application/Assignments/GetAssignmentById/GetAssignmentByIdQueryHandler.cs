@@ -1,11 +1,15 @@
 ﻿namespace Constellation.Application.Assignments.GetAssignmentById;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Extensions;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
-using Constellation.Core.Errors;
-using Constellation.Core.Shared;
+using Abstractions.Messaging;
+using Extensions;
+using Interfaces.Repositories;
+using Constellation.Core.Models.Assignments.Repositories;
+using Constellation.Core.Models.Subjects.Errors;
+using Core.Shared;
+using Core.Models;
+using Core.Models.Assignments;
+using Core.Models.Assignments.Errors;
+using Core.Models.Subjects;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -30,21 +34,21 @@ internal sealed class GetAssignmentByIdQueryHandler
 
     public async Task<Result<AssignmentResponse>> Handle(GetAssignmentByIdQuery request, CancellationToken cancellationToken)
     {
-        var assignment = await _assignmentRepository.GetById(request.AssignmentId, cancellationToken);
+        CanvasAssignment assignment = await _assignmentRepository.GetById(request.AssignmentId, cancellationToken);
 
         if (assignment is null)
-            return Result.Failure<AssignmentResponse>(DomainErrors.Assignments.Assignment.NotFound(request.AssignmentId));
+            return Result.Failure<AssignmentResponse>(AssignmentErrors.NotFound(request.AssignmentId));
 
         List<AssignmentResponse.Submission> submissions = new();
 
-        foreach (var submission in assignment.Submissions)
+        foreach (CanvasAssignmentSubmission submission in assignment.Submissions)
         {
-            var student = await _studentRepository.GetById(submission.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetById(submission.StudentId, cancellationToken);
 
             if (student is null)
                 continue;
 
-            var record = new AssignmentResponse.Submission(
+            AssignmentResponse.Submission record = new(
                 submission.Id,
                 student.DisplayName,
                 DateOnly.FromDateTime(submission.SubmittedOn),
@@ -53,14 +57,14 @@ internal sealed class GetAssignmentByIdQueryHandler
             submissions.Add(record);
         }
 
-        var course = await _courseRepository.GetById(assignment.CourseId, cancellationToken);
+        Course course = await _courseRepository.GetById(assignment.CourseId, cancellationToken);
 
         if (course is null)
-            return Result.Failure<AssignmentResponse>(DomainErrors.Subjects.Course.NotFound(assignment.CourseId));
+            return Result.Failure<AssignmentResponse>(CourseErrors.NotFound(assignment.CourseId));
 
-        var courseName = $"Y{course.Grade.AsNumber()} {course.Name}";
+        string courseName = $"Y{course.Grade.AsNumber()} {course.Name}";
 
-        var entry = new AssignmentResponse(
+        AssignmentResponse entry = new(
             assignment.Id,
             course.Id,
             courseName,
@@ -68,6 +72,8 @@ internal sealed class GetAssignmentByIdQueryHandler
             DateOnly.FromDateTime(assignment.DueDate),
             (assignment.UnlockDate.HasValue ? DateOnly.FromDateTime(assignment.UnlockDate.Value) : null),
             (assignment.LockDate.HasValue ? DateOnly.FromDateTime(assignment.LockDate.Value) : null),
+            assignment.DelayForwarding,
+            assignment.ForwardingDate,
             assignment.AllowedAttempts,
             submissions);
 

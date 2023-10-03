@@ -21,6 +21,9 @@ public class IndexModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
+    [ViewData]
+    public string ActivePage => "Assignments";
+
     public List<CurrentAssignmentSummaryResponse> Assignments { get; set; } = new();
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)

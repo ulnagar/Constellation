@@ -37,7 +37,7 @@ public abstract class ValueObject : IEquatable<ValueObject>
         if (ReferenceEquals(left, null) ^ ReferenceEquals(right, null)) 
             return false;
 
-        return ReferenceEquals(left, right);
+        return left.ValuesAreEqual(right);
     }
 
     protected static bool NotEqualOperator(ValueObject left, ValueObject right)

@@ -6,9 +6,10 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
@@ -24,7 +25,7 @@ internal sealed class CoverCancelledDomainEvent_SendCoverCancelledEmailHandler
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IClassCoverRepository _classCoverRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ICasualRepository _casualRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
@@ -36,7 +37,7 @@ internal sealed class CoverCancelledDomainEvent_SendCoverCancelledEmailHandler
     public CoverCancelledDomainEvent_SendCoverCancelledEmailHandler(
         IUnitOfWork unitOfWork,
         IClassCoverRepository classCoverRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
         ICasualRepository casualRepository,
         ITimetablePeriodRepository periodRepository,

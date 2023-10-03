@@ -2,9 +2,11 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using System.Collections.Generic;
@@ -17,13 +19,13 @@ internal sealed class GetAbsencesWithFilterForReportQueryHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ISchoolRepository _schoolRepository;
 
     public GetAbsencesWithFilterForReportQueryHandler(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ISchoolRepository schoolRepository)
     {
         _studentRepository = studentRepository;
@@ -72,7 +74,7 @@ internal sealed class GetAbsencesWithFilterForReportQueryHandler
             if (studentName is null)
                 continue;
 
-            CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
             string offeringName = offering?.Name;
 

@@ -1,0 +1,178 @@
+﻿@page "{Id:guid}"
+
+@model Constellation.Presentation.Server.Areas.Subject.Pages.Offerings.AddSessionsModel
+
+<h2>Add Multiple Sessions</h2>
+<form method="post">
+    <div class="page-menu">
+        <input type="submit" value="Save" class="btn btn-primary" />
+
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    </div>
+
+    <hr />
+
+    <div class="row">
+        <h4>Select periods for the @Model.CourseName offering @Model.OfferingName</h4>
+    </div>
+
+    <div id="period_inputs"></div>
+</form>
+
+<div>
+    <div class="nav nav-pills timetable-selector" data-tabs="tabs">
+        @{
+            var timetables = Model.ValidPeriods
+                .OrderBy(period => period.Timetable)
+                .ThenBy(period => period.Day)
+                .GroupBy(period => period.Timetable);
+
+            bool firstTab = true;
+
+            foreach (var timetable in timetables)
+            {
+                <a class="nav-link @(firstTab ? "active" : "")" href="#@timetable.Key" data-toggle="tab">@timetable.Key</a>
+                firstTab = false;
+            }
+        }
+    </div>
+
+    <div class="tab-content">
+        @{
+            firstTab = true;
+            foreach (var block in timetables)
+            {
+                <div id="@block.Key" class="tab-pane @(firstTab ? "active" : "")">
+                    @{
+                        var dayList = block.Select(p => p.Day).Distinct().ToList();
+                        var weekList = dayList.Max();
+                        var numWeeks = weekList / 5;
+                        int i;
+
+                        for (i = 1; i <= numWeeks; i++)
+                        {
+                            <div class="Timetable-Week">
+                                @foreach (var day in dayList.Where(d => d <= i * 5 && d > (i - 1) * 5))
+                                {
+                                    <div class="Timetable-Day">
+                                        @{
+                                            var WeekNo = (day - 1) / 5;
+                                            var WeekName = "";
+                                            switch (WeekNo)
+                                            {
+                                                case 0:
+                                                    WeekName = "Week A";
+                                                    break;
+                                                case 1:
+                                                    WeekName = "Week B";
+                                                    break;
+                                                case 2:
+                                                    WeekName = "Week C";
+                                                    break;
+                                                case 4:
+                                                    WeekName = "Week D";
+                                                    break;
+                                                default:
+                                                    WeekName = "";
+                                                    break;
+                                            }
+
+                                            var DayNo = day % 5;
+                                            var DayName = "";
+                                            switch (DayNo)
+                                            {
+                                                case 1:
+                                                    DayName = "Monday";
+                                                    break;
+                                                case 2:
+                                                    DayName = "Tuesday";
+                                                    break;
+                                                case 3:
+                                                    DayName = "Wednesday";
+                                                    break;
+                                                case 4:
+                                                    DayName = "Thursday";
+                                                    break;
+                                                case 0:
+                                                    DayName = "Friday";
+                                                    break;
+                                                default:
+                                                    DayName = "";
+                                                    break;
+                                            }
+                                        }
+
+                                        @WeekName - @DayName
+                                        @{
+                                            var daysPeriods = block.Where(p => p.Day == day);
+
+                                            foreach (var period in daysPeriods)
+                                            {
+                                                var length = period.EndTime.Subtract(period.StartTime).Minutes;
+                                                length += period.EndTime.Subtract(period.StartTime).Hours * 60;
+                                                var lengthpx = (length * 1.25) + "px";
+
+                                                if (Model.ExistingSessions.Any(session => session.PeriodId == period.PeriodId))
+                                                {
+                                                    <div class="blockLink pt_Selected_Elsewhere">
+                                                        <div class="Timetable-Period Timetable-@period.Type" style="height: @lengthpx;" title="@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
+                                                            @period.Name
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="blockLink" id="period_table_@period.PeriodId" onClick="toggleSelect(@period.PeriodId)" data-selected="false">
+                                                        <div class="Timetable-Period Timetable-@period.Type" style="height: @lengthpx;" title="@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
+                                                            @period.Name
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+
+                firstTab = false;
+            }
+        }
+    </div>
+</div>
+
+@section scripts
+    {
+    <script>
+        function toggleSelect(periodId) {
+            var period_table = $('#period_table_' + periodId);
+            var selected = period_table[0].dataset.selected;
+
+            if (selected === "true") {
+                removePeriodFromSession(periodId);
+                period_table.removeClass("pt_Selected");
+                period_table.attr('data-selected', 'false');
+            } else {
+                addPeriodToSession(periodId);
+                period_table.addClass("pt_Selected");
+                period_table.attr('data-selected', 'true');
+            }
+        }
+
+        function addPeriodToSession(periodId) {
+            var input = $('<input>').attr('id', periodId + "_input")
+                .attr('name', "Periods")
+                .attr('type', "hidden");
+            input.val(periodId);
+            var periodInputDiv = $('div#period_inputs')[0];
+            periodInputDiv.append(input[0]);
+        }
+
+        function removePeriodFromSession(periodId) {
+            var input = $('#' + periodId + '_input');
+            input.remove();
+        }
+    </script>
+}

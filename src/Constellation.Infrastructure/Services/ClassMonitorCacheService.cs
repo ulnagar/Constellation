@@ -1,18 +1,19 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Rooms.GetRoomById;
+using Constellation.Application.Rooms.Models;
 using Constellation.Core.Comparators;
+using Constellation.Core.Models;
 using Constellation.Core.Models.Casuals;
-using Constellation.Core.Models.Covers;
-using Constellation.Core.ValueObjects;
+using Constellation.Core.Models.Enrolments;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.Subjects;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Services
 {
@@ -162,50 +163,65 @@ namespace Constellation.Infrastructure.Services
             using var scope = _scopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            var courses = await context.Offerings
-                .Include(course => course.Enrolments)
-                .ThenInclude(enrol => enrol.Student)
-                .Include(course => course.Sessions)
-                .ThenInclude(session => session.Room)
-                .Include(course => course.Sessions)
-                .ThenInclude(session => session.Teacher)
-                .Include(course => course.Course)
+            var offerings = await context.Set<Offering>()
                 .AsNoTracking()
                 .ToListAsync();
 
-            foreach (var course in courses.Where(course => course.IsCurrent()))
+            foreach (var offering in offerings.Where(course => course.IsCurrent))
             {
-                var rooms = course.Sessions.Where(session => !session.IsDeleted).Select(session => session.Room).Distinct(new AdobeConnectRoomComparator()).ToList();
-                foreach (var room in rooms)
+                List<AdobeConnectRoomResource> resources = offering
+                    .Resources
+                    .Where(resource => resource.Type == ResourceType.AdobeConnectRoom)
+                    .Select(resource => resource as AdobeConnectRoomResource)
+                    .ToList();
+                
+                foreach (AdobeConnectRoomResource resource in resources)
                 {
+                    AdobeConnectRoom room = await context
+                        .Set<AdobeConnectRoom>()
+                        .FirstOrDefaultAsync(room => room.ScoId == resource.ScoId);
+
+                    Course course = await context
+                        .Set<Course>()
+                        .FirstOrDefaultAsync(course => course.Id == offering.CourseId);
+
                     var dto = new ClassMonitorDtos.MonitorCourse
                     {
-                        Id = course.Id,
-                        Name = course.Name,
-                        StartDate = course.StartDate,
-                        EndDate = course.EndDate,
-                        IsCurrent = course.IsCurrent(),
-                        GradeName = $"Year {course.Course.Grade.ToString().Substring(1, 2)}",
-                        GradeShortCode = course.Course.Grade.ToString(),
+                        Id = offering.Id,
+                        Name = offering.Name,
+                        StartDate = offering.StartDate,
+                        EndDate = offering.EndDate,
+                        IsCurrent = offering.IsCurrent,
+                        GradeName = $"Year {course.Grade.ToString().Substring(1, 2)}",
+                        GradeShortCode = course.Grade.ToString(),
                         RoomScoId = room.ScoId,
                         RoomName = room.Name,
                         RoomUrlPath = room.UrlPath
                     };
 
-                    foreach (var enrol in course.Enrolments.Where(enrolment => !enrolment.IsDeleted))
+                    List<Enrolment> enrolments = await context
+                        .Set<Enrolment>()
+                        .Where(enrolment => !enrolment.IsDeleted && enrolment.OfferingId == offering.Id)
+                        .ToListAsync();
+
+                    foreach (Enrolment enrol in enrolments)
                     {
+                        Student student = await context
+                            .Set<Student>()
+                            .FirstOrDefaultAsync(student => student.StudentId == enrol.StudentId);
+
                         dto.Enrolments.Add(new ClassMonitorDtos.MonitorCourseEnrolment
                         {
                             Id = enrol.Id,
                             StudentId = enrol.StudentId,
-                            StudentDisplayName = enrol.Student.DisplayName,
-                            StudentLastName = enrol.Student.LastName,
-                            StudentGender = enrol.Student.Gender,
+                            StudentDisplayName = student.DisplayName,
+                            StudentLastName = student.LastName,
+                            StudentGender = student.Gender,
                             IsDeleted = enrol.IsDeleted
                         });
                     }
 
-                    foreach (var session in course.Sessions.Where(session => !session.IsDeleted))
+                    foreach (var session in offering.Sessions.Where(session => !session.IsDeleted))
                     {
                         dto.Sessions.Add(new ClassMonitorDtos.MonitorCourseSession
                         {
@@ -239,7 +255,19 @@ namespace Constellation.Infrastructure.Services
                     //    dto.Covers.Add(entry);
                     //}
 
-                    foreach (var teacher in course.Sessions.Where(session => !session.IsDeleted).Select(session => session.Teacher).Distinct(new StaffComparator()).ToList())
+                    List<TeacherAssignment> assignments = offering
+                        .Teachers
+                        .Where(assignment => 
+                            assignment.Type == AssignmentType.ClassroomTeacher && 
+                            !assignment.IsDeleted)
+                        .ToList();
+
+                    List<Staff> teachers = await context
+                        .Set<Staff>()
+                        .Where(staff => assignments.Select(assignment => assignment.StaffId).ToList().Contains(staff.StaffId))
+                        .ToListAsync();
+
+                    foreach (var teacher in teachers)
                     {
                         dto.Teachers.Add(new ClassMonitorDtos.MonitorCourseTeacher
                         {

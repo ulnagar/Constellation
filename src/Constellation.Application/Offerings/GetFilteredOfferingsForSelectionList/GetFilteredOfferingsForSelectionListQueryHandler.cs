@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.Offerings.GetFilteredOfferingsForSelectionList;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Extensions;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -14,11 +14,11 @@ using System.Threading.Tasks;
 internal sealed class GetFilteredOfferingsForSelectionListQueryHandler
     : IQueryHandler<GetFilteredOfferingsForSelectionListQuery, List<OfferingForSelectionList>>
 {
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public GetFilteredOfferingsForSelectionListQueryHandler(
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _offeringRepository = offeringRepository;
@@ -29,15 +29,15 @@ internal sealed class GetFilteredOfferingsForSelectionListQueryHandler
     {
         List<OfferingForSelectionList> response = new();
 
-        foreach (int courseId in request.CourseIds)
+        foreach (CourseId courseId in request.CourseIds)
         {
-            List<CourseOffering> offerings = await _offeringRepository.GetByCourseId(courseId, cancellationToken);
+            List<Offering> offerings = await _offeringRepository.GetByCourseId(courseId, cancellationToken);
 
             offerings = offerings
-                .Where(offering => offering.IsCurrent())
+                .Where(offering => offering.IsCurrent)
                 .ToList();
 
-            foreach (CourseOffering offering in offerings)
+            foreach (Offering offering in offerings)
             {
                 if (response.Any(entry => entry.Id == offering.Id))
                     continue;

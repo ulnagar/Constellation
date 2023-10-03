@@ -1,4 +1,6 @@
 ﻿using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,6 +13,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
             builder.ToTable("WholeAbsences");
 
             builder.HasKey(a => a.Id);
+
+            builder
+                .Property(a => a.OfferingId)
+                .HasConversion(
+                    id => id.Value,
+                    value => OfferingId.FromValue(value));
 
             builder.HasOne(a => a.Student)
                 .WithMany(s => s.WholeAbsences)
@@ -52,6 +60,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
             builder.ToTable("PartialAbsences");
 
             builder.HasKey(a => a.Id);
+
+            builder
+                .Property(a => a.OfferingId)
+                .HasConversion(
+                    id => id.Value,
+                    value => OfferingId.FromValue(value));
 
             builder.HasOne(a => a.Student)
                 .WithMany(s => s.PartialAbsences)

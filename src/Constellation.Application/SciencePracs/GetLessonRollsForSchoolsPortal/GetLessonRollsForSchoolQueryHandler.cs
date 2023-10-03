@@ -2,9 +2,13 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
-using Constellation.Core.Models;
+using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using System;
 using System.Collections.Generic;
@@ -16,12 +20,12 @@ internal sealed class GetLessonRollsForSchoolQueryHandler
     : IQueryHandler<GetLessonRollsForSchoolQuery, List<ScienceLessonRollSummary>>
 {
     private readonly ILessonRepository _lessonRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
 
     public GetLessonRollsForSchoolQueryHandler(
         ILessonRepository lessonRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ICourseRepository courseRepository)
     {
         _lessonRepository = lessonRepository;
@@ -42,9 +46,9 @@ internal sealed class GetLessonRollsForSchoolQueryHandler
             if (roll is null)
                 continue;
 
-            int offeringId = lesson.Offerings.First().OfferingId;
+            OfferingId offeringId = lesson.Offerings.First().OfferingId;
 
-            CourseOffering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
             Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 

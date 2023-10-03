@@ -3,6 +3,7 @@ namespace Constellation.Core.Models;
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;

@@ -1,5 +1,8 @@
 ﻿namespace Constellation.Application.Offerings.GetOfferingsForSelectionList;
 
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
+
 public sealed record OfferingSelectionListResponse(
-    int Id,
+    OfferingId Id,
     string Name);

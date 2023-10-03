@@ -30,4 +30,13 @@ $(document).ready(function () {
             ]
         });
 
+    // Create a datatable with the first column hidden, and the first column used as the sort data for the second column
+    $('.hidden-sort-data-table')
+        .DataTable({
+            "order": [ [ 1, 'asc'] ],
+            "columnDefs": [
+                { "visible": false, "targets": 0 },
+                { "orderData": 0, "targets": 1 }
+            ]
+        });
 });

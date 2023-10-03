@@ -7,14 +7,13 @@ using Constellation.Application.Absences.SendAbsenceNotificationToStudent;
 using Constellation.Application.Absences.SendMissedWorkEmailToStudent;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
 
-public class AbsenceMonitorJob : IAbsenceMonitorJob, IHangfireJob
+internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;

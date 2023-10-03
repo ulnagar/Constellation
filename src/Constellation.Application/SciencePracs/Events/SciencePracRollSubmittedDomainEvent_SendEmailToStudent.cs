@@ -3,10 +3,11 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;

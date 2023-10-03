@@ -8,6 +8,7 @@ using Constellation.Application.Schools.GetCurrentPartnerSchoolsWithStudentsList
 using Constellation.Application.Schools.Models;
 using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Shared.Models;
 using MediatR;
@@ -60,8 +61,10 @@ public class IndexModel : BasePageModel
         foreach (var entry in Filter.Categories)
             filterCategories.Add(ContactCategory.FromValue(entry));
 
+        List<OfferingId> offeringIds = Filter.Offerings.Select(id => OfferingId.FromValue(id)).ToList();
+
         var file = await _mediator.Send(new ExportContactListCommand(
-                Filter.Offerings,
+                offeringIds,
                 Filter.Grades,
                 Filter.Schools,
                 filterCategories),
@@ -138,9 +141,11 @@ public class IndexModel : BasePageModel
         foreach (var entry in Filter.Categories)
             filterCategories.Add(ContactCategory.FromValue(entry));
 
+        List<OfferingId> offeringIds = Filter.Offerings.Select(id => OfferingId.FromValue(id)).ToList();
+
         var contactRequest = await _mediator.Send(
             new GetContactListQuery(
-                Filter.Offerings,
+                offeringIds,
                 Filter.Grades,
                 Filter.Schools,
                 filterCategories),
@@ -170,7 +175,7 @@ public class IndexModel : BasePageModel
 
     public class FilterDefinition
     {
-        public List<int> Offerings { get; set; } = new();
+        public List<Guid> Offerings { get; set; } = new();
         public List<Grade> Grades { get; set; } = new();
         public List<string> Schools { get; set; } = new();
         public List<string> Categories { get; set; } = new();

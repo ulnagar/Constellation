@@ -2,6 +2,8 @@
 
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System;
@@ -17,7 +19,7 @@ public class Absence : AggregateRoot
         AbsenceId id,
         AbsenceType type,
         string studentId,
-        int offeringId,
+        OfferingId offeringId,
         DateOnly date,
         string periodName,
         string periodTimeframe,
@@ -44,7 +46,7 @@ public class Absence : AggregateRoot
     public AbsenceType Type { get; private set; }
 
     public string StudentId { get; private set; }
-    public int OfferingId { get; private set; }
+    public OfferingId OfferingId { get; private set; }
 
     public DateOnly Date { get; private set; }
     public string PeriodName { get; private set; }
@@ -66,7 +68,7 @@ public class Absence : AggregateRoot
     public static Absence Create(
         AbsenceType type,
         string studentId,
-        int offeringId,
+        OfferingId offeringId,
         DateOnly date,
         string periodName,
         string periodTimeframe,

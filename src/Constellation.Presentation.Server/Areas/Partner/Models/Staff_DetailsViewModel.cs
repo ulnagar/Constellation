@@ -1,12 +1,15 @@
 ﻿using Constellation.Application.Helpers;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.TeacherAddFaculty;
 using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Models
 {
+    using Core.Models.Offerings.ValueObjects;
+
     public class Staff_DetailsViewModel : BaseViewModel
     {
         public StaffDto Staff { get; set; }
@@ -56,47 +59,21 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
 
         public class OfferingDto
         {
-            public int Id { get; set; }
+            public OfferingId Id { get; set; }
             public string Name { get; set; }
             [Display(Name = DisplayNameDefaults.CourseName)]
             public string CourseName { get; set; }
-
-            public static OfferingDto ConvertFromOffering(CourseOffering offering)
-            {
-                var viewModel = new OfferingDto
-                {
-                    Id = offering.Id,
-                    Name = offering.Name,
-                    CourseName = offering.Course.Name
-                };
-
-                return viewModel;
-            }
+            public AssignmentType AssignmentType { get; set; }
         }
 
         public class SessionDto
         {
-            public TimetablePeriod Period { get; set; }
+            public string PeriodSortOrder { get; set; }
+            public string Period { get; set; }
             [Display(Name = DisplayNameDefaults.ClassName)]
             public string ClassName { get; set; }
             [Display(Name = DisplayNameDefaults.RoomName)]
-            public string RoomName { get; set; }
             public int Duration { get; set; }
-
-            public static SessionDto ConvertFromSession(OfferingSession session)
-            {
-                var viewModel = new SessionDto
-                {
-                    Period = session.Period,
-                    ClassName = session.Offering.Name,
-                    RoomName = session.Room.Name
-                };
-
-                viewModel.Duration = session.Period.EndTime.Subtract(session.Period.StartTime).Minutes;
-                viewModel.Duration += session.Period.EndTime.Subtract(session.Period.StartTime).Hours * 60;
-
-                return viewModel;
-            }
         }
 
         public class ContactDto

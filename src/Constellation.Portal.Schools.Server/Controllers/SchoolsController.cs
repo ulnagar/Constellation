@@ -1,15 +1,15 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
+using Application.Schools.GetSchoolsFromList;
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Portal.School.Contacts.Models;
 using Constellation.Application.Features.Portal.School.Contacts.Queries;
-using Constellation.Application.Features.Portal.School.Home.Commands;
 using Constellation.Application.Features.Portal.School.Home.Queries;
 using Constellation.Application.Models.Identity;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 [Route("api/[controller]")]
 public class SchoolsController : BaseAPIController
@@ -28,13 +28,13 @@ public class SchoolsController : BaseAPIController
     [HttpGet]
     public async Task<List<SchoolDto>> Get()
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
-        var schoolCodes = new List<string>();
+        List<string> schoolCodes = new();
 
         if (await IsUserAdmin(user))
         {
-            schoolCodes = await _mediator.Send(new GetAllPartnerSchoolCodesQuery()) as List<string>;
+            schoolCodes = (await _mediator.Send(new GetAllPartnerSchoolCodesQuery())).ToList();
         }
         else
         {
@@ -43,9 +43,14 @@ public class SchoolsController : BaseAPIController
 
         _logger.Information("Requested to get list of schools for user {user} with return values {@values}", user.DisplayName, schoolCodes);
 
-        var schoolDtos = await _mediator.Send(new ConvertListOfSchoolCodesToSchoolListCommand { SchoolCodes = schoolCodes });
+        Result<List<SchoolDto>>? request = await _mediator.Send(new GetSchoolsFromListQuery(schoolCodes));
 
-        return schoolDtos.ToList();
+        if (request.IsFailure)
+        {
+            return new List<SchoolDto>();
+        }
+
+        return request.Value;
     }
 
     [HttpGet("{code}/Details")]

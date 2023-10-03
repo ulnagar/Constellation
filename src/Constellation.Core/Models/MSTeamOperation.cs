@@ -2,6 +2,9 @@
 using Constellation.Core.Models.Casuals;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 
 namespace Constellation.Core.Models
@@ -30,8 +33,8 @@ namespace Constellation.Core.Models
 
     public abstract class OfferingMSTeamOperation : MSTeamOperation
     {
-        public int OfferingId { get; set; }
-        public CourseOffering Offering { get; set; }
+        public OfferingId OfferingId { get; set; }
+        public Offering Offering { get; set; }
     }
 
     public class StudentMSTeamOperation : OfferingMSTeamOperation
@@ -84,5 +87,15 @@ namespace Constellation.Core.Models
     {
         public GroupTutorialId TutorialId { get; set; }
         public GroupTutorial GroupTutorial { get; set; }
+    }
+
+    public sealed class TeacherAssignmentMSTeamOperation : EventMSTeamOperation
+    {
+        public string StaffId { get; set; }
+    }
+
+    public sealed class StudentOfferingMSTeamOperation : EventMSTeamOperation
+    {
+        public string StudentId { get; set; }
     }
 }

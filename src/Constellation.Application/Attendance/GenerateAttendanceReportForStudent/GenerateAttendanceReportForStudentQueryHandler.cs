@@ -5,9 +5,12 @@ using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using System;
 using System.Collections.Generic;
@@ -22,8 +25,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly IOfferingSessionsRepository _sessionRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
     private readonly IExportService _exportService;
@@ -32,8 +34,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
     public GenerateAttendanceReportForStudentQueryHandler(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
-        IOfferingSessionsRepository sessionRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ICourseRepository courseRepository,
         ITimetablePeriodRepository periodRepository,
         IExportService exportService,
@@ -41,7 +42,6 @@ public class GenerateAttendanceReportForStudentQueryHandler
     {
         _studentRepository = studentRepository;
         _absenceRepository = absenceRepository;
-        _sessionRepository = sessionRepository;
         _offeringRepository = offeringRepository;
         _courseRepository = courseRepository;
         _periodRepository = periodRepository;
@@ -110,15 +110,14 @@ public class GenerateAttendanceReportForStudentQueryHandler
 
         foreach (DateOnly date in reportableDates)
         {
-            List<OfferingSession> sessions = await _sessionRepository.GetAllForStudentAndDayDuringTime(student.StudentId, date.GetDayNumber(), date, cancellationToken);
+            List<Offering> offerings = await _offeringRepository.GetCurrentEnrolmentsFromStudentForDate(student.StudentId, date, date.GetDayNumber(), cancellationToken);
             List<AttendanceDateDetail.SessionWithOffering> sessionDetails = new();
 
-            foreach (IGrouping<int, OfferingSession> offeringSessions in sessions.GroupBy(s => s.OfferingId))
+            foreach (Offering offering in offerings)
             {
-                CourseOffering offering = await _offeringRepository.GetById(offeringSessions.Key, cancellationToken);
                 Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 
-                List<TimetablePeriod> periods = await _periodRepository.GetForOfferingOnDay(offeringSessions.Key, date, date.GetDayNumber(), cancellationToken);
+                List<TimetablePeriod> periods = await _periodRepository.GetForOfferingOnDay(offering.Id, date, date.GetDayNumber(), cancellationToken);
                 TimetablePeriod firstPeriod = periods.First(period => period.StartTime == periods.Min(p => p.StartTime));
                 TimetablePeriod lastPeriod = periods.First(period => period.EndTime == periods.Max(p => p.EndTime));
 
@@ -129,7 +128,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
                         $"{firstPeriod.StartTime.As12HourTime()} - {lastPeriod.EndTime.As12HourTime()}",
                         offering.Name,
                         course.Name,
-                        offeringSessions.Key));
+                        offering.Id));
                 }
                 else
                 {
@@ -138,7 +137,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
                         $"{firstPeriod.StartTime.As12HourTime()} - {lastPeriod.EndTime.As12HourTime()}",
                         offering.Name,
                         course.Name,
-                        offeringSessions.Key));
+                        offering.Id));
                 }
             }
 

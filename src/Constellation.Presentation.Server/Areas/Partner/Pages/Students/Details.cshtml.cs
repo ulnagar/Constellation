@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Partner.Pages.Students;
 
+using Application.Students.GetLifecycleDetailsForStudent;
 using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
 using Constellation.Application.Assets.GetDevicesAllocatedToStudent;
 using Constellation.Application.Enrolments.GetStudentEnrolmentsWithDetails;
@@ -8,6 +9,7 @@ using Constellation.Application.Families.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetSessionDetailsForStudent;
 using Constellation.Application.Students.GetStudentById;
+using Constellation.Application.Students.Models;
 using Constellation.Application.Students.ReinstateStudent;
 using Constellation.Application.Students.WithdrawStudent;
 using Constellation.Core.Errors;
@@ -50,6 +52,8 @@ public class DetailsModel : BasePageModel
     public List<StudentDeviceResponse> Equipment { get; set; } = new();
 
     public List<StudentAbsenceSummaryResponse> Absences { get; set; } = new();
+
+    public RecordLifecycleDetailsResponse RecordLifecycle { get; set; }
 
     public async Task OnGet(CancellationToken cancellationToken)
     {
@@ -96,6 +100,10 @@ public class DetailsModel : BasePageModel
 
         Absences = absencesRequest.IsSuccess ? absencesRequest.Value : new();
 
+        var lifecycleRequest = await _mediator.Send(new GetLifecycleDetailsForStudentQuery(Id), cancellationToken);
+
+        RecordLifecycle = lifecycleRequest.IsSuccess ? lifecycleRequest.Value : new(string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue);
+        
         return true;
     }
 

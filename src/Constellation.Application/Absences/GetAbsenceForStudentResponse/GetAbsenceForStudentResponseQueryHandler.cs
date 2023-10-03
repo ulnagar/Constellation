@@ -2,10 +2,13 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Errors;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
@@ -17,13 +20,13 @@ internal sealed class GetAbsenceForStudentResponseQueryHandler
 {
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IStudentRepository _studentRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public GetAbsenceForStudentResponseQueryHandler(
         IAbsenceRepository absenceRepository,
         IStudentRepository studentRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
@@ -66,13 +69,13 @@ internal sealed class GetAbsenceForStudentResponseQueryHandler
             return Result.Failure<AbsenceForStudentResponse>(new("ValueObjects.Name.NotCreated", "Could not create name object"));
         }
 
-        CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         if (offering is null)
         {
             _logger.Warning("Could not find offering with Id {id}", absence.OfferingId);
 
-            return Result.Failure<AbsenceForStudentResponse>(DomainErrors.Subjects.Offering.NotFound(absence.OfferingId));
+            return Result.Failure<AbsenceForStudentResponse>(OfferingErrors.NotFound(absence.OfferingId));
         }
 
         AbsenceForStudentResponse result = new(

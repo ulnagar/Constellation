@@ -33,10 +33,10 @@ namespace Constellation.Presentation.Server.Areas.Portal.Controllers
             return PartialView(statusList);
         }
 
-        public async Task<IActionResult> StatusPopup(int id)
+        public async Task<IActionResult> StatusPopup(Guid id)
         {
             var statusList = await _classMonitorCacheService.GetCurrentStatus();
-            var course = statusList.FirstOrDefault(status => status.Id == id) ?? new ClassMonitorDtos.MonitorCourse();
+            var course = statusList.FirstOrDefault(status => status.Id.Value == id) ?? new ClassMonitorDtos.MonitorCourse();
 
             return PartialView("StatusPopup", course);
         }

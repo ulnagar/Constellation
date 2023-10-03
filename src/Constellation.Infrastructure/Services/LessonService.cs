@@ -2,9 +2,11 @@
 
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.DependencyInjection;
 using System;
 using System.Linq;
@@ -36,7 +38,7 @@ public class LessonService : ILessonService, IScopedService
     // That way, the student will be included in the Missed Lesson Report. (That report should include student enrolled
     // school as well as lesson roll school.
 
-    public async Task RemoveStudentFromFutureRollsForCourse(string studentId, int offeringId)
+    public async Task RemoveStudentFromFutureRollsForCourse(string studentId, OfferingId offeringId)
     {
         List<SciencePracLesson> lessons = await _lessonRepository.GetAllForStudent(studentId);
 
@@ -67,7 +69,7 @@ public class LessonService : ILessonService, IScopedService
         }
     }
 
-    public async Task AddStudentToFutureRollsForCourse(string studentId, string schoolCode, int offeringId)
+    public async Task AddStudentToFutureRollsForCourse(string studentId, string schoolCode, OfferingId offeringId)
     {
         List<SciencePracLesson> lessons = await _lessonRepository.GetAllForOffering(offeringId);
 

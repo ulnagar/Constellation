@@ -1,13 +1,12 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection;
 
-using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Clock;
 using Constellation.Application.Common.Behaviours;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Providers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Infrastructure.ExternalServices.AdobeConnect;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Infrastructure.Idempotence;
 using Constellation.Infrastructure.Jobs;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
@@ -100,6 +99,7 @@ public static class ServicesRegistration
 
         services.AddScoped<IAbsenceMonitorJob, AbsenceMonitorJob>();
         services.AddScoped<IAbsenceProcessingJob, AbsenceProcessingJob>();
+        services.AddScoped<IAssignmentSubmissionJob, AssignmentSubmissionJob>();
         services.AddScoped<IAttendanceReportJob, AttendanceReportJob>();
         services.AddScoped<IClassMonitorJob, ClassMonitorJob>();
         services.AddScoped<IGroupTutorialExpiryScanJob, GroupTutorialExpiryScanJob>();

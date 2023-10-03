@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Assignments.UploadAssignmentSubmission;
 
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Assignments.Identifiers;
+using Constellation.Core.Models.Assignments.Repositories;
 using FluentValidation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,13 +24,9 @@ public class UploadAssignmentSubmissionCommandValidator : AbstractValidator<Uplo
         RuleFor(command => command.File).NotNull();
     }
 
-    public async Task<bool> BeValidAssignmentId(AssignmentId assignmentId, CancellationToken cancellation = new CancellationToken())
-    {
-        return await _assignmentRepository.IsValidAssignmentId(assignmentId, cancellation);
-    }
+    public async Task<bool> BeValidAssignmentId(AssignmentId assignmentId, CancellationToken cancellation = new CancellationToken()) => 
+        await _assignmentRepository.IsValidAssignmentId(assignmentId, cancellation);
 
-    public async Task<bool> BeValidStudentId(string studentId, CancellationToken cancellation = new CancellationToken())
-    {
-        return await _studentRepository.IsValidStudentId(studentId, cancellation);
-    }
+    public async Task<bool> BeValidStudentId(string studentId, CancellationToken cancellation = new CancellationToken()) => 
+        await _studentRepository.IsValidStudentId(studentId, cancellation);
 }

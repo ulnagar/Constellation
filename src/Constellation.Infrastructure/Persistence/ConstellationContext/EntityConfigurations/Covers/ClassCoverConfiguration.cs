@@ -1,8 +1,10 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Covers;
 
-using Constellation.Core.Models;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +26,13 @@ internal sealed class ClassCoverConfiguration : IEntityTypeConfiguration<ClassCo
                 value => ClassCoverId.FromValue(value));
 
         builder
-            .HasOne<CourseOffering>()
+            .Property(cover => cover.OfferingId)
+            .HasConversion(
+                id => id.Value,
+                value => OfferingId.FromValue(value));
+
+        builder
+            .HasOne<Offering>()
             .WithMany()
             .HasForeignKey(cover => cover.OfferingId)
             .OnDelete(DeleteBehavior.Restrict);

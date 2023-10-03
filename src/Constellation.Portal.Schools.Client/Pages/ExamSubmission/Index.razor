@@ -1,17 +1,20 @@
 ﻿@page "/Exams/"
 
 @using Constellation.Application.Assignments.GetAssignmentsByCourse;
-@using Constellation.Application.Features.Portal.School.Assignments.Commands;
-@using Constellation.Application.Features.Portal.School.Assignments.Models;
 @using Constellation.Application.Features.Portal.School.Home.Models;
 @using Constellation.Application.Assignments.UploadAssignmentSubmission;
-@using Constellation.Core.Models.Identifiers;
+@using Constellation.Application.Courses.GetCoursesForStudent
+@using Constellation.Core.Models.Assignments.Identifiers;
+@using Constellation.Core.Models.Subjects.Identifiers
+@using Blazored.Modal
+@using Blazored.Modal.Services;
 
 @attribute [Authorize]
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject HttpClient Http
 @inject NavigationManager navManager
+@inject IModalService Modal
 
 <Loader IsLoading="@IsLoading">
     <h2>Exam Uploads</h2>
@@ -117,9 +120,9 @@
 
     public StudentFromSchoolForDropdownSelection SelectedStudent { get; set; }
 
-    public List<StudentCourseForDropdownSelection> Courses { get; set; } = new();
+    public List<StudentCourseResponse> Courses { get; set; } = new();
 
-    public StudentCourseForDropdownSelection SelectedCourse { get; set; }
+    public StudentCourseResponse SelectedCourse { get; set; }
 
     public List<CourseAssignmentResponse> Assignments { get; set; } = new();
 
@@ -163,14 +166,16 @@
     {
         IsLoading = true;
 
+        Courses = new List<StudentCourseResponse>();
+        
         if (SelectedStudent != null)
         {
-            var courses = await Http.GetFromJsonAsync<List<StudentCourseForDropdownSelection>>($"api/Exams/{SelectedStudent.StudentId}/Courses");
-            Courses = courses.OrderBy(course => course.Name).ToList();
-        } 
-        else
-        {
-            Courses = new List<StudentCourseForDropdownSelection>();
+            var courses = await Http.GetFromJsonAsync<List<StudentCourseResponse>>($"api/Exams/{SelectedStudent.StudentId}/Courses");
+
+            if (courses.Count != 0)
+            {
+                Courses = courses.OrderBy(course => course.Name).ToList();
+            }
         }
 
         IsLoading = false;
@@ -190,7 +195,10 @@
 
     private async Task SelectNewStudent(ChangeEventArgs e)
     {
-        var studentId = e.Value.ToString();
+        if (e.Value is null)
+            return;
+
+        string studentId = e.Value.ToString();
 
         SelectedStudent = Students.First(student => student.StudentId == studentId);
 
@@ -203,10 +211,15 @@
 
     private async Task SelectNewCourse(ChangeEventArgs e)
     {
-        if (e.Value.ToString() == "")
+        if (e.Value is null)
             return;
 
-        var courseId = Int32.Parse(e.Value.ToString());
+        bool convertSuccess = Guid.TryParse(e.Value.ToString(), out Guid paramGuid);
+
+        if (!convertSuccess)
+            return;
+
+        var courseId = CourseId.FromValue(paramGuid);
 
         SelectedCourse = Courses.First(course => course.Id == courseId);
 
@@ -217,7 +230,15 @@
 
     private void SelectNewAssignment(ChangeEventArgs e)
     {
-        var assignmentId = AssignmentId.FromValue(new Guid(e.Value.ToString()));
+        if (e.Value is null)
+            return;
+
+        bool convertSuccess = Guid.TryParse(e.Value.ToString(), out Guid paramGuid);
+
+        if (!convertSuccess)
+            return;
+
+        AssignmentId assignmentId = AssignmentId.FromValue(paramGuid);
 
         SelectedAssignment = Assignments.First(assignment => assignment.AssignmentId == assignmentId);
 
@@ -243,6 +264,15 @@
         try
         {
             long maxFileSize = 10485760;
+
+            if (File.Size > maxFileSize)
+            {
+                var parameters = new ModalParameters();
+                parameters.Add("Text", "The supplied file is too large. Files must be less than 10Mb each.");
+
+                var modal = Modal.Show<FeedbackModal>("Submit Exam", parameters);
+            }
+
             await using var target = new MemoryStream();
             await File.OpenReadStream(maxFileSize).CopyToAsync(target);
             SelectedFile.FileData = target.ToArray();
@@ -265,8 +295,20 @@
             SelectedStudent.StudentId,
             SelectedFile);
 
-        await Http.PostAsJsonAsync<UploadAssignmentSubmissionCommand>($"api/Exams/Upload", Command);
+        using var response = await Http.PostAsJsonAsync<UploadAssignmentSubmissionCommand>($"api/Exams/Upload", Command);
 
-        navManager.NavigateTo("");
+        bool success = await response.Content.ReadFromJsonAsync<bool>();
+
+        if (success)
+        {
+            navManager.NavigateTo("");
+        }
+
+        var parameters = new ModalParameters();
+        parameters.Add("Text", "An error occurred while trying to upload the file.");
+
+        var modal = Modal.Show<FeedbackModal>("Submit Exam", parameters);
+
+        OkToSubmit = false;
     }
 }

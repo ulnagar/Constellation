@@ -1,19 +1,14 @@
 ﻿namespace Constellation.Presentation.Server.BaseModels;
 
-using Constellation.Application.Features.Home.Queries;
-using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 public class BaseController : Controller
 {
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IMediator _mediator;
-
-    public BaseController(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
-    }
 
     public BaseController(IMediator mediator)
     {
@@ -33,50 +28,25 @@ public class BaseController : Controller
         viewModel.Classes = await GetClasses();
     }
 
-    protected async Task<IDictionary<string, int>> GetClasses()
+    protected async Task<IDictionary<string, OfferingId>> GetClasses()
     {
-        if (_mediator is not null)
-        {
-            return await GetClassesWithMediator();
-        }
+        Dictionary<string, OfferingId> response = new();
 
-        if (_unitOfWork is not null)
-        {
-            return await GetClassesWithUoW();
-        }
-
-        return new Dictionary<string, int>();
-    }
-
-    private async Task<IDictionary<string, int>> GetClassesWithMediator()
-    {
         var username = User.Identity?.Name;
 
         if (username is null)
+            return new Dictionary<string, OfferingId>();
+
+        var query = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(null, username));
+
+        if (query.IsFailure)
+            return response;
+
+        foreach (var entry in query.Value)
         {
-            return new Dictionary<string, int>();
+            response.Add(entry.OfferingName, entry.OfferingId);
         }
 
-        return await _mediator.Send(new GetUsersClassesQuery { Username = username });
-    }
-
-    private async Task<IDictionary<string, int>> GetClassesWithUoW()
-    {
-        var result = new Dictionary<string, int>();
-
-        var username = User.Identity.Name;
-        var teacher = await _unitOfWork.Staff.FromEmailForExistCheck(username);
-
-        if (teacher != null)
-        {
-            var entries = await _unitOfWork.CourseOfferings.AllForTeacherAsync(teacher.StaffId);
-
-            foreach (var entry in entries)
-            {
-                result.Add(entry.Name, entry.Id);
-            }
-        }
-
-        return result;
+        return response;
     }
 }

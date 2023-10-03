@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.SciencePracs;
 
-using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -27,8 +29,14 @@ public class SciencePracLessonOfferingConfiguration : IEntityTypeConfiguration<S
                 value => SciencePracLessonId.FromValue(value));
 
         builder
-            .HasOne<CourseOffering>()
+            .HasOne<Offering>()
             .WithMany()
             .HasForeignKey(entity => entity.OfferingId);
+
+        builder
+            .Property(entity => entity.OfferingId)
+            .HasConversion(
+                id => id.Value,
+                value => OfferingId.FromValue(value));
     }
 }

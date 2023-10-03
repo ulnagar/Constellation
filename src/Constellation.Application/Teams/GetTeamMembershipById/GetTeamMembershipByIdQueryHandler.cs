@@ -2,11 +2,13 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Core.Models.Offerings.Errors;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using Serilog;
 using System;
@@ -19,7 +21,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
     : IQueryHandler<GetTeamMembershipByIdQuery, List<TeamMembershipResponse>>
 {
     private readonly ITeamRepository _teamRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IFacultyRepository _facultyRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
@@ -29,7 +31,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
     public GetTeamMembershipByIdQueryHandler(
         ITeamRepository teamRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IFacultyRepository facultyRepository,
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
@@ -74,7 +76,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 //error
                 _logger.Warning("Could not identify Offering from year {year} and name {name}", teamYear, teamCourse);
 
-                return Result.Failure<List<TeamMembershipResponse>>(new Error("Subjects.Offering.SearchFailed", $"Could not identify Offering from Year {teamYear} and name {teamCourse}."));
+                return Result.Failure<List<TeamMembershipResponse>>(OfferingErrors.SearchFailed(teamYear, teamCourse));
             }
 
             // Enrolled Students

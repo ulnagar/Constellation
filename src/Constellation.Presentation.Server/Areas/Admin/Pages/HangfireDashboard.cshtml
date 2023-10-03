@@ -11,20 +11,20 @@
 
 <table class="table-striped table-hover data-table">
     <thead>
-    <tr>
-        <th>Name</th>
-        <th>Add</th>
-        <th>Trigger</th>
-        <th>Remove</th>
-    </tr>
+        <tr>
+            <th>Name</th>
+            <th>Add</th>
+            <th>Trigger</th>
+            <th>Remove</th>
+        </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.JobDefinitions.OrderBy(def => def.Key))
+        @foreach (var item in Model.JobDefinitions.OrderBy(def => def.TypeName))
         {
-            var isActive = Model.GetJobStatus(item.Key);
+            var isActive = Model.GetJobStatus(item.TypeName);
 
             <tr>
-                <td>@item.Key</td>
+                <td>@item.TypeName</td>
                 <td>
                     <!-- Add button -->
                     @if (!isActive)
@@ -32,8 +32,8 @@
                         <form asp-page-handler="AddJob" method="post">
                             <div class="form-row">
                                 <div class="col">
-                                    <input type="hidden" name="actionName" value="@item.Key" />
-                                    <input type="text" name="cronExpression" value="@item.Value" class="form-control" />
+                                    <input type="hidden" name="actionName" value="@item.TypeName" />
+                                    <input type="text" name="cronExpression" value="@item.TypeSchedule" class="form-control" />
                                 </div>
                                 <div class="col">
                                     <button class="btn btn-primary">Add</button>
@@ -47,14 +47,14 @@
                     @if (isActive)
                     {
                         <form asp-page-handler="TriggerJob" method="post">
-                            <input type="hidden" name="actionName" value="@item.Key" />
+                            <input type="hidden" name="actionName" value="@item.TypeName" />
                             <button class="btn btn-success" disabled="@(!isActive)">Trigger</button>
                         </form>                        
                     }
 
                     <!-- Local Trigger button -->
                     <form asp-page-handler="LocalTriggerJob" method="post">
-                        <input type="hidden" name="actionName" value="@item.Key" />
+                        <input type="hidden" name="actionName" value="@item.TypeName" />
                         <button class="btn btn-success ml-3">Trigger Locally</button>
                     </form>
                 </td>
@@ -63,7 +63,7 @@
                     @if (isActive)
                     {
                        <form asp-page-handler="RemoveJob" method="post">
-                            <input type="hidden" name="actionName" value="@item.Key" />
+                            <input type="hidden" name="actionName" value="@item.TypeName" />
                             <button class="btn btn-warning" disabled="@(!isActive)">Remove</button>
                         </form> 
                     }

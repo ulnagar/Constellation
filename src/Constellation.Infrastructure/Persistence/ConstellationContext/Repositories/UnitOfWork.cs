@@ -2,6 +2,7 @@
 
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
+using Constellation.Core.Abstractions.Clock;
 using Microsoft.AspNetCore.Identity;
 
 public class UnitOfWork : IUnitOfWork
@@ -11,15 +12,12 @@ public class UnitOfWork : IUnitOfWork
     public IAdobeConnectOperationsRepository AdobeConnectOperations { get; set; }
     public IAdobeConnectRoomRepository AdobeConnectRooms { get; set; }
     public IAppAccessTokenRepository AppAccessTokens { get; set; }
-    public ICourseOfferingRepository CourseOfferings { get; set; }
-    public ICourseRepository Courses { get; set; }
     public IDeviceAllocationRepository DeviceAllocations { get; set; }
     public IDeviceNotesRepository DeviceNotes { get; set; }
     public IDeviceRepository Devices { get; set; }
     public IEnrolmentRepository Enrolments { get; set; }
     public IIdentityRepository Identities { get; set; }
     public IMSTeamOperationsRepository MSTeamOperations { get; set; }
-    public IOfferingSessionsRepository OfferingSessions { get; set; }
     public ISchoolContactRepository SchoolContacts { get; set; }
     public ISchoolContactRoleRepository SchoolContactRoles { get; set; }
     public ISchoolRepository Schools { get; set; }
@@ -31,28 +29,28 @@ public class UnitOfWork : IUnitOfWork
     public IJobActivationRepository JobActivations { get; set; }
 
 
-    public UnitOfWork(AppDbContext context, UserManager<AppUser> userManager)
+    public UnitOfWork(
+        AppDbContext context, 
+        UserManager<AppUser> userManager,
+        IDateTimeProvider dateTime)
     {
         _context = context;
 
         AdobeConnectOperations = new AdobeConnectOperationsRepository(context);
-        AdobeConnectRooms = new AdobeConnectRoomRepository(context);
+        AdobeConnectRooms = new AdobeConnectRoomRepository(context, dateTime);
         AppAccessTokens = new AppAccessTokenRepository(context);
-        CourseOfferings = new CourseOfferingRepository(context);
-        Courses = new CourseRepository(context);
         DeviceAllocations = new DeviceAllocationRepository(context);
         DeviceNotes = new DeviceNotesRepository(context);
         Devices = new DeviceRepository(context);
-        Enrolments = new EnrolmentRepository(context);
+        Enrolments = new EnrolmentRepository(context, dateTime);
         Identities = new IdentityRepository(userManager);
         MSTeamOperations = new MSTeamOperationsRepository(context);
-        OfferingSessions = new OfferingSessionsRepository(context);
         SchoolContacts = new SchoolContactRepository(context);
         SchoolContactRoles = new SchoolContactRoleRepository(context);
         Schools = new SchoolRepository(context);
         Settings = new SettingRepository(context);
         Staff = new StaffRepository(context);
-        Students = new StudentRepository(context);
+        Students = new StudentRepository(context, dateTime);
         Periods = new TimetablePeriodRepository(context);
         CanvasOperations = new CanvasOperationsRepository(context);
         JobActivations = new JobActivationRepository(context);

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Assignments.GetCurrentAssignmentsListing;
 
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Assignments.Identifiers;
 using System;
 
 public sealed record CurrentAssignmentSummaryResponse(

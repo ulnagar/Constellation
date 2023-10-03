@@ -1,8 +1,8 @@
 ﻿#nullable enable
 namespace Constellation.Presentation.Server.BaseModels;
 
-using Constellation.Application.Features.Home.Queries;
-using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
+using Constellation.Core.Models.Offerings.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
@@ -10,45 +10,55 @@ using System.Threading.Tasks;
 
 public class BasePageModel : PageModel, IBaseModel
 {
-    public IDictionary<string, int> Classes { get; set; }
+    public IDictionary<string, OfferingId> Classes { get; set; }
     public ErrorDisplay? Error { get; set; }
 
     public BasePageModel()
     {
-        Classes = new Dictionary<string, int>();
-    }
-
-    public async Task GetClasses(IUnitOfWork unitOfWork)
-    {
-        var username = User.Identity?.Name;
-
-        if (username is null)
-        {
-            return;
-        }
-
-        var teacher = await unitOfWork.Staff.FromEmailForExistCheck(username);
-
-        if (teacher != null)
-        {
-            var entries = unitOfWork.CourseOfferings.AllForTeacher(teacher.StaffId);
-
-            foreach (var entry in entries)
-            {
-                Classes.Add(entry.Name, entry.Id);
-            }
-        }
+        Classes = new Dictionary<string, OfferingId>();
     }
 
     public async Task GetClasses(IMediator mediator)
     {
+        Dictionary<string, OfferingId> response = new();
+
         var username = User.Identity?.Name;
 
         if (username is null)
-        {
             return;
+
+        var query = await mediator.Send(new GetCurrentOfferingsForTeacherQuery(null, username));
+
+        if (query.IsFailure)
+            return;
+
+        foreach (var entry in query.Value)
+        {
+            response.Add(entry.OfferingName, entry.OfferingId);
         }
 
-        Classes = await mediator.Send(new GetUsersClassesQuery { Username = username });
+        Classes = response;
+    }
+
+    public async Task GetClasses(ISender mediator)
+    {
+        Dictionary<string, OfferingId> response = new();
+
+        var username = User.Identity?.Name;
+
+        if (username is null)
+            return;
+
+        var query = await mediator.Send(new GetCurrentOfferingsForTeacherQuery(null, username));
+
+        if (query.IsFailure)
+            return;
+
+        foreach (var entry in query.Value)
+        {
+            response.Add(entry.OfferingName, entry.OfferingId);
+        }
+
+        Classes = response;
     }
 }

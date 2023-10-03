@@ -18,7 +18,7 @@
             <label asp-for="Period.Timetable" class="col-md-2"></label>
             <div class="col-md-3">
                 <select asp-for="Period.Timetable" asp-items="@Model.TimetableList" class="form-control combo-with-tag">
-                    <option value="-- Select or Enter --"></option>
+                    <option value="">-- Select or Enter --</option>
                 </select>
                 <span asp-validation-for="Period.Timetable" class="text-danger"></span>
             </div>
@@ -68,7 +68,7 @@
             <label asp-for="Period.Type" class="col-md-2"></label>
             <div class="col-md-3">
                 <select asp-for="Period.Type" asp-items="@Model.TypeList" class="form-control combo-with-tag">
-                    <option value="-- Select or Enter --"></option>
+                    <option value="">-- Select or Enter --</option>
                 </select>
                 <span asp-validation-for="Period.Type" class="text-danger"></span>
             </div>

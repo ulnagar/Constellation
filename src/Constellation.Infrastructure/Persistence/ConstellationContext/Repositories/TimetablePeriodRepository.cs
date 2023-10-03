@@ -1,13 +1,8 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
-using Constellation.Infrastructure.Persistence.ConstellationContext;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
-using static Constellation.Core.Errors.DomainErrors.ClassCovers;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
 {
@@ -20,46 +15,68 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
             _context = context;
         }
 
-        public async Task<List<TimetablePeriod>> GetForOfferingOnDay(
-            int offeringId,
-            DateTime absenceDate,
-            int dayNumber,
+        public async Task<TimetablePeriod> GetById(
+            int id,
             CancellationToken cancellationToken = default) =>
             await _context
-                .Set<OfferingSession>()
+                .Set<TimetablePeriod>()
+                .SingleOrDefaultAsync(period => period.Id == id, cancellationToken);
+
+        public async Task<List<TimetablePeriod>> GetForOfferingOnDay(
+            OfferingId offeringId,
+            DateTime absenceDate,
+            int dayNumber,
+            CancellationToken cancellationToken = default)
+        {
+            List<Session> sessions = await _context
+                .Set<Session>()
                 .Where(session => session.OfferingId == offeringId &&
                     // session was created before the absence date
-                    session.DateCreated < absenceDate &&
+                    session.CreatedAt < absenceDate &&
                     // session is still current (not deleted) OR session was deleted after absence date
-                    (!session.IsDeleted || session.DateDeleted.Value.Date > absenceDate) &&
-                    // session is active on the absence day
-                    session.Period.Day == dayNumber)
-                .Select(session => session.Period)
-                .Distinct()
+                    (!session.IsDeleted || session.DeletedAt.Date > absenceDate))
                 .ToListAsync(cancellationToken);
+
+            return await _context
+                .Set<TimetablePeriod>()
+                .Where(period =>
+                    period.Day == dayNumber &&
+                    sessions.Select(session => session.PeriodId).Contains(period.Id))
+                .ToListAsync(cancellationToken);
+        }
 
         // Method is not async as we are passing the async task to another method
         public Task<List<TimetablePeriod>> GetForOfferingOnDay(
-            int offeringId,
+            OfferingId offeringId,
             DateOnly absenceDate,
             int dayNumber,
             CancellationToken cancellationToken = default) =>
             GetForOfferingOnDay(offeringId, absenceDate.ToDateTime(TimeOnly.MinValue), dayNumber, cancellationToken);
 
-        private IQueryable<TimetablePeriod> Collection()
+        public async Task<List<TimetablePeriod>> GetCurrent(
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<TimetablePeriod>()
+                .Where(period => !period.IsDeleted)
+                .ToListAsync(cancellationToken);
+
+        public async Task<double> TotalDurationForCollectionOfPeriods(
+            List<int> PeriodIds,
+            CancellationToken cancellationToken = default)
         {
-            return _context.Periods
-                .Include(p => p.OfferingSessions)
-                    .ThenInclude(offering => offering.Offering)
-                .Include(p => p.OfferingSessions)
-                    .ThenInclude(offering => offering.Room)
-                .Include(p => p.OfferingSessions)
-                    .ThenInclude(offering => offering.Teacher);
+            List<TimetablePeriod> periods = await _context
+                .Set<TimetablePeriod>()
+                .Where(period => PeriodIds.Contains(period.Id))
+                .ToListAsync(cancellationToken);
+    
+            return periods
+                .Sum(period => period.EndTime.Subtract(period.StartTime).TotalMinutes);
         }
+
 
         public async Task<List<TimetablePeriod>> GetByDayAndOfferingId(
             int dayNumber,
-            int offeringId,
+            OfferingId offeringId,
             CancellationToken cancellationToken = default) =>
             await _context
                 .Set<TimetablePeriod>()
@@ -84,58 +101,25 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Where(period => !period.IsDeleted && timetables.Contains(period.Timetable))
                 .ToListAsync(cancellationToken);
 
-        public TimetablePeriod WithDetails(int id)
-        {
-            return Collection()
-                .SingleOrDefault(d => d.Id == id);
-        }
-
-        public TimetablePeriod WithFilter(Expression<Func<TimetablePeriod, bool>> predicate)
-        {
-            return Collection()
-                .FirstOrDefault(predicate);
-        }
-
-        public ICollection<TimetablePeriod> All()
-        {
-            return Collection()
-                .ToList();
-        }
-
-        public ICollection<TimetablePeriod> AllWithFilter(Expression<Func<TimetablePeriod, bool>> predicate)
-        {
-            return Collection()
-                .Where(predicate)
-                .ToList();
-        }
+        public async Task<List<TimetablePeriod>> GetListFromIds(
+            List<int> periodIds, 
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<TimetablePeriod>()
+                .Where(period => periodIds.Contains(period.Id))
+                .ToListAsync(cancellationToken);
 
         public ICollection<TimetablePeriod> AllFromDay(int day)
         {
-            return Collection()
+            return _context.Set<TimetablePeriod>()
                 .Where(p => p.IsDeleted == false)
                 .Where(p => p.Day == day)
                 .ToList();
         }
 
-        public ICollection<TimetablePeriod> AllActive()
-        {
-            return Collection()
-                .Where(p => p.IsDeleted == false)
-                .ToList();
-        }
-
-        public ICollection<TimetablePeriod> AllForStudent(string studentId)
-        {
-            var enrolments = _context.Enrolments.Where(e => !e.IsDeleted && e.StudentId == studentId);
-            var sessions = enrolments.SelectMany(e => e.Offering.Sessions);
-            var periods = sessions.Select(s => s.Period);
-
-            return periods.Distinct().ToList();
-        }
-
         public async Task<ICollection<TimetablePeriod>> ForSelectionAsync()
         {
-            return await _context.Periods
+            return await _context.Set<TimetablePeriod>()
                 .Where(period => !period.IsDeleted)
                 .OrderBy(period => period.Timetable)
                 .ThenBy(period => period.Day)
@@ -145,14 +129,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
         public async Task<ICollection<TimetablePeriod>> ForGraphicalDisplayAsync()
         {
-            return await _context.Periods
+            return await _context.Set<TimetablePeriod>()
                 .Where(period => !period.IsDeleted)
                 .ToListAsync();
         }
 
         public async Task<TimetablePeriod> ForEditAsync(int id)
         {
-            return await _context.Periods
+            return await _context.Set<TimetablePeriod>()
                 .SingleOrDefaultAsync(period => period.Id == id);
         }
     }

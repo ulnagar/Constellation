@@ -43,7 +43,8 @@ a.navbar-brand {
     margin: 2px 0px;
 }
 
-.sidebar-layout .nav-item:hover, .nav-item:has(a.active):hover {
+.sidebar-layout .nav-item:hover, 
+.sidebar-layout .nav-item:has(a.active):hover {
     background-color: #f0f1f2;
     border: 3px solid #e0e1e2;
     border-radius: 10px;
@@ -108,6 +109,10 @@ button.accept-policy {
 html {
   position: relative;
   min-height: 100%;
+}
+
+body {
+    padding-bottom: 60px;
 }
 
 .footer {
@@ -363,3 +368,14 @@ input.checkbox-toggle:checked:before {
 main {
     /* min-height: 100vh; */
 }
+
+
+/* Custom sort data table styles */
+table.hidden-sort-data-table {
+    width: 100% !important;
+}
+
+table.hidden-sort-data-table th {
+    width: unset !important;
+}
+

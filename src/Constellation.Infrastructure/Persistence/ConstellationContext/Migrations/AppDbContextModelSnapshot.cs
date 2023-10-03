@@ -17,7 +17,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.4")
+                .HasAnnotation("ProductVersion", "7.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -50,7 +50,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("AppSettings", (string)null);
+                    b.ToTable("AppSettings");
                 });
 
             modelBuilder.Entity("Constellation.Application.Models.Audit.Audit", b =>
@@ -106,7 +106,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("AccessToken");
 
-                    b.ToTable("AspNetAccessTokens", (string)null);
+                    b.ToTable("AspNetAccessTokens");
                 });
 
             modelBuilder.Entity("Constellation.Application.Models.Identity.AppRole", b =>
@@ -248,7 +248,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsUnique()
                         .HasFilter("[JobName] IS NOT NULL");
 
-                    b.ToTable("JobActivations", (string)null);
+                    b.ToTable("JobActivations");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
@@ -280,8 +280,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<DateTime>("LastSeen")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("OfferingId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("OfferingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PeriodName")
                         .HasColumnType("nvarchar(max)");
@@ -428,7 +428,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("ScoId");
 
-                    b.ToTable("AdobeConnectOperations", (string)null);
+                    b.ToTable("AdobeConnectOperations");
 
                     b.HasDiscriminator<string>("UserType").HasValue("AdobeConnectOperation");
 
@@ -457,7 +457,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("ScoId");
 
-                    b.ToTable("Rooms", (string)null);
+                    b.ToTable("Rooms");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Assignments.CanvasAssignment", b =>
@@ -471,10 +471,16 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<int>("CanvasId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CourseId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("DelayForwarding")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ForwardingDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("LockDate")
@@ -508,8 +514,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("SubmittedBy")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("SubmittedOn")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("Uploaded")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -664,7 +676,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("CanvasOperations", (string)null);
+                    b.ToTable("CanvasOperations");
 
                     b.HasDiscriminator<string>("OperationType").HasValue("CanvasOperation");
 
@@ -726,61 +738,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("Casuals_Casuals", (string)null);
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.Course", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<Guid>("FacultyId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("FullTimeEquivalentValue")
-                        .HasPrecision(4, 3)
-                        .HasColumnType("decimal(4,3)");
-
-                    b.Property<int>("Grade")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FacultyId");
-
-                    b.ToTable("Courses", (string)null);
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.CourseOffering", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CourseId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.ToTable("Offerings", (string)null);
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.Covers.ClassCover", b =>
                 {
                     b.Property<Guid>("Id")
@@ -810,8 +767,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("OfferingId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("OfferingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -857,7 +814,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("SerialNumber");
 
-                    b.ToTable("Devices", (string)null);
+                    b.ToTable("Devices");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.DeviceAllocation", b =>
@@ -889,7 +846,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("DeviceAllocations", (string)null);
+                    b.ToTable("DeviceAllocations");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.DeviceNotes", b =>
@@ -913,28 +870,37 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("SerialNumber");
 
-                    b.ToTable("DeviceNotes", (string)null);
+                    b.ToTable("DeviceNotes");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.Enrolment", b =>
+            modelBuilder.Entity("Constellation.Core.Models.Enrolments.Enrolment", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("DateCreated")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DateDeleted")
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DeletedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("OfferingId")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("OfferingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("StudentId")
                         .HasColumnType("nvarchar(450)");
@@ -983,7 +949,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("Faculties", (string)null);
+                    b.ToTable("Faculties");
 
                     b.HasData(
                         new
@@ -1100,7 +1066,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StaffId");
 
-                    b.ToTable("FacultyMembership", (string)null);
+                    b.ToTable("FacultyMembership");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Families.Family", b =>
@@ -1452,7 +1418,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("MSTeamOperations", (string)null);
+                    b.ToTable("MSTeamOperations");
 
                     b.HasDiscriminator<string>("UserType").HasValue("MSTeamOperation");
 
@@ -1554,61 +1520,93 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("MandatoryTraining_Modules", (string)null);
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.OfferingResource", b =>
+            modelBuilder.Entity("Constellation.Core.Models.Offerings.Offering", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid?>("CourseId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("OfferingId")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<bool>("ShowLink")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Title")
+                    b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UrlPath")
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("Offerings_Offerings", (string)null);
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Offerings.Resource", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("OfferingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ResourceId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Url")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OfferingId");
 
-                    b.ToTable("OfferingResources", (string)null);
+                    b.ToTable("Offerings_Resources", (string)null);
+
+                    b.HasDiscriminator<string>("Type");
+
+                    b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.OfferingSession", b =>
+            modelBuilder.Entity("Constellation.Core.Models.Offerings.Session", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("DateCreated")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DateDeleted")
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DeletedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("OfferingId")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("OfferingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("PeriodId")
                         .HasColumnType("int");
-
-                    b.Property<string>("RoomId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("StaffId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -1616,11 +1614,51 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("PeriodId");
 
-                    b.HasIndex("RoomId");
+                    b.ToTable("Offerings_Sessions", (string)null);
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Offerings.TeacherAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("OfferingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("StaffId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OfferingId");
 
                     b.HasIndex("StaffId");
 
-                    b.ToTable("Sessions", (string)null);
+                    b.ToTable("Offerings_Teachers", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.PartialAbsenceNotification", b =>
@@ -1804,7 +1842,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Code");
 
-                    b.ToTable("Schools", (string)null);
+                    b.ToTable("Schools");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.SchoolContact", b =>
@@ -1927,8 +1965,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<Guid>("LessonId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("OfferingId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("OfferingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("LessonId", "OfferingId");
 
@@ -1993,7 +2031,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Name", "Type");
 
-                    b.ToTable("Setting", (string)null);
+                    b.ToTable("Setting");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Staff", b =>
@@ -2055,7 +2093,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("StocktakeEvents", (string)null);
+                    b.ToTable("StocktakeEvents");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Stocktake.StocktakeSighting", b =>
@@ -2119,7 +2157,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StocktakeEventId");
 
-                    b.ToTable("StocktakeSightings", (string)null);
+                    b.ToTable("StocktakeSightings");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.StoredFile", b =>
@@ -2150,7 +2188,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("StoredFiles", (string)null);
+                    b.ToTable("StoredFiles");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Student", b =>
@@ -2208,7 +2246,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("SchoolCode");
 
-                    b.ToTable("Students", (string)null);
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.StudentPartialAbsence", b =>
@@ -2229,8 +2267,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<DateTime>("LastSeen")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("OfferingId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("OfferingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("PartialAbsenceLength")
                         .HasColumnType("int");
@@ -2274,8 +2312,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<DateTime>("LastSeen")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("OfferingId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("OfferingId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PeriodName")
                         .HasColumnType("nvarchar(max)");
@@ -2343,6 +2381,38 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("Students_AbsenceConfiguration", (string)null);
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Subjects.Course", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<Guid>("FacultyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("FullTimeEquivalentValue")
+                        .HasPrecision(4, 3)
+                        .HasColumnType("decimal(4,3)");
+
+                    b.Property<int>("Grade")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code");
+
+                    b.HasIndex("FacultyId");
+
+                    b.ToTable("Subjects_Courses", (string)null);
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.Team", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2403,7 +2473,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("Periods", (string)null);
+                    b.ToTable("Periods");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.WholeAbsenceNotification", b =>
@@ -2822,9 +2892,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ClassName");
 
-                    b.Property<int>("CourseId")
+                    b.Property<Guid?>("CourseId")
                         .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("int")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("CourseId");
 
                     b.Property<string>("CourseName")
@@ -2832,9 +2902,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("CourseName");
 
-                    b.Property<int>("OfferingId")
+                    b.Property<Guid?>("OfferingId")
                         .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("int")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("OfferingId");
 
                     b.HasDiscriminator().HasValue("Academic Achievement");
@@ -2849,9 +2919,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ClassName");
 
-                    b.Property<int>("CourseId")
+                    b.Property<Guid?>("CourseId")
                         .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("int")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("CourseId");
 
                     b.Property<string>("CourseName")
@@ -2859,9 +2929,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("CourseName");
 
-                    b.Property<int>("OfferingId")
+                    b.Property<Guid?>("OfferingId")
                         .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("int")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("OfferingId");
 
                     b.HasDiscriminator().HasValue("Academic Excellence");
@@ -2871,9 +2941,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 {
                     b.HasBaseType("Constellation.Core.Models.Awards.Nomination");
 
-                    b.Property<int>("CourseId")
+                    b.Property<Guid?>("CourseId")
                         .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("int")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("CourseId");
 
                     b.Property<string>("CourseName")
@@ -2947,22 +3017,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasDiscriminator().HasValue("ModifyEnrolment");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.CasualMSTeamOperation", b =>
-                {
-                    b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
-
-                    b.Property<Guid>("CasualId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("OfferingId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("int");
-
-                    b.HasIndex("OfferingId");
-
-                    b.HasDiscriminator().HasValue("Casual");
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.ContactAddedMSTeamOperation", b =>
                 {
                     b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
@@ -2977,24 +3031,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("ContactId");
 
                     b.HasDiscriminator().HasValue("ContactAdded");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.GroupMSTeamOperation", b =>
-                {
-                    b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
-
-                    b.Property<Guid>("FacultyId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("OfferingId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("int");
-
-                    b.HasIndex("FacultyId");
-
-                    b.HasIndex("OfferingId");
-
-                    b.HasDiscriminator().HasValue("Group");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.GroupTutorialCreatedMSTeamOperation", b =>
@@ -3013,6 +3049,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasDiscriminator().HasValue("GroupTutorialCreatedMSTeamOperation");
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.OfferingMSTeamOperation", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
+
+                    b.Property<Guid?>("OfferingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasIndex("OfferingId");
+
+                    b.HasDiscriminator().HasValue("OfferingMSTeamOperation");
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.StudentEnrolledMSTeamOperation", b =>
                 {
                     b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
@@ -3026,31 +3074,48 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
+                    b.ToTable("MSTeamOperations", t =>
+                        {
+                            t.Property("StudentId")
+                                .HasColumnName("StudentEnrolledMSTeamOperation_StudentId");
+                        });
+
                     b.HasDiscriminator().HasValue("StudentEnrolled");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.StudentMSTeamOperation", b =>
+            modelBuilder.Entity("Constellation.Core.Models.StudentOfferingMSTeamOperation", b =>
                 {
                     b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
 
-                    b.Property<int>("OfferingId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("int");
-
                     b.Property<string>("StudentId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("StudentId");
 
-                    b.HasIndex("OfferingId");
+                    b.Property<string>("TeamName")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("StudentId")
+                        .HasDatabaseName("IX_MSTeamOperations_StudentId1");
 
-                    b.ToTable("MSTeamOperations", null, t =>
-                        {
-                            t.Property("StudentId")
-                                .HasColumnName("StudentMSTeamOperation_StudentId");
-                        });
+                    b.HasDiscriminator().HasValue("StudentOffering");
+                });
 
-                    b.HasDiscriminator().HasValue("Student");
+            modelBuilder.Entity("Constellation.Core.Models.TeacherAssignmentMSTeamOperation", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
+
+                    b.Property<string>("StaffId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("StaffId");
+
+                    b.Property<string>("TeamName")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasIndex("StaffId");
+
+                    b.HasDiscriminator().HasValue("TeacherAssigned");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.TeacherEmployedMSTeamOperation", b =>
@@ -3066,25 +3131,86 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StaffId");
 
+                    b.ToTable("MSTeamOperations", t =>
+                        {
+                            t.Property("StaffId")
+                                .HasColumnName("TeacherEmployedMSTeamOperation_StaffId");
+                        });
+
                     b.HasDiscriminator().HasValue("TeacherEmployed");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Offerings.AdobeConnectRoomResource", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.Offerings.Resource");
+
+                    b.HasDiscriminator().HasValue("Adobe Connect Room");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Offerings.CanvasCourseResource", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.Offerings.Resource");
+
+                    b.HasDiscriminator().HasValue("Canvas Course");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Offerings.MicrosoftTeamResource", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.Offerings.Resource");
+
+                    b.HasDiscriminator().HasValue("Microsoft Team");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.CasualMSTeamOperation", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.OfferingMSTeamOperation");
+
+                    b.Property<Guid>("CasualId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasDiscriminator().HasValue("Casual");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.GroupMSTeamOperation", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.OfferingMSTeamOperation");
+
+                    b.Property<Guid>("FacultyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasIndex("FacultyId");
+
+                    b.HasDiscriminator().HasValue("Group");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.StudentMSTeamOperation", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.OfferingMSTeamOperation");
+
+                    b.Property<string>("StudentId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("MSTeamOperations", t =>
+                        {
+                            t.Property("StudentId")
+                                .HasColumnName("StudentMSTeamOperation_StudentId");
+                        });
+
+                    b.HasDiscriminator().HasValue("Student");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.TeacherMSTeamOperation", b =>
                 {
-                    b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
-
-                    b.Property<int>("OfferingId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("int");
+                    b.HasBaseType("Constellation.Core.Models.OfferingMSTeamOperation");
 
                     b.Property<string>("StaffId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("OfferingId");
-
                     b.HasIndex("StaffId");
 
-                    b.ToTable("MSTeamOperations", null, t =>
+                    b.ToTable("MSTeamOperations", t =>
                         {
                             t.Property("StaffId")
                                 .HasColumnName("TeacherMSTeamOperation_StaffId");
@@ -3095,7 +3221,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Constellation.Application.Models.AppSettings", b =>
                 {
-                    b.OwnsOne("Constellation.Application.Models.AppSettings.Absences#Constellation.Application.Models.AppSettings+AbsencesModule", "Absences", b1 =>
+                    b.OwnsOne("Constellation.Application.Models.AppSettings+AbsencesModule", "Absences", b1 =>
                         {
                             b1.Property<int>("AppSettingsId")
                                 .HasColumnType("int");
@@ -3129,7 +3255,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                             b1.HasKey("AppSettingsId");
 
-                            b1.ToTable("AppSettings", (string)null);
+                            b1.ToTable("AppSettings");
 
                             b1.WithOwner()
                                 .HasForeignKey("AppSettingsId");
@@ -3140,11 +3266,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.CourseOffering", null)
-                        .WithMany("Absences")
-                        .HasForeignKey("OfferingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Constellation.Core.Models.Offerings.Offering", null)
+                        .WithMany()
+                        .HasForeignKey("OfferingId");
 
                     b.HasOne("Constellation.Core.Models.Student", null)
                         .WithMany("Absences")
@@ -3176,11 +3300,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Constellation.Core.Models.Assignments.CanvasAssignment", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.Course", null)
+                    b.HasOne("Constellation.Core.Models.Subjects.Course", null)
                         .WithMany()
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Assignments.CanvasAssignmentSubmission", b =>
@@ -3238,35 +3361,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.Course", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Faculty", "Faculty")
-                        .WithMany()
-                        .HasForeignKey("FacultyId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Faculty");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.CourseOffering", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Course", "Course")
-                        .WithMany("Offerings")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.Covers.ClassCover", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.CourseOffering", null)
+                    b.HasOne("Constellation.Core.Models.Offerings.Offering", null)
                         .WithMany()
                         .HasForeignKey("OfferingId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.DeviceAllocation", b =>
@@ -3293,21 +3393,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Device");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.Enrolment", b =>
+            modelBuilder.Entity("Constellation.Core.Models.Enrolments.Enrolment", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.CourseOffering", "Offering")
-                        .WithMany("Enrolments")
-                        .HasForeignKey("OfferingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Constellation.Core.Models.Offerings.Offering", null)
+                        .WithMany()
+                        .HasForeignKey("OfferingId");
 
-                    b.HasOne("Constellation.Core.Models.Student", "Student")
+                    b.HasOne("Constellation.Core.Models.Student", null)
                         .WithMany("Enrolments")
                         .HasForeignKey("StudentId");
-
-                    b.Navigation("Offering");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.FacultyMembership", b =>
@@ -3428,48 +3522,50 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("StoredFile");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.OfferingResource", b =>
+            modelBuilder.Entity("Constellation.Core.Models.Offerings.Offering", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.CourseOffering", "Offering")
+                    b.HasOne("Constellation.Core.Models.Subjects.Course", null)
+                        .WithMany("Offerings")
+                        .HasForeignKey("CourseId");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Offerings.Resource", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Offerings.Offering", "Offering")
                         .WithMany("Resources")
-                        .HasForeignKey("OfferingId")
+                        .HasForeignKey("OfferingId");
+
+                    b.Navigation("Offering");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Offerings.Session", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Offerings.Offering", "Offering")
+                        .WithMany("Sessions")
+                        .HasForeignKey("OfferingId");
+
+                    b.HasOne("Constellation.Core.Models.TimetablePeriod", null)
+                        .WithMany("OfferingSessions")
+                        .HasForeignKey("PeriodId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Offering");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.OfferingSession", b =>
+            modelBuilder.Entity("Constellation.Core.Models.Offerings.TeacherAssignment", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.CourseOffering", "Offering")
-                        .WithMany("Sessions")
+                    b.HasOne("Constellation.Core.Models.Offerings.Offering", "Offering")
+                        .WithMany("Teachers")
                         .HasForeignKey("OfferingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Constellation.Core.Models.TimetablePeriod", "Period")
-                        .WithMany("OfferingSessions")
-                        .HasForeignKey("PeriodId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Constellation.Core.Models.AdobeConnectRoom", "Room")
-                        .WithMany("OfferingSessions")
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Constellation.Core.Models.Staff", "Teacher")
-                        .WithMany("CourseSessions")
+                    b.HasOne("Constellation.Core.Models.Staff", null)
+                        .WithMany()
                         .HasForeignKey("StaffId")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Offering");
-
-                    b.Navigation("Period");
-
-                    b.Navigation("Room");
-
-                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.PartialAbsenceNotification", b =>
@@ -3557,7 +3653,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Constellation.Core.Models.CourseOffering", null)
+                    b.HasOne("Constellation.Core.Models.Offerings.Offering", null)
                         .WithMany()
                         .HasForeignKey("OfferingId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3613,11 +3709,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Constellation.Core.Models.StudentPartialAbsence", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.CourseOffering", "Offering")
+                    b.HasOne("Constellation.Core.Models.Offerings.Offering", "Offering")
                         .WithMany()
-                        .HasForeignKey("OfferingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OfferingId");
 
                     b.HasOne("Constellation.Core.Models.Student", "Student")
                         .WithMany("PartialAbsences")
@@ -3631,11 +3725,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Constellation.Core.Models.StudentWholeAbsence", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.CourseOffering", "Offering")
+                    b.HasOne("Constellation.Core.Models.Offerings.Offering", "Offering")
                         .WithMany()
-                        .HasForeignKey("OfferingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OfferingId");
 
                     b.HasOne("Constellation.Core.Models.Student", "Student")
                         .WithMany("WholeAbsences")
@@ -3653,6 +3745,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .WithMany("AbsenceConfigurations")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Subjects.Course", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Faculty", null)
+                        .WithMany()
+                        .HasForeignKey("FacultyId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.WholeAbsenceNotification", b =>
@@ -3758,17 +3859,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Teacher");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.CasualMSTeamOperation", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.CourseOffering", "Offering")
-                        .WithMany()
-                        .HasForeignKey("OfferingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Offering");
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.ContactAddedMSTeamOperation", b =>
                 {
                     b.HasOne("Constellation.Core.Models.SchoolContact", "Contact")
@@ -3778,25 +3868,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired();
 
                     b.Navigation("Contact");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.GroupMSTeamOperation", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Faculty", "Faculty")
-                        .WithMany()
-                        .HasForeignKey("FacultyId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Constellation.Core.Models.CourseOffering", "Offering")
-                        .WithMany()
-                        .HasForeignKey("OfferingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Faculty");
-
-                    b.Navigation("Offering");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.GroupTutorialCreatedMSTeamOperation", b =>
@@ -3809,6 +3880,16 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("GroupTutorial");
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.OfferingMSTeamOperation", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Offerings.Offering", "Offering")
+                        .WithMany()
+                        .HasForeignKey("OfferingId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Offering");
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.StudentEnrolledMSTeamOperation", b =>
                 {
                     b.HasOne("Constellation.Core.Models.Student", "Student")
@@ -3818,22 +3899,21 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.StudentMSTeamOperation", b =>
+            modelBuilder.Entity("Constellation.Core.Models.StudentOfferingMSTeamOperation", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.CourseOffering", "Offering")
+                    b.HasOne("Constellation.Core.Models.Student", null)
                         .WithMany()
-                        .HasForeignKey("OfferingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Constellation.Core.Models.Student", "Student")
-                        .WithMany("MSTeamOperations")
                         .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_MSTeamOperations_Students_StudentId1");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.TeacherAssignmentMSTeamOperation", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Staff", null)
+                        .WithMany()
+                        .HasForeignKey("StaffId")
                         .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Offering");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.TeacherEmployedMSTeamOperation", b =>
@@ -3845,20 +3925,33 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Staff");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.TeacherMSTeamOperation", b =>
+            modelBuilder.Entity("Constellation.Core.Models.GroupMSTeamOperation", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.CourseOffering", "Offering")
+                    b.HasOne("Constellation.Core.Models.Faculty", "Faculty")
                         .WithMany()
-                        .HasForeignKey("OfferingId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("FacultyId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.Navigation("Faculty");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.StudentMSTeamOperation", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Student", "Student")
+                        .WithMany("MSTeamOperations")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.TeacherMSTeamOperation", b =>
+                {
                     b.HasOne("Constellation.Core.Models.Staff", "Staff")
                         .WithMany("MSTeamOperations")
                         .HasForeignKey("StaffId")
                         .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Offering");
 
                     b.Navigation("Staff");
                 });
@@ -3868,11 +3961,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Notifications");
 
                     b.Navigation("Responses");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.AdobeConnectRoom", b =>
-                {
-                    b.Navigation("OfferingSessions");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Assignments.CanvasAssignment", b =>
@@ -3885,22 +3973,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("IncludedGrades");
 
                     b.Navigation("Nominations");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Course", b =>
-                {
-                    b.Navigation("Offerings");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.CourseOffering", b =>
-                {
-                    b.Navigation("Absences");
-
-                    b.Navigation("Enrolments");
-
-                    b.Navigation("Resources");
-
-                    b.Navigation("Sessions");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Device", b =>
@@ -3941,6 +4013,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Completions");
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Offerings.Offering", b =>
+                {
+                    b.Navigation("Resources");
+
+                    b.Navigation("Sessions");
+
+                    b.Navigation("Teachers");
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.School", b =>
                 {
                     b.Navigation("Staff");
@@ -3974,8 +4055,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("AdobeConnectGroupOperations");
 
                     b.Navigation("AdobeConnectOperations");
-
-                    b.Navigation("CourseSessions");
 
                     b.Navigation("Faculties");
 
@@ -4024,6 +4103,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Notifications");
 
                     b.Navigation("Responses");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Subjects.Course", b =>
+                {
+                    b.Navigation("Offerings");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.TimetablePeriod", b =>

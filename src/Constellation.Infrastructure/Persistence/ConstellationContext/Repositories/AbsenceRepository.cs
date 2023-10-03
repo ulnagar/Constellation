@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -75,7 +77,7 @@ public class AbsenceRepository : IAbsenceRepository
     public async Task<int> GetCountForStudentDateAndOffering(
         string studentId,
         DateOnly absenceDate,
-        int offeringId,
+        OfferingId offeringId,
         string absenceTimeframe,
         CancellationToken cancellationToken = default) =>
         await _context
@@ -89,8 +91,8 @@ public class AbsenceRepository : IAbsenceRepository
 
     public async Task<List<Absence>> GetAllForStudentDateAndOffering(
         string studentId, 
-        DateOnly absenceDate, 
-        int offeringId, 
+        DateOnly absenceDate,
+        OfferingId offeringId, 
         string absenceTimeframe, 
         CancellationToken cancellationToken = default) =>
         await _context
@@ -127,7 +129,7 @@ public class AbsenceRepository : IAbsenceRepository
                 absence.FirstSeen >= seenBefore)
             .ToListAsync(cancellationToken);
     }
-        
+
     public async Task<List<Absence>> GetForStudentFromDateRange(
         string studentId, 
         DateOnly startDate, 

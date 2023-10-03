@@ -2,9 +2,14 @@
 using Constellation.Application.Features.API.Operations.Commands;
 using Constellation.Application.Features.API.Operations.Queries;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Application.StaffMembers.GetStaffById;
+using Constellation.Application.Students.GetStudentById;
+using Constellation.Application.Teams.GetTeamByName;
+using Constellation.Application.Teams.Models;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Areas.API.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -50,6 +55,114 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
         private async Task<ICollection<TeamsOperation>> BuildOperations(MSTeamOperationsList operations)
         {
             var returnData = new List<TeamsOperation>();
+
+            foreach (var operation in operations.AssignmentOperations)
+            {
+                var staffMember = await _mediator.Send(new GetStaffByIdQuery(operation.StaffId));
+
+                if (staffMember.IsFailure)
+                {
+                    continue;
+                }
+
+                var teamOperation = new TeamsOperation
+                {
+                    Id = operation.Id,
+                    TeamName = operation.TeamName,
+                    UserEmail = staffMember.Value.EmailAddress.Email
+                };
+
+                switch (operation.Action)
+                {
+                    case MSTeamOperationAction.Add:
+                        teamOperation.Action = "Add";
+                        break;
+                    case MSTeamOperationAction.Remove:
+                        teamOperation.Action = "Remove";
+                        break;
+                    case MSTeamOperationAction.Promote:
+                        teamOperation.Action = "Promote";
+                        break;
+                    case MSTeamOperationAction.Demote:
+                        teamOperation.Action = "Demote";
+                        break;
+                }
+
+                switch (operation.PermissionLevel)
+                {
+                    case MSTeamOperationPermissionLevel.Member:
+                        teamOperation.Role = "Member";
+                        break;
+                    case MSTeamOperationPermissionLevel.Owner:
+                        teamOperation.Role = "Owner";
+                        break;
+                }
+
+                Result<TeamResource> request = await _mediator.Send(new GetTeamByNameQuery(operation.TeamName));
+
+                if (request.IsFailure)
+                {
+                    continue;
+                }
+
+                teamOperation.TeamId = request.Value.Id.ToString();
+
+                returnData.Add(teamOperation);
+            }
+
+            foreach (var operation in operations.StudentOfferingOperations)
+            {
+                var student = await _mediator.Send(new GetStudentByIdQuery(operation.StudentId));
+
+                if (student.IsFailure)
+                {
+                    continue;
+                }
+
+                var teamOperation = new TeamsOperation
+                {
+                    Id = operation.Id,
+                    TeamName = operation.TeamName,
+                    UserEmail = student.Value.EmailAddress
+                };
+
+                switch (operation.Action)
+                {
+                    case MSTeamOperationAction.Add:
+                        teamOperation.Action = "Add";
+                        break;
+                    case MSTeamOperationAction.Remove:
+                        teamOperation.Action = "Remove";
+                        break;
+                    case MSTeamOperationAction.Promote:
+                        teamOperation.Action = "Promote";
+                        break;
+                    case MSTeamOperationAction.Demote:
+                        teamOperation.Action = "Demote";
+                        break;
+                }
+
+                switch (operation.PermissionLevel)
+                {
+                    case MSTeamOperationPermissionLevel.Member:
+                        teamOperation.Role = "Member";
+                        break;
+                    case MSTeamOperationPermissionLevel.Owner:
+                        teamOperation.Role = "Owner";
+                        break;
+                }
+
+                Result<TeamResource> request = await _mediator.Send(new GetTeamByNameQuery(operation.TeamName));
+
+                if (request.IsFailure)
+                {
+                    continue;
+                }
+
+                teamOperation.TeamId = request.Value.Id.ToString();
+
+                returnData.Add(teamOperation);
+            }
 
             foreach (var operation in operations.StudentOperations)
             {

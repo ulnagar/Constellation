@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.DTOs;
 
-using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Offerings;
 using System;
 using System.Collections.Generic;
 using System.Net.Mail;
@@ -32,7 +32,7 @@ public partial class EmailDtos
             public AbsenceType AbsenceType { get; set; }
             public string AbsenceTimeframe { get; set; }
 
-            public AbsenceDto(Absence absence, Response response, CourseOffering offering)
+            public AbsenceDto(Absence absence, Response response, Offering offering)
             {
                 ReportedBy = "UNKNOWN SOURCE";
 

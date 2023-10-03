@@ -1,4 +1,5 @@
 ﻿using Constellation.Core.Models.Assignments;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 
 namespace Constellation.Application.DTOs
@@ -6,7 +7,7 @@ namespace Constellation.Application.DTOs
     public class CanvasAssignmentDto
     {
         public Guid Id { get; set; }
-        public int? CourseId { get; set; }
+        public CourseId CourseId { get; set; }
         public string Name { get; set; }
         public int CanvasId { get; set; }
         public DateTime DueDate { get; set; }

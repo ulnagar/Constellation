@@ -5,11 +5,13 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
@@ -22,14 +24,14 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
     public SendAbsenceNotificationToStudentCommandHandler(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IEmailService emailService,
         ILogger logger)
     {
@@ -82,7 +84,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
 
         foreach (Absence absence in absences)
         {
-            CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
             if (offering is null)
                 continue;

@@ -5,10 +5,13 @@ using Constellation.Application.Absences.ConvertResponseToAbsenceExplanation;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Covers;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings;
 using Constellation.Core.ValueObjects;
+using Core.Models.Assignments;
+using Core.Models.Subjects;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -42,6 +45,9 @@ public interface IEmailService
     /// <returns></returns>
     Task SendMissedWorkEmail(Student student, string subjectName, string className, DateOnly absenceDate, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
 
+    // Assignment Emails
+    Task<bool> SendAssignmentUploadReceipt(CanvasAssignment assignment, CanvasAssignmentSubmission submission, Course course, Student student, CancellationToken cancellationToken = default);
+
 
     // Attendance Emails
     Task<bool> SendParentAttendanceReportEmail(string studentName, DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<Attachment> attachments, CancellationToken cancellationToken = default);
@@ -54,11 +60,11 @@ public interface IEmailService
 
 
     // Cover Emails
-    Task SendCancelledCoverEmail(ClassCover cover, CourseOffering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task SendCancelledCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
     Task SendCancelledCoverEmail(EmailDtos.CoverEmail resource);
-    Task SendNewCoverEmail(ClassCover cover, CourseOffering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task SendNewCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
     Task SendNewCoverEmail(EmailDtos.CoverEmail resource);
-    Task SendUpdatedCoverEmail(ClassCover cover, CourseOffering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, DateOnly originalStartDate, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task SendUpdatedCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, DateOnly originalStartDate, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
     Task SendUpdatedCoverEmail(EmailDtos.CoverEmail resource);
 
     // Service Emails

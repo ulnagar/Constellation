@@ -1,8 +1,12 @@
 ﻿using Constellation.Application.DTOs;
+using Constellation.Application.Enrolments.GetStudentEnrolmentsWithDetails;
 using Constellation.Application.Features.API.Schools.Queries;
+using Constellation.Application.Features.Faculties.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
+using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -24,9 +28,11 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         private readonly ISchoolService _schoolService;
         private readonly IMediator _mediator;
 
-        public SchoolsController(IUnitOfWork unitOfWork, ISchoolService schoolService,
+        public SchoolsController(
+            IUnitOfWork unitOfWork, 
+            ISchoolService schoolService,
             IMediator mediator)
-            : base(unitOfWork)
+            : base(mediator)
         {
             _unitOfWork = unitOfWork;
             _schoolService = schoolService;
@@ -202,8 +208,58 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             var viewModel = await CreateViewModel<School_DetailsViewModel>();
             viewModel.School = School_DetailsViewModel.SchoolDto.ConvertFromSchool(school);
             viewModel.Contacts = school.StaffAssignments.Where(role => !role.IsDeleted).Select(School_DetailsViewModel.ContactDto.ConvertFromAssignment).ToList();
-            viewModel.Students = school.Students.Where(student => !student.IsDeleted).Select(School_DetailsViewModel.StudentDto.ConvertFromStudent).ToList();
-            viewModel.Staff = school.Staff.Where(staff => !staff.IsDeleted).Select(School_DetailsViewModel.StaffDto.ConvertFromStaff).ToList();
+            
+            foreach (var student in school.Students)
+            {
+                if (student.IsDeleted)
+                    continue;
+
+                var enrolments = await _mediator.Send(new GetStudentEnrolmentsWithDetailsQuery(student.StudentId));
+
+                viewModel.Students.Add(new()
+                {
+                    StudentId = student.StudentId,
+                    Gender = student.Gender,
+                    Name = student.DisplayName,
+                    Grade = student.CurrentGrade,
+                    Enrolments = enrolments
+                        .Value
+                        .Select(enrolment => enrolment.OfferingName)
+                        .OrderBy(entry => entry)
+                        .ToList()
+                });
+            }
+            
+            foreach (var member in school.Staff.Where(staff => !staff.IsDeleted))
+            {
+                List<string> faculties = new();
+
+                foreach (var membership in member.Faculties.Where(membership => !membership.IsDeleted))
+                {
+                    var faculty = await _mediator.Send(new GetFacultyNameQuery(membership.FacultyId));
+
+                    if (!string.IsNullOrWhiteSpace(faculty))
+                    {
+                        faculties.Add(faculty);
+                    }
+                }
+
+                var courseList = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(member.StaffId));
+
+                var entry = new School_DetailsViewModel.StaffDto
+                {
+                    Id = member.StaffId,
+                    Name = member.DisplayName,
+                    Faculty = faculties,
+                    Courses = courseList
+                        .Value
+                        .Select(course => course.OfferingName.Value)
+                        .OrderBy(entry => entry)
+                        .ToList() 
+                };
+
+                viewModel.Staff.Add(entry);
+            }                
 
             viewModel.RoleAssignmentDto = new Contacts_AssignmentViewModel
             {
@@ -227,115 +283,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
             vm.PageHeading = "Map of Schools";
-
-            return View("Map", vm);
-        }
-
-        [AllowAnonymous]
-        [HttpGet("/Partner/Schools/Map/All")]
-        public async Task<IActionResult> ViewCompleteMap()
-        {
-            var vm = await CreateViewModel<School_MapViewModel>();
-
-            var schools = await _unitOfWork.Schools
-                .ForListAsync(school => school.Students.Any(student => !student.IsDeleted) || school.Staff.Any(staff => !staff.IsDeleted));
-
-            var schoolCodes = schools.Select(school => school.Code).ToList();
-
-            vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
-            vm.PageHeading = "All Partner Schools";
-
-            return View("Map", vm);
-        }
-
-        [AllowAnonymous]
-        [HttpGet("/Partner/Schools/Map/OC")]
-        public async Task<IActionResult> ViewOCMap()
-        {
-            var vm = await CreateViewModel<School_MapViewModel>();
-
-            var schools = await _unitOfWork.Schools
-                .ForListAsync(school =>
-                    school.Students.Any(student =>
-                        !student.IsDeleted &&
-                        (student.CurrentGrade == Core.Enums.Grade.Y05 || student.CurrentGrade == Core.Enums.Grade.Y06)));
-
-            var schoolCodes = schools.Select(school => school.Code).ToList();
-
-            vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
-            vm.PageHeading = "Primary Partner Schools";
-
-            return View("Map", vm);
-        }
-
-        [AllowAnonymous]
-        [HttpGet("/Partner/Schools/Map/AHP")]
-        public async Task<IActionResult> ViewAHPMap()
-        {
-            var vm = await CreateViewModel<School_MapViewModel>();
-
-            var schoolCodes = await _unitOfWork.Schools
-                .AHPSchoolCodes();
-
-            vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes.ToList());
-            vm.PageHeading = "AHP Partner Schools";
-
-            return View("Map", vm);
-        }
-
-        [AllowAnonymous]
-        [HttpGet("/Partner/Schools/Map/Stage45")]
-        public async Task<IActionResult> ViewStage45Map()
-        {
-            var vm = await CreateViewModel<School_MapViewModel>();
-
-            var schools = await _unitOfWork.Schools
-                .ForListAsync(school =>
-                    school.Students.Any(student =>
-                        !student.IsDeleted &&
-                        (student.CurrentGrade == Core.Enums.Grade.Y07 || student.CurrentGrade == Core.Enums.Grade.Y08 || student.CurrentGrade == Core.Enums.Grade.Y09 || student.CurrentGrade == Core.Enums.Grade.Y10)));
-
-            var schoolCodes = schools.Select(school => school.Code).ToList();
-
-            vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
-            vm.PageHeading = "Stage 4 & 5 Partner Schools";
-
-            return View("Map", vm);
-        }
-
-        [AllowAnonymous]
-        [HttpGet("/Partner/Schools/Map/Stage6")]
-        public async Task<IActionResult> ViewStage6Map()
-        {
-            var vm = await CreateViewModel<School_MapViewModel>();
-
-            var schools = await _unitOfWork.Schools
-                .ForListAsync(school =>
-                    school.Students.Any(student =>
-                        !student.IsDeleted &&
-                        (student.CurrentGrade == Core.Enums.Grade.Y11 || student.CurrentGrade == Core.Enums.Grade.Y11)));
-
-            var schoolCodes = schools.Select(school => school.Code).ToList();
-
-            vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
-            vm.PageHeading = "Stage 6 Partner Schools";
-
-            return View("Map", vm);
-        }
-
-        [AllowAnonymous]
-        [HttpGet("/Partner/Schools/Map/Staff")]
-        public async Task<IActionResult> ViewStaffMap()
-        {
-            var vm = await CreateViewModel<School_MapViewModel>();
-
-            var schools = await _unitOfWork.Schools
-                .ForListAsync(school => school.Staff.Any(staff => !staff.IsDeleted));
-
-            var schoolCodes = schools.Select(school => school.Code).ToList();
-
-            vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
-            vm.PageHeading = "Staff Locations";
 
             return View("Map", vm);
         }

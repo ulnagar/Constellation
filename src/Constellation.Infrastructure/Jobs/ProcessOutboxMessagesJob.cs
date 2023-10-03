@@ -10,13 +10,16 @@ using Polly;
 using Polly.Retry;
 using Serilog;
 
-public class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob, IHangfireJob
+internal sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
 {
     private readonly AppDbContext _context;
     private readonly IPublisher _publisher;
     private readonly ILogger _logger;
 
-    public ProcessOutboxMessagesJob(AppDbContext context, IPublisher publisher, Serilog.ILogger logger)
+    public ProcessOutboxMessagesJob(
+        AppDbContext context, 
+        IPublisher publisher, 
+        ILogger logger)
     {
         _context = context;
         _publisher = publisher;

@@ -4,10 +4,12 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -17,7 +19,7 @@ internal sealed class AbsenceResponseConfirmedDomainEvent_SendEmailToSchoolAdmin
     : IDomainEventHandler<AbsenceResponseConfirmedDomainEvent>
 {
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IEmailService _emailService;
@@ -26,7 +28,7 @@ internal sealed class AbsenceResponseConfirmedDomainEvent_SendEmailToSchoolAdmin
 
     public AbsenceResponseConfirmedDomainEvent_SendEmailToSchoolAdmin(
         IAbsenceRepository absenceRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
         IEmailService emailService,
@@ -62,7 +64,7 @@ internal sealed class AbsenceResponseConfirmedDomainEvent_SendEmailToSchoolAdmin
             return;
         }
 
-        CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         if (offering is null)
         {

@@ -2,35 +2,35 @@
 
 using Constellation.Application.Abstractions;
 using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Abstractions;
+using Constellation.Application.Models.Identity;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
+using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
-using System.Net.Mail;
+using Serilog;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
-using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Models.Identity;
-using Serilog;
-using System.Linq;
-using Constellation.Application.Extensions;
-using Constellation.Core.Models.Identifiers;
 
 internal sealed class CoverStartAndEndDatesChangedDomainEvent_SendCoverUpdatedEmailHandler
     : IDomainEventHandler<CoverStartAndEndDatesChangedDomainEvent>
 {
     private readonly IClassCoverRepository _classCoverRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ICasualRepository _casualRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ITeamRepository _teamRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
-    private readonly IOfferingSessionsRepository _sessionRepository;
     private readonly UserManager<AppUser> _userManager;
     private readonly IEmailAttachmentService _emailAttachmentService;
     private readonly IEmailService _emailService;
@@ -38,13 +38,12 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_SendCoverUpdatedEm
 
     public CoverStartAndEndDatesChangedDomainEvent_SendCoverUpdatedEmailHandler(
         IClassCoverRepository classCoverRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
         ICasualRepository casualRepository,
         IStudentRepository studentRepository,
         ITeamRepository teamRepository,
         ITimetablePeriodRepository periodRepository,
-        IOfferingSessionsRepository sessionRepository,
         UserManager<AppUser> userManager,
         IEmailAttachmentService emailAttachmentService,
         IEmailService emailService,
@@ -57,7 +56,6 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_SendCoverUpdatedEm
         _studentRepository = studentRepository;
         _teamRepository = teamRepository;
         _periodRepository = periodRepository;
-        _sessionRepository = sessionRepository;
         _userManager = userManager;
         _emailAttachmentService = emailAttachmentService;
         _emailService = emailService;
@@ -201,11 +199,10 @@ internal sealed class CoverStartAndEndDatesChangedDomainEvent_SendCoverUpdatedEm
         }
         else
         {
-            var sessions = await _sessionRepository.GetByOfferingId(cover.OfferingId, cancellationToken);
-            var relevantTimetables = await _sessionRepository.GetTimetableByOfferingId(cover.OfferingId, cancellationToken);
+            var relevantTimetables = await _offeringRepository.GetTimetableByOfferingId(cover.OfferingId, cancellationToken);
             var relevantPeriods = await _periodRepository.GetAllFromTimetable(relevantTimetables, cancellationToken);
 
-            var timetableAttachment = await _emailAttachmentService.GenerateClassTimetableDocument(offering, sessions, relevantPeriods, cancellationToken);
+            var timetableAttachment = await _emailAttachmentService.GenerateClassTimetableDocument(offering, relevantPeriods, cancellationToken);
 
             attachments.Add(timetableAttachment);
         }

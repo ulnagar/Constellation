@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Absences.GetAbsenceSummaryForStudent;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +13,11 @@ internal sealed class GetAbsenceSummaryForStudentQueryHandler
     : IQueryHandler<GetAbsenceSummaryForStudentQuery, List<StudentAbsenceSummaryResponse>>
 {
     private readonly IAbsenceRepository _absenceRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
 
     public GetAbsenceSummaryForStudentQueryHandler(
         IAbsenceRepository absenceRepository,
-        ICourseOfferingRepository offeringRepository)
+        IOfferingRepository offeringRepository)
 	{
         _absenceRepository = absenceRepository;
         _offeringRepository = offeringRepository;

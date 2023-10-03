@@ -3,36 +3,51 @@
 using Constellation.Application.ClassCovers.GetCoversSummaryByDateAndOffering;
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Faculties.Queries;
+using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
-using Constellation.Infrastructure.DependencyInjection;
+using Constellation.Core.Models.Offerings.Repositories;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using MediatR;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHangfireJob
+internal sealed class RollMarkingReportJob : IRollMarkingReportJob
 {
+    private readonly ICourseRepository _courseRepository;
+    private readonly IOfferingRepository _offeringRepository;
+    private readonly IStaffRepository _staffRepository;
     private readonly ISentralGateway _sentralService;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IEmailService _emailService;
-    private readonly ILogger<IRollMarkingReportJob> _logger;
+    private readonly ILogger _logger;
     private readonly IMediator _mediator;
+    private readonly AppConfiguration _configuration;
 
-    public RollMarkingReportJob(ISentralGateway sentralService, IUnitOfWork unitOfWork, 
-        IEmailService emailService, ILogger<IRollMarkingReportJob> logger, IMediator mediator)
+    public RollMarkingReportJob(
+        ICourseRepository courseRepository,
+        IOfferingRepository offeringRepository,
+        IStaffRepository staffRepository,
+        ISentralGateway sentralService, 
+        IEmailService emailService, 
+        ILogger logger, 
+        IMediator mediator,
+        IOptions<AppConfiguration> configuration)
     {
+        _courseRepository = courseRepository;
+        _offeringRepository = offeringRepository;
+        _staffRepository = staffRepository;
         _sentralService = sentralService;
-        _unitOfWork = unitOfWork;
         _emailService = emailService;
-        _logger = logger;
+        _logger = logger.ForContext<IRollMarkingReportJob>();
         _mediator = mediator;
+        _configuration = configuration.Value;
     }
 
     public async Task StartJob(Guid jobId, CancellationToken token)
@@ -42,23 +57,26 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
         if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
             return;
 
-        _logger.LogInformation("{id}: Checking Date: {date}", jobId, date.ToShortDateString());
+        _logger.Information("{id}: Checking Date: {date}", jobId, date.ToShortDateString());
         var entries = await _sentralService.GetRollMarkingReportAsync(date);
 
         var unsubmitted = entries.Where(entry => !entry.Submitted).ToList();
-        var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
+        var absenceSettings = _configuration.Absences;
         var recipients = new Dictionary<string, string>();
 
         if (!unsubmitted.Any())
         {
             var infoString = $"{date.ToShortDateString()} - No Unsubmitted Rolls found!";
 
-            _logger.LogInformation("{id}: {infoString}", jobId, infoString);
+            _logger.Information("{id}: {infoString}", jobId, infoString);
 
 
             recipients = new();
-            if (!recipients.Any(recipient => recipient.Value == absenceSettings.ForwardingEmailAbsenceCoordinator))
-                recipients.Add(absenceSettings.AbsenceCoordinatorName, absenceSettings.ForwardingEmailAbsenceCoordinator);
+            foreach (var entry in absenceSettings.ForwardAbsenceEmailsTo)
+            {
+                if (!recipients.Any(recipient => recipient.Value == entry))
+                    recipients.Add(absenceSettings.AbsenceCoordinatorName, entry);
+            }
 
             if (!recipients.Any(recipient => recipient.Value == "scott.new@det.nsw.edu.au"))
                 recipients.Add("Scott New", "scott.new@det.nsw.edu.au");
@@ -84,25 +102,30 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
             offeringName = offeringName.StartsWith("5") || offeringName.StartsWith("6") ? offeringName.PadLeft(8, '0') : offeringName;
             entry.ClassName = offeringName;
 
-            var offering = await _unitOfWork.CourseOfferings.GetFromYearAndName(date.Year, offeringName);
+            var offering = await _offeringRepository.GetFromYearAndName(date.Year, offeringName);
 
             Staff teacher = null;
 
             if (string.IsNullOrWhiteSpace(entry.Teacher) && offering is not null)
             {
-                var sessions = _unitOfWork.OfferingSessions.AllForOffering(offering.Id);
-                teacher = sessions
-                    .GroupBy(entry => entry.StaffId)
-                    .OrderByDescending(entry => entry.Count())
-                    .First()
-                    .Select(entry => entry.Teacher)
-                    .First();
+                var assignments = offering
+                    .Teachers
+                    .Where(assignment =>
+                        !assignment.IsDeleted &&
+                        assignment.Type == AssignmentType.ClassroomTeacher)
+                    .ToList();
 
-                entry.Teacher = teacher.DisplayName;
+                foreach (var assignment in assignments)
+                {
+                    teacher = await _staffRepository.GetById(assignment.StaffId, token);
+
+                    if (teacher is not null)
+                        entry.Teacher = teacher.DisplayName;
+                }
             }
             else if (!string.IsNullOrWhiteSpace(entry.Teacher))
             {
-                teacher = await _unitOfWork.Staff.GetFromName(entry.Teacher);
+                teacher = await _staffRepository.GetFromName(entry.Teacher);
             }
 
             var infoString = string.Empty;
@@ -124,7 +147,8 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
 
             if (offering is not null)
             {
-                var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = offering.Course.FacultyId }, token);
+                var course = await _courseRepository.GetById(offering.CourseId, token);
+                var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = course.FacultyId }, token);
                 emailDto.HeadTeachers = headTeachers.ToDictionary(member => member.EmailAddress, member => member.DisplayName);
 
                 var coversRequest = await _mediator.Send(new GetCoversSummaryByDateAndOfferingQuery(date, offering.Id), token);
@@ -148,7 +172,7 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
                 infoString += $" covered by {CoveredBy} ({CoverType})";
             }
 
-            _logger.LogInformation("{id}: {infoString}", jobId, infoString);
+            _logger.Information("{id}: {infoString}", jobId, infoString);
             emailDto.RollInformation = infoString;
             emailList.Add(emailDto);
         }
@@ -196,8 +220,11 @@ public class RollMarkingReportJob : IRollMarkingReportJob, IScopedService, IHang
             return;
         
         recipients = new();
-        if (!recipients.Any(recipient => recipient.Value == absenceSettings.ForwardingEmailAbsenceCoordinator))
-            recipients.Add(absenceSettings.AbsenceCoordinatorName, absenceSettings.ForwardingEmailAbsenceCoordinator);
+        foreach (var entry in absenceSettings.ForwardAbsenceEmailsTo)
+        {
+            if (!recipients.Any(recipient => recipient.Value == entry))
+                recipients.Add(absenceSettings.AbsenceCoordinatorName, entry);
+        }
 
         if (!recipients.Any(recipient => recipient.Value == "scott.new@det.nsw.edu.au"))
             recipients.Add("Scott New", "scott.new@det.nsw.edu.au");

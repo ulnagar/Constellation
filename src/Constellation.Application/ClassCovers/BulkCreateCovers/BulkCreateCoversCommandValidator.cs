@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Application.ClassCovers.BulkCreateCovers;
 
-using Constellation.Application.Extensions;
-using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.Repositories;
+using Constellation.Core.Models.Subjects.Identifiers;
 using FluentValidation;
 using System;
 using System.Threading;
@@ -9,9 +10,9 @@ using System.Threading.Tasks;
 
 public class BulkCreateCoversCommandValidator : AbstractValidator<BulkCreateCoversCommand>
 {
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
 
-    public BulkCreateCoversCommandValidator(ICourseOfferingRepository offeringRepository)
+    public BulkCreateCoversCommandValidator(IOfferingRepository offeringRepository)
     {
         _offeringRepository = offeringRepository;
 
@@ -33,14 +34,14 @@ public class BulkCreateCoversCommandValidator : AbstractValidator<BulkCreateCove
                 .WithMessage("Cannot create a cover that has already ended!");
     }
 
-    private async Task<bool> BeCurrentOffering(int OfferingId, CancellationToken cancellationToken)
+    private async Task<bool> BeCurrentOffering(OfferingId OfferingId, CancellationToken cancellationToken)
     {
-        var offering = await _offeringRepository.GetForExistCheck(OfferingId);
+        var offering = await _offeringRepository.GetById(OfferingId, cancellationToken);
 
         if (offering is null)
             return false;
 
-        if (offering.IsCurrent())
+        if (offering.IsCurrent)
             return true;
 
         return false;

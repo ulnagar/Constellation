@@ -1,0 +1,16 @@
+﻿@model RemoveSessionModalViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">Remove Session</h5>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="form-group col">
+            <span class="control-label">Are you sure you wish to remove @Model.SessionName from the @Model.CourseName offering @Model.OfferingName?</span>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <a asp-page-handler="RemoveSession" asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@Model.OfferingId.Value" asp-route-sessionId="@Model.SessionId.Value" class="btn btn-danger">Remove Session</a>
+    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+</div>

@@ -2,12 +2,13 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.Collections.Generic;
 
 public sealed record LessonDetailsResponse(
     SciencePracLessonId LessonId,
-    int CourseId,
+    CourseId CourseId,
     string CourseName,
     string Name,
     DateOnly DueDate,

@@ -2,12 +2,14 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
-using Microsoft.Extensions.Primitives;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -19,14 +21,14 @@ internal sealed class GetLessonDetailsQueryHandler
     : IQueryHandler<GetLessonDetailsQuery, LessonDetailsResponse>
 {
     private readonly ILessonRepository _lessonRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly ILogger _logger;
 
     public GetLessonDetailsQueryHandler(
         ILessonRepository lessonRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ICourseRepository courseRepository,
         ISchoolRepository schoolRepository,
         ILogger logger)
@@ -53,7 +55,7 @@ internal sealed class GetLessonDetailsQueryHandler
 
         foreach (SciencePracLessonOffering entry in lesson.Offerings)
         {
-            CourseOffering offering = await _offeringRepository.GetById(entry.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(entry.OfferingId, cancellationToken);
 
             if (offering is null)
                 continue;
@@ -88,11 +90,10 @@ internal sealed class GetLessonDetailsQueryHandler
         Course course = await _courseRepository.GetByLessonId(lesson.Id, cancellationToken);
 
         string courseName = $"{course?.Grade} {course?.Name}";
-        int courseId = course?.Id ?? 0;
 
         LessonDetailsResponse response = new(
             lesson.Id,
-            courseId,
+            course?.Id,
             courseName,
             lesson.Name,
             lesson.DueDate,

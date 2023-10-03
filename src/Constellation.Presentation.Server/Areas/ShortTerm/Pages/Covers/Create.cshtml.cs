@@ -6,6 +6,8 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetOfferingsForSelectionList;
 using Constellation.Application.StaffMembers.GetStaffForSelectionList;
 using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.ValueObjects;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Shared.Models;
@@ -32,14 +34,14 @@ public class CreateModel : BasePageModel
     [BindProperty]
     public string CoveringTeacherId { get; set; }
     [BindProperty]
-    [DataType(DataType.Date)]
     [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy-MM-dd}")]
+
     public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     [BindProperty]
     [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy-MM-dd}")]
     public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     [BindProperty]
-    public List<int> CoveredClasses { get; set; } = new();
+    public List<Guid> CoveredClasses { get; set; } = new();
 
     public List<CoveringTeacherRecord> CoveringTeacherSelectionList { get; set; } = new();
     public List<ClassRecord> ClassSelectionList { get; set; } = new();
@@ -68,9 +70,11 @@ public class CreateModel : BasePageModel
             "Teachers" => CoverTeacherType.Staff
         };
 
+        List<OfferingId> offeringIds = CoveredClasses.Select(id => OfferingId.FromValue(id)).ToList();
+
         var command = new BulkCreateCoversCommand(
             Guid.NewGuid(),
-            CoveredClasses,
+            offeringIds,
             StartDate,
             EndDate,
             teacherType,

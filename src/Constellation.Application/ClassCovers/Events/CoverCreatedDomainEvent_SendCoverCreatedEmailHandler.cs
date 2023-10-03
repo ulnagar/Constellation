@@ -7,9 +7,10 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
@@ -25,12 +26,11 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IClassCoverRepository _classCoverRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ICasualRepository _casualRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ITeamRepository _teamRepository;
-    private readonly IOfferingSessionsRepository _sessionRepository;
     private readonly UserManager<AppUser> _userManager;
     private readonly ITimetablePeriodRepository _periodRepository;
     private readonly IEmailAttachmentService _emailAttachmentService;
@@ -40,12 +40,11 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
     public CoverCreatedDomainEvent_SendCoverCreatedEmailHandler(
         IUnitOfWork unitOfWork,
         IClassCoverRepository classCoverRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
         ICasualRepository casualRepository,
         IStudentRepository studentRepository,
         ITeamRepository teamRepository,
-        IOfferingSessionsRepository sessionRepository,
         UserManager<AppUser> userManager,
         ITimetablePeriodRepository periodRepository,
         IEmailAttachmentService emailAttachmentService,
@@ -58,7 +57,6 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
         _staffRepository = staffRepository;
         _casualRepository = casualRepository;
         _teamRepository = teamRepository;
-        _sessionRepository = sessionRepository;
         _userManager = userManager;
         _periodRepository = periodRepository;
         _emailAttachmentService = emailAttachmentService;
@@ -207,11 +205,10 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
         } 
         else
         {
-            var sessions = await _sessionRepository.GetByOfferingId(cover.OfferingId, cancellationToken);
-            var relevantTimetables = await _sessionRepository.GetTimetableByOfferingId(cover.OfferingId, cancellationToken);
+            var relevantTimetables = await _offeringRepository.GetTimetableByOfferingId(cover.OfferingId, cancellationToken);
             var relevantPeriods = await _periodRepository.GetAllFromTimetable(relevantTimetables, cancellationToken);
 
-            var timetableAttachment = await _emailAttachmentService.GenerateClassTimetableDocument(offering, sessions, relevantPeriods, cancellationToken);
+            var timetableAttachment = await _emailAttachmentService.GenerateClassTimetableDocument(offering, relevantPeriods, cancellationToken);
 
             attachments.Add(timetableAttachment);
         }

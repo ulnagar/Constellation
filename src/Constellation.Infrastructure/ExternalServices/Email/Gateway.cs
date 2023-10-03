@@ -736,7 +736,11 @@ public class Gateway : IEmailGateway
                 _configuration.Password,
                 cancellationToken);
 
-        await client.SendAsync(message, cancellationToken);
+        string response = await client.SendAsync(message, cancellationToken);
+
+        _logger
+            .ForContext(nameof(MimeMessage), message, true)
+            .Information("Email send response: {response}", response);
 
         await client.DisconnectAsync(false, cancellationToken);
     }

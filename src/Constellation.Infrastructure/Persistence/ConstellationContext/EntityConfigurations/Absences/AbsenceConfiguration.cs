@@ -3,6 +3,9 @@
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -52,7 +55,13 @@ public class AbsenceConfiguration : IEntityTypeConfiguration<Absence>
             .HasForeignKey(absence => absence.StudentId);
 
         builder
-            .HasOne<CourseOffering>()
+            .Property(absence => absence.OfferingId)
+            .HasConversion(
+                id => id.Value,
+                value => OfferingId.FromValue(value));
+
+        builder
+            .HasOne<Offering>()
             .WithMany()
             .HasForeignKey(absence => absence.OfferingId);
 

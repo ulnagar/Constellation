@@ -3,10 +3,12 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -18,13 +20,13 @@ internal sealed class CreateLessonCommandHandler
     : ICommandHandler<CreateLessonCommand>
 {
     private readonly ILessonRepository _lessonRepository;
-    private readonly ICourseOfferingRepository _courseOfferingRepository;
+    private readonly IOfferingRepository _courseOfferingRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public CreateLessonCommandHandler(
         ILessonRepository lessonRepository,
-        ICourseOfferingRepository courseOfferingRepository,
+        IOfferingRepository courseOfferingRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -36,15 +38,15 @@ internal sealed class CreateLessonCommandHandler
 
     public async Task<Result> Handle(CreateLessonCommand request, CancellationToken cancellationToken)
     {
-        List<CourseOffering> offerings = await _courseOfferingRepository.GetByCourseId(request.CourseId, cancellationToken);
+        List<Offering> offerings = await _courseOfferingRepository.GetByCourseId(request.CourseId, cancellationToken);
 
-        offerings = offerings.Where(offering => offering.IsCurrent()).ToList();
+        offerings = offerings.Where(offering => offering.IsCurrent).ToList();
 
         if (offerings.Count == 0)
         {
             _logger.Warning("Could not find any offerings for course with Id {id}", request.CourseId);
 
-            return Result.Failure(DomainErrors.Subjects.Course.NoOfferings(request.CourseId));
+            return Result.Failure(CourseErrors.NoOfferings(request.CourseId));
         }
 
         Result<SciencePracLesson> lesson = SciencePracLesson.Create(

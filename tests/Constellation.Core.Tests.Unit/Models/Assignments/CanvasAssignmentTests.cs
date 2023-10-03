@@ -2,7 +2,6 @@
 
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Assignments;
-using Constellation.Core.Models.Identifiers;
 
 public class CanvasAssignmentTests
 {
@@ -11,19 +10,20 @@ public class CanvasAssignmentTests
     {
         // Arrange
         var sut = CanvasAssignment.Create(
-            new AssignmentId(),
-            1,
+            new(),
             "Test Assignment",
             1,
             DateTime.Today,
             DateTime.Today.AddMonths(1),
             DateTime.Today,
+            false,
+            null,
             3);
 
         // Act
         var result = sut.AddSubmission(
-            new AssignmentSubmissionId(),
-            "StudentId");
+            "StudentId", 
+            "test@email.com");
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -36,23 +36,24 @@ public class CanvasAssignmentTests
     {
         // Arrange
         var sut = CanvasAssignment.Create(
-            new AssignmentId(),
-            1,
+            new(),
             "Test Assignment",
             1,
             DateTime.Today,
             DateTime.Today.AddMonths(1),
             DateTime.Today,
+            false,
+            null,
             3);
 
         sut.AddSubmission(
-            new AssignmentSubmissionId(),
-            "StudentId");
+            "StudentId", 
+            "test@email.com");
 
         // Act
         var result = sut.AddSubmission(
-            new AssignmentSubmissionId(),
-            "StudentId");
+            "StudentId", 
+            "test@email.com");
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -65,18 +66,19 @@ public class CanvasAssignmentTests
     {
         // Arrange
         var sut = CanvasAssignment.Create(
-            new AssignmentId(),
-            1,
+            new(),
             "Test Assignment",
             1,
             DateTime.Today,
             DateTime.Today.AddMonths(1),
             DateTime.Today,
+            false,
+            null,
             3);
 
         sut.AddSubmission(
-            new AssignmentSubmissionId(),
-            "StudentId");
+            "StudentId",
+            "test@email.com");
 
         // Act
         var result = sut.GetDomainEvents();
@@ -84,70 +86,5 @@ public class CanvasAssignmentTests
         // Assert
         result.Should().HaveCount(1);
         result.First().Should().BeOfType<AssignmentAttemptSubmittedDomainEvent>();
-    }
-
-    [Fact]
-    public void ReuploadSubmissionToCanvas_ShouldReturnFailure_WhenSubmissionDoesNotPreviouslyExist()
-    {
-        // Arrange
-        var sut = CanvasAssignment.Create(
-            new AssignmentId(),
-            1,
-            "Test Assignment",
-            1,
-            DateTime.Today,
-            DateTime.Today.AddMonths(1),
-            DateTime.Today,
-            3);
-
-        var submission = sut.AddSubmission(
-            new AssignmentSubmissionId(),
-            "StudentId");
-
-        var domainEvent = sut.GetDomainEvents().First();
-
-        sut.ClearDomainEvents();
-
-        // Act
-        var result = sut.ReuploadSubmissionToCanvas(new AssignmentSubmissionId());
-        var events = sut.GetDomainEvents();
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.IsFailure.Should().BeTrue();
-        events.Should().HaveCount(0);
-    }
-
-    [Fact]
-    public void ReuploadSubmissionToCanvas_ShouldRaiseNewDomainEvent_WhenSubmissionPreviouslyExists()
-    {
-        // Arrange
-        var sut = CanvasAssignment.Create(
-            new AssignmentId(),
-            1,
-            "Test Assignment",
-            1,
-            DateTime.Today,
-            DateTime.Today.AddMonths(1),
-            DateTime.Today,
-            3);
-
-        var submission = sut.AddSubmission(
-            new AssignmentSubmissionId(),
-            "StudentId");
-
-        var domainEvent = sut.GetDomainEvents().First();
-
-        sut.ClearDomainEvents();
-
-        // Act
-        var result = sut.ReuploadSubmissionToCanvas(submission.Value.Id);
-        var events = sut.GetDomainEvents();
-
-        // Assert
-        result.IsSuccess.Should().BeTrue();
-        events.Should().HaveCount(1);
-        events.First().Should().BeOfType<AssignmentAttemptSubmittedDomainEvent>();
-        events.First().Id.Should().NotBeEquivalentTo(domainEvent.Id);
     }
 }

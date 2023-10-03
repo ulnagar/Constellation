@@ -5,6 +5,8 @@ using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -17,14 +19,14 @@ internal sealed class GetContactListForParentPortalQueryHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
     private readonly AppConfiguration _configuration;
 
     public GetContactListForParentPortalQueryHandler(
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         IOptions<AppConfiguration> configuration,
         ILogger logger)
     {
@@ -46,6 +48,13 @@ internal sealed class GetContactListForParentPortalQueryHandler
             _logger.Warning("Could not find Student with Id {id}", request.StudentId);
 
             return Result.Failure<List<StudentSupportContactResponse>>(DomainErrors.Partners.Student.NotFound(request.StudentId));
+        }
+
+        if (_configuration.Contacts is null)
+        {
+            _logger.Warning("Could not load configuration data for Contacts");
+
+            return response;
         }
 
         // Add Counsellor
@@ -97,9 +106,9 @@ internal sealed class GetContactListForParentPortalQueryHandler
         response.Add(StudentSupportContactResponse.GetSupport);
 
         // Add class teachers
-        List<CourseOffering> offerings = await _offeringRepository.GetByStudentId(request.StudentId, cancellationToken);
+        List<Offering> offerings = await _offeringRepository.GetByStudentId(request.StudentId, cancellationToken);
 
-        foreach (CourseOffering offering in offerings)
+        foreach (Offering offering in offerings)
         {
             List<Staff> members = await _staffRepository.GetPrimaryTeachersForOffering(offering.Id, cancellationToken);
 

@@ -1,11 +1,13 @@
 ﻿using Constellation.Application.DTOs;
-using Constellation.Application.Helpers;
+using Constellation.Application.Enrolments.EnrolStudent;
+using Constellation.Application.Enrolments.UnenrolStudent;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Application.Offerings.GetOfferingsForBulkEnrol;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Areas.Partner.Models;
@@ -21,15 +23,21 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
     [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class StudentsController : BaseController
     {
+        private readonly IOfferingRepository _offeringRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStudentService _studentService;
         private readonly IOperationService _operationService;
         private readonly IMediator _mediator;
 
-        public StudentsController(IUnitOfWork unitOfWork, IStudentService studentService,
-            IOperationService operationService, IMediator mediator)
-            : base(unitOfWork)
+        public StudentsController(
+            IOfferingRepository offeringRepository,
+            IUnitOfWork unitOfWork, 
+            IStudentService studentService,
+            IOperationService operationService, 
+            IMediator mediator)
+            : base(mediator)
         {
+            _offeringRepository = offeringRepository;
             _unitOfWork = unitOfWork;
             _studentService = studentService;
             _operationService = operationService;
@@ -226,21 +234,23 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             foreach (var enrolment in student.Enrolments.Where(e => !e.IsDeleted))
             {
-                await _studentService.UnenrolStudentFromClass(student.StudentId, enrolment.OfferingId);
+                await _mediator.Send(new UnenrolStudentCommand(student.StudentId, enrolment.OfferingId));
             }
 
-            await _unitOfWork.CompleteAsync();
-
-            return RedirectToAction("Details", new { id });
+            return RedirectToPage("/Students/Details", new { area = "Partner", id });
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Unenrol(string id, int classId)
+        public async Task<IActionResult> Unenrol(string id, Guid classId)
         {
-            await _studentService.UnenrolStudentFromClass(id, classId);
-            await _unitOfWork.CompleteAsync();
+            OfferingId offeringId = OfferingId.FromValue(classId);
 
-            return RedirectToAction("Details", new { id });
+            if (offeringId is null)
+                return RedirectToPage("/Students/Details", new { area = "Partner", id });
+
+            await _mediator.Send(new UnenrolStudentCommand(id, offeringId));
+
+            return RedirectToPage("/Students/Details", new { area = "Partner", id });
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
@@ -260,7 +270,12 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             var viewModel = await CreateViewModel<Student_BulkEnrolViewModel>();
             viewModel.StudentId = student.StudentId;
-            viewModel.OfferingList = await _unitOfWork.CourseOfferings.FromGradeForBulkEnrolAsync(student.CurrentGrade);
+
+            var offerings = await _mediator.Send(new GetOfferingsForBulkEnrolQuery(student.CurrentGrade));
+
+            
+
+            viewModel.OfferingList = offerings.Value;
 
             return View("BulkEnrol", viewModel);
         }
@@ -273,24 +288,24 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             if (student != null)
             {
-                foreach (var offeringId in viewModel.SelectedClasses)
+                foreach (var classId in viewModel.SelectedClasses)
                 {
-                    var offering = await _unitOfWork.CourseOfferings.ForEnrolmentAsync(offeringId);
+                    OfferingId offeringId = OfferingId.FromValue(classId);
+
+                    var offering = await _offeringRepository.GetById(offeringId);
 
                     if (offering == null)
                         continue;
 
-                    await _studentService.EnrolStudentInClass(student.StudentId, offering.Id);
+                    await _mediator.Send(new EnrolStudentCommand(student.StudentId, offering.Id));
                 }
-
-                await _unitOfWork.CompleteAsync();
             }
 
-            return RedirectToAction("Details", new { id = viewModel.StudentId });
+            return RedirectToPage("/Students/Details", new { area = "Partner", id = viewModel.StudentId });
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Enrol(string id, int classId)
+        public async Task<IActionResult> Enrol(string id, Guid classId)
         {
             var student = await _unitOfWork.Students.ForEditAsync(id);
 
@@ -299,19 +314,21 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 return RedirectToAction("Index");
             }
 
-            var offering = await _unitOfWork.CourseOfferings.ForEnrolmentAsync(classId);
+            OfferingId offeringId = OfferingId.FromValue(classId);
+
+            var offering = await _offeringRepository.GetById(offeringId);
 
             if (offering == null)
             {
                 return RedirectToAction("Index");
             }
 
-            if (!student.Enrolments.Any(e => e.OfferingId == classId && !e.IsDeleted))
+            if (!student.Enrolments.Any(e => e.OfferingId == offeringId && !e.IsDeleted))
             {
-                await _studentService.EnrolStudentInClass(student.StudentId, offering.Id);
+                await _mediator.Send(new EnrolStudentCommand(student.StudentId, offering.Id));
             }
 
-            return RedirectToAction("Details", new { id });
+            return RedirectToPage("/Students/Details", new { area = "Partner", id });
         }
     }
 }

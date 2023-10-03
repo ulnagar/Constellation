@@ -23,6 +23,9 @@ public class UpsertModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
+    [ViewData]
+    public string ActivePage => "Tutorials";
+
     [BindProperty(SupportsGet = true)]
     public Guid? Id { get; set; }
 

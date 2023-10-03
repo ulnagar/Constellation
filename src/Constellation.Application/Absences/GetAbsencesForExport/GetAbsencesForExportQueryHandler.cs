@@ -2,10 +2,12 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
@@ -21,14 +23,14 @@ internal sealed class GetAbsencesForExportQueryHandler
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ISchoolRepository _schoolRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public GetAbsencesForExportQueryHandler(
         IAbsenceRepository absenceRepository,
         IStudentRepository studentRepository,
         ISchoolRepository schoolRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
@@ -71,7 +73,7 @@ internal sealed class GetAbsencesForExportQueryHandler
 
             School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
 
-            CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
             var entry = new AbsenceExportResponse(
                 student.GetName(),

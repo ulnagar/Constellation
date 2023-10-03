@@ -1,8 +1,11 @@
-﻿using Constellation.Core.Models.Identifiers;
+﻿namespace Constellation.Core.Errors;
+
+using Constellation.Core.Enums;
+using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using System;
 
-namespace Constellation.Core.Errors;
 public static class DomainErrors
 {
     public static class Absences
@@ -47,27 +50,6 @@ public static class DomainErrors
             public static readonly Func<string, Error> NotFoundForStudent = id => new Error(
                 "Assets.Allocations.NotFoundForStudent",
                 $"Could not find any asset allocations for student {id}");
-        }
-    }
-
-    public static class Assignments
-    {
-        public static class Assignment
-        {
-            public static readonly Func<AssignmentId, Error> NotFound = id => new(
-                "Assignments.Assignment.NotFound",
-                $"Could not find an assignment with the Id {id}");
-
-            public static readonly Func<int, Error> NotFoundByCourse = id => new(
-                "Assignments.Assignment.NotFoundByCourse",
-                $"Could not find any assignments linked to the course with id {id}");
-        }
-
-        public static class Submission
-        {
-            public static readonly Func<AssignmentSubmissionId, Error> NotFound = id => new(
-                "Assignments.Submission.NotFound",
-                $"Could not find any submission with the id {id}");
         }
     }
 
@@ -169,6 +151,10 @@ public static class DomainErrors
             public static readonly Func<string, Error> NotFoundForStudent = id => new Error(
                 "Enrolments.Enrolment.NotFoundForStudent",
                 $"No enrolments could be found for student with Id {id}");
+
+            public static readonly Func<string, OfferingId, Error> AlreadyExists = (studentId, offeringId) => new(
+                "Enrolments.Enrolment.AlreadyExists",
+                $"A current enrolment already exists for student {studentId} and offering {offeringId}");
         }
     }
 
@@ -278,6 +264,17 @@ public static class DomainErrors
 
     public static class LinkedSystems
     {
+        public static class AdobeConnect
+        {
+            public static readonly Func<string, Error> RoomNotFound = id => new(
+                "LinkedSystems.AdobeConnect.RoomNotFound",
+                $"Could not find an Adobe Connect Room with the Id {id}");
+
+            public static readonly Error CannotCreate = new(
+                "LinkedSystems.AdobeConnect.CannotCreate",
+                "An error occured while waiting for Adobe Connect to create the room");
+        }
+
         public static class Sentral
         {
             public static readonly Func<string, Error> FamilyIdNotValid = id => new Error(
@@ -332,6 +329,13 @@ public static class DomainErrors
             public static readonly Func<int, Error> NotFound = id => new(
                 "Partners.Contact.NotFound",
                 $"Could not find a School Contact with the Id {id}");
+        }
+
+        public static class Faculty
+        {
+            public static readonly Func<Guid, Error> NotFound = id => new(
+                "Partners.Faculty.NotFound",
+                $"Could not find a Faculty with the Id {id}");
         }
 
         public static class School
@@ -446,25 +450,11 @@ public static class DomainErrors
         }
     }
 
-    public static class Subjects
+    public static class Period
     {
-        public static class Course
-        {
-            public static readonly Func<int, Error> NoOfferings = id => new(
-                "Subjects.Course.NoOfferings",
-                $"Could not find any offerings related to course with id {id}");
-
-            public static readonly Func<int, Error> NotFound = id => new(
-                "Subjects.Course.NotFound",
-                $"Could not find a course with the id {id}");
-        }
-
-        public static class Offering
-        {
-            public static readonly Func<int, Error> NotFound = id => new(
-                "Subjects.Offering.NotFound",
-                $"Could not find an offering with the id {id}");
-        }
+        public static readonly Error NoneFoundForOffering = new(
+            "Periods.Period.NoneFoundForOffering",
+            "Could not find Periods attached to Offering");
     }
 
     public static class Permissions
@@ -503,6 +493,21 @@ public static class DomainErrors
             public static readonly Error LastNameEmpty = new Error(
                 "ValueObjects.Name.LastNameEmpty",
                 "Last Name must not be empty.");
+        }
+
+        public static class OfferingName
+        {
+            public static readonly Func<Grade, Error> InvalidGrade = grade => new(
+                "ValueObjects.OfferingName.InvalidGrade",
+                $"Invalid grade supplied: {grade.ToString()}");
+
+            public static readonly Func<string, Error> InvalidCourseCode = code => new(
+                "ValueObjects.OfferingName.InvalidCourseCode",
+                $"Invalid course code supplied: {code}");
+
+            public static readonly Func<string, Error> InvalidTutorialInitials = initials => new(
+                "ValueObjects.OfferingName.InvalidTutorialInitials",
+                $"Invalid initals supplied for tutorial class: {initials}");
         }
 
         public static class PhoneNumber

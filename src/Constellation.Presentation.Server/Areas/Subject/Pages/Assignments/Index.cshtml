@@ -3,7 +3,7 @@
 
 <h2>Canvas Assignments</h2>
 
-<a asp-area="Subject" asp-controller="Assignments" asp-action="Create_Step1" class="btn btn-primary">Create New</a>
+<a asp-page="/Assignments/Create" asp-area="Subject" class="btn btn-primary">Create New</a>
 
 <hr />
 
@@ -24,7 +24,7 @@
                 <td>@item.AssignmentName</td>
                 <td>@item.DueDate.ToShortDateString()</td>
                 <td>
-                    <a asp-action="Details" asp-controller="Assignments" asp-area="Subject" asp-route-id="@item.AssignmentId.Value" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                    <a asp-page="/Assignments/Details" asp-area="Subject" asp-route-id="@item.AssignmentId.Value" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                 </td>
             </tr>
         }

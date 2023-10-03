@@ -1,7 +1,11 @@
-﻿namespace Constellation .Infrastructure.Persistence.ConstellationContext.Repositories;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class FacultyRepository : IFacultyRepository
@@ -12,6 +16,19 @@ internal sealed class FacultyRepository : IFacultyRepository
     {
         _dbContext = dbContext;
     }
+
+    public async Task<List<Faculty>> GetAll(
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<Faculty>()
+            .ToListAsync(cancellationToken);
+
+    public async Task<Faculty> GetById(
+        Guid FacultyId,
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<Faculty>()
+            .FirstOrDefaultAsync(faculty => faculty.Id == FacultyId, cancellationToken);
 
     public async Task<List<Faculty>> GetCurrentForStaffMember(
         string staffId,
@@ -24,13 +41,19 @@ internal sealed class FacultyRepository : IFacultyRepository
             .ToListAsync(cancellationToken);
 
     public async Task<Faculty?> GetByOfferingId(
-        int offeringId,
+        OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
-        Guid? facultyId = await _dbContext
-            .Set<CourseOffering>()
+        CourseId courseId = await _dbContext
+            .Set<Offering>()
             .Where(offering => offering.Id == offeringId)
-            .Select(offering => offering.Course.FacultyId)
+            .Select(offering => offering.CourseId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        Guid? facultyId = await _dbContext
+            .Set<Course>()
+            .Where(course => course.Id == courseId)
+            .Select(course => course.FacultyId)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (facultyId is null)

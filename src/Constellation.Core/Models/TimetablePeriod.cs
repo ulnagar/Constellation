@@ -1,16 +1,11 @@
-﻿using System;
+﻿using Constellation.Core.Models.Offerings;
+using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace Constellation.Core.Models
 {
     public class TimetablePeriod
     {
-        public TimetablePeriod()
-        {
-            OfferingSessions = new List<OfferingSession>();
-        }
-
         public int Id { get; set; }
         public string Timetable { get; set; }
         public int Day { get; set; }
@@ -21,20 +16,19 @@ namespace Constellation.Core.Models
         public string Type { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime? DateDeleted { get; set; }
-        public ICollection<OfferingSession> OfferingSessions { get; set; }
+        public List<Session> OfferingSessions { get; set; } = new();
         public int Duration => GetDuration();
 
-        private int GetDuration()
-        {
-            return (int)EndTime.Subtract(StartTime).TotalMinutes;
-        }
+        public string SortOrder => $"{Timetable[..1]}.{Day.ToString().PadLeft(2, '0')}.{Period.ToString().PadLeft(2, '0')}";
 
-        public override string ToString()
-        {
-            var GridName = Timetable[..3].ToUpper();
+        private int GetDuration() => (int)EndTime.Subtract(StartTime).TotalMinutes;
 
-            var WeekNo = (Day - 1) / 5;
-            var WeekName = WeekNo switch
+        public string GroupName()
+        {
+            string gridName = Timetable[..3].ToUpper();
+
+            int weekNo = (Day - 1) / 5;
+            string weekName = weekNo switch
             {
                 0 => "Week A",
                 1 => "Week B",
@@ -43,8 +37,8 @@ namespace Constellation.Core.Models
                 _ => "",
             };
 
-            var DayNo = Day % 5;
-            var DayName = DayNo switch
+            int dayNo = Day % 5;
+            string dayName = dayNo switch
             {
                 1 => "Monday",
                 2 => "Tuesday",
@@ -54,7 +48,10 @@ namespace Constellation.Core.Models
                 _ => "",
             };
 
-            return $"{GridName} {WeekName} {DayName} - {Name}";
+            return $"{gridName} {weekName} {dayName}";
         }
+
+        public override string ToString() =>
+            $"{GroupName()} - {Name}";
     }
 }

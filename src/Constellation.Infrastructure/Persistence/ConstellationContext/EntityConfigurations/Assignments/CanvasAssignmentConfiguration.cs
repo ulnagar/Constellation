@@ -1,12 +1,13 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Assignments;
 
-using Constellation.Core.Models;
 using Constellation.Core.Models.Assignments;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Assignments.Identifiers;
+using Constellation.Core.Models.Subjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using ValueConverters;
 
-public class CanvasAssignmentConfiguration : IEntityTypeConfiguration<CanvasAssignment>
+internal sealed class CanvasAssignmentConfiguration : IEntityTypeConfiguration<CanvasAssignment>
 {
     public void Configure(EntityTypeBuilder<CanvasAssignment> builder)
     {
@@ -22,14 +23,23 @@ public class CanvasAssignmentConfiguration : IEntityTypeConfiguration<CanvasAssi
                 value => AssignmentId.FromValue(value));
 
         builder
+            .Navigation(assignment => assignment.Submissions)
+            .AutoInclude();
+
+        builder
             .HasMany(assignment => assignment.Submissions)
             .WithOne()
             .HasForeignKey(submission => submission.AssignmentId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne<Course>()
+        builder
+            .HasOne<Course>()
             .WithMany()
             .HasForeignKey(assignment => assignment.CourseId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .Property(assignment => assignment.ForwardingDate)
+            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }

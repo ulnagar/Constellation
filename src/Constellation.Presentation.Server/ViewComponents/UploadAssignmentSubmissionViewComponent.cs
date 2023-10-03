@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Presentation.Server.ViewComponents;
 
 using Constellation.Application.Students.GetStudentsFromCourseAsDictionary;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.Pages.Shared.Components.UploadAssignmentSubmission;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ public class UploadAssignmentSubmissionViewComponent : ViewComponent
         _mediator = mediator;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(int CourseId)
+    public async Task<IViewComponentResult> InvokeAsync(CourseId CourseId)
     {
         var viewModel = new AssignmentStudentSelection();
         var result =  await _mediator.Send(new GetStudentsFromCourseAsDictionaryQuery(CourseId));

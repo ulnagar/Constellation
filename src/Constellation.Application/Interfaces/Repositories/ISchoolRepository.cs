@@ -14,6 +14,7 @@ public interface ISchoolRepository
     Task<School?> GetById(string id, CancellationToken cancellationToken = default);
     Task<List<School>> GetAll(CancellationToken cancellationToken = default);
     Task<List<School>> GetWithCurrentStudents(CancellationToken cancellationToken = default);
+    Task<List<School>> GetListFromIds(List<string> schoolCodes, CancellationToken cancellationToken = default);
     School WithDetails(string code);
     School WithFilter(Expression<Func<School, bool>> predicate);
     ICollection<School> All();
@@ -34,5 +35,4 @@ public interface ISchoolRepository
     Task<ICollection<School>> ForBulkUpdate();
     IList<MapLayer> GetForMapping(IList<string> schoolCodes);
     Task<ICollection<School>> ForTrackItSync();
-    Task<ICollection<string>> AHPSchoolCodes();
 }

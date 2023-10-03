@@ -1,10 +1,12 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -51,11 +53,11 @@ public class LessonRepository : ILessonRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<SciencePracLesson>> GetAllForCourse(
-        int CourseId,
+        CourseId CourseId,
         CancellationToken cancellationToken = default)
     {
         var offeringIds = await _context
-            .Set<CourseOffering>()
+            .Set<Offering>()
             .Where(offering => offering.CourseId == CourseId)
             .Select(offering => offering.Id)
             .ToListAsync(cancellationToken);
@@ -67,7 +69,7 @@ public class LessonRepository : ILessonRepository
     }
 
     public async Task<List<SciencePracLesson>> GetAllForOffering(
-        int OfferingId, 
+        OfferingId OfferingId, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SciencePracLesson>()

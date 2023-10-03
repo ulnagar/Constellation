@@ -4,6 +4,8 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -46,7 +48,7 @@ internal sealed class GetFilteredStudentsForSelectionListQueryHandler
 
         if (request.FromOffering.Count > 0)
         {
-            foreach (int offeringId in  request.FromOffering)
+            foreach (OfferingId offeringId in  request.FromOffering)
             {
                 List<Student> offeringStudents = await _studentRepository.GetCurrentEnrolmentsForOffering(offeringId, cancellationToken);
 
@@ -56,7 +58,7 @@ internal sealed class GetFilteredStudentsForSelectionListQueryHandler
 
         if (request.FromCourse.Count > 0)
         {
-            foreach (int courseId in request.FromCourse)
+            foreach (CourseId courseId in request.FromCourse)
             {
                 List<Student> courseStudents = await _studentRepository.GetCurrentEnrolmentsForCourse(courseId, cancellationToken);
 

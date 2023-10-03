@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Constellation.Core.Models.Enrolments.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
+using System;
 using System.Collections.Generic;
 
 namespace Constellation.Application.DTOs
@@ -35,10 +38,10 @@ namespace Constellation.Application.DTOs
             public const string StudentsPresent = " status-students";
             public const string TeachersPresent = " status-teachers";
 
-            public int Id { get; set; }
+            public OfferingId Id { get; set; }
             public string Name { get; set; }
-            public DateTime StartDate { get; set; }
-            public DateTime EndDate { get; set; }
+            public DateOnly StartDate { get; set; }
+            public DateOnly EndDate { get; set; }
             public bool IsCurrent { get; set; }
             public string GradeShortCode { get; set; }
             public string GradeName { get; set; }
@@ -61,7 +64,7 @@ namespace Constellation.Application.DTOs
 
         public class MonitorCourseEnrolment
         {
-            public int Id { get; set; }
+            public EnrolmentId Id { get; set; }
             public string StudentId { get; set; }
             public string StudentDisplayName { get; set; }
             public string StudentLastName { get; set; }
@@ -72,7 +75,7 @@ namespace Constellation.Application.DTOs
 
         public class MonitorCourseSession
         {
-            public int Id { get; set; }
+            public SessionId Id { get; set; }
             public int PeriodId { get; set; }
             public bool IsDeleted { get; set; }
         }

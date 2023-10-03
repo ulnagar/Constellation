@@ -2,11 +2,10 @@
 
 using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.Extensions;
-using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Shared;
@@ -21,19 +20,13 @@ using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
+internal sealed class AttendanceReportJob : IAttendanceReportJob
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IFamilyRepository _familyRepository;
     private readonly ISchoolContactRepository _contactRepository;
-    private readonly IAbsenceRepository _absenceRepository;
-    private readonly IOfferingSessionsRepository _sessionRepository;
-    private readonly ITimetablePeriodRepository _periodRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
-    private readonly ICourseRepository _courseRepository;
     private readonly IEmailService _emailService;
     private readonly IMediator _mediator;
-    private readonly ISentralGateway _sentralGateway;
     private readonly ILogger _logger;
 
     private Guid JobId { get; set; }
@@ -42,27 +35,15 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
         IStudentRepository studentRepository,
         IFamilyRepository familyRepository,
         ISchoolContactRepository contactRepository,
-        IAbsenceRepository absenceRepository,
-        IOfferingSessionsRepository sessionRepository,
-        ITimetablePeriodRepository periodRepository,
-        ICourseOfferingRepository offeringRepository,
-        ICourseRepository courseRepository,
         IEmailService emailService,
         IMediator mediator,
-        ISentralGateway sentralGateway, 
         ILogger logger)
     {
         _studentRepository = studentRepository;
         _familyRepository = familyRepository;
         _contactRepository = contactRepository;
-        _absenceRepository = absenceRepository;
-        _sessionRepository = sessionRepository;
-        _periodRepository = periodRepository;
-        _offeringRepository = offeringRepository;
-        _courseRepository = courseRepository;
         _emailService = emailService;
         _mediator = mediator;
-        _sentralGateway = sentralGateway;
         _logger = logger.ForContext<IAttendanceReportJob>();
     }
 
@@ -101,7 +82,7 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
                     continue;
 
                 string tempFile = Path.GetTempFileName();
-                File.WriteAllBytes(tempFile, studentReportRequest.Value.FileData);
+                await File.WriteAllBytesAsync(tempFile, studentReportRequest.Value.FileData, cancellationToken);
                 studentFiles.Add(tempFile, studentReportRequest.Value.Name);
 
                 await SendParentEmail(studentReportRequest.Value, student, startDate, cancellationToken);
@@ -124,9 +105,9 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
                     foreach (KeyValuePair<string, string> file in studentFiles)
                     {
                         ZipArchiveEntry zipArchiveEntry = zipArchive.CreateEntry(file.Value);
-                        using StreamWriter streamWriter = new(zipArchiveEntry.Open());
-                        byte[] fileData = File.ReadAllBytes(file.Key);
-                        streamWriter.BaseStream.Write(fileData, 0, fileData.Length);
+                        await using StreamWriter streamWriter = new(zipArchiveEntry.Open());
+                        byte[] fileData = await File.ReadAllBytesAsync(file.Key, cancellationToken);
+                        await streamWriter.BaseStream.WriteAsync(fileData, 0, fileData.Length, cancellationToken);
                     }
                 }
 
@@ -138,7 +119,7 @@ public class AttendanceReportJob : IAttendanceReportJob, IHangfireJob
             {
                 foreach (KeyValuePair<string, string> file in studentFiles)
                 {
-                    byte[] fileData = File.ReadAllBytes(file.Key);
+                    byte[] fileData = await File.ReadAllBytesAsync(file.Key, cancellationToken);
 
                     attachmentList.Add(new(new MemoryStream(fileData), file.Value, MediaTypeNames.Application.Pdf));
                 }

@@ -2,10 +2,13 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Errors;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using Serilog;
 using System;
@@ -19,14 +22,14 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IFamilyRepository _familyRepository;
     private readonly IStudentRepository _studentRepository;
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public GetAbsenceDetailsForParentQueryHandler(
         IAbsenceRepository absenceRepository,
         IFamilyRepository familyRepository,
         IStudentRepository studentRepository,
-        ICourseOfferingRepository offeringRepository,
+        IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
@@ -65,13 +68,13 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
             return Result.Failure<ParentAbsenceDetailsResponse>(DomainErrors.Partners.Student.NotFound(absence.StudentId));
         }
 
-        CourseOffering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         if (offering is null)
         {
             _logger.Information("Could not find offering with Id {id} while retrieving absence {@absence}", absence.OfferingId, absence);
 
-            return Result.Failure<ParentAbsenceDetailsResponse>(DomainErrors.Subjects.Offering.NotFound(absence.OfferingId));
+            return Result.Failure<ParentAbsenceDetailsResponse>(OfferingErrors.NotFound(absence.OfferingId));
         }
 
         Response response = absence.GetExplainedResponse();

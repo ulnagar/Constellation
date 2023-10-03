@@ -4,6 +4,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.Areas.Admin.Models;
 using Constellation.Presentation.Server.Areas.Admin.Models.AdobeConnect;
 using Constellation.Presentation.Server.BaseModels;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -17,8 +18,11 @@ namespace Constellation.Presentation.Server.Areas.Admin.Controllers
     {
         private readonly IAdobeConnectService _adobeConnectService;
 
-        public AdobeConnectController(IUnitOfWork unitOfWork, IAdobeConnectService adobeConnectService)
-            : base(unitOfWork)
+        public AdobeConnectController(
+            IUnitOfWork unitOfWork, 
+            IAdobeConnectService adobeConnectService,
+            IMediator mediator)
+            : base(mediator)
         {
             _adobeConnectService = adobeConnectService;
         }

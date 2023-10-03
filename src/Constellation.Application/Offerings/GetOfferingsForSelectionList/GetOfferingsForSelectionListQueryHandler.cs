@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Offerings.GetOfferingsForSelectionList;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +11,10 @@ using System.Threading.Tasks;
 internal sealed class GetOfferingsForSelectionListQueryHandler
     : IQueryHandler<GetOfferingsForSelectionListQuery, List<OfferingSelectionListResponse>>
 {
-    private readonly ICourseOfferingRepository _offeringRepository;
+    private readonly IOfferingRepository _offeringRepository;
 
     public GetOfferingsForSelectionListQueryHandler(
-        ICourseOfferingRepository offeringRepository)
+        IOfferingRepository offeringRepository)
     {
         _offeringRepository = offeringRepository;
     }
