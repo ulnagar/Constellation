@@ -30,18 +30,37 @@ internal sealed class GetAllTutorialsQueryHandler
 
     public async Task<Result<List<GroupTutorialSummaryResponse>>> Handle(GetAllTutorialsQuery request, CancellationToken cancellationToken)
     {
-        List<GroupTutorial> tutorials = await _groupTutorialRepository.GetAll(cancellationToken);
+        var watch = System.Diagnostics.Stopwatch.StartNew();
 
-        List<GroupTutorialSummaryResponse> summaryList = new();
+        List<GroupTutorialSummaryResponse> response = new();
 
-        if (tutorials is null)
-            return summaryList;
+        var watch2 = System.Diagnostics.Stopwatch.StartNew();
+
+        List<GroupTutorial> tutorials = request.Filter switch
+        {
+            GetAllTutorialsQuery.FilterEnum.All => await _groupTutorialRepository.GetAll(cancellationToken),
+            GetAllTutorialsQuery.FilterEnum.Active => await _groupTutorialRepository.GetActive(cancellationToken),
+            GetAllTutorialsQuery.FilterEnum.Future => await _groupTutorialRepository.GetFuture(cancellationToken),
+            GetAllTutorialsQuery.FilterEnum.Inactive => await _groupTutorialRepository.GetInactive(cancellationToken),
+            _ => new List<GroupTutorial>()
+        };
+        watch2.Stop();
+
+        if (tutorials.Count == 0)
+            return response;
+
+        List<Staff> staff = await _staffRepository.GetAll(cancellationToken);
+
 
         foreach (GroupTutorial tutorial in tutorials)
         {
-            List<Staff> teachers = await _staffRepository.GetListFromIds(tutorial.Teachers.Select(teacher => teacher.StaffId).ToList(), cancellationToken);
+            List<string> activeStaffIds = tutorial
+                .Teachers
+                .Where(teacher => !teacher.IsDeleted)
+                .Select(teacher => teacher.StaffId)
+                .ToList();
 
-            List<Student> students = await _studentRepository.GetListFromIds(tutorial.Enrolments.Select(student => student.StudentId).ToList(), cancellationToken);
+            List<Staff> teachers = staff.Where(member => activeStaffIds.Contains(member.StaffId)).ToList();
 
             GroupTutorialSummaryResponse entry = new(
                 tutorial.Id,
@@ -49,11 +68,16 @@ internal sealed class GetAllTutorialsQueryHandler
                 tutorial.StartDate,
                 tutorial.EndDate,
                 teachers.Select(teacher => teacher.DisplayName).ToList(),
-                students.Select(student => student.DisplayName).ToList());
+                tutorial.Enrolments.Count(student => !student.IsDeleted));
 
-            summaryList.Add(entry);
+            response.Add(entry);
         }
 
-        return summaryList;
+        watch.Stop();
+
+        var time = watch.ElapsedMilliseconds;
+        var time2 = watch2.ElapsedMilliseconds;
+
+        return response;
     }
 }

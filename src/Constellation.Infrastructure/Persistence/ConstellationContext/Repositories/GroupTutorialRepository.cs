@@ -4,15 +4,20 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
+using Core.Abstractions.Clock;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class GroupTutorialRepository : IGroupTutorialRepository
 {
     private readonly AppDbContext _dbContext;
+    private readonly IDateTimeProvider _dateTime;
 
-    public GroupTutorialRepository(AppDbContext dbContext)
+    public GroupTutorialRepository(
+        AppDbContext dbContext,
+        IDateTimeProvider dateTime)
     {
         _dbContext = dbContext;
+        _dateTime = dateTime;
     }
 
     public async Task<GroupTutorial?> GetById(
@@ -20,11 +25,8 @@ internal sealed class GroupTutorialRepository : IGroupTutorialRepository
     CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<GroupTutorial>()
-            .Include(tutorial => tutorial.Enrolments)
-            .Include(tutorial => tutorial.Teachers)
-            .Include(tutorial => tutorial.Rolls)
-            .ThenInclude(roll => roll.Students)
             .Where(tutorial => tutorial.Id == id)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<GroupTutorial?> GetByName(
@@ -32,42 +34,55 @@ internal sealed class GroupTutorialRepository : IGroupTutorialRepository
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<GroupTutorial>()
-            .Include(tutorial => tutorial.Enrolments)
-            .Include(tutorial => tutorial.Teachers)
-            .Include(tutorial => tutorial.Rolls)
-            .ThenInclude(roll => roll.Students)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(tutorial => tutorial.Name == name, cancellationToken);
 
     public async Task<List<GroupTutorial>> GetAll(
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<GroupTutorial>()
-            .Include(tutorial => tutorial.Enrolments)
-            .Include(tutorial => tutorial.Teachers)
-            .Include(tutorial => tutorial.Rolls)
-            .ThenInclude(roll => roll.Students)
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<GroupTutorial>> GetActive(
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<GroupTutorial>()
+            .Where(tutorial => 
+                tutorial.StartDate <= _dateTime.Today &&
+                tutorial.EndDate >= _dateTime.Today)
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<GroupTutorial>> GetFuture(
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<GroupTutorial>()
+            .Where(tutorial => tutorial.StartDate > _dateTime.Today)
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<GroupTutorial>> GetInactive(
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<GroupTutorial>()
+            .Where(tutorial => tutorial.EndDate < _dateTime.Today)
+            .AsSplitQuery()
             .ToListAsync(cancellationToken);
 
     public async Task<List<GroupTutorial>> GetAllWhereAccessExpired(
-        CancellationToken cancellationToken = default)
-    {
-        var dateOnlyToday = DateOnly.FromDateTime(DateTime.Today);
-
-        return await _dbContext
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
             .Set<GroupTutorial>()
-            .Include(tutorial => tutorial.Enrolments)
-            .Include(tutorial => tutorial.Teachers)
-            .Include(tutorial => tutorial.Rolls)
-            .ThenInclude(roll => roll.Students)
             .Where(tutorial =>
                 tutorial.Enrolments.Any(enrol =>
                     !enrol.IsDeleted &&
-                    enrol.EffectiveTo < dateOnlyToday) ||
+                    enrol.EffectiveTo < _dateTime.Today) ||
                 tutorial.Teachers.Any(member =>
                     !member.IsDeleted &&
-                    member.EffectiveTo < dateOnlyToday))
+                    member.EffectiveTo < _dateTime.Today))
+            .AsSplitQuery()
             .ToListAsync(cancellationToken);
-    }
 
     public void Insert(GroupTutorial tutorial) =>
         _dbContext.Set<GroupTutorial>().Add(tutorial);

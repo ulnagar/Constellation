@@ -27,6 +27,9 @@ public class OfferingRepository : IOfferingRepository
     public void Insert(Offering offering) =>
         _context.Set<Offering>().Add(offering);
 
+    public void Remove(Resource resource) =>
+        _context.Set<Resource>().Remove(resource);
+
     public async Task<Offering?> GetById(
         OfferingId offeringId, 
         CancellationToken cancellationToken = default) =>
@@ -43,6 +46,24 @@ public class OfferingRepository : IOfferingRepository
                 offering.StartDate <= _dateTime.Today &&
                 offering.EndDate >= _dateTime.Today &&
                 offering.Sessions.Any(session => !session.IsDeleted))
+            .OrderBy(offering => offering.Name)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Offering>> GetAllInactive(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Offering>()
+            .Where(offering =>
+                offering.EndDate < _dateTime.Today)
+            .OrderBy(offering => offering.Name)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Offering>> GetAllFuture(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Offering>()
+            .Where(offering =>
+                offering.StartDate > _dateTime.Today)
             .OrderBy(offering => offering.Name)
             .ToListAsync(cancellationToken);
 

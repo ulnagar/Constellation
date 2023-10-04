@@ -2,6 +2,7 @@
 @model IndexModel
 @inject IAuthorizationService AuthorizationService
 @using Constellation.Presentation.Server.Areas.Subject.Pages.GroupTutorials.Tutorials;
+@using Constellation.Application.GroupTutorials.GetAllTutorials
 
 @{
     var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
@@ -19,26 +20,26 @@
 
         switch (Model.Filter)
         {
-            case IndexModel.FilterDto.All:
+            case GetAllTutorialsQuery.FilterEnum.All:
                 all_style = "btn-primary";
                 break;
-            case IndexModel.FilterDto.Active:
+            case GetAllTutorialsQuery.FilterEnum.Active:
                 active_style = "btn-primary";
                 break;
-            case IndexModel.FilterDto.Inactive:
+            case GetAllTutorialsQuery.FilterEnum.Inactive:
                 inactive_style = "btn-primary";
                 break;
-            case IndexModel.FilterDto.Future:
+            case GetAllTutorialsQuery.FilterEnum.Future:
                 future_style = "btn-primary";
                 break;
         }
     }
 
     <div class="btn-group">
-        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
-        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Active" class="btn @active_style">Active</a>
-        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Inactive" class="btn @inactive_style">Inactive</a>
-        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Future" class="btn @future_style">Future</a>
+        <a asp-page="Index" asp-route-filter="@GetAllTutorialsQuery.FilterEnum.All" class="btn @all_style">All</a>
+        <a asp-page="Index" asp-route-filter="@GetAllTutorialsQuery.FilterEnum.Active" class="btn @active_style">Active</a>
+        <a asp-page="Index" asp-route-filter="@GetAllTutorialsQuery.FilterEnum.Inactive" class="btn @inactive_style">Inactive</a>
+        <a asp-page="Index" asp-route-filter="@GetAllTutorialsQuery.FilterEnum.Future" class="btn @future_style">Future</a>
     </div>
 
     @if (canEditTest.Succeeded)
@@ -74,7 +75,7 @@
                     <span>@teacher</span>
                 }
             </td>
-            <td>@item.Students.Count()</td>
+            <td>@item.Students</td>
             <td>
                 <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
             </td>

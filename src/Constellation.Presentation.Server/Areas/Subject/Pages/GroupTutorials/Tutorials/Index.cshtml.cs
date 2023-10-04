@@ -21,7 +21,7 @@ public class IndexModel : BasePageModel
     public string ActivePage => "Tutorials";
 
     [BindProperty(SupportsGet = true)]
-    public FilterDto Filter { get; set; } = FilterDto.Active;
+    public GetAllTutorialsQuery.FilterEnum Filter { get; set; } = GetAllTutorialsQuery.FilterEnum.Active;
 
     public List<GroupTutorialSummaryResponse> Tutorials { get; set; } = new();
 
@@ -29,7 +29,7 @@ public class IndexModel : BasePageModel
     {
         await GetClasses(_mediator);
 
-        var tutorialResponse = await _mediator.Send(new GetAllTutorialsQuery());
+        var tutorialResponse = await _mediator.Send(new GetAllTutorialsQuery { Filter = Filter });
 
         if (tutorialResponse.IsFailure) 
         {
@@ -37,25 +37,6 @@ public class IndexModel : BasePageModel
             return;
         }
 
-        Tutorials = tutorialResponse.Value;
-
-        Tutorials = Filter switch
-        {
-            FilterDto.All => Tutorials,
-            FilterDto.Active => Tutorials.Where(tutorial => tutorial.StartDate <= DateOnly.FromDateTime(DateTime.Today) && tutorial.EndDate >= DateOnly.FromDateTime(DateTime.Today)).ToList(),
-            FilterDto.Inactive => Tutorials.Where(tutorial => tutorial.EndDate < DateOnly.FromDateTime(DateTime.Today)).ToList(),
-            FilterDto.Future => Tutorials.Where(tutorial => tutorial.StartDate > DateOnly.FromDateTime(DateTime.Today)).ToList(),
-            _ => Tutorials
-        };
-
-        Tutorials = Tutorials.OrderBy(tutorial => tutorial.StartDate).ToList();
-    }
-
-    public enum FilterDto
-    {
-        All,
-        Active,
-        Inactive,
-        Future
+        Tutorials = tutorialResponse.Value.OrderBy(tutorial => tutorial.StartDate).ToList();
     }
 }

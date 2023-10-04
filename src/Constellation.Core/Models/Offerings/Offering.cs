@@ -174,19 +174,19 @@ public sealed class Offering : AggregateRoot
         return Result.Success();
     }
 
-    public Result RemoveResource(
+    public Result<Resource> RemoveResource(
         ResourceId resourceId)
     {
         Resource resource = _resources.FirstOrDefault(resource =>
             resource.Id == resourceId);
 
         if (resource is null)
-            return Result.Failure(ResourceErrors.NotFound(resourceId));
+            return Result.Failure<Resource>(ResourceErrors.NotFound(resourceId));
 
         RaiseDomainEvent(new ResourceRemovedFromOfferingDomainEvent(new(), Id, resource));
 
         _resources.Remove(resource);
 
-        return Result.Success();
+        return resource;
     }
 }
