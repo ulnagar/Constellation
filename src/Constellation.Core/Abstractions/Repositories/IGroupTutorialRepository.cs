@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using Constellation;
 
 namespace Constellation.Core.Abstractions.Repositories;
 
@@ -14,6 +13,10 @@ public interface IGroupTutorialRepository
     Task<GroupTutorial?> GetById(GroupTutorialId id, CancellationToken cancellationToken = default);
     Task<GroupTutorial?> GetByName(string name, CancellationToken cancellationToken = default);
     Task<List<GroupTutorial>> GetAll(CancellationToken cancellationToken = default);
+    Task<List<GroupTutorial>> GetActive(CancellationToken cancellationToken = default);
+    Task<List<GroupTutorial>> GetFuture(CancellationToken cancellationToken = default);
+    Task<List<GroupTutorial>> GetInactive(CancellationToken cancellationToken = default);
+
     Task<List<GroupTutorial>> GetAllWhereAccessExpired(CancellationToken cancellationToken = default);
 
     void Insert(GroupTutorial tutorial);

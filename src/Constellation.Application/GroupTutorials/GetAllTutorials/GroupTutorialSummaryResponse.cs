@@ -10,4 +10,4 @@ public sealed record GroupTutorialSummaryResponse(
     DateOnly StartDate,
     DateOnly EndDate,
     List<string> Teachers,
-    List<string> Students);
+    int Students);

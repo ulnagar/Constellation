@@ -62,7 +62,11 @@ public static class ServicesRegistration
             {
                 options.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"),
-                    b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
+                    b =>
+                    {
+                        b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
+                        b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    });
 
                 options.EnableSensitiveDataLogging(true);
 

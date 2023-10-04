@@ -3,10 +3,11 @@
 using Constellation.Core.Errors;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-public sealed class Name : ValueObject
+public sealed class Name : ValueObject, IComparable
 {
     private Name(string firstName, string preferredName, string lastName)
     {
@@ -51,9 +52,16 @@ public sealed class Name : ValueObject
         yield return LastName;
     }
 
-    public override string ToString()
+    public override string ToString() => DisplayName;
+
+    public int CompareTo(object obj)
     {
-        return DisplayName;
+        if (obj is Name other)
+        {
+            return string.Compare(SortOrder, other.SortOrder, StringComparison.Ordinal);
+        }
+
+        return -1;
     }
 
     public static implicit operator string(Name name) =>

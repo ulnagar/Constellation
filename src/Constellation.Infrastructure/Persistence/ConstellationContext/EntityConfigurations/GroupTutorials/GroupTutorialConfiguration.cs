@@ -61,5 +61,17 @@ internal sealed class GroupTutorialConfiguration : IEntityTypeConfiguration<Grou
 
         builder
             .Ignore(tutorial => tutorial.CurrentEnrolments);
+
+        builder
+            .Navigation(tutorial => tutorial.Enrolments)
+            .AutoInclude();
+
+        builder
+            .Navigation(tutorial => tutorial.Teachers)
+            .AutoInclude();
+
+        builder
+            .Navigation(tutorial => tutorial.Rolls)
+            .AutoInclude();
     }
 }

@@ -172,6 +172,12 @@ internal sealed class GetOfferingDetailsQueryHandler
                     entry.Present,
                     roll.Comment));
             }
+
+            lessons.Add(new(
+                lesson.Id,
+                lesson.DueDate,
+                lesson.Name,
+                studentAttendances));
         }
 
         decimal fteTotal = (students.Count() * course.FullTimeEquivalentValue);
