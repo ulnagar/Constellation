@@ -739,7 +739,7 @@ public class Gateway : IEmailGateway
         string response = await client.SendAsync(message, cancellationToken);
 
         _logger
-            .ForContext(nameof(MimeMessage), message, true)
+            //.ForContext(nameof(MimeMessage), message.GetTextBody(TextFormat.Plain), true)
             .Information("Email send response: {response}", response);
 
         await client.DisconnectAsync(false, cancellationToken);
