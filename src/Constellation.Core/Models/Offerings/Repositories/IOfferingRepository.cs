@@ -37,4 +37,5 @@ public interface IOfferingRepository
     void Remove(Resource resource);
 
     Task<List<string>> GetTimetableByOfferingId(OfferingId offeringId, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetWithLinkedTeamResource(string teamName, CancellationToken cancellationToken = default);
 }
