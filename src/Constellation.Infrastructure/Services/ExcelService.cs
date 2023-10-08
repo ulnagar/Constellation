@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
-using Constellation.Application.Absences.GetAbsencesForExport;
+using Application.Attendance.GetAttendanceDataFromSentral;
+using Application.Extensions;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
 using Constellation.Application.Awards.ExportAwardNominations;
 using Constellation.Application.Contacts.GetContactList;
@@ -11,16 +12,15 @@ using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
-using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Jobs;
+using ExcelDataReader;
 using OfficeOpenXml;
 using System.Data;
 using System.Drawing;
 using System.Reflection;
-using System.Threading.Channels;
+using System.Text.RegularExpressions;
 
 public class ExcelService : IExcelService
 {
@@ -731,6 +731,96 @@ public class ExcelService : IExcelService
         memoryStream.Position = 0;
 
         return memoryStream;
+    }
+
+    public async Task<List<StudentAttendanceData>> ReadSystemAttendanceData(
+        List<StudentAttendanceData> data, 
+        SystemAttendanceData systemData, 
+        CancellationToken cancellationToken = default)
+    {
+        Regex CSVParser = new(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+
+        if (systemData.YearToDateDayCalculationDocument is not null)
+        {
+            var ytdDayData = systemData.YearToDateDayCalculationDocument.DocumentNode.InnerHtml.Split('\u000A').ToList();
+
+            // Remove first and last entry
+            ytdDayData.RemoveAt(0);
+            ytdDayData.RemoveAt(ytdDayData.Count - 1);
+
+            for (int i = 0; i < ytdDayData.Count; i++)
+            {
+                string row = ytdDayData[i];
+                string[] line = CSVParser.Split(row);
+
+                // Index 0: Surname
+                // Index 1: Preferred name
+                // Index 2: Rollclass name
+                // Index 3: School year
+                // Index 4: External id
+                // Index 5: Days total
+                // Index 6: Days absent
+                // Index 7: Days attended
+                // Index 8: Percentage attendance
+                // Index 9: Percentage absent
+                // Index 10: Explained absences
+                // Index 11: Unexplained absences
+                // Index 12: Percentage explained
+                // Index 13: Percentage unexplained
+
+                string studentId = line[4].FormatField();
+
+                StudentAttendanceData entry = data.FirstOrDefault(entry => entry.SRN == studentId);
+
+                if (entry is not null)
+                {
+                    entry.DayYTD = Convert.ToDecimal(line[8].FormatField());
+                }
+                else
+                {
+                    entry = new()
+                    {
+                        SRN = studentId,
+                        Name = $"{line[1].FormatField()} {line[0].FormatField()}",
+                        DayYTD = Convert.ToDecimal(line[8].FormatField())
+                    };
+
+                    data.Add(entry);
+                }
+            }
+        }
+
+        if (systemData.YearToDateMinuteCalculationDocument is not null)
+        {
+            using IExcelDataReader reader = ExcelReaderFactory.CreateReader(systemData.YearToDateMinuteCalculationDocument);
+            DataSet result = reader.AsDataSet();
+
+            foreach (DataRow row in result.Tables[0].Rows)
+            {
+                // Index 0: Student ID
+                // Index 1: First Name
+                // Index 2: Last Name
+                // Index 3: Gender
+                // Index 4: School Year
+                // Index 5: Roll Class
+                // Index 6: Class
+                // Index 7: Class Time
+                // Index 8: Absence Time
+                // Index 9: Untallied Time
+                // Index 10: Percentage
+
+                string studentId = row[0].ToString();
+
+                StudentAttendanceData entry = data.FirstOrDefault(entry => entry.SRN == studentId);
+
+                if (entry is null)
+                    continue;
+
+                entry.MinuteYTD = Convert.ToDecimal(row[10]);
+            }
+        }
+
+        return data.OrderBy(entry => entry.SRN).ToList();
     }
 
     private class StudentRecord
