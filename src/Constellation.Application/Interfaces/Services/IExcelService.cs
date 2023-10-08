@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
+using Attendance.GetAttendanceDataFromSentral;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
 using Constellation.Application.Awards.ExportAwardNominations;
 using Constellation.Application.Contacts.GetContactList;
@@ -33,4 +34,5 @@ public interface IExcelService
     Task<MemoryStream> CreateAwardNominationsExportFile(List<AwardNominationExportDto> nominations, CancellationToken cancellationToken = default);
     Task<List<StudentImportRecord>> ConvertStudentImportFile(MemoryStream importFile, CancellationToken cancellationToken = default);
 
+    Task<List<StudentAttendanceData>> ReadSystemAttendanceData(List<StudentAttendanceData> data, SystemAttendanceData systemData, CancellationToken cancellationToken = default);
 }

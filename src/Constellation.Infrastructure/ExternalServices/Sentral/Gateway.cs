@@ -1,14 +1,20 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Sentral;
 
+using Application.Attendance.GetAttendanceDataFromSentral;
 using Constellation.Application.Attendance.GetValidAttendanceReportDates;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.Awards;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
+using Core.Abstractions.Clock;
+using ExcelDataReader;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
+using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
+using System.IO;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
@@ -16,6 +22,7 @@ using System.Web;
 
 public partial class Gateway : ISentralGateway
 {
+    private readonly IDateTimeProvider _dateTime;
     private readonly SentralGatewayConfiguration _settings;
     private readonly ILogger _logger;
     private readonly bool _logOnly = true;
@@ -24,10 +31,12 @@ public partial class Gateway : ISentralGateway
     private HtmlDocument _studentListPage;
 
     public Gateway(
+        IDateTimeProvider dateTime,
         IOptions<SentralGatewayConfiguration> settings, 
         IHttpClientFactory factory,
         ILogger logger)
     {
+        _dateTime = dateTime;
         _logger = logger.ForContext<ISentralGateway>();
 
         _settings = settings.Value;
@@ -147,6 +156,32 @@ public partial class Gateway : ISentralGateway
         }
 
         return null;
+    }
+
+    private async Task<Stream> GetStreamAsync(string uri)
+    {
+        for (int i = 1; i < 6; i++)
+        {
+            try
+            {
+                await Login();
+
+                HttpResponseMessage response = await _client.GetAsync(uri);
+
+                return await response.Content.ReadAsStreamAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning($"Failed to retrieve information from Sentral Server with error: {ex.Message}");
+                if (ex.InnerException != null)
+                    _logger.Warning($"Inner Exception: {ex.InnerException.Message}");
+
+                // Wait and retry
+                await Task.Delay(5000);
+            }
+        }
+
+        return Stream.Null;
     }
 
     public async Task<string> GetSentralStudentIdAsync(string studentName)
@@ -1275,5 +1310,69 @@ public partial class Gateway : ISentralGateway
         }
 
         return await document.Content.ReadAsByteArrayAsync();
+    }
+
+    public async Task<SystemAttendanceData> GetAttendancePercentages()
+    {
+        SystemAttendanceData response = new();
+
+        if (_logOnly)
+        {
+            _logger.Information("GetAttendancePercentages: ");
+
+            return response;
+        }
+
+        List<KeyValuePair<string, string>> payload = new()
+        {
+            // length=year
+            new("length", "year"),
+            // year=2023
+            new("year", _dateTime.Today.Year.ToString()),
+            // limit_sign=equal
+            new("limit_sign", "equal"),
+            // limit_percent=100
+            new("limit_percent", "100"),
+            // reasons%5B%5D=8
+            new("reasons[]", "8"),
+            // reasons%5B%5D=1
+            new("reasons[]", "1"),
+            // reasons%5B%5D=7
+            new("reasons[]", "7"),
+            // reasons%5B%5D=5
+            new("reasons[]", "5"),
+            // reasons%5B%5D=3
+            new("reasons[]", "3"),
+            // reasons%5B%5D=9
+            new("reasons[]", "9"),
+            // show_current=true
+            new("show_current", "true"),
+            // group=years
+            new("group", "years"),
+            // years%5B%5D=5
+            new("years[]", "5"),
+            // years%5B%5D=6
+            new("years[]", "6"),
+            // years%5B%5D=7
+            new("years[]", "7"),
+            // years%5B%5D=8
+            new("years[]", "8"),
+            // years%5B%5D=9
+            new("years[]", "9"),
+            // years%5B%5D=10
+            new("years[]", "10"),
+            // years%5B%5D=11
+            new("years[]", "11"),
+            // years%5B%5D=12
+            new("years[]", "12"),
+            // action=export
+            new("action", "export")
+        };
+
+        response.YearToDateDayCalculationDocument = await PostPageAsync($"{_settings.ServerUrl}/attendance/reports/percentage", payload);
+
+        response.YearToDateMinuteCalculationDocument = await GetStreamAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={_dateTime.Today.Year.ToString()}&start_date={_dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")}&end_date={_dateTime.Today.ToString("yyyy-MM-dd")}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
+
+        return response;
     }
 }
