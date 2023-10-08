@@ -8,8 +8,6 @@ using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
 using Core.Abstractions.Clock;
-using Core.Errors;
-using Core.Shared;
 using ExcelDataReader;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
@@ -695,79 +693,6 @@ public partial class Gateway : ISentralGateway
         return nonSchoolDays.OrderBy(a => a).ToList();
     }
 
-    private async Task<Result<DateOnly>> GetEndDateForFortnight(string year, string term, string week)
-    {
-        if (_logOnly)
-        {
-            _logger
-                .Information("GetEndDateForFortnight: year={year}, term={term}, week={week}", year, term, week);
-
-            return _dateTime.Today;
-        }
-
-        HtmlDocument page = await GetPageAsync($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term");
-
-        if (page == null)
-            return Result.Failure<DateOnly>(new("SentralGateway.GetPage.Failure", "Could not retrieve page from Sentral Server"));
-
-        HtmlNode calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "TermCalendarTable").Value);
-
-        if (calendarTable != null)
-        {
-            IEnumerable<HtmlNode> rows = calendarTable.Descendants("tr");
-
-            bool correctTerm = false;
-
-            foreach (HtmlNode row in rows)
-            {
-                if (row.Descendants("td").Count() == 1)
-                {
-                    // This is a header row
-                    HtmlNode header = row.Descendants("td").First();
-                    HtmlNode termName = header.Descendants("b").FirstOrDefault();
-
-                    if (termName is null)
-                    {
-                        // This is a blank row, skip
-                        continue;
-                    }
-
-                    if (termName.InnerText == $"Term {term}")
-                    {
-                        correctTerm = true;
-                        continue;
-                    }
-                    else
-                    {
-                        correctTerm = false;
-                        continue;
-                    }
-                }
-
-                if (correctTerm == true)
-                {
-                    var weekName = row.Descendants("th").FirstOrDefault();
-
-                    if (weekName?.InnerText == week)
-                    {
-                        HtmlNode day = row.Descendants("td").Last();
-
-                        string action = day.GetAttributeValue("onclick", "");
-                        if (!string.IsNullOrWhiteSpace(action))
-                        {
-                            string detectedDate = action.Split('\'')[1];
-                            DateOnly date = DateOnly.Parse(detectedDate);
-
-                            return date;
-                        }
-                    }
-                }
-            }
-        }
-
-        return Result.Failure<DateOnly>(new("SentralGateway.GetPage.Incorrect", "Sentral Server page did not include calendar table"));
-    }
-
     public async Task<List<ValidAttendenceReportDate>> GetValidAttendanceReportDatesFromCalendar(string year)
     {
         if (_logOnly)
@@ -1233,7 +1158,7 @@ public partial class Gateway : ISentralGateway
             // Index 3 = Award Created DateTime
             // Index 4 = Award Source
             // Index 5 = Student Id (Sentral)
-            // Index 6 = Student Id (StudentId)
+            // Index 6 = Student Id (SRN)
             // Index 7 = First Name
             // Index 8 = Last Name
 
@@ -1387,7 +1312,7 @@ public partial class Gateway : ISentralGateway
         return await document.Content.ReadAsByteArrayAsync();
     }
 
-    public async Task<SystemAttendanceData> GetAttendancePercentages(string term, string week, string year)
+    public async Task<SystemAttendanceData> GetAttendancePercentages()
     {
         SystemAttendanceData response = new();
 
@@ -1398,21 +1323,12 @@ public partial class Gateway : ISentralGateway
             return response;
         }
 
-        Result<DateOnly> endDate = await GetEndDateForFortnight(year, term, week);
-
-        if (endDate.IsFailure)
-        {
-            return response;
-        }
-
-
-
         List<KeyValuePair<string, string>> payload = new()
         {
             // length=year
             new("length", "year"),
             // year=2023
-            new("year", year),
+            new("year", _dateTime.Today.Year.ToString()),
             // limit_sign=equal
             new("limit_sign", "equal"),
             // limit_percent=100
@@ -1455,82 +1371,8 @@ public partial class Gateway : ISentralGateway
 
         response.YearToDateDayCalculationDocument = await PostPageAsync($"{_settings.ServerUrl}/attendance/reports/percentage", payload);
 
-        response.YearToDateMinuteCalculationDocument = await GetStreamAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={year}&start_date={_dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")}&end_date={endDate.Value.ToString("yyyy-MM-dd")}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
+        response.YearToDateMinuteCalculationDocument = await GetStreamAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={_dateTime.Today.Year.ToString()}&start_date={_dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")}&end_date={_dateTime.Today.ToString("yyyy-MM-dd")}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
 
-        payload = new()
-        {
-            // length=fortnight
-            new("length", "fortnight"),
-            // term=3
-            new ("term", term),
-            // week=1
-            new ("week", week),
-            // year=2023
-            new("year", year),
-            // limit_sign=equal
-            new("limit_sign", "equal"),
-            // limit_percent=100
-            new("limit_percent", "100"),
-            // reasons%5B%5D=8
-            new("reasons[]", "8"),
-            // reasons%5B%5D=1
-            new("reasons[]", "1"),
-            // reasons%5B%5D=7
-            new("reasons[]", "7"),
-            // reasons%5B%5D=5
-            new("reasons[]", "5"),
-            // reasons%5B%5D=3
-            new("reasons[]", "3"),
-            // reasons%5B%5D=9
-            new("reasons[]", "9"),
-            // show_current=true
-            new("show_current", "true"),
-            // group=years
-            new("group", "years"),
-            // years%5B%5D=5
-            new("years[]", "5"),
-            // years%5B%5D=6
-            new("years[]", "6"),
-            // years%5B%5D=7
-            new("years[]", "7"),
-            // years%5B%5D=8
-            new("years[]", "8"),
-            // years%5B%5D=9
-            new("years[]", "9"),
-            // years%5B%5D=10
-            new("years[]", "10"),
-            // years%5B%5D=11
-            new("years[]", "11"),
-            // years%5B%5D=12
-            new("years[]", "12"),
-            // action=export
-            new("action", "export")
-        };
-
-        response.FortnightDayCalculationDocument = await PostPageAsync($"{_settings.ServerUrl}/attendance/reports/percentage", payload);
-
-        response.FortnightMinuteCalculationDocument = await GetStreamAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=fortnight&term={term}&week={week}&year={year}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
-        
         return response;
-
-        // PER DAY - POST
-
-        //Invoke-WebRequest -UseBasicParsing -Uri "https://admin.aurora.dec.nsw.gov.au/attendance/reports/percentage"
-
-        // YTD
-        //-Body "length=year&year=2023&limit_sign=equal&limit_percent=100&reasons%5B%5D=8&reasons%5B%5D=1&reasons%5B%5D=7&reasons%5B%5D=5&reasons%5B%5D=3&reasons%5B%5D=9&show_current=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export"
-
-        // Fortnight
-        //-Body "length=fortnight&term=3&week=1&year=2023&limit_sign=equal&limit_percent=100&reasons%5B%5D=8&reasons%5B%5D=1&reasons%5B%5D=7&reasons%5B%5D=5&reasons%5B%5D=3&reasons%5B%5D=9&show_current=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export"
-
-
-        // PER MINUTE - GET
-
-        // YTD
-        //Invoke-WebRequest -UseBasicParsing -Uri "https://admin.aurora.dec.nsw.gov.au/attendancepxp/period/administration/percentage_attendance_report?length=period&year=2023&start_date=2023-01-01&end_date=2023-10-06&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export"
-
-        // Fortnight
-        //Invoke-WebRequest -UseBasicParsing -Uri "https://admin.aurora.dec.nsw.gov.au/attendancepxp/period/administration/percentage_attendance_report?length=fortnight&term=3&week=1&year=2023&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export" `
-
     }
 }

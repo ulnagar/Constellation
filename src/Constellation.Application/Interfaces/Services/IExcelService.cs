@@ -9,7 +9,6 @@ using Constellation.Application.DTOs.CSV;
 using Constellation.Application.ExternalDataConsistency;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.MandatoryTraining.Models;
-using Constellation.Application.Rollover.ImportStudents;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Infrastructure.Jobs;
 using System.Collections.Generic;
@@ -32,11 +31,5 @@ public interface IExcelService
     Task<MemoryStream> CreateMasterFileConsistencyReport(List<UpdateItem> updateItems, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateContactExportFile(List<ContactResponse> contacts, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateAwardNominationsExportFile(List<AwardNominationExportDto> nominations, CancellationToken cancellationToken = default);
-    List<StudentAttendanceData> ExtractYTDDayData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
-    List<StudentAttendanceData> ExtractYTDMinuteData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
-    List<StudentAttendanceData> ExtractFNDayData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
-    List<StudentAttendanceData> ExtractFNMinuteData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
-    Task<List<StudentImportRecord>> ConvertStudentImportFile(MemoryStream importFile, CancellationToken cancellationToken = default);
-
     Task<List<StudentAttendanceData>> ReadSystemAttendanceData(List<StudentAttendanceData> data, SystemAttendanceData systemData, CancellationToken cancellationToken = default);
 }

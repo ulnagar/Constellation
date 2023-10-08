@@ -1,45 +1,4 @@
 ﻿@page
-@using Constellation.Application.Extensions
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
 
-<h2>Test Page</h2>
-
-<div class="page-menu">
-    <a asp-page-handler="RetreiveAttendance" class="btn btn-success">Sync Attendance</a>
-</div>
-
-<hr />
-
-<table class="table table-striped data-table">
-    <thead>
-        <tr>
-            <th rowspan="2">StudentId</th>
-            <th rowspan="2">Name</th>
-            <th rowspan="2">Grade</th>
-            <th rowspan="2">School</th>
-            <th colspan="2">YTD</th>
-            <th colspan="2">Fortnight</th>
-        </tr>
-        <tr>
-            <th>Day</th>
-            <th>Minute</th>
-            <th>Day</th>
-            <th>Minute</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var entry in Model.StudentData)
-        {
-            <tr>
-                <td>@entry.StudentId</td>
-                <td>@entry.Name</td>
-                <td>@entry.Grade.AsName()</td>
-                <td>@entry.SchoolName</td>
-                <td>@entry.DayYTD</td>
-                <td>@entry.MinuteYTD</td>
-                <td>@entry.DayFN</td>
-                <td>@entry.MinuteFN</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<a asp-page-handler="RetreiveAttendance" class="btn btn-success">Sync Attendance</a>

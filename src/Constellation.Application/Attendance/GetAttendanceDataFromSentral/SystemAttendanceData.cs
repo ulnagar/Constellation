@@ -1,5 +1,5 @@
 ﻿namespace Constellation.Application.Attendance.GetAttendanceDataFromSentral;
-using HtmlAgilityPack;
+
 using System.IO;
 
 public class SystemAttendanceData

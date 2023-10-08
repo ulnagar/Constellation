@@ -1,23 +1,25 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Application.Attendance.GetAttendanceDataFromSentral;
+using Application.Interfaces.Gateways;
+using Application.Interfaces.Services;
 using Constellation.Presentation.Server.BaseModels;
-using Core.Shared;
-using MediatR;
 using System.Threading;
 
 public class IndexModel : BasePageModel
 {
-    private readonly ISender _mediator;
+    private readonly ISentralGateway _gateway;
+    private readonly IExcelService _excelService;
 
 
     public IndexModel(
-        ISender mediator)
+        ISentralGateway gateway,
+        IExcelService excelService)
     {
-        _mediator = mediator;
+        _gateway = gateway;
+        _excelService = excelService;
     }
 
-    public List<StudentAttendanceData> StudentData { get; set; } = new();
 
     public async Task OnGetAsync()
     {
@@ -26,11 +28,15 @@ public class IndexModel : BasePageModel
 
     public async Task OnGetRetreiveAttendance(CancellationToken cancellationToken = default)
     {
-        Result<List<StudentAttendanceData>> request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", "3", "1"), cancellationToken);
+        SystemAttendanceData sentralData = await _gateway.GetAttendancePercentages();
 
-        if (request.IsSuccess)
-        {
-            StudentData = request.Value;
-        }
+        List<StudentAttendanceData> systemData = await _excelService.ReadSystemAttendanceData(
+            new List<StudentAttendanceData>(), 
+            sentralData, 
+            cancellationToken);
+
+
+
     }
+
 }
