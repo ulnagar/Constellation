@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Interfaces.Gateways;
 
+using Constellation.Application.Attendance.GetAttendanceDataFromSentral;
 using Constellation.Application.Attendance.GetValidAttendanceReportDates;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.Awards;
@@ -25,4 +26,5 @@ public interface ISentralGateway
     Task<ICollection<AwardDetailDto>> GetAwardsReport();
     Task<List<AwardIncidentDto>> GetAwardsListing(string sentralStudentId, string calYear);
     Task<byte[]> GetAwardDocument(string sentralStudentId, string incidentId);
+    Task<SystemAttendanceData> GetAttendancePercentages();
 }
