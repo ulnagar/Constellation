@@ -10,6 +10,8 @@ using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Offerings;
+using Core.Models.Offerings.ValueObjects;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -51,9 +53,9 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
     public async Task<Result<List<TeamMembershipResponse>>> Handle(GetTeamMembershipByIdQuery request, CancellationToken cancellationToken)
     {
-        var returnData = new List<TeamMembershipResponse>();
+        List<TeamMembershipResponse> returnData = new List<TeamMembershipResponse>();
 
-        var team = await _teamRepository.GetById(request.Id, cancellationToken);
+        Team team = await _teamRepository.GetById(request.Id, cancellationToken);
 
         if (team is null)
         {
@@ -65,105 +67,101 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         if (team.Description.Split(';').Contains("CLASS"))
         {
             // Class Team which should have an offering
+            List<Offering> offerings = await _offeringRepository.GetWithLinkedTeamResource(team.Name, cancellationToken);
 
-            _ = int.TryParse(team.Name.Split(" - ")[1], out int teamYear);
-            var teamCourse = team.Name.Split(" - ")[2];
-
-            var course = await _offeringRepository.GetFromYearAndName(teamYear, teamCourse);
-
-            if (course is null)
+            if (offerings.Count == 0)
             {
                 //error
-                _logger.Warning("Could not identify Offering from year {year} and name {name}", teamYear, teamCourse);
+                _logger.Warning("Could not identify any Offering with active Resource for Team {id}", team.Id);
 
-                return Result.Failure<List<TeamMembershipResponse>>(OfferingErrors.SearchFailed(teamYear, teamCourse));
+                return Result.Failure<List<TeamMembershipResponse>>(ResourceErrors.NoneOfTypeFound(ResourceType.MicrosoftTeam));
             }
 
-            // Enrolled Students
-
-            var students = await _studentRepository.GetCurrentEnrolmentsForOffering(course.Id, cancellationToken);
-
-            foreach (var student in students)
+            foreach (Offering offering in offerings)
             {
-                var entry = new TeamMembershipResponse(
-                    team.Id,
-                    student.EmailAddress,
-                    TeamsMembershipLevel.Member.Value);
+                // Enrolled Students
+                List<Student> students = await _studentRepository.GetCurrentEnrolmentsForOffering(offering.Id, cancellationToken);
 
-                if (!returnData.Any(value => value.EmailAddress == entry.EmailAddress))
-                    returnData.Add(entry);
+                foreach (Student student in students)
+                {
+                    TeamMembershipResponse entry = new(
+                        team.Id,
+                        student.EmailAddress,
+                        TeamsMembershipLevel.Member.Value);
+
+                    if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
+                        returnData.Add(entry);
+                }
+
+                // Class Teachers
+                List<Staff> teachers = await _staffRepository.GetCurrentTeachersForOffering(offering.Id, cancellationToken);
+
+                foreach (Staff teacher in teachers)
+                {
+                    TeamMembershipResponse entry = new(
+                        team.Id,
+                        teacher.EmailAddress,
+                        TeamsMembershipLevel.Owner.Value);
+
+                    if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
+                        returnData.Add(entry);
+                }
+
+                // Covering Teachers
+                List<string> coveringTeachers = await _coverRepository.GetCurrentCoveringTeachersForOffering(offering.Id, cancellationToken);
+
+                foreach (string teacher in coveringTeachers)
+                {
+                    TeamMembershipResponse entry = new(
+                        team.Id,
+                        teacher,
+                        TeamsMembershipLevel.Owner.Value);
+
+                    if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
+                        returnData.Add(entry);
+
+                    TeamMembershipResponse cathyEntry = new(
+                        team.Id,
+                        "catherine.crouch@det.nsw.edu.au",
+                        TeamsMembershipLevel.Owner.Value);
+
+                    if (returnData.All(value => value.EmailAddress != cathyEntry.EmailAddress))
+                        returnData.Add(cathyEntry);
+
+                    TeamMembershipResponse karenEntry = new(
+                        team.Id,
+                        "karen.bellamy3@det.nsw.edu.au",
+                        TeamsMembershipLevel.Owner.Value);
+
+                    if (returnData.All(value => value.EmailAddress != karenEntry.EmailAddress))
+                        returnData.Add(karenEntry);
+                }
+
+                // Head Teachers
+                Faculty faculty = await _facultyRepository.GetByOfferingId(offering.Id, cancellationToken);
+
+                if (faculty is null)
+                {
+                    //error
+                    _logger.Warning("Could not identify Faculty from offering {offering}.", offering.Name);
+
+                    return Result.Failure<List<TeamMembershipResponse>>(new Error("Partners.Faculty.SearchFailed", $"Could not identify faculty from offering {offering.Name}."));
+                }
+
+                List<Staff> headTeachers = await _staffRepository.GetFacultyHeadTeachers(faculty.Id, cancellationToken);
+
+                foreach (Staff teacher in headTeachers)
+                {
+                    TeamMembershipResponse entry = new(
+                        team.Id,
+                        teacher.EmailAddress,
+                        TeamsMembershipLevel.Owner.Value);
+
+                    if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
+                        returnData.Add(entry);
+                }
             }
-
-            // Class Teachers
-
-            var teachers = await _staffRepository.GetCurrentTeachersForOffering(course.Id, cancellationToken);
-
-            foreach (var teacher in teachers)
-            {
-                var entry = new TeamMembershipResponse(
-                    team.Id,
-                    teacher.EmailAddress,
-                    TeamsMembershipLevel.Owner.Value);
-
-                if (!returnData.Any(value => value.EmailAddress == entry.EmailAddress))
-                    returnData.Add(entry);
-            }
-
-            // Covering Teachers
-
-            var coveringTeachers = await _coverRepository.GetCurrentCoveringTeachersForOffering(course.Id, cancellationToken);
-
-            foreach (var teacher in coveringTeachers)
-            {
-                var entry = new TeamMembershipResponse(
-                    team.Id,
-                    teacher,
-                    TeamsMembershipLevel.Owner.Value);
-
-                if (!returnData.Any(value => value.EmailAddress == entry.EmailAddress))
-                    returnData.Add(entry);
-
-                var cathyEntry = new TeamMembershipResponse(
-                    team.Id,
-                    "catherine.crouch@det.nsw.edu.au",
-                    TeamsMembershipLevel.Owner.Value);
-
-                if (!returnData.Any(value => value.EmailAddress == cathyEntry.EmailAddress))
-                    returnData.Add(cathyEntry);
-
-                var karenEntry = new TeamMembershipResponse(
-                    team.Id,
-                    "karen.bellamy3@det.nsw.edu.au",
-                    TeamsMembershipLevel.Owner.Value);
-
-                if (!returnData.Any(value => value.EmailAddress == karenEntry.EmailAddress))
-                    returnData.Add(karenEntry);
-            }
-
-            // Head Teachers
-
-        var faculty = await _facultyRepository.GetByOfferingId(course.Id, cancellationToken);
-
-            if (faculty is null)
-            {
-                //error
-                _logger.Warning("Could not identify Faculty from offering {course}.", course.Name);
-
-                return Result.Failure<List<TeamMembershipResponse>>(new Error("Partners.Faculty.SearchFailed", $"Could not identify faculty from offering {course.Name}."));
-            }
-
-            var headTeachers = await _staffRepository.GetFacultyHeadTeachers(faculty.Id, cancellationToken);
-
-            foreach (var teacher in headTeachers)
-            {
-                var entry = new TeamMembershipResponse(
-                    team.Id,
-                    teacher.EmailAddress,
-                    TeamsMembershipLevel.Owner.Value);
-
-                if (!returnData.Any(value => value.EmailAddress == entry.EmailAddress))
-                    returnData.Add(entry);
-            }
+            
         }
 
         if (team.Description.Split(';').Contains("GTUT"))
@@ -196,12 +194,11 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                     student.EmailAddress,
                     TeamsMembershipLevel.Member.Value);
 
-                if (!returnData.Any(value => value.EmailAddress == entry.EmailAddress))
+                if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
                     returnData.Add(entry);
             }
 
             // Class Teachers
-
             List<string> teacherIds = tutorial
                 .Teachers
                 .Where(member =>
@@ -220,13 +217,12 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                     teacher.EmailAddress,
                     TeamsMembershipLevel.Owner.Value);
 
-                if (!returnData.Any(value => value.EmailAddress == entry.EmailAddress))
+                if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
                     returnData.Add(entry);
             }
         }
 
         // Mandatory Owners
-
         List<string> standardOwners = new()
         {
             "michael.necovski2@det.nsw.edu.au",
@@ -247,7 +243,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 owner,
                 TeamsMembershipLevel.Owner.Value);
 
-            if (!returnData.Any(value => value.EmailAddress == entry.EmailAddress))
+            if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
                 returnData.Add(entry);
         }
 

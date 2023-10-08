@@ -9,7 +9,9 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Abstractions.Clock;
+using Core.Models.Offerings.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 public class OfferingRepository : IOfferingRepository
 {
@@ -186,9 +188,19 @@ public class OfferingRepository : IOfferingRepository
         return await _context
             .Set<Offering>()
             .Where(offering => offeringIds.Contains(offering.Id))
-            .ToListAsync(cancellationToken);
+        .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Offering>> GetWithLinkedTeamResource(
+        string teamName, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Offering>()
+            .Where(offering =>
+                offering.Resources.Any(resource =>
+                        resource.Type == ResourceType.MicrosoftTeam &&
+                        resource.ResourceId == teamName))
+            .ToListAsync(cancellationToken);
 
     public async Task<Offering> GetFromYearAndName(
         int year, 

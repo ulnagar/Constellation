@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Offerings.ValueObjects;
 
 using Constellation.Core.Primitives;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 public sealed class ResourceType : ValueObject
@@ -17,6 +18,7 @@ public sealed class ResourceType : ValueObject
         return new(value);
     }
 
+    [JsonConstructor]
     private ResourceType(string value)
     {
         Value = value;
