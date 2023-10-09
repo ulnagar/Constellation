@@ -57,16 +57,6 @@ internal sealed class SendUploadReceipt
             return;
         }
 
-        if (assignment.DelayForwarding && assignment.ForwardingDate > _dateTime.Today)
-        {
-            _logger
-                .ForContext(nameof(AssignmentAttemptSubmittedDomainEvent), notification, true)
-                .ForContext(nameof(Error), new Error("UploadSubmissionToCanvas", "Assignment set to delay forwarding and delay date has not yet passed"), true)
-                .Warning("Failed to send Assignment Submission receipt to uploader");
-
-            return;
-        }
-
         CanvasAssignmentSubmission submission = assignment.Submissions.FirstOrDefault(entry => entry.Id == notification.SubmissionId);
 
         if (submission is null)

@@ -271,7 +271,7 @@
                             <div class="col">
                                 @foreach (var offering in grade)
                                 {
-                                    <button id="offeringSelect-@offering.Id" class="btn btn-outline-info select-button" onClick="toggleClass(@offering.Id)">@offering.Name (@offering.Teacher)</button>
+                                    <button id="offeringSelect-@offering.Id" class="btn btn-outline-info select-button" onClick="toggleClass('@offering.Id')">@offering.Name (@offering.Teacher)</button>
                                 }
                             </div>
                         </div>
