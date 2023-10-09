@@ -13,42 +13,42 @@
     <h2>New School Contact</h2>
 
     <div class="form-horizontal">
-        <EditForm OnValidSubmit="SubmitResponse">
+        <EditForm Model="Context" OnValidSubmit="SubmitResponse">
             <FluentValidationValidator />
             <ValidationSummary />
 
             <div class="mb-3 row">
                 <label class="form-label col-md-2">First Name</label>
                 <div class="col-md-3">
-                    <InputText @bind-Value="FirstName" class="form-control" />
+                    <InputText @bind-Value="Context.FirstName" class="form-control" />
                 </div>
             </div>
 
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Last Name</label>
                 <div class="col-md-3">
-                    <InputText @bind-Value="LastName" class="form-control" />
+                    <InputText @bind-Value="Context.LastName" class="form-control" />
                 </div>
             </div>
 
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Phone Number</label>
                 <div class="col-md-3">
-                    <InputText @bind-Value="PhoneNumber" class="form-control" />
+                    <InputText @bind-Value="Context.PhoneNumber" class="form-control" />
                 </div>
             </div>
 
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Email Address</label>
                 <div class="col-md-3">
-                    <InputText @bind-Value="EmailAddress" class="form-control" placeholder="john.smith1@det.nsw.edu.au" />
+                    <InputText @bind-Value="Context.EmailAddress" class="form-control" placeholder="john.smith1@det.nsw.edu.au" />
                 </div>
             </div>
 
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Phone Number</label>
                 <div class="col-md-3">
-                    <select @bind="Position" class="form-control">
+                    <select @bind="Context.Position" class="form-control">
                         <option value="">-- Select --</option>
                         <option value="@SchoolContactRole.Principal">@SchoolContactRole.Principal</option>
                         <option value="@SchoolContactRole.Coordinator">@SchoolContactRole.Coordinator</option>
@@ -83,12 +83,7 @@
 
     private bool IsLoading { get; set; } = false;
 
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string PhoneNumber { get; set; }
-    public string EmailAddress { get; set; }
-    public string Position { get; set; }
-    public string SchoolCode { get; set; }
+    public FormContext Context { get; set; } = new();
 
     protected override void OnParametersSet()
     {
@@ -108,7 +103,7 @@
             NavigationManager.NavigateTo("Contacts");
         }
 
-        SchoolCode = SelectedSchool.Code;
+        Context.SchoolCode = SelectedSchool.Code;
 
         IsLoading = false;
     }
@@ -119,19 +114,34 @@
     {
         IsLoading = true;
 
-        CreateContactWithRoleCommand command = new(
-            FirstName,
-            LastName,
-            EmailAddress,
-            PhoneNumber,
-            Position,
-            SchoolCode,
-            true);
+        CreateContactWithRoleCommand command = Context.ConvertToCommand();
 
         await Http.PostAsJsonAsync<CreateContactWithRoleCommand>($"api/Contacts/New", command);
 
         IsLoading = false;
 
         NavigationManager.NavigateTo("Contacts");
+    }
+
+    public class FormContext
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string PhoneNumber { get; set; }
+        public string EmailAddress { get; set; }
+        public string Position { get; set; }
+        public string SchoolCode { get; set; }
+
+        public CreateContactWithRoleCommand ConvertToCommand()
+        {
+            return new CreateContactWithRoleCommand(
+                FirstName,
+                LastName,
+                EmailAddress,
+                PhoneNumber,
+                Position,
+                SchoolCode,
+                true);
+        }
     }
 }
