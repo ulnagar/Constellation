@@ -124,14 +124,16 @@ public sealed class SciencePracRoll
     /// Do not use. Does not delete record and throws NRE for the Attendance (as RollId is null)
     /// </summary>
     /// <param name="studentId"></param>
-    public void RemoveStudent(string studentId)
+    public SciencePracAttendance? RemoveStudent(string studentId)
     {
         SciencePracAttendance record = _attendance.FirstOrDefault(entry => entry.StudentId == studentId);
 
         if (record is null)
-            return;
+            return null;
 
         _attendance.Remove(record);
+
+        return record;
     }
 
     public void IncrementNotificationCount() => NotificationCount++;

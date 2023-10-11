@@ -62,7 +62,12 @@ internal sealed class RemoveFromLessonRolls
                 lesson.Cancel();
             }
 
-            roll.RemoveStudent(notification.StudentId);
+            SciencePracAttendance? attendance = roll.RemoveStudent(notification.StudentId);
+
+            if (attendance is not null)
+            {
+                _lessonRepository.Delete(attendance);
+            }
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);

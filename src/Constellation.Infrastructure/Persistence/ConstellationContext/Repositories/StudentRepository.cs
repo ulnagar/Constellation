@@ -85,7 +85,8 @@ public class StudentRepository : IStudentRepository
             .Set<Offering>()
             .Where(offering => 
                 offering.CourseId == courseId &&
-                offering.IsCurrent)
+                offering.StartDate <= _dateTime.Today &&
+                offering.EndDate >= _dateTime.Today)
             .Select(offering => offering.Id)
             .ToListAsync(cancellationToken);
 

@@ -205,10 +205,20 @@ public class OfferingRepository : IOfferingRepository
     public async Task<Offering> GetFromYearAndName(
         int year, 
         string name, 
-        CancellationToken cancellationToken = default) =>
-        await _context
+        CancellationToken cancellationToken = default)
+    {
+        DateOnly startOfYear = new DateOnly(year, 1, 1);
+        DateOnly endOfYear = new DateOnly(year, 12, 31);
+
+        return await _context
             .Set<Offering>()
-            .SingleOrDefaultAsync(offering => offering.Name == name && offering.EndDate.Year == year, cancellationToken);
+            .SingleOrDefaultAsync(offering => 
+                offering.Name == name && 
+                offering.EndDate >= startOfYear &&
+                offering.EndDate <= endOfYear, 
+                cancellationToken);
+    }
+        
 
     public async Task<List<string>> GetTimetableByOfferingId(
         OfferingId offeringId,
