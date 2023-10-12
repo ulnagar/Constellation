@@ -272,9 +272,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             viewModel.StudentId = student.StudentId;
 
             var offerings = await _mediator.Send(new GetOfferingsForBulkEnrolQuery(student.CurrentGrade));
-
             
-
             viewModel.OfferingList = offerings.Value;
 
             return View("BulkEnrol", viewModel);

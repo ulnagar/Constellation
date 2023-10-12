@@ -3,9 +3,10 @@
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
+using System;
 using System.Collections.Generic;
 
-public sealed class OfferingName : ValueObject
+public sealed class OfferingName : ValueObject, IComparable
 {
     private OfferingName(string value)
     {
@@ -30,6 +31,16 @@ public sealed class OfferingName : ValueObject
     }
 
     public override string ToString() => Value;
+
+    public int CompareTo(object obj)
+    {
+        if (obj is OfferingName other)
+        {
+            return string.Compare(Value, other.Value, StringComparison.Ordinal);
+        }
+
+        return -1;
+    }
 
     public static implicit operator string(OfferingName offeringName) =>
         offeringName is null ? string.Empty : offeringName.ToString();
