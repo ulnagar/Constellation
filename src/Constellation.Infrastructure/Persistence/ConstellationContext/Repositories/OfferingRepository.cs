@@ -105,8 +105,8 @@ public class OfferingRepository : IOfferingRepository
             .Where(course => course.Grade == grade)
             .SelectMany(course => course.Offerings)
             .Where(offering => 
-                (offering.Sessions.Any(session => !session.IsDeleted) ||
-                (offering.StartDate <= _dateTime.Today && offering.EndDate >= _dateTime.Today)))
+                offering.StartDate <= _dateTime.Today && 
+                offering.EndDate >= _dateTime.Today)
             .ToListAsync(cancellationToken);
 
     public async Task<List<Offering>> GetActiveByCourseId(
@@ -115,8 +115,8 @@ public class OfferingRepository : IOfferingRepository
         await _context
             .Set<Offering>()
             .Include(offering => offering.Sessions)
-            .Where(offering => offering.CourseId == courseId &&
-                offering.Sessions.Any(session => !session.IsDeleted) &&
+            .Where(offering => 
+                offering.CourseId == courseId &&
                 offering.StartDate <= _dateTime.Today && 
                 offering.EndDate >= _dateTime.Today)
             .ToListAsync(cancellationToken);
