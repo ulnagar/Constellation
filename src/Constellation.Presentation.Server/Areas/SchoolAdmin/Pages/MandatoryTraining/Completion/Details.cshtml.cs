@@ -5,10 +5,10 @@ using Constellation.Application.MandatoryTraining.GetUploadedTrainingCertificate
 using Constellation.Application.MandatoryTraining.MarkTrainingCompletionRecordDeleted;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Models.Attachments.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -66,7 +66,7 @@ public class DetailsModel : BasePageModel
 
         Record = recordRequest.Value;
 
-        Result<CompletionRecordCertificateDetailsDto> certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateFileByIdQuery(StoredFile.TrainingCertificate, Record.Id.ToString()));
+        Result<CompletionRecordCertificateDetailsDto> certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateFileByIdQuery(AttachmentType.TrainingCertificate, Record.Id.ToString()));
 
         if (certificateRequest.IsFailure)
             UploadedCertificate = null;
@@ -82,7 +82,7 @@ public class DetailsModel : BasePageModel
 
         await GetClasses(_mediator);
 
-        var certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateFileByIdQuery(StoredFile.TrainingCertificate, Record.Id.ToString()));
+        var certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateFileByIdQuery(AttachmentType.TrainingCertificate, Record.Id.ToString()));
 
         if (certificateRequest.IsFailure)
         {

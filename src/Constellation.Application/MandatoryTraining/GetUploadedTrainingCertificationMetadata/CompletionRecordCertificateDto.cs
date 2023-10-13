@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.MandatoryTraining.GetUploadedTrainingCertificationMetadata;
 
 using Constellation.Application.Common.Mapping;
-using Constellation.Core.Models;
+using Core.Models.Attachments;
 
-public class CompletionRecordCertificateDto : IMapFrom<StoredFile>
+public class CompletionRecordCertificateDto : IMapFrom<Attachment>
 {
     public int Id { get; set; }
     public string Name { get; set; }

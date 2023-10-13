@@ -22,8 +22,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 LoggingConfiguration.SetupLogging(builder.Configuration, Serilog.Events.LogEventLevel.Debug);
 
-// Add infrastructure services
-builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
+// Add application services
+builder.Services
+    .AddApplication()
+    .AddInfrastructure(builder.Configuration, builder.Environment);
 
 // Configuration Authentication and Authorization
 builder.Services.AddIdentity<AppUser, AppRole>()

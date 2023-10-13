@@ -8,6 +8,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Core.Models.Attachments;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -25,7 +26,7 @@ internal sealed class GenerateStaffReportCommandHandler
     private readonly ISchoolRepository _schoolRepository;
     private readonly ISchoolContactRepository _schoolContactRepository;
     private readonly IExcelService _excelService;
-    private readonly IStoredFileRepository _storedFileRepository;
+    private readonly IAttachmentRepository _attachmentRepository;
 
     public GenerateStaffReportCommandHandler(
         ITrainingModuleRepository trainingModuleRepository,
@@ -34,7 +35,7 @@ internal sealed class GenerateStaffReportCommandHandler
         ISchoolRepository schoolRepository,
         ISchoolContactRepository schoolContactRepository,
         IExcelService excelService,
-        IStoredFileRepository storedFileRepository)
+        IAttachmentRepository attachmentRepository)
     {
         _trainingModuleRepository = trainingModuleRepository;
         _staffRepository = staffRepository;
@@ -42,7 +43,7 @@ internal sealed class GenerateStaffReportCommandHandler
         _schoolRepository = schoolRepository;
         _schoolContactRepository = schoolContactRepository;
         _excelService = excelService;
-        _storedFileRepository = storedFileRepository;
+        _attachmentRepository = attachmentRepository;
     }
 
     public async Task<Result<ReportDto>> Handle(GenerateStaffReportCommand request, CancellationToken cancellationToken)
@@ -135,9 +136,9 @@ internal sealed class GenerateStaffReportCommandHandler
             .Select(record => record.RecordId.ToString())
             .ToList();
 
-        List<StoredFile> certificates = await _storedFileRepository.GetTrainingCertificatesFromList(recordIds, cancellationToken);
+        List<Attachment> certificates = await _attachmentRepository.GetTrainingCertificatesFromList(recordIds, cancellationToken);
 
-        foreach (StoredFile certificate in certificates)
+        foreach (Attachment certificate in certificates)
             fileList.Add(certificate.Name, certificate.FileData);
 
         // Create ZIP file

@@ -5,9 +5,10 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
-using Constellation.Core.Models;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Core.Models.Attachments;
+using Core.Models.Attachments.ValueObjects;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -18,20 +19,20 @@ internal sealed class UpdateTrainingCompletionCommandHandler
 {
     private readonly ITrainingModuleRepository _trainingModuleRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IStoredFileRepository _storedFileRepository;
+    private readonly IAttachmentRepository _attachmentRepository;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ILogger _logger;
 
     public UpdateTrainingCompletionCommandHandler(
         ITrainingModuleRepository trainingModuleRepository,
         IUnitOfWork unitOfWork,
-        IStoredFileRepository storedFileRepository,
+        IAttachmentRepository attachmentRepository,
         IDateTimeProvider dateTimeProvider,
         ILogger logger)
     {
         _trainingModuleRepository = trainingModuleRepository;
         _unitOfWork = unitOfWork;
-        _storedFileRepository = storedFileRepository;
+        _attachmentRepository = attachmentRepository;
         _dateTimeProvider = dateTimeProvider;
         _logger = logger.ForContext<UpdateTrainingCompletionCommand>();
     }
@@ -75,7 +76,7 @@ internal sealed class UpdateTrainingCompletionCommandHandler
 
         }
 
-        StoredFile existingFile = await _storedFileRepository.GetTrainingCertificateByLinkId(record.Id.ToString(), cancellationToken);
+        Attachment existingFile = await _attachmentRepository.GetTrainingCertificateByLinkId(record.Id.ToString(), cancellationToken);
 
         if (existingFile is not null)
         {
@@ -86,13 +87,13 @@ internal sealed class UpdateTrainingCompletionCommandHandler
         }
         else
         {
-            StoredFile fileEntity = new()
+            Attachment fileEntity = new()
             {
                 Name = request.File.FileName,
                 FileType = request.File.FileType,
                 FileData = request.File.FileData,
                 CreatedAt = _dateTimeProvider.Now,
-                LinkType = StoredFile.TrainingCertificate,
+                LinkType = AttachmentType.TrainingCertificate,
                 LinkId = record.Id.ToString()
             };
 

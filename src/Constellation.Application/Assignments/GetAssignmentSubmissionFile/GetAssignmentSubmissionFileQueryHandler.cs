@@ -1,14 +1,14 @@
 ﻿namespace Constellation.Application.Assignments.GetAssignmentSubmissionFile;
 
+using Attachments.GetAttachmentFile;
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.DTOs;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Shared;
-using Core.Models;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
+using Core.Models.Attachments.Services;
+using Core.Models.Attachments.ValueObjects;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,14 +17,14 @@ internal sealed class GetAssignmentSubmissionFileQueryHandler
     : IQueryHandler<GetAssignmentSubmissionFileQuery, FileDto>
 {
     private readonly IAssignmentRepository _assignmentRepository;
-    private readonly IStoredFileRepository _storedFileRepository;
+    private readonly IAttachmentService _attachmentService;
 
     public GetAssignmentSubmissionFileQueryHandler(
         IAssignmentRepository assignmentRepository,
-        IStoredFileRepository storedFileRepository)
+        IAttachmentService attachmentService)
     {
         _assignmentRepository = assignmentRepository;
-        _storedFileRepository = storedFileRepository;
+        _attachmentService = attachmentService;
     }
 
     public async Task<Result<FileDto>> Handle(GetAssignmentSubmissionFileQuery request, CancellationToken cancellationToken)
@@ -39,16 +39,16 @@ internal sealed class GetAssignmentSubmissionFileQueryHandler
         if (submission is null)
             return Result.Failure<FileDto>(SubmissionErrors.NotFound(request.SubmissionId));
 
-        StoredFile file = await _storedFileRepository.GetAssignmentSubmissionByLinkId(submission.Id.ToString(), cancellationToken);
+        Result<AttachmentResponse> fileRequest = await _attachmentService.GetAttachmentFile(AttachmentType.CanvasAssignmentSubmission, submission.Id.ToString(), cancellationToken);
 
-        if (file is null)
-            return Result.Failure<FileDto>(DomainErrors.Documents.AssignmentSubmission.NotFound(submission.Id.ToString()));
+        if (fileRequest.IsFailure)
+            return Result.Failure<FileDto>(fileRequest.Error);
 
         FileDto entry = new()
         {
-            FileData = file.FileData,
-            FileType = file.FileType,
-            FileName = file.Name
+            FileData = fileRequest.Value.FileData,
+            FileType = fileRequest.Value.FileType,
+            FileName = fileRequest.Value.FileName
         };
 
         return entry;

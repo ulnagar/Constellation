@@ -3,10 +3,11 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Reports;
 using Constellation.Core.Shared;
+using Core.Models.Attachments;
+using Core.Models.Attachments.ValueObjects;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,16 +16,16 @@ public class CreateNewStudentReportCommandHandler
     : ICommandHandler<CreateNewStudentReportCommand>
 {
     private readonly IAcademicReportRepository _reportRepository;
-    private readonly IStoredFileRepository _storedFileRepository;
+    private readonly IAttachmentRepository _attachmentRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateNewStudentReportCommandHandler(
         IAcademicReportRepository reportRepository,
-        IStoredFileRepository storedFileRepository,
+        IAttachmentRepository attachmentRepository,
         IUnitOfWork unitOfWork)
     {
         _reportRepository = reportRepository;
-        _storedFileRepository = storedFileRepository;
+        _attachmentRepository = attachmentRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -39,17 +40,17 @@ public class CreateNewStudentReportCommandHandler
 
         _reportRepository.Insert(report);
 
-        var file = new StoredFile
+        var file = new Attachment
         {
             Name = request.FileName,
             FileType = "application/pdf",
             FileData = request.FileData,
             CreatedAt = DateTime.Now,
-            LinkType = StoredFile.StudentReport,
+            LinkType = AttachmentType.StudentReport,
             LinkId = report.Id.ToString()
         };
 
-        _storedFileRepository.Insert(file);
+        _attachmentRepository.Insert(file);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

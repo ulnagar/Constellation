@@ -17,7 +17,9 @@ var configuration = builder.Configuration;
 var environment = builder.Environment;
 
 // Register Infrastructure services
-builder.Services.AddInfrastructure(configuration, environment);
+builder.Services
+    .AddApplication()
+    .AddInfrastructure(configuration, environment);
 
 // Configure Authentication and Authorization
 builder.Services.AddDefaultIdentity<AppUser>()

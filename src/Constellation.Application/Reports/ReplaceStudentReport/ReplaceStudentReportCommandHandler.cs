@@ -13,16 +13,16 @@ public class ReplaceStudentReportCommandHandler
     : ICommandHandler<ReplaceStudentReportCommand>
 {
     private readonly IAcademicReportRepository _reportRepository;
-    private readonly IStoredFileRepository _storedFileRepository;
+    private readonly IAttachmentRepository _attachmentRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public ReplaceStudentReportCommandHandler(
         IAcademicReportRepository reportRepository,
-        IStoredFileRepository storedFileRepository,
+        IAttachmentRepository attachmentRepository,
         IUnitOfWork unitOfWork)
     {
         _reportRepository = reportRepository;
-        _storedFileRepository = storedFileRepository;
+        _attachmentRepository = attachmentRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -33,7 +33,7 @@ public class ReplaceStudentReportCommandHandler
         if (existingReport is null)
             return Result.Failure(DomainErrors.Reports.AcademicReport.NotFoundByPublishId(request.OldPublishId));
 
-        var existingFile = await _storedFileRepository.GetAcademicReportByLinkId(existingReport.Id.ToString(), cancellationToken);
+        var existingFile = await _attachmentRepository.GetAcademicReportByLinkId(existingReport.Id.ToString(), cancellationToken);
 
         if (existingFile is null)
             return Result.Failure(DomainErrors.Documents.AcademicReport.NotFound(existingReport.Id.ToString()));

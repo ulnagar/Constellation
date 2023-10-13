@@ -9,6 +9,8 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.Attachments;
+using Core.Models.Attachments.ValueObjects;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +21,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
     private readonly ISentralGateway _gateway;
     private readonly IStudentRepository _studentRepository;
     private readonly IStudentAwardRepository _awardRepository;
-    private readonly IStoredFileRepository _storedFileRepository;
+    private readonly IAttachmentRepository _attachmentRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -28,7 +30,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
         ISentralGateway gateway,
         IStudentRepository studentRepository,
         IStudentAwardRepository awardRepository,
-        IStoredFileRepository storedFileRepository,
+        IAttachmentRepository attachmentRepository,
         IStaffRepository staffRepository,
         IUnitOfWork unitOfWork)
     {
@@ -36,7 +38,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
         _gateway = gateway;
         _studentRepository = studentRepository;
         _awardRepository = awardRepository;
-        _storedFileRepository = storedFileRepository;
+        _attachmentRepository = attachmentRepository;
         _staffRepository = staffRepository;
         _unitOfWork = unitOfWork;
     }
@@ -165,16 +167,16 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
             return;
         }
 
-        var file = new StoredFile
+        var file = new Attachment
         {
             FileData = awardDocument,
             FileType = "application/pdf",
             Name = $"{student.DisplayName} - Astra Award - {award.DateIssued:dd-MM-yyyy} - {award.IncidentId}.pdf",
             CreatedAt = DateTime.Now,
             LinkId = matchingAward.Id.ToString(),
-            LinkType = StoredFile.AwardCertificate
+            LinkType = AttachmentType.AwardCertificate
         };
 
-        _storedFileRepository.Insert(file);
+        _attachmentRepository.Insert(file);
     }
 }

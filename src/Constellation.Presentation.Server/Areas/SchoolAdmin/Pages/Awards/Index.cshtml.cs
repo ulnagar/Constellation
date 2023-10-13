@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards;
 
+using Application.Attachments.GetAttachmentFile;
 using Constellation.Application.Awards.GetAllAwards;
-using Constellation.Application.Awards.GetAwardCertificate;
 using Constellation.Application.Awards.GetRecentAwards;
 using Constellation.Application.Awards.Models;
 using Constellation.Application.Interfaces.Jobs;
@@ -9,7 +9,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Helpers.Attributes;
+using Core.Models.Attachments.ValueObjects;
 using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -80,7 +80,7 @@ public class IndexModel : BasePageModel
 
         var awardId = StudentAwardId.FromValue(Guid.Parse(Id));
 
-        var fileRequest = await _mediator.Send(new GetAwardCertificateQuery(awardId), cancellationToken);
+        var fileRequest = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.AwardCertificate, awardId.ToString()), cancellationToken);
 
         if (fileRequest.IsFailure)
         {
@@ -93,7 +93,7 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
-        return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.Name);
+        return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
     }
 
     public IActionResult OnGetRefreshAwards()

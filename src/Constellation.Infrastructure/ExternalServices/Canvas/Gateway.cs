@@ -2,8 +2,8 @@
 
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Gateways;
-using Constellation.Core.Models;
 using Constellation.Infrastructure.ExternalServices.Canvas.Models;
+using Core.Models.Attachments;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Serilog;
@@ -171,7 +171,7 @@ internal class Gateway : ICanvasGateway
         return assignments;
     }
 
-    public async Task<bool> UploadAssignmentSubmission(string CourseId, int CanvasAssignmentId, string StudentId, StoredFile file)
+    public async Task<bool> UploadAssignmentSubmission(string CourseId, int CanvasAssignmentId, string StudentId, Attachment file)
     {
         var stepOnePath = $"courses/sis_course_id:{CourseId}/assignments/{CanvasAssignmentId}/submissions/sis_user_id:{StudentId}/files";
 
@@ -185,7 +185,7 @@ internal class Gateway : ICanvasGateway
 
         if (_logOnly)
         {
-            _logger.Information("UploadAssignmentSubmission: CourseId={courseId}, CanvasAssignmentId={canvasAssignmentId}, StudentId={studentId}, StoredFile={@file}, stepOnePath={stepOnePath}, stepOnePayload={@stepOnePayload}", CourseId, CanvasAssignmentId, StudentId, file, stepOnePath, stepOnePayload);
+            _logger.Information("UploadAssignmentSubmission: CourseId={courseId}, CanvasAssignmentId={canvasAssignmentId}, StudentId={studentId}, Attachment={@file}, stepOnePath={stepOnePath}, stepOnePayload={@stepOnePayload}", CourseId, CanvasAssignmentId, StudentId, file, stepOnePath, stepOnePayload);
 
             return true;
         }

@@ -9,6 +9,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Core.Models.Attachments;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,20 +25,20 @@ internal sealed class GenerateModuleReportCommandHandler
     private readonly ITrainingModuleRepository _trainingModuleRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
-    private readonly IStoredFileRepository _storedFileRepository;
+    private readonly IAttachmentRepository _attachmentRepository;
     private readonly IExcelService _excelService;
 
     public GenerateModuleReportCommandHandler(
         ITrainingModuleRepository trainingModuleRepository,
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
-        IStoredFileRepository storedFileRepository,
+        IAttachmentRepository attachmentRepository,
         IExcelService excelService)
     {
         _trainingModuleRepository = trainingModuleRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
-        _storedFileRepository = storedFileRepository;
+        _attachmentRepository = attachmentRepository;
         _excelService = excelService;
     }
 
@@ -146,9 +147,9 @@ internal sealed class GenerateModuleReportCommandHandler
             .Select(record => record.Id.ToString())
             .ToList();
 
-        List<StoredFile> certificates = await _storedFileRepository.GetTrainingCertificatesFromList(recordIds, cancellationToken);
+        List<Attachment> certificates = await _attachmentRepository.GetTrainingCertificatesFromList(recordIds, cancellationToken);
             
-        foreach (StoredFile certificate in certificates)
+        foreach (Attachment certificate in certificates)
             fileList.Add(certificate.Name, certificate.FileData);
 
         // Create ZIP file

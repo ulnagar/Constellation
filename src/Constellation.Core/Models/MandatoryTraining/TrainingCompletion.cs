@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.MandatoryTraining;
 
+using Attachments;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
 using System;
@@ -23,7 +24,7 @@ public class TrainingCompletion : IAuditableEntity
     public TrainingModuleId TrainingModuleId { get; private set; }
     public TrainingModule Module { get; set; }
     public int? StoredFileId { get; private set; }
-    public StoredFile StoredFile { get; private set; }
+    public Attachment Attachment { get; private set; }
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public string ModifiedBy { get; set; }
@@ -43,26 +44,17 @@ public class TrainingCompletion : IAuditableEntity
             moduleId);
     }
 
-    public void UpdateStaffMember(string staffId)
-    {
-        StaffId = staffId;
-    }
+    public void UpdateStaffMember(string staffId) => StaffId = staffId;
 
-    public void UpdateTrainingModule(TrainingModuleId moduleId)
-    {
-        TrainingModuleId = moduleId;
-    }
+    public void UpdateTrainingModule(TrainingModuleId moduleId) => TrainingModuleId = moduleId;
 
-    public void Delete()
-    {
-        IsDeleted = true;
-    }
+    public void Delete() => IsDeleted = true;
 
     public void MarkNotRequired(TrainingModule module)
     {
         // Check that this is valid on the Module
-        var canMarkNotRequired = module.CanMarkNotRequired;
-        var sameModule = module.Id == TrainingModuleId;
+        bool canMarkNotRequired = module.CanMarkNotRequired;
+        bool sameModule = module.Id == TrainingModuleId;
 
         if (canMarkNotRequired && sameModule)
         {
@@ -81,13 +73,7 @@ public class TrainingCompletion : IAuditableEntity
         CompletedDate = completedDate;
     }
 
-    public void LinkStoredFile(int fileId)
-    {
-        StoredFileId = fileId;
-    }
+    public void LinkStoredFile(int fileId) => StoredFileId = fileId;
 
-    public void LinkStoredFile(StoredFile file)
-    {
-        StoredFile = file;
-    }
+    public void LinkStoredFile(Attachment file) => Attachment = file;
 }

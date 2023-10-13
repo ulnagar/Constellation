@@ -18,14 +18,14 @@ internal sealed class GetRecentAwardsQueryHandler
     private readonly IStudentAwardRepository _awardRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly IStoredFileRepository _fileRepository;
+    private readonly IAttachmentRepository _fileRepository;
     private readonly ILogger _logger;
 
     public GetRecentAwardsQueryHandler(
         IStudentAwardRepository awardRepository,
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
-        IStoredFileRepository fileRepository,
+        IAttachmentRepository fileRepository,
         Serilog.ILogger logger)
     {
         _awardRepository = awardRepository;

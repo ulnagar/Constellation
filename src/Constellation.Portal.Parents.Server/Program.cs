@@ -15,7 +15,9 @@ builder.Host.UseSerilog();
 LoggingConfiguration.SetupLogging(builder.Configuration, Serilog.Events.LogEventLevel.Debug);
 
 // Register Infrastructure services
-builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
+builder.Services
+    .AddApplication()
+    .AddInfrastructure(builder.Configuration, builder.Environment);
 
 // Add Authentication and Authorization
 builder.Services.AddDefaultIdentity<AppUser>()

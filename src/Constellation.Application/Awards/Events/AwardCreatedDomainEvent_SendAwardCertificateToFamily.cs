@@ -1,15 +1,21 @@
 ﻿namespace Constellation.Application.Awards.Events;
 
+using Attachments.GetAttachmentFile;
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.ValueObjects;
+using Core.Models.Attachments.Services;
+using Core.Models.Attachments.ValueObjects;
+using Core.Shared;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,7 +24,7 @@ internal sealed class AwardCreatedDomainEvent_SendAwardCertificateToFamily
 {
     private readonly IStudentAwardRepository _awardRepository;
     private readonly IStudentRepository _studentRepository;
-    private readonly IStoredFileRepository _fileRepository;
+    private readonly IAttachmentService _attachmentService;
     private readonly IStaffRepository _staffRepository;
     private readonly IFamilyRepository _familyRepository;
     private readonly IEmailService _emailService;
@@ -27,15 +33,15 @@ internal sealed class AwardCreatedDomainEvent_SendAwardCertificateToFamily
     public AwardCreatedDomainEvent_SendAwardCertificateToFamily(
         IStudentAwardRepository awardRepository,
         IStudentRepository studentRepository,
-        IStoredFileRepository fileRepository,
+        IAttachmentService attachmentService,
         IStaffRepository staffRepository,
         IFamilyRepository familyRepository,
         IEmailService emailService,
-        Serilog.ILogger logger)
+        ILogger logger)
     {
         _awardRepository = awardRepository;
         _studentRepository = studentRepository;
-        _fileRepository = fileRepository;
+        _attachmentService = attachmentService;
         _staffRepository = staffRepository;
         _familyRepository = familyRepository;
         _emailService = emailService;
@@ -91,13 +97,20 @@ internal sealed class AwardCreatedDomainEvent_SendAwardCertificateToFamily
             recipients.Add(recipient.Value);
         }
 
-        var file = await _fileRepository.GetAwardCertificateByLinkId(award.Id.ToString(), cancellationToken);
+        Result<AttachmentResponse> fileRequest = await _attachmentService.GetAttachmentFile(
+            AttachmentType.AwardCertificate,
+            award.Id.ToString(), 
+            cancellationToken);
 
-        if (file is null)
+        if (fileRequest.IsFailure)
         {
             _logger.Error("Could not retrieve certificate while attempting to send certificate to parents: {@award}", award);
             return;
         }
+
+        MemoryStream stream = new(fileRequest.Value.FileData);
+
+        Attachment attachment = new(stream, fileRequest.Value.FileName, fileRequest.Value.FileType);
 
         var student = await _studentRepository.GetById(award.StudentId, cancellationToken);
 
@@ -112,10 +125,10 @@ internal sealed class AwardCreatedDomainEvent_SendAwardCertificateToFamily
         {
             _logger.Warning("Failed to retrieve teacher while attempting to send certificate to parents: {@award}", award);
         }
-
+        
         await _emailService.SendAwardCertificateParentEmail(
             recipients,
-            file,
+            attachment,
             award,
             student,
             teacher,

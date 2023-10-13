@@ -12,6 +12,7 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
+using DTOs;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,7 +22,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 public class GenerateAttendanceReportForStudentQueryHandler 
-    : IQueryHandler<GenerateAttendanceReportForStudentQuery, StoredFile>
+    : IQueryHandler<GenerateAttendanceReportForStudentQuery, FileDto>
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
@@ -49,7 +50,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
         _sentralGateway = sentralGateway;
     }
 
-    public async Task<Result<StoredFile>> Handle(GenerateAttendanceReportForStudentQuery request, CancellationToken cancellationToken)
+    public async Task<Result<FileDto>> Handle(GenerateAttendanceReportForStudentQuery request, CancellationToken cancellationToken)
     {
         List<DateOnly> excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(request.StartDate.Year.ToString());
 
@@ -158,9 +159,9 @@ public class GenerateAttendanceReportForStudentQueryHandler
 
         var fileName = $"{student.LastName}, {student.FirstName} - {request.StartDate:yyyy-MM-dd} - Attendance Report.pdf";
 
-        var result = new StoredFile
+        var result = new FileDto
         {
-            Name = fileName,
+            FileName = fileName,
             FileData = fileStream.ToArray(),
             FileType = MediaTypeNames.Application.Pdf
         };

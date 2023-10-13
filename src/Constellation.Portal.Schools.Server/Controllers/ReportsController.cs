@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
-using Constellation.Application.Features.Documents.Queries;
+using Application.Attachments.GetAttachmentFile;
 using Constellation.Application.Reports.GetStudentReportsForSchool;
+using Core.Models.Attachments.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,8 +42,13 @@ public class ReportsController : BaseAPIController
 
         _logger.Information("Requested to download Student Report with id {reportId} by user {user}", reportId.ToString(), user.DisplayName);
 
-        var file = await _mediator.Send(new GetFileFromDatabaseQuery { LinkType = Core.Models.StoredFile.StudentReport, LinkId = reportId.ToString() });
+        var file = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.StudentReport, reportId.ToString()));
 
-        return File(file.FileData, file.FileType, file.Name);
+        if (file.IsFailure)
+        {
+            return BadRequest();
+        }
+
+        return File(file.Value.FileData, file.Value.FileType, file.Value.FileName);
     }
 }

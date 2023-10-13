@@ -14,12 +14,12 @@ internal sealed class GetSummaryForStudentQueryHandler
 {
     private readonly IStudentAwardRepository _awardRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly IStoredFileRepository _fileRepository;
+    private readonly IAttachmentRepository _fileRepository;
 
     public GetSummaryForStudentQueryHandler(
         IStudentAwardRepository awardRepository,
         IStaffRepository staffRepository,
-        IStoredFileRepository fileRepository)
+        IAttachmentRepository fileRepository)
     {
         _awardRepository = awardRepository;
         _staffRepository = staffRepository;

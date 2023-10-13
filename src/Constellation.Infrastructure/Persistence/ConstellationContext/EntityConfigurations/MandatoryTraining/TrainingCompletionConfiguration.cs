@@ -1,4 +1,4 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.MandatoryTraining;
 
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
@@ -33,7 +33,7 @@ internal sealed class TrainingCompletionConfiguration : IEntityTypeConfiguration
             .OnDelete(DeleteBehavior.NoAction);
 
         builder
-            .HasOne(completion => completion.StoredFile)
+            .HasOne(completion => completion.Attachment)
             .WithMany()
             .IsRequired(false)
             .OnDelete(DeleteBehavior.NoAction);

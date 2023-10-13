@@ -4,7 +4,7 @@ using Application.Models.Identity;
 using Application.Timetables.GetStudentTimetableData;
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Portal.School.Timetables.Queries;
-using Core.Models;
+using Core.Models.Attachments;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -52,8 +52,8 @@ public class TimetablesController : BaseAPIController
             return BadRequest();
         }
 
-        StoredFile? file = await _mediator.Send(new GetStudentTimetableExportQuery { Data = request.Value });
+        FileDto? file = await _mediator.Send(new GetStudentTimetableExportQuery { Data = request.Value });
 
-        return File(file.FileData, file.FileType, file.Name);
+        return File(file.FileData, file.FileType, file.FileName);
     }
 }

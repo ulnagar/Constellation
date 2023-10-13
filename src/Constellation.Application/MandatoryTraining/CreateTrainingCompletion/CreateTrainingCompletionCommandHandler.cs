@@ -5,10 +5,11 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Core.Models.Attachments;
+using Core.Models.Attachments.ValueObjects;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -78,13 +79,13 @@ internal sealed class CreateTrainingCompletionCommandHandler
             return Result.Success();
         }
 
-        StoredFile fileEntity = new()
+        Attachment fileEntity = new()
         {
             Name = request.File.FileName,
             FileType = request.File.FileType,
             FileData = request.File.FileData,
             CreatedAt = _dateTimeProvider.Now,
-            LinkType = StoredFile.TrainingCertificate,
+            LinkType = AttachmentType.TrainingCertificate,
             LinkId = recordEntity.Id.ToString()
         };
 

@@ -4,27 +4,27 @@ using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Core.Errors;
-using Core.Models;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
 using Core.Models.Assignments.Services;
+using Core.Models.Attachments;
 using Core.Shared;
 using System.Threading.Tasks;
 
 internal class AssignmentService : IAssignmentService
 {
-    private readonly IStoredFileRepository _storedFileRepository;
+    private readonly IAttachmentRepository _attachmentRepository;
     private readonly ICanvasGateway _canvasGateway;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
     public AssignmentService(
-        IStoredFileRepository storedFileRepository,
+        IAttachmentRepository attachmentRepository,
         ICanvasGateway canvasGateway,
         IEmailService emailService,
         ILogger logger)
     {
-        _storedFileRepository = storedFileRepository;
+        _attachmentRepository = attachmentRepository;
         _canvasGateway = canvasGateway;
         _emailService = emailService;
         _logger = logger.ForContext<IAssignmentService>();
@@ -36,7 +36,7 @@ internal class AssignmentService : IAssignmentService
         string canvasCourseId,
         CancellationToken cancellationToken = default)
     {
-        StoredFile file = await _storedFileRepository.GetAssignmentSubmissionByLinkId(submission.Id.Value.ToString(), cancellationToken);
+        Attachment file = await _attachmentRepository.GetAssignmentSubmissionByLinkId(submission.Id.Value.ToString(), cancellationToken);
 
         if (file is null)
         {

@@ -38,7 +38,6 @@ public interface IAppDbContext
     DbSet<Staff> Staff { get; set; }
     DbSet<Student> Students { get; set; }
     DbSet<StudentWholeAbsence> WholeAbsences { get; set; }
-    DbSet<StoredFile> StoredFiles { get; set; }
     DbSet<StocktakeEvent> StocktakeEvents { get; set; }
     DbSet<StocktakeSighting> StocktakeSightings { get; set; }
     DbSet<StudentAward> StudentAward { get; set; }

@@ -2,10 +2,10 @@
 
 using AutoMapper;
 using Constellation.Application.Common.Mapping;
-using Constellation.Core.Models;
+using Core.Models.Attachments;
 using System;
 
-public class CompletionRecordCertificateDetailsDto : IMapFrom<StoredFile>
+public class CompletionRecordCertificateDetailsDto : IMapFrom<Attachment>
 {
     public int Id { get; set; }
     public string Name { get; set; }
@@ -15,7 +15,7 @@ public class CompletionRecordCertificateDetailsDto : IMapFrom<StoredFile>
 
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<StoredFile, CompletionRecordCertificateDetailsDto>()
+        profile.CreateMap<Attachment, CompletionRecordCertificateDetailsDto>()
             .ForMember(dest => dest.FileDataBase64, opt => opt.MapFrom(src => Convert.ToBase64String(src.FileData)));
     }
 }

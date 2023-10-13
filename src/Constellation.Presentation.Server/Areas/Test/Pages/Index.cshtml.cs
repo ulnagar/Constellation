@@ -3,11 +3,11 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
-using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Models.Attachments;
+using Core.Models.Attachments.ValueObjects;
 using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -81,7 +81,7 @@ public class IndexModel : BasePageModel
         //    {
         //        var teacher = teachers.FirstOrDefault(entry => entry.StaffId == award.TeacherId);
 
-        //        var certificate = await _context.Set<StoredFile>().AnyAsync(entry => entry.LinkId == award.Id.ToString() && entry.LinkType == StoredFile.AwardCertificate);
+        //        var certificate = await _context.Set<Attachment>().AnyAsync(entry => entry.LinkId == award.Id.ToString() && entry.LinkType == Attachment.AwardCertificate);
 
         //        Awards.Add(new()
         //        {
@@ -105,7 +105,7 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGetAttemptDownload(string id)
     {
-        var file = await _context.Set<StoredFile>().FirstOrDefaultAsync(entry => entry.LinkId == id && entry.LinkType == StoredFile.AwardCertificate);
+        var file = await _context.Set<Attachment>().FirstOrDefaultAsync(entry => entry.LinkId == id && entry.LinkType == AttachmentType.AwardCertificate);
 
         if (file is null)
             return Page();

@@ -3,11 +3,12 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
+using Core.Models.Attachments;
+using Core.Models.Attachments.ValueObjects;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,16 +17,16 @@ internal sealed class UploadAssignmentSubmissionCommandHandler
     : ICommandHandler<UploadAssignmentSubmissionCommand>
 {
     private readonly IAssignmentRepository _assignmentRepository;
-    private readonly IStoredFileRepository _storedFileRepository;
+    private readonly IAttachmentRepository _attachmentRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public UploadAssignmentSubmissionCommandHandler(
         IAssignmentRepository assignmentRepository,
-        IStoredFileRepository storedFileRepository,
+        IAttachmentRepository attachmentRepository,
         IUnitOfWork unitOfWork)
     {
         _assignmentRepository = assignmentRepository;
-        _storedFileRepository = storedFileRepository;
+        _attachmentRepository = attachmentRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -43,17 +44,17 @@ internal sealed class UploadAssignmentSubmissionCommandHandler
         if (submissionResult.IsFailure)
             return submissionResult;
 
-        StoredFile file = new()
+        Attachment file = new()
         {
             LinkId = submissionResult.Value.Id.ToString(),
-            LinkType = StoredFile.CanvasAssignmentSubmission,
+            LinkType = AttachmentType.CanvasAssignmentSubmission,
             Name = request.File.FileName,
             FileType = request.File.FileType,
             FileData = request.File.FileData,
             CreatedAt = DateTime.Now
         };
 
-        _storedFileRepository.Insert(file);
+        _attachmentRepository.Insert(file);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

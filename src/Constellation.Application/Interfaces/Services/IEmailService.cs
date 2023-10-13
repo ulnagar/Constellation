@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 public interface IEmailService
 {
     // Awards Emails
-    Task SendAwardCertificateParentEmail(List<EmailRecipient> recipients, StoredFile certificate, StudentAward award, Student? student, Staff? teacher, CancellationToken cancellationToken = default);
+    Task SendAwardCertificateParentEmail(List<EmailRecipient> recipients, Attachment certificate, StudentAward award, Student? student, Staff? teacher, CancellationToken cancellationToken = default);
 
     // Lesson Emails
     Task SendLessonMissedEmail(LessonMissedNotificationEmail notification);
@@ -50,8 +50,8 @@ public interface IEmailService
 
 
     // Attendance Emails
-    Task<bool> SendParentAttendanceReportEmail(string studentName, DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<Attachment> attachments, CancellationToken cancellationToken = default);
-    Task<bool> SendSchoolAttendanceReportEmail(DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task<bool> SendParentAttendanceReportEmail(string studentName, DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<System.Net.Mail.Attachment> attachments, CancellationToken cancellationToken = default);
+    Task<bool> SendSchoolAttendanceReportEmail(DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<System.Net.Mail.Attachment> attachments, CancellationToken cancellationToken = default);
 
 
     // RollMarking Emails
@@ -60,11 +60,11 @@ public interface IEmailService
 
 
     // Cover Emails
-    Task SendCancelledCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task SendCancelledCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<System.Net.Mail.Attachment> attachments, CancellationToken cancellationToken = default);
     Task SendCancelledCoverEmail(EmailDtos.CoverEmail resource);
-    Task SendNewCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task SendNewCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<System.Net.Mail.Attachment> attachments, CancellationToken cancellationToken = default);
     Task SendNewCoverEmail(EmailDtos.CoverEmail resource);
-    Task SendUpdatedCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, DateOnly originalStartDate, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task SendUpdatedCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, DateOnly originalStartDate, TimeOnly startTime, TimeOnly endTime, string teamLink, List<System.Net.Mail.Attachment> attachments, CancellationToken cancellationToken = default);
     Task SendUpdatedCoverEmail(EmailDtos.CoverEmail resource);
 
     // Service Emails

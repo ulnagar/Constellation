@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Portal.Parents.Server.Controllers;
 
-using Constellation.Application.Features.Documents.Queries;
+using Application.Attachments.GetAttachmentFile;
 using Constellation.Application.Reports.GetAcademicReportList;
-using Constellation.Core.Models;
+using Core.Models.Attachments.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -51,10 +51,15 @@ public class ReportsController : BaseAPIController
 			return BadRequest();
 
         // Create file as stream
-        var fileEntry = await _mediator.Send(new GetFileFromDatabaseQuery { LinkType = StoredFile.StudentReport, LinkId = entryId });
+        var fileEntry = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.StudentReport, entryId));
+
+        if (fileEntry.IsFailure)
+        {
+            return BadRequest();
+        }
 
         var filename = $"Academic Report - {DateTime.Today:yyyy-MM-dd}.pdf";
 
-		return File(new MemoryStream(fileEntry.FileData), "application/pdf", filename);
+		return File(new MemoryStream(fileEntry.Value.FileData), "application/pdf", filename);
     }
 }

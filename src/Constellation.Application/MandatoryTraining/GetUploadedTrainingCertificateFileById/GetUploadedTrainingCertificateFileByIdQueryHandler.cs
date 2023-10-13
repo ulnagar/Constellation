@@ -11,17 +11,17 @@ using System.Threading.Tasks;
 internal sealed class GetUploadedTrainingCertificateFileByIdQueryHandler
     : IQueryHandler<GetUploadedTrainingCertificateFileByIdQuery, CompletionRecordCertificateDetailsDto>
 {
-    private readonly IStoredFileRepository _storedFileRepository;
+    private readonly IAttachmentRepository _attachmentRepository;
 
     public GetUploadedTrainingCertificateFileByIdQueryHandler(
-        IStoredFileRepository storedFileRepository)
+        IAttachmentRepository attachmentRepository)
     {
-        _storedFileRepository = storedFileRepository;
+        _attachmentRepository = attachmentRepository;
     }
 
     public async Task<Result<CompletionRecordCertificateDetailsDto>> Handle(GetUploadedTrainingCertificateFileByIdQuery request, CancellationToken cancellationToken)
     {
-        var file = await _storedFileRepository.GetTrainingCertificateByLinkId(request.LinkId, cancellationToken);
+        var file = await _attachmentRepository.GetTrainingCertificateByLinkId(request.LinkId, cancellationToken);
 
         if (file is null)
             return Result.Failure<CompletionRecordCertificateDetailsDto>(DomainErrors.Documents.TrainingCertificate.NotFound);
