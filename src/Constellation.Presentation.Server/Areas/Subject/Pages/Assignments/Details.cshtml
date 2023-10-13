@@ -5,8 +5,9 @@
 @inject IDateTimeProvider _dateTime;
 
 @{
-    bool AllowForwarding = !Model.Assignment.DelayForwarding ||
-                           Model.Assignment.ForwardingDate <= _dateTime.Today;
+    bool AllowForwarding = (Model.Assignment is not null) 
+        ? !Model.Assignment.DelayForwarding || Model.Assignment.ForwardingDate <= _dateTime.Today 
+        : false;
 }
 
 <h2>Canvas Assignment</h2>
