@@ -23,8 +23,13 @@ internal sealed class AttachmentConfiguration : IEntityTypeConfiguration<Attachm
 
         builder
             .Property(attachment => attachment.LinkType)
+            .IsRequired()
             .HasConversion(
                 type => type.Value,
                 value => AttachmentType.FromValue(value));
+
+        builder
+            .Property(attachment => attachment.LinkId)
+            .IsRequired();
     }
 }

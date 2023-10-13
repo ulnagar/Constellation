@@ -8,6 +8,8 @@ using ValueObjects;
 
 public sealed class Attachment
 {
+    private Attachment() { } // Required for EFCore
+
     private Attachment(
         string name,
         string fileType,
