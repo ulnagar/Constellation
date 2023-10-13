@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Attachments.GetAttachmentFile;
+﻿namespace Constellation.Core.Models.Attachments.DTOs;
 
 public sealed record AttachmentResponse(
     string FileType,

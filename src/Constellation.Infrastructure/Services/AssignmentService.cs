@@ -3,52 +3,60 @@
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
-using Core.Errors;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
 using Core.Models.Assignments.Services;
-using Core.Models.Attachments;
+using Core.Models.Attachments.DTOs;
+using Core.Models.Attachments.Services;
+using Core.Models.Attachments.ValueObjects;
 using Core.Shared;
 using System.Threading.Tasks;
 
 internal class AssignmentService : IAssignmentService
 {
     private readonly IAttachmentRepository _attachmentRepository;
+    private readonly IAttachmentService _attachmentService;
     private readonly ICanvasGateway _canvasGateway;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
     public AssignmentService(
         IAttachmentRepository attachmentRepository,
+        IAttachmentService attachmentService,
         ICanvasGateway canvasGateway,
         IEmailService emailService,
         ILogger logger)
     {
         _attachmentRepository = attachmentRepository;
+        _attachmentService = attachmentService;
         _canvasGateway = canvasGateway;
         _emailService = emailService;
         _logger = logger.ForContext<IAssignmentService>();
     }
 
-    public async Task<bool> UploadSubmissionToCanvas(
+    public async Task<Result> UploadSubmissionToCanvas(
         CanvasAssignment assignment,
         CanvasAssignmentSubmission submission,
         string canvasCourseId,
         CancellationToken cancellationToken = default)
     {
-        Attachment file = await _attachmentRepository.GetAssignmentSubmissionByLinkId(submission.Id.Value.ToString(), cancellationToken);
+        Result<AttachmentResponse> fileRequest = await _attachmentService.GetAttachmentFile(
+            AttachmentType.CanvasAssignmentSubmission ,
+            submission.Id.Value.ToString(), 
+            cancellationToken);
 
-        if (file is null)
+        if (fileRequest.IsFailure)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Documents.AssignmentSubmission.NotFound(submission.Id.Value.ToString()), true)
+                .ForContext(nameof(Error), fileRequest.Error, true)
                 .Warning("Failed to upload Assignment Submission to Canvas");
-            return true;
+
+            return fileRequest;
         }
 
         // Upload file to Canvas
         // Include error checking/retry on failure
-        bool result = await _canvasGateway.UploadAssignmentSubmission(canvasCourseId, assignment.CanvasId, submission.StudentId, file);
+        bool result = await _canvasGateway.UploadAssignmentSubmission(canvasCourseId, assignment.CanvasId, submission.StudentId, fileRequest.Value);
 
         if (!result)
         {
@@ -62,8 +70,10 @@ internal class AssignmentService : IAssignmentService
                 submission.StudentId,
                 submission.Id, 
                 cancellationToken);
+
+            return Result.Failure(SubmissionErrors.UploadFailed);
         }
 
-        return false;
+        return Result.Success();
     }
 }

@@ -9,7 +9,6 @@ using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
-using Core.Abstractions.Repositories;
 using Core.Models.Assignments.Services;
 using Core.Models.Offerings.ValueObjects;
 using System;
@@ -83,10 +82,18 @@ internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
 
             foreach (CanvasAssignmentSubmission submission in assignment.Submissions)
             {
-                if (await _assignmentService.UploadSubmissionToCanvas(assignment, submission, canvasCourseId, cancellationToken))
+                Result result = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, canvasCourseId, cancellationToken);
+
+                if (result.IsFailure)
                 {
-                    assignment.MarkSubmissionUploaded(submission.Id);
+                    _logger
+                        .ForContext(nameof(Error), result.Error, true)
+                        .Warning("Failed to upload Assignment Submission to Canvas");
+
+                    continue;
                 }
+
+                assignment.MarkSubmissionUploaded(submission.Id);
             }
         }
 

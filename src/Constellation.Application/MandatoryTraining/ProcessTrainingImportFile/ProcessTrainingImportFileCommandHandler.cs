@@ -61,7 +61,6 @@ internal sealed class ProcessTrainingImportFileCommandHandler
 
                     // Link the record to the database copy of the module
                     TrainingCompletion newRecord = TrainingCompletion.Create(
-                        new TrainingCompletionId(),
                         record.StaffId,
                         existing.Id);
 

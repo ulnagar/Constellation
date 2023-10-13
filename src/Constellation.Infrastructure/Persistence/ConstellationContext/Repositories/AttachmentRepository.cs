@@ -2,6 +2,7 @@
 
 using Constellation.Core.Abstractions.Repositories;
 using Core.Models.Attachments;
+using Core.Models.Attachments.Identifiers;
 using Core.Models.Attachments.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +22,7 @@ internal class AttachmentRepository : IAttachmentRepository
             .ToListAsync(cancellationToken);
 
     public async Task<Attachment?> GetById(
-        int id,
+        AttachmentId id,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Attachment>()
@@ -110,4 +111,7 @@ internal class AttachmentRepository : IAttachmentRepository
 
     public void Insert(Attachment file) =>
         _context.Set<Attachment>().Add(file);
+
+    public void Remove(Attachment file) =>
+        _context.Set<Attachment>().Remove(file);
 }

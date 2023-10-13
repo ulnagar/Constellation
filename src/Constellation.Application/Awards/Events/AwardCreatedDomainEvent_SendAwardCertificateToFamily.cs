@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Application.Awards.Events;
 
-using Attachments.GetAttachmentFile;
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.ValueObjects;
+using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Shared;

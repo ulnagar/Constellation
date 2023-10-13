@@ -123,11 +123,20 @@ internal sealed class UploadSubmissionToCanvas
 
         string canvasCourseId = resources.First();
 
-        if (await _assignmentService.UploadSubmissionToCanvas(assignment, submission, canvasCourseId, cancellationToken))
+        Result uploadAttempt = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, canvasCourseId, cancellationToken);
+
+        if (uploadAttempt.IsSuccess)
         {
             assignment.MarkSubmissionUploaded(submission.Id);
 
             await _unitOfWork.CompleteAsync(cancellationToken);
+
+            return;
         }
+
+        _logger
+            .ForContext(nameof(AssignmentAttemptSubmittedDomainEvent), notification, true)
+            .ForContext(nameof(Error), uploadAttempt.Error, true)
+            .Warning("Failed to upload Assignment Submission to Canvas");
     }
 }

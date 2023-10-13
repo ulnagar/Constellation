@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
-using Constellation.Application.Absences.GetAbsencesForExport;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
 using Constellation.Application.Awards.ExportAwardNominations;
 using Constellation.Application.Contacts.GetContactList;
@@ -11,16 +10,13 @@ using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
-using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Jobs;
 using OfficeOpenXml;
 using System.Data;
 using System.Drawing;
 using System.Reflection;
-using System.Threading.Channels;
 
 public class ExcelService : IExcelService
 {
@@ -424,7 +420,6 @@ public class ExcelService : IExcelService
                     continue;
 
                 var entry = TrainingCompletion.Create(
-                    new TrainingCompletionId(),
                     workSheet.Cells[1, column].GetCellValue<string>(),
                     module.Id);
 

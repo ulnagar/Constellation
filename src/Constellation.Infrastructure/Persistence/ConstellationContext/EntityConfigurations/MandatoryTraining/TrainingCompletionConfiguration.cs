@@ -31,11 +31,5 @@ internal sealed class TrainingCompletionConfiguration : IEntityTypeConfiguration
             .HasOne(completion => completion.Module)
             .WithMany(module => module.Completions)
             .OnDelete(DeleteBehavior.NoAction);
-
-        builder
-            .HasOne(completion => completion.Attachment)
-            .WithMany()
-            .IsRequired(false)
-            .OnDelete(DeleteBehavior.NoAction);
     }
 }

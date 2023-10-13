@@ -8,7 +8,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
 using Core.Models.Attachments;
-using Core.Models.Attachments.ValueObjects;
+using Core.Models.Attachments.Services;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -20,20 +20,23 @@ internal sealed class UpdateTrainingCompletionCommandHandler
     private readonly ITrainingModuleRepository _trainingModuleRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAttachmentRepository _attachmentRepository;
-    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IAttachmentService _attachmentService;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public UpdateTrainingCompletionCommandHandler(
         ITrainingModuleRepository trainingModuleRepository,
         IUnitOfWork unitOfWork,
         IAttachmentRepository attachmentRepository,
-        IDateTimeProvider dateTimeProvider,
+        IAttachmentService attachmentService,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _trainingModuleRepository = trainingModuleRepository;
         _unitOfWork = unitOfWork;
         _attachmentRepository = attachmentRepository;
-        _dateTimeProvider = dateTimeProvider;
+        _attachmentService = attachmentService;
+        _dateTime = dateTime;
         _logger = logger.ForContext<UpdateTrainingCompletionCommand>();
     }
 
@@ -43,7 +46,10 @@ internal sealed class UpdateTrainingCompletionCommandHandler
 
         if (module is null)
         {
-            _logger.Warning("Could not find Training Module with Id {id}", request.TrainingModuleId);
+            _logger
+                .ForContext(nameof(UpdateTrainingCompletionCommand), request, true)
+                .ForContext(nameof(Error), DomainErrors.MandatoryTraining.Module.NotFound(request.TrainingModuleId), true)
+                .Warning("Failed to update Training Completion record");
 
             return Result.Failure(DomainErrors.MandatoryTraining.Module.NotFound(request.TrainingModuleId));
         }
@@ -52,7 +58,10 @@ internal sealed class UpdateTrainingCompletionCommandHandler
 
         if (record is null)
         {
-            _logger.Warning("Could not find Training Completion with Id {id}", request.CompletionId);
+            _logger
+                .ForContext(nameof(UpdateTrainingCompletionCommand), request, true)
+                .ForContext(nameof(Error), DomainErrors.MandatoryTraining.Completion.NotFound(request.CompletionId), true)
+                .Warning("Failed to update Training Completion record");
 
             return Result.Failure(DomainErrors.MandatoryTraining.Completion.NotFound(request.CompletionId));
         }
@@ -68,40 +77,30 @@ internal sealed class UpdateTrainingCompletionCommandHandler
         else
             record.SetCompletedDate(request.CompletedDate);
 
-        if (request.File is null)
+        if (request.File is not null)
         {
-            await _unitOfWork.CompleteAsync(cancellationToken);
+            Attachment existingFile = await _attachmentRepository.GetTrainingCertificateByLinkId(record.Id.ToString(), cancellationToken);
 
-            return Result.Success();
+            if (existingFile is not null)
+                _attachmentService.DeleteAttachment(existingFile);
 
-        }
+            Attachment fileEntity = Attachment.CreateTrainingCertificateAttachment(
+                request.File.FileName,
+                request.File.FileType,
+                record.Id.ToString(),
+                _dateTime.Now);
 
-        Attachment existingFile = await _attachmentRepository.GetTrainingCertificateByLinkId(record.Id.ToString(), cancellationToken);
+            Result attempt = await _attachmentService.StoreAttachmentData(fileEntity, request.File.FileData, cancellationToken);
 
-        if (existingFile is not null)
-        {
-            existingFile.FileData = request.File.FileData;
-            existingFile.FileType = request.File.FileType;
-            existingFile.CreatedAt = _dateTimeProvider.Now;
-            existingFile.Name = request.File.FileName;
-        }
-        else
-        {
-            Attachment fileEntity = new()
+            if (attempt.IsFailure)
             {
-                Name = request.File.FileName,
-                FileType = request.File.FileType,
-                FileData = request.File.FileData,
-                CreatedAt = _dateTimeProvider.Now,
-                LinkType = AttachmentType.TrainingCertificate,
-                LinkId = record.Id.ToString()
-            };
+                return attempt;
+            }
 
-            record.LinkStoredFile(fileEntity);
+            _attachmentRepository.Insert(fileEntity);
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);
-
         return Result.Success();
     }
 }

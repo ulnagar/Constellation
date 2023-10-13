@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Application.Assignments.GetAssignmentSubmissionFile;
 
-using Attachments.GetAttachmentFile;
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.DTOs;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
+using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using System.Linq;

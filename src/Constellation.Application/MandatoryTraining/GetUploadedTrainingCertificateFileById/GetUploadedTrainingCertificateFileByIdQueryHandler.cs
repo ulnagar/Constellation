@@ -4,6 +4,10 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
+using Core.Models.Attachments;
+using Core.Models.Attachments.DTOs;
+using Core.Models.Attachments.Services;
+using Core.Models.Attachments.ValueObjects;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,27 +16,39 @@ internal sealed class GetUploadedTrainingCertificateFileByIdQueryHandler
     : IQueryHandler<GetUploadedTrainingCertificateFileByIdQuery, CompletionRecordCertificateDetailsDto>
 {
     private readonly IAttachmentRepository _attachmentRepository;
+    private readonly IAttachmentService _attachmentService;
 
     public GetUploadedTrainingCertificateFileByIdQueryHandler(
-        IAttachmentRepository attachmentRepository)
+        IAttachmentRepository attachmentRepository,
+        IAttachmentService attachmentService)
     {
         _attachmentRepository = attachmentRepository;
+        _attachmentService = attachmentService;
     }
 
     public async Task<Result<CompletionRecordCertificateDetailsDto>> Handle(GetUploadedTrainingCertificateFileByIdQuery request, CancellationToken cancellationToken)
     {
-        var file = await _attachmentRepository.GetTrainingCertificateByLinkId(request.LinkId, cancellationToken);
+        Attachment attachment = await _attachmentRepository.GetTrainingCertificateByLinkId(request.LinkId, cancellationToken);
 
-        if (file is null)
+        if (attachment is null)
             return Result.Failure<CompletionRecordCertificateDetailsDto>(DomainErrors.Documents.TrainingCertificate.NotFound);
+
+        Result<AttachmentResponse> attempt =
+            await _attachmentService.GetAttachmentFile(AttachmentType.TrainingCertificate, request.LinkId,
+                cancellationToken);
+
+        if (attempt.IsFailure)
+        {
+            return Result.Failure<CompletionRecordCertificateDetailsDto>(attempt.Error);
+        }
 
         return new CompletionRecordCertificateDetailsDto
         {
-            Id = file.Id,
-            Name = file.Name,
-            FileData = file.FileData,
-            FileType = file.FileType,
-            FileDataBase64 = Convert.ToBase64String(file.FileData)
+            Id = attachment.Id,
+            Name = attachment.Name,
+            FileData = attempt.Value.FileData,
+            FileType = attempt.Value.FileType,
+            FileDataBase64 = Convert.ToBase64String(attempt.Value.FileData)
         };
     }
 }

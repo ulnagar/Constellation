@@ -6,9 +6,12 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Reports;
 using Constellation.Core.Shared;
+using Core.Abstractions.Clock;
 using Core.Models.Attachments;
+using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using System;
+using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,16 +20,22 @@ public class CreateNewStudentReportCommandHandler
 {
     private readonly IAcademicReportRepository _reportRepository;
     private readonly IAttachmentRepository _attachmentRepository;
+    private readonly IAttachmentService _attachmentService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTime;
 
     public CreateNewStudentReportCommandHandler(
         IAcademicReportRepository reportRepository,
         IAttachmentRepository attachmentRepository,
-        IUnitOfWork unitOfWork)
+        IAttachmentService attachmentService,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTime)
     {
         _reportRepository = reportRepository;
         _attachmentRepository = attachmentRepository;
+        _attachmentService = attachmentService;
         _unitOfWork = unitOfWork;
+        _dateTime = dateTime;
     }
 
     public async Task<Result> Handle(CreateNewStudentReportCommand request, CancellationToken cancellationToken)
@@ -40,18 +49,23 @@ public class CreateNewStudentReportCommandHandler
 
         _reportRepository.Insert(report);
 
-        var file = new Attachment
+        Attachment attachment = Attachment.CreateStudentReportAttachment(
+            request.FileName,
+            MediaTypeNames.Application.Pdf,
+            report.Id.ToString(),
+            _dateTime.Now);
+
+        Result attempt = await _attachmentService.StoreAttachmentData(
+            attachment,
+            request.FileData,
+            cancellationToken);
+
+        if (attempt.IsFailure)
         {
-            Name = request.FileName,
-            FileType = "application/pdf",
-            FileData = request.FileData,
-            CreatedAt = DateTime.Now,
-            LinkType = AttachmentType.StudentReport,
-            LinkId = report.Id.ToString()
-        };
+            return attempt;
+        }
 
-        _attachmentRepository.Insert(file);
-
+        _attachmentRepository.Insert(attachment);
         await _unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();

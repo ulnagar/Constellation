@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Assignments.GetAllAssignmentSubmissionFiles;
 
 using Abstractions.Messaging;
-using Attachments.GetAttachmentFile;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings.Repositories;
 using Core.Abstractions.Repositories;
@@ -9,6 +8,7 @@ using Core.Errors;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
 using Core.Models.Assignments.Repositories;
+using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Offerings;

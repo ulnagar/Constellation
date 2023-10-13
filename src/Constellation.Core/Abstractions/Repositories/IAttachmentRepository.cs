@@ -4,13 +4,14 @@ namespace Constellation.Core.Abstractions.Repositories;
 
 using Constellation.Core.Models.Attachments.ValueObjects;
 using Models.Attachments;
+using Models.Attachments.Identifiers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 public interface IAttachmentRepository
 {
-    Task<Attachment?> GetById(int id, CancellationToken cancellationToken = default);
+    Task<Attachment?> GetById(AttachmentId id, CancellationToken cancellationToken = default);
     Task<List<Attachment>> GetAll(CancellationToken cancellationToken = default);
     Task<Attachment?> GetByTypeAndLinkId(AttachmentType type, string linkId, CancellationToken cancellationToken = default);
 
@@ -26,4 +27,5 @@ public interface IAttachmentRepository
     Task<bool> DoesAwardCertificateExistInDatabase(string linkId, CancellationToken cancellationToken = default);
 
     void Insert(Attachment file);
+    void Remove(Attachment file);
 }

@@ -9,7 +9,9 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
-using Core.Models.Attachments;
+using Core.Models.Attachments.DTOs;
+using Core.Models.Attachments.Services;
+using Core.Models.Attachments.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,6 +28,7 @@ internal sealed class GenerateModuleReportCommandHandler
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
     private readonly IAttachmentRepository _attachmentRepository;
+    private readonly IAttachmentService _attachmentService;
     private readonly IExcelService _excelService;
 
     public GenerateModuleReportCommandHandler(
@@ -33,12 +36,14 @@ internal sealed class GenerateModuleReportCommandHandler
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
         IAttachmentRepository attachmentRepository,
+        IAttachmentService attachmentService,
         IExcelService excelService)
     {
         _trainingModuleRepository = trainingModuleRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
         _attachmentRepository = attachmentRepository;
+        _attachmentService = attachmentService;
         _excelService = excelService;
     }
 
@@ -135,9 +140,12 @@ internal sealed class GenerateModuleReportCommandHandler
             return reportDto;
         }
 
-        Dictionary<string, byte[]> fileList = new();
+        List<AttachmentResponse> fileList = new();
 
-        fileList.Add($"Mandatory Training Report - {data.Name}.xlsx", fileData.ToArray());
+        fileList.Add(new(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+            $"Mandatory Training Report - {data.Name}.xlsx", 
+            fileData.ToArray()));
 
         List<string> recordIds = data
             .Completions
@@ -147,20 +155,27 @@ internal sealed class GenerateModuleReportCommandHandler
             .Select(record => record.Id.ToString())
             .ToList();
 
-        List<Attachment> certificates = await _attachmentRepository.GetTrainingCertificatesFromList(recordIds, cancellationToken);
-            
-        foreach (Attachment certificate in certificates)
-            fileList.Add(certificate.Name, certificate.FileData);
+        foreach (string recordId in recordIds)
+        {
+            Result<AttachmentResponse> attempt = await _attachmentService.GetAttachmentFile(AttachmentType.TrainingCertificate, recordId, cancellationToken);
+
+            if (attempt.IsFailure)
+            {
+                continue;
+            }
+
+            fileList.Add(attempt.Value);
+        }
 
         // Create ZIP file
         using MemoryStream memoryStream = new MemoryStream();
         using (ZipArchive zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Create))
         {
-            foreach (KeyValuePair<string, byte[]> file in fileList)
+            foreach (AttachmentResponse file in fileList)
             {
-                ZipArchiveEntry zipArchiveEntry = zipArchive.CreateEntry(file.Key);
-                using StreamWriter streamWriter = new StreamWriter(zipArchiveEntry.Open());
-                streamWriter.BaseStream.Write(file.Value, 0, file.Value.Length);
+                ZipArchiveEntry zipArchiveEntry = zipArchive.CreateEntry(file.FileName);
+                await using StreamWriter streamWriter = new StreamWriter(zipArchiveEntry.Open());
+                await streamWriter.BaseStream.WriteAsync(file.FileData, 0, file.FileData.Length, cancellationToken);
             }
         }
 

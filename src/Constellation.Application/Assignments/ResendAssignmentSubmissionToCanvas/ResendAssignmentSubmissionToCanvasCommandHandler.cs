@@ -98,16 +98,16 @@ internal sealed class ResendAssignmentSubmissionToCanvasCommandHandler
             return Result.Failure(SubmissionErrors.NotFound(request.SubmissionId));
         }
 
-        bool result = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, canvasCourseId, cancellationToken);
+        Result result = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, canvasCourseId, cancellationToken);
 
-        if (!result)
+        if (result.IsFailure)
         {
             _logger
                 .ForContext(nameof(ResendAssignmentSubmissionToCanvasCommand), request, true)
-                .ForContext(nameof(Error), SubmissionErrors.UploadFailed, true)
+                .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to upload Assignment Submission to Canvas");
 
-            return Result.Failure(SubmissionErrors.UploadFailed);
+            return Result.Failure(result.Error);
         }
 
         assignment.MarkSubmissionUploaded(submission.Id);

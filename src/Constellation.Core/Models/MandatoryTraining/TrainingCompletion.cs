@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Core.Models.MandatoryTraining;
 
-using Attachments;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
 using System;
@@ -8,11 +7,10 @@ using System;
 public class TrainingCompletion : IAuditableEntity
 {
     public TrainingCompletion(
-        TrainingCompletionId id,
         string staffId,
         TrainingModuleId trainingModuleId)
     {
-        Id = id;
+        Id = new();
         StaffId = staffId;
         TrainingModuleId = trainingModuleId;
     }
@@ -23,8 +21,6 @@ public class TrainingCompletion : IAuditableEntity
     public bool NotRequired { get; private set; }
     public TrainingModuleId TrainingModuleId { get; private set; }
     public TrainingModule Module { get; set; }
-    public int? StoredFileId { get; private set; }
-    public Attachment Attachment { get; private set; }
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public string ModifiedBy { get; set; }
@@ -34,12 +30,10 @@ public class TrainingCompletion : IAuditableEntity
     public DateTime DeletedAt { get; set; }
 
     public static TrainingCompletion Create(
-        TrainingCompletionId id,
         string staffId,
         TrainingModuleId moduleId)
     {
         return new(
-            id,
             staffId,
             moduleId);
     }
@@ -72,8 +66,4 @@ public class TrainingCompletion : IAuditableEntity
 
         CompletedDate = completedDate;
     }
-
-    public void LinkStoredFile(int fileId) => StoredFileId = fileId;
-
-    public void LinkStoredFile(Attachment file) => Attachment = file;
 }

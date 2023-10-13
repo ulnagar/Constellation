@@ -3,12 +3,13 @@
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Attachments.Errors;
 using Core.Models.Attachments;
+using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Shared;
-using GetAttachmentFile;
 using Serilog;
 using System.IO;
+using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -46,7 +47,7 @@ internal sealed class AttachmentService : IAttachmentService
             return new AttachmentResponse(
                 record.FileType,
                 record.Name,
-            record.FileData);
+                record.FileData);
         }
 
         if (!File.Exists(record.FilePath))
@@ -65,5 +66,56 @@ internal sealed class AttachmentService : IAttachmentService
             record.FileType,
             record.Name,
             fileData);
+    }
+
+    public async Task<Result> StoreAttachmentData(
+        Attachment attachment, 
+        byte[] fileData,
+        CancellationToken cancellationToken = default)
+    {
+        string base_path = "c:/users/ben/desktop/files";
+        int max_db_size = 1048576;
+
+
+        if (fileData.Length > max_db_size)
+        {
+            // Get file extension
+            string extension = attachment.FileType switch
+            {
+                MediaTypeNames.Application.Pdf => "pdf",
+                MediaTypeNames.Image.Jpeg => "jpg",
+                _ => "txt"
+            };
+
+            // Store file on disk
+            string filePath = $"{base_path}/{attachment.LinkType.Value}/{attachment.LinkId[..2]}/{attachment.LinkId}.{extension}";
+
+            // Ensure the directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+            await File.WriteAllBytesAsync(filePath, fileData, cancellationToken);
+
+            Result attempt = attachment.AttachPath(filePath, fileData.Length);
+
+            return attempt;
+        }
+        else
+        {
+            // Store file in database
+            Result attempt = attachment.AttachData(fileData, true);
+
+            return attempt;
+        }
+    }
+
+    public void DeleteAttachment(Attachment attachment)
+    {
+        if (attachment.FilePath is not null)
+        {
+            if (File.Exists(attachment.FilePath))
+                File.Delete(attachment.FilePath);
+        }
+
+        _attachmentRepository.Remove(attachment);
     }
 }

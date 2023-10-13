@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Application.Tests.Unit.Reports.Events;
 
-using Attachments.GetAttachmentFile;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Reports.Events;
@@ -8,7 +7,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Reports;
-using Core.Models.Attachments;
+using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Errors;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
@@ -149,17 +148,6 @@ public class EmailToNonResidentialParentsTests
             "1234",
             "2023",
             "Year 7, Semester 1, 2023");
-
-        var storedFile = new Attachment
-        {
-            Id = 1,
-            Name = "Test.pdf",
-            FileData = new byte[100],
-            FileType = "application/pdf",
-            CreatedAt = DateTime.Now,
-            LinkType = AttachmentType.StudentReport,
-            LinkId = academicReport.Id.ToString()
-        };
 
         _reportRepositoryMock.Setup(
             x => x.GetById(

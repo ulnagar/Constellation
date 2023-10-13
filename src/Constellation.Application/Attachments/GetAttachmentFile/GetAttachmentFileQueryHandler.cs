@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Attachments.GetAttachmentFile;
 
 using Abstractions.Messaging;
+using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Shared;
 using System.Threading;
