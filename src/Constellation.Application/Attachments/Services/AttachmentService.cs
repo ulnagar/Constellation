@@ -7,6 +7,8 @@ using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Shared;
+using Interfaces.Configuration;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System.IO;
 using System.Net.Mime;
@@ -16,13 +18,16 @@ using System.Threading.Tasks;
 internal sealed class AttachmentService : IAttachmentService
 {
     private readonly IAttachmentRepository _attachmentRepository;
+    private readonly AppConfiguration _configuration;
     private readonly ILogger _logger;
 
     public AttachmentService(
         IAttachmentRepository attachmentRepository,
+        IOptions<AppConfiguration> configuration,
         ILogger logger)
     {
         _attachmentRepository = attachmentRepository;
+        _configuration = configuration.Value;
         _logger = logger.ForContext<IAttachmentService>();
     }
 
@@ -73,11 +78,10 @@ internal sealed class AttachmentService : IAttachmentService
         byte[] fileData,
         CancellationToken cancellationToken = default)
     {
-        string base_path = "c:/users/ben/desktop/files";
-        int max_db_size = 1048576;
+        string basePath = _configuration.Attachments.BaseFilePath;
+        int maxDbSize = _configuration.Attachments.MaxDBStoreSize;
 
-
-        if (fileData.Length > max_db_size)
+        if (fileData.Length > maxDbSize)
         {
             // Get file extension
             string extension = attachment.FileType switch
@@ -88,7 +92,7 @@ internal sealed class AttachmentService : IAttachmentService
             };
 
             // Store file on disk
-            string filePath = $"{base_path}/{attachment.LinkType.Value}/{attachment.LinkId[..2]}/{attachment.LinkId}.{extension}";
+            string filePath = $"{basePath}/{attachment.LinkType.Value}/{attachment.LinkId[..2]}/{attachment.LinkId}.{extension}";
 
             // Ensure the directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
