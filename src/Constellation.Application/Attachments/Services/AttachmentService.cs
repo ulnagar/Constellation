@@ -78,11 +78,12 @@ internal sealed class AttachmentService : IAttachmentService
         byte[] fileData,
         CancellationToken cancellationToken = default)
     {
-        string basePath = _configuration.Attachments.BaseFilePath;
-        int maxDbSize = _configuration.Attachments.MaxDBStoreSize;
+        bool useDisk = _configuration.Attachments is not null;
 
-        if (fileData.Length > maxDbSize)
+        if (useDisk && fileData.Length > _configuration.Attachments.MaxDBStoreSize)
         {
+            string basePath = _configuration.Attachments.BaseFilePath;
+
             // Get file extension
             string extension = attachment.FileType switch
             {
