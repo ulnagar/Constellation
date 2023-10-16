@@ -49,6 +49,16 @@ internal sealed class AttachmentService : IAttachmentService
 
         if (record.FilePath is null)
         {
+            if (record.FileData is null)
+            {
+                _logger
+                    .ForContext(nameof(GetAttachmentFile), new { Type = type, LinkId = linkId }, true)
+                    .ForContext(nameof(Error), AttachmentErrors.NotFound(type, linkId), true)
+                    .Warning("Failed to retrieve attachment file");
+
+                return Result.Failure<AttachmentResponse>(AttachmentErrors.NotFound(type, linkId));
+            }
+
             return new AttachmentResponse(
                 record.FileType,
                 record.Name,
