@@ -41,6 +41,7 @@ public class HangfireDashboardModel : BasePageModel
         JobDefinitions.Add(new (typeof(IProcessOutboxMessagesJob), nameof(IProcessOutboxMessagesJob), "* 2-22 * * *"));
         JobDefinitions.Add(new (typeof(IGroupTutorialExpiryScanJob), nameof(IGroupTutorialExpiryScanJob), "0 7 * * 1-5"));
         JobDefinitions.Add(new (typeof(IAssignmentSubmissionJob), nameof(IAssignmentSubmissionJob), "30 12 * * *"));
+        JobDefinitions.Add(new (typeof(IAttachmentManagementJob), nameof(IAttachmentManagementJob), "0 4 * * *"));
     }
 
     public sealed record JobDefinition(

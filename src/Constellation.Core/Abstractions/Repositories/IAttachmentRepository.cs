@@ -13,6 +13,7 @@ public interface IAttachmentRepository
 {
     Task<Attachment?> GetById(AttachmentId id, CancellationToken cancellationToken = default);
     Task<List<Attachment>> GetAll(CancellationToken cancellationToken = default);
+    Task<List<Attachment>> GetSubsetOverSizeInDb(int maxSize, int count, CancellationToken cancellationToken = default);
     Task<Attachment?> GetByTypeAndLinkId(AttachmentType type, string linkId, CancellationToken cancellationToken = default);
 
     Task<List<Attachment>> GetTrainingCertificatesFromList(List<string> recordIds, CancellationToken cancellationToken = default);

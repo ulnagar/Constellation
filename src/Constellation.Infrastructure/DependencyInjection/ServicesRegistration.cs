@@ -104,6 +104,7 @@ public static class ServicesRegistration
         services.AddScoped<IAbsenceMonitorJob, AbsenceMonitorJob>();
         services.AddScoped<IAbsenceProcessingJob, AbsenceProcessingJob>();
         services.AddScoped<IAssignmentSubmissionJob, AssignmentSubmissionJob>();
+        services.AddScoped<IAttachmentManagementJob, AttachmentManagementJob>();
         services.AddScoped<IAttendanceReportJob, AttendanceReportJob>();
         services.AddScoped<IClassMonitorJob, ClassMonitorJob>();
         services.AddScoped<IGroupTutorialExpiryScanJob, GroupTutorialExpiryScanJob>();

@@ -21,6 +21,19 @@ internal class AttachmentRepository : IAttachmentRepository
             .Set<Attachment>()
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Attachment>> GetSubsetOverSizeInDb(
+        int maxSize,
+        int count,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Attachment>()
+            .Where(attachment =>
+                attachment.FileData != null &&
+                attachment.FileSize > maxSize)
+            .OrderBy(attachment => attachment.CreatedAt)
+            .Take(count)
+            .ToListAsync(cancellationToken);
+
     public async Task<Attachment?> GetById(
         AttachmentId id,
         CancellationToken cancellationToken = default) =>

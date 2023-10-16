@@ -68,6 +68,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 nullable: false,
                 defaultValue: 0);
 
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[Attachments_Attachments]
+                    SET [FileSize] = datalength(FileData)
+                    WHERE 1 = 1;");
+
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "Attachments_Attachments",
