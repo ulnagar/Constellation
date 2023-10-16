@@ -101,7 +101,7 @@ public sealed class Attachment
 
     public Result AttachData(byte[] fileData, bool overwrite = false)
     {
-        if (FilePath is not null)
+        if (FilePath is not null && overwrite is false)
         {
             return Result.Failure(AttachmentErrors.FilePathExists);
         }
@@ -118,14 +118,14 @@ public sealed class Attachment
         return Result.Success();
     }
 
-    public Result AttachPath(string filePath, int fileSize)
+    public Result AttachPath(string filePath, int fileSize, bool overwrite = false)
     {
-        if (FileData is not null)
+        if (FileData is not null && overwrite is false)
         {
             return Result.Failure(AttachmentErrors.FileDataExists);
         }
 
-        if (FilePath is not null)
+        if (FilePath is not null && overwrite is false)
         {
             return Result.Failure(AttachmentErrors.FilePathExists);
         }

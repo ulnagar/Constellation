@@ -184,6 +184,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
         await _attachmentService.StoreAttachmentData(
             attachment,
             awardDocument,
+            false,
             cancellationToken);
 
         _attachmentRepository.Insert(attachment);

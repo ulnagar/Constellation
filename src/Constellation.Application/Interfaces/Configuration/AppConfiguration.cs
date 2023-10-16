@@ -9,6 +9,8 @@ public sealed class AppConfiguration
 {
     public const string Section = "Constellation:AppSettings";
 
+    public string DebugLabel { get; set; }
+
     public AbsencesConfiguration Absences { get; set; }
     public LessonsConfiguration Lessons { get; set; }
     public MandatoryTrainingConfiguration MandatoryTraining { get; set; }

@@ -63,6 +63,7 @@ public class ReplaceStudentReportCommandHandler
         Result attempt = await _attachmentService.StoreAttachmentData(
             attachment,
             request.FileData,
+            true,
             cancellationToken);
 
         if (attempt.IsFailure)

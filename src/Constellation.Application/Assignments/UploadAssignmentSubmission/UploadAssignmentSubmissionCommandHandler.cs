@@ -62,7 +62,7 @@ internal sealed class UploadAssignmentSubmissionCommandHandler
             submissionResult.Value.Id.ToString(),
             _dateTime.Now);
 
-        Result attempt = await _attachmentService.StoreAttachmentData(fileEntity, request.File.FileData, cancellationToken);
+        Result attempt = await _attachmentService.StoreAttachmentData(fileEntity, request.File.FileData, false, cancellationToken);
 
         if (attempt.IsFailure)
         {

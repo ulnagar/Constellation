@@ -9,6 +9,6 @@ using ValueObjects;
 public interface IAttachmentService
 {
     Task<Result<AttachmentResponse>> GetAttachmentFile(AttachmentType type, string linkId, CancellationToken cancellationToken = default);
-    Task<Result> StoreAttachmentData(Attachment attachment, byte[] fileData, CancellationToken cancellationToken = default);
+    Task<Result> StoreAttachmentData(Attachment attachment, byte[] fileData, bool overwrite = false, CancellationToken cancellationToken = default);
     void DeleteAttachment(Attachment attachment);
 }

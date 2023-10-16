@@ -40,7 +40,7 @@ internal sealed class AttachmentManagementJob : IAttachmentManagementJob
             _logger
                 .Information("Processing file {filename} from attachment {id}", attachment.Name, attachment.Id.Value);
 
-            Result attempt = await _attachmentService.StoreAttachmentData(attachment, attachment.FileData, cancellationToken);
+            Result attempt = await _attachmentService.StoreAttachmentData(attachment, attachment.FileData, true, cancellationToken);
 
             if (attempt.IsFailure)
             {

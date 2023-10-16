@@ -90,7 +90,7 @@ internal sealed class UpdateTrainingCompletionCommandHandler
                 record.Id.ToString(),
                 _dateTime.Now);
 
-            Result attempt = await _attachmentService.StoreAttachmentData(fileEntity, request.File.FileData, cancellationToken);
+            Result attempt = await _attachmentService.StoreAttachmentData(fileEntity, request.File.FileData, true, cancellationToken);
 
             if (attempt.IsFailure)
             {

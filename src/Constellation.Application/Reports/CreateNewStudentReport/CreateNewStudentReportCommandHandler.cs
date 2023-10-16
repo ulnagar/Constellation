@@ -9,8 +9,6 @@ using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
 using Core.Models.Attachments;
 using Core.Models.Attachments.Services;
-using Core.Models.Attachments.ValueObjects;
-using System;
 using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,6 +56,7 @@ public class CreateNewStudentReportCommandHandler
         Result attempt = await _attachmentService.StoreAttachmentData(
             attachment,
             request.FileData,
+            false,
             cancellationToken);
 
         if (attempt.IsFailure)

@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 internal sealed class AttachmentService : IAttachmentService
 {
     private readonly IAttachmentRepository _attachmentRepository;
-    private readonly AppConfiguration _configuration;
+    private readonly AppConfiguration.AttachmentsConfiguration _configuration;
     private readonly ILogger _logger;
 
     public AttachmentService(
@@ -27,7 +27,7 @@ internal sealed class AttachmentService : IAttachmentService
         ILogger logger)
     {
         _attachmentRepository = attachmentRepository;
-        _configuration = configuration.Value;
+        _configuration = configuration.Value.Attachments;
         _logger = logger.ForContext<IAttachmentService>();
     }
 
@@ -86,13 +86,14 @@ internal sealed class AttachmentService : IAttachmentService
     public async Task<Result> StoreAttachmentData(
         Attachment attachment, 
         byte[] fileData,
+        bool overwrite = false,
         CancellationToken cancellationToken = default)
     {
-        bool useDisk = _configuration.Attachments is not null;
+        bool useDisk = _configuration is not null;
 
-        if (useDisk && fileData.Length > _configuration.Attachments.MaxDBStoreSize)
+        if (useDisk && fileData.Length > _configuration.MaxDBStoreSize)
         {
-            string basePath = _configuration.Attachments.BaseFilePath;
+            string basePath = _configuration.BaseFilePath;
 
             // Get file extension
             string extension = attachment.FileType switch
@@ -110,14 +111,14 @@ internal sealed class AttachmentService : IAttachmentService
 
             await File.WriteAllBytesAsync(filePath, fileData, cancellationToken);
 
-            Result attempt = attachment.AttachPath(filePath, fileData.Length);
+            Result attempt = attachment.AttachPath(filePath, fileData.Length, overwrite);
 
             return attempt;
         }
         else
         {
             // Store file in database
-            Result attempt = attachment.AttachData(fileData, true);
+            Result attempt = attachment.AttachData(fileData, overwrite);
 
             return attempt;
         }

@@ -99,7 +99,7 @@ internal sealed class CreateTrainingCompletionCommandHandler
             recordEntity.Id.ToString(),
             _dateTime.Now);
 
-        Result attempt = await _attachmentService.StoreAttachmentData(fileEntity, request.File.FileData, cancellationToken);
+        Result attempt = await _attachmentService.StoreAttachmentData(fileEntity, request.File.FileData, false, cancellationToken);
 
         if (attempt.IsFailure)
         {
