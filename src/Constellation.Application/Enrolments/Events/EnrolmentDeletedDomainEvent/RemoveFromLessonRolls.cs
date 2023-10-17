@@ -57,11 +57,12 @@ internal sealed class RemoveFromLessonRolls
         {
             if (roll.Attendance.Count == 1)
             {
-                SciencePracLesson lesson = lessons.First(lesson => lesson.Id == roll.LessonId);
-
-                lesson.Cancel();
+                // This is the last student in the class from this school
+                // The roll is no longer needed and should be cancelled
+                roll.CancelRoll("Last student has withdrawn. Roll no longer required.");
             }
 
+            // Remove the student from the roll
             SciencePracAttendance? attendance = roll.RemoveStudent(notification.StudentId);
 
             if (attendance is not null)
