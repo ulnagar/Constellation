@@ -1374,5 +1374,25 @@ public partial class Gateway : ISentralGateway
         response.YearToDateMinuteCalculationDocument = await GetStreamAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={_dateTime.Today.Year.ToString()}&start_date={_dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")}&end_date={_dateTime.Today.ToString("yyyy-MM-dd")}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
 
         return response;
+
+        // PER DAY - POST
+
+        //Invoke-WebRequest -UseBasicParsing -Uri "https://admin.aurora.dec.nsw.gov.au/attendance/reports/percentage"
+
+        // YTD
+        //-Body "length=year&year=2023&limit_sign=equal&limit_percent=100&reasons%5B%5D=8&reasons%5B%5D=1&reasons%5B%5D=7&reasons%5B%5D=5&reasons%5B%5D=3&reasons%5B%5D=9&show_current=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export"
+
+        // Fortnight
+        //-Body "length=fortnight&term=3&week=1&year=2023&limit_sign=equal&limit_percent=100&reasons%5B%5D=8&reasons%5B%5D=1&reasons%5B%5D=7&reasons%5B%5D=5&reasons%5B%5D=3&reasons%5B%5D=9&show_current=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export"
+
+
+        // PER MINUTE - GET
+
+        // YTD
+        //Invoke-WebRequest -UseBasicParsing -Uri "https://admin.aurora.dec.nsw.gov.au/attendancepxp/period/administration/percentage_attendance_report?length=period&year=2023&start_date=2023-01-01&end_date=2023-10-06&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export"
+
+        // Fortnight
+        //Invoke-WebRequest -UseBasicParsing -Uri "https://admin.aurora.dec.nsw.gov.au/attendancepxp/period/administration/percentage_attendance_report?length=fortnight&term=3&week=1&year=2023&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export" `
+
     }
 }
