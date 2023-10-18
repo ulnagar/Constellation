@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
 using Core.Models.Attachments;

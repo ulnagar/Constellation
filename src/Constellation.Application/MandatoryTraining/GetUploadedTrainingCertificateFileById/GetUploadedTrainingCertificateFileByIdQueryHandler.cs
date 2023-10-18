@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.MandatoryTraining.GetUploadedTrainingCertificateFileById;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Shared;
 using Core.Models.Attachments;
 using Core.Models.Attachments.DTOs;

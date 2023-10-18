@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Awards.Models;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;

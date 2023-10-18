@@ -3,6 +3,7 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
 using System.Linq;

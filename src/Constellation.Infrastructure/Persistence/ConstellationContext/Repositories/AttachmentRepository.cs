@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Attachments.Repository;
 using Core.Models.Attachments;
 using Core.Models.Attachments.Identifiers;
 using Core.Models.Attachments.ValueObjects;

@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Offerings.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Errors;

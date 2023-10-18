@@ -2,8 +2,8 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Assignments.Repositories;
+using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
 using Core.Models.Assignments;

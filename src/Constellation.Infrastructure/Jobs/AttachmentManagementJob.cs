@@ -3,6 +3,7 @@
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Jobs;
 using Application.Interfaces.Repositories;
+using Constellation.Core.Models.Attachments.Repository;
 using Core.Abstractions.Repositories;
 using Core.Models.Attachments;
 using Core.Models.Attachments.Services;

@@ -2,7 +2,7 @@
 
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Attachments.Repository;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
 using Core.Models.Assignments.Services;

@@ -1,6 +1,5 @@
 ﻿#nullable enable
-
-namespace Constellation.Core.Abstractions.Repositories;
+namespace Constellation.Core.Models.Attachments.Repository;
 
 using Constellation.Core.Models.Attachments.ValueObjects;
 using Models.Attachments;

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Attachments.Services;
 
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Attachments.Errors;
+using Constellation.Core.Models.Attachments.Repository;
 using Core.Models.Attachments;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;

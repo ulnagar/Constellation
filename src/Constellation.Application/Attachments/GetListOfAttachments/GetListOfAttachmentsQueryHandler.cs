@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Attachments.GetListOfAttachments;
 
 using Abstractions.Messaging;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Attachments;
+using Constellation.Core.Models.Attachments.Repository;
 using Core.Shared;
 using System.Collections.Generic;
 using System.Threading;

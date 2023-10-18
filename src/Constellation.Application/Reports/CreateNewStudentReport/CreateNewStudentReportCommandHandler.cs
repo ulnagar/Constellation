@@ -3,6 +3,7 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Reports;
 using Constellation.Core.Shared;
