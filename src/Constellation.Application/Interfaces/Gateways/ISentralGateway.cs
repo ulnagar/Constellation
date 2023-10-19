@@ -26,5 +26,5 @@ public interface ISentralGateway
     Task<ICollection<AwardDetailDto>> GetAwardsReport();
     Task<List<AwardIncidentDto>> GetAwardsListing(string sentralStudentId, string calYear);
     Task<byte[]> GetAwardDocument(string sentralStudentId, string incidentId);
-    Task<SystemAttendanceData> GetAttendancePercentages();
+    Task<SystemAttendanceData> GetAttendancePercentages(string term, string week, string year);
 }

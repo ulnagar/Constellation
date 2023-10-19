@@ -27,6 +27,9 @@ using System.Text.RegularExpressions;
 
 public class ExcelService : IExcelService
 {
+    private static readonly Regex _csvParser = new(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+
+
     public async Task<MemoryStream> CreatePTOFile(ICollection<InterviewExportDto> exportLines)
     {
         var excel = new ExcelPackage();
@@ -735,94 +738,217 @@ public class ExcelService : IExcelService
         return memoryStream;
     }
 
-    public async Task<List<StudentAttendanceData>> ReadSystemAttendanceData(
-        List<StudentAttendanceData> data, 
-        SystemAttendanceData systemData, 
-        CancellationToken cancellationToken = default)
+
+    public List<StudentAttendanceData> ExtractYTDDayData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
     {
-        Regex CSVParser = new(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+        if (systemData.YearToDateDayCalculationDocument is null)
+            return data;
 
-        if (systemData.YearToDateDayCalculationDocument is not null)
+        List<string> ytdDayData = systemData.YearToDateDayCalculationDocument.DocumentNode.InnerHtml.Split('\u000A').ToList();
+
+        // Remove first and last entry
+        ytdDayData.RemoveAt(0);
+        ytdDayData.RemoveAt(ytdDayData.Count - 1);
+
+        foreach (string row in ytdDayData)
         {
-            var ytdDayData = systemData.YearToDateDayCalculationDocument.DocumentNode.InnerHtml.Split('\u000A').ToList();
+            string[] line = _csvParser.Split(row);
 
-            // Remove first and last entry
-            ytdDayData.RemoveAt(0);
-            ytdDayData.RemoveAt(ytdDayData.Count - 1);
+            // Index 0: Surname
+            // Index 1: Preferred name
+            // Index 2: Rollclass name
+            // Index 3: School year
+            // Index 4: External id
+            // Index 5: Days total
+            // Index 6: Days absent
+            // Index 7: Days attended
+            // Index 8: Percentage attendance
+            // Index 9: Percentage absent
+            // Index 10: Explained absences
+            // Index 11: Unexplained absences
+            // Index 12: Percentage explained
+            // Index 13: Percentage unexplained
 
-            for (int i = 0; i < ytdDayData.Count; i++)
+            string studentId = line[4].FormatField();
+
+            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentId == studentId);
+
+            if (entry is not null)
             {
-                string row = ytdDayData[i];
-                string[] line = CSVParser.Split(row);
-
-                // Index 0: Surname
-                // Index 1: Preferred name
-                // Index 2: Rollclass name
-                // Index 3: School year
-                // Index 4: External id
-                // Index 5: Days total
-                // Index 6: Days absent
-                // Index 7: Days attended
-                // Index 8: Percentage attendance
-                // Index 9: Percentage absent
-                // Index 10: Explained absences
-                // Index 11: Unexplained absences
-                // Index 12: Percentage explained
-                // Index 13: Percentage unexplained
-
-                string studentId = line[4].FormatField();
-
-                StudentAttendanceData entry = data.FirstOrDefault(entry => entry.SRN == studentId);
-
-                if (entry is not null)
+                entry.DayYTD = Convert.ToDecimal(line[8].FormatField());
+            }
+            else
+            {
+                entry = new()
                 {
-                    entry.DayYTD = Convert.ToDecimal(line[8].FormatField());
-                }
-                else
-                {
-                    entry = new()
-                    {
-                        SRN = studentId,
-                        Name = $"{line[1].FormatField()} {line[0].FormatField()}",
-                        DayYTD = Convert.ToDecimal(line[8].FormatField())
-                    };
+                    StudentId = studentId,
+                    Name = $"{line[1].FormatField()} {line[0].FormatField()}",
+                    DayYTD = Convert.ToDecimal(line[8].FormatField())
+                };
 
-                    data.Add(entry);
-                }
+                data.Add(entry);
             }
         }
 
-        if (systemData.YearToDateMinuteCalculationDocument is not null)
+        return data;
+    }
+
+    public List<StudentAttendanceData> ExtractYTDMinuteData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
+    {
+        if (systemData.YearToDateMinuteCalculationDocument is null)
+            return data;
+
+        using IExcelDataReader reader = ExcelReaderFactory.CreateReader(systemData.YearToDateMinuteCalculationDocument);
+        DataSet result = reader.AsDataSet();
+
+        foreach (DataRow row in result.Tables[0].Rows)
         {
-            using IExcelDataReader reader = ExcelReaderFactory.CreateReader(systemData.YearToDateMinuteCalculationDocument);
-            DataSet result = reader.AsDataSet();
+            if (row.ItemArray.First()?.ToString() == "Student ID") // This is a header row
+                continue;
 
-            foreach (DataRow row in result.Tables[0].Rows)
+            if (row[6].ToString() != "Overall") // This is a class specific value
+                continue;
+
+            // Index 0: Student ID
+            // Index 1: First Name
+            // Index 2: Last Name
+            // Index 3: Gender
+            // Index 4: School Year
+            // Index 5: Roll Class
+            // Index 6: Class
+            // Index 7: Class Time
+            // Index 8: Absence Time
+            // Index 9: Untallied Time
+            // Index 10: Percentage
+
+            string studentId = row[0].ToString();
+
+            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentId == studentId);
+
+            if (entry is not null)
             {
-                // Index 0: Student ID
-                // Index 1: First Name
-                // Index 2: Last Name
-                // Index 3: Gender
-                // Index 4: School Year
-                // Index 5: Roll Class
-                // Index 6: Class
-                // Index 7: Class Time
-                // Index 8: Absence Time
-                // Index 9: Untallied Time
-                // Index 10: Percentage
-
-                string studentId = row[0].ToString();
-
-                StudentAttendanceData entry = data.FirstOrDefault(entry => entry.SRN == studentId);
-
-                if (entry is null)
-                    continue;
-
                 entry.MinuteYTD = Convert.ToDecimal(row[10]);
             }
+            else
+            {
+                entry = new()
+                {
+                    StudentId = studentId,
+                    Name = $"{row[1].ToString().FormatField()} {row[2].ToString().FormatField()}",
+                    MinuteYTD = Convert.ToDecimal(row[10])
+                };
+
+                data.Add(entry);
+            }
         }
 
-        return data.OrderBy(entry => entry.SRN).ToList();
+        return data;
+    }
+
+    public List<StudentAttendanceData> ExtractFNDayData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
+    {
+        if (systemData.FortnightDayCalculationDocument is null)
+            return data;
+
+        List<string> fnDayData = systemData.FortnightDayCalculationDocument.DocumentNode.InnerHtml.Split('\u000A').ToList();
+
+        // Remove first and last entry
+        fnDayData.RemoveAt(0);
+        fnDayData.RemoveAt(fnDayData.Count - 1);
+
+        foreach (string row in fnDayData)
+        {
+            string[] line = _csvParser.Split(row);
+
+            // Index 0: Surname
+            // Index 1: Preferred name
+            // Index 2: Rollclass name
+            // Index 3: School year
+            // Index 4: External id
+            // Index 5: Days total
+            // Index 6: Days absent
+            // Index 7: Days attended
+            // Index 8: Percentage attendance
+            // Index 9: Percentage absent
+            // Index 10: Explained absences
+            // Index 11: Unexplained absences
+            // Index 12: Percentage explained
+            // Index 13: Percentage unexplained
+
+            string studentId = line[4].FormatField();
+
+            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentId == studentId);
+
+            if (entry is not null)
+            {
+                entry.DayFN = Convert.ToDecimal(line[8].FormatField());
+            }
+            else
+            {
+                entry = new()
+                {
+                    StudentId = studentId,
+                    Name = $"{line[1].FormatField()} {line[0].FormatField()}",
+                    DayFN = Convert.ToDecimal(line[8].FormatField())
+                };
+
+                data.Add(entry);
+            }
+        }
+
+        return data;
+    }
+
+    public List<StudentAttendanceData> ExtractFNMinuteData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
+    {
+        if (systemData.FortnightMinuteCalculationDocument is null)
+            return data;
+
+        using IExcelDataReader reader = ExcelReaderFactory.CreateReader(systemData.FortnightMinuteCalculationDocument);
+        DataSet result = reader.AsDataSet();
+
+        foreach (DataRow row in result.Tables[0].Rows)
+        {
+            if (row.ItemArray.First()?.ToString() == "Student ID") // This is a header row
+                continue;
+
+            if (row[6].ToString() != "Overall") // This is a class specific value
+                continue;
+
+            // Index 0: Student ID
+            // Index 1: First Name
+            // Index 2: Last Name
+            // Index 3: Gender
+            // Index 4: School Year
+            // Index 5: Roll Class
+            // Index 6: Class
+            // Index 7: Class Time
+            // Index 8: Absence Time
+            // Index 9: Untallied Time
+            // Index 10: Percentage
+
+            string studentId = row[0].ToString();
+
+            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentId == studentId);
+
+            if (entry is not null)
+            {
+                entry.MinuteFN = Convert.ToDecimal(row[10]);
+            }
+            else
+            {
+                entry = new()
+                {
+                    StudentId = studentId,
+                    Name = $"{row[1].ToString().FormatField()} {row[2].ToString().FormatField()}",
+                    MinuteFN = Convert.ToDecimal(row[10])
+                };
+
+                data.Add(entry);
+            }
+        }
+
+        return data;
     }
 
     public async Task<List<StudentImportRecord>> ConvertStudentImportFile(MemoryStream importFile, CancellationToken cancellationToken = default)
