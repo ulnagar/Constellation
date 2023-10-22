@@ -384,6 +384,10 @@ public static class DomainErrors
             public static readonly Func<string, Error> NotFoundForSchool = id => new Error(
                 "Partners.Student.NotFoundForSchool",
                 $"No current students found linked to school with Id {id}");
+
+            public static readonly Func<Grade, Error> NotFoundForGrade = grade => new(
+                "Partners.Student.NotFoundForGrade",
+                $"No current students found linked to grade {grade}");
         }
     }
 
