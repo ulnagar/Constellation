@@ -10,10 +10,11 @@ using Constellation.Application.MandatoryTraining.GetUploadedTrainingCertificati
 using Constellation.Application.MandatoryTraining.UpdateTrainingCompletion;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Validation;
+using Core.Models.Attachments;
+using Core.Models.Attachments.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -138,7 +139,7 @@ public class UpsertModel : BasePageModel
             ModuleId = entity.TrainingModuleId.Value;
             NotRequired = entity.NotRequired;
 
-            var certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateMetadataQuery(StoredFile.TrainingCertificate, Id.Value.ToString()));
+            var certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateMetadataQuery(AttachmentType.TrainingCertificate, Id.Value.ToString()));
 
             if (certificateRequest.IsSuccess)
             {

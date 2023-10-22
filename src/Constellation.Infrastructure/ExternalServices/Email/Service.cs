@@ -1128,7 +1128,7 @@ public class Service : IEmailService
 
     public async Task SendAwardCertificateParentEmail(
         List<EmailRecipient> recipients,
-        StoredFile certificate, 
+        Attachment certificate, 
         StudentAward award,
         Student? student,
         Staff? teacher,
@@ -1148,14 +1148,10 @@ public class Service : IEmailService
         };
 
         var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Awards/NewAwardCertificateEmail.cshtml", viewModel);
-
-        var stream = new MemoryStream(certificate.FileData);
-
-        var attachment = new Attachment(stream, certificate.Name, certificate.FileType);
-
+        
         foreach (var recipient in recipients)
         {
-            await _emailSender.Send(new List<EmailRecipient> { recipient }, "noreply@aurora.nsw.edu.au", viewModel.Title, body, new List<Attachment> { attachment }, cancellationToken);
+            await _emailSender.Send(new List<EmailRecipient> { recipient }, "noreply@aurora.nsw.edu.au", viewModel.Title, body, new List<Attachment> { certificate }, cancellationToken);
         }
     }
 

@@ -9,10 +9,13 @@ public sealed class AppConfiguration
 {
     public const string Section = "Constellation:AppSettings";
 
+    public string DebugLabel { get; set; }
+
     public AbsencesConfiguration Absences { get; set; }
     public LessonsConfiguration Lessons { get; set; }
     public MandatoryTrainingConfiguration MandatoryTraining { get; set; }
     public ContactsConfiguration Contacts { get; set; }
+    public AttachmentsConfiguration Attachments { get; set; }
 
 
     public class AbsencesConfiguration
@@ -54,5 +57,11 @@ public sealed class AppConfiguration
         public List<string> CounsellorIds { get; set; }
         public List<string> CareersAdvisorIds { get; set; }
         public Dictionary<Grade, string> LearningSupportIds { get; set; }
+    }
+
+    public class AttachmentsConfiguration
+    {
+        public string BaseFilePath { get; set; }
+        public int MaxDBStoreSize { get; set; }
     }
 }

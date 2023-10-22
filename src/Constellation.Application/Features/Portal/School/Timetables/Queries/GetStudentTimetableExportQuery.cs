@@ -1,11 +1,9 @@
-﻿using Constellation.Application.DTOs;
-using Constellation.Core.Models;
+﻿namespace Constellation.Application.Features.Portal.School.Timetables.Queries;
+
+using Constellation.Application.DTOs;
 using MediatR;
 
-namespace Constellation.Application.Features.Portal.School.Timetables.Queries
+public sealed class GetStudentTimetableExportQuery : IRequest<FileDto>
 {
-    public class GetStudentTimetableExportQuery : IRequest<StoredFile>
-    {
-        public StudentTimetableDataDto Data { get; set; }
-    }
+    public StudentTimetableDataDto Data { get; set; }
 }

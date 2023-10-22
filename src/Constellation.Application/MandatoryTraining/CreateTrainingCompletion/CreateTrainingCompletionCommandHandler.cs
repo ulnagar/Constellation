@@ -5,10 +5,12 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
-using Constellation.Core.Models;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Core.Models.Attachments;
+using Core.Models.Attachments.Services;
+using Serilog;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -18,17 +20,26 @@ internal sealed class CreateTrainingCompletionCommandHandler
     : ICommandHandler<CreateTrainingCompletionCommand>
 {
     private readonly ITrainingModuleRepository _trainingModuleRepository;
-    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IAttachmentService _attachmentService;
+    private readonly IAttachmentRepository _attachmentRepository;
+    private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger _logger;
 
     public CreateTrainingCompletionCommandHandler(
         ITrainingModuleRepository trainingModuleRepository,
-        IDateTimeProvider dateTimeProvider,
-        IUnitOfWork unitOfWork)
+        IAttachmentService attachmentService,
+        IAttachmentRepository attachmentRepository,
+        IDateTimeProvider dateTime,
+        IUnitOfWork unitOfWork,
+        ILogger logger)
     {
         _trainingModuleRepository = trainingModuleRepository;
-        _dateTimeProvider = dateTimeProvider;
+        _attachmentService = attachmentService;
+        _attachmentRepository = attachmentRepository;
+        _dateTime = dateTime;
         _unitOfWork = unitOfWork;
+        _logger = logger.ForContext<CreateTrainingCompletionCommand>();
     }
     public async Task<Result> Handle(CreateTrainingCompletionCommand request, CancellationToken cancellationToken)
     {
@@ -36,6 +47,11 @@ internal sealed class CreateTrainingCompletionCommandHandler
 
         if (module is null)
         {
+            _logger
+                .ForContext(nameof(CreateTrainingCompletionCommand), request, true)
+                .ForContext(nameof(Error), DomainErrors.MandatoryTraining.Module.NotFound(request.TrainingModuleId), true)
+                .Warning("Failed to create Training Completion");
+
             return Result.Failure(DomainErrors.MandatoryTraining.Module.NotFound(request.TrainingModuleId));
         }
 
@@ -46,22 +62,22 @@ internal sealed class CreateTrainingCompletionCommandHandler
                 !record.IsDeleted)
             .ToList();
 
-        TrainingCompletion record = records
-            .OrderByDescending(record =>
-                (record.CompletedDate.HasValue) ? record.CompletedDate.Value : record.CreatedAt)
-            .FirstOrDefault();
+        TrainingCompletion record = records.MaxBy(record =>
+            record.CompletedDate ?? record.CreatedAt);
 
-        if (record is not null)
+        if (record is not null &&
+            ((request.NotRequired && record.NotRequired) ||
+             (!request.NotRequired && record.CompletedDate!.Value == request.CompletedDate)))
         {
-            if ((request.NotRequired && record.NotRequired) ||
-                (!request.NotRequired && record.CompletedDate.Value == request.CompletedDate))
-            {
-                return Result.Failure(DomainErrors.MandatoryTraining.Completion.AlreadyExists);
-            }
+            _logger
+                .ForContext(nameof(CreateTrainingCompletionCommand), request, true)
+                .ForContext(nameof(Error), DomainErrors.MandatoryTraining.Module.NotFound(request.TrainingModuleId), true)
+                .Warning("Failed to create Training Completion");
+
+            return Result.Failure(DomainErrors.MandatoryTraining.Completion.AlreadyExists);
         }
 
         TrainingCompletion recordEntity = TrainingCompletion.Create(
-            new TrainingCompletionId(),
             request.StaffId,
             request.TrainingModuleId);
 
@@ -78,17 +94,26 @@ internal sealed class CreateTrainingCompletionCommandHandler
             return Result.Success();
         }
 
-        StoredFile fileEntity = new()
-        {
-            Name = request.File.FileName,
-            FileType = request.File.FileType,
-            FileData = request.File.FileData,
-            CreatedAt = _dateTimeProvider.Now,
-            LinkType = StoredFile.TrainingCertificate,
-            LinkId = recordEntity.Id.ToString()
-        };
+        Attachment fileEntity = Attachment.CreateTrainingCertificateAttachment(
+            request.File.FileName,
+            request.File.FileType,
+            recordEntity.Id.ToString(),
+            _dateTime.Now);
 
-        recordEntity.LinkStoredFile(fileEntity);
+        Result attempt = await _attachmentService.StoreAttachmentData(fileEntity, request.File.FileData, false, cancellationToken);
+
+        if (attempt.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(CreateTrainingCompletionCommand), request, true)
+                .ForContext(nameof(Error), attempt.Error, true)
+                .Warning("Failed to create Training Completion");
+
+            return Result.Failure(attempt.Error);
+        }
+
+        _attachmentRepository.Insert(fileEntity);
+
         module.AddCompletion(recordEntity);
         await _unitOfWork.CompleteAsync(cancellationToken);
 

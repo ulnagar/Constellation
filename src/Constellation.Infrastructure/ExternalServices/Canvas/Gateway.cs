@@ -2,8 +2,8 @@
 
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Gateways;
-using Constellation.Core.Models;
 using Constellation.Infrastructure.ExternalServices.Canvas.Models;
+using Core.Models.Attachments.DTOs;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Serilog;
@@ -171,13 +171,13 @@ internal class Gateway : ICanvasGateway
         return assignments;
     }
 
-    public async Task<bool> UploadAssignmentSubmission(string CourseId, int CanvasAssignmentId, string StudentId, StoredFile file)
+    public async Task<bool> UploadAssignmentSubmission(string CourseId, int CanvasAssignmentId, string StudentId, AttachmentResponse file)
     {
         var stepOnePath = $"courses/sis_course_id:{CourseId}/assignments/{CanvasAssignmentId}/submissions/sis_user_id:{StudentId}/files";
 
         var stepOnePayload = new
         {
-            name = file.Name,
+            name = file.FileName,
             size = file.FileData.Length,
             content_type = file.FileType,
             on_duplicate = "overwrite"
@@ -185,7 +185,7 @@ internal class Gateway : ICanvasGateway
 
         if (_logOnly)
         {
-            _logger.Information("UploadAssignmentSubmission: CourseId={courseId}, CanvasAssignmentId={canvasAssignmentId}, StudentId={studentId}, StoredFile={@file}, stepOnePath={stepOnePath}, stepOnePayload={@stepOnePayload}", CourseId, CanvasAssignmentId, StudentId, file, stepOnePath, stepOnePayload);
+            _logger.Information("UploadAssignmentSubmission: CourseId={courseId}, CanvasAssignmentId={canvasAssignmentId}, StudentId={studentId}, Attachment={@file}, stepOnePath={stepOnePath}, stepOnePayload={@stepOnePayload}", CourseId, CanvasAssignmentId, StudentId, file, stepOnePath, stepOnePayload);
 
             return true;
         }
@@ -207,13 +207,13 @@ internal class Gateway : ICanvasGateway
         // MultipartFormDataContent code taken from https://makolyte.com/csharp-how-to-send-a-file-with-httpclient/
         using (var stepTwoContent = new MultipartFormDataContent())
         {
-            stepTwoContent.Add(new StringContent(file.Name), name: "filename");
+            stepTwoContent.Add(new StringContent(file.FileName), name: "filename");
             stepTwoContent.Add(new StringContent(file.FileType), name: "content_type");
 
             var fileStream = new MemoryStream(file.FileData);
             var fileStreamContent = new StreamContent(fileStream);
             fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(file.FileType);
-            stepTwoContent.Add(fileStreamContent, name: "file", fileName: file.Name);
+            stepTwoContent.Add(fileStreamContent, name: "file", fileName: file.FileName);
 
             var stepTwoResponse = await _client.PostAsync(fileUploadLocation.UploadUrl, stepTwoContent);
             if (!stepTwoResponse.IsSuccessStatusCode)

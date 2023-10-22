@@ -4,8 +4,13 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Shared;
-using System;
+using Core.Abstractions.Clock;
+using Core.Models.Attachments;
+using Core.Models.Attachments.Services;
+using Core.Models.Reports;
+using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,35 +18,61 @@ public class ReplaceStudentReportCommandHandler
     : ICommandHandler<ReplaceStudentReportCommand>
 {
     private readonly IAcademicReportRepository _reportRepository;
-    private readonly IStoredFileRepository _storedFileRepository;
+    private readonly IAttachmentRepository _attachmentRepository;
+    private readonly IAttachmentService _attachmentService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTime;
 
     public ReplaceStudentReportCommandHandler(
         IAcademicReportRepository reportRepository,
-        IStoredFileRepository storedFileRepository,
-        IUnitOfWork unitOfWork)
+        IAttachmentRepository attachmentRepository,
+        IAttachmentService attachmentService,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTime)
     {
         _reportRepository = reportRepository;
-        _storedFileRepository = storedFileRepository;
+        _attachmentRepository = attachmentRepository;
+        _attachmentService = attachmentService;
         _unitOfWork = unitOfWork;
+        _dateTime = dateTime;
     }
 
     public async Task<Result> Handle(ReplaceStudentReportCommand request, CancellationToken cancellationToken)
     {
-        var existingReport = await _reportRepository.GetByPublishId(request.OldPublishId, cancellationToken);
+        AcademicReport existingReport = await _reportRepository.GetByPublishId(request.OldPublishId, cancellationToken);
 
         if (existingReport is null)
             return Result.Failure(DomainErrors.Reports.AcademicReport.NotFoundByPublishId(request.OldPublishId));
 
-        var existingFile = await _storedFileRepository.GetAcademicReportByLinkId(existingReport.Id.ToString(), cancellationToken);
+        Attachment existingFile = await _attachmentRepository.GetAcademicReportByLinkId(existingReport.Id.ToString(), cancellationToken);
 
         if (existingFile is null)
             return Result.Failure(DomainErrors.Documents.AcademicReport.NotFound(existingReport.Id.ToString()));
 
         existingReport.Update(request.NewPublishId);
 
-        existingFile.FileData = request.FileData;
-        existingFile.CreatedAt = DateTime.Now;
+        string fileName = existingFile.Name;
+
+        _attachmentService.DeleteAttachment(existingFile);
+
+        Attachment attachment = Attachment.CreateStudentReportAttachment(
+            fileName,
+            MediaTypeNames.Application.Pdf,
+            existingReport.Id.ToString(),
+            _dateTime.Now);
+
+        Result attempt = await _attachmentService.StoreAttachmentData(
+            attachment,
+            request.FileData,
+            true,
+            cancellationToken);
+
+        if (attempt.IsFailure)
+        {
+            return attempt;
+        }
+
+        _attachmentRepository.Insert(attachment);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

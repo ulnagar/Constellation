@@ -5,9 +5,13 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Reports.Events;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Reports;
+using Core.Models.Attachments.DTOs;
+using Core.Models.Attachments.Errors;
+using Core.Models.Attachments.Services;
+using Core.Models.Attachments.ValueObjects;
+using Core.Shared;
 using Moq;
 
 public class EmailToNonResidentialParentsTests
@@ -15,7 +19,7 @@ public class EmailToNonResidentialParentsTests
     private readonly Mock<IAcademicReportRepository> _reportRepositoryMock;
     private readonly Mock<IStudentRepository> _studentRepositoryMock;
     private readonly Mock<IFamilyRepository> _familyRepositoryMock;
-    private readonly Mock<IStoredFileRepository> _fileRepositoryMock;
+    private readonly Mock<IAttachmentService> _attachmentServiceMock;
     private readonly Mock<IEmailService> _emailServiceMock;
     private readonly Mock<Serilog.ILogger> _loggerMock;
 
@@ -24,7 +28,7 @@ public class EmailToNonResidentialParentsTests
         _reportRepositoryMock = new();
         _studentRepositoryMock = new();
         _familyRepositoryMock = new();
-        _fileRepositoryMock = new();
+        _attachmentServiceMock = new();
         _emailServiceMock = new();
         _loggerMock = new();
     }
@@ -52,8 +56,9 @@ public class EmailToNonResidentialParentsTests
                 It.Is<AcademicReportCreatedDomainEvent>(entry => entry == notification)))
             .Verifiable();
 
-        _fileRepositoryMock.Setup(
-            x => x.GetAcademicReportByLinkId(
+        _attachmentServiceMock.Setup(
+            x => x.GetAttachmentFile(
+                It.IsAny<AttachmentType>(),
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => null)
@@ -63,7 +68,7 @@ public class EmailToNonResidentialParentsTests
             _reportRepositoryMock.Object,
             _studentRepositoryMock.Object,
             _familyRepositoryMock.Object,
-            _fileRepositoryMock.Object,
+            _attachmentServiceMock.Object,
             _emailServiceMock.Object,
             _loggerMock.Object);
 
@@ -73,11 +78,11 @@ public class EmailToNonResidentialParentsTests
         // Assert
         _reportRepositoryMock.Verify();
         _loggerMock.Verify();
-        _fileRepositoryMock.Verify(mock => mock.GetAcademicReportByLinkId(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never());
+        _attachmentServiceMock.Verify(mock => mock.GetAttachmentFile(It.IsAny<AttachmentType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 
     [Fact]
-    public async Task Handle_ShouldLogWarningAndFail_WhenStoredFileCannotBeFoundInDatabase()
+    public async Task Handle_ShouldLogWarningAndFail_WhenAttachmentEntryCannotBeFoundInDatabase()
     {
         // Arrange
         var notification = new AcademicReportCreatedDomainEvent(new DomainEventId(), new AcademicReportId());
@@ -106,18 +111,19 @@ public class EmailToNonResidentialParentsTests
                 It.Is<AcademicReportCreatedDomainEvent>(entry => entry == notification)))
             .Verifiable();
 
-        _fileRepositoryMock.Setup(
-            x => x.GetAcademicReportByLinkId(
-                It.IsAny<string>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => null)
+        _attachmentServiceMock.Setup(
+                x => x.GetAttachmentFile(
+                    It.IsAny<AttachmentType>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => Result.Failure<AttachmentResponse>(AttachmentErrors.NotFound(AttachmentType.AwardCertificate, "")))
             .Verifiable();
 
         var handler = new AcademicReportCreatedDomainEvent_EmailToNonResidentialParents(
             _reportRepositoryMock.Object,
             _studentRepositoryMock.Object,
             _familyRepositoryMock.Object,
-            _fileRepositoryMock.Object,
+            _attachmentServiceMock.Object,
             _emailServiceMock.Object,
             _loggerMock.Object);
 
@@ -126,7 +132,7 @@ public class EmailToNonResidentialParentsTests
 
         // Assert
         _reportRepositoryMock.Verify();
-        _fileRepositoryMock.Verify(mock => mock.GetAcademicReportByLinkId(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once());
+        _attachmentServiceMock.Verify(mock => mock.GetAttachmentFile(It.IsAny<AttachmentType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once());
         _loggerMock.Verify();
     }
 
@@ -143,17 +149,6 @@ public class EmailToNonResidentialParentsTests
             "2023",
             "Year 7, Semester 1, 2023");
 
-        var storedFile = new StoredFile
-        {
-            Id = 1,
-            Name = "Test.pdf",
-            FileData = new byte[100],
-            FileType = "application/pdf",
-            CreatedAt = DateTime.Now,
-            LinkType = StoredFile.StudentReport,
-            LinkId = academicReport.Id.ToString()
-        };
-
         _reportRepositoryMock.Setup(
             x => x.GetById(
                 It.IsAny<AcademicReportId>(),
@@ -171,11 +166,12 @@ public class EmailToNonResidentialParentsTests
                 It.Is<AcademicReportCreatedDomainEvent>(entry => entry == notification)))
             .Verifiable();
 
-        _fileRepositoryMock.Setup(
-            x => x.GetAcademicReportByLinkId(
-                It.IsAny<string>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => storedFile)
+        _attachmentServiceMock.Setup(
+                x => x.GetAttachmentFile(
+                    It.IsAny<AttachmentType>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => Result.Success<AttachmentResponse>(new AttachmentResponse("", "", new byte[] {})))
             .Verifiable();
 
         _familyRepositoryMock.Setup(
@@ -189,7 +185,7 @@ public class EmailToNonResidentialParentsTests
             _reportRepositoryMock.Object,
             _studentRepositoryMock.Object,
             _familyRepositoryMock.Object,
-            _fileRepositoryMock.Object,
+            _attachmentServiceMock.Object,
             _emailServiceMock.Object,
             _loggerMock.Object);
 
@@ -198,7 +194,7 @@ public class EmailToNonResidentialParentsTests
 
         // Assert
         _reportRepositoryMock.Verify();
-        _fileRepositoryMock.Verify();
+        _attachmentServiceMock.Verify();
         _loggerMock.Verify(mock => mock.Warning(It.IsAny<string>(), It.IsAny<AcademicReportCreatedDomainEvent>()), Times.Never());
         _familyRepositoryMock.Verify();
     }

@@ -6,8 +6,12 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Core.Models.Attachments.DTOs;
+using Core.Models.Attachments.Services;
+using Core.Models.Attachments.ValueObjects;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -25,7 +29,8 @@ internal sealed class GenerateStaffReportCommandHandler
     private readonly ISchoolRepository _schoolRepository;
     private readonly ISchoolContactRepository _schoolContactRepository;
     private readonly IExcelService _excelService;
-    private readonly IStoredFileRepository _storedFileRepository;
+    private readonly IAttachmentRepository _attachmentRepository;
+    private readonly IAttachmentService _attachmentService;
 
     public GenerateStaffReportCommandHandler(
         ITrainingModuleRepository trainingModuleRepository,
@@ -34,7 +39,8 @@ internal sealed class GenerateStaffReportCommandHandler
         ISchoolRepository schoolRepository,
         ISchoolContactRepository schoolContactRepository,
         IExcelService excelService,
-        IStoredFileRepository storedFileRepository)
+        IAttachmentRepository attachmentRepository,
+        IAttachmentService attachmentService)
     {
         _trainingModuleRepository = trainingModuleRepository;
         _staffRepository = staffRepository;
@@ -42,7 +48,8 @@ internal sealed class GenerateStaffReportCommandHandler
         _schoolRepository = schoolRepository;
         _schoolContactRepository = schoolContactRepository;
         _excelService = excelService;
-        _storedFileRepository = storedFileRepository;
+        _attachmentRepository = attachmentRepository;
+        _attachmentService = attachmentService;
     }
 
     public async Task<Result<ReportDto>> Handle(GenerateStaffReportCommand request, CancellationToken cancellationToken)
@@ -126,29 +133,39 @@ internal sealed class GenerateStaffReportCommandHandler
             return reportDto;
         }
 
-        Dictionary<string, byte[]> fileList = new();
+        List<AttachmentResponse> fileList = new();
 
-        fileList.Add($"Mandatory Training Report - {data.Name}.xlsx", fileData.ToArray());
+        fileList.Add(new(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            $"Mandatory Training Report - {data.Name}.xlsx", 
+            fileData.ToArray()));
 
         List<string> recordIds = data.Modules
             .Where(record => record.RecordId is not null)
             .Select(record => record.RecordId.ToString())
             .ToList();
 
-        List<StoredFile> certificates = await _storedFileRepository.GetTrainingCertificatesFromList(recordIds, cancellationToken);
+        foreach (string recordId in recordIds)
+        {
+            Result<AttachmentResponse> attempt = await _attachmentService.GetAttachmentFile(AttachmentType.TrainingCertificate, recordId, cancellationToken);
 
-        foreach (StoredFile certificate in certificates)
-            fileList.Add(certificate.Name, certificate.FileData);
+            if (attempt.IsFailure)
+            {
+                continue;
+            }
+
+            fileList.Add(attempt.Value);
+        }
 
         // Create ZIP file
         using MemoryStream memoryStream = new MemoryStream();
         using (ZipArchive zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Create))
         {
-            foreach (KeyValuePair<string, byte[]> file in fileList)
+            foreach (AttachmentResponse file in fileList)
             {
-                ZipArchiveEntry zipArchiveEntry = zipArchive.CreateEntry(file.Key);
-                using StreamWriter streamWriter = new StreamWriter(zipArchiveEntry.Open());
-                streamWriter.BaseStream.Write(file.Value, 0, file.Value.Length);
+                ZipArchiveEntry zipArchiveEntry = zipArchive.CreateEntry(file.FileName);
+                await using StreamWriter streamWriter = new StreamWriter(zipArchiveEntry.Open());
+                await streamWriter.BaseStream.WriteAsync(file.FileData, 0, file.FileData.Length, cancellationToken);
             }
         }
 

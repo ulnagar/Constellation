@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.DTOs;
 using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Jobs;
@@ -76,14 +77,14 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
 
                 _logger.Information("{id}: Creating Report for {name}", JobId, student.DisplayName);
                 // Get Data from server
-                Result<StoredFile> studentReportRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(student.StudentId, startDate, endDate), cancellationToken);
+                Result<FileDto> studentReportRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(student.StudentId, startDate, endDate), cancellationToken);
 
                 if (studentReportRequest.IsFailure)
                     continue;
 
                 string tempFile = Path.GetTempFileName();
                 await File.WriteAllBytesAsync(tempFile, studentReportRequest.Value.FileData, cancellationToken);
-                studentFiles.Add(tempFile, studentReportRequest.Value.Name);
+                studentFiles.Add(tempFile, studentReportRequest.Value.FileName);
 
                 await SendParentEmail(studentReportRequest.Value, student, startDate, cancellationToken);
             }
@@ -91,7 +92,7 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
             _logger.Information("{id}: Sending reports to school {school}", JobId, school.First().School.Name);
 
             // Email all the files to the school
-            List<Attachment> attachmentList = new();
+            List<System.Net.Mail.Attachment> attachmentList = new();
 
             if (cancellationToken.IsCancellationRequested)
                 return;
@@ -140,7 +141,7 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
     }
 
     private async Task SendParentEmail(
-        StoredFile file,
+        FileDto file,
         Student student, 
         DateOnly dateToReport, 
         CancellationToken cancellationToken)
@@ -180,18 +181,18 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
                 dateToReport, 
                 dateToReport.AddDays(12), 
                 recipients, 
-                new List<Attachment> { new(stream, file.Name) }, 
+                new List<Attachment> { new(stream, file.FileName) }, 
                 cancellationToken);
 
             if (success)
             {
                 foreach (EmailRecipient recipient in recipients)
-                    _logger.Information("{id}: Message sent via Email to {parent} ({email}) with attachment: {filename}", JobId, recipient.Name, recipient.Email, file.Name);
+                    _logger.Information("{id}: Message sent via Email to {parent} ({email}) with attachment: {filename}", JobId, recipient.Name, recipient.Email, file.FileName);
             }
             else
             {
                 foreach (EmailRecipient recipient in recipients)
-                    _logger.Warning("{id}: FAILED to send email to {parent} ({email}) with attachment: {filename}", JobId, recipient.Name, recipient.Email, file.Name);
+                    _logger.Warning("{id}: FAILED to send email to {parent} ({email}) with attachment: {filename}", JobId, recipient.Name, recipient.Email, file.FileName);
             }
         }
         else

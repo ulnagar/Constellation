@@ -6,7 +6,6 @@ using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Models.Offerings;
-using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Stocktake;
 using Constellation.Core.Models.Subjects;
 using Constellation.Infrastructure.Persistence.ConstellationContext.ContextExtensions;
@@ -20,6 +19,8 @@ using System.Reflection;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext
 {
+    using Core.Models.Attachments;
+
     public class AppDbContext : KeyApiAuthorizationDbContext<AppUser, AppRole, Guid>, IAppDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options, IOptions<OperationalStoreOptions> operationalStoreOptions)
@@ -50,7 +51,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
         public DbSet<StudentPartialAbsence> PartialAbsences { get; set; }
         public DbSet<CanvasOperation> CanvasOperations { get; set; }
         public DbSet<JobActivation> JobActivations { get; set; }
-        public DbSet<StoredFile> StoredFiles { get; set; }
         public DbSet<StocktakeEvent> StocktakeEvents { get; set; }
         public DbSet<StocktakeSighting> StocktakeSightings { get; set; }
         public DbSet<StudentAward> StudentAward { get; set; }

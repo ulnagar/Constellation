@@ -532,6 +532,42 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("Assignments_Submissions", (string)null);
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Attachments.Attachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("FileData")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("FilePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FileSize")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LinkId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LinkType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Attachments_Attachments", (string)null);
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.Awards.Nomination", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1460,17 +1496,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("StaffId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("StoredFileId")
-                        .HasColumnType("int");
-
                     b.Property<Guid?>("TrainingModuleId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("StaffId");
-
-                    b.HasIndex("StoredFileId");
 
                     b.HasIndex("TrainingModuleId");
 
@@ -2158,37 +2189,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("StocktakeEventId");
 
                     b.ToTable("StocktakeSightings");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.StoredFile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<byte[]>("FileData")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("FileType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LinkId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LinkType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("StoredFiles");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Student", b =>
@@ -3505,12 +3505,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasOne("Constellation.Core.Models.Staff", null)
                         .WithMany("TrainingCompletionRecords")
                         .HasForeignKey("StaffId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Constellation.Core.Models.StoredFile", "StoredFile")
-                        .WithMany()
-                        .HasForeignKey("StoredFileId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Constellation.Core.Models.MandatoryTraining.TrainingModule", "Module")
                         .WithMany("Completions")
@@ -3518,8 +3513,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .OnDelete(DeleteBehavior.ClientCascade);
 
                     b.Navigation("Module");
-
-                    b.Navigation("StoredFile");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Offerings.Offering", b =>

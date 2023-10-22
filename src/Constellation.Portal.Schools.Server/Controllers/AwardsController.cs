@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
+using Application.Attachments.GetAttachmentFile;
 using Constellation.Application.Awards.GetSummaryForStudent;
-using Constellation.Application.Features.Documents.Queries;
-using Constellation.Core.Models;
+using Core.Models.Attachments.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,8 +38,13 @@ public class AwardsController : BaseAPIController
         _logger.Information("Requested to retrieve award certificate for student {id} by parent {name}", studentId, user.UserName);
 
         // Create file as stream
-        var fileEntry = await _mediator.Send(new GetFileFromDatabaseQuery { LinkType = StoredFile.AwardCertificate, LinkId = awardId });
+        var fileEntry = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.AwardCertificate, awardId));
 
-        return File(new MemoryStream(fileEntry.FileData), "application/pdf");
+        if (fileEntry.IsFailure)
+        {
+            return BadRequest();
+        }
+
+        return File(new MemoryStream(fileEntry.Value.FileData), "application/pdf");
     }
 }

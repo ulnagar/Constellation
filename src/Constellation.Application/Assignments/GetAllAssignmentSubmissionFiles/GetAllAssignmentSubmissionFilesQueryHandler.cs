@@ -2,12 +2,16 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Offerings.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Errors;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
 using Core.Models.Assignments.Repositories;
+using Core.Models.Attachments.DTOs;
+using Core.Models.Attachments.Services;
+using Core.Models.Attachments.ValueObjects;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
 using Core.Shared;
@@ -26,20 +30,23 @@ internal sealed class GetAllAssignmentSubmissionFilesQueryHandler
     : IQueryHandler<GetAllAssignmentSubmissionFilesQuery, FileDto>
 {
     private readonly IAssignmentRepository _assignmentRepository;
-    private readonly IStoredFileRepository _fileRepository;
+    private readonly IAttachmentRepository _fileRepository;
+    private readonly IAttachmentService _attachmentService;
     private readonly IStudentRepository _studentRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public GetAllAssignmentSubmissionFilesQueryHandler(
         IAssignmentRepository assignmentRepository,
-        IStoredFileRepository fileRepository,
+        IAttachmentRepository fileRepository,
+        IAttachmentService attachmentService,
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _assignmentRepository = assignmentRepository;
         _fileRepository = fileRepository;
+        _attachmentService = attachmentService;
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
         _logger = logger.ForContext<GetAllAssignmentSubmissionFilesQuery>();
@@ -61,7 +68,7 @@ internal sealed class GetAllAssignmentSubmissionFilesQueryHandler
 
         List<IGrouping<string, CanvasAssignmentSubmission>> submissions = assignment.Submissions.GroupBy(submission => submission.StudentId).ToList();
 
-        List<StoredFile> files = new();
+        List<AttachmentResponse> files = new();
 
         foreach (IGrouping<string, CanvasAssignmentSubmission> studentSubmissions in submissions)
         {
@@ -94,24 +101,30 @@ internal sealed class GetAllAssignmentSubmissionFilesQueryHandler
             CanvasAssignmentSubmission submission = studentSubmissions.FirstOrDefault(submission =>
                 submission.Attempt == studentSubmissions.Max(submission => submission.Attempt));
 
-            StoredFile file = await _fileRepository.GetAssignmentSubmissionByLinkId(submission.Id.ToString(), cancellationToken);
+            Result<AttachmentResponse> fileRequest = await _attachmentService.GetAttachmentFile(
+                AttachmentType.CanvasAssignmentSubmission, 
+                submission!.Id.ToString(), 
+                cancellationToken);
 
-            string extension = file.FileType == MediaTypeNames.Application.Pdf
+            string extension = fileRequest.Value.FileType == MediaTypeNames.Application.Pdf
                 ? "pdf"
-                : file.Name.Split('.').Last();
+                : fileRequest.Value.FileName.Split('.').Last();
 
-            file.Name = $"{student.GetName().SortOrder} - {offering.Name} - {submission.Attempt}.{extension}";
+            AttachmentResponse updatedResponse = fileRequest.Value with
+            {
+                FileName = $"{student.GetName().SortOrder} - {offering.Name} - {submission.Attempt}.{extension}"
+            };
 
-            files.Add(file);
+            files.Add(updatedResponse);
         }
 
         // Create Zip File
         using MemoryStream memoryStream = new();
         using (ZipArchive zipArchive = new(memoryStream, ZipArchiveMode.Create))
         {
-            foreach (StoredFile file in files)
+            foreach (AttachmentResponse file in files)
             {
-                ZipArchiveEntry zipArchiveEntry = zipArchive.CreateEntry(file.Name);
+                ZipArchiveEntry zipArchiveEntry = zipArchive.CreateEntry(file.FileName);
                 await using StreamWriter streamWriter = new(zipArchiveEntry.Open());
                 await streamWriter.BaseStream.WriteAsync(file.FileData, 0, file.FileData.Length, cancellationToken);
             }

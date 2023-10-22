@@ -1,34 +1,3 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
-@using Constellation.Application.Extensions
 
-<a asp-page-handler="CheckAwards" class="btn btn-success">Sync Awards</a>
-
-<table class="table table-striped data-table">
-    <thead>
-        <tr>
-            <th>Student</th>
-            <th>Type</th>
-            <th>Teacher</th>
-            <th>Date</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.Awards)
-        {
-            <tr>
-                <td>@item.StudentName (@item.StudentGrade.AsName())</td>
-                <td>@item.Type</td>
-                <td>@item.TeacherName</td>
-                <td>@item.AwardedOn.ToShortDateString()</td>
-                <td>
-                    @if (item.HasCertificate)
-                    {
-                        <a asp-page-handler="AttemptDownload" asp-route-id="@item.Id.ToString()" class="btn btn-sm btn-warning btn-show-hover">Download</a>
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>

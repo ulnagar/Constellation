@@ -7,9 +7,9 @@ using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.Attendance.GetValidAttendanceReportDates;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Identity;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Core.Models.Attachments;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -105,13 +105,13 @@ public class AttendanceController : BaseAPIController
         }
 
         // Create file as stream
-        Result<StoredFile> fileRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(request.StudentId, DateOnly.FromDateTime(request.StartDate), DateOnly.FromDateTime(request.EndDate)), cancellationToken);
+        Result<FileDto> fileRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(request.StudentId, DateOnly.FromDateTime(request.StartDate), DateOnly.FromDateTime(request.EndDate)), cancellationToken);
 
         if (fileRequest.IsFailure)
         {
             return BadRequest();
         }
 
-        return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.Name);
+        return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
     }
 }

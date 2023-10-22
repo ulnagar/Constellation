@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
+using Application.DTOs;
 using Constellation.Application.Absences.CreateAbsenceResponseFromSchool;
 using Constellation.Application.Absences.GetAbsenceDetailsForSchool;
 using Constellation.Application.Absences.GetAbsenceResponseDetailsForSchool;
@@ -7,10 +8,10 @@ using Constellation.Application.Absences.GetOutstandingAbsencesForSchool;
 using Constellation.Application.Absences.RejectStudentExplanation;
 using Constellation.Application.Absences.VerifyStudenExplanation;
 using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Portal.Schools.Client.Shared.Models;
+using Core.Models.Attachments;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.IO.Compression;
@@ -201,12 +202,12 @@ public class AbsencesController : BaseAPIController
 
         if (Request.Students.Count > 1)
         {
-            List<StoredFile> reports = new();
+            List<FileDto> reports = new();
 
             // We need to loop each student id and collate the report into a zip file.
             foreach (string studentId in Request.Students)
             {
-                Result<StoredFile> reportRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(studentId, startDate, endDate), cancellationToken);
+                Result<FileDto> reportRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(studentId, startDate, endDate), cancellationToken);
                 
                 if (reportRequest.IsSuccess)
                     reports.Add(reportRequest.Value);
@@ -216,9 +217,9 @@ public class AbsencesController : BaseAPIController
             using MemoryStream memoryStream = new MemoryStream();
             using (ZipArchive zipArchive = new(memoryStream, ZipArchiveMode.Create))
             {
-                foreach (StoredFile file in reports)
+                foreach (FileDto file in reports)
                 {
-                    ZipArchiveEntry zipArchiveEntry = zipArchive.CreateEntry(file.Name);
+                    ZipArchiveEntry zipArchiveEntry = zipArchive.CreateEntry(file.FileName);
                     using StreamWriter streamWriter = new StreamWriter(zipArchiveEntry.Open());
                     byte[] fileData = file.FileData;
                     streamWriter.BaseStream.Write(fileData, 0, fileData.Length);
@@ -232,12 +233,12 @@ public class AbsencesController : BaseAPIController
         else
         {
             // We only have one student, so just download that file.
-            Result<StoredFile> fileRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(Request.Students.First(), startDate, endDate), cancellationToken);
+            Result<FileDto> fileRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(Request.Students.First(), startDate, endDate), cancellationToken);
 
             if (fileRequest.IsFailure)
                 return BadRequest();
 
-            return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.Name);
+            return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
         }
     }
 }

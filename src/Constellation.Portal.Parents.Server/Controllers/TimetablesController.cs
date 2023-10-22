@@ -60,6 +60,6 @@ public class TimetablesController : BaseAPIController
         // We only have one student, so just download that file.
         var file = await _mediator.Send(new GetStudentTimetableExportQuery { Data = data.Value });
 
-        return File(file.FileData, file.FileType, file.Name);
+        return File(file.FileData, file.FileType, file.FileName);
     }
 }

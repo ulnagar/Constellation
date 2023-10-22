@@ -19,7 +19,6 @@ public class TrainingCompletionTests
             false);
 
         var sut = TrainingCompletion.Create(
-            new TrainingCompletionId(),
             "1",
             module.Id);
 
@@ -45,7 +44,6 @@ public class TrainingCompletionTests
             true);
 
         var sut = TrainingCompletion.Create(
-            new TrainingCompletionId(),
             "1",
             module.Id);
 
@@ -73,7 +71,6 @@ public class TrainingCompletionTests
             true);
 
         var sut = TrainingCompletion.Create(
-            new TrainingCompletionId(),
             "1",
             module.Id);
 

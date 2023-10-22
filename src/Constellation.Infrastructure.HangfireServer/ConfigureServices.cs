@@ -13,7 +13,9 @@ public static class DependencyInjection
 	{
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-        services.AddInfrastructure(config, environment);
+        services
+            .AddApplication()
+            .AddInfrastructure(config, environment);
 
         services.AddIdentity<AppUser, AppRole>()
             .AddEntityFrameworkStores<AppDbContext>();

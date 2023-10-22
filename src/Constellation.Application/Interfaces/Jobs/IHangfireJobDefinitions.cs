@@ -16,6 +16,8 @@ public interface IAbsenceProcessingJob
 
 public interface IAssignmentSubmissionJob : IHangfireJob { }
 
+public interface IAttachmentManagementJob : IHangfireJob { }
+
 public interface IAttendanceReportJob : IHangfireJob  { }
 
 public interface IClassMonitorJob : IHangfireJob { }

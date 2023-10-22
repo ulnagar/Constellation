@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Awards.Models;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Serilog;
@@ -19,14 +20,14 @@ internal sealed class GetAllAwardsQueryHandler
     private readonly IStudentAwardRepository _awardRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly IStoredFileRepository _fileRepository;
+    private readonly IAttachmentRepository _fileRepository;
     private readonly ILogger _logger;
 
     public GetAllAwardsQueryHandler(
         IStudentAwardRepository awardRepository,
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
-        IStoredFileRepository fileRepository,
+        IAttachmentRepository fileRepository,
         Serilog.ILogger logger)
     {
         _awardRepository = awardRepository;

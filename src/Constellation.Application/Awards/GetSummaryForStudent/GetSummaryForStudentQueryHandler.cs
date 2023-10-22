@@ -3,6 +3,7 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +15,12 @@ internal sealed class GetSummaryForStudentQueryHandler
 {
     private readonly IStudentAwardRepository _awardRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly IStoredFileRepository _fileRepository;
+    private readonly IAttachmentRepository _fileRepository;
 
     public GetSummaryForStudentQueryHandler(
         IStudentAwardRepository awardRepository,
         IStaffRepository staffRepository,
-        IStoredFileRepository fileRepository)
+        IAttachmentRepository fileRepository)
     {
         _awardRepository = awardRepository;
         _staffRepository = staffRepository;
