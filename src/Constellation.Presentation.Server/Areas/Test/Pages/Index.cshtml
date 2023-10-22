@@ -1,3 +1,93 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
 
+@using Constellation.Application.Extensions
+@using Constellation.Presentation.Server.Shared.Models
+
+<h2>Rollover</h2>
+
+<div class="page-menu">
+    <button class="btn btn-primary" onclick="MarkAllWithdrawn()">Mark All Withdrawn</button>
+    <button class="btn btn-primary" onclick="MarkAllRemain()">Mark All Remain</button>
+    <button class="btn btn-primary" onclick="MarkAllRollover()">Mark All Rollover</button>
+</div>
+
+<hr />
+
+<form method="post">
+    <input type="hidden" asp-for="CurrentGrade" value="@Model.CurrentGrade" />
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>SRN</th>
+            <th>Student</th>
+            <th>Grade</th>
+            <th>School</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        @for (var i = 0; i < Model.Statuses.Count; i++)
+        {
+@*             if (Model.Statuses[i].Status != IndexModel.Status.Unknown)
+            {
+                <input type="hidden" asp-for="@Model.Statuses[i].StudentId" />
+                <input type="hidden" asp-for="@Model.Statuses[i].StudentName" />
+                <input type="hidden" asp-for="@Model.Statuses[i].Grade" />
+                <input type="hidden" asp-for="@Model.Statuses[i].SchoolName" />
+                <input type="hidden" asp-for="@Model.Statuses[i].Status" />
+                
+                continue;
+            } *@
+
+            <tr>
+                <td>
+                    <input type="hidden" asp-for="@Model.Statuses[i].StudentId" />
+                    @Model.Statuses[i].StudentId
+                </td>
+                <td>
+                    <input type="hidden" asp-for="@Model.Statuses[i].StudentName" />
+                    @Model.Statuses[i].StudentName
+                </td>
+                <td>
+                    <input type="hidden" asp-for="@Model.Statuses[i].Grade" />
+                    @Model.Statuses[i].Grade.AsName()
+                </td>
+                <td>
+                    <input type="hidden" asp-for="@Model.Statuses[i].SchoolName" />
+                    @Model.Statuses[i].SchoolName
+                </td>
+                <td>
+                    <select class="waiting-value" asp-for="@Model.Statuses[i].Decision">
+                        <option value="@RolloverDecision.Status.Rollover">Rollover</option>
+                        <option value="@RolloverDecision.Status.Withdraw">Withdraw</option>
+                        <option value="@RolloverDecision.Status.Remain">Remain</option>
+                    </select>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <div>
+        <button type="submit" class="btn btn-large btn-success">Submit</button>
+    </div>
+</form>
+
+@section scripts
+{   
+    <script>
+        function MarkAllWithdrawn() {
+            $('.waiting-value').val("@RolloverDecision.Status.Withdraw").change();
+        }
+
+        function MarkAllRemain() {
+            $('.waiting-value').val("@RolloverDecision.Status.Remain").change();
+        }
+
+        function MarkAllRollover() {
+            $('.waiting-value').val("@RolloverDecision.Status.Rollover").change();
+        }
+    </script>
+}
