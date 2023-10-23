@@ -28,38 +28,28 @@
         </tr>
         </thead>
         <tbody>
-        @for (var i = 0; i < Model.Statuses.Count; i++)
+        @foreach (var entry in Model.Statuses)
         {
-@*             if (Model.Statuses[i].Status != IndexModel.Status.Unknown)
-            {
-                <input type="hidden" asp-for="@Model.Statuses[i].StudentId" />
-                <input type="hidden" asp-for="@Model.Statuses[i].StudentName" />
-                <input type="hidden" asp-for="@Model.Statuses[i].Grade" />
-                <input type="hidden" asp-for="@Model.Statuses[i].SchoolName" />
-                <input type="hidden" asp-for="@Model.Statuses[i].Status" />
-                
-                continue;
-            } *@
-
             <tr>
                 <td>
-                    <input type="hidden" asp-for="@Model.Statuses[i].StudentId" />
-                    @Model.Statuses[i].StudentId
+                    <input type="hidden" name="Statuses.Index" value="@entry.StudentId" />
+                    <input type="hidden" name="Statuses[@entry.StudentId].StudentId" value="@entry.StudentId" />
+                    @entry.StudentId
                 </td>
                 <td>
-                    <input type="hidden" asp-for="@Model.Statuses[i].StudentName" />
-                    @Model.Statuses[i].StudentName
+                    <input type="hidden" name="Statuses[@entry.StudentId].StudentName" value="@entry.StudentName" />
+                    @entry.StudentName
                 </td>
                 <td>
-                    <input type="hidden" asp-for="@Model.Statuses[i].Grade" />
-                    @Model.Statuses[i].Grade.AsName()
+                    <input type="hidden" name="Statuses[@entry.StudentId].Grade" value="@entry.Grade" />
+                    @entry.Grade.AsName()
                 </td>
                 <td>
-                    <input type="hidden" asp-for="@Model.Statuses[i].SchoolName" />
-                    @Model.Statuses[i].SchoolName
+                    <input type="hidden" name="Statuses[@entry.StudentId].SchoolName" value="@entry.SchoolName" />
+                    @entry.SchoolName
                 </td>
                 <td>
-                    <select class="waiting-value" asp-for="@Model.Statuses[i].Decision">
+                    <select class="waiting-value" name="Statuses[@entry.StudentId].Decision">
                         <option value="@RolloverDecision.Status.Rollover">Rollover</option>
                         <option value="@RolloverDecision.Status.Withdraw">Withdraw</option>
                         <option value="@RolloverDecision.Status.Remain">Remain</option>

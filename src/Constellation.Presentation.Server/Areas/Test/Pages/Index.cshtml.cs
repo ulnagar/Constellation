@@ -52,42 +52,39 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
-        switch (CurrentGrade)
+        return CurrentGrade switch
         {
-            case Grade.Y12:
-                await GetStudents(Grade.Y11);
-                break;
-            case Grade.Y11:
-                await GetStudents(Grade.Y10);
-                break;
-            case Grade.Y10:
-                await GetStudents(Grade.Y09);
-                break;
-            case Grade.Y09:
-                await GetStudents(Grade.Y08);
-                break;
-            case Grade.Y08:
-                await GetStudents(Grade.Y07);
-                break;
-            case Grade.Y07:
-                await GetStudents(Grade.Y06);
-                break;
-            case Grade.Y06:
-                await GetStudents(Grade.Y05);
-                break;
-            case Grade.Y05:
-                await Finalise();
-                break;
-        }
-
-        return Page();
+            Grade.Y12 => await GetStudents(Grade.Y11),
+            Grade.Y11 => await GetStudents(Grade.Y10),
+            Grade.Y10 => await GetStudents(Grade.Y09),
+            Grade.Y09 => await GetStudents(Grade.Y08),
+            Grade.Y08 => await GetStudents(Grade.Y07),
+            Grade.Y07 => await GetStudents(Grade.Y06),
+            Grade.Y06 => await GetStudents(Grade.Y05),
+            Grade.Y05 => await Finalise()
+        };
     }
 
-    public async Task GetStudents(Grade grade)
+    public async Task<IActionResult> GetStudents(Grade grade)
     {
         if (Statuses.Any())
         {
-            _rolloverService.RolloverDecisions.AddRange(Statuses);
+            foreach (RolloverDecision decision in Statuses)
+            {
+                Result registerAttempt = _rolloverService.RegisterDecision(decision);
+
+                if (registerAttempt.IsFailure)
+                {
+                    Error = new()
+                    {
+                        Error = registerAttempt.Error,
+                        RedirectPath = null
+                    };
+
+                    return Page();
+                }
+
+            }
 
             Statuses = new();
         }
@@ -102,14 +99,11 @@ public class IndexModel : BasePageModel
                 RedirectPath = null
             };
 
-            return;
+            return Page();
         }
 
         foreach (StudentResponse entry in attempt.Value.OrderBy(student => student.DisplayName))
         {
-            if (_rolloverService.RolloverDecisions.Any(record => record.StudentId == entry.StudentId))
-                continue;
-
             Statuses.Add(new()
             {
                 StudentId = entry.StudentId,
@@ -121,10 +115,14 @@ public class IndexModel : BasePageModel
         }
 
         CurrentGrade = grade;
+
+        return Page();
     }
 
-    public async Task Finalise()
+    public async Task<IActionResult> Finalise()
     {
-        var entriesByGrade = _rolloverService.RolloverDecisions.GroupBy(entry => entry.Grade);
+        var entriesByGrade = _rolloverService.GetRegisteredDecisions().GroupBy(entry => entry.Grade);
+
+        return Page();
     }
 }
