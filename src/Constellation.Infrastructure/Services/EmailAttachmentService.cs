@@ -7,6 +7,7 @@ using Constellation.Application.StaffMembers.GetStaffById;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Infrastructure.Templates.Views.Documents.Covers;
 using System.Net.Mail;

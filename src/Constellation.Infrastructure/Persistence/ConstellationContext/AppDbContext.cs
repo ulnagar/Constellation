@@ -19,6 +19,7 @@ using System.Reflection;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext
 {
+    using Constellation.Core.Models.Students;
     using Core.Models.Attachments;
 
     public class AppDbContext : KeyApiAuthorizationDbContext<AppUser, AppRole, Guid>, IAppDbContext

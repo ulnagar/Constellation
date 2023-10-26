@@ -2,6 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Models.Students;
 using Core.Errors;
 using Core.Models;
 using Core.Shared;

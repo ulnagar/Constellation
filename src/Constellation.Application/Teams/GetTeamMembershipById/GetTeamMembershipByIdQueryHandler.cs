@@ -9,6 +9,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
+using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Core.Models.Offerings;
 using Core.Models.Offerings.ValueObjects;

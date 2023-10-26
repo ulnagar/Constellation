@@ -5,6 +5,7 @@ using Constellation.Application.Common.Mapping;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Students;
 using Constellation.Core.Models;
 using Core.Extensions;
 using MediatR;

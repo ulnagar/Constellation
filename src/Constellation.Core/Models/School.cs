@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Constellation.Core.Models.Students;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Constellation.Core.Models

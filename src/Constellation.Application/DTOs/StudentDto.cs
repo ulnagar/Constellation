@@ -1,5 +1,5 @@
 ﻿using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Students;
 using System;
 using System.ComponentModel.DataAnnotations;
 

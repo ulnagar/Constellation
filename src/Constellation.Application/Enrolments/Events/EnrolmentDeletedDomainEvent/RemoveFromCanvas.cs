@@ -10,6 +10,7 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;

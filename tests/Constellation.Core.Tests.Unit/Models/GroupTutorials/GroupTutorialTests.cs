@@ -5,6 +5,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.Students;
 
 public class GroupTutorialTests
 {

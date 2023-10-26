@@ -1,16 +1,18 @@
-﻿namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.StudentWithdrawn;
+﻿namespace Constellation.Application.Students.Events.StudentWithdrawnDomainEvent;
 
-using Constellation.Application.Features.Partners.Students.Notifications;
+using Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
-using MediatR;
+using Core.Models.Students.Events;
 using Serilog;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class RemoveClassEnrolments : INotificationHandler<StudentWithdrawnNotification>
+internal sealed class RemoveClassEnrolments 
+    : IDomainEventHandler<StudentWithdrawnDomainEvent>
 {
     private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly IOfferingRepository _offeringRepository;
@@ -26,10 +28,10 @@ public class RemoveClassEnrolments : INotificationHandler<StudentWithdrawnNotifi
         _enrolmentRepository = enrolmentRepository;
         _offeringRepository = offeringRepository;
         _unitOfWork = unitOfWork;
-        _logger = logger.ForContext<StudentWithdrawnNotification>();
+        _logger = logger.ForContext<StudentWithdrawnDomainEvent>();
     }
 
-    public async Task Handle(StudentWithdrawnNotification notification, CancellationToken cancellationToken)
+    public async Task Handle(StudentWithdrawnDomainEvent notification, CancellationToken cancellationToken)
     {
         _logger.Information("Attempting to unenroll student {studentId} from classes due to withdrawal", notification.StudentId);
 

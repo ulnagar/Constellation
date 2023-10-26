@@ -2,7 +2,7 @@
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
 
 @using Constellation.Application.Extensions
-@using Constellation.Presentation.Server.Shared.Models
+@using Constellation.Core.Models.Rollover.Enums
 
 <h2>Rollover</h2>
 
@@ -32,27 +32,27 @@
         {
             <tr>
                 <td>
-                    <input type="hidden" name="Statuses.Index" value="@entry.StudentId" />
-                    <input type="hidden" name="Statuses[@entry.StudentId].StudentId" value="@entry.StudentId" />
+                    <input type="hidden" name="RolloverStatuses.Index" value="@entry.StudentId" />
+                    <input type="hidden" name="RolloverStatuses[@entry.StudentId].StudentId" value="@entry.StudentId" />
                     @entry.StudentId
                 </td>
                 <td>
-                    <input type="hidden" name="Statuses[@entry.StudentId].StudentName" value="@entry.StudentName" />
+                    <input type="hidden" name="RolloverStatuses[@entry.StudentId].StudentName" value="@entry.StudentName" />
                     @entry.StudentName
                 </td>
                 <td>
-                    <input type="hidden" name="Statuses[@entry.StudentId].Grade" value="@entry.Grade" />
+                    <input type="hidden" name="RolloverStatuses[@entry.StudentId].Grade" value="@entry.Grade" />
                     @entry.Grade.AsName()
                 </td>
                 <td>
-                    <input type="hidden" name="Statuses[@entry.StudentId].SchoolName" value="@entry.SchoolName" />
+                    <input type="hidden" name="RolloverStatuses[@entry.StudentId].SchoolName" value="@entry.SchoolName" />
                     @entry.SchoolName
                 </td>
                 <td>
-                    <select class="waiting-value" name="Statuses[@entry.StudentId].Decision">
-                        <option value="@RolloverDecision.Status.Rollover">Rollover</option>
-                        <option value="@RolloverDecision.Status.Withdraw">Withdraw</option>
-                        <option value="@RolloverDecision.Status.Remain">Remain</option>
+                    <select class="waiting-value" name="RolloverStatuses[@entry.StudentId].Decision">
+                        <option value="@RolloverStatus.Rollover">Rollover</option>
+                        <option value="@RolloverStatus.Withdraw">Withdraw</option>
+                        <option value="@RolloverStatus.Remain">Remain</option>
                     </select>
                 </td>
             </tr>
@@ -69,15 +69,15 @@
 {   
     <script>
         function MarkAllWithdrawn() {
-            $('.waiting-value').val("@RolloverDecision.Status.Withdraw").change();
+            $('.waiting-value').val("@RolloverStatus.Withdraw").change();
         }
 
         function MarkAllRemain() {
-            $('.waiting-value').val("@RolloverDecision.Status.Remain").change();
+            $('.waiting-value').val("@RolloverStatus.Remain").change();
         }
 
         function MarkAllRollover() {
-            $('.waiting-value').val("@RolloverDecision.Status.Rollover").change();
+            $('.waiting-value').val("@RolloverStatus.Rollover").change();
         }
     </script>
 }

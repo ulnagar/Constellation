@@ -3,6 +3,7 @@
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Students;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System;

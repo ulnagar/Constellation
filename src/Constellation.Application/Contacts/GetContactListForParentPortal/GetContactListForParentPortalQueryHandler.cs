@@ -7,6 +7,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
+using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Microsoft.Extensions.Options;
 using Serilog;

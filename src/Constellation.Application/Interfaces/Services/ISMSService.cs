@@ -2,7 +2,7 @@
 
 using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
 using Constellation.Application.DTOs;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Students;
 using Constellation.Core.ValueObjects;
 using System.Collections.Generic;
 using System.Threading;

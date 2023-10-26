@@ -1,5 +1,6 @@
 ﻿using Constellation.Core.Enums;
 using Constellation.Core.Models.Casuals;
+using Constellation.Core.Models.Students;
 using System;
 
 namespace Constellation.Core.Models

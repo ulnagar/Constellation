@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Assignments;
 using Constellation.Core.Models.Assignments.Repositories;
+using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Core.DomainEvents;
