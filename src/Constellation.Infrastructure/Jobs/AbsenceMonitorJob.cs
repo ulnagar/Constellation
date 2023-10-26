@@ -9,9 +9,9 @@ using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Students;
 
 internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 {

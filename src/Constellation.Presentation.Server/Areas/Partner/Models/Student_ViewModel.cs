@@ -1,5 +1,5 @@
 ﻿using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Students;
 using Constellation.Presentation.Server.BaseModels;
 using System.Collections.Generic;
 using System.Linq;

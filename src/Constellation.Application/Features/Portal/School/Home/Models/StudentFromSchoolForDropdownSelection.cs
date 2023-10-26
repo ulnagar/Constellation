@@ -1,5 +1,5 @@
 ﻿using Constellation.Application.Common.Mapping;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Students;
 
 namespace Constellation.Application.Features.Portal.School.Home.Models
 {

@@ -1,12 +1,20 @@
-﻿namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.StudentWithdrawn;
+﻿namespace Constellation.Application.Students.Events.StudentWithdrawnDomainEvent;
 
+using Abstractions.Messaging;
 using Constellation.Application.Enums;
 using Constellation.Application.Features.Partners.Students.Notifications;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Students;
+using Core.Models.Students.Events;
+using Serilog;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-public class RemoveSchoolwideTeamsAccess : INotificationHandler<StudentWithdrawnNotification>
+internal sealed class RemoveSchoolwideTeamsAccess 
+    : IDomainEventHandler<StudentWithdrawnDomainEvent>
 {
     private readonly ILogger _logger;
     private readonly IStudentRepository _studentRepository;
@@ -19,13 +27,13 @@ public class RemoveSchoolwideTeamsAccess : INotificationHandler<StudentWithdrawn
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
-        _logger = logger.ForContext<StudentWithdrawnNotification>();
+        _logger = logger.ForContext<StudentWithdrawnDomainEvent>();
         _studentRepository = studentRepository;
         _operationsRepository = operationsRepository;
         _unitOfWork = unitOfWork;
     }
-
-    public async Task Handle(StudentWithdrawnNotification notification, CancellationToken cancellationToken)
+    
+    public async Task Handle(StudentWithdrawnDomainEvent notification, CancellationToken cancellationToken)
     {
         _logger.Information("Attempting to remove student ({studentId}) from school wide teams due to withdrawal", notification.StudentId);
 
@@ -37,7 +45,7 @@ public class RemoveSchoolwideTeamsAccess : INotificationHandler<StudentWithdrawn
             return;
         }
 
-        StudentEnrolledMSTeamOperation operation = new() 
+        StudentEnrolledMSTeamOperation operation = new()
         {
             StudentId = notification.StudentId,
             TeamName = MicrosoftTeam.Students,

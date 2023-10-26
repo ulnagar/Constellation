@@ -1,20 +1,19 @@
-namespace Constellation.Core.Models;
+namespace Constellation.Core.Models.Students;
 
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Families;
-using Constellation.Core.Models.SciencePracs;
-using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Events;
+using Primitives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
-public class Student
+public class Student : AggregateRoot
 {
     private readonly List<AbsenceConfiguration> _absenceConfigurations = new();
 
@@ -78,7 +77,7 @@ public class Student
         return Result.Success();
     }
 
-    public Name? GetName()
+    public Name GetName()
     {
         Result<Name> request = Name.Create(FirstName, string.Empty, LastName);
 
@@ -127,7 +126,14 @@ public class Student
             // First range encompasses second range
             return true;
         }
-
         return false;
+    }
+
+    public void Withdraw()
+    {
+        IsDeleted = true;
+        DateDeleted = DateTime.Now;
+
+        RaiseDomainEvent(new StudentWithdrawnDomainEvent(new(), StudentId));
     }
 }

@@ -4,23 +4,24 @@ using Application.Students.GetCurrentStudentsFromGrade;
 using Application.Students.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Core.Enums;
+using Core.Models.Rollover;
+using Core.Models.Rollover.Repositories;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Services;
-using Shared.Models;
 
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
-    private readonly RolloverService _rolloverService;
+    private readonly IRolloverRepository _rolloverRepository;
 
     public IndexModel(
-        ISender mediator,
-        RolloverService rolloverService)
+        ISender mediator, 
+        IRolloverRepository rolloverRepository)
     {
         _mediator = mediator;
-        _rolloverService = rolloverService;
+        _rolloverRepository = rolloverRepository;
     }
 
     [BindProperty] 
@@ -61,7 +62,8 @@ public class IndexModel : BasePageModel
             Grade.Y08 => await GetStudents(Grade.Y07),
             Grade.Y07 => await GetStudents(Grade.Y06),
             Grade.Y06 => await GetStudents(Grade.Y05),
-            Grade.Y05 => await Finalise()
+            Grade.Y05 => await Finalise(),
+            _ => throw new ArgumentOutOfRangeException()
         };
     }
 
@@ -71,7 +73,7 @@ public class IndexModel : BasePageModel
         {
             foreach (RolloverDecision decision in Statuses)
             {
-                Result registerAttempt = _rolloverService.RegisterDecision(decision);
+                Result registerAttempt = _rolloverRepository.RegisterDecision(decision);
 
                 if (registerAttempt.IsFailure)
                 {
@@ -104,14 +106,11 @@ public class IndexModel : BasePageModel
 
         foreach (StudentResponse entry in attempt.Value.OrderBy(student => student.DisplayName))
         {
-            Statuses.Add(new()
-            {
-                StudentId = entry.StudentId,
-                StudentName = entry.DisplayName,
-                Grade = grade,
-                SchoolName = entry.School,
-                Decision = RolloverDecision.Status.Unknown
-            });
+            Statuses.Add(new(
+                entry.StudentId,
+                entry.DisplayName,
+                grade,
+                entry.School));
         }
 
         CurrentGrade = grade;
@@ -121,7 +120,7 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> Finalise()
     {
-        var entriesByGrade = _rolloverService.GetRegisteredDecisions().GroupBy(entry => entry.Grade);
+        
 
         return Page();
     }

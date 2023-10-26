@@ -96,8 +96,6 @@ builder.Services.Configure<RazorViewEngineOptions>(options =>
     options.AreaPageViewLocationFormats.Add("/Pages/Shared/PartialViews/{1}/{1}" + RazorViewEngine.ViewExtension);
 });
 
-builder.Services.AddSingleton<RolloverService>();
-
 builder.WebHost.UseStaticWebAssets();
 
 var app = builder.Build();

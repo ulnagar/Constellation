@@ -3,6 +3,7 @@
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Students;
 using Constellation.Infrastructure.Persistence.TrackItContext;
 using Constellation.Infrastructure.Persistence.TrackItContext.Models;
 using Microsoft.EntityFrameworkCore;

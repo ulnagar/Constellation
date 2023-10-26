@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Students.GetCurrentStudentsFromGrade;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Students;
 using Core.Errors;
 using Core.Models;
 using Core.Shared;

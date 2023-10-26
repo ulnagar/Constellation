@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 public interface IDeviceRepository
 {
     Task<Device?> GetDeviceById(string SerialNumber, CancellationToken cancellationToken = default);
+    Task<List<Device>> GetActiveDevicesForStudent(string StudentId, CancellationToken cancellationToken = default);
     Device WithDetails(string id);
     Device WithFilter(Expression<Func<Device, bool>> predicate);
     ICollection<Device> All();

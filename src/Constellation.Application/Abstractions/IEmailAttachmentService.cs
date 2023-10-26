@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Students;
 using System.Collections.Generic;
 using System.Net.Mail;
 using System.Threading;

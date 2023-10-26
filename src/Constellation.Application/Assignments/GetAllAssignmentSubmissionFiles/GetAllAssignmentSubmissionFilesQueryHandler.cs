@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.Assignments.GetAllAssignmentSubmissionFiles;
 
 using Abstractions.Messaging;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Offerings.Repositories;
+using Constellation.Core.Models.Students;
 using Core.Abstractions.Repositories;
 using Core.Errors;
 using Core.Models.Assignments;

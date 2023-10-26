@@ -14,6 +14,7 @@ using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.Templates.Views.Emails.Absences;

@@ -2,6 +2,8 @@
 
 namespace Constellation.Core.Tests.Unit.Models;
 
+using Core.Models.Students;
+
 public class SchoolTests
 {
     [Fact]

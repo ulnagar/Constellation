@@ -1,13 +1,11 @@
 ﻿namespace Constellation.Application.Students.WithdrawStudent;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Features.Partners.Students.Notifications;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
-using MediatR;
+using Core.Models.Students;
 using Serilog;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,24 +14,21 @@ internal sealed class WithdrawStudentCommandHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMediator _mediator;
     private readonly ILogger _logger;
 
     public WithdrawStudentCommandHandler(
         IStudentRepository studentRepository,
         IUnitOfWork unitOfWork,
-        IMediator mediator,
-        Serilog.ILogger logger)
+        ILogger logger)
     {
         _studentRepository = studentRepository;
         _unitOfWork = unitOfWork;
-        _mediator = mediator;
         _logger = logger.ForContext<WithdrawStudentCommand>();
     }
 
     public async Task<Result> Handle(WithdrawStudentCommand request, CancellationToken cancellationToken)
     {
-        var student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -42,12 +37,9 @@ internal sealed class WithdrawStudentCommandHandler
             return Result.Failure(DomainErrors.Partners.Student.NotFound(request.StudentId));
         }
 
-        student.IsDeleted = true;
-        student.DateDeleted = DateTime.Now;
+        student.Withdraw();
 
         await _unitOfWork.CompleteAsync(cancellationToken);
-
-        await _mediator.Publish(new StudentWithdrawnNotification { StudentId = request.StudentId }, cancellationToken);
 
         return Result.Success();
     }

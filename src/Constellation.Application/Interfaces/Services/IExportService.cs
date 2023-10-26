@@ -2,7 +2,7 @@
 
 using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.DTOs;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Students;
 using System;
 using System.Collections.Generic;
 using System.IO;

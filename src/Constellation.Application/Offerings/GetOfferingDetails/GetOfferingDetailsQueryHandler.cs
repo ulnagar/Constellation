@@ -9,6 +9,7 @@ using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;

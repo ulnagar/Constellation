@@ -9,6 +9,7 @@ using Constellation.Core.Models.Casuals;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Subjects;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Persistence.ConstellationContext;

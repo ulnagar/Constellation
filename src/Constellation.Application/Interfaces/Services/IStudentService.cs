@@ -1,5 +1,5 @@
 ﻿using Constellation.Application.DTOs;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Students;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Services

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.GroupTutorials;
 
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Students;
 using Constellation.Core.Primitives;
 using System;
 

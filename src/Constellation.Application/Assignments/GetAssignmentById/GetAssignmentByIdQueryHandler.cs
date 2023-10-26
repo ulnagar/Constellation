@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Constellation.Core.Models.Students;
 
 internal sealed class GetAssignmentByIdQueryHandler
     : IQueryHandler<GetAssignmentByIdQuery, AssignmentResponse>

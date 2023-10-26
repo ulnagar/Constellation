@@ -7,6 +7,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
+using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
 using System.Linq;

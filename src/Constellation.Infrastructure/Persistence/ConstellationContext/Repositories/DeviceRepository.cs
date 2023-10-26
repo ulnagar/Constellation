@@ -21,6 +21,18 @@ public class DeviceRepository : IDeviceRepository
             .Set<Device>()
             .FirstOrDefaultAsync(device => device.SerialNumber == SerialNumber, cancellationToken);
 
+    public async Task<List<Device>> GetActiveDevicesForStudent(
+        string StudentId, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Device>()
+            .Include(device => device.Allocations)
+            .Where(device => 
+                device.Allocations.Any(allocation => 
+                    allocation.StudentId == StudentId && 
+                    !allocation.IsDeleted))
+            .ToListAsync(cancellationToken);
+
     private IQueryable<Device> Collection()
     {
         return _context.Devices
