@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
+using Application.Rollover.ProcessRolloverDecisions;
 using Application.Students.GetCurrentStudentsFromGrade;
 using Application.Students.Models;
 using Constellation.Presentation.Server.BaseModels;
@@ -9,7 +10,6 @@ using Core.Models.Rollover.Repositories;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Services;
 
 public class IndexModel : BasePageModel
 {
@@ -26,6 +26,8 @@ public class IndexModel : BasePageModel
 
     [BindProperty] 
     public List<RolloverDecision> Statuses { get; set; } = new();
+
+    public List<RolloverResult> ProcessResults { get; set; } = new();
 
     [BindProperty(SupportsGet = true)]
     public Grade CurrentGrade { get; set; }
@@ -48,26 +50,12 @@ public class IndexModel : BasePageModel
     {
         await GetClasses(_mediator);
 
+        _rolloverRepository.Reset();
+
         await GetStudents(Grade.Y12);
     }
 
     public async Task<IActionResult> OnPost()
-    {
-        return CurrentGrade switch
-        {
-            Grade.Y12 => await GetStudents(Grade.Y11),
-            Grade.Y11 => await GetStudents(Grade.Y10),
-            Grade.Y10 => await GetStudents(Grade.Y09),
-            Grade.Y09 => await GetStudents(Grade.Y08),
-            Grade.Y08 => await GetStudents(Grade.Y07),
-            Grade.Y07 => await GetStudents(Grade.Y06),
-            Grade.Y06 => await GetStudents(Grade.Y05),
-            Grade.Y05 => await Finalise(),
-            _ => throw new ArgumentOutOfRangeException()
-        };
-    }
-
-    public async Task<IActionResult> GetStudents(Grade grade)
     {
         if (Statuses.Any())
         {
@@ -91,6 +79,22 @@ public class IndexModel : BasePageModel
             Statuses = new();
         }
 
+        return CurrentGrade switch
+        {
+            Grade.Y12 => await GetStudents(Grade.Y11),
+            Grade.Y11 => await GetStudents(Grade.Y10),
+            Grade.Y10 => await GetStudents(Grade.Y09),
+            Grade.Y09 => await GetStudents(Grade.Y08),
+            Grade.Y08 => await GetStudents(Grade.Y07),
+            Grade.Y07 => await GetStudents(Grade.Y06),
+            Grade.Y06 => await GetStudents(Grade.Y05),
+            Grade.Y05 => await Finalise(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+
+    public async Task<IActionResult> GetStudents(Grade grade)
+    {
         Result<List<StudentResponse>> attempt = await _mediator.Send(new GetCurrentStudentsFromGradeQuery(grade));
 
         if (attempt.IsFailure)
@@ -120,7 +124,20 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> Finalise()
     {
-        
+        Result<List<RolloverResult>> results = await _mediator.Send(new ProcessRolloverDecisionsCommand());
+
+        if (results.IsFailure)
+        {
+            Error = new()
+            {
+                Error = results.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        ProcessResults = results.Value;
 
         return Page();
     }
