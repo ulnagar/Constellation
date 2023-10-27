@@ -39,7 +39,9 @@ internal sealed class ProcessRolloverDecisionsCommandHandler
     {
         List<RolloverResult> results = new();
 
-        foreach (RolloverDecision decision in _rolloverRepository.GetRegisteredDecisions())
+        List<RolloverDecision> decisions = _rolloverRepository.GetRegisteredDecisions();
+
+        foreach (RolloverDecision decision in decisions)
         {
             if (decision.Decision == RolloverStatus.Unknown)
             {
