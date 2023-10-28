@@ -1,12 +1,29 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+namespace Constellation.Presentation.Server.Areas.Admin.Pages.Rollover;
 
-namespace Constellation.Presentation.Server.Areas.Admin.Pages.Rollover
+using Application.Models.Auth;
+using BaseModels;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
+public class ImportModel : BasePageModel
 {
-    public class ImportModel : PageModel
+    private readonly ISender _mediator;
+
+    public ImportModel(
+        ISender mediator)
     {
-        public void OnGet()
-        {
-        }
+        _mediator = mediator;
+    }
+
+    public async Task OnGet()
+    {
+        await GetClasses(_mediator);
+    }
+
+    public async Task<IActionResult> OnPost()
+    {
+
     }
 }
