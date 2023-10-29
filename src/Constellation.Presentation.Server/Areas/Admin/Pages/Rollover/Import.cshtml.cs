@@ -38,12 +38,30 @@ public class ImportModel : BasePageModel
     {
         if (FormFile is null)
         {
+            Error = new()
+            {
+                Error = new("Page.Form.File", "A file must be specified"),
+                RedirectPath = null
+            };
 
             return Page();
         }
 
         try
         {
+            // Verify that FormFile is xlsx/xls
+            string[] allowedExtensions = { "xlsx", "xls" };
+            if (!allowedExtensions.Contains(FormFile.FileName.Split('.').Last()))
+            {
+                Error = new()
+                {
+                    Error = new("Page.Form.File", "You must provide an Excel file"),
+                    RedirectPath = null
+                };
+
+                return Page();
+            }
+            
             await using MemoryStream target = new();
             await FormFile.CopyToAsync(target, cancellationToken);
 

@@ -14,6 +14,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Infrastructure.Jobs;
+using ExcelDataReader;
 using OfficeOpenXml;
 using System.Data;
 using System.Drawing;
@@ -733,7 +734,50 @@ public class ExcelService : IExcelService
     {
         List<StudentImportRecord> results = new();
 
-        //todo: Implement conversion from xlsx/xls/csv to List<StudentImportRecord>
+        using IExcelDataReader reader = ExcelReaderFactory.CreateReader(importFile);
+
+        DataSet sheet = reader.AsDataSet();
+        DataRowCollection rows = sheet.Tables[0].Rows;
+        foreach (DataRow row in rows)
+        {
+            if (row[0].ToString() == "StudentId")
+                continue;
+
+            string studentId = row[0]?.ToString() ?? string.Empty;
+            string firstName = row[1]?.ToString() ?? string.Empty;
+            string lastName = row[2]?.ToString() ?? string.Empty;
+            string userName = row[3]?.ToString() ?? string.Empty;
+            string grade = row[4]?.ToString() ?? string.Empty;
+            string schoolCode = row[5]?.ToString() ?? string.Empty;
+            string gender = row[6]?.ToString() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(studentId) ||
+                string.IsNullOrWhiteSpace(firstName) ||
+                string.IsNullOrWhiteSpace(lastName) ||
+                string.IsNullOrWhiteSpace(userName) ||
+                string.IsNullOrWhiteSpace(grade) ||
+                string.IsNullOrWhiteSpace(schoolCode) ||
+                string.IsNullOrWhiteSpace(gender))
+            {
+                continue;
+            }
+
+            bool success = Enum.TryParse(grade, true, out Grade gradeVal);
+
+            if (!success)
+            {
+                continue;
+            }
+
+            results.Add(new(
+                studentId,
+                firstName,
+                lastName,
+                userName,
+                gradeVal,
+                schoolCode,
+                gender));
+        }
 
         return results;
     }
