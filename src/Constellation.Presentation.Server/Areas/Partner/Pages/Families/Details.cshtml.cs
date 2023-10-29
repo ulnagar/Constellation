@@ -9,6 +9,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.FamilyAddStudent;
+using Core.Models.Students.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -61,7 +62,7 @@ public class DetailsModel : BasePageModel
         {
             Error = new()
             {
-                Error = DomainErrors.Partners.Student.InvalidId,
+                Error = StudentErrors.InvalidId,
                 RedirectPath = _linkGenerator.GetPathByPage("/Families/Index", values: new { area = "Partner" })
             };
 
@@ -139,7 +140,7 @@ public class DetailsModel : BasePageModel
         {
             Error = new()
             {
-                Error = DomainErrors.Partners.Student.InvalidId,
+                Error = StudentErrors.InvalidId,
                 RedirectPath = _linkGenerator.GetPathByPage("/Families/Index", values: new { area = "Partner" })
             };
 

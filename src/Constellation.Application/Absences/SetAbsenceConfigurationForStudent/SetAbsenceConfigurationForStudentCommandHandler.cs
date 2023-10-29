@@ -3,9 +3,9 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
+using Core.Models.Students.Errors;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -110,6 +110,6 @@ internal sealed class SetAbsenceConfigurationForStudentCommandHandler
             return Result.Success();
         }
 
-        return Result.Failure(DomainErrors.Partners.Student.InvalidId);
+        return Result.Failure(StudentErrors.InvalidId);
     }
 }

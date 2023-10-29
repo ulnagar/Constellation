@@ -359,36 +359,6 @@ public static class DomainErrors
                 "Partners.Staff.TeacherNotFound",
                 $"A teacher with the Email Address {email} could not be found");
         }
-
-        public static class Student
-        {
-            public static class AbsenceConfiguration
-            {
-                public static readonly Error AlreadyCancelled = new(
-                    "Partners.Student.AbsenceConfiguration.AlreadyCancelled",
-                    "This absence configuration has already been marked cancelled");
-
-                public static readonly Func<DateOnly, DateOnly, Error> RecordForRangeExists = (startDate, endDate) => new(
-                    "Partners.Student.AbsenceConfiguration.RecordForRangeExists",
-                    $"A current configuration exists that covers some or all of the dates from {startDate} to {endDate}");
-            }
-
-            public static readonly Error InvalidId = new(
-                "Partners.Student.InvalidId",
-                "The provided student id is not valid");
-
-            public static readonly Func<string, Error> NotFound = id => new Error(
-                "Partners.Student.NotFound",
-                $"A student with the Id {id} could not be found");
-
-            public static readonly Func<string, Error> NotFoundForSchool = id => new Error(
-                "Partners.Student.NotFoundForSchool",
-                $"No current students found linked to school with Id {id}");
-
-            public static readonly Func<Grade, Error> NotFoundForGrade = grade => new(
-                "Partners.Student.NotFoundForGrade",
-                $"No current students found linked to grade {grade}");
-        }
     }
 
     public static class Reports

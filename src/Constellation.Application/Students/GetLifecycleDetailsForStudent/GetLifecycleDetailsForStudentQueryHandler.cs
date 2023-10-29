@@ -3,8 +3,7 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Students;
-using Core.Errors;
-using Core.Models;
+using Core.Models.Students.Errors;
 using Core.Shared;
 using Serilog;
 using System;
@@ -33,10 +32,10 @@ internal sealed class GetLifecycleDetailsForStudentQueryHandler
         {
             _logger
                 .ForContext(nameof(GetLifecycleDetailsForStudentQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Student.NotFound(request.StudentId), true)
+                .ForContext(nameof(Error), StudentErrors.NotFound(request.StudentId), true)
                 .Warning("Failed to retrieve record lifecycle details for Student");
 
-            return Result.Failure<RecordLifecycleDetailsResponse>(DomainErrors.Partners.Student.NotFound(request.StudentId));
+            return Result.Failure<RecordLifecycleDetailsResponse>(StudentErrors.NotFound(request.StudentId));
         }
 
         return new RecordLifecycleDetailsResponse(

@@ -3,10 +3,10 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
+using Core.Models.Students.Errors;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading;
@@ -43,7 +43,7 @@ internal sealed class UnenrolStudentCommandHandler
         {
             _logger.Warning("Could not find Student with Id {id}", request.StudentId);
 
-            return Result.Failure(DomainErrors.Partners.Student.NotFound(request.StudentId));
+            return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
         List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);

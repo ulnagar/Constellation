@@ -5,6 +5,7 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
+using Errors;
 using System;
 
 public class AbsenceConfiguration: IAuditableEntity
@@ -66,7 +67,7 @@ public class AbsenceConfiguration: IAuditableEntity
             return Result.Failure(ValidationErrors.Date.OutOfRange(cancelDate, ScanStartDate, ScanEndDate));
 
         if (IsDeleted)
-            return Result.Failure(DomainErrors.Partners.Student.AbsenceConfiguration.AlreadyCancelled);
+            return Result.Failure(AbsenceConfigurationErrors.AlreadyCancelled);
 
         ScanEndDate = cancelDate;
 

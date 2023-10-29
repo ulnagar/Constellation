@@ -14,6 +14,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.Students.Errors;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,7 +55,7 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
         {
             _logger.Warning("{jobId}: Could not find student with Id {studentId}", request.JobId, request.StudentId);
 
-            return Result.Failure(DomainErrors.Partners.Student.NotFound(request.StudentId));
+            return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
         List<Absence> digestAbsences = await _absenceRepository.GetUnexplainedWholeAbsencesForStudentWithDelay(student.StudentId, 1, cancellationToken);

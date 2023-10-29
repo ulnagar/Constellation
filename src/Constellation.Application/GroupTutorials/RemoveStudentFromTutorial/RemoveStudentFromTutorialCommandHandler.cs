@@ -7,6 +7,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
+using Core.Models.Students.Errors;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,7 +44,7 @@ internal sealed class RemoveStudentFromTutorialCommandHandler
         Student studentEntity = await _studentRepository.GetForExistCheck(studentRecord.StudentId);
 
         if (studentEntity is null)
-            return Result.Failure(DomainErrors.Partners.Student.NotFound(studentRecord.StudentId));
+            return Result.Failure(StudentErrors.NotFound(studentRecord.StudentId));
 
         tutorial.UnenrolStudent(studentEntity, request.EffectiveFrom);
 

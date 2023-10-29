@@ -4,11 +4,10 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
-using Core.Errors;
-using Core.Models;
 using Core.Models.Enrolments;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
+using Core.Models.Students.Errors;
 using Core.Shared;
 using Serilog;
 using System.Threading;
@@ -59,7 +58,7 @@ internal sealed class EnrolMultipleStudentsInOfferingCommandHandler
             {
                 _logger
                     .ForContext(nameof(EnrolMultipleStudentsInOfferingCommand), request, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.Student.NotFound(studentId), true)
+                    .ForContext(nameof(Error), StudentErrors.NotFound(studentId), true)
                     .Warning("Could not create Enrolments for multiple Students");
 
                 continue;

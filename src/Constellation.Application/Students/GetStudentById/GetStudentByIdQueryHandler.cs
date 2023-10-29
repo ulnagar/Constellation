@@ -3,8 +3,8 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Students.Models;
-using Constellation.Core.Errors;
 using Constellation.Core.Shared;
+using Core.Models.Students.Errors;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,7 +24,7 @@ internal sealed class GetStudentByIdQueryHandler
 
         if (student is null)
         {
-            return Result.Failure<StudentResponse>(DomainErrors.Partners.Student.NotFound(request.StudentId));
+            return Result.Failure<StudentResponse>(StudentErrors.NotFound(request.StudentId));
         }
 
         return new StudentResponse(

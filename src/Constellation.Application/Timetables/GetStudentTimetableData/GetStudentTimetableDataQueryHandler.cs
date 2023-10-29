@@ -13,6 +13,7 @@ using Constellation.Core.Shared;
 using Core.Errors;
 using Core.Extensions;
 using Core.Models.Offerings.Errors;
+using Core.Models.Students.Errors;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,10 +56,10 @@ internal sealed class GetStudentTimetableDataQueryHandler
         {
             _logger
                 .ForContext(nameof(GetStudentTimetableDataQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Student.NotFound(request.StudentId), true)
+                .ForContext(nameof(Error), StudentErrors.NotFound(request.StudentId), true)
                 .Warning("Failed to retrieve Timetable data for Student");
 
-            return Result.Failure<StudentTimetableDataDto>(DomainErrors.Partners.Student.NotFound(request.StudentId));
+            return Result.Failure<StudentTimetableDataDto>(StudentErrors.NotFound(request.StudentId));
         }
 
         School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);

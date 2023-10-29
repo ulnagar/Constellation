@@ -4,8 +4,6 @@ using Abstractions.Messaging;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
-using Core.Abstractions.Repositories;
-using Core.Errors;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
 using Core.Models.Assignments.Repositories;
@@ -14,6 +12,7 @@ using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
+using Core.Models.Students.Errors;
 using Core.Shared;
 using DTOs;
 using Interfaces.Repositories;
@@ -78,7 +77,7 @@ internal sealed class GetAllAssignmentSubmissionFilesQueryHandler
             {
                 _logger
                     .ForContext(nameof(GetAllAssignmentSubmissionFilesQuery), request, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.Student.NotFound(studentSubmissions.Key), true)
+                    .ForContext(nameof(Error), StudentErrors.NotFound(studentSubmissions.Key), true)
                     .Warning("Failed to retrieve Assignment Submission files for Student");
 
                 continue;

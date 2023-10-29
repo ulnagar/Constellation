@@ -9,11 +9,10 @@ using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
+using Core.Models.Students.Errors;
 using Serilog;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -48,10 +47,10 @@ internal sealed class EnrolStudentCommandHandler
         {
             _logger
                 .ForContext(nameof(EnrolStudentCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Student.NotFound(request.StudentId), true)
+                .ForContext(nameof(Error), StudentErrors.NotFound(request.StudentId), true)
                 .Warning("Could not enrol student");
 
-            return Result.Failure(DomainErrors.Partners.Student.NotFound(request.StudentId));
+            return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
         Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);

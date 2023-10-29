@@ -7,6 +7,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.StaffTrainingReport;
+using Core.Models.Students.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -117,7 +118,7 @@ public class IndexModel : BasePageModel
         {
             Error = new ErrorDisplay
             {
-                Error = DomainErrors.Partners.Student.NotFound(""),
+                Error = StudentErrors.NotFound(""),
                 RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
             };
 

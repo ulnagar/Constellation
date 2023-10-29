@@ -6,7 +6,6 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings;
@@ -14,6 +13,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.Students.Errors;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading;
@@ -50,7 +50,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
         {
             _logger.Warning("{jobId}: Could not find student with Id {studentId}", request.JobId, request.StudentId);
 
-            return Result.Failure(DomainErrors.Partners.Student.NotFound(request.StudentId));
+            return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
         List<Absence> absences = new();

@@ -3,15 +3,14 @@
 using Abstractions.Messaging;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Assignments;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Core.DomainEvents;
-using Core.Models;
 using Core.Models.Assignments.Errors;
+using Core.Models.Students.Errors;
 using Core.Models.Subjects;
 using Interfaces.Repositories;
 using Serilog;
@@ -88,7 +87,7 @@ internal sealed class SendUploadReceipt
         {
             _logger
                 .ForContext(nameof(AssignmentAttemptSubmittedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Student.NotFound(submission.StudentId), true)
+                .ForContext(nameof(Error), StudentErrors.NotFound(submission.StudentId), true)
                 .Error("Failed to send Assignment Submission receipt to uploader");
 
             return;

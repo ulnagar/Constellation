@@ -11,6 +11,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.Students.Errors;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -57,7 +58,7 @@ internal sealed class GetAbsenceForStudentResponseQueryHandler
         {
             _logger.Warning("Could not find student with Id {id}", absence.StudentId);
 
-            return Result.Failure<AbsenceForStudentResponse>(DomainErrors.Partners.Student.NotFound(absence.StudentId));
+            return Result.Failure<AbsenceForStudentResponse>(StudentErrors.NotFound(absence.StudentId));
         }
 
         Name? studentName = student.GetName();

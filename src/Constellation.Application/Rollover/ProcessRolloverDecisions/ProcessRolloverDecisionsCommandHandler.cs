@@ -3,11 +3,11 @@
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students;
 using Core.Enums;
-using Core.Errors;
 using Core.Models.Rollover;
 using Core.Models.Rollover.Enums;
 using Core.Models.Rollover.Errors;
 using Core.Models.Rollover.Repositories;
+using Core.Models.Students.Errors;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
@@ -54,10 +54,10 @@ internal sealed class ProcessRolloverDecisionsCommandHandler
             {
                 _logger
                     .ForContext(nameof(RolloverDecision), decision, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.Student.NotFound(decision.StudentId), true)
+                    .ForContext(nameof(Error), StudentErrors.NotFound(decision.StudentId), true)
                     .Warning("Could not process Rollover Decision for student");
 
-                results.Add(new(decision, Result.Failure(DomainErrors.Partners.Student.NotFound(decision.StudentId))));
+                results.Add(new(decision, Result.Failure(StudentErrors.NotFound(decision.StudentId))));
 
                 continue;
             }
