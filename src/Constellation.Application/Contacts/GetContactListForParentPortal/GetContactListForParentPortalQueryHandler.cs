@@ -3,12 +3,12 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
+using Core.Models.Students.Errors;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Collections.Generic;
@@ -48,7 +48,7 @@ internal sealed class GetContactListForParentPortalQueryHandler
         {
             _logger.Warning("Could not find Student with Id {id}", request.StudentId);
 
-            return Result.Failure<List<StudentSupportContactResponse>>(DomainErrors.Partners.Student.NotFound(request.StudentId));
+            return Result.Failure<List<StudentSupportContactResponse>>(StudentErrors.NotFound(request.StudentId));
         }
 
         if (_configuration.Contacts is null)

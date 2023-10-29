@@ -1,12 +1,13 @@
 namespace Constellation.Core.Models.Students;
 
+using Abstractions.Clock;
 using Constellation.Core.Enums;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Errors;
 using Events;
 using Primitives;
 using System;
@@ -16,6 +17,25 @@ using System.Linq;
 public class Student : AggregateRoot
 {
     private readonly List<AbsenceConfiguration> _absenceConfigurations = new();
+
+    private Student(
+        string studentId,
+        string firstName,
+        string lastName,
+        string portalUsername,
+        Grade grade,
+        string schoolCode,
+        string gender)
+    {
+        StudentId = studentId;
+        FirstName = firstName;
+        LastName = lastName;
+        PortalUsername = portalUsername;
+        CurrentGrade = grade;
+        EnrolledGrade = grade;
+        Gender = gender;
+        SchoolCode = schoolCode;
+    }
 
     public Student()
     {
@@ -62,6 +82,29 @@ public class Student : AggregateRoot
     public ICollection<StudentWholeAbsence> WholeAbsences { get; set; }
     public IReadOnlyCollection<AbsenceConfiguration> AbsenceConfigurations => _absenceConfigurations;
 
+    public static Student Create(
+        string studentId,
+        string firstName,
+        string lastName,
+        string portalUsername,
+        Grade grade,
+        string schoolCode,
+        string gender)
+    {
+        Student entry = new Student(
+            studentId,
+            firstName,
+            lastName,
+            portalUsername,
+            grade,
+            schoolCode,
+            gender);
+
+        entry.RaiseDomainEvent(new StudentCreatedDomainEvent(new(), studentId));
+
+        return entry;
+    }
+
     public Result AddAbsenceConfiguration(AbsenceConfiguration configuration)
     {
         if (_absenceConfigurations.Any(config =>
@@ -69,7 +112,7 @@ public class Student : AggregateRoot
             config.AbsenceType == configuration.AbsenceType &&
             DoDateRangesOverlap(configuration.ScanStartDate, configuration.ScanEndDate, config.ScanStartDate, config.ScanEndDate)))
         {
-            return Result.Failure(DomainErrors.Partners.Student.AbsenceConfiguration.RecordForRangeExists(configuration.ScanStartDate, configuration.ScanEndDate));
+            return Result.Failure(AbsenceConfigurationErrors.RecordForRangeExists(configuration.ScanStartDate, configuration.ScanEndDate));
         }
 
         _absenceConfigurations.Add(configuration);
@@ -135,5 +178,29 @@ public class Student : AggregateRoot
         DateDeleted = DateTime.Now;
 
         RaiseDomainEvent(new StudentWithdrawnDomainEvent(new(), StudentId));
+    }
+
+    public void Reinstate(IDateTimeProvider dateTime)
+    {
+        int yearLeft = DateDeleted!.Value.Year;
+        int previousGrade = (int)CurrentGrade;
+        int thisYear = dateTime.Today.Year;
+        int difference = thisYear - yearLeft;
+        int thisGrade = previousGrade + difference;
+        
+        if (thisGrade > 12 || thisGrade == previousGrade)
+        {
+            // Do NOTHING!
+        }
+        else if (Enum.IsDefined(typeof(Grade), thisGrade))
+        {
+            Grade newGrade = (Grade)thisGrade;
+            CurrentGrade = newGrade;
+        }
+
+        IsDeleted = false;
+        DateDeleted = null;
+
+        RaiseDomainEvent(new StudentReinstatedDomainEvent(new(), StudentId));
     }
 }

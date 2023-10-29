@@ -53,4 +53,6 @@ public interface IStudentRepository
     Task<List<Student>> ForInterviewsExportAsync(InterviewExportSelectionDto filter, CancellationToken cancellationToken = default);
     Task<bool> AnyWithId(string id);
     Task<ICollection<Student>> WithoutAdobeConnectDetailsForUpdate();
+
+    void Insert(Student student);
 }

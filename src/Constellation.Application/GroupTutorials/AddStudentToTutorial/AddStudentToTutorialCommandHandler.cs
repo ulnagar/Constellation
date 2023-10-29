@@ -7,6 +7,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
+using Core.Models.Students.Errors;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -40,7 +41,7 @@ internal sealed class AddStudentToTutorialCommandHandler
 
         if (student is null)
         {
-            return Result.Failure(DomainErrors.Partners.Student.NotFound(request.StudentId));
+            return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
         Result<TutorialEnrolment> result = tutorial.EnrolStudent(student, request.EffectiveTo);

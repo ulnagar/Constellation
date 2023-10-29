@@ -4,11 +4,11 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
+using Core.Models.Students.Errors;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,7 +46,7 @@ internal sealed class AddToLessonRolls
         {
             _logger
                 .ForContext(nameof(EnrolmentCreatedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Student.NotFound(notification.StudentId))
+                .ForContext(nameof(Error), StudentErrors.NotFound(notification.StudentId))
                 .Error("Failed to complete the event handler");
 
             return;

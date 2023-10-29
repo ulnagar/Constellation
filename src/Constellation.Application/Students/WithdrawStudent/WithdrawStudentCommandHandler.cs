@@ -2,9 +2,9 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Core.Models.Students;
+using Core.Models.Students.Errors;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,7 +34,7 @@ internal sealed class WithdrawStudentCommandHandler
         {
             _logger.Warning("Could not find student with Id {id}", request.StudentId);
 
-            return Result.Failure(DomainErrors.Partners.Student.NotFound(request.StudentId));
+            return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
         student.Withdraw();

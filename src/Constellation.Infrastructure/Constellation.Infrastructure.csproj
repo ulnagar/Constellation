@@ -30,6 +30,7 @@
 	  <PackageReference Include="Duende.IdentityServer.Storage" Version="6.0.4" />
     <PackageReference Include="AutoMapper" Version="11.0.0" />
     <PackageReference Include="EPPlus" Version="6.0.3" />
+    <PackageReference Include="ExcelDataReader.DataSet" Version="3.6.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.42" />
     <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="6.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.ApiAuthorization.IdentityServer" Version="6.0.7" />

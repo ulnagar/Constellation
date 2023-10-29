@@ -193,10 +193,14 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             if (viewModel.IsNew)
             {
-                var result = await _studentService.CreateStudent(viewModel.Student);
-                await _unitOfWork.CompleteAsync();
-                await _operationService.CreateStudentEnrolmentMSTeamAccess(viewModel.Student.StudentId);
-                await _operationService.CreateCanvasUserFromStudent(result.Entity);
+                Student.Create(
+                    viewModel.Student.StudentId,
+                    viewModel.Student.FirstName,
+                    viewModel.Student.LastName,
+                    viewModel.Student.PortalUsername,
+                    viewModel.Student.CurrentGrade,
+                    viewModel.Student.SchoolCode,
+                    viewModel.Student.Gender);
             }
             else
             {

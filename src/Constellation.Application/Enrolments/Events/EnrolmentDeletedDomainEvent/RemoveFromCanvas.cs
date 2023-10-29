@@ -3,7 +3,6 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.Offerings;
@@ -12,6 +11,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
+using Core.Models.Students.Errors;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,7 +52,7 @@ internal class RemoveFromCanvas
         {
             _logger
                 .ForContext(nameof(EnrolmentDeletedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Student.NotFound(notification.StudentId))
+                .ForContext(nameof(Error), StudentErrors.NotFound(notification.StudentId))
                 .Error("Failed to complete the event handler");
 
             return;

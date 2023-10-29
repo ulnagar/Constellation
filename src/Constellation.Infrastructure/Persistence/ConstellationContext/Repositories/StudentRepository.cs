@@ -186,6 +186,8 @@ public class StudentRepository : IStudentRepository
                 student.CurrentGrade == grade)
             .ToListAsync(cancellationToken);
 
+    public void Insert(Student student) => _context.Set<Student>().Add(student);
+
     public async Task<Student> GetForExistCheck(string id)
     {
         return await _context.Students

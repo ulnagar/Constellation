@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
+using Application.Rollover.ImportStudents;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
 using Constellation.Application.Awards.ExportAwardNominations;
 using Constellation.Application.Contacts.GetContactList;
@@ -726,6 +727,15 @@ public class ExcelService : IExcelService
         memoryStream.Position = 0;
 
         return memoryStream;
+    }
+
+    public async Task<List<StudentImportRecord>> ConvertStudentImportFile(MemoryStream importFile, CancellationToken cancellationToken = default)
+    {
+        List<StudentImportRecord> results = new();
+
+        //todo: Implement conversion from xlsx/xls/csv to List<StudentImportRecord>
+
+        return results;
     }
 
     private class StudentRecord

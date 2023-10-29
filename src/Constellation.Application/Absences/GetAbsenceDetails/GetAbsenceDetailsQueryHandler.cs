@@ -9,6 +9,7 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.Students.Errors;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,7 @@ internal sealed class GetAbsenceDetailsQueryHandler
         {
             _logger.Warning("Could not locate student with Id {id}", absence.StudentId);
 
-            return Result.Failure<AbsenceDetailsResponse>(DomainErrors.Partners.Student.NotFound(absence.StudentId));        
+            return Result.Failure<AbsenceDetailsResponse>(StudentErrors.NotFound(absence.StudentId));        
         }
 
         Result<Name> studentNameRequest = Name.Create(student.FirstName, string.Empty, student.LastName);

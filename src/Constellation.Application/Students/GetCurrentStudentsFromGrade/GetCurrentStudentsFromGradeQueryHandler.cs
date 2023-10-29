@@ -2,8 +2,8 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students;
-using Core.Errors;
 using Core.Models;
+using Core.Models.Students.Errors;
 using Core.Shared;
 using Interfaces.Repositories;
 using Models;
@@ -39,10 +39,10 @@ internal sealed class GetCurrentStudentsFromGradeQueryHandler
         {
             _logger
                 .ForContext(nameof(GetCurrentStudentsFromGradeQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Student.NotFoundForGrade(request.Grade), true)
+                .ForContext(nameof(Error), StudentErrors.NotFoundForGrade(request.Grade), true)
                 .Warning("Could not retrieve students from grade");
 
-            return Result.Failure<List<StudentResponse>>(DomainErrors.Partners.Student.NotFoundForGrade(request.Grade));
+            return Result.Failure<List<StudentResponse>>(StudentErrors.NotFoundForGrade(request.Grade));
         }
 
         foreach (Student student in students)

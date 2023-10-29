@@ -10,6 +10,7 @@ using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
+using Core.Models.Students.Errors;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -65,7 +66,7 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
         {
             _logger.Information("Could not find student with Id {id} while retrieving absence {@absence}", absence.StudentId, absence);
 
-            return Result.Failure<ParentAbsenceDetailsResponse>(DomainErrors.Partners.Student.NotFound(absence.StudentId));
+            return Result.Failure<ParentAbsenceDetailsResponse>(StudentErrors.NotFound(absence.StudentId));
         }
 
         Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
