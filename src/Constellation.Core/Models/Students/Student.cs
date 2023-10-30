@@ -35,6 +35,8 @@ public class Student : AggregateRoot
         EnrolledGrade = grade;
         Gender = gender;
         SchoolCode = schoolCode;
+
+        DateEntered = DateTime.Now;
     }
 
     public Student()
