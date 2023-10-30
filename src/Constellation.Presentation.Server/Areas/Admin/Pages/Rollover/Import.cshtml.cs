@@ -55,7 +55,7 @@ public class ImportModel : BasePageModel
             {
                 Error = new()
                 {
-                    Error = new("Page.Form.File", "You must provide an Excel file"),
+                    Error = new("Page.Form.File", "You must provide an Excel file (.xls or .xlsx)"),
                     RedirectPath = null
                 };
 
