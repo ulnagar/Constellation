@@ -12,6 +12,7 @@ using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
+using Core.Enums;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -94,6 +95,9 @@ internal sealed class GetOfferingDetailsQueryHandler
 
         foreach (Session session in offering.Sessions)
         {
+            if (session.IsDeleted)
+                continue;
+
             TimetablePeriod period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
 
             if (period is null)
@@ -152,6 +156,9 @@ internal sealed class GetOfferingDetailsQueryHandler
 
         foreach (SciencePracLesson lesson in activeLessons)
         {
+            if (lesson.Rolls.All(roll => roll.Status == LessonStatus.Cancelled))
+                continue;
+
             List<OfferingDetailsResponse.LessonStudentAttendance> studentAttendances = new();
 
             List<SciencePracAttendance> attendance = lesson.Rolls
