@@ -259,7 +259,7 @@ public class NominateModel : BasePageModel
         {
             OfferingId offeringId = Core.Models.Offerings.Identifiers.OfferingId.FromValue(OfferingId);
 
-            Result<List<StudentForSelectionList>> studentsRequest = await _mediator.Send(new GetFilteredStudentsForSelectionListQuery(periodRequest.Value.IncludedGrades, new List<OfferingId> { offeringId }, new List<CourseId>()));
+            Result<List<StudentForSelectionList>> studentsRequest = await _mediator.Send(new GetFilteredStudentsForSelectionListQuery(new List<Grade>(), new List<OfferingId> { offeringId }, new List<CourseId>()));
 
             if (studentsRequest.IsFailure)
             {
