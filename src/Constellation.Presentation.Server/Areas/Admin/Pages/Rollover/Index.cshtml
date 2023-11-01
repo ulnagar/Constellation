@@ -1,3 +1,62 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Admin.Pages.Rollover.IndexModel
 
+<h2>End of Year Rollover Processes</h2>
+
+<div class="page-menu">
+
+</div>
+
+<hr />
+
+<div class="row">
+    <div class="col">
+        <h3>Step 1 - Rollover Students</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <p>This process allows you to chose one of three options for each student:</p>
+        <dl>
+            <dt>Withdraw</dt>
+            <dd>The student will no longer be studying with Aurora College and should be removed from the school.</dd>
+            <dt>Rollover</dt>
+            <dd>The student has graduated to the next grade or cohort. They should be updated to reflect this.</dd>
+            <dt>Remain</dt>
+            <dd>No changes should be made to the student record. They will remain in the current grade.</dd>
+        </dl>
+    </div>
+    <div class="col">
+        <a asp-page="Rollover/Rollover" asp-area="Admin" class="btn btn-success">Rollover</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <h3>Step 2 - Import Students</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <p>This process allows you to bulk import the new students enrolling at Aurora College. Use the provided Excel file to specify all their details:</p>
+        <dl>
+            <dt>StudentId</dt>
+            <dd>The Departments Student Reference Number (SRN) for the student.</dd>
+            <dt>FirstName</dt>
+            <dd>The students preferred First Name.</dd>
+            <dt>LastName</dt>
+            <dd>The students preferred Last Name.</dd>
+            <dt>UserName</dt>
+            <dd>The Departments Portal Username for the student. Is also the first section of the students DoE Email address.</dd>
+            <dt>Grade</dt>
+            <dd>The Grade the student should be enrolled to, as a number. E.g. 5 for Year 5 and 12 for Year 12.</dd>
+            <dt>SchoolCode</dt>
+            <dd>The Departments four digit school location code. E.g 8912 for Aurora College</dd>
+            <dt>Gender</dt>
+            <dd>The single character representation of the students gender. E.g. M for male and F for female.</dd>
+        </dl>
+    </div>
+    <div class="col">
+        <a asp-page="Rollover/Import" asp-area="Admin" class="btn btn-success">Import</a>
+    </div>
+</div>
