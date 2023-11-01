@@ -39,7 +39,11 @@ internal sealed class NominationConfiguration
             .HasDiscriminator(nomination => nomination.AwardType)
             .HasValue<FirstInSubjectNomination>(AwardType.FirstInSubject)
             .HasValue<AcademicExcellenceNomination>(AwardType.AcademicExcellence)
+            .HasValue<AcademicExcellenceMathematicsNomination>(AwardType.AcademicExcellenceMathematics)
+            .HasValue<AcademicExcellenceScienceTechnologyNomination>(AwardType.AcademicExcellenceScienceTechnology)
             .HasValue<AcademicAchievementNomination>(AwardType.AcademicAchievement)
+            .HasValue<AcademicAchievementMathematicsNomination>(AwardType.AcademicAchievementMathematics)
+            .HasValue<AcademicAchievementScienceTechnologyNomination>(AwardType.AcademicAchievementScienceTechnology)
             .HasValue<PrincipalsAwardNomination>(AwardType.PrincipalsAward)
             .HasValue<GalaxyMedalNomination>(AwardType.GalaxyMedal)
             .HasValue<UniversalAchieverNomination>(AwardType.UniversalAchiever);

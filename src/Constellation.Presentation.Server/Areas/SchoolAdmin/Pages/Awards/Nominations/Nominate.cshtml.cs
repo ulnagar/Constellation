@@ -79,7 +79,11 @@ public class NominateModel : BasePageModel
         if (CurrentStep == Phase.AwardSelection &&
             (AwardType.Equals(AwardType.FirstInSubject) ||
             AwardType.Equals(AwardType.AcademicExcellence) ||
-            AwardType.Equals(AwardType.AcademicAchievement)))
+            AwardType.Equals(AwardType.AcademicExcellenceMathematics) ||
+            AwardType.Equals(AwardType.AcademicExcellenceScienceTechnology) ||
+            AwardType.Equals(AwardType.AcademicAchievement) ||
+            AwardType.Equals(AwardType.AcademicAchievementMathematics) ||
+            AwardType.Equals(AwardType.AcademicAchievementScienceTechnology)))
         {
             PreviousSteps.Add(Phase.AwardSelection);
             CurrentStep = Phase.CourseSelection;
@@ -100,9 +104,13 @@ public class NominateModel : BasePageModel
             return Page();
         }
 
-        if (CurrentStep == Phase.CourseSelection && 
+        if (CurrentStep == Phase.CourseSelection &&
             (AwardType.Equals(AwardType.AcademicExcellence) ||
-            AwardType.Equals(AwardType.AcademicAchievement)))
+            AwardType.Equals(AwardType.AcademicExcellenceMathematics) ||
+            AwardType.Equals(AwardType.AcademicExcellenceScienceTechnology) ||
+            AwardType.Equals(AwardType.AcademicAchievement) ||
+            AwardType.Equals(AwardType.AcademicAchievementMathematics) ||
+            AwardType.Equals(AwardType.AcademicAchievementScienceTechnology)))
         {
             PreviousSteps.Add(Phase.CourseSelection);
             CurrentStep = Phase.OfferingSelection;
@@ -323,7 +331,11 @@ public class NominateModel : BasePageModel
 
             if (Type != AwardType.FirstInSubject.Value &&
                 Type != AwardType.AcademicExcellence.Value &&
+                Type != AwardType.AcademicExcellenceMathematics.Value &&
+                Type != AwardType.AcademicExcellenceScienceTechnology.Value &&
                 Type != AwardType.AcademicAchievement.Value &&
+                Type != AwardType.AcademicAchievementMathematics.Value &&
+                Type != AwardType.AcademicAchievementScienceTechnology.Value &&
                 Type != AwardType.PrincipalsAward.Value &&
                 Type != AwardType.GalaxyMedal.Value &&
                 Type != AwardType.UniversalAchiever.Value)
@@ -336,7 +348,11 @@ public class NominateModel : BasePageModel
         {
             if ((Type == AwardType.FirstInSubject.Value ||
                 Type == AwardType.AcademicExcellence.Value ||
-                Type == AwardType.AcademicAchievement.Value) &&
+                Type != AwardType.AcademicExcellenceMathematics.Value ||
+                Type != AwardType.AcademicExcellenceScienceTechnology.Value ||
+                Type == AwardType.AcademicAchievement.Value ||
+                Type != AwardType.AcademicAchievementMathematics.Value ||
+                Type != AwardType.AcademicAchievementScienceTechnology.Value) &&
                 CourseId == Guid.Empty)
             {
                 ModelState.AddModelError("CourseId", "You must select a valid course");
@@ -345,8 +361,13 @@ public class NominateModel : BasePageModel
 
         if (CurrentStep == Phase.OfferingSelection || PreviousSteps.Contains(Phase.OfferingSelection))
         {
-            if ((Type == AwardType.AcademicExcellence.Value ||
-                Type == AwardType.AcademicAchievement.Value) &&
+            if ((Type == AwardType.FirstInSubject.Value ||
+                 Type == AwardType.AcademicExcellence.Value ||
+                 Type != AwardType.AcademicExcellenceMathematics.Value ||
+                 Type != AwardType.AcademicExcellenceScienceTechnology.Value ||
+                 Type == AwardType.AcademicAchievement.Value ||
+                 Type != AwardType.AcademicAchievementMathematics.Value ||
+                 Type != AwardType.AcademicAchievementScienceTechnology.Value) &&
                 OfferingId == new Guid())
             {
                 ModelState.AddModelError("OfferingId", "You must select a valid class");

@@ -8,6 +8,7 @@ using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
+using Core.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;

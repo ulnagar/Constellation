@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Constellation.Core.Models.Offerings.Repositories;
 using Core.Abstractions.Repositories;
+using Core.Extensions;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
 using Core.Models.Subjects;

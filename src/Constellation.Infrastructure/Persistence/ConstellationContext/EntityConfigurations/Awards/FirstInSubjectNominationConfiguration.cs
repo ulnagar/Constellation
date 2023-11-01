@@ -20,5 +20,9 @@ internal sealed class FirstInSubjectNominationConfiguration :
         builder
             .Property(nomination => nomination.CourseName)
             .HasColumnName(nameof(FirstInSubjectNomination.CourseName));
+
+        builder
+            .Property(nomination => nomination.Grade)
+            .HasColumnName(nameof(FirstInSubjectNomination.Grade));
     }
 }

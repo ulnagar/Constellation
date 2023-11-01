@@ -5,6 +5,7 @@ using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Shared;
+using Core.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Threading;

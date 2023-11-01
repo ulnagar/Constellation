@@ -10,6 +10,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.ValueObjects;
+using Core.Extensions;
 using MediatR;
 using System;
 using System.Collections.Generic;

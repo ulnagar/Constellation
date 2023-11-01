@@ -6,6 +6,7 @@ using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
+using Core.Extensions;
 using MediatR;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,36 +1,36 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Awards;
 
-using Constellation.Core.Models.Awards;
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Models.Awards;
+using Core.Models.Offerings.Identifiers;
+using Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-internal sealed class AcademicExcellenceNominationConfiguration
-    : IEntityTypeConfiguration<AcademicExcellenceNomination>
+internal sealed class AcademicExcellenceMathematicsNominationConfiguration
+    : IEntityTypeConfiguration<AcademicExcellenceMathematicsNomination>
 {
-    public void Configure(EntityTypeBuilder<AcademicExcellenceNomination> builder)
+    public void Configure(EntityTypeBuilder<AcademicExcellenceMathematicsNomination> builder)
     {
         builder
             .Property(nomination => nomination.CourseId)
-            .HasColumnName(nameof(AcademicExcellenceNomination.CourseId))
+            .HasColumnName(nameof(AcademicExcellenceMathematicsNomination.CourseId))
             .HasConversion(
                 id => id.Value,
                 value => CourseId.FromValue(value));
 
         builder
             .Property(nomination => nomination.CourseName)
-            .HasColumnName(nameof(AcademicExcellenceNomination.CourseName));
+            .HasColumnName(nameof(AcademicExcellenceMathematicsNomination.CourseName));
 
         builder
             .Property(nomination => nomination.OfferingId)
-            .HasColumnName(nameof(AcademicExcellenceNomination.OfferingId))
+            .HasColumnName(nameof(AcademicExcellenceMathematicsNomination.OfferingId))
             .HasConversion(
                 id => id.Value,
                 value => OfferingId.FromValue(value));
 
         builder
             .Property(nomination => nomination.ClassName)
-            .HasColumnName(nameof(AcademicExcellenceNomination.ClassName));
+            .HasColumnName(nameof(AcademicExcellenceMathematicsNomination.ClassName));
     }
 }

@@ -4,6 +4,7 @@ using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
+using Core.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;

@@ -7,6 +7,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Shared;
+using Core.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;

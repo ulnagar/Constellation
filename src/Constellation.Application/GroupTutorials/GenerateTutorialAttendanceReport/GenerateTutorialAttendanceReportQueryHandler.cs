@@ -10,6 +10,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Shared;
+using Core.Extensions;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

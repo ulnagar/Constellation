@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Shared;
+using Core.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;

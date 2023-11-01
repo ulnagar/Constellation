@@ -9,6 +9,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Infrastructure.Templates.Views.Documents.Attendance;
+using Core.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;

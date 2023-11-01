@@ -8,6 +8,7 @@ using Application.Models.Auth;
 using BaseModels;
 using Constellation.Application.Assignments.GetAssignmentsFromCourse;
 using Constellation.Application.Courses.GetCoursesForSelectionList;
+using Core.Extensions;
 using Core.Models.Subjects.Identifiers;
 using Core.Shared;
 using MediatR;

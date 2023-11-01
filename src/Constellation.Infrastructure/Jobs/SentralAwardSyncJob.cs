@@ -11,6 +11,7 @@ using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Identifiers;
 using Core.Abstractions.Clock;
+using Core.Extensions;
 using Core.Models.Attachments;
 using Core.Models.Attachments.Services;
 using System;

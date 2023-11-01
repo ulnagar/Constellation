@@ -56,7 +56,7 @@ internal sealed class CreateAwardNominationCommandHandler
         {
             Course course = await _courseRepository.GetById(request.CourseId);
 
-            nomination = new FirstInSubjectNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name);
+            nomination = new FirstInSubjectNomination(request.PeriodId, request.StudentId, request.CourseId, course.Grade, course.Name);
         }
 
         if (request.AwardType.Equals(AwardType.AcademicExcellence))
@@ -68,13 +68,49 @@ internal sealed class CreateAwardNominationCommandHandler
             nomination = new AcademicExcellenceNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name);
         }
 
+        if (request.AwardType.Equals(AwardType.AcademicExcellenceMathematics))
+        {
+            Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
+
+            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
+
+            nomination = new AcademicExcellenceMathematicsNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name);
+        }
+
+        if (request.AwardType.Equals(AwardType.AcademicExcellenceScienceTechnology))
+        {
+            Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
+
+            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
+
+            nomination = new AcademicExcellenceScienceTechnologyNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name);
+        }
+
         if (request.AwardType.Equals(AwardType.AcademicAchievement))
         {
             Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
 
             Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
 
-            nomination = new AcademicAchievementNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name);
+            nomination = new AcademicAchievementNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name.Value);
+        }
+
+        if (request.AwardType.Equals(AwardType.AcademicAchievementMathematics))
+        {
+            Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
+
+            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
+
+            nomination = new AcademicAchievementMathematicsNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name.Value);
+        }
+
+        if (request.AwardType.Equals(AwardType.AcademicAchievementScienceTechnology))
+        {
+            Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
+
+            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
+
+            nomination = new AcademicAchievementScienceTechnologyNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name.Value);
         }
 
         if (request.AwardType.Equals(AwardType.PrincipalsAward))

@@ -7,6 +7,7 @@ using Constellation.Application.Reports.CreateNewStudentReport;
 using Constellation.Application.Reports.GetAcademicReportsForStudent;
 using Constellation.Application.Reports.ReplaceStudentReport;
 using Constellation.Application.Students.GetCurrentStudentsWithSentralId;
+using Core.Extensions;
 using MediatR;
 using System;
 using System.Linq;

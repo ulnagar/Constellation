@@ -3,6 +3,8 @@ using Constellation.Core.Enums;
 
 namespace Constellation.Application.Tests.Unit.Extensions;
 
+using Core.Extensions;
+
 public class GradeExtensionsTests
 {
 

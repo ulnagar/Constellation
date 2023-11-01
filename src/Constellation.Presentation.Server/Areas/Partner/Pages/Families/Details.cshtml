@@ -5,6 +5,7 @@
 
 @using Constellation.Core.ValueObjects;
 @using Constellation.Application.Extensions;
+@using Constellation.Core.Extensions
 
 @{
     var isAuthorised = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);

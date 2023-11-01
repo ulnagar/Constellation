@@ -10,6 +10,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Core.Errors;
+using Core.Extensions;
 using Core.Models.Offerings.Errors;
 using Serilog;
 using System.Collections.Generic;

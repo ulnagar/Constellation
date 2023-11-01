@@ -11,6 +11,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
 {
     using Application.Enrolments.GetFTETotalByGrade;
     using Constellation.Core.Models.Offerings.Repositories;
+    using Core.Extensions;
     using Core.Shared;
 
     [Area("Reports")]

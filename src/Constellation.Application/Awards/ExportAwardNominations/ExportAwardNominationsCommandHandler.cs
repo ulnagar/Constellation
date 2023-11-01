@@ -10,6 +10,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Shared;
+using Core.Extensions;
 using Serilog;
 using System;
 using System.Collections.Generic;
