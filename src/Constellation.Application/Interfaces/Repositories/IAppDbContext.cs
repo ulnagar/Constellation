@@ -18,7 +18,6 @@ using System.Threading.Tasks;
 public interface IAppDbContext
 {
     DbSet<AdobeConnectOperation> AdobeConnectOperations { get; set; }
-    DbSet<AppSettings> AppSettings { get; set; }
     DbSet<AppAccessToken> AspNetAccessTokens { get; set; }
     DbSet<CanvasOperation> CanvasOperations { get; set; }
     DbSet<Course> Courses { get; set; }
@@ -42,7 +41,6 @@ public interface IAppDbContext
     DbSet<StocktakeEvent> StocktakeEvents { get; set; }
     DbSet<StocktakeSighting> StocktakeSightings { get; set; }
     DbSet<StudentAward> StudentAward { get; set; }
-    //DbSet<EmailQueueItem> EmailQueue { get; set; }
     DbSet<Faculty> Faculties { get; set; }
 
     IMandatoryTrainingSets MandatoryTraining { get; }

@@ -21,7 +21,6 @@ public class UnitOfWork : IUnitOfWork
     public ISchoolContactRepository SchoolContacts { get; set; }
     public ISchoolContactRoleRepository SchoolContactRoles { get; set; }
     public ISchoolRepository Schools { get; set; }
-    public ISettingRepository Settings { get; set; }
     public IStaffRepository Staff { get; set; }
     public IStudentRepository Students { get; set; }
     public ITimetablePeriodRepository Periods { get; set; }
@@ -48,7 +47,6 @@ public class UnitOfWork : IUnitOfWork
         SchoolContacts = new SchoolContactRepository(context);
         SchoolContactRoles = new SchoolContactRoleRepository(context);
         Schools = new SchoolRepository(context);
-        Settings = new SettingRepository(context);
         Staff = new StaffRepository(context);
         Students = new StudentRepository(context, dateTime);
         Periods = new TimetablePeriodRepository(context);
