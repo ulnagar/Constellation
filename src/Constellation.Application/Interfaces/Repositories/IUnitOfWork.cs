@@ -17,7 +17,6 @@ public interface IUnitOfWork
     ISchoolContactRepository SchoolContacts { get; set; }
     ISchoolContactRoleRepository SchoolContactRoles { get; set; }
     ISchoolRepository Schools { get; set; }
-    ISettingRepository Settings { get; set; }
     IStaffRepository Staff { get; set; }
     IStudentRepository Students { get; set; }
     ITimetablePeriodRepository Periods { get; set; }

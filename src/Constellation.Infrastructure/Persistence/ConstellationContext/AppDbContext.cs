@@ -20,7 +20,6 @@ using System.Reflection;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext
 {
     using Constellation.Core.Models.Students;
-    using Core.Models.Attachments;
 
     public class AppDbContext : KeyApiAuthorizationDbContext<AppUser, AppRole, Guid>, IAppDbContext
     {
@@ -30,7 +29,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext
             MandatoryTraining = new MandatoryTrainingSets(this);
         }
 
-        public DbSet<AppSettings> AppSettings { get; set; }
         public DbSet<AdobeConnectOperation> AdobeConnectOperations { get; set; }
         public DbSet<MSTeamOperation> MSTeamOperations { get; set; }
         public DbSet<AppAccessToken> AspNetAccessTokens { get; set; }

@@ -291,8 +291,6 @@ public class Service : IEmailService
         List<EmailRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
-        var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
-
         var viewModel = new CoordinatorAbsenceVerificationRequestEmailViewModel
         {
             Preheader = "",
@@ -832,13 +830,11 @@ public class Service : IEmailService
 
     private async Task SendFirstLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
-        var settings = await _unitOfWork.Settings.Get();
-
         var viewModel = new FirstWarningEmailViewModel
         {
             Preheader = "",
-            SenderName = settings.LessonsCoordinatorName,
-            SenderTitle = settings.LessonsCoordinatorTitle,
+            SenderName = _configuration.Lessons.CoordinatorName,
+            SenderTitle = _configuration.Lessons.CoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
             Link = "https://acos.aurora.nsw.edu.au/schools",
             SchoolName = notification.SchoolName,
@@ -852,18 +848,16 @@ public class Service : IEmailService
             if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
                 toRecipients.Add(entry.Name, entry.Email);
 
-        await _emailSender.Send(toRecipients, settings.LessonsCoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(toRecipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
     }
 
     private async Task SendSecondLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
-        var settings = await _unitOfWork.Settings.Get();
-
         var viewModel = new SecondWarningEmailViewModel
         {
             Preheader = "",
-            SenderName = settings.LessonsCoordinatorName,
-            SenderTitle = settings.LessonsCoordinatorTitle,
+            SenderName = _configuration.Lessons.CoordinatorName,
+            SenderTitle = _configuration.Lessons.CoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
             Link = "https://acos.aurora.nsw.edu.au/schools",
             SchoolName = notification.SchoolName,
@@ -877,18 +871,16 @@ public class Service : IEmailService
             if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
                 toRecipients.Add(entry.Name, entry.Email);
 
-        await _emailSender.Send(toRecipients, settings.LessonsCoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(toRecipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
     }
 
     private async Task SendThirdLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
-        var settings = await _unitOfWork.Settings.Get();
-
         var viewModel = new SecondWarningEmailViewModel
         {
             Preheader = "",
-            SenderName = settings.LessonsCoordinatorName,
-            SenderTitle = settings.LessonsCoordinatorTitle,
+            SenderName = _configuration.Lessons.CoordinatorName,
+            SenderTitle = _configuration.Lessons.CoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
             Link = "https://acos.aurora.nsw.edu.au/schools",
             SchoolName = notification.SchoolName,
@@ -902,18 +894,16 @@ public class Service : IEmailService
             if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
                 toRecipients.Add(entry.Name, entry.Email);
 
-        await _emailSender.Send(toRecipients, settings.LessonsCoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(toRecipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
     }
 
     private async Task SendFinalLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
-        var settings = await _unitOfWork.Settings.Get();
-
         var viewModel = new FinalWarningEmailViewModel
         {
             Preheader = "",
-            SenderName = settings.LessonsCoordinatorName,
-            SenderTitle = settings.LessonsCoordinatorTitle,
+            SenderName = _configuration.Lessons.CoordinatorName,
+            SenderTitle = _configuration.Lessons.CoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
             Link = "https://acos.aurora.nsw.edu.au/schools",
             SchoolName = notification.SchoolName,
@@ -927,18 +917,16 @@ public class Service : IEmailService
             if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
                 toRecipients.Add(entry.Name, entry.Email);
 
-        await _emailSender.Send(toRecipients, settings.LessonsCoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(toRecipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
     }
 
     private async Task SendLessonAlertEmail(LessonMissedNotificationEmail notification)
     {
-        var settings = await _unitOfWork.Settings.Get();
-
         var viewModel = new CoordinatorNotificationEmailViewModel
         {
             Preheader = "",
-            SenderName = settings.LessonsCoordinatorName,
-            SenderTitle = settings.LessonsCoordinatorTitle,
+            SenderName = _configuration.Lessons.CoordinatorName,
+            SenderTitle = _configuration.Lessons.CoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
             SchoolName = notification.SchoolName,
             Lessons = notification.Lessons
@@ -951,7 +939,7 @@ public class Service : IEmailService
             if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
                 toRecipients.Add(entry.Name, entry.Email);
 
-        await _emailSender.Send(toRecipients, settings.LessonsCoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(toRecipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
     }
 
     public async Task SendStudentLessonCompletedEmail(
@@ -1003,8 +991,6 @@ public class Service : IEmailService
 
     public async Task SendDailyRollMarkingReport(List<RollMarkingEmailDto> entries, DateOnly reportDate, Dictionary<string, string> recipients)
     {
-        var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
-
         var viewModel = new DailyReportEmailViewModel
         {
             Preheader = "",
@@ -1021,8 +1007,6 @@ public class Service : IEmailService
 
     public async Task SendNoRollMarkingReport(DateOnly reportDate, Dictionary<string, string> recipients)
     {
-        var absenceSettings = await _unitOfWork.Settings.GetAbsenceAppSettings();
-
         var viewModel = new DailyReportEmailViewModel
         {
             Preheader = "",
@@ -1038,8 +1022,6 @@ public class Service : IEmailService
 
     public async Task SendMagicLinkLoginEmail(MagicLinkEmail notification)
     {
-        var settings = await _unitOfWork.Settings.Get();
-
         var viewModel = new MagicLinkLoginEmailViewModel
         {
             Preheader = "This is an automated message. Please do not reply.",
