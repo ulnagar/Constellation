@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Extensions;
 using Constellation.Application.DTOs;
-using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
