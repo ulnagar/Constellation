@@ -26,6 +26,6 @@ public interface IUnitOfWork
 
     void Remove<TEntity>(TEntity entity) where TEntity : class;
     void Add<TEntity>(TEntity entity) where TEntity : class;
-    Task CompleteAsync(CancellationToken token = new CancellationToken());
+    Task CompleteAsync(CancellationToken token);
     Task CompleteAsync();
 }

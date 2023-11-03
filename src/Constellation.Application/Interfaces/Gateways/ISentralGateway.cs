@@ -4,6 +4,7 @@ using Constellation.Application.Attendance.GetAttendanceDataFromSentral;
 using Constellation.Application.Attendance.GetValidAttendanceReportDates;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.Awards;
+using Constellation.Core.Shared;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -26,5 +27,6 @@ public interface ISentralGateway
     Task<ICollection<AwardDetailDto>> GetAwardsReport();
     Task<List<AwardIncidentDto>> GetAwardsListing(string sentralStudentId, string calYear);
     Task<byte[]> GetAwardDocument(string sentralStudentId, string incidentId);
-    Task<SystemAttendanceData> GetAttendancePercentages(string term, string week, string year);
+    Task<SystemAttendanceData> GetAttendancePercentages(string term, string week, string year, DateOnly startDate, DateOnly endDate);
+    Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForFortnight(string year, string term, string week);
 }

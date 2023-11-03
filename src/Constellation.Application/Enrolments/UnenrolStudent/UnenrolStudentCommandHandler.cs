@@ -61,7 +61,7 @@ internal sealed class UnenrolStudentCommandHandler
             }
         }
 
-        await _unitOfWork.CompleteAsync();
+        await _unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();
     }

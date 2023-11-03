@@ -1,6 +1,7 @@
 ﻿@page
-@using Constellation.Application.Extensions
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
+
+@using Constellation.Core.Extensions
 
 <h2>Test Page</h2>
 
@@ -17,6 +18,7 @@
             <th rowspan="2">Name</th>
             <th rowspan="2">Grade</th>
             <th rowspan="2">School</th>
+            <th rowspan="2">Start Date</th>
             <th colspan="2">YTD</th>
             <th colspan="2">Fortnight</th>
         </tr>
@@ -28,18 +30,23 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var entry in Model.StudentData)
+    @foreach (var studentId in Model.StudentData.Select(entry => entry.StudentId).Distinct().ToList())
+    {
+        @foreach (var entry in Model.StudentData.Where(entry => entry.StudentId == studentId).OrderBy(entry => entry.StartDate))
         {
             <tr>
                 <td>@entry.StudentId</td>
-                <td>@entry.Name</td>
+                <td><a asp-page="Student" asp-route-studentId="@entry.StudentId">@entry.Name</a></td>
                 <td>@entry.Grade.AsName()</td>
                 <td>@entry.SchoolName</td>
+                <td>@entry.StartDate.ToShortDateString()</td>
                 <td>@entry.DayYTD</td>
                 <td>@entry.MinuteYTD</td>
                 <td>@entry.DayFN</td>
                 <td>@entry.MinuteFN</td>
             </tr>
         }
+    }
+
     </tbody>
 </table>

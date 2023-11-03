@@ -2,11 +2,13 @@
 
 using Abstractions.Messaging;
 using Core.Models;
+using Core.Models.Students;
 using Core.Shared;
 using Interfaces.Gateways;
 using Interfaces.Repositories;
 using Interfaces.Services;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,7 +38,19 @@ internal sealed class GetAttendanceDataFromSentralQueryHandler
 
     public async Task<Result<List<StudentAttendanceData>>> Handle(GetAttendanceDataFromSentralQuery request, CancellationToken cancellationToken)
     {
-        SystemAttendanceData data = await _sentralGateway.GetAttendancePercentages(request.Term, request.Week, request.Year);
+        Result<(DateOnly StartDate, DateOnly EndDate)> dateResponse = await _sentralGateway.GetDatesForFortnight(request.Year, request.Term, request.Week);
+
+        if (dateResponse.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(GetAttendanceDataFromSentralQuery), request, true)
+                .ForContext(nameof(Error), dateResponse.Error, true)
+                .Warning("Failed to retrieve attendance data from Sentral");
+
+            return Result.Failure<List<StudentAttendanceData>>(new Error("TBC", "TBC - GetAttendanceDataFromSentralQuery:50"));
+        }
+
+        SystemAttendanceData data = await _sentralGateway.GetAttendancePercentages(request.Term, request.Week, request.Year, dateResponse.Value.StartDate, dateResponse.Value.EndDate);
 
         if (data is null)
         {
@@ -44,7 +58,7 @@ internal sealed class GetAttendanceDataFromSentralQueryHandler
                 .ForContext(nameof(GetAttendanceDataFromSentralQuery), request, true)
                 .Warning("Failed to retrieve attendance data from Sentral");
 
-            return Result.Failure<List<StudentAttendanceData>>(new Error("TBC", "TBC - GetAttendanceDataFromSentralQuery:39"));
+            return Result.Failure<List<StudentAttendanceData>>(new Error("TBC", "TBC - GetAttendanceDataFromSentralQuery:61"));
         }
 
         List<StudentAttendanceData> response = new();
@@ -63,6 +77,8 @@ internal sealed class GetAttendanceDataFromSentralQueryHandler
 
             School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
 
+            entry.StartDate = dateResponse.Value.StartDate;
+            entry.EndDate = dateResponse.Value.EndDate;
             entry.Name = student.DisplayName;
             entry.Grade = student.CurrentGrade;
             entry.SchoolName = school?.Name;

@@ -9,6 +9,7 @@ using Constellation.Application.DTOs.CSV;
 using Constellation.Application.ExternalDataConsistency;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.MandatoryTraining.Models;
+using Constellation.Application.Rollover.ImportStudents;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Infrastructure.Jobs;
 using System.Collections.Generic;
@@ -35,4 +36,5 @@ public interface IExcelService
     List<StudentAttendanceData> ExtractYTDMinuteData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
     List<StudentAttendanceData> ExtractFNDayData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
     List<StudentAttendanceData> ExtractFNMinuteData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
+    Task<List<StudentImportRecord>> ConvertStudentImportFile(MemoryStream importFile, CancellationToken cancellationToken = default);
 }

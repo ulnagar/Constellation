@@ -7,7 +7,6 @@ using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Presentation.Server.Helpers.HtmlGenerator;
 using Constellation.Presentation.Server.Infrastructure;
 using Constellation.Presentation.Server.Services;
-using Constellation.Presentation.Server.Shared.Models;
 using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +26,8 @@ LoggingConfiguration.SetupLogging(builder.Configuration, Serilog.Events.LogEvent
 builder.Services
     .AddApplication()
     .AddInfrastructure(builder.Configuration, builder.Environment);
+
+builder.Services.AddSingleton<StudentAttendanceService>();
 
 // Configuration Authentication and Authorization
 builder.Services.AddIdentity<AppUser, AppRole>()
