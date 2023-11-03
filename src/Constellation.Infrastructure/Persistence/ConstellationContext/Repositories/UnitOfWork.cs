@@ -54,23 +54,11 @@ public class UnitOfWork : IUnitOfWork
         JobActivations = new JobActivationRepository(context);
     }
 
-    public void Remove<TEntity>(TEntity entity) where TEntity : class
-    {
-        _context.Set<TEntity>().Remove(entity);
-    }
+    public void Remove<TEntity>(TEntity entity) where TEntity : class => _context.Set<TEntity>().Remove(entity);
 
-    public void Add<TEntity>(TEntity entity) where TEntity : class
-    {
-        _context.Set<TEntity>().Add(entity);
-    }
+    public void Add<TEntity>(TEntity entity) where TEntity : class => _context.Set<TEntity>().Add(entity);
 
-    public async Task CompleteAsync(CancellationToken token = new CancellationToken())
-    {
-        await _context.SaveChangesAsync(token);
-    }
+    public async Task CompleteAsync(CancellationToken token) => await _context.SaveChangesAsync(token);
 
-    public async Task CompleteAsync()
-    {
-        await _context.SaveChangesAsync();
-    }
+    public async Task CompleteAsync() => await _context.SaveChangesAsync();
 }

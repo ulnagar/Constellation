@@ -695,20 +695,23 @@ public partial class Gateway : ISentralGateway
         return nonSchoolDays.OrderBy(a => a).ToList();
     }
 
-    private async Task<Result<DateOnly>> GetEndDateForFortnight(string year, string term, string week)
+    public async Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForFortnight(string year, string term, string week)
     {
         if (_logOnly)
         {
             _logger
                 .Information("GetEndDateForFortnight: year={year}, term={term}, week={week}", year, term, week);
 
-            return _dateTime.Today;
+            return (_dateTime.Today, _dateTime.Today.AddDays(12));
         }
+
+        DateOnly startDate;
+        DateOnly endDate;
 
         HtmlDocument page = await GetPageAsync($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term");
 
         if (page == null)
-            return Result.Failure<DateOnly>(new("SentralGateway.GetPage.Failure", "Could not retrieve page from Sentral Server"));
+            return Result.Failure<(DateOnly, DateOnly)>(new("SentralGateway.GetPage.Failure", "Could not retrieve page from Sentral Server"));
 
         HtmlNode calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "TermCalendarTable").Value);
 
@@ -717,6 +720,7 @@ public partial class Gateway : ISentralGateway
             IEnumerable<HtmlNode> rows = calendarTable.Descendants("tr");
 
             bool correctTerm = false;
+            bool nextWeek = false;
 
             foreach (HtmlNode row in rows)
             {
@@ -750,6 +754,23 @@ public partial class Gateway : ISentralGateway
 
                     if (weekName?.InnerText == week)
                     {
+                        HtmlNode day = row.Descendants("td").First();
+
+                        string action = day.GetAttributeValue("onclick", "");
+                        if (!string.IsNullOrWhiteSpace(action))
+                        {
+                            string detectedDate = action.Split('\'')[1];
+                            DateOnly date = DateOnly.Parse(detectedDate);
+
+                            startDate = date;
+                        }
+
+                        nextWeek = true;
+                        continue;
+                    }
+
+                    if (nextWeek)
+                    {
                         HtmlNode day = row.Descendants("td").Last();
 
                         string action = day.GetAttributeValue("onclick", "");
@@ -758,14 +779,16 @@ public partial class Gateway : ISentralGateway
                             string detectedDate = action.Split('\'')[1];
                             DateOnly date = DateOnly.Parse(detectedDate);
 
-                            return date;
+                            endDate = date;
+
+                            return (startDate, endDate);
                         }
                     }
                 }
             }
         }
 
-        return Result.Failure<DateOnly>(new("SentralGateway.GetPage.Incorrect", "Sentral Server page did not include calendar table"));
+        return Result.Failure<(DateOnly, DateOnly)>(new("SentralGateway.GetPage.Incorrect", "Sentral Server page did not include calendar table"));
     }
 
     public async Task<List<ValidAttendenceReportDate>> GetValidAttendanceReportDatesFromCalendar(string year)
@@ -1387,7 +1410,7 @@ public partial class Gateway : ISentralGateway
         return await document.Content.ReadAsByteArrayAsync();
     }
 
-    public async Task<SystemAttendanceData> GetAttendancePercentages(string term, string week, string year)
+    public async Task<SystemAttendanceData> GetAttendancePercentages(string term, string week, string year, DateOnly startDate, DateOnly endDate)
     {
         SystemAttendanceData response = new();
 
@@ -1398,21 +1421,16 @@ public partial class Gateway : ISentralGateway
             return response;
         }
 
-        Result<DateOnly> endDate = await GetEndDateForFortnight(year, term, week);
-
-        if (endDate.IsFailure)
-        {
-            return response;
-        }
-
-
-
         List<KeyValuePair<string, string>> payload = new()
         {
             // length=year
             new("length", "year"),
             // year=2023
             new("year", year),
+            // start_date=2023-01-01
+            new ("start_date", startDate.ToString("yyyy-MM-dd")),
+            // end_date=2023-11-03
+            new ("end-date", endDate.ToString("yyyy-MM-dd")),
             // limit_sign=equal
             new("limit_sign", "equal"),
             // limit_percent=100
@@ -1455,7 +1473,7 @@ public partial class Gateway : ISentralGateway
 
         response.YearToDateDayCalculationDocument = await PostPageAsync($"{_settings.ServerUrl}/attendance/reports/percentage", payload);
 
-        response.YearToDateMinuteCalculationDocument = await GetStreamAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={year}&start_date={_dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")}&end_date={endDate.Value.ToString("yyyy-MM-dd")}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
+        response.YearToDateMinuteCalculationDocument = await GetStreamAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={year}&start_date={_dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")}&end_date={endDate.ToString("yyyy-MM-dd")}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
 
         payload = new()
         {

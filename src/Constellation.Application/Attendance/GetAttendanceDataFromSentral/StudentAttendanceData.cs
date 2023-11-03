@@ -1,9 +1,12 @@
 ﻿namespace Constellation.Application.Attendance.GetAttendanceDataFromSentral;
 
 using Core.Enums;
+using System;
 
 public class StudentAttendanceData
 {
+    public DateOnly StartDate { get; set; }
+    public DateOnly EndDate { get; set; }
     public string StudentId { get; set; }
     public string Name { get; set; }
     public Grade Grade { get; set; }

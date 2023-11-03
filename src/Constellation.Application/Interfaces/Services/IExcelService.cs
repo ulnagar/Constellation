@@ -37,6 +37,4 @@ public interface IExcelService
     List<StudentAttendanceData> ExtractFNDayData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
     List<StudentAttendanceData> ExtractFNMinuteData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
     Task<List<StudentImportRecord>> ConvertStudentImportFile(MemoryStream importFile, CancellationToken cancellationToken = default);
-
-    Task<List<StudentAttendanceData>> ReadSystemAttendanceData(List<StudentAttendanceData> data, SystemAttendanceData systemData, CancellationToken cancellationToken = default);
 }
