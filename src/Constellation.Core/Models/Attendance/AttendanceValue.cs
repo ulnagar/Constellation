@@ -9,6 +9,8 @@ using System;
 
 public sealed class AttendanceValue : AggregateRoot
 {
+    private AttendanceValue() {}
+
     private AttendanceValue(
         string studentId,
         Grade grade,

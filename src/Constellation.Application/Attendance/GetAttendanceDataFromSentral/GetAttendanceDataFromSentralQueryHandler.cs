@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Models;
+using Core.Models.Attendance;
 using Core.Models.Students;
 using Core.Shared;
 using Interfaces.Gateways;
@@ -14,7 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class GetAttendanceDataFromSentralQueryHandler
-    : IQueryHandler<GetAttendanceDataFromSentralQuery, List<StudentAttendanceData>>
+    : IQueryHandler<GetAttendanceDataFromSentralQuery, List<AttendanceValue>>
 {
     private readonly IStudentRepository _studentRepository;
     private readonly ISchoolRepository _schoolRepository;
@@ -36,9 +37,9 @@ internal sealed class GetAttendanceDataFromSentralQueryHandler
         _logger = logger.ForContext<GetAttendanceDataFromSentralQuery>();
     }
 
-    public async Task<Result<List<StudentAttendanceData>>> Handle(GetAttendanceDataFromSentralQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<AttendanceValue>>> Handle(GetAttendanceDataFromSentralQuery request, CancellationToken cancellationToken)
     {
-        Result<(DateOnly StartDate, DateOnly EndDate)> dateResponse = await _sentralGateway.GetDatesForFortnight(request.Year, request.Term, request.Week);
+        Result<(DateOnly StartDate, DateOnly EndDate)> dateResponse = await _sentralGateway.GetDatesForWeek(request.Year, request.Term, request.Week);
 
         if (dateResponse.IsFailure)
         {
@@ -47,7 +48,7 @@ internal sealed class GetAttendanceDataFromSentralQueryHandler
                 .ForContext(nameof(Error), dateResponse.Error, true)
                 .Warning("Failed to retrieve attendance data from Sentral");
 
-            return Result.Failure<List<StudentAttendanceData>>(new Error("TBC", "TBC - GetAttendanceDataFromSentralQuery:50"));
+            return Result.Failure<List<AttendanceValue>>(new Error("TBC", "TBC - GetAttendanceDataFromSentralQuery:50"));
         }
 
         SystemAttendanceData data = await _sentralGateway.GetAttendancePercentages(request.Term, request.Week, request.Year, dateResponse.Value.StartDate, dateResponse.Value.EndDate);
@@ -58,30 +59,46 @@ internal sealed class GetAttendanceDataFromSentralQueryHandler
                 .ForContext(nameof(GetAttendanceDataFromSentralQuery), request, true)
                 .Warning("Failed to retrieve attendance data from Sentral");
 
-            return Result.Failure<List<StudentAttendanceData>>(new Error("TBC", "TBC - GetAttendanceDataFromSentralQuery:61"));
+            return Result.Failure<List<AttendanceValue>>(new Error("TBC", "TBC - GetAttendanceDataFromSentralQuery:61"));
         }
 
-        List<StudentAttendanceData> response = new();
+        List<StudentAttendanceData> attendanceData = new();
+        List<AttendanceValue> response = new();
 
-        response = _excelService.ExtractYTDDayData(data, response);
-        response = _excelService.ExtractYTDMinuteData(data, response);
-        response = _excelService.ExtractFNDayData(data, response);
-        response = _excelService.ExtractFNMinuteData(data, response);
+        attendanceData = _excelService.ExtractPerDayYearToDateAttendanceData(data, attendanceData);
+        attendanceData = _excelService.ExtractPerDayWeekAttendanceData(data, attendanceData);
+        attendanceData = _excelService.ExtractPerMinuteYearToDateAttendanceData(data, attendanceData);
+        attendanceData = _excelService.ExtractPerMinuteWeekAttendanceData(data, attendanceData);
 
-        foreach (StudentAttendanceData entry in response)
+        foreach (StudentAttendanceData entry in attendanceData)
         {
             Student student = await _studentRepository.GetById(entry.StudentId, cancellationToken);
 
             if (student is null)
                 continue;
 
-            School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
+            Result<AttendanceValue> modelRequest = AttendanceValue.Create(
+                student.StudentId,
+                student.CurrentGrade,
+                dateResponse.Value.StartDate,
+                dateResponse.Value.EndDate,
+                $"Term {request.Term}, Week {request.Week}, {request.Year}",
+                entry.MinuteYTD,
+                entry.MinuteWeek,
+                entry.DayYTD,
+                entry.DayWeek);
 
-            entry.StartDate = dateResponse.Value.StartDate;
-            entry.EndDate = dateResponse.Value.EndDate;
-            entry.Name = student.DisplayName;
-            entry.Grade = student.CurrentGrade;
-            entry.SchoolName = school?.Name;
+            if (modelRequest.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(GetAttendanceDataFromSentralQuery), request, true)
+                    .ForContext(nameof(Error), modelRequest.Error, true)
+                    .Warning("Failed to retrieve attendance data from Sentral");
+
+                return Result.Failure<List<AttendanceValue>>(modelRequest.Error);
+            }
+
+            response.Add(modelRequest.Value);
         }
 
         return response;

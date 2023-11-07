@@ -16,13 +16,10 @@
 
 <dl>
     <dt>Name</dt>
-    <dd>@Model.Points.FirstOrDefault()?.Name</dd>
+    <dd>@Model.Points.FirstOrDefault()?.StudentId</dd>
     
     <dt>Grade</dt>
     <dd>@Model.Points.FirstOrDefault()?.Grade.AsName()</dd>
-    
-    <dt>School</dt>
-    <dd>@Model.Points.FirstOrDefault()?.SchoolName</dd>
 </dl>
 
 <h3 class="mt-3">Graphs</h3>
@@ -70,10 +67,10 @@
         {
             <tr>
                 <td>@entry.StartDate.ToShortDateString() - @entry.EndDate.ToShortDateString()</td>
-                <td>@entry.DayFN</td>
-                <td>@entry.DayYTD</td>
-                <td>@entry.MinuteFN</td>
-                <td>@entry.MinuteYTD</td>
+                <td>@entry.PerDayWeekPercentage</td>
+                <td>@entry.PerDayYearToDatePercentage</td>
+                <td>@entry.PerMinuteWeekPercentage</td>
+                <td>@entry.PerMinuteYearToDatePercentage</td>
             </tr>
         }
     </tbody>
@@ -85,25 +82,25 @@
         showGraph(
             'day-Fn',
             @Html.Raw(JsonConvert.SerializeObject(Model.Points.OrderBy(entry => entry.StartDate).Skip(Model.Points.Count - 5).Select(entry => entry.StartDate).ToArray())),
-            @JsonConvert.SerializeObject(@Model.Points.OrderBy(entry => entry.StartDate).Skip(Model.Points.Count - 5).Select(entry => entry.DayFN).ToArray())
+            @JsonConvert.SerializeObject(@Model.Points.OrderBy(entry => entry.StartDate).Skip(Model.Points.Count - 5).Select(entry => entry.PerDayWeekPercentage).ToArray())
         )
 
         showGraph(
             'day-Ytd',
             @Html.Raw(JsonConvert.SerializeObject(Model.Points.OrderBy(entry => entry.StartDate).Skip(Model.Points.Count - 5).Select(entry => entry.StartDate).ToArray())),
-            @JsonConvert.SerializeObject(@Model.Points.OrderBy(entry => entry.StartDate).Skip(Model.Points.Count - 5).Select(entry => entry.DayYTD).ToArray())
+            @JsonConvert.SerializeObject(@Model.Points.OrderBy(entry => entry.StartDate).Skip(Model.Points.Count - 5).Select(entry => entry.PerDayYearToDatePercentage).ToArray())
         )
 
         showGraph(
             'min-Fn',
             @Html.Raw(JsonConvert.SerializeObject(Model.Points.OrderBy(entry => entry.StartDate).Skip(Model.Points.Count - 5).Select(entry => entry.StartDate).ToArray())),
-            @JsonConvert.SerializeObject(@Model.Points.OrderBy(entry => entry.StartDate).Skip(Model.Points.Count - 5).Select(entry => entry.MinuteFN).ToArray())
+            @JsonConvert.SerializeObject(@Model.Points.OrderBy(entry => entry.StartDate).Skip(Model.Points.Count - 5).Select(entry => entry.PerMinuteWeekPercentage).ToArray())
         )
 
         showGraph(
             'min-Ytd',
             @Html.Raw(JsonConvert.SerializeObject(Model.Points.OrderBy(entry => entry.StartDate).Skip(Model.Points.Count - 5).Select(entry => entry.StartDate).ToArray())),
-            @JsonConvert.SerializeObject(@Model.Points.OrderBy(entry => entry.StartDate).Skip(Model.Points.Count - 5).Select(entry => entry.MinuteYTD).ToArray())
+            @JsonConvert.SerializeObject(@Model.Points.OrderBy(entry => entry.StartDate).Skip(Model.Points.Count - 5).Select(entry => entry.PerMinuteYearToDatePercentage).ToArray())
         )
 
         function showGraph(elementId, labels, values) {

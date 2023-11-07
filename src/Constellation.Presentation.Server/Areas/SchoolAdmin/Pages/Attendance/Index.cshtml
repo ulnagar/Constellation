@@ -6,7 +6,7 @@
 <h2>Test Page</h2>
 
 <div class="page-menu">
-    <a asp-page-handler="RetreiveAttendance" class="btn btn-success">Sync Attendance</a>
+    <a asp-page-handler="RetrieveAttendance" class="btn btn-success">Sync Attendance</a>
 </div>
 
 <hr />
@@ -15,10 +15,8 @@
     <thead>
         <tr>
             <th rowspan="2">StudentId</th>
-            <th rowspan="2">Name</th>
             <th rowspan="2">Grade</th>
-            <th rowspan="2">School</th>
-            <th rowspan="2">Start Date</th>
+            <th rowspan="2">Period</th>
             <th colspan="2">YTD</th>
             <th colspan="2">Fortnight</th>
         </tr>
@@ -35,15 +33,13 @@
         @foreach (var entry in Model.StudentData.Where(entry => entry.StudentId == studentId).OrderBy(entry => entry.StartDate))
         {
             <tr>
-                <td>@entry.StudentId</td>
-                <td><a asp-page="Student" asp-route-studentId="@entry.StudentId">@entry.Name</a></td>
+                <td><a asp-page="Student" asp-route-studentId="@entry.StudentId">@entry.StudentId</a></td>
                 <td>@entry.Grade.AsName()</td>
-                <td>@entry.SchoolName</td>
-                <td>@entry.StartDate.ToShortDateString()</td>
-                <td>@entry.DayYTD</td>
-                <td>@entry.MinuteYTD</td>
-                <td>@entry.DayFN</td>
-                <td>@entry.MinuteFN</td>
+                <td>@entry.PeriodLabel</td>
+                <td>@entry.PerDayYearToDatePercentage</td>
+                <td>@entry.PerMinuteYearToDatePercentage</td>
+                <td>@entry.PerDayYearToDatePercentage</td>
+                <td>@entry.PerMinuteWeekPercentage</td>
             </tr>
         }
     }

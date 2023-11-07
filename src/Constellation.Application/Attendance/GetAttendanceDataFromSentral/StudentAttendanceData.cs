@@ -12,7 +12,7 @@ public class StudentAttendanceData
     public Grade Grade { get; set; }
     public string SchoolName { get; set; }
     public decimal MinuteYTD { get; set; }
-    public decimal MinuteFN { get; set; }
+    public decimal MinuteWeek { get; set; }
     public decimal DayYTD { get; set; }
-    public decimal DayFN { get; set; }
+    public decimal DayWeek { get; set; }
 }
