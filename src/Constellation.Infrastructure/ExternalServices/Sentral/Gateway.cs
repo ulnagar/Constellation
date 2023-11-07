@@ -19,8 +19,10 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
+using static Constellation.Core.Errors.ValidationErrors;
 
 public partial class Gateway : ISentralGateway
 {
@@ -695,12 +697,12 @@ public partial class Gateway : ISentralGateway
         return nonSchoolDays.OrderBy(a => a).ToList();
     }
 
-    public async Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForFortnight(string year, string term, string week)
+    public async Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForWeek(string year, string term, string week)
     {
         if (_logOnly)
         {
             _logger
-                .Information("GetEndDateForFortnight: year={year}, term={term}, week={week}", year, term, week);
+                .Information("GetDatesForWeek: year={year}, term={term}, week={week}", year, term, week);
 
             return (_dateTime.Today, _dateTime.Today.AddDays(12));
         }
@@ -720,7 +722,6 @@ public partial class Gateway : ISentralGateway
             IEnumerable<HtmlNode> rows = calendarTable.Descendants("tr");
 
             bool correctTerm = false;
-            bool nextWeek = false;
 
             foreach (HtmlNode row in rows)
             {
@@ -754,36 +755,31 @@ public partial class Gateway : ISentralGateway
 
                     if (weekName?.InnerText == week)
                     {
-                        HtmlNode day = row.Descendants("td").First();
+                        HtmlNode monday = row.Descendants("td").First();
 
-                        string action = day.GetAttributeValue("onclick", "");
-                        if (!string.IsNullOrWhiteSpace(action))
+                        string mondayAction = monday.GetAttributeValue("onclick", "");
+                        if (!string.IsNullOrWhiteSpace(mondayAction))
                         {
-                            string detectedDate = action.Split('\'')[1];
+                            string detectedDate = mondayAction.Split('\'')[1];
                             DateOnly date = DateOnly.Parse(detectedDate);
 
                             startDate = date;
                         }
 
-                        nextWeek = true;
-                        continue;
-                    }
+                        HtmlNode friday = row.Descendants("td").Last();
 
-                    if (nextWeek)
-                    {
-                        HtmlNode day = row.Descendants("td").Last();
-
-                        string action = day.GetAttributeValue("onclick", "");
-                        if (!string.IsNullOrWhiteSpace(action))
+                        string fridayAction = friday.GetAttributeValue("onclick", "");
+                        if (!string.IsNullOrWhiteSpace(fridayAction))
                         {
-                            string detectedDate = action.Split('\'')[1];
+                            string detectedDate = fridayAction.Split('\'')[1];
                             DateOnly date = DateOnly.Parse(detectedDate);
 
                             endDate = date;
-
-                            return (startDate, endDate);
                         }
                     }
+
+                    if (startDate != DateOnly.MinValue && endDate != DateOnly.MinValue)
+                        return (startDate, endDate);
                 }
             }
         }
@@ -1473,12 +1469,13 @@ public partial class Gateway : ISentralGateway
 
         response.YearToDateDayCalculationDocument = await PostPageAsync($"{_settings.ServerUrl}/attendance/reports/percentage", payload);
 
-        response.YearToDateMinuteCalculationDocument = await GetStreamAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={year}&start_date={_dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")}&end_date={endDate.ToString("yyyy-MM-dd")}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
+        Stream perMinuteYearToDateCalculationFile = await GetStreamAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={year}&start_date={_dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")}&end_date={endDate.ToString("yyyy-MM-dd")}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
+        response.YearToDateMinuteCalculationDocument = perMinuteYearToDateCalculationFile.IsExcelFile() ? perMinuteYearToDateCalculationFile : null;
 
         payload = new()
         {
-            // length=fortnight
-            new("length", "fortnight"),
+            // length=week
+            new("length", "week"),
             // term=3
             new ("term", term),
             // week=1
@@ -1525,30 +1522,11 @@ public partial class Gateway : ISentralGateway
             new("action", "export")
         };
 
-        response.FortnightDayCalculationDocument = await PostPageAsync($"{_settings.ServerUrl}/attendance/reports/percentage", payload);
+        response.WeekDayCalculationDocument = await PostPageAsync($"{_settings.ServerUrl}/attendance/reports/percentage", payload);
 
-        response.FortnightMinuteCalculationDocument = await GetStreamAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=fortnight&term={term}&week={week}&year={year}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
-        
+        Stream perMinuteWeekCalculationFile = await GetStreamAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=week&term={term}&week={week}&year={year}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
+        response.WeekMinuteCalculationDocument = perMinuteWeekCalculationFile.IsExcelFile() ? perMinuteWeekCalculationFile : null;
+
         return response;
-
-        // PER DAY - POST
-
-        //Invoke-WebRequest -UseBasicParsing -Uri "https://admin.aurora.dec.nsw.gov.au/attendance/reports/percentage"
-
-        // YTD
-        //-Body "length=year&year=2023&limit_sign=equal&limit_percent=100&reasons%5B%5D=8&reasons%5B%5D=1&reasons%5B%5D=7&reasons%5B%5D=5&reasons%5B%5D=3&reasons%5B%5D=9&show_current=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export"
-
-        // Fortnight
-        //-Body "length=fortnight&term=3&week=1&year=2023&limit_sign=equal&limit_percent=100&reasons%5B%5D=8&reasons%5B%5D=1&reasons%5B%5D=7&reasons%5B%5D=5&reasons%5B%5D=3&reasons%5B%5D=9&show_current=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export"
-
-
-        // PER MINUTE - GET
-
-        // YTD
-        //Invoke-WebRequest -UseBasicParsing -Uri "https://admin.aurora.dec.nsw.gov.au/attendancepxp/period/administration/percentage_attendance_report?length=period&year=2023&start_date=2023-01-01&end_date=2023-10-06&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export"
-
-        // Fortnight
-        //Invoke-WebRequest -UseBasicParsing -Uri "https://admin.aurora.dec.nsw.gov.au/attendancepxp/period/administration/percentage_attendance_report?length=fortnight&term=3&week=1&year=2023&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export" `
-
     }
 }

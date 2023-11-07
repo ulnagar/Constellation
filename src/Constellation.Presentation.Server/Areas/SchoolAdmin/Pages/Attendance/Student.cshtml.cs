@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
-using Application.Attendance.GetAttendanceDataFromSentral;
 using BaseModels;
+using Core.Models.Attendance;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Services;
@@ -22,7 +22,7 @@ public class StudentModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public string StudentId { get; set; }
 
-    public List<StudentAttendanceData> Points { get; set; }
+    public List<AttendanceValue> Points { get; set; }
 
     public async Task OnGet()
     {

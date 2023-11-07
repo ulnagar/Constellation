@@ -737,7 +737,7 @@ public class ExcelService : IExcelService
     }
 
 
-    public List<StudentAttendanceData> ExtractYTDDayData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
+    public List<StudentAttendanceData> ExtractPerDayYearToDateAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
     {
         if (systemData.YearToDateDayCalculationDocument is null)
             return data;
@@ -791,7 +791,7 @@ public class ExcelService : IExcelService
         return data;
     }
 
-    public List<StudentAttendanceData> ExtractYTDMinuteData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
+    public List<StudentAttendanceData> ExtractPerMinuteYearToDateAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
     {
         if (systemData.YearToDateMinuteCalculationDocument is null)
             return data;
@@ -843,12 +843,12 @@ public class ExcelService : IExcelService
         return data;
     }
 
-    public List<StudentAttendanceData> ExtractFNDayData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
+    public List<StudentAttendanceData> ExtractPerDayWeekAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
     {
-        if (systemData.FortnightDayCalculationDocument is null)
+        if (systemData.WeekDayCalculationDocument is null)
             return data;
 
-        List<string> fnDayData = systemData.FortnightDayCalculationDocument.DocumentNode.InnerHtml.Split('\u000A').ToList();
+        List<string> fnDayData = systemData.WeekDayCalculationDocument.DocumentNode.InnerHtml.Split('\u000A').ToList();
 
         // Remove first and last entry
         fnDayData.RemoveAt(0);
@@ -879,7 +879,7 @@ public class ExcelService : IExcelService
 
             if (entry is not null)
             {
-                entry.DayFN = Convert.ToDecimal(line[8].FormatField());
+                entry.DayWeek = Convert.ToDecimal(line[8].FormatField());
             }
             else
             {
@@ -887,7 +887,7 @@ public class ExcelService : IExcelService
                 {
                     StudentId = studentId,
                     Name = $"{line[1].FormatField()} {line[0].FormatField()}",
-                    DayFN = Convert.ToDecimal(line[8].FormatField())
+                    DayWeek = Convert.ToDecimal(line[8].FormatField())
                 };
 
                 data.Add(entry);
@@ -897,12 +897,12 @@ public class ExcelService : IExcelService
         return data;
     }
 
-    public List<StudentAttendanceData> ExtractFNMinuteData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
+    public List<StudentAttendanceData> ExtractPerMinuteWeekAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
     {
-        if (systemData.FortnightMinuteCalculationDocument is null)
+        if (systemData.WeekMinuteCalculationDocument is null)
             return data;
 
-        using IExcelDataReader reader = ExcelReaderFactory.CreateReader(systemData.FortnightMinuteCalculationDocument);
+        using IExcelDataReader reader = ExcelReaderFactory.CreateReader(systemData.WeekMinuteCalculationDocument);
         DataSet result = reader.AsDataSet();
 
         foreach (DataRow row in result.Tables[0].Rows)
@@ -931,7 +931,7 @@ public class ExcelService : IExcelService
 
             if (entry is not null)
             {
-                entry.MinuteFN = Convert.ToDecimal(row[10]);
+                entry.MinuteWeek = Convert.ToDecimal(row[10]);
             }
             else
             {
@@ -939,7 +939,7 @@ public class ExcelService : IExcelService
                 {
                     StudentId = studentId,
                     Name = $"{row[1].ToString().FormatField()} {row[2].ToString().FormatField()}",
-                    MinuteFN = Convert.ToDecimal(row[10])
+                    MinuteWeek = Convert.ToDecimal(row[10])
                 };
 
                 data.Add(entry);

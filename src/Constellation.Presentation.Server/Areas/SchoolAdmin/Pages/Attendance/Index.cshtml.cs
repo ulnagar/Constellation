@@ -2,6 +2,7 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Application.Attendance.GetAttendanceDataFromSentral;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Models.Attendance;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -22,85 +23,28 @@ public class IndexModel : BasePageModel
         _service = service;
     }
 
-    public List<StudentAttendanceData> StudentData { get; set; } = new();
+    public List<AttendanceValue> StudentData { get; set; } = new();
 
     public async Task OnGetAsync()
     {
         StudentData = _service.GetAllData;
     }
 
-    public async Task<IActionResult> OnGetRetreiveAttendance(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> OnGetRetrieveAttendance(CancellationToken cancellationToken = default)
     {
-        Result<List<StudentAttendanceData>> request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", "2", "1"), cancellationToken);
-
-        if (request.IsSuccess)
+        for (int term = 1; term < 2; term++)
         {
-            _service.AddItems(request.Value);
-        }
+            for (int week = 1; week < 11; week++)
+            {
+                Result<List<AttendanceValue>> request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", term.ToString(), week.ToString()), cancellationToken);
 
-        request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", "2", "3"), cancellationToken);
-
-        if (request.IsSuccess)
-        {
-            _service.AddItems(request.Value);
-        }
-
-        request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", "2", "5"), cancellationToken);
-
-        if (request.IsSuccess)
-        {
-            _service.AddItems(request.Value);
-        }
-
-        request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", "2", "7"), cancellationToken);
-
-        if (request.IsSuccess)
-        {
-            _service.AddItems(request.Value);
-        }
-
-        request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", "2", "9"), cancellationToken);
-
-        if (request.IsSuccess)
-        {
-            _service.AddItems(request.Value);
-        }
-
-        request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", "3", "1"), cancellationToken);
-
-        if (request.IsSuccess)
-        {
-            _service.AddItems(request.Value);
+                if (request.IsSuccess)
+                {
+                    _service.AddItems(request.Value);
+                }
+            }
         }
         
-        request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", "3", "3"), cancellationToken);
-
-        if (request.IsSuccess)
-        {
-            _service.AddItems(request.Value);
-        }
-        
-        request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", "3", "5"), cancellationToken);
-
-        if (request.IsSuccess)
-        {
-            _service.AddItems(request.Value);
-        }
-        
-        request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", "3", "7"), cancellationToken);
-
-        if (request.IsSuccess)
-        {
-            _service.AddItems(request.Value);
-        }
-        
-        request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", "3", "9"), cancellationToken);
-
-        if (request.IsSuccess)
-        {
-            _service.AddItems(request.Value);
-        }
-
         return RedirectToPage();
     }
 }

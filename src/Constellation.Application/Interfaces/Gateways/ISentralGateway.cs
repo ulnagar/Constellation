@@ -28,5 +28,5 @@ public interface ISentralGateway
     Task<List<AwardIncidentDto>> GetAwardsListing(string sentralStudentId, string calYear);
     Task<byte[]> GetAwardDocument(string sentralStudentId, string incidentId);
     Task<SystemAttendanceData> GetAttendancePercentages(string term, string week, string year, DateOnly startDate, DateOnly endDate);
-    Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForFortnight(string year, string term, string week);
+    Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForWeek(string year, string term, string week);
 }

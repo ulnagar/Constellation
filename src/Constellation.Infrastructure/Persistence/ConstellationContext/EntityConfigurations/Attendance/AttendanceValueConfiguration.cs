@@ -5,6 +5,7 @@ using Core.Models.Attendance.Identifiers;
 using Core.Models.Students;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using ValueConverters;
 
 internal sealed class AttendanceValueConfiguration
     : IEntityTypeConfiguration<AttendanceValue>
@@ -31,10 +32,12 @@ internal sealed class AttendanceValueConfiguration
 
         builder
             .Property(value => value.StartDate)
+            .HasConversion<DateOnlyConverter, DateOnlyComparer>()
             .IsRequired();
 
         builder
             .Property(value => value.EndDate)
+            .HasConversion<DateOnlyConverter, DateOnlyComparer>()
             .IsRequired();
 
         builder
