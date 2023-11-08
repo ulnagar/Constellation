@@ -32,9 +32,9 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGetRetrieveAttendance(CancellationToken cancellationToken = default)
     {
-        for (int term = 1; term < 2; term++)
+        for (int term = 1; term < 4; term++)
         {
-            for (int week = 1; week < 11; week++)
+            for (int week = 1; week < 12; week++)
             {
                 Result<List<AttendanceValue>> request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", term.ToString(), week.ToString()), cancellationToken);
 

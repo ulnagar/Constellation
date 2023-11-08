@@ -7,7 +7,7 @@
 <h2>Student Attendance Review</h2>
 
 <div class="page-menu">
-    <a asp-page="Index" asp-area="Test" class="btn btn-danger btn-pull-right">Go Back</a>
+    <a asp-page="/Attendance/Index" asp-area="SchoolAdmin" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />
@@ -16,17 +16,20 @@
 
 <dl>
     <dt>Name</dt>
-    <dd>@Model.Points.FirstOrDefault()?.StudentId</dd>
+    <dd>@Model.Student?.DisplayName</dd>
     
     <dt>Grade</dt>
-    <dd>@Model.Points.FirstOrDefault()?.Grade.AsName()</dd>
+    <dd>@Model.Student?.CurrentGrade.AsName()</dd>
+    
+    <dt>School</dt>
+    <dd>@Model.Student?.School</dd>
 </dl>
 
 <h3 class="mt-3">Graphs</h3>
 
 <div class="row mt-2">
     <div class="col">
-        <h4>Per Day Fortnight</h4>
+        <h4>Per Day Week</h4>
         <canvas id="day-Fn"></canvas>
     </div>
     <div class="col">
@@ -37,7 +40,7 @@
 
 <div class="row mt-2">
     <div class="col">
-        <h4>Per Minute Fortnight</h4>
+        <h4>Per Minute Week</h4>
         <canvas id="min-Fn"></canvas>
     </div>
     <div class="col">
@@ -56,9 +59,9 @@
             <th colspan="2">Per Minute</th>
         </tr>
         <tr>
-            <th>Fortnight</th>
+            <th>Week</th>
             <th>YTD</th>
-            <th>Fortnight</th>
+            <th>Week</th>
             <th>YTD</th>
         </tr>
     </thead>
@@ -66,7 +69,7 @@
         @foreach (var entry in Model.Points.OrderBy(entry => entry.StartDate))
         {
             <tr>
-                <td>@entry.StartDate.ToShortDateString() - @entry.EndDate.ToShortDateString()</td>
+                <td>@entry.PeriodLabel (@entry.StartDate.ToShortDateString() - @entry.EndDate.ToShortDateString())</td>
                 <td>@entry.PerDayWeekPercentage</td>
                 <td>@entry.PerDayYearToDatePercentage</td>
                 <td>@entry.PerMinuteWeekPercentage</td>

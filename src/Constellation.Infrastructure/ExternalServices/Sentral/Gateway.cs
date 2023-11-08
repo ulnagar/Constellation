@@ -1420,13 +1420,13 @@ public partial class Gateway : ISentralGateway
         List<KeyValuePair<string, string>> payload = new()
         {
             // length=year
-            new("length", "year"),
+            new("length", "period"),
             // year=2023
             new("year", year),
             // start_date=2023-01-01
-            new ("start_date", startDate.ToString("yyyy-MM-dd")),
+            new ("start_date", _dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")),
             // end_date=2023-11-03
-            new ("end-date", endDate.ToString("yyyy-MM-dd")),
+            new ("end_date", endDate.ToString("yyyy-MM-dd")),
             // limit_sign=equal
             new("limit_sign", "equal"),
             // limit_percent=100
