@@ -13,7 +13,7 @@ public static class SMSServicesRegistration
         services.AddOptions<SMSGatewayConfiguration>();
         services.Configure<SMSGatewayConfiguration>(configuration.GetSection(SMSGatewayConfiguration.Section));
 
-        if (!environment.IsDevelopment())
+        if (environment.IsDevelopment())
             services.AddScoped<ISMSGateway, LogOnlyGateway>();
         else
             services.AddScoped<ISMSGateway, Gateway>();

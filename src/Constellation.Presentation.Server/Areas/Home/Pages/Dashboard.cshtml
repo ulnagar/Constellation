@@ -44,7 +44,7 @@
 
     @foreach (var entry in @Model.Classes.OrderBy(entry => entry.Key))
     {
-        <a class="btn btn-secondary btn-block" asp-area="Subject" asp-page="/Courses/Details" asp-route-id="@entry.Value">@entry.Key</a>
+        <a class="btn btn-secondary btn-block" asp-area="Subject" asp-page="/Offerings/Details" asp-route-id="@entry.Value">@entry.Key</a>
     }
 </div>
 

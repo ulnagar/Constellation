@@ -35,7 +35,6 @@ internal sealed class Gateway : ISMSGateway
 
         if (_logOnly)
         {
-
             return;
         }
 
