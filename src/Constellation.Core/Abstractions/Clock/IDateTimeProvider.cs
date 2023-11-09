@@ -9,6 +9,8 @@ public interface IDateTimeProvider
     DateOnly LastDayOfYear { get; }
     DateOnly FirstDayOfYear { get; }
 
+    int CurrentYear { get; }
+
     DateOnly GetFirstDayOfYear(int year);
     DateOnly GetLastDayOfYear(int year);
 }

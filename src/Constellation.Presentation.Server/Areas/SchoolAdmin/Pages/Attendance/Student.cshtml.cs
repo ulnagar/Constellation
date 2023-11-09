@@ -3,23 +3,27 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages;
 using Application.Students.GetStudentById;
 using Application.Students.Models;
 using BaseModels;
+using Core.Abstractions.Clock;
 using Core.Models.Attendance;
+using Core.Models.Attendance.Repositories;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Services;
 
 public class StudentModel : BasePageModel
 {
     private readonly ISender _mediator;
-    private readonly StudentAttendanceService _service;
+    private readonly IAttendanceRepository _repository;
+    private readonly IDateTimeProvider _dateTime;
 
     public StudentModel(
         ISender mediator,
-        StudentAttendanceService service)
+        IAttendanceRepository repository,
+        IDateTimeProvider dateTime)
     {
         _mediator = mediator;
-        _service = service;
+        _repository = repository;
+        _dateTime = dateTime;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -27,7 +31,7 @@ public class StudentModel : BasePageModel
 
     public StudentResponse Student { get; set; }
 
-    public List<AttendanceValue> Points { get; set; }
+    public List<AttendanceValue> Points { get; set; } = new();
 
     public async Task OnGet()
     {
@@ -38,6 +42,6 @@ public class StudentModel : BasePageModel
         if (student.IsSuccess)
             Student = student.Value;
 
-        Points = _service.GetDataForStudent(StudentId);
+        Points = await _repository.GetAllForStudent(_dateTime.CurrentYear, StudentId);
     }
 }

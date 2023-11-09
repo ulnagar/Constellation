@@ -27,8 +27,6 @@ builder.Services
     .AddApplication()
     .AddInfrastructure(builder.Configuration, builder.Environment);
 
-builder.Services.AddSingleton<StudentAttendanceService>();
-
 // Configuration Authentication and Authorization
 builder.Services.AddIdentity<AppUser, AppRole>()
             .AddClaimsPrincipalFactory<StaffUserIdClaimsFactory>()
