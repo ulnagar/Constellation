@@ -98,4 +98,5 @@ internal class AttendanceRepository : IAttendanceRepository
             .ToListAsync(cancellationToken);
 
     public void Insert(AttendanceValue item) => _context.Set<AttendanceValue>().Add(item);
+    public void Insert(List<AttendanceValue> items) => _context.Set<AttendanceValue>().AddRange(items);
 }

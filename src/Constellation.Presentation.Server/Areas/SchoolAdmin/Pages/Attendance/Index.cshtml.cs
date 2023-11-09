@@ -1,33 +1,46 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Application.Attendance.GetAttendanceDataFromSentral;
+using Application.Interfaces.Repositories;
+using Application.Students.GetCurrentStudentsWithSentralId;
+using Application.Students.GetStudents;
+using Application.Students.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Core.Models.Attendance;
+using Core.Models.Attendance.Repositories;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Services;
 using System.Threading;
 
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
-    private readonly StudentAttendanceService _service;
+    private readonly IAttendanceRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
 
 
     public IndexModel(
         ISender mediator,
-        StudentAttendanceService service)
+        IAttendanceRepository repository,
+        IUnitOfWork unitOfWork)
     {
         _mediator = mediator;
-        _service = service;
+        _repository = repository;
+        _unitOfWork = unitOfWork;
     }
 
     public List<AttendanceValue> StudentData { get; set; } = new();
+    public List<StudentResponse> Students { get; set; } = new();
 
     public async Task OnGetAsync()
     {
-        StudentData = _service.GetAllData;
+        Result<List<StudentResponse>> studentRequest = await _mediator.Send(new GetStudentsQuery());
+
+        if (studentRequest.IsSuccess)
+            Students = studentRequest.Value;
+
+        StudentData = await _repository.GetAll();
     }
 
     public async Task<IActionResult> OnGetRetrieveAttendance(CancellationToken cancellationToken = default)
@@ -40,10 +53,12 @@ public class IndexModel : BasePageModel
 
                 if (request.IsSuccess)
                 {
-                    _service.AddItems(request.Value);
+                    _repository.Insert(request.Value);
                 }
             }
         }
+
+        await _unitOfWork.CompleteAsync(cancellationToken);
         
         return RedirectToPage();
     }

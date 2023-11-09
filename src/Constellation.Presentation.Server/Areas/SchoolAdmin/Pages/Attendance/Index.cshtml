@@ -33,7 +33,20 @@
         @foreach (var entry in Model.StudentData.Where(entry => entry.StudentId == studentId).OrderBy(entry => entry.StartDate))
         {
             <tr>
-                <td><a asp-page="Student" asp-route-studentId="@entry.StudentId">@entry.StudentId</a></td>
+                <td>
+                    @{
+                        var student = Model.Students.FirstOrDefault(student => student.StudentId == entry.StudentId);
+
+                        if (student is null)
+                        {
+                            <a asp-page="Student" asp-route-studentId="@entry.StudentId">@entry.StudentId</a>
+                        }
+                        else
+                        {
+                            <a asp-page="Student" asp-route-studentId="@entry.StudentId">@student.DisplayName</a>
+                        }
+                    }
+                </td>
                 <td>@entry.Grade.AsName()</td>
                 <td>@entry.PeriodLabel</td>
                 <td>@entry.PerDayYearToDatePercentage</td>
