@@ -6,6 +6,7 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
+using Core.Abstractions.Clock;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -15,10 +16,14 @@ using System.Threading.Tasks;
 public class AbsenceRepository : IAbsenceRepository
 {
     private readonly AppDbContext _context;
+    private readonly IDateTimeProvider _dateTime;
 
-    public AbsenceRepository(AppDbContext context)
+    public AbsenceRepository(
+        AppDbContext context,
+        IDateTimeProvider dateTime)
     {
         _context = context;
+        _dateTime = dateTime;
     }
 
     public async Task<Absence> GetById(
@@ -113,20 +118,18 @@ public class AbsenceRepository : IAbsenceRepository
     {
         DateTime seenAfter = DateTime.Today.AddDays(-(ageInWeeks * 7));
         DateTime seenBefore = DateTime.Today.AddDays(-(ageInWeeks - 1) * 7 - 1);
-
-        DateOnly startOfYear = new DateOnly(DateTime.Today.Year, 1, 1);
-
+        
         return await _context
             .Set<Absence>()
             .Include(absence => absence.Responses)
             .Include(absence => absence.Notifications)
             .Where(absence =>
-                absence.Date > startOfYear &&
-                absence.StudentId == studentId &&
-                !absence.Explained &&
-                absence.Type == AbsenceType.Whole &&
-                absence.FirstSeen <= seenAfter &&
-                absence.FirstSeen >= seenBefore)
+                absence.Date > _dateTime.FirstDayOfYear && // Absence was this year
+                absence.StudentId == studentId && // Absence was for this student
+                !absence.Explained && // Absence has not been marked explained
+                absence.Type == AbsenceType.Whole && // Absence is a Whole absence
+                absence.FirstSeen >= seenAfter && // Absence was first recorded on or after the cut off date
+                absence.FirstSeen <= seenBefore) // Absence was first recorded on or before the cut off date
             .ToListAsync(cancellationToken);
     }
 
