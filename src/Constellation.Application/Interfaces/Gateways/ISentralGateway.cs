@@ -8,6 +8,7 @@ using Constellation.Core.Shared;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 public interface ISentralGateway
@@ -29,4 +30,5 @@ public interface ISentralGateway
     Task<byte[]> GetAwardDocument(string sentralStudentId, string incidentId);
     Task<SystemAttendanceData> GetAttendancePercentages(string term, string week, string year, DateOnly startDate, DateOnly endDate);
     Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForWeek(string year, string term, string week);
+    Task<Stream> GetNAwardReport();
 }

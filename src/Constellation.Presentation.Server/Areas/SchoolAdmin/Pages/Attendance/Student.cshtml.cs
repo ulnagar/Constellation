@@ -1,12 +1,12 @@
-namespace Constellation.Presentation.Server.Areas.Test.Pages;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Attendance;
 
-using Application.Students.GetStudentById;
-using Application.Students.Models;
-using BaseModels;
-using Core.Abstractions.Clock;
-using Core.Models.Attendance;
-using Core.Models.Attendance.Repositories;
-using Core.Shared;
+using Constellation.Application.Students.GetStudentById;
+using Constellation.Application.Students.Models;
+using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Models.Attendance;
+using Constellation.Core.Models.Attendance.Repositories;
+using Constellation.Core.Shared;
+using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

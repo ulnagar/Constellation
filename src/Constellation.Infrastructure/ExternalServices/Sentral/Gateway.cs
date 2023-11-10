@@ -1406,6 +1406,13 @@ public partial class Gateway : ISentralGateway
         return await document.Content.ReadAsByteArrayAsync();
     }
 
+    public async Task<Stream> GetNAwardReport()
+    {
+        Stream file = await GetStreamAsync($"{_settings.ServerUrl}/wellbeing/reports/incidents?report_id=4154&export-xls&victims-witnesses=All");
+
+        return file;
+    }
+
     public async Task<SystemAttendanceData> GetAttendancePercentages(string term, string week, string year, DateOnly startDate, DateOnly endDate)
     {
         SystemAttendanceData response = new();
