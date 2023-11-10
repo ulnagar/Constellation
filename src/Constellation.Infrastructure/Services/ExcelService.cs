@@ -2,6 +2,7 @@
 
 using Application.Attendance.GetAttendanceDataFromSentral;
 using Application.Extensions;
+using Application.Rollover.ImportStudents;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
 using Constellation.Application.Awards.ExportAwardNominations;
 using Constellation.Application.Contacts.GetContactList;
@@ -15,17 +16,25 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Infrastructure.Jobs;
+using Core.Abstractions.Clock;
 using ExcelDataReader;
 using OfficeOpenXml;
 using System.Data;
 using System.Drawing;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using static Constellation.Core.Errors.ValidationErrors;
 
 public class ExcelService : IExcelService
 {
+    private readonly IDateTimeProvider _dateTime;
     private static readonly Regex _csvParser = new(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
 
+    public ExcelService(
+        IDateTimeProvider dateTime)
+    {
+        _dateTime = dateTime;
+    }
 
     public async Task<MemoryStream> CreatePTOFile(ICollection<InterviewExportDto> exportLines)
     {
@@ -427,7 +436,6 @@ public class ExcelService : IExcelService
                     continue;
 
                 var entry = TrainingCompletion.Create(
-                    new TrainingCompletionId(),
                     workSheet.Cells[1, column].GetCellValue<string>(),
                     module.Id);
 
@@ -947,6 +955,126 @@ public class ExcelService : IExcelService
         }
 
         return data;
+    }
+
+    public async Task<List<SentralIncidentDetails>> ConvertSentralIncidentReport(Stream reportFile, CancellationToken cancellationToken = default)
+    {
+        List<SentralIncidentDetails> response = new();
+
+        if (reportFile is null)
+            return response;
+
+        using IExcelDataReader reader = ExcelReaderFactory.CreateReader(reportFile);
+        DataSet result = reader.AsDataSet(new ExcelDataSetConfiguration { UseColumnDataType = true });
+
+        foreach (DataRow row in result.Tables[0].Rows)
+        {
+            if (row.ItemArray.First()?.ToString() == "Student Id") // This is a header row
+                continue;
+
+            // Index 0: Student Id
+            // Index 1: Date Created
+            // Index 2: Date of Incident
+            // Index 3: Day
+            // Index 4: Incident
+            // Index 5: Student Was
+            // Index 6: Incident Time
+            // Index 7: Period
+            // Index 8: Subject
+            // Index 9: Category
+            // Index 10: Type
+            // Index 11: Sub Type
+            // Index 12: Incident Records Description
+            // Index 13: Incident Record Details
+            // Index 14: Incident Record Detail Options
+            // Index 15: Follow Up Action Comment
+            // Index 16: Follow Up Actions
+            // Index 17: Teacher
+            // Index 18: Student Surname,
+            // Index 19: Student First Name,
+            // Index 20: DOB
+            // Index 21: Years
+            // Index 22: Months
+            // Index 23: School Year
+            // Index 24: House
+            // Index 25: Roll Class
+            // Index 26: Location
+
+            string studentId = row[0].ToString();
+
+            DateOnly.TryParse(row[1].ToString(), out DateOnly dateCreated);
+
+            int severity = _dateTime.Today.DayNumber - dateCreated.DayNumber;
+
+            int gradeNum = Convert.ToInt32(row[23]);
+            Grade grade = (Grade)gradeNum;
+            
+            response.Add(new(
+                studentId,
+                dateCreated,
+                row[4].ToString().FormatField(),
+                row[8].ToString().FormatField(),
+                row[10].ToString().FormatField(),
+                row[17].ToString().FormatField(),
+                row[19].ToString().FormatField(),
+                row[18].ToString().FormatField(),
+                grade,
+                severity));
+        }
+
+        return response;
+    }
+
+    public async Task<List<StudentImportRecord>> ConvertStudentImportFile(MemoryStream importFile, CancellationToken cancellationToken = default)
+    {
+        List<StudentImportRecord> results = new();
+
+        using IExcelDataReader reader = ExcelReaderFactory.CreateReader(importFile);
+
+        DataSet sheet = reader.AsDataSet();
+        DataRowCollection rows = sheet.Tables[0].Rows;
+        foreach (DataRow row in rows)
+        {
+            if (row[0].ToString() == "StudentId")
+                continue;
+
+            string studentId = row[0]?.ToString() ?? string.Empty;
+            string firstName = row[1]?.ToString() ?? string.Empty;
+            string lastName = row[2]?.ToString() ?? string.Empty;
+            string userName = row[3]?.ToString() ?? string.Empty;
+            string grade = row[4]?.ToString() ?? string.Empty;
+            string schoolCode = row[5]?.ToString() ?? string.Empty;
+            string gender = row[6]?.ToString() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(studentId) ||
+                string.IsNullOrWhiteSpace(firstName) ||
+                string.IsNullOrWhiteSpace(lastName) ||
+                string.IsNullOrWhiteSpace(userName) ||
+                string.IsNullOrWhiteSpace(grade) ||
+                string.IsNullOrWhiteSpace(schoolCode) ||
+                string.IsNullOrWhiteSpace(gender))
+            {
+                continue;
+            }
+
+            bool success = Enum.TryParse(grade, true, out Grade gradeVal);
+
+            if (!success)
+            {
+                continue;
+            }
+
+            results.Add(new(
+                studentId,
+                firstName,
+                lastName,
+                userName,
+                gradeVal,
+                schoolCode,
+                gender));
+        }
+
+        return results;
     }
 
     private class StudentRecord

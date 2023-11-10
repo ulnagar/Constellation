@@ -1,9 +1,12 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Absences;
 
+using Application.Models.Auth;
 using Constellation.Application.Students.GetStudentsWithAbsenceSettings;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 
+[Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class AuditModel : BasePageModel
 {
     private readonly IMediator _mediator;
@@ -21,7 +24,6 @@ public class AuditModel : BasePageModel
 
     public async Task OnGet()
     {
-
         ViewData["ActivePage"] = "Audit";
 
         await GetClasses(_mediator);

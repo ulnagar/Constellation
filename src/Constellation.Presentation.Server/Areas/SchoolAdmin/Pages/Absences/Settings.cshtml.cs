@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Absences;
 
+using Application.Models.Auth;
 using Constellation.Application.Absences.SetAbsenceConfigurationForStudent;
 using Constellation.Application.Helpers;
 using Constellation.Application.Schools.GetSchoolsForSelectionList;
@@ -8,9 +9,11 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
+[Authorize(Policy = AuthPolicies.CanManageAbsences)]
 public class SettingsModel : BasePageModel
 {
     private readonly IMediator _mediator;

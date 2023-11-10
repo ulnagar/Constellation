@@ -1,9 +1,8 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Absences;
 
+using Application.Models.Auth;
 using Constellation.Application.Absences.ExportAbsencesReport;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
-using Constellation.Application.Contacts.ExportContactList;
-using Constellation.Application.Contacts.GetContactList;
 using Constellation.Application.Offerings.GetOfferingsForSelectionList;
 using Constellation.Application.Schools.GetCurrentPartnerSchoolsWithStudentsList;
 using Constellation.Application.Schools.Models;
@@ -11,14 +10,14 @@ using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
 using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Shared.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using System.Runtime.InteropServices;
 
+[Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class ReportModel : BasePageModel
 {
     private readonly IMediator _mediator;

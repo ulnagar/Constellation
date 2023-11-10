@@ -1,14 +1,13 @@
-namespace Constellation.Presentation.Server.Areas.Test.Pages;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Attendance;
 
-using Application.Attendance.GetAttendanceDataFromSentral;
-using Application.Interfaces.Repositories;
-using Application.Students.GetCurrentStudentsWithSentralId;
-using Application.Students.GetStudents;
-using Application.Students.Models;
+using Constellation.Application.Attendance.GetAttendanceDataFromSentral;
+using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Students.GetStudents;
+using Constellation.Application.Students.Models;
+using Constellation.Core.Models.Attendance;
+using Constellation.Core.Models.Attendance.Repositories;
+using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
-using Core.Models.Attendance;
-using Core.Models.Attendance.Repositories;
-using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -45,17 +44,11 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGetRetrieveAttendance(CancellationToken cancellationToken = default)
     {
-        for (int term = 1; term < 4; term++)
-        {
-            for (int week = 1; week < 12; week++)
-            {
-                Result<List<AttendanceValue>> request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", term.ToString(), week.ToString()), cancellationToken);
+        Result<List<AttendanceValue>> request = await _mediator.Send(new GetAttendanceDataFromSentralQuery("2023", "4", "1"), cancellationToken);
 
-                if (request.IsSuccess)
-                {
-                    _repository.Insert(request.Value);
-                }
-            }
+        if (request.IsSuccess)
+        {
+            _repository.Insert(request.Value);
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);
