@@ -1,0 +1,54 @@
+﻿@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Compliance
+@{
+    Layout = "/Pages/Shared/_WebLayout.cshtml";
+
+    string activePage = ViewData["ActivePage"].ToString();
+}
+
+<div class="row sidebar-layout">
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+        <div class="sidebar-sticky pt-3">
+            <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted">
+                <span class="w-100">Attendance</span>
+            </h4>
+            <ul class="nav flex-column mx-2">
+                <li class="nav-item">
+                    <a class="nav-link @(activePage == CompliancePages.Attendance_Index ? "active" : "")" href="/SchoolAdmin/Compliance/Attendance">
+                        Records
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(activePage == CompliancePages.Attendance_Reports ? "active" : "")" href="/SchoolAdmin/Compliance/Attendance/Reports">
+                        Reports
+                    </a>
+                </li>
+            </ul>
+            
+            <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted">
+                <span class="w-100">Wellbeing</span>
+            </h4>
+            <ul class="nav flex-column mx-2">
+                <li class="nav-item">
+                    <a class="nav-link @(activePage == CompliancePages.Wellbeing_Index ? "active" : "")" href="/SchoolAdmin/Compliance/Wellbeing">
+                        N-Award Compliance
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pt-md-3">
+        @RenderBody()
+    </main>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            var container = $('#main-container');
+            container.removeClass('container');
+            container.addClass('container-fluid')
+        });
+    </script>
+
+  @RenderSection("scripts", required: false)
+}
