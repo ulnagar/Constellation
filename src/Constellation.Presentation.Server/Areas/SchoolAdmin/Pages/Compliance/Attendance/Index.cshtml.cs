@@ -1,7 +1,8 @@
-namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Attendance;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Compliance.Attendance;
 
 using Constellation.Application.Attendance.GetAttendanceDataFromSentral;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Models.Auth;
 using Constellation.Application.Students.GetStudents;
 using Constellation.Application.Students.Models;
 using Constellation.Core.Models.Attendance;
@@ -9,15 +10,16 @@ using Constellation.Core.Models.Attendance.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 
+[Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly IAttendanceRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
-
 
     public IndexModel(
         ISender mediator,
@@ -28,6 +30,8 @@ public class IndexModel : BasePageModel
         _repository = repository;
         _unitOfWork = unitOfWork;
     }
+
+    [ViewData] public string ActivePage { get; set; } = CompliancePages.Attendance_Index;
 
     public List<AttendanceValue> StudentData { get; set; } = new();
     public List<StudentResponse> Students { get; set; } = new();
@@ -48,7 +52,8 @@ public class IndexModel : BasePageModel
 
         if (request.IsSuccess)
         {
-            _repository.Insert(request.Value);
+            foreach (var entry in request.Value)
+                _repository.Insert(entry);
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);

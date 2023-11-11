@@ -1,6 +1,6 @@
 ﻿@page
 @using Constellation.Core.Extensions
-@model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Compliance.Wellbeing.IndexModel
 
 <h2>Sentral Incident Tracking Report</h2>
 
@@ -14,16 +14,16 @@
 
 <table class="table">
     <thead>
-    <tr>
-        <th>Age</th>
-        <th>Date</th>
-        <th>Subject</th>
-        <th>Type</th>
-        <th>Teacher</th>
-        <th>Surname</th>
-        <th>Name</th>
-        <th>Year</th>
-    </tr>
+        <tr>
+            <th>Age</th>
+            <th>Date</th>
+            <th>Subject</th>
+            <th>Type</th>
+            <th>Teacher</th>
+            <th>Surname</th>
+            <th>Name</th>
+            <th>Year</th>
+        </tr>
     </thead>
     <tbody>
         @foreach (var entry in Model.Data.OrderByDescending(entry => entry.DateCreated))
