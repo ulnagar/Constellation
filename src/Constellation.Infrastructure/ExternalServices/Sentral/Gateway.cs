@@ -7,6 +7,7 @@ using Constellation.Application.DTOs.Awards;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
+using Constellation.Core.Models;
 using Core.Abstractions.Clock;
 using Core.Errors;
 using Core.Shared;
@@ -695,6 +696,73 @@ public partial class Gateway : ISentralGateway
         }
 
         return nonSchoolDays.OrderBy(a => a).ToList();
+    }
+
+    public async Task<Result<(string Week, string Term)>> GetWeekForDate(DateOnly date)
+    {
+        if (_logOnly)
+        {
+            _logger
+                .Information("GetWeekForDate: date={date}", date);
+
+            return ("1", "1");
+        }
+
+        string year = date.Year.ToString();
+
+        HtmlDocument page = await GetPageAsync($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term");
+
+        if (page == null)
+            return Result.Failure<(string, string)>(new("SentralGateway.GetPage.Failure", "Could not retrieve page from Sentral Server"));
+
+        HtmlNode calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "TermCalendarTable").Value);
+
+        if (calendarTable != null)
+        {
+            IEnumerable<HtmlNode> rows = calendarTable.Descendants("tr");
+
+            string term = "1";
+            string week = "1";
+
+            foreach (HtmlNode row in rows)
+            {
+                if (row.Descendants("td").Count() == 1)
+                {
+                    // This is a header row
+                    HtmlNode header = row.Descendants("td").First();
+                    HtmlNode termName = header.Descendants("b").FirstOrDefault();
+
+                    if (termName is null)
+                    {
+                        // This is a blank row, skip
+                        continue;
+                    }
+
+                    term = termName.InnerText.Split(' ')[1];
+                    continue;
+                }
+
+                HtmlNode weekName = row.Descendants("th").FirstOrDefault();
+
+                if (string.IsNullOrWhiteSpace(weekName.InnerText))
+                    continue;
+
+                week = weekName.InnerText;
+
+                foreach (HtmlNode cell in row.Descendants("td"))
+                {
+                    string action = cell.GetAttributeValue("onclick", "");
+                    if (string.IsNullOrWhiteSpace(action))
+                        continue;
+
+                    string detectedDate = action.Split('\'')[1];
+                    if (DateOnly.Parse(detectedDate) == date)
+                        return (week, term);
+                }
+            }
+        }
+
+        return Result.Failure<(string, string)>(new("SentralGateway.GetWeekForDate.NotFound", "Could not identify Term and Week from date"));
     }
 
     public async Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForWeek(string year, string term, string week)

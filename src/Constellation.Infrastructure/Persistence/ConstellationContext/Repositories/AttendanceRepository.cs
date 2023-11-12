@@ -29,6 +29,23 @@ internal class AttendanceRepository : IAttendanceRepository
             .Set<AttendanceValue>()
             .ToListAsync(cancellationToken);
 
+    public async Task<List<AttendanceValue>> GetAllRecent(
+        CancellationToken cancellationToken = default)
+    {
+        List<DateOnly> listOfStartDates = await _context
+            .Set<AttendanceValue>()
+            .Select(entry => entry.StartDate)
+            .Distinct()
+            .OrderByDescending(entry => entry)
+            .Take(5)
+            .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<AttendanceValue>()
+            .Where(entry => listOfStartDates.Contains(entry.StartDate))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<AttendanceValue>> GetAllForStudent(
         int year,
         string studentId,
@@ -97,6 +114,28 @@ internal class AttendanceRepository : IAttendanceRepository
                 entry.EndDate >= selectedDate)
             .ToListAsync(cancellationToken);
 
-    public void Insert(AttendanceValue item) => _context.Set<AttendanceValue>().Add(item);
+    public void Insert(AttendanceValue item)
+    {
+        bool existing = _context
+            .Set<AttendanceValue>()
+            .Any(entry =>
+                entry.StudentId == item.StudentId &&
+                entry.PeriodLabel == item.PeriodLabel);
+
+        if (existing)
+        {
+            AttendanceValue entry = _context
+                .Set<AttendanceValue>()
+                .First(entry =>
+                    entry.StudentId == item.StudentId &&
+                    entry.PeriodLabel == item.PeriodLabel);
+
+            _context
+                .Set<AttendanceValue>()
+                .Remove(entry);
+        }
+
+        _context.Set<AttendanceValue>().Add(item);
+    } 
     public void Insert(List<AttendanceValue> items) => _context.Set<AttendanceValue>().AddRange(items);
 }

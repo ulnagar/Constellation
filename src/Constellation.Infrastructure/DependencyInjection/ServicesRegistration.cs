@@ -114,6 +114,7 @@ public static class ServicesRegistration
         services.AddScoped<IProcessOutboxMessagesJob, ProcessOutboxMessagesJob>();
         services.AddScoped<IRollMarkingReportJob, RollMarkingReportJob>();
         services.AddScoped<ISchoolRegisterJob, SchoolRegisterJob>();
+        services.AddScoped<ISentralAttendancePercentageSyncJob, SentralAttendancePercentageSyncJob>();
         services.AddScoped<ISentralAwardSyncJob, SentralAwardSyncJob>();
         services.AddScoped<ISentralFamilyDetailsSyncJob, SentralFamilyDetailsSyncJob>();
         services.AddScoped<ISentralPhotoSyncJob, SentralPhotoSyncJob>();

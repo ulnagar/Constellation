@@ -3,28 +3,24 @@
 
 @using Constellation.Core.Extensions
 
-<h2>Test Page</h2>
+<h2>Attendance Percentages</h2>
 
-<div class="page-menu">
+@* <div class="page-menu">
     <a asp-page-handler="RetrieveAttendance" class="btn btn-success">Sync Attendance</a>
-</div>
+</div> *@
 
 <hr />
 
 <table class="table table-striped data-table">
     <thead>
         <tr>
-            <th rowspan="2">StudentId</th>
-            <th rowspan="2">Grade</th>
-            <th rowspan="2">Period</th>
-            <th colspan="2">YTD</th>
-            <th colspan="2">Week</th>
-        </tr>
-        <tr>
-            <th>Day</th>
-            <th>Minute</th>
-            <th>Day</th>
-            <th>Minute</th>
+            <th>Student</th>
+            <th>Grade</th>
+            <th>Period</th>
+            <th>YTD (Day)</th>
+            <th>YTD (Minute)</th>
+            <th>Week (Day)</th>
+            <th>Week (Minute)</th>
         </tr>
     </thead>
     <tbody>
