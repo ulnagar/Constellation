@@ -15,7 +15,7 @@ public interface IAttendanceRepository
     Task<List<AttendanceValue>> GetAllForStudentAndDate(string studentId, DateOnly selectedDate, CancellationToken cancellationToken = default);
     Task<List<AttendanceValue>> GetAllForGrade(int year, Grade selectedGrade, CancellationToken cancellationToken = default);
     Task<List<AttendanceValue>> GetAllForGradeAndDate(Grade selectedGrade, DateOnly selectedDate, CancellationToken cancellationToken = default);
-
+    Task<List<AttendanceValue>> GetForReportWithTitle(string periodLabel, CancellationToken cancellationToken = default);
     void Insert(AttendanceValue item);
     void Insert(List<AttendanceValue> items);
 }

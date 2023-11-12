@@ -12,6 +12,7 @@ using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Rollover.ImportStudents;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Infrastructure.Jobs;
+using Core.Models.Attendance;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -38,4 +39,5 @@ public interface IExcelService
     List<StudentAttendanceData> ExtractPerMinuteWeekAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
     Task<List<StudentImportRecord>> ConvertStudentImportFile(MemoryStream importFile, CancellationToken cancellationToken = default);
     Task<List<SentralIncidentDetails>> ConvertSentralIncidentReport(Stream reportFile, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateStudentAttendanceReport(List<AttendanceValue> values, CancellationToken cancellationToken = default);
 }
