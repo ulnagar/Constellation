@@ -37,6 +37,8 @@ public interface IRollMarkingReportJob : IHangfireJob { }
 
 public interface ISchoolRegisterJob : IHangfireJob { }
 
+public interface ISentralAttendancePercentageSyncJob : IHangfireJob { }
+
 public interface ISentralAwardSyncJob : IHangfireJob { }
 
 public interface ISentralFamilyDetailsSyncJob : IHangfireJob { }

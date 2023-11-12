@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 public interface IAttendanceRepository
 {
     Task<List<AttendanceValue>> GetAll(CancellationToken cancellationToken = default);
+    Task<List<AttendanceValue>> GetAllRecent(CancellationToken cancellationToken = default);
     Task<List<AttendanceValue>> GetAllForStudent(int year, string studentId, CancellationToken cancellationToken = default);
     Task<List<AttendanceValue>> GetAllForDate(DateOnly selectedDate, CancellationToken cancellationToken = default);
     Task<List<AttendanceValue>> GetAllForStudentAndDate(string studentId, DateOnly selectedDate, CancellationToken cancellationToken = default);
