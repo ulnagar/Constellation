@@ -114,6 +114,14 @@ internal class AttendanceRepository : IAttendanceRepository
                 entry.EndDate >= selectedDate)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<AttendanceValue>> GetForReportWithTitle(
+        string periodLabel, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AttendanceValue>()
+            .Where(entry => entry.PeriodLabel == periodLabel)
+            .ToListAsync(cancellationToken);
+
     public void Insert(AttendanceValue item)
     {
         bool existing = _context

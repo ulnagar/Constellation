@@ -2,6 +2,8 @@
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+Year 5 Data is not reaching database!
+
 https://schoolsnsw-my.sharepoint.com/:x:/g/personal/julie_dent_det_nsw_edu_au/EWzMx1uE9eFKur2m3Ccw-OAB-vfSCnKQ9XMCOxTmHa-zXw?e=0yM4Dz
 Export report for Exec Meeting that outlines the students attendance bands per grade.
 Include students with 100% YTD (minute) attendace
