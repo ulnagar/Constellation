@@ -1139,13 +1139,20 @@ public class ExcelService : IExcelService
         ExcelWorksheet pivotWorksheet = package.Workbook.Worksheets.Add($"{grade.AsName()} Data");
         ExcelRangeBase table = pivotWorksheet.Cells[1, 1].LoadFromCollection(records, true);
 
-        ExcelPivotTable pivot = pivotWorksheet.PivotTables.Add(pivotWorksheet.Cells[1, 7], table, $"Pivot{grade.AsNumber()}");
-        ExcelPivotTableField group = pivot.RowFields.Add(pivot.Fields["Group"]);
+        pivotWorksheet.Cells[2, 7].Value = "90% - 100% Attendance";
+        pivotWorksheet.Cells[2, 8].Formula = "=countif(D:D, G2)";
 
-        ExcelPivotTableDataField count = pivot.DataFields.Add(pivot.Fields["StudentId"]);
-        count.Name = "Count of StudentId";
-        count.Function = DataFieldFunctions.Count;
-        
+        pivotWorksheet.Cells[3, 7].Value = "75% - 90% Attendance";
+        pivotWorksheet.Cells[3, 8].Formula = "=countif(D:D, G3)";
+
+        pivotWorksheet.Cells[4, 7].Value = "50% - 75% Attendance";
+        pivotWorksheet.Cells[4, 8].Formula = "=countif(D:D, G4)";
+
+        pivotWorksheet.Cells[5, 7].Value = "Below 50% Attendance";
+        pivotWorksheet.Cells[5, 8].Formula = "=countif(D:D, G5)";
+
+        ExcelRangeBase chartRange = pivotWorksheet.Cells[2, 7, 5, 8];
+
         ExcelWorksheet chartWorksheet = package.Workbook.Worksheets.Add($"{grade.AsName()} Report");
         ExcelRangeBase chartTitle = chartWorksheet.Cells[1, 1, 1, 9];
         chartTitle.Merge = true;
@@ -1161,14 +1168,32 @@ public class ExcelService : IExcelService
         chartSubtitle.Style.Font.Name = "Maiandra GD";
         chartSubtitle.Style.Font.Size = 16;
         chartSubtitle.Value = $"YTD up to {data.First().PeriodLabel} - {grade.AsName()}";
+        chartSubtitle.Style.Border.Bottom.Color.SetColor(0, 0, 32, 96);
 
-        ExcelPieChart chart = chartWorksheet.Drawings.AddPieChart($"Chart{grade.AsNumber()}", ePieChartType.Pie, pivot);
+        ExcelPieChart chart = chartWorksheet.Drawings.AddPieChart($"Chart{grade.AsNumber()}", ePieChartType.Pie);
+        ExcelPieChartSerie series = chart.Series.Add(pivotWorksheet.Cells[2, 8, 5, 8], pivotWorksheet.Cells[2, 7, 5, 7]);
+        ExcelChartDataPoint point0 = series.DataPoints.Add(0);
+        point0.Fill.Style = eFillStyle.SolidFill;
+        point0.Fill.SolidFill.Color.SetHslColor(97, 42, 79);
+
+        ExcelChartDataPoint point1 = series.DataPoints.Add(1);
+        point1.Fill.Style = eFillStyle.SolidFill;
+        point1.Fill.SolidFill.Color.SetHslColor(45, 100, 90);
+
+        ExcelChartDataPoint point2 = series.DataPoints.Add(2);
+        point2.Fill.Style = eFillStyle.SolidFill;
+        point2.Fill.SolidFill.Color.SetHslColor(45, 100, 50);
+
+        ExcelChartDataPoint point3 = series.DataPoints.Add(3);
+        point3.Fill.Style = eFillStyle.SolidFill;
+        point3.Fill.SolidFill.Color.SetHslColor(0, 100, 50);
+
         chart.Title.Text = $"{grade.AsName()} Attendance Year to Date up to {data.First().PeriodLabel}";
         chart.Legend.Position = eLegendPosition.Bottom;
         chart.DataLabel.ShowPercent = true;
         chart.SetSize(300, 500);
         chart.SetPosition(2, 5, 0, 5);
-        
+
         pivotWorksheet.Hidden = eWorkSheetHidden.Hidden;
     }
 
