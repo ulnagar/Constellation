@@ -1251,6 +1251,11 @@ public class ExcelService : IExcelService
             rowNumber++;
         }
 
+        chartWorksheet.Rows[6, rowNumber].Height = chartWorksheet.Row(5).Height * 2;
+        chartWorksheet.Rows[6, rowNumber].Style.WrapText = true;
+        chartWorksheet.Cells[6, 6, rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+
+
         pivotWorksheet.Hidden = eWorkSheetHidden.Hidden;
     }
 
