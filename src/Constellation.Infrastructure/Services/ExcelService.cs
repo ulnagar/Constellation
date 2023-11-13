@@ -1168,6 +1168,7 @@ public class ExcelService : IExcelService
         chartSubtitle.Style.Font.Name = "Maiandra GD";
         chartSubtitle.Style.Font.Size = 16;
         chartSubtitle.Value = $"YTD up to {data.First().PeriodLabel} - {grade.AsName()}";
+        chartSubtitle.Style.Border.Bottom.Style = ExcelBorderStyle.Thick;
         chartSubtitle.Style.Border.Bottom.Color.SetColor(0, 0, 32, 96);
 
         ExcelPieChart chart = chartWorksheet.Drawings.AddPieChart($"Chart{grade.AsNumber()}", ePieChartType.Pie);
@@ -1194,6 +1195,53 @@ public class ExcelService : IExcelService
         chart.SetSize(300, 500);
         chart.SetPosition(2, 5, 0, 5);
 
+        ExcelRangeBase tableTitle = chartWorksheet.Cells[3, 6, 4, 9];
+        tableTitle.Merge = true;
+        tableTitle.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        tableTitle.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+        tableTitle.Style.Font.Name = "Maiandra GD";
+        tableTitle.Style.Font.Size = 14;
+        tableTitle.Value = "Students of Concern";
+
+        chartWorksheet.Rows[5].Height = chartWorksheet.Row(5).Height * 2;
+        chartWorksheet.Rows[5].Style.WrapText = true;
+
+        ExcelRangeBase tableStudentColumn = chartWorksheet.Cells[5, 6];
+        tableStudentColumn.Style.Font.Name = "Calibri";
+        tableStudentColumn.Style.Font.Size = 10;
+        tableStudentColumn.Style.Font.Bold = true;
+        tableStudentColumn.Style.Fill.PatternType = ExcelFillStyle.Solid;
+        tableStudentColumn.Style.Fill.BackgroundColor.SetColor(0, 155, 194, 230);
+        tableStudentColumn.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+        tableStudentColumn.Value = "Student";
+
+        ExcelRangeBase tableReasonColumn = chartWorksheet.Cells[5, 7];
+        tableReasonColumn.Style.Font.Name = "Calibri";
+        tableReasonColumn.Style.Font.Size = 10;
+        tableReasonColumn.Style.Font.Bold = true;
+        tableReasonColumn.Style.Fill.PatternType = ExcelFillStyle.Solid;
+        tableReasonColumn.Style.Fill.BackgroundColor.SetColor(0, 155, 194, 230);
+        tableReasonColumn.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+        tableReasonColumn.Value = "Reason";
+
+        ExcelRangeBase tableDatesColumn = chartWorksheet.Cells[5, 8];
+        tableDatesColumn.Style.Font.Name = "Calibri";
+        tableDatesColumn.Style.Font.Size = 10;
+        tableDatesColumn.Style.Font.Bold = true;
+        tableDatesColumn.Style.Fill.PatternType = ExcelFillStyle.Solid;
+        tableDatesColumn.Style.Fill.BackgroundColor.SetColor(0, 155, 194, 230);
+        tableDatesColumn.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+        tableDatesColumn.Value = "Dates Absent";
+
+        ExcelRangeBase tableLessonsColumn = chartWorksheet.Cells[5, 9];
+        tableLessonsColumn.Style.Font.Name = "Calibri";
+        tableLessonsColumn.Style.Font.Size = 10;
+        tableLessonsColumn.Style.Font.Bold = true;
+        tableLessonsColumn.Style.Fill.PatternType = ExcelFillStyle.Solid;
+        tableLessonsColumn.Style.Fill.BackgroundColor.SetColor(0, 155, 194, 230);
+        tableLessonsColumn.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+        tableLessonsColumn.Value = "Lessons Missed";
+        
         pivotWorksheet.Hidden = eWorkSheetHidden.Hidden;
     }
 
