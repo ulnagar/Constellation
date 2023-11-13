@@ -18,11 +18,16 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Infrastructure.Jobs;
 using Core.Abstractions.Clock;
+using Core.Extensions;
 using ExcelDataReader;
 using OfficeOpenXml;
+using OfficeOpenXml.Drawing;
+using OfficeOpenXml.Drawing.Chart;
+using OfficeOpenXml.Style;
 using OfficeOpenXml.Table.PivotTable;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using static Constellation.Core.Errors.ValidationErrors;
@@ -791,6 +796,7 @@ public class ExcelService : IExcelService
                 {
                     StudentId = studentId,
                     Name = $"{line[1].FormatField()} {line[0].FormatField()}",
+                    Grade = (Grade)Convert.ToInt32(line[3].FormatField()),
                     DayYTD = Convert.ToDecimal(line[8].FormatField())
                 };
 
@@ -1097,47 +1103,73 @@ public class ExcelService : IExcelService
             .ToList();
 
         ExcelPackage excel = new();
-        ExcelWorksheet worksheet1 = excel.Workbook.Worksheets.Add("Weekly Data");
 
-        ExcelRangeBase table = worksheet1.Cells[1, 1].LoadFromCollection(records, true);
+        BuildDataTableAndPivot(excel, Grade.Y05, values.Where(entry => entry.Grade == Grade.Y05).ToList());
+        BuildDataTableAndPivot(excel, Grade.Y06, values.Where(entry => entry.Grade == Grade.Y06).ToList());
+        BuildDataTableAndPivot(excel, Grade.Y07, values.Where(entry => entry.Grade == Grade.Y07).ToList());
+        BuildDataTableAndPivot(excel, Grade.Y08, values.Where(entry => entry.Grade == Grade.Y08).ToList());
+        BuildDataTableAndPivot(excel, Grade.Y09, values.Where(entry => entry.Grade == Grade.Y09).ToList());
+        BuildDataTableAndPivot(excel, Grade.Y10, values.Where(entry => entry.Grade == Grade.Y10).ToList());
+        BuildDataTableAndPivot(excel, Grade.Y11, values.Where(entry => entry.Grade == Grade.Y11).ToList());
+        BuildDataTableAndPivot(excel, Grade.Y12, values.Where(entry => entry.Grade == Grade.Y12).ToList());
         
-        // Year 5 Pivot Table
-        ExcelPivotTable year5Pivot = worksheet1.PivotTables.Add(worksheet1.Cells[3, 7], table, "Year5Pivot");
-        ExcelPivotTableField year5Group = year5Pivot.RowFields.Add(year5Pivot.Fields["Group"]);
-        
-        ExcelPivotTableDataField year5Count = year5Pivot.DataFields.Add(year5Pivot.Fields["StudentId"]);
-        year5Count.Name = "Count of StudentId";
-        year5Count.Function = DataFieldFunctions.Count;
-
-        ExcelPivotTableField year5Grade = year5Pivot.PageFields.Add(year5Pivot.Fields["Grade"]);
-        year5Grade.Sort = eSortType.Ascending;
-        year5Grade.Filters.AddValueFilter(ePivotTableValueFilterType.ValueEqual, 0, "Y05");
-
-        year5Group.Items.Refresh();
-
-        // Year 6 Pivot Table
-        ExcelPivotTable year6Pivot = worksheet1.PivotTables.Add(worksheet1.Cells[3, 10], table, "Year6Pivot");
-        ExcelPivotTableField year6Group = year6Pivot.RowFields.Add(year6Pivot.Fields["Group"]);
-
-        ExcelPivotTableDataField year6Count = year6Pivot.DataFields.Add(year6Pivot.Fields["StudentId"]);
-        year6Count.Name = "Count of StudentId";
-        year6Count.Function = DataFieldFunctions.Count;
-
-        ExcelPivotTableField grade = year6Pivot.PageFields.Add(year6Pivot.Fields["Grade"]);
-        grade.Sort = eSortType.Ascending;
-        grade.Filters.AddValueFilter(ePivotTableValueFilterType.ValueEqual, 0, "Y06");
-        grade.Items.Refresh();
-
-        //year6Pivot.DataOnRows = false;
-        //year6Group.Items.Refresh();
-
-
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
 
         memoryStream.Position = 0;
 
         return memoryStream;
+    }
+
+    private void BuildDataTableAndPivot(ExcelPackage package, Grade grade, List<AttendanceValue> data)
+    {
+        var records = data
+            .Select(entry => new
+            {
+                StudentId = entry.StudentId,
+                Grade = entry.Grade,
+                Percentage = entry.PerMinuteYearToDatePercentage,
+                Group = entry.PerMinuteYearToDatePercentage >= 90 ? "90% - 100% Attendance" :
+                    entry.PerMinuteYearToDatePercentage >= 75 ? "75% - 90% Attendance" :
+                    entry.PerMinuteYearToDatePercentage >= 50 ? "50% - 75% Attendance" :
+                    "Below 50% Attendance"
+            })
+            .ToList();
+
+        ExcelWorksheet pivotWorksheet = package.Workbook.Worksheets.Add($"{grade.AsName()} Data");
+        ExcelRangeBase table = pivotWorksheet.Cells[1, 1].LoadFromCollection(records, true);
+
+        ExcelPivotTable pivot = pivotWorksheet.PivotTables.Add(pivotWorksheet.Cells[1, 7], table, $"Pivot{grade.AsNumber()}");
+        ExcelPivotTableField group = pivot.RowFields.Add(pivot.Fields["Group"]);
+
+        ExcelPivotTableDataField count = pivot.DataFields.Add(pivot.Fields["StudentId"]);
+        count.Name = "Count of StudentId";
+        count.Function = DataFieldFunctions.Count;
+        
+        ExcelWorksheet chartWorksheet = package.Workbook.Worksheets.Add($"{grade.AsName()} Report");
+        ExcelRangeBase chartTitle = chartWorksheet.Cells[1, 1, 1, 9];
+        chartTitle.Merge = true;
+        chartTitle.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        chartTitle.Style.Font.Name = "Maiandra GD";
+        chartTitle.Style.Font.Size = 36;
+        chartTitle.Style.Font.Color.SetColor(0, 91, 155, 213);
+        chartTitle.Value = "Attendance Report";
+        
+        ExcelRangeBase chartSubtitle = chartWorksheet.Cells[2, 1, 2, 9];
+        chartSubtitle.Merge = true;
+        chartSubtitle.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        chartSubtitle.Style.Font.Name = "Maiandra GD";
+        chartSubtitle.Style.Font.Size = 16;
+        chartSubtitle.Value = $"YTD up to {data.First().PeriodLabel} - {grade.AsName()}";
+
+        ExcelPieChart chart = chartWorksheet.Drawings.AddPieChart($"Chart{grade.AsNumber()}", ePieChartType.Pie, pivot);
+        chart.Title.Text = $"{grade.AsName()} Attendance Year to Date up to {data.First().PeriodLabel}";
+        chart.Legend.Position = eLegendPosition.Bottom;
+        chart.DataLabel.ShowPercent = true;
+        chart.SetSize(300, 500);
+        chart.SetPosition(2, 5, 0, 5);
+        
+        pivotWorksheet.Hidden = eWorkSheetHidden.Hidden;
     }
 
     private class StudentRecord
