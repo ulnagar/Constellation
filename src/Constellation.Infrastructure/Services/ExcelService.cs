@@ -1240,13 +1240,13 @@ public class ExcelService : IExcelService
             chartWorksheet.Cells[rowNumber, 8].Value = entry.AbsenceDate.ToShortDateString();
             chartWorksheet.Cells[rowNumber, 9].Value = entry.AbsenceLesson;
 
-            chartWorksheet.Cells[rowNumber, 5, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
+            chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
 
             if (entry.Severity == 1)
-                chartWorksheet.Cells[rowNumber, 5, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 0, 0);
+                chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 0, 0);
 
             if (entry.Severity == 2)
-                chartWorksheet.Cells[rowNumber, 5, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 192, 0);
+                chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 192, 0);
 
             rowNumber++;
         }

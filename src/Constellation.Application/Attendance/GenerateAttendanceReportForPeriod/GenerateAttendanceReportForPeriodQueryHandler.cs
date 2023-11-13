@@ -79,6 +79,9 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
 
             foreach (Absence absence in absences)
             {
+                if (absence.Type.Equals(AbsenceType.Partial))
+                    continue;
+
                 Student student = students.FirstOrDefault(student => student.StudentId == absence.StudentId)!;
                 Offering offering = offerings.FirstOrDefault(offering => offering.Id == absence.OfferingId);
 
