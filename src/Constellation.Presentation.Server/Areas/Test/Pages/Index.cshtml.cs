@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
+using Application.Attendance.GenerateAttendanceReportForPeriod;
 using Application.DTOs;
 using Application.Interfaces.Gateways;
 using Application.Interfaces.Services;
@@ -13,20 +14,11 @@ using System.IO;
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
-    private readonly ISentralGateway _sentralGateway;
-    private readonly IAttendanceRepository _attendanceRepository;
-    private readonly IExcelService _excelService;
 
     public IndexModel(
-        ISender mediator,
-        ISentralGateway sentralGateway,
-        IAttendanceRepository attendanceRepository,
-        IExcelService excelService)
+        ISender mediator)
     {
         _mediator = mediator;
-        _sentralGateway = sentralGateway;
-        _attendanceRepository = attendanceRepository;
-        _excelService = excelService;
     }
 
     public List<SentralIncidentDetails> Data { get; set; } = new();
@@ -40,11 +32,12 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
-        List<AttendanceValue> values = await _attendanceRepository.GetForReportWithTitle("Term 4, Week 5, 2023");
+        var request = await _mediator.Send(new GenerateAttendanceReportForPeriodQuery("Term 4, Week 5, 2023"));
 
-        MemoryStream result = await _excelService.CreateStudentAttendanceReport(values);
+        if (request.IsFailure)
+            return RedirectToPage();
 
-        byte[] fileData = result.ToArray();
+        byte[] fileData = request.Value.ToArray();
         string fileName = "Attendance Report.xlsx";
         string fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
