@@ -2,6 +2,7 @@
 
 using Attendance.GetAttendanceDataFromSentral;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
+using Constellation.Application.Attendance.GenerateAttendanceReportForPeriod;
 using Constellation.Application.Awards.ExportAwardNominations;
 using Constellation.Application.Contacts.GetContactList;
 using Constellation.Application.DTOs;
@@ -39,5 +40,6 @@ public interface IExcelService
     List<StudentAttendanceData> ExtractPerMinuteWeekAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
     Task<List<StudentImportRecord>> ConvertStudentImportFile(MemoryStream importFile, CancellationToken cancellationToken = default);
     Task<List<SentralIncidentDetails>> ConvertSentralIncidentReport(Stream reportFile, CancellationToken cancellationToken = default);
-    Task<MemoryStream> CreateStudentAttendanceReport(List<AttendanceValue> values, CancellationToken cancellationToken = default);
+
+    Task<MemoryStream> CreateStudentAttendanceReport(string periodLabel, List<AttendanceRecord> records, List<AbsenceRecord> absenceRecords, CancellationToken cancellationToken = default);
 }

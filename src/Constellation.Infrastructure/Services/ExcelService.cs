@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
+using Application.Attendance.GenerateAttendanceReportForPeriod;
 using Application.Attendance.GetAttendanceDataFromSentral;
 using Application.Extensions;
 using Application.Rollover.ImportStudents;
@@ -1086,33 +1087,29 @@ public class ExcelService : IExcelService
     }
 
     public async Task<MemoryStream> CreateStudentAttendanceReport(
-        List<AttendanceValue> values,
+        string periodLabel,
+        List<AttendanceRecord> records,
+        List<AbsenceRecord> absenceRecords,
         CancellationToken cancellationToken = default)
     {
-        var records = values
-            .Select(entry => new
-            {
-                StudentId = entry.StudentId,
-                Grade = entry.Grade,
-                Percentage = entry.PerMinuteYearToDatePercentage,
-                Group = entry.PerMinuteYearToDatePercentage >= 90 ? "90% - 100% Attendance" :
-                    entry.PerMinuteYearToDatePercentage >= 75 ? "75% - 90% Attendance" :
-                    entry.PerMinuteYearToDatePercentage >= 50 ? "50% - 75% Attendance" :
-                    "Below 50% Attendance"
-            })
-            .ToList();
-
         ExcelPackage excel = new();
 
-        BuildDataTableAndPivot(excel, Grade.Y05, values.Where(entry => entry.Grade == Grade.Y05).ToList());
-        BuildDataTableAndPivot(excel, Grade.Y06, values.Where(entry => entry.Grade == Grade.Y06).ToList());
-        BuildDataTableAndPivot(excel, Grade.Y07, values.Where(entry => entry.Grade == Grade.Y07).ToList());
-        BuildDataTableAndPivot(excel, Grade.Y08, values.Where(entry => entry.Grade == Grade.Y08).ToList());
-        BuildDataTableAndPivot(excel, Grade.Y09, values.Where(entry => entry.Grade == Grade.Y09).ToList());
-        BuildDataTableAndPivot(excel, Grade.Y10, values.Where(entry => entry.Grade == Grade.Y10).ToList());
-        BuildDataTableAndPivot(excel, Grade.Y11, values.Where(entry => entry.Grade == Grade.Y11).ToList());
-        BuildDataTableAndPivot(excel, Grade.Y12, values.Where(entry => entry.Grade == Grade.Y12).ToList());
-        
+        foreach (Grade grade in Enum.GetValues<Grade>())
+        {
+            List<AttendanceRecord> filteredRecords = records
+                .Where(entry => entry.Grade == grade)
+                .ToList();
+
+            List<AbsenceRecord> filteredAbsences = absenceRecords
+                .Where(entry => entry.Grade == grade)
+                .ToList();
+
+            if (filteredRecords.Any())
+            {
+                BuildDataTableAndPivot(excel, periodLabel, grade, filteredRecords, filteredAbsences);
+            }
+        }
+
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
 
@@ -1121,21 +1118,8 @@ public class ExcelService : IExcelService
         return memoryStream;
     }
 
-    private void BuildDataTableAndPivot(ExcelPackage package, Grade grade, List<AttendanceValue> data)
+    private void BuildDataTableAndPivot(ExcelPackage package, string periodLabel, Grade grade, List<AttendanceRecord> records, List<AbsenceRecord> absences)
     {
-        var records = data
-            .Select(entry => new
-            {
-                StudentId = entry.StudentId,
-                Grade = entry.Grade,
-                Percentage = entry.PerMinuteYearToDatePercentage,
-                Group = entry.PerMinuteYearToDatePercentage >= 90 ? "90% - 100% Attendance" :
-                    entry.PerMinuteYearToDatePercentage >= 75 ? "75% - 90% Attendance" :
-                    entry.PerMinuteYearToDatePercentage >= 50 ? "50% - 75% Attendance" :
-                    "Below 50% Attendance"
-            })
-            .ToList();
-
         ExcelWorksheet pivotWorksheet = package.Workbook.Worksheets.Add($"{grade.AsName()} Data");
         ExcelRangeBase table = pivotWorksheet.Cells[1, 1].LoadFromCollection(records, true);
 
@@ -1167,7 +1151,7 @@ public class ExcelService : IExcelService
         chartSubtitle.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
         chartSubtitle.Style.Font.Name = "Maiandra GD";
         chartSubtitle.Style.Font.Size = 16;
-        chartSubtitle.Value = $"YTD up to {data.First().PeriodLabel} - {grade.AsName()}";
+        chartSubtitle.Value = $"YTD up to {periodLabel} - {grade.AsName()}";
         chartSubtitle.Style.Border.Bottom.Style = ExcelBorderStyle.Thick;
         chartSubtitle.Style.Border.Bottom.Color.SetColor(0, 0, 32, 96);
 
@@ -1189,7 +1173,7 @@ public class ExcelService : IExcelService
         point3.Fill.Style = eFillStyle.SolidFill;
         point3.Fill.SolidFill.Color.SetHslColor(0, 100, 50);
 
-        chart.Title.Text = $"{grade.AsName()} Attendance Year to Date up to {data.First().PeriodLabel}";
+        chart.Title.Text = $"{grade.AsName()} Attendance Year to Date up to {periodLabel}";
         chart.Legend.Position = eLegendPosition.Bottom;
         chart.DataLabel.ShowPercent = true;
         chart.SetSize(300, 500);
@@ -1241,7 +1225,32 @@ public class ExcelService : IExcelService
         tableLessonsColumn.Style.Fill.BackgroundColor.SetColor(0, 155, 194, 230);
         tableLessonsColumn.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
         tableLessonsColumn.Value = "Lessons Missed";
-        
+
+        List<AbsenceRecord> orderedAbsences = absences
+            .OrderBy(record => record.Severity)
+            .ThenBy(record => record.StudentName)
+            .ThenBy(record => record.AbsenceDate)
+            .ToList();
+
+        int rowNumber = 6;
+        foreach (AbsenceRecord entry in orderedAbsences)
+        {
+            chartWorksheet.Cells[rowNumber, 6].Value = entry.StudentName;
+            chartWorksheet.Cells[rowNumber, 7].Value = entry.AbsenceReason;
+            chartWorksheet.Cells[rowNumber, 8].Value = entry.AbsenceDate.ToShortDateString();
+            chartWorksheet.Cells[rowNumber, 9].Value = entry.AbsenceLesson;
+
+            chartWorksheet.Cells[rowNumber, 5, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
+
+            if (entry.Severity == 1)
+                chartWorksheet.Cells[rowNumber, 5, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 0, 0);
+
+            if (entry.Severity == 2)
+                chartWorksheet.Cells[rowNumber, 5, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 192, 0);
+
+            rowNumber++;
+        }
+
         pivotWorksheet.Hidden = eWorkSheetHidden.Hidden;
     }
 
