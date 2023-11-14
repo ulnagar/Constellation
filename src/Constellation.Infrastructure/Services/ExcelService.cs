@@ -1232,6 +1232,8 @@ public class ExcelService : IExcelService
             .ThenBy(record => record.AbsenceDate)
             .ToList();
 
+        chartWorksheet.Columns[6, 9].Width = chartWorksheet.Column(6).Width * 1.5;
+
         int rowNumber = 6;
         foreach (AbsenceRecord entry in orderedAbsences)
         {
@@ -1242,6 +1244,11 @@ public class ExcelService : IExcelService
 
             chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
 
+            chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+            chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+            chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+            chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+            
             if (entry.Severity == 1)
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 0, 0);
 
@@ -1251,11 +1258,12 @@ public class ExcelService : IExcelService
             rowNumber++;
         }
 
-        chartWorksheet.Rows[6, rowNumber].Height = chartWorksheet.Row(5).Height * 2;
-        chartWorksheet.Rows[6, rowNumber].Style.WrapText = true;
-        chartWorksheet.Cells[6, 6, rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-
-
+        if (rowNumber > 6)
+        {
+            chartWorksheet.Rows[6, rowNumber - 1].Height = chartWorksheet.Row(6).Height * 2;
+            chartWorksheet.Rows[6, rowNumber - 1].Style.WrapText = true;
+        }
+        
         pivotWorksheet.Hidden = eWorkSheetHidden.Hidden;
     }
 
