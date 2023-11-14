@@ -1100,13 +1100,9 @@ public class ExcelService : IExcelService
                 .Where(entry => entry.Grade == grade)
                 .ToList();
 
-            List<AbsenceRecord> filteredAbsences = absenceRecords
-                .Where(entry => entry.Grade == grade)
-                .ToList();
-
             if (filteredRecords.Any())
             {
-                BuildDataTableAndPivot(excel, periodLabel, grade, filteredRecords, filteredAbsences);
+                BuildDataTableAndPivot(excel, periodLabel, grade, filteredRecords, absenceRecords);
             }
         }
 
@@ -1124,16 +1120,16 @@ public class ExcelService : IExcelService
         ExcelRangeBase table = pivotWorksheet.Cells[1, 1].LoadFromCollection(records, true);
 
         pivotWorksheet.Cells[2, 7].Value = "90% - 100% Attendance";
-        pivotWorksheet.Cells[2, 8].Formula = "=countif(D:D, G2)";
+        pivotWorksheet.Cells[2, 8].Formula = "=countif(E:E, G2)";
 
         pivotWorksheet.Cells[3, 7].Value = "75% - 90% Attendance";
-        pivotWorksheet.Cells[3, 8].Formula = "=countif(D:D, G3)";
+        pivotWorksheet.Cells[3, 8].Formula = "=countif(E:E, G3)";
 
         pivotWorksheet.Cells[4, 7].Value = "50% - 75% Attendance";
-        pivotWorksheet.Cells[4, 8].Formula = "=countif(D:D, G4)";
+        pivotWorksheet.Cells[4, 8].Formula = "=countif(E:E, G4)";
 
         pivotWorksheet.Cells[5, 7].Value = "Below 50% Attendance";
-        pivotWorksheet.Cells[5, 8].Formula = "=countif(D:D, G5)";
+        pivotWorksheet.Cells[5, 8].Formula = "=countif(E:E, G5)";
 
         ExcelRangeBase chartRange = pivotWorksheet.Cells[2, 7, 5, 8];
 
@@ -1226,36 +1222,80 @@ public class ExcelService : IExcelService
         tableLessonsColumn.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
         tableLessonsColumn.Value = "Lessons Missed";
 
-        List<AbsenceRecord> orderedAbsences = absences
-            .OrderBy(record => record.Severity)
-            .ThenBy(record => record.StudentName)
-            .ThenBy(record => record.AbsenceDate)
-            .ToList();
-
         chartWorksheet.Columns[6, 9].Width = chartWorksheet.Column(6).Width * 1.5;
 
+        List<string> lowestStudentIds = records
+            .Where(entry => entry.Group == "Below 50% Attendance")
+            .Select(entry => entry.StudentId)
+            .ToList();
+
+        List<string> lowerStudentIds = records
+            .Where(entry => entry.Group == "50% - 75% Attendance")
+            .Select(entry => entry.StudentId)
+            .ToList();
+
         int rowNumber = 6;
-        foreach (AbsenceRecord entry in orderedAbsences)
+        foreach (string studentId in lowestStudentIds)
         {
-            chartWorksheet.Cells[rowNumber, 6].Value = entry.StudentName;
-            chartWorksheet.Cells[rowNumber, 7].Value = entry.AbsenceReason;
-            chartWorksheet.Cells[rowNumber, 8].Value = entry.AbsenceDate.ToShortDateString();
-            chartWorksheet.Cells[rowNumber, 9].Value = entry.AbsenceLesson;
+            AttendanceRecord record = records.First(entry => entry.StudentId == studentId);
 
-            chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
+            chartWorksheet.Cells[rowNumber, 6].Value = record.StudentName.DisplayName;
 
-            chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-            chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-            chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-            chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-            
-            if (entry.Severity == 1)
+            List<AbsenceRecord> absenceList = absences
+                .Where(entry => entry.StudentId == studentId)
+                .OrderBy(entry => entry.AbsenceDate)
+                .ToList();
+
+            if (absenceList.Count == 0)
+                rowNumber++;
+
+            foreach (AbsenceRecord entry in absenceList)
+            {
+                chartWorksheet.Cells[rowNumber, 7].Value = entry.AbsenceReason;
+                chartWorksheet.Cells[rowNumber, 8].Value = entry.AbsenceDate.ToShortDateString();
+                chartWorksheet.Cells[rowNumber, 9].Value = entry.AbsenceLesson;
+
+                chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+
+                chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 0, 0);
 
-            if (entry.Severity == 2)
+                rowNumber++;
+            }
+        }
+
+        foreach (string studentId in lowerStudentIds)
+        {
+            AttendanceRecord record = records.First(entry => entry.StudentId == studentId);
+
+            chartWorksheet.Cells[rowNumber, 6].Value = record.StudentName.DisplayName;
+
+            List<AbsenceRecord> absenceList = absences
+                .Where(entry => entry.StudentId == studentId)
+                .ToList();
+
+            if (absenceList.Count == 0)
+                rowNumber++;
+
+            foreach (AbsenceRecord entry in absenceList)
+            {
+                chartWorksheet.Cells[rowNumber, 7].Value = entry.AbsenceReason;
+                chartWorksheet.Cells[rowNumber, 8].Value = entry.AbsenceDate.ToShortDateString();
+                chartWorksheet.Cells[rowNumber, 9].Value = entry.AbsenceLesson;
+
+                chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+
+                chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 192, 0);
 
-            rowNumber++;
+                rowNumber++;
+            }
         }
 
         if (rowNumber > 6)

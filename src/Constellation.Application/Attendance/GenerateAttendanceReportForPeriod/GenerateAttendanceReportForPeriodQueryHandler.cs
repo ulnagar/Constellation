@@ -60,8 +60,11 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
 
         foreach (AttendanceValue value in values)
         {
+            Student student = students.FirstOrDefault(student => student.StudentId == value.StudentId)!;
+
             records.Add(new(
                 value.StudentId,
+                student.GetName(),
                 value.Grade,
                 value.PerMinuteYearToDatePercentage,
                 value.PerMinuteYearToDatePercentage >= 90 ? "90% - 100% Attendance" :
@@ -79,17 +82,11 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
 
             foreach (Absence absence in absences)
             {
-                if (absence.Type.Equals(AbsenceType.Partial))
-                    continue;
-
-                Student student = students.FirstOrDefault(student => student.StudentId == absence.StudentId)!;
                 Offering offering = offerings.FirstOrDefault(offering => offering.Id == absence.OfferingId);
 
                 absenceRecords.Add(new(
                     absence.StudentId,
-                    student.DisplayName,
-                    student.CurrentGrade,
-                    absence.AbsenceReason.ToString(),
+                    $"{absence.AbsenceReason} ({absence.Type.Value})",
                     absence.Date,
                     offering?.Name.ToString(),
                     1));
@@ -104,14 +101,11 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
 
             foreach (Absence absence in absences)
             {
-                Student student = students.FirstOrDefault(student => student.StudentId == absence.StudentId)!;
                 Offering offering = offerings.FirstOrDefault(offering => offering.Id == absence.OfferingId);
 
                 absenceRecords.Add(new(
                     absence.StudentId,
-                    student.DisplayName,
-                    student.CurrentGrade,
-                    absence.AbsenceReason.ToString(),
+                    $"{absence.AbsenceReason} ({absence.Type.Value})",
                     absence.Date,
                     offering?.Name.ToString(),
                     2));
