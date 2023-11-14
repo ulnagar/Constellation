@@ -193,7 +193,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             if (viewModel.IsNew)
             {
-                Student.Create(
+                Student student = Student.Create(
                     viewModel.Student.StudentId,
                     viewModel.Student.FirstName,
                     viewModel.Student.LastName,
@@ -201,6 +201,8 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                     viewModel.Student.CurrentGrade,
                     viewModel.Student.SchoolCode,
                     viewModel.Student.Gender);
+
+                _unitOfWork.Students.Insert(student);
             }
             else
             {
