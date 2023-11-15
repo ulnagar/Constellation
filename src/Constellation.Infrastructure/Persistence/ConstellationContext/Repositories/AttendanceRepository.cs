@@ -122,6 +122,58 @@ internal class AttendanceRepository : IAttendanceRepository
             .Where(entry => entry.PeriodLabel == periodLabel)
             .ToListAsync(cancellationToken);
 
+
+    public async Task<List<DateOnly>> GetPeriodEndDates(
+        int year,
+        CancellationToken cancellationToken = default)
+    {
+        DateOnly startOfYear = _dateTime.GetFirstDayOfYear(year);
+        DateOnly endOfYear = _dateTime.GetLastDayOfYear(year);
+
+        return await _context
+            .Set<AttendanceValue>()
+            .Where(entry => 
+                startOfYear <= entry.StartDate &&
+                endOfYear >= entry.EndDate)
+            .Select(entry => entry.EndDate)
+            .Distinct()
+            .OrderBy(entry => entry)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<string>> GetPeriodNames(
+        int year,
+        CancellationToken cancellationToken = default)
+    { 
+        DateOnly startOfYear = _dateTime.GetFirstDayOfYear(year);
+        DateOnly endOfYear = _dateTime.GetLastDayOfYear(year);
+
+        return await _context
+            .Set<AttendanceValue>()
+            .Where(entry =>
+                startOfYear <= entry.StartDate &&
+                endOfYear >= entry.EndDate)
+            .Select(entry => new { entry.PeriodLabel, entry.EndDate })
+            .Distinct()
+            .OrderBy(entry => entry.EndDate)
+            .Select(entry => entry.PeriodLabel)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<AttendanceValue>> GetForStudentBetweenDates(
+        string studentId, 
+        DateOnly earlierEndDate, 
+        DateOnly laterEndDate, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AttendanceValue>()
+            .Where(entry => entry.StudentId == studentId)
+            .Where(entry => 
+                entry.EndDate >= earlierEndDate &&
+                entry.EndDate <= laterEndDate)
+            .OrderBy(entry => entry.EndDate)
+            .ToListAsync(cancellationToken);
+
     public void Insert(AttendanceValue item)
     {
         bool existing = _context
