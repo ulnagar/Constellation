@@ -14,7 +14,6 @@ using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Infrastructure.Jobs;
@@ -25,13 +24,10 @@ using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Style;
-using OfficeOpenXml.Table.PivotTable;
 using System.Data;
 using System.Drawing;
-using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using static Constellation.Core.Errors.ValidationErrors;
 
 public class ExcelService : IExcelService
 {
@@ -1134,6 +1130,7 @@ public class ExcelService : IExcelService
         ExcelRangeBase chartRange = pivotWorksheet.Cells[2, 7, 5, 8];
 
         ExcelWorksheet chartWorksheet = package.Workbook.Worksheets.Add($"{grade.AsName()} Report");
+
         ExcelRangeBase chartTitle = chartWorksheet.Cells[1, 1, 1, 9];
         chartTitle.Merge = true;
         chartTitle.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
@@ -1141,7 +1138,7 @@ public class ExcelService : IExcelService
         chartTitle.Style.Font.Size = 36;
         chartTitle.Style.Font.Color.SetColor(0, 91, 155, 213);
         chartTitle.Value = "Attendance Report";
-        
+
         ExcelRangeBase chartSubtitle = chartWorksheet.Cells[2, 1, 2, 9];
         chartSubtitle.Merge = true;
         chartSubtitle.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
@@ -1151,30 +1148,7 @@ public class ExcelService : IExcelService
         chartSubtitle.Style.Border.Bottom.Style = ExcelBorderStyle.Thick;
         chartSubtitle.Style.Border.Bottom.Color.SetColor(0, 0, 32, 96);
 
-        ExcelPieChart chart = chartWorksheet.Drawings.AddPieChart($"Chart{grade.AsNumber()}", ePieChartType.Pie);
-        ExcelPieChartSerie series = chart.Series.Add(pivotWorksheet.Cells[2, 8, 5, 8], pivotWorksheet.Cells[2, 7, 5, 7]);
-        ExcelChartDataPoint point0 = series.DataPoints.Add(0);
-        point0.Fill.Style = eFillStyle.SolidFill;
-        point0.Fill.SolidFill.Color.SetHslColor(97, 42, 79);
-
-        ExcelChartDataPoint point1 = series.DataPoints.Add(1);
-        point1.Fill.Style = eFillStyle.SolidFill;
-        point1.Fill.SolidFill.Color.SetHslColor(45, 100, 90);
-
-        ExcelChartDataPoint point2 = series.DataPoints.Add(2);
-        point2.Fill.Style = eFillStyle.SolidFill;
-        point2.Fill.SolidFill.Color.SetHslColor(45, 100, 50);
-
-        ExcelChartDataPoint point3 = series.DataPoints.Add(3);
-        point3.Fill.Style = eFillStyle.SolidFill;
-        point3.Fill.SolidFill.Color.SetHslColor(0, 100, 50);
-
-        chart.Title.Text = $"{grade.AsName()} Attendance Year to Date up to {periodLabel}";
-        chart.Legend.Position = eLegendPosition.Bottom;
-        chart.DataLabel.ShowPercent = true;
-        chart.SetSize(300, 500);
-        chart.SetPosition(2, 5, 0, 5);
-
+        // Create absence table
         ExcelRangeBase tableTitle = chartWorksheet.Cells[3, 6, 4, 9];
         tableTitle.Merge = true;
         tableTitle.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
@@ -1194,6 +1168,7 @@ public class ExcelService : IExcelService
         tableStudentColumn.Style.Fill.BackgroundColor.SetColor(0, 155, 194, 230);
         tableStudentColumn.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
         tableStudentColumn.Value = "Student";
+        chartWorksheet.Column(6).Width = chartWorksheet.Column(1).Width * 1.5;
 
         ExcelRangeBase tableReasonColumn = chartWorksheet.Cells[5, 7];
         tableReasonColumn.Style.Font.Name = "Calibri";
@@ -1203,7 +1178,8 @@ public class ExcelService : IExcelService
         tableReasonColumn.Style.Fill.BackgroundColor.SetColor(0, 155, 194, 230);
         tableReasonColumn.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
         tableReasonColumn.Value = "Reason";
-
+        chartWorksheet.Column(7).Width = chartWorksheet.Column(1).Width * 1.75;
+        
         ExcelRangeBase tableDatesColumn = chartWorksheet.Cells[5, 8];
         tableDatesColumn.Style.Font.Name = "Calibri";
         tableDatesColumn.Style.Font.Size = 10;
@@ -1212,6 +1188,7 @@ public class ExcelService : IExcelService
         tableDatesColumn.Style.Fill.BackgroundColor.SetColor(0, 155, 194, 230);
         tableDatesColumn.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
         tableDatesColumn.Value = "Dates Absent";
+        chartWorksheet.Column(8).Width = chartWorksheet.Column(1).Width * 1.5;
 
         ExcelRangeBase tableLessonsColumn = chartWorksheet.Cells[5, 9];
         tableLessonsColumn.Style.Font.Name = "Calibri";
@@ -1221,8 +1198,7 @@ public class ExcelService : IExcelService
         tableLessonsColumn.Style.Fill.BackgroundColor.SetColor(0, 155, 194, 230);
         tableLessonsColumn.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
         tableLessonsColumn.Value = "Lessons Missed";
-
-        chartWorksheet.Columns[6, 9].Width = chartWorksheet.Column(6).Width * 1.5;
+        chartWorksheet.Column(9).Width = chartWorksheet.Column(1).Width * 1.5;
 
         List<string> lowestStudentIds = records
             .Where(entry => entry.Group == "Below 50% Attendance")
@@ -1247,24 +1223,61 @@ public class ExcelService : IExcelService
                 .ToList();
 
             if (absenceList.Count == 0)
-                rowNumber++;
-
-            foreach (AbsenceRecord entry in absenceList)
             {
-                chartWorksheet.Cells[rowNumber, 7].Value = entry.AbsenceReason;
-                chartWorksheet.Cells[rowNumber, 8].Value = entry.AbsenceDate.ToShortDateString();
-                chartWorksheet.Cells[rowNumber, 9].Value = entry.AbsenceLesson;
+                // Row border
+                chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
 
-                chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                // Cell border
+                //chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                //chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                //chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                //chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
 
+                // Background fill
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 0, 0);
 
                 rowNumber++;
+
+                continue;
             }
+
+            int startRow = rowNumber;
+            var groups = absenceList
+                .OrderBy(absence => absence.AbsenceDate)
+                .GroupBy(absence => new { absence.AbsenceReason, absence.AbsenceLesson });
+
+            foreach (var group in groups)
+            {
+                string dateDisplay = BuildDateGroupLabel(group.Select(entry => entry.AbsenceDate));
+
+                chartWorksheet.Cells[rowNumber, 7].Value = group.Key.AbsenceReason;
+                chartWorksheet.Cells[rowNumber, 8].Value = dateDisplay;
+                chartWorksheet.Cells[rowNumber, 9].Value = group.Key.AbsenceLesson;
+
+                // Cell border
+                //chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                //chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                //chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                //chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+
+                // Background fill
+                chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 0, 0);
+
+                // Row height
+                chartWorksheet.Rows[rowNumber].Height = chartWorksheet.Row(2).Height * 2;
+                chartWorksheet.Rows[rowNumber].Style.WrapText = true;
+
+                // Auto row height -- Upsets chart size, as the height of the row is set when the file is opened
+                //chartWorksheet.Rows[rowNumber].CustomHeight = false;
+                //chartWorksheet.Rows[rowNumber].Style.WrapText = true;
+
+                rowNumber++;
+            }
+
+            // Row border
+            chartWorksheet.Cells[startRow, 6, rowNumber - 1, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
         }
 
         foreach (string studentId in lowerStudentIds)
@@ -1278,33 +1291,302 @@ public class ExcelService : IExcelService
                 .ToList();
 
             if (absenceList.Count == 0)
-                rowNumber++;
-
-            foreach (AbsenceRecord entry in absenceList)
             {
-                chartWorksheet.Cells[rowNumber, 7].Value = entry.AbsenceReason;
-                chartWorksheet.Cells[rowNumber, 8].Value = entry.AbsenceDate.ToShortDateString();
-                chartWorksheet.Cells[rowNumber, 9].Value = entry.AbsenceLesson;
+                // Row border
+                chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
 
-                chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                // Cell border
+                //chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                //chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                //chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                //chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
 
+                // Background fill
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 192, 0);
 
                 rowNumber++;
+
+                continue;
+            }
+
+            int startRow = rowNumber;
+            var groups = absenceList
+                .OrderBy(absence => absence.AbsenceDate)
+                .GroupBy(absence => new { absence.AbsenceReason, absence.AbsenceLesson });
+
+            foreach (var group in groups)
+            {
+                string dateDisplay = BuildDateGroupLabel(group.Select(entry => entry.AbsenceDate));
+
+                chartWorksheet.Cells[rowNumber, 7].Value = group.Key.AbsenceReason;
+                chartWorksheet.Cells[rowNumber, 8].Value = dateDisplay;
+                chartWorksheet.Cells[rowNumber, 9].Value = group.Key.AbsenceLesson;
+
+                // Cell border
+                //chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                //chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                //chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                //chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+
+                // Background fill
+                chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 192, 0);
+
+                // Row height
+                chartWorksheet.Rows[rowNumber].Height = chartWorksheet.Row(2).Height * 2;
+                chartWorksheet.Rows[rowNumber].Style.WrapText = true;
+
+                // Auto row height -- Upsets chart size, as the height of the row is set when the file is opened
+                //chartWorksheet.Rows[rowNumber].CustomHeight = false;
+                //chartWorksheet.Rows[rowNumber].Style.WrapText = true;
+
+                rowNumber++;
+            }
+
+            chartWorksheet.Cells[startRow, 6, rowNumber - 1, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+        }
+
+        // Create Chart
+        ExcelPieChart chart = chartWorksheet.Drawings.AddPieChart($"Chart{grade.AsNumber()}", ePieChartType.Pie);
+        ExcelPieChartSerie series = chart.Series.Add(pivotWorksheet.Cells[2, 8, 5, 8], pivotWorksheet.Cells[2, 7, 5, 7]);
+        ExcelChartDataPoint point0 = series.DataPoints.Add(0);
+        point0.Fill.Style = eFillStyle.SolidFill;
+        point0.Fill.SolidFill.Color.SetHslColor(97, 42, 79);
+
+        ExcelChartDataPoint point1 = series.DataPoints.Add(1);
+        point1.Fill.Style = eFillStyle.SolidFill;
+        point1.Fill.SolidFill.Color.SetHslColor(45, 100, 90);
+
+        ExcelChartDataPoint point2 = series.DataPoints.Add(2);
+        point2.Fill.Style = eFillStyle.SolidFill;
+        point2.Fill.SolidFill.Color.SetHslColor(45, 100, 50);
+
+        ExcelChartDataPoint point3 = series.DataPoints.Add(3);
+        point3.Fill.Style = eFillStyle.SolidFill;
+        point3.Fill.SolidFill.Color.SetHslColor(0, 100, 50);
+
+        chart.Title.Text = $"{grade.AsName()} Attendance Year to Date up to {periodLabel}";
+        chart.Legend.Position = eLegendPosition.Bottom;
+        chart.DataLabel.ShowPercent = true;
+        chart.SetPosition(2, 5, 0, 5);
+        chart.SetSize(300, 500);
+
+        // Borders
+        int bottom = chart.To.Row + 1 > rowNumber ? chart.To.Row + 1 : rowNumber;
+
+        ExcelRange chartHorizontalDivider = chartWorksheet.Cells[bottom, 1, bottom, 9];
+        chartHorizontalDivider.Style.Border.Bottom.Style = ExcelBorderStyle.Thick;
+        chartHorizontalDivider.Style.Border.Bottom.Color.SetColor(0, 0, 32, 96);
+
+        bottom++; 
+        rowNumber = bottom;
+
+        // Attendance Patterns
+        ExcelRangeBase patternsTitle = chartWorksheet.Cells[rowNumber, 1, rowNumber, 5];
+        patternsTitle.Merge = true;
+        patternsTitle.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        patternsTitle.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+        patternsTitle.Style.Font.Name = "Maiandra GD";
+        patternsTitle.Style.Font.Size = 14;
+        patternsTitle.Value = "Attendance Patterns";
+
+        rowNumber++;
+
+        // 100% Attendance YTD
+        ExcelRangeBase _100PercentTitle = chartWorksheet.Cells[rowNumber, 1, rowNumber, 5];
+        _100PercentTitle.Merge = true;
+        _100PercentTitle.Style.Font.Name = "Calibri";
+        _100PercentTitle.Style.Font.Size = 11;
+        _100PercentTitle.Style.Font.Bold = true;
+        _100PercentTitle.Value = "100% Attendance YTD:";
+
+        rowNumber++;
+
+        IOrderedEnumerable<AttendanceRecord> perfectAttendanceRecords = records
+            .Where(entry => entry.Percentage == 100)
+            .OrderBy(entry => entry.StudentName.SortOrder);
+
+        foreach (AttendanceRecord record in perfectAttendanceRecords)
+        {
+            ExcelRange recordRow = chartWorksheet.Cells[rowNumber, 1, rowNumber, 5];
+            recordRow.Merge = true;
+            recordRow.Value = record.StudentName.DisplayName;
+
+            rowNumber++;
+        }
+
+        rowNumber++;
+
+        // Attendance Improvements
+        ExcelRangeBase improvementsTitle = chartWorksheet.Cells[rowNumber, 1, rowNumber, 5];
+        improvementsTitle.Merge = true;
+        improvementsTitle.Style.Font.Name = "Calibri";
+        improvementsTitle.Style.Font.Size = 11;
+        improvementsTitle.Style.Font.Bold = true;
+        improvementsTitle.Value = "Improvement in attendance:";
+
+        rowNumber++;
+
+        IOrderedEnumerable<AttendanceRecord> improvementRecords = records
+            .Where(entry => entry.Improvement)
+            .OrderBy(entry => entry.StudentName.SortOrder);
+
+        foreach (AttendanceRecord record in improvementRecords)
+        {
+            ExcelRange recordRow = chartWorksheet.Cells[rowNumber, 1, rowNumber, 5];
+            recordRow.Merge = true;
+            recordRow.Value = record.StudentName.DisplayName;
+
+            rowNumber++;
+        }
+
+        rowNumber++;
+
+        // Decline in attendance
+        ExcelRangeBase declineTitle = chartWorksheet.Cells[rowNumber, 1, rowNumber, 5];
+        declineTitle.Merge = true;
+        declineTitle.Style.Font.Name = "Calibri";
+        declineTitle.Style.Font.Size = 11;
+        declineTitle.Style.Font.Bold = true;
+        declineTitle.Value = "Decline in attendance:";
+
+        rowNumber++;
+
+        IOrderedEnumerable<AttendanceRecord> declineRecords = records
+            .Where(entry => entry.Decline)
+            .OrderBy(entry => entry.StudentName.SortOrder);
+
+        foreach (AttendanceRecord record in declineRecords)
+        {
+            ExcelRange recordRow = chartWorksheet.Cells[rowNumber, 1, rowNumber, 5];
+            recordRow.Merge = true;
+            recordRow.Value = record.StudentName.DisplayName;
+
+            rowNumber++;
+        }
+
+        rowNumber++;
+
+        (bottom, rowNumber) = (rowNumber, bottom); // Swap the bottom and rowNumber variables
+
+        // Follow up actions
+        ExcelRangeBase followUpTitle = chartWorksheet.Cells[rowNumber, 6, rowNumber, 9];
+        followUpTitle.Merge = true;
+        followUpTitle.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        followUpTitle.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+        followUpTitle.Style.Font.Name = "Maiandra GD";
+        followUpTitle.Style.Font.Size = 14;
+        followUpTitle.Value = "Follow Up Actions";
+
+        rowNumber += 2;
+
+        ExcelRangeBase teacherTitle = chartWorksheet.Cells[rowNumber, 6, rowNumber, 9];
+        teacherTitle.Merge = true;
+        teacherTitle.Style.Font.Name = "Calibri";
+        teacherTitle.Style.Font.Size = 11;
+        teacherTitle.Style.Font.Bold = true;
+        teacherTitle.Value = "Classroom Teacher Level:";
+
+        rowNumber += 2;
+
+        ExcelRangeBase assistantPrincipalTitle = chartWorksheet.Cells[rowNumber, 6, rowNumber, 9];
+        assistantPrincipalTitle.Merge = true;
+        assistantPrincipalTitle.Style.Font.Name = "Calibri";
+        assistantPrincipalTitle.Style.Font.Size = 11;
+        assistantPrincipalTitle.Style.Font.Bold = true;
+        assistantPrincipalTitle.Value = "HT/AP Level:";
+
+        rowNumber += 2;
+
+        ExcelRangeBase htWellbeingTitle = chartWorksheet.Cells[rowNumber, 6, rowNumber, 9];
+        htWellbeingTitle.Merge = true;
+        htWellbeingTitle.Style.Font.Name = "Calibri";
+        htWellbeingTitle.Style.Font.Size = 11;
+        htWellbeingTitle.Style.Font.Bold = true;
+        htWellbeingTitle.Value = "Head Teacher Wellbeing Level:";
+
+        rowNumber += 2;
+
+        ExcelRangeBase hpStudiesTitle = chartWorksheet.Cells[rowNumber, 6, rowNumber, 9];
+        hpStudiesTitle.Merge = true;
+        hpStudiesTitle.Style.Font.Name = "Calibri";
+        hpStudiesTitle.Style.Font.Size = 11;
+        hpStudiesTitle.Style.Font.Bold = true;
+        hpStudiesTitle.Value = "Head Teacher Secondary Studies Level:";
+
+        rowNumber += 2;
+
+        ExcelRangeBase dpTitle = chartWorksheet.Cells[rowNumber, 6, rowNumber, 9];
+        dpTitle.Merge = true;
+        dpTitle.Style.Font.Name = "Calibri";
+        dpTitle.Style.Font.Size = 11;
+        dpTitle.Style.Font.Bold = true;
+        dpTitle.Value = "Deputy Principal Level:";
+
+        rowNumber += 2;
+        
+        // Vertical divider
+        int lower = rowNumber > bottom ? rowNumber : bottom;
+
+        ExcelRange chartVerticalDivider = chartWorksheet.Cells[3, 5, lower, 5];
+        chartVerticalDivider.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+        chartVerticalDivider.Style.Border.Right.Color.SetColor(0, 0, 32, 96);
+
+        // Hide sheet
+        pivotWorksheet.Hidden = eWorkSheetHidden.Hidden;
+    }
+
+    private string BuildDateGroupLabel(IEnumerable<DateOnly> group)
+    {
+        // Group the absence dates as well
+        List<List<DateOnly>> dates = new();
+        List<DateOnly> date = new() { group.First() };
+        dates.Add(date);
+
+        DateOnly lastDate = group.First();
+        for (int i = 1; i < group.Count(); i++)
+        {
+            DateOnly currentDate = group.ElementAt(i);
+            int diff = currentDate.DayNumber - lastDate.DayNumber;
+            if (diff > 1)
+            {
+                dates.Add(new List<DateOnly>());
+            }
+
+            dates.Last().Add(currentDate);
+            lastDate = currentDate;
+        }
+
+        string dateDisplay = string.Empty;
+
+        foreach (List<DateOnly> dateList in dates)
+        {
+            if (dateDisplay != string.Empty)
+                dateDisplay += ", ";
+
+            if (dateList.Count == 1)
+            {
+                dateDisplay += dateList[0].ToShortDateString();
+
+                continue;
+            }
+
+            if (dateList.First().Month == dateList.Last().Month)
+            {
+                dateDisplay += dateList.First().Day;
+                dateDisplay += "-";
+                dateDisplay += dateList.Last().ToShortDateString();
+            }
+            else
+            {
+                dateDisplay += dateList.First().ToShortDateString();
+                dateDisplay += "-";
+                dateDisplay += dateList.Last().ToShortDateString();
             }
         }
 
-        if (rowNumber > 6)
-        {
-            chartWorksheet.Rows[6, rowNumber - 1].Height = chartWorksheet.Row(6).Height * 2;
-            chartWorksheet.Rows[6, rowNumber - 1].Style.WrapText = true;
-        }
-        
-        pivotWorksheet.Hidden = eWorkSheetHidden.Hidden;
+        return dateDisplay;
     }
 
     private class StudentRecord

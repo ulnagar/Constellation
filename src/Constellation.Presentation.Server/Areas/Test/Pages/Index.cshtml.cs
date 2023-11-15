@@ -2,14 +2,9 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Application.Attendance.GenerateAttendanceReportForPeriod;
 using Application.DTOs;
-using Application.Interfaces.Gateways;
-using Application.Interfaces.Services;
 using BaseModels;
-using Core.Models.Attendance;
-using Core.Models.Attendance.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
 
 public class IndexModel : BasePageModel
 {

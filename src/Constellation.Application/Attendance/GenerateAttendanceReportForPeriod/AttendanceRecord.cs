@@ -8,4 +8,6 @@ public sealed record AttendanceRecord(
     Name StudentName,
     Grade Grade,
     decimal Percentage,
-    string Group);
+    string Group,
+    bool Improvement,
+    bool Decline);
