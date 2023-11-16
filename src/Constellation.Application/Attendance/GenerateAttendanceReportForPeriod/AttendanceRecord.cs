@@ -9,5 +9,5 @@ public sealed record AttendanceRecord(
     Grade Grade,
     decimal Percentage,
     string Group,
-    bool Improvement,
-    bool Decline);
+    string Improvement,
+    string Decline);

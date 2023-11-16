@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Attendance.GenerateAttendanceReportForPeriod;
 
 using Abstractions.Messaging;
-using AutoMapper;
 using Constellation.Core.Models.Attendance;
 using Core.Abstractions.Repositories;
 using Core.Models.Absences;
@@ -69,9 +68,6 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
 
             List<AttendanceValue> recentHistory = await _attendanceRepository.GetForStudentBetweenDates(student.StudentId, historyBoundary, endDate, cancellationToken);
 
-            bool improvement = IsImproving(recentHistory);
-            bool decline = IsDeclining(recentHistory);
-
             records.Add(new(
                 value.StudentId,
                 student.GetName(),
@@ -81,8 +77,8 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
                     value.PerMinuteYearToDatePercentage >= 75 ? "75% - 90% Attendance" :
                     value.PerMinuteYearToDatePercentage >= 50 ? "50% - 75% Attendance" :
                     "Below 50% Attendance",
-                improvement,
-                decline));
+                ImprovingText(recentHistory),
+                DecliningText(recentHistory)));
 
             startDate = value.StartDate;
             endDate = value.EndDate;
@@ -151,25 +147,25 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
         return value.PerMinuteWeekPercentage;
     }
 
-    private bool IsDeclining(List<AttendanceValue> values)
+    private string DecliningText(List<AttendanceValue> values)
     {
         // Compare trend data
         // Is the most recent attendance figure 40% or less? If so, attendance is declining.
-        if (NormalisedPerMinuteWeekPercentage(values.Last()) <= 40)
-            return true;
+        //if (NormalisedPerMinuteWeekPercentage(values.Last()) <= 40)
+        //    return true;
 
         // Is the more recent attendance figure 100%? If so, attendance cannot be declining.
         if (NormalisedPerMinuteWeekPercentage(values.Last()) == 100)
-            return false;
+            return string.Empty;
 
         // Comparing Week 0 with Week 4, is the overall difference more than a decline of 30%? If so, attendance is declining.
         decimal difference = NormalisedPerMinuteWeekPercentage(values.Last()) - NormalisedPerMinuteWeekPercentage(values.First());
         decimal percentage = NormalisedPerMinuteWeekPercentage(values.First()) == 0 
-            ? NormalisedPerMinuteWeekPercentage(values.Last()) 
-            : difference / NormalisedPerMinuteWeekPercentage(values.First());
+            ? difference
+            : difference / NormalisedPerMinuteWeekPercentage(values.First()) * 100;
 
-        if (percentage < -0.3m)
-            return true;
+        if (percentage < -30m)
+            return $"{(percentage * -1):F}% 5 Week Decrease{Environment.NewLine}{values.First().PeriodLabel} - {NormalisedPerMinuteWeekPercentage(values.First())}{Environment.NewLine}{values.Last().PeriodLabel} - {NormalisedPerMinuteWeekPercentage(values.Last())}";
 
         // Comparing each Week to the preceding one, is there an ongoing decline of more than 5%? If so, attendance is declining.
         for (int i = 0; i < (values.Count - 1); i++)
@@ -180,33 +176,33 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
             difference = next - current;
             percentage = current == 0 
                 ? current 
-                : difference / current;
+                : difference / current * 100;
 
             // If the percentage difference is an increase in attendance,
             // or the delta is less than a decrease of 5%, attendance is not declining.
-            if (percentage > -0.05m)
-                return false;
+            if (percentage > -5m)
+                return string.Empty;
         }
 
         // Attendance is declining!
-        return true;
+        return values.Aggregate("5 Week Decrease > 5% per week" + Environment.NewLine, (current, entry) => current + ($"{entry.PeriodLabel} - {NormalisedPerMinuteWeekPercentage(entry)}" + Environment.NewLine));
     }
 
-    private bool IsImproving(List<AttendanceValue> values)
+    private string ImprovingText(List<AttendanceValue> values)
     {
         // Compare trend data
         // Is the more distant attendance figure 100%? If so, attendance cannot be improving.
         if (NormalisedPerMinuteWeekPercentage(values.First()) == 100)
-            return false;
+            return string.Empty;
 
         // Comparing Week 0 with Week 4, is the overall difference more than an increase of 30%? If so, attendance is increasing.
         decimal difference = NormalisedPerMinuteWeekPercentage(values.Last()) - NormalisedPerMinuteWeekPercentage(values.First());
         decimal percentage = NormalisedPerMinuteWeekPercentage(values.First()) == 0
-            ? NormalisedPerMinuteWeekPercentage(values.First())
-            : difference / NormalisedPerMinuteWeekPercentage(values.First());
+            ? difference
+            : difference / NormalisedPerMinuteWeekPercentage(values.First()) * 100;
 
-        if (percentage > 0.3m)
-            return true;
+        if (percentage > 30m)
+            return $"{percentage:F}% 5 Week Increase{Environment.NewLine}{values.First().PeriodLabel} - {NormalisedPerMinuteWeekPercentage(values.First())}{Environment.NewLine}{values.Last().PeriodLabel} - {NormalisedPerMinuteWeekPercentage(values.Last())}";
 
         // Comparing each Week to the preceding one, is there an ongoing increase of more than 10%? If so, attendance is increasing.
         for (int i = 0; i < (values.Count - 1); i++)
@@ -223,15 +219,15 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
             difference = next - current;
             percentage = current == 0
                 ? current
-                : difference / current;
+                : difference / current * 100;
 
             // If the percentage difference is a decrease in attendance,
             // or the delta is less than 10%, attendance is not increasing.
-            if (percentage < 0.1m)
-                return false;
+            if (percentage < 10m)
+                return string.Empty;
         }
 
         // Attendance is increasing!
-        return true;
+        return values.Aggregate("5 Week Increase > 10% per week" + Environment.NewLine, (current, entry) => current + ($"{entry.PeriodLabel} - {NormalisedPerMinuteWeekPercentage(entry)}" + Environment.NewLine));
     }
 }

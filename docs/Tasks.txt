@@ -2,23 +2,11 @@
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Year 5 Data is not reaching database!
-
-https://schoolsnsw-my.sharepoint.com/:x:/g/personal/julie_dent_det_nsw_edu_au/EWzMx1uE9eFKur2m3Ccw-OAB-vfSCnKQ9XMCOxTmHa-zXw?e=0yM4Dz
-Export report for Exec Meeting that outlines the students attendance bands per grade.
-Include students with 100% YTD (minute) attendace
-Highlight students with Improved Attendance:
- - Analyse last 5 weeks, and identify students where every week there has been a 10%+ rise in attendance
- - Analyse Week 5 vs Week 0 and identify students with overall 30%+ rise in attendance
-
-Highlight students with Declining Attendance:
- - Analyse Week 0 and identify students with <= 40% WEEK (minute) attendance
- - Analyse last 5 weeks, and identify students where every week there has been a 5%+ decline in attendance
- - Analyse Week 5 vs Week 0 and identify students with overall 30%+ decline in attendance
-
- Populate trouble students from the lowest two bands, and include details of their absences from the week
-
-
+Attendance Index - 
+	Get Data button to show Modal with list of periods. 
+	User selects one period and the application will replace the existing data for that period with a fresh batch. 
+	Limited to authorised users only.
+	Bulk process hidden behind second button for admins only.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS

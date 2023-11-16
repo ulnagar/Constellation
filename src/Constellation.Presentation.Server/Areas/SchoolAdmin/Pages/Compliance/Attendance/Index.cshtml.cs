@@ -4,6 +4,7 @@ using Application.Attendance.GetAttendanceDataFromSentral;
 using Application.Interfaces.Gateways;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Constellation.Application.Attendance.GetAttendancePeriodLabels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Students.GetStudents;
 using Constellation.Application.Students.Models;
@@ -16,6 +17,7 @@ using Core.Abstractions.Clock;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
@@ -51,6 +53,8 @@ public class IndexModel : BasePageModel
     public List<AttendanceValue> StudentData { get; set; } = new();
     public List<StudentResponse> Students { get; set; } = new();
 
+    public List<string> PeriodNames { get; set; } = new();
+
     public async Task OnGetAsync()
     {
         Result<List<StudentResponse>> studentRequest = await _mediator.Send(new GetStudentsQuery());
@@ -59,6 +63,43 @@ public class IndexModel : BasePageModel
             Students = studentRequest.Value;
 
         StudentData = await _repository.GetAllRecent();
+
+        Result<List<string>> periodRequest = await _mediator.Send(new GetAttendancePeriodLabelsQuery());
+
+        if (periodRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = periodRequest.Error,
+                RedirectPath = null
+            };
+
+            return;
+        }
+
+        PeriodNames = periodRequest.Value.ToList();
+    }
+
+    public async Task OnGetRetrieveAttendancePeriod(string period)
+    {
+        string term = string.Empty;
+        string week = string.Empty;
+        string year = string.Empty;
+
+        string[] blocks = period.Split(',');
+        foreach (string block in blocks)
+        {
+            string[] microBlocks = block.Split(' ');
+
+            if (microBlocks.Contains("Term"))
+                term = microBlocks[1];
+            else if (microBlocks.Contains("Week"))
+                week = microBlocks[1];
+            else
+                year = microBlocks[0];
+        }
+
+        await _mediator.Send(new GetAttendanceDataFromSentralQuery(year, term, week));
     }
 
     public async Task OnGetRetrieveAttendance()
