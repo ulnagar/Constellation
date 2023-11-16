@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Attendance.GetAttendanceDataFromSentral;
 
 using Abstractions.Messaging;
-using Core.Models;
 using Core.Models.Attendance;
 using Core.Models.Students;
 using Core.Shared;
@@ -18,20 +17,17 @@ internal sealed class GetAttendanceDataFromSentralQueryHandler
     : IQueryHandler<GetAttendanceDataFromSentralQuery, List<AttendanceValue>>
 {
     private readonly IStudentRepository _studentRepository;
-    private readonly ISchoolRepository _schoolRepository;
     private readonly ISentralGateway _sentralGateway;
     private readonly IExcelService _excelService;
     private readonly ILogger _logger;
 
     public GetAttendanceDataFromSentralQueryHandler(
         IStudentRepository studentRepository,
-        ISchoolRepository schoolRepository,
         ISentralGateway sentralGateway,
         IExcelService excelService,
         ILogger logger)
     {
         _studentRepository = studentRepository;
-        _schoolRepository = schoolRepository;
         _sentralGateway = sentralGateway;
         _excelService = excelService;
         _logger = logger.ForContext<GetAttendanceDataFromSentralQuery>();

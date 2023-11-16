@@ -1115,20 +1115,19 @@ public class ExcelService : IExcelService
         ExcelWorksheet pivotWorksheet = package.Workbook.Worksheets.Add($"{grade.AsName()} Data");
         ExcelRangeBase table = pivotWorksheet.Cells[1, 1].LoadFromCollection(records, true);
 
-        pivotWorksheet.Cells[2, 7].Value = "90% - 100% Attendance";
-        pivotWorksheet.Cells[2, 8].Formula = "=countif(E:E, G2)";
+        pivotWorksheet.Cells[2, 9].Value = "90% - 100% Attendance";
+        pivotWorksheet.Cells[2, 10].Formula = "=countif(E:E, I2)";
 
-        pivotWorksheet.Cells[3, 7].Value = "75% - 90% Attendance";
-        pivotWorksheet.Cells[3, 8].Formula = "=countif(E:E, G3)";
+        pivotWorksheet.Cells[3, 9].Value = "75% - 90% Attendance";
+        pivotWorksheet.Cells[3, 10].Formula = "=countif(E:E, I3)";
 
-        pivotWorksheet.Cells[4, 7].Value = "50% - 75% Attendance";
-        pivotWorksheet.Cells[4, 8].Formula = "=countif(E:E, G4)";
+        pivotWorksheet.Cells[4, 9].Value = "50% - 75% Attendance";
+        pivotWorksheet.Cells[4, 10].Formula = "=countif(E:E, I4)";
 
-        pivotWorksheet.Cells[5, 7].Value = "Below 50% Attendance";
-        pivotWorksheet.Cells[5, 8].Formula = "=countif(E:E, G5)";
+        pivotWorksheet.Cells[5, 9].Value = "Below 50% Attendance";
+        pivotWorksheet.Cells[5, 10].Formula = "=countif(E:E, I5)";
 
-        ExcelRangeBase chartRange = pivotWorksheet.Cells[2, 7, 5, 8];
-
+        ExcelRangeBase chartRange = pivotWorksheet.Cells[2, 9, 5, 10];
         ExcelWorksheet chartWorksheet = package.Workbook.Worksheets.Add($"{grade.AsName()} Report");
 
         ExcelRangeBase chartTitle = chartWorksheet.Cells[1, 1, 1, 9];
@@ -1224,18 +1223,26 @@ public class ExcelService : IExcelService
 
             if (absenceList.Count == 0)
             {
+                chartWorksheet.Cells[rowNumber, 8].Value = "Nil";
+                
                 // Row border
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
 
                 // Cell border
-                //chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                //chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                //chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                //chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
 
                 // Background fill
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 0, 0);
+
+                // Row height
+                chartWorksheet.Rows[rowNumber].Height = chartWorksheet.Row(2).Height * 2;
+                chartWorksheet.Rows[rowNumber].Style.WrapText = true;
+
+                chartWorksheet.Rows[rowNumber].Style.Font.Color.SetColor(Color.White);
 
                 rowNumber++;
 
@@ -1255,11 +1262,11 @@ public class ExcelService : IExcelService
                 chartWorksheet.Cells[rowNumber, 8].Value = dateDisplay;
                 chartWorksheet.Cells[rowNumber, 9].Value = group.Key.AbsenceLesson;
 
-                // Cell border
-                //chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                //chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                //chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                //chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                //Cell border
+                chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
 
                 // Background fill
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -1278,6 +1285,7 @@ public class ExcelService : IExcelService
 
             // Row border
             chartWorksheet.Cells[startRow, 6, rowNumber - 1, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+            chartWorksheet.Cells[startRow, 6, rowNumber - 1, 9].Style.Font.Color.SetColor(Color.White);
         }
 
         foreach (string studentId in lowerStudentIds)
@@ -1292,18 +1300,24 @@ public class ExcelService : IExcelService
 
             if (absenceList.Count == 0)
             {
+                chartWorksheet.Cells[rowNumber, 8].Value = "Nil";
+                
                 // Row border
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
 
                 // Cell border
-                //chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                //chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                //chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                //chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
 
                 // Background fill
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.BackgroundColor.SetColor(0, 255, 192, 0);
+
+                // Row height
+                chartWorksheet.Rows[rowNumber].Height = chartWorksheet.Row(2).Height * 2;
+                chartWorksheet.Rows[rowNumber].Style.WrapText = true;
 
                 rowNumber++;
 
@@ -1324,10 +1338,10 @@ public class ExcelService : IExcelService
                 chartWorksheet.Cells[rowNumber, 9].Value = group.Key.AbsenceLesson;
 
                 // Cell border
-                //chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                //chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                //chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
-                //chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
+                chartWorksheet.Cells[rowNumber, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.DarkBlue);
 
                 // Background fill
                 chartWorksheet.Cells[rowNumber, 6, rowNumber, 9].Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -1349,7 +1363,7 @@ public class ExcelService : IExcelService
 
         // Create Chart
         ExcelPieChart chart = chartWorksheet.Drawings.AddPieChart($"Chart{grade.AsNumber()}", ePieChartType.Pie);
-        ExcelPieChartSerie series = chart.Series.Add(pivotWorksheet.Cells[2, 8, 5, 8], pivotWorksheet.Cells[2, 7, 5, 7]);
+        ExcelPieChartSerie series = chart.Series.Add(pivotWorksheet.Cells[2, 10, 5, 10], pivotWorksheet.Cells[2, 9, 5, 9]);
         ExcelChartDataPoint point0 = series.DataPoints.Add(0);
         point0.Fill.Style = eFillStyle.SolidFill;
         point0.Fill.SolidFill.Color.SetHslColor(97, 42, 79);
@@ -1429,7 +1443,7 @@ public class ExcelService : IExcelService
         rowNumber++;
 
         IOrderedEnumerable<AttendanceRecord> improvementRecords = records
-            .Where(entry => entry.Improvement)
+            .Where(entry => !string.IsNullOrWhiteSpace(entry.Improvement))
             .OrderBy(entry => entry.StudentName.SortOrder);
 
         foreach (AttendanceRecord record in improvementRecords)
@@ -1437,6 +1451,8 @@ public class ExcelService : IExcelService
             ExcelRange recordRow = chartWorksheet.Cells[rowNumber, 1, rowNumber, 5];
             recordRow.Merge = true;
             recordRow.Value = record.StudentName.DisplayName;
+            ExcelComment comment = recordRow.AddComment(record.Improvement);
+            comment.AutoFit = true;
 
             rowNumber++;
         }
@@ -1454,7 +1470,7 @@ public class ExcelService : IExcelService
         rowNumber++;
 
         IOrderedEnumerable<AttendanceRecord> declineRecords = records
-            .Where(entry => entry.Decline)
+            .Where(entry => !string.IsNullOrWhiteSpace(entry.Decline))
             .OrderBy(entry => entry.StudentName.SortOrder);
 
         foreach (AttendanceRecord record in declineRecords)
@@ -1462,6 +1478,8 @@ public class ExcelService : IExcelService
             ExcelRange recordRow = chartWorksheet.Cells[rowNumber, 1, rowNumber, 5];
             recordRow.Merge = true;
             recordRow.Value = record.StudentName.DisplayName;
+            ExcelComment comment = recordRow.AddComment(record.Decline);
+            comment.AutoFit = true;
 
             rowNumber++;
         }
