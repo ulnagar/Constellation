@@ -2,12 +2,12 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Faculty;
+using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
+using Core.Models.Faculty.Errors;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +35,7 @@ public class GetCoursesForSelectionListQueryHandler
     {
         List<Course> courses = await _courseRepository.GetAll(cancellationToken);
 
-        if (courses is null)
+        if (courses.Count == 0)
         {
             _logger.Warning("Could not find any courses in the database");
 
@@ -51,7 +51,7 @@ public class GetCoursesForSelectionListQueryHandler
             if (faculty is null)
                 _logger
                     .ForContext(nameof(GetCoursesForSelectionListQuery), request, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.Faculty.NotFound(course.FacultyId), true)
+                    .ForContext(nameof(Error), FacultyErrors.NotFound(course.FacultyId), true)
                     .Warning("Could not find faculty linked to course");
 
 

@@ -1,11 +1,9 @@
 ﻿using Constellation.Core.Enums;
-using Constellation.Core.Models.Casuals;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 
 namespace Constellation.Core.Models
@@ -58,7 +56,7 @@ namespace Constellation.Core.Models
     public class GroupMSTeamOperation : OfferingMSTeamOperation
     {
         public Guid FacultyId { get; set; }
-        public Faculty Faculty { get; set; }
+        public Faculty.Faculty Faculty { get; set; }
     }
 
     public abstract class EventMSTeamOperation : MSTeamOperation

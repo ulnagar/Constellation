@@ -6,7 +6,7 @@ using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
-using System;
+using Faculty.Identifiers;
 using System.Collections.Generic;
 
 public sealed class Course : AggregateRoot
@@ -19,7 +19,7 @@ public sealed class Course : AggregateRoot
         string name,
         string code,
         Grade grade,
-        Guid facultyId,
+        FacultyId facultyId,
         decimal fteValue)
     {
         Id = new();
@@ -34,7 +34,7 @@ public sealed class Course : AggregateRoot
     public string Name { get; private set; }
     public string Code { get; private set; }
     public Grade Grade { get; private set; }
-    public Guid FacultyId { get; private set; }
+    public FacultyId FacultyId { get; private set; }
     public decimal FullTimeEquivalentValue { get; private set; }
     public IReadOnlyList<Offering> Offerings => _offerings;
 
@@ -42,7 +42,7 @@ public sealed class Course : AggregateRoot
         string name,
         string code,
         Grade grade,
-        Guid facultyId,
+        FacultyId facultyId,
         decimal fteValue)
     {
         if (string.IsNullOrWhiteSpace(code))
@@ -63,7 +63,7 @@ public sealed class Course : AggregateRoot
         string name,
         string code,
         Grade grade,
-        Guid facultyId,
+        FacultyId facultyId,
         decimal fteValue)
     {
         if (string.IsNullOrWhiteSpace(code))

@@ -2,7 +2,7 @@
 
 using AutoMapper;
 using Constellation.Application.Common.Mapping;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Faculty;
 using System;
 using System.Linq;
 

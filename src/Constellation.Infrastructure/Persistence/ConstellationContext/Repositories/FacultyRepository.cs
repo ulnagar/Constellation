@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Faculty;
+using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Models.Faculty.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class FacultyRepository : IFacultyRepository
@@ -24,11 +25,11 @@ internal sealed class FacultyRepository : IFacultyRepository
             .ToListAsync(cancellationToken);
 
     public async Task<Faculty> GetById(
-        Guid FacultyId,
+        FacultyId facultyId,
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<Faculty>()
-            .FirstOrDefaultAsync(faculty => faculty.Id == FacultyId, cancellationToken);
+            .FirstOrDefaultAsync(faculty => faculty.Id == facultyId, cancellationToken);
 
     public async Task<List<Faculty>> GetCurrentForStaffMember(
         string staffId,
@@ -36,7 +37,6 @@ internal sealed class FacultyRepository : IFacultyRepository
         await _dbContext
             .Set<Faculty>()
             .Include(faculty => faculty.Members)
-            .ThenInclude(member => member.Staff)
             .Where(faculty => faculty.Members.Any(member => !member.IsDeleted && member.StaffId == staffId))
             .ToListAsync(cancellationToken);
 
@@ -50,7 +50,7 @@ internal sealed class FacultyRepository : IFacultyRepository
             .Select(offering => offering.CourseId)
             .FirstOrDefaultAsync(cancellationToken);
 
-        Guid? facultyId = await _dbContext
+        FacultyId? facultyId = await _dbContext
             .Set<Course>()
             .Where(course => course.Id == courseId)
             .Select(course => course.FacultyId)
@@ -68,7 +68,7 @@ internal sealed class FacultyRepository : IFacultyRepository
     }
         
     public async Task<List<Faculty>> GetListFromIds(
-        List<Guid> facultyIds,
+        List<FacultyId> facultyIds,
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<Faculty>()

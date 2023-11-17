@@ -4,13 +4,13 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Courses.GetCourseSummary;
 using Constellation.Application.Courses.Models;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Faculty;
+using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
+using Core.Models.Faculty.Errors;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,10 +52,10 @@ internal sealed class GetCourseSummaryListQueryHandler
             {
                 _logger
                     .ForContext(nameof(GetCourseSummaryQuery), request, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.Faculty.NotFound(course.FacultyId))
+                    .ForContext(nameof(Error), FacultyErrors.NotFound(course.FacultyId))
                     .Warning("Failed to retrieve Course summary");
 
-                return Result.Failure<List<CourseSummaryResponse>>(DomainErrors.Partners.Faculty.NotFound(course.FacultyId));
+                return Result.Failure<List<CourseSummaryResponse>>(FacultyErrors.NotFound(course.FacultyId));
             }
 
             CourseSummaryResponse.Faculty responseFaculty = new(

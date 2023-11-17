@@ -2,12 +2,6 @@
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Attendance Index - 
-	Get Data button to show Modal with list of periods. 
-	User selects one period and the application will replace the existing data for that period with a fresh batch. 
-	Limited to authorised users only.
-	Bulk process hidden behind second button for admins only.
-
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~

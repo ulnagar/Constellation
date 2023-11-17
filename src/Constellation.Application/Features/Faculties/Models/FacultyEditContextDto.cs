@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Features.Faculties.Models;
 
 using Constellation.Application.Common.Mapping;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Faculty;
 using System;
 
 public class FacultyEditContextDto : IMapFrom<Faculty>

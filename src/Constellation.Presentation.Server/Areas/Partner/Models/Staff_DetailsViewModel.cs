@@ -8,6 +8,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Models
 {
+    using Constellation.Core.Models.Faculty;
+    using Core.Models.Faculty.ValueObjects;
     using Core.Models.Offerings.ValueObjects;
 
     public class Staff_DetailsViewModel : BaseViewModel

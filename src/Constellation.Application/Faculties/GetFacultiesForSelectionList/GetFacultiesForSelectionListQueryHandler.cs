@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Faculties.GetFacultiesForSelectionList;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Faculty;
+using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;

@@ -1,5 +1,6 @@
 ﻿using Constellation.Application.Extensions;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Faculty;
 using Constellation.Presentation.Server.BaseModels;
 using System.Collections.Generic;
 

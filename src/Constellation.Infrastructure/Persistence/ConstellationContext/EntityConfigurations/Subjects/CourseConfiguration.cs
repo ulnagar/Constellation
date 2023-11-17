@@ -1,8 +1,9 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Subjects;
 
-using Constellation.Core.Models;
+using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Models.Faculty.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -36,6 +37,12 @@ public class CourseConfiguration : IEntityTypeConfiguration<Course>
             .HasForeignKey(course => course.FacultyId)
             .OnDelete(DeleteBehavior.NoAction);
 
+        builder
+            .Property(course => course.FacultyId)
+            .HasConversion(
+                id => id.Value,
+                value => FacultyId.FromValue(value));
+        
         builder
             .Property(course => course.Code)
             .HasMaxLength(3)

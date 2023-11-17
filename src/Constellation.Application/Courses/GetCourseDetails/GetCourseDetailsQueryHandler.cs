@@ -3,15 +3,16 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Faculty;
+using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
+using Core.Models.Faculty.Errors;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,10 +68,10 @@ internal sealed class GetCourseDetailsQueryHandler
         {
             _logger
                 .ForContext(nameof(GetCourseDetailsQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Faculty.NotFound(course.FacultyId))
+                .ForContext(nameof(Error), FacultyErrors.NotFound(course.FacultyId))
                 .Warning("Failed to retrieve Course details");
 
-            return Result.Failure<CourseDetailsResponse>(DomainErrors.Partners.Faculty.NotFound(course.FacultyId));
+            return Result.Failure<CourseDetailsResponse>(FacultyErrors.NotFound(course.FacultyId));
         }
 
         CourseDetailsResponse.Faculty responseFaculty = new(

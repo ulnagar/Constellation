@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models;
 
+using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Shared;

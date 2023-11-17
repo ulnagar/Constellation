@@ -33,7 +33,7 @@ internal sealed class AbsenceConfigurationConfiguration : IEntityTypeConfigurati
             .HasConversion(
                 entry => entry.Value,
                 value => AbsenceType.FromValue(value));
-
+        
         builder
             .Property(config => config.ScanStartDate)
             .HasConversion<DateOnlyConverter, DateOnlyComparer>();

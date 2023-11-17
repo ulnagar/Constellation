@@ -2,12 +2,12 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Enums;
-using System;
+using Core.Models.Faculty.Identifiers;
 
 public sealed record CreateCourseCommand(
     string Name,
     string Code,
     Grade Grade,
-    Guid FacultyId,
+    FacultyId FacultyId,
     decimal FTEValue)
     : ICommand;

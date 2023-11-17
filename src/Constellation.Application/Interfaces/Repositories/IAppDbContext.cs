@@ -3,6 +3,7 @@
 using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Stocktake;
 using Constellation.Core.Models.Students;
 using Microsoft.EntityFrameworkCore;

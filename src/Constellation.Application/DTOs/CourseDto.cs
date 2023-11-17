@@ -1,6 +1,6 @@
 ﻿using Constellation.Application.Helpers;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 using System.ComponentModel.DataAnnotations;

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Faculties.GetFacultiesForSelectionList;
 
-using System;
+using Core.Models.Faculty.Identifiers;
 
 public sealed record FacultySummaryResponse(
-    Guid FacultyId,
+    FacultyId FacultyId,
     string Name);
