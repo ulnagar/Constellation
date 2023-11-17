@@ -2,48 +2,56 @@
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Compliance.Attendance.IndexModel
 
 @using Constellation.Core.Extensions
+@inject IAuthorizationService AuthorizationService
+
+@{
+    AuthorizationResult isAdmin = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.IsSiteAdmin);
+    AuthorizationResult isManager = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanManageCompliance);
+}
 
 <h2>Attendance Percentages</h2>
 
 <div class="page-menu">
-    <a asp-page-handler="RetrieveAttendance" class="btn btn-success">Sync Attendance</a>
+    @if (isManager.Succeeded || isAdmin.Succeeded)
+    {
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#replace-data-modal">Update Attendance Period</button>
+    }
+    
+    @if (isAdmin.Succeeded)
+    {
+        <a asp-page-handler="SyncAllAttendance" class="btn btn-success">Sync Attendance</a>
+    }
 </div>
 
 <hr />
 
 <table class="table table-striped data-table">
     <thead>
-        <tr>
-            <th>Student</th>
-            <th>Grade</th>
-            <th>Period</th>
-            <th>YTD (Day)</th>
-            <th>YTD (Minute)</th>
-            <th>Week (Day)</th>
-            <th>Week (Minute)</th>
-        </tr>
+    <tr>
+        <th>Student</th>
+        <th>Grade</th>
+        <th>Period</th>
+        <th>YTD (Day)</th>
+        <th>YTD (Minute)</th>
+        <th>Week (Day)</th>
+        <th>Week (Minute)</th>
+    </tr>
     </thead>
     <tbody>
-    @foreach (var studentId in Model.StudentData.Select(entry => entry.StudentId).Distinct().ToList())
-    {
-        @foreach (var entry in Model.StudentData.Where(entry => entry.StudentId == studentId).OrderBy(entry => entry.StartDate))
+        @foreach (var entry in Model.StudentData.OrderBy(entry => entry.StudentId).ThenBy(entry => entry.PeriodLabel))
         {
             <tr>
                 <td>
-                    @{
-                        var student = Model.Students.FirstOrDefault(student => student.StudentId == entry.StudentId);
-
-                        if (student is null)
-                        {
-                            <a asp-page="Student" asp-route-studentId="@entry.StudentId">@entry.StudentId</a>
-                        }
-                        else
-                        {
-                            <a asp-page="Student" asp-route-studentId="@entry.StudentId">@student.DisplayName</a>
-                        }
+                    @if (entry.StudentName is null)
+                    {
+                        <a asp-page="Student" asp-route-studentId="@entry.StudentId">@entry.StudentId</a>
+                    }
+                    else
+                    {
+                        <a asp-page="Student" asp-route-studentId="@entry.StudentId">@entry.StudentName.DisplayName</a>
                     }
                 </td>
-                <td>@entry.Grade.AsName()</td>
+                <td>@entry.StudentGrade.AsName()</td>
                 <td>@entry.PeriodLabel</td>
                 <td>@entry.PerDayYearToDatePercentage</td>
                 <td>@entry.PerMinuteYearToDatePercentage</td>
@@ -51,7 +59,36 @@
                 <td>@entry.PerMinuteWeekPercentage</td>
             </tr>
         }
-    }
-
     </tbody>
 </table>
+
+<div class="modal fade" tabindex="-1" id="replace-data-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+            <form asp-page-handler="SyncAttendance" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sync Attendance Data</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            Replace Attendance data for period:
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col">
+                            <select asp-for="SelectedPeriod" asp-items="new SelectList(Model.PeriodNames)" class="form-control combo custom-select">
+                                <option selected="selected" value=""> -- Please Select -- </option>
+                            </select>
+                            <span asp-validation-for="SelectedPeriod" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Sync</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

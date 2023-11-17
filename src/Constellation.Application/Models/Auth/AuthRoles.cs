@@ -14,6 +14,7 @@
         public const string MandatoryTrainingEditor = "Mandatory Training Editor";
         public const string GroupTutorialsEditor = "Group Tutorials Editor";
         public const string AwardsManager = "Awards Manager";
+        public const string ComplianceManager = "Compliance Manager";
 
         public const string ExecStaffMember = "Exec Staff Member";
     }

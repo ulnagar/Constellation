@@ -20,6 +20,7 @@ public static class IdentityDefaults
                 AuthPermissions.SchoolAdmin.Awards.Add,
                 AuthPermissions.SchoolAdmin.Awards.View,
                 AuthPermissions.SchoolAdmin.Awards.Manage,
+                AuthPermissions.SchoolAdmin.Compliance.Manage,
                 AuthPermissions.AssignmentsEdit,
                 AuthPermissions.AssignmentsSubmit,
                 AuthPermissions.ContactsEdit,
@@ -142,6 +143,10 @@ public static class IdentityDefaults
                 AuthPermissions.MandatoryTrainingEdit,
                 AuthPermissions.MandatoryTrainingReportsRun,
                 AuthPermissions.MandatoryTrainingView });
+
+        await CreateRoleWithPermission(roleManager, AuthRoles.ComplianceManager,
+            new [] {
+                AuthPermissions.SchoolAdmin.Compliance.Manage });
 
         await CreateRoleWithPermission(roleManager, AuthRoles.GroupTutorialsEditor,
             new[]
