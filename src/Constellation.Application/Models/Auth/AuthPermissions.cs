@@ -10,6 +10,11 @@ public class AuthPermissions
             public const string Add = "SchoolAdmin.Awards.Add";
             public const string Manage = "SchoolAdmin.Awards.Manage";
         }
+
+        public static class Compliance
+        {
+            public const string Manage = "SchoolAdmin.Compliance.Manage";
+        }
     }
 
     public const string PartnerView = "Partner.View";
