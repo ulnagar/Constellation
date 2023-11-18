@@ -14,6 +14,7 @@ using Constellation.Core.Shared;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
+using Core.Models.Faculty.ValueObjects;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -95,13 +96,16 @@ internal sealed class GenerateStaffReportCommandHandler
 
             foreach (Faculty faculty in faculties)
             {
-                List<Staff> headTeachers = faculty
+                List<string> headTeacherIds = faculty
                     .Members
                     .Where(member =>
                         !member.IsDeleted &&
-                        member.Role == Core.Enums.FacultyMembershipRole.Manager)
-                    .Select(member => member.Staff)
+                        member.Role == FacultyMembershipRole.Manager)
+                    .Select(member => member.StaffId)
                     .ToList();
+
+                List<Staff> headTeachers = await _staffRepository
+                    .GetListFromIds(headTeacherIds, cancellationToken);
 
                 foreach (Staff headTeacher in headTeachers)
                     entry.AddHeadTeacherDetails(faculty, headTeacher);

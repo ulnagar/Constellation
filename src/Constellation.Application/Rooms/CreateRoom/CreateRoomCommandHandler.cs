@@ -15,10 +15,10 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
+using Core.Models.Faculty.Errors;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
-using static Constellation.Core.Errors.DomainErrors.LinkedSystems;
 
 internal sealed class CreateRoomCommandHandler
     : ICommandHandler<CreateRoomCommand, RoomResponse>
@@ -78,10 +78,10 @@ internal sealed class CreateRoomCommandHandler
         {
             _logger
                 .ForContext(nameof(CreateRoomCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Faculty.NotFound(course.FacultyId), true)
+                .ForContext(nameof(Error), FacultyErrors.NotFound(course.FacultyId), true)
                 .Warning("Failed to create new Adobe Connect Room");
 
-            return Result.Failure<RoomResponse>(DomainErrors.Partners.Faculty.NotFound(course.FacultyId));
+            return Result.Failure<RoomResponse>(FacultyErrors.NotFound(course.FacultyId));
         }
 
         string zeroFillGrade = ((int)course.Grade).ToString().PadLeft(2, '0');

@@ -10,6 +10,7 @@ using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Core.Models.Faculty.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,7 +51,7 @@ internal sealed class GetModuleDetailsQueryHandler
 
         foreach (Staff staffMember in staffMembers)
         {
-            List<Guid> facultyIds = staffMember
+            List<FacultyId> facultyIds = staffMember
                 .Faculties
                 .Where(member => !member.IsDeleted)
                 .Select(member => member.FacultyId)

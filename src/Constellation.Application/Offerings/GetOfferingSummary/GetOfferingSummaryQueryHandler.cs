@@ -13,6 +13,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
+using Core.Models.Faculty.Errors;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,10 +91,10 @@ internal sealed class GetOfferingSummaryQueryHandler
         {
             _logger
                 .ForContext(nameof(GetOfferingSummaryQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Faculty.NotFound(course.FacultyId), true)
+                .ForContext(nameof(Error), FacultyErrors.NotFound(course.FacultyId), true)
                 .Warning("Could not retrieve Offering summary");
 
-            return Result.Failure<OfferingSummaryResponse>(DomainErrors.Partners.Faculty.NotFound(course.FacultyId));
+            return Result.Failure<OfferingSummaryResponse>(FacultyErrors.NotFound(course.FacultyId));
         }
 
         OfferingSummaryResponse entry = new(

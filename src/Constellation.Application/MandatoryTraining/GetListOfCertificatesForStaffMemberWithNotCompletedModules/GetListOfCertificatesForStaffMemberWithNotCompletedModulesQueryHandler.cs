@@ -9,6 +9,7 @@ using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Core.Models.Faculty.ValueObjects;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -75,13 +76,16 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
 
             foreach (Faculty faculty in faculties)
             {
-                List<Staff> headTeachers = faculty
+                List<string> headTeacherIds = faculty
                     .Members
                     .Where(member =>
                         !member.IsDeleted &&
-                        member.Role == Core.Enums.FacultyMembershipRole.Manager)
-                    .Select(member => member.Staff)
+                        member.Role == FacultyMembershipRole.Manager)
+                    .Select(member => member.StaffId)
                     .ToList();
+
+                List<Staff> headTeachers = await _staffRepository
+                    .GetListFromIds(headTeacherIds, cancellationToken);
 
                 foreach (Staff headTeacher in headTeachers)
                     entry.AddHeadTeacherDetails(faculty, headTeacher);

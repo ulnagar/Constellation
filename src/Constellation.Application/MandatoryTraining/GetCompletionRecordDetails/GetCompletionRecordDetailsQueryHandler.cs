@@ -10,6 +10,7 @@ using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Core.Models.Faculty.Identifiers;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -66,7 +67,7 @@ internal sealed class GetCompletionRecordDetailsQueryHandler
             return Result.Failure<CompletionRecordDto>(DomainErrors.Partners.Staff.NotFound(record.StaffId));
         }
 
-        List<Guid> facultyIds = staff
+        List<FacultyId> facultyIds = staff
             .Faculties
             .Where(member => !member.IsDeleted)
             .Select(member => member.FacultyId)

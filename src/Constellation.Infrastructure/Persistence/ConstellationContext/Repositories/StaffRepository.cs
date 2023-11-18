@@ -9,6 +9,8 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Models.Faculty.Identifiers;
+using Core.Models.Faculty.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -26,11 +28,10 @@ public class StaffRepository : IStaffRepository
     {
         return _context.Staff
             .Include(s => s.AdobeConnectOperations)
-                .ThenInclude(operation => operation.Room)
+            .ThenInclude(operation => operation.Room)
             .Include(s => s.AdobeConnectGroupOperations)
             .Include(s => s.School)
-            .Include(staff => staff.Faculties)
-                .ThenInclude(member => member.Faculty);
+            .Include(staff => staff.Faculties);
     }
 
     public async Task<List<Staff>> GetAll(
@@ -94,7 +95,7 @@ public class StaffRepository : IStaffRepository
     }
 
     public async Task<List<Staff>> GetFacultyHeadTeachers(
-        Guid facultyId,
+        FacultyId facultyId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Staff>()
@@ -116,7 +117,7 @@ public class StaffRepository : IStaffRepository
             .Select(offering => offering.CourseId)
             .ToListAsync(cancellationToken);
 
-        List<Guid> facultyIds = await _context
+        List<FacultyId> facultyIds = await _context
             .Set<Course>()
             .Where(course => courseIds.Contains(course.Id))
             .Select(course => course.FacultyId)
@@ -228,7 +229,6 @@ public class StaffRepository : IStaffRepository
         return await _context.Staff
             .Include(staff => staff.School)
             .Include(staff => staff.Faculties)
-            .ThenInclude(member => member.Faculty)
             .OrderBy(staff => staff.LastName)
             .Where(predicate)
             .ToListAsync();
@@ -238,7 +238,6 @@ public class StaffRepository : IStaffRepository
     {
         return await _context.Staff
             .Include(staff => staff.Faculties)
-            .ThenInclude(member => member.Faculty)
             .Include(staff => staff.School)
             .ThenInclude(school => school.StaffAssignments)
             .ThenInclude(role => role.SchoolContact)

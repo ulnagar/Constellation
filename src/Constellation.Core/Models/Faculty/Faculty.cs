@@ -28,6 +28,7 @@ public sealed class Faculty : AggregateRoot, IAuditableEntity
     public string Name { get; private set; }
     public string Colour { get; private set; }
     public IReadOnlyList<FacultyMembership> Members => _members.ToList();
+    public int MemberCount => _members.Count(member => !member.IsDeleted);
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public string ModifiedBy { get; set; }

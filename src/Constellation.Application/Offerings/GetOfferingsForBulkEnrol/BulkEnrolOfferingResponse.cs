@@ -2,10 +2,10 @@
 
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
-using System;
+using Core.Models.Faculty.Identifiers;
 
 public sealed record BulkEnrolOfferingResponse(
     OfferingId OfferingId,
     OfferingName Name,
-    Guid FacultyId,
+    FacultyId FacultyId,
     string FacultyName);

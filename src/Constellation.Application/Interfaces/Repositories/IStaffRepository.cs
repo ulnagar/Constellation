@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Core.Models.Faculty.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -15,7 +16,7 @@ public interface IStaffRepository
     Task<List<Staff>> GetListFromIds(List<string> staffIds, CancellationToken cancellationToken = default);
     Task<List<Staff>> GetCurrentTeachersForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Staff>> GetPrimaryTeachersForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
-    Task<List<Staff>> GetFacultyHeadTeachers(Guid facultyId, CancellationToken cancellationToken = default);
+    Task<List<Staff>> GetFacultyHeadTeachers(FacultyId facultyId, CancellationToken cancellationToken = default);
     Task<List<Staff>> GetFacultyHeadTeachersForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Staff>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<string>> GetAllActiveStaffIds(CancellationToken cancellationToken = default);

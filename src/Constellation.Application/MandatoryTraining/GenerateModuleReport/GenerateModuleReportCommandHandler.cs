@@ -15,7 +15,7 @@ using Constellation.Core.Shared;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
-using System;
+using Core.Models.Faculty.Identifiers;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -67,7 +67,7 @@ internal sealed class GenerateModuleReportCommandHandler
 
         foreach (Staff staffMember in staffMembers)
         {
-            List<Guid> facultyIds = staffMember
+            List<FacultyId> facultyIds = staffMember
                 .Faculties
                 .Where(member => !member.IsDeleted)
                 .Select(member => member.FacultyId)
