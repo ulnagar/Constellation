@@ -4,12 +4,12 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Offerings.RemoveTeacherFromAllOfferings;
 using Constellation.Core.Models;
 using Constellation.Infrastructure.DependencyInjection;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Services
 {
+    using Core.Models.Faculty;
+    using Core.Models.Faculty.Repositories;
+
     // Reviewed for ASYNC Operations
     public class StaffService : IStaffService, IScopedService
     {
@@ -17,16 +17,19 @@ namespace Constellation.Infrastructure.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IOperationService _operationService;
         private readonly IPeriodService _sessionService;
+        private readonly IFacultyRepository _facultyRepository;
 
         public StaffService(
             ISender mediator,
             IUnitOfWork unitOfWork, 
             IPeriodService sessionService,
+            IFacultyRepository facultyRepository,
             IOperationService operationService)
         {
             _mediator = mediator;
             _unitOfWork = unitOfWork;
             _sessionService = sessionService;
+            _facultyRepository = facultyRepository;
             _operationService = operationService;
         }
 
@@ -94,10 +97,13 @@ namespace Constellation.Infrastructure.Services
             staff.IsDeleted = true;
             staff.DateDeleted = DateTime.Now;
 
-            foreach (var faculty in staff.Faculties)
+            foreach (FacultyMembership membership in staff.Faculties)
             {
-                if (!faculty.IsDeleted)
-                    faculty.IsDeleted = true;
+                if (membership.IsDeleted) 
+                    continue;
+
+                Faculty faculty = await _facultyRepository.GetById(membership.FacultyId);
+                faculty.RemoveMember(staff.StaffId);
             }
         }
 

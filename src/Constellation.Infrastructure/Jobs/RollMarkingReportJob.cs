@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Faculties.GetFacultyManagers;
 using Constellation.Application.ClassCovers.GetCoversSummaryByDateAndOffering;
 using Constellation.Application.DTOs;
-using Constellation.Application.Features.Faculties.Queries;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
@@ -11,6 +11,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Core.Shared;
 using MediatR;
 using Microsoft.Extensions.Options;
 using System;
@@ -148,8 +149,19 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
             if (offering is not null)
             {
                 var course = await _courseRepository.GetById(offering.CourseId, token);
-                var headTeachers = await _mediator.Send(new GetListOfFacultyManagersQuery { FacultyId = course.FacultyId }, token);
-                emailDto.HeadTeachers = headTeachers.ToDictionary(member => member.EmailAddress, member => member.DisplayName);
+
+                Result<List<Staff>> headTeachersRequest = await _mediator.Send(new GetFacultyManagersQuery(course.FacultyId), token);
+                if (headTeachersRequest.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(Error), headTeachersRequest.Error, true)
+                        .Warning("Failed to determine Head Teachers for Faculty");
+                }
+                else
+                {
+                    emailDto.HeadTeachers = headTeachersRequest.Value
+                        .ToDictionary(member => member.EmailAddress, member => member.DisplayName);
+                }
 
                 var coversRequest = await _mediator.Send(new GetCoversSummaryByDateAndOfferingQuery(date, offering.Id), token);
 

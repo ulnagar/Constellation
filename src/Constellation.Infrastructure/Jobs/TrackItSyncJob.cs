@@ -6,6 +6,8 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Students;
 using Constellation.Infrastructure.Persistence.TrackItContext;
 using Constellation.Infrastructure.Persistence.TrackItContext.Models;
+using Core.Models.Faculty;
+using Core.Models.Faculty.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class TrackItSyncJob : ITrackItSyncJob
@@ -13,6 +15,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolRepository _schoolRepository;
+    private readonly IFacultyRepository _facultyRepository;
     private readonly TrackItContext _tiContext;
     private readonly ILogger _logger;
     private static int _newCustomerSequence;
@@ -24,12 +27,14 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
         ISchoolRepository schoolRepository,
+        IFacultyRepository facultyRepository,
         TrackItContext tiContext, 
         ILogger logger)
     {
         _studentRepository = studentRepository;
         _staffRepository = staffRepository;
         _schoolRepository = schoolRepository;
+        _facultyRepository = facultyRepository;
         _tiContext = tiContext;
         _logger = logger.ForContext<ITrackItSyncJob>();
     }
@@ -143,11 +148,11 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             var tiCustomer = tiCustomers.FirstOrDefault(c => c.Client == CreateClientFromPortalUsername(acosStaffMember.PortalUsername) || c.Emailid == customerEmailId);
             if (tiCustomer != null)
             {
-                CheckExistingCustomerDetail(tiCustomer, acosStaffMember);
+                await CheckExistingCustomerDetail(tiCustomer, acosStaffMember);
             }
             else
             {
-                var customer = CreateCustomerFromStaff(acosStaffMember);
+                var customer = await CreateCustomerFromStaff(acosStaffMember);
                 _tiContext.Customers.Add(customer);
             }
         }
@@ -316,7 +321,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         customer.Updated();
     }
 
-    private void CheckExistingCustomerDetail(Customer customer, Staff staff)
+    private async Task CheckExistingCustomerDetail(Customer customer, Staff staff)
     {
         if (customer.Client != CreateClientFromPortalUsername(staff.PortalUsername).ToUpper())
             customer.Client = CreateClientFromPortalUsername(staff.PortalUsername).ToUpper();
@@ -337,10 +342,11 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             _logger.Information("{id}: Staff: Name {student} - Email {emailAddress}: LastName updated to {newName}", JobId, staff.DisplayName, staff.EmailAddress, staff.LastName);
         }
 
-        var faculty = staff.Faculties.FirstOrDefault(member => !member.IsDeleted);
+        FacultyMembership membership = staff.Faculties.FirstOrDefault(member => !member.IsDeleted);
+        Faculty faculty = await _facultyRepository.GetById(membership.FacultyId);
         if (faculty is not null) 
         {
-            var department = _tiContext.Departments.ToList().FirstOrDefault(c => c.Name.Contains(faculty.Faculty.Name));
+            var department = _tiContext.Departments.ToList().FirstOrDefault(c => c.Name.Contains(faculty.Name));
             customer.Dept = department?.Sequence;
         }
         
@@ -377,7 +383,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         return customer;
     }
 
-    private Customer CreateCustomerFromStaff(Staff staff)
+    private async Task<Customer> CreateCustomerFromStaff(Staff staff)
     {
         var customer = new Customer
         {
@@ -391,10 +397,11 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
 
         _logger.Information("{id}: Staff: Name {staff} - Email {emailAddress}: Created new record", JobId, staff.DisplayName, staff.EmailAddress);
 
-        var faculty = staff.Faculties.FirstOrDefault(member => !member.IsDeleted);
+        FacultyMembership membership = staff.Faculties.FirstOrDefault(member => !member.IsDeleted);
+        Faculty faculty = await _facultyRepository.GetById(membership.FacultyId);
         if (faculty is not null)
         {
-            var department = _tiContext.Departments.ToList().FirstOrDefault(c => c.Name.Contains(faculty.Faculty.Name));
+            var department = _tiContext.Departments.ToList().FirstOrDefault(c => c.Name.Contains(faculty.Name));
             customer.Dept = department?.Sequence;
         }
 

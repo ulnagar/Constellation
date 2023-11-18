@@ -13,6 +13,7 @@ using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.Faculty.ValueObjects;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System;
@@ -85,13 +86,15 @@ internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJ
 
                 foreach (Faculty faculty in faculties)
                 {
-                    List<Staff> headTeachers = faculty
+                    List<string> headTeacherIds = faculty
                         .Members
                         .Where(member =>
                             !member.IsDeleted &&
-                            member.Role == Core.Enums.FacultyMembershipRole.Manager)
-                        .Select(member => member.Staff)
+                            member.Role == FacultyMembershipRole.Manager)
+                        .Select(member => member.StaffId)
                         .ToList();
+
+                    List<Staff> headTeachers = await _staffRepository.GetListFromIds(headTeacherIds, cancellationToken);
 
                     foreach (Staff headTeacher in headTeachers)
                     {

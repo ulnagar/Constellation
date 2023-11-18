@@ -25,12 +25,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
 
             builder
                 .HasMany(staff => staff.Faculties)
-                .WithOne(member => member.Staff)
+                .WithOne()
                 .OnDelete(DeleteBehavior.NoAction);
-
-            //builder
-            //    .HasMany(staff => staff.ClassworkNotifications)
-            //    .WithMany();
         }
     }
 }
