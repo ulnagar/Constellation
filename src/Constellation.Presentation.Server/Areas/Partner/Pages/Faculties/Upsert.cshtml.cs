@@ -1,9 +1,12 @@
 namespace Constellation.Presentation.Server.Areas.Partner.Pages.Faculties;
 
-using Constellation.Application.Features.Faculties.Commands;
-using Constellation.Application.Features.Faculties.Queries;
+using Application.Faculties.CreateFaculty;
+using Application.Faculties.GetFaculty;
+using Application.Faculties.UpdateFaculty;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Models.Faculty.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,9 +15,9 @@ using System.ComponentModel.DataAnnotations;
 [Authorize(Policy = AuthPolicies.CanEditFaculties)]
 public class UpsertModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
 
-    public UpsertModel(IMediator mediator)
+    public UpsertModel(ISender mediator)
     {
         _mediator = mediator;
     }
@@ -35,11 +38,24 @@ public class UpsertModel : BasePageModel
 
         if (Id.HasValue)
         {
+            FacultyId facultyId = FacultyId.FromValue(Id.Value);
+            
             // Get values from database
-            var entry = await _mediator.Send(new GetFacultyEditContextQuery(Id.Value));
+            Result<FacultyResponse> request = await _mediator.Send(new GetFacultyQuery(facultyId));
 
-            Name = entry.Name;
-            Colour = entry.Colour;
+            if (request.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = request.Error,
+                    RedirectPath = null
+                };
+
+                return;
+            }
+
+            Name = request.Value.Name;
+            Colour = request.Value.Colour;
         }
     }
 
@@ -53,9 +69,10 @@ public class UpsertModel : BasePageModel
         if (Id.HasValue)
         {
             // Update existing entry
+            FacultyId facultyId = FacultyId.FromValue(Id.Value);
 
-            var command = new UpdateFacultyCommand(
-                Id.Value,
+            UpdateFacultyCommand command = new(
+                facultyId,
                 Name,
                 Colour);
 
@@ -65,7 +82,7 @@ public class UpsertModel : BasePageModel
         {
             // Create new entry
 
-            var command = new CreateFacultyCommand(
+            CreateFacultyCommand command = new(
                 Name,
                 Colour);
 

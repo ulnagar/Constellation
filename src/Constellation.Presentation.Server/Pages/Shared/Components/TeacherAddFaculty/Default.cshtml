@@ -28,7 +28,7 @@
                         <div class="row">
                             <div class="form-group col-md-10 offset-1">
                                 <span class="control-label">with role </span>
-                                <select asp-for="Role" asp-items="@Html.GetEnumSelectList<FacultyMembershipRole>()" class="form-control combo custom-select">
+                                <select asp-for="Role" asp-items="@Model.FacultyRoles" class="form-control combo custom-select">
                                     <option> -- Please Select -- </option>
                                 </select>
                             </div>

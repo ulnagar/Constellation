@@ -25,4 +25,5 @@ public class AuthPolicies
     public const string CanManageSciencePracs = "CanManageSciencePracs";
     public const string CanEditSubjects = "CanEditSubjects";
     public const string CanManageCompliance = "CanManageCompliance";
+    public const string CanEditStaff = "CanEditStaff";
 }

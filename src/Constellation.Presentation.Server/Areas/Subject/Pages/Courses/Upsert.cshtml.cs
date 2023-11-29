@@ -7,6 +7,7 @@ using Constellation.Application.Courses.UpdateCourse;
 using Constellation.Application.Faculties.GetFacultiesForSelectionList;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Faculty.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
@@ -68,7 +69,7 @@ public class UpsertModel : BasePageModel
             Name = courseRequest.Value.Name;
             Code = courseRequest.Value.Code;
             Grade = courseRequest.Value.Grade;
-            FacultyId = courseRequest.Value.CourseFaculty.FacultyId;
+            FacultyId = courseRequest.Value.CourseFaculty.FacultyId.Value;
             FTEValue = courseRequest.Value.FTEValue;
         }
 
@@ -110,11 +111,13 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
+        FacultyId facultyId = Core.Models.Faculty.Identifiers.FacultyId.FromValue(FacultyId);
+
         Result request = await _mediator.Send(new CreateCourseCommand(
             Name,
             Code,
             Grade,
-            FacultyId,
+            facultyId,
             FTEValue));
 
         if (request.IsFailure)
@@ -170,12 +173,14 @@ public class UpsertModel : BasePageModel
 
         CourseId courseId = CourseId.FromValue(Id.Value);
 
+        FacultyId facultyId = Core.Models.Faculty.Identifiers.FacultyId.FromValue(FacultyId);
+        
         Result request = await _mediator.Send(new UpdateCourseCommand(
             courseId,
             Name,
             Code,
             Grade,
-            FacultyId,
+            facultyId,
             FTEValue));
 
         if (request.IsFailure)

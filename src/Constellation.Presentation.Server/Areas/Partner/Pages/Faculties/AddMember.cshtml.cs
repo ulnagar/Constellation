@@ -1,14 +1,17 @@
 namespace Constellation.Presentation.Server.Areas.Partner.Pages.Faculties;
 
+using Application.Faculties.GetFaculty;
+using Application.StaffMembers.AddStaffToFaculty;
 using Constellation.Application.Features.Common.Queries;
-using Constellation.Application.Features.Faculties.Queries;
-using Constellation.Application.Features.StaffMembers.Commands;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Enums;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Models.Faculty.Identifiers;
+using Core.Models.Faculty.ValueObjects;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanEditFaculties)]
@@ -40,13 +43,21 @@ public class AddMemberModel : BasePageModel
 
     public Dictionary<string, string> StaffList { get; set; } = new();
 
+    public SelectList FacultyRoles { get; set; } = new(FacultyMembershipRole.Enumerations(), "");
+
     public async Task OnGet()
     {
         await GetClasses(_mediator);
 
         StaffList = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
         MemberDefinition.FacultyId = FacultyId;
-        MemberDefinition.FacultyName = await _mediator.Send(new GetFacultyNameQuery(FacultyId));
+        
+        FacultyId facultyId = Core.Models.Faculty.Identifiers.FacultyId.FromValue(FacultyId);
+
+        Result<FacultyResponse> faculty = await _mediator.Send(new GetFacultyQuery(facultyId));
+
+        if (faculty.IsSuccess)
+            MemberDefinition.FacultyName = faculty.Value.Name;
     }
 
     public async Task<IActionResult> OnPostAddMember()
@@ -58,13 +69,15 @@ public class AddMemberModel : BasePageModel
             return Page();
         }
 
-        await _mediator.Send(new CreateFacultyMembershipForStaffMemberCommand
+        if (MemberDefinition.FacultyId.HasValue)
         {
-            FacultyId = MemberDefinition.FacultyId.Value,
-            StaffId = MemberDefinition.StaffId,
-            Role = MemberDefinition.Role
-        });
-
+            FacultyId facultyId = Core.Models.Faculty.Identifiers.FacultyId.FromValue(MemberDefinition.FacultyId.Value);
+            await _mediator.Send(new AddStaffToFacultyCommand(
+                MemberDefinition.StaffId,
+                facultyId,
+                MemberDefinition.Role));
+        }
+        
         return RedirectToPage("Details", new { FacultyId = MemberDefinition.FacultyId });
     }
 }

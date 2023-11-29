@@ -1,0 +1,90 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.Partner.Pages.Staff.IndexModel
+
+@using Constellation.Presentation.Server.Areas.Partner.Pages.Staff;
+@inject IAuthorizationService authService;
+
+@{
+    AuthorizationResult canManageStaff = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStaff);
+}
+
+<h2>Staff List</h2>
+
+<div class="page-menu">
+    @{
+        var all_style = "btn-outline-secondary";
+        var active_style = all_style;
+        var inactive_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case IndexModel.FilterDto.All:
+                all_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Active:
+                active_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Inactive:
+                inactive_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Active" class="btn @active_style">Active</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Inactive" class="btn @inactive_style">Inactive</a>
+    </div>
+
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">From Faculty <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            @{
+                foreach (var faculty in Model.FacultyList.OrderBy(faculty => faculty.Value))
+                {
+                    <a asp-page="Index" asp-route-faculty="@faculty.Key" class="dropdown-item">@faculty.Value</a>
+                }
+            }
+        </div>
+    </div>
+
+    @if (canManageStaff.Succeeded)
+    {
+        <div class="btn-group new-group" role="group">
+            <a asp-action="Create" asp-controller="Staff" asp-area="Partner" class="btn btn-info">Create New</a>
+        </div>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th>Staff Id</th>
+            <th>Name</th>
+            <th>Faculty</th>
+            <th>School</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Staff)
+        {
+            <tr>
+                <td>@item.StaffId</td>
+                <td>@item.Name.DisplayName</td>
+                <td>
+                    @foreach (var entry in item.Faculties)
+                    {
+                        <span class="badge" style="background-color: @entry.Colour; color: white">@entry.Name</span>
+                    }
+                </td>
+                <td>@item.School</td>
+                <td>
+                    <a asp-action="Details" asp-controller="Staff" asp-area="Partner" asp-route-id="@item.StaffId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

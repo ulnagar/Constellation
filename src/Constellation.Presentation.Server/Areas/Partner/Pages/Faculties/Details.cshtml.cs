@@ -1,10 +1,11 @@
 namespace Constellation.Presentation.Server.Areas.Partner.Pages.Faculties;
 
-using Constellation.Application.Features.Faculties.Models;
-using Constellation.Application.Features.Faculties.Queries;
-using Constellation.Application.Features.StaffMembers.Commands;
+using Application.Faculties.GetFacultyDetails;
+using Application.StaffMembers.RemoveStaffFromFaculty;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Models.Faculty.Identifiers;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,21 +23,26 @@ public class DetailsModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public Guid FacultyId { get; set; }
 
-    public FacultyDetailsDto Faculty { get; set; }
+    public FacultyDetailsResponse Faculty { get; set; }
 
     public async Task OnGet()
     {
         await GetClasses(_mediator);
 
-        Faculty = await _mediator.Send(new GetFacultyDetailsQuery(FacultyId));
+        FacultyId facultyId = Core.Models.Faculty.Identifiers.FacultyId.FromValue(FacultyId);
+
+        Result<FacultyDetailsResponse> facultyRequest = await _mediator.Send(new GetFacultyDetailsQuery(facultyId));
+
+        if (facultyRequest.IsSuccess)
+            Faculty = facultyRequest.Value;
     }
 
-    public async Task<IActionResult> OnPostRemoveMember([FromQuery]Guid membershipId)
+    public async Task<IActionResult> OnPostRemoveMember([FromQuery]string staffId)
     {
-        await _mediator.Send(new RemoveFacultyMembershipFromStaffMemberCommand { MembershipId = membershipId });
+        FacultyId facultyId = Core.Models.Faculty.Identifiers.FacultyId.FromValue(FacultyId);
 
-        await GetClasses(_mediator);
-        Faculty = await _mediator.Send(new GetFacultyDetailsQuery(FacultyId));
-        return Page();
+        await _mediator.Send(new RemoveStaffFromFacultyCommand(staffId, facultyId));
+
+        return RedirectToPage();
     }
 }

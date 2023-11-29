@@ -76,6 +76,9 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanManageCompliance, policy =>
             policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.SchoolAdmin.Compliance.Manage));
 
+        options.AddPolicy(AuthPolicies.CanEditStaff, policy =>
+            policy.RequireRole(AuthRoles.Editor, AuthRoles.Admin));
+
         return options;
     }
 }

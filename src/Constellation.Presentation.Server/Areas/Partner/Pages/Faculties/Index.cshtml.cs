@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Server.Areas.Partner.Pages.Faculties;
 
-using Constellation.Application.Features.Faculties.Models;
-using Constellation.Application.Features.Faculties.Queries;
+using Application.Faculties.GetFacultiesSummary;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 
@@ -17,12 +17,25 @@ public class IndexModel : BasePageModel
         _mediator = mediator;
     }
 
-    public List<FacultySummaryDto> Faculties { get; set; } = new();
+    public List<FacultySummaryResponse> Faculties { get; set; } = new();
 
     public async Task OnGet()
     {
         await GetClasses(_mediator);
 
-        Faculties = await _mediator.Send(new GetListOfFacultySummaryQuery());
+        Result<List<FacultySummaryResponse>> faculties = await _mediator.Send(new GetFacultiesSummaryQuery());
+
+        if (faculties.IsFailure)
+        {
+            Error = new()
+            {
+                Error = faculties.Error,
+                RedirectPath = null
+            };
+
+            return;
+        }
+
+        Faculties = faculties.Value;
     }
 }

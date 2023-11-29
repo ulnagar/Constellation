@@ -1,12 +1,10 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Enrolments.GetStudentEnrolmentsWithDetails;
 using Constellation.Application.Features.API.Schools.Queries;
-using Constellation.Application.Features.Faculties.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
-using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -14,12 +12,11 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 {
+    using Application.Faculties.GetFaculty;
+
     [Area("Partner")]
     [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class SchoolsController : BaseController
@@ -236,11 +233,11 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
                 foreach (var membership in member.Faculties.Where(membership => !membership.IsDeleted))
                 {
-                    var faculty = await _mediator.Send(new GetFacultyNameQuery(membership.FacultyId));
+                    var facultyRequest = await _mediator.Send(new GetFacultyQuery(membership.FacultyId));
 
-                    if (!string.IsNullOrWhiteSpace(faculty))
+                    if (facultyRequest.IsSuccess)
                     {
-                        faculties.Add(faculty);
+                        faculties.Add(facultyRequest.Value.Name);
                     }
                 }
 

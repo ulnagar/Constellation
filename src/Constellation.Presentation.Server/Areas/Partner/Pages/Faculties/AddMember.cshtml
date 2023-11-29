@@ -1,6 +1,5 @@
 ﻿@page
-@using Constellation.Core.Enums;
-@model AddMemberModel
+@model Constellation.Presentation.Server.Areas.Partner.Pages.Faculties.AddMemberModel
 
 <h2>Add Member to Faculty</h2>
 
@@ -35,7 +34,7 @@
         <div class="form-group row">
             <label asp-for="MemberDefinition.Role" class="col-md-2"></label>
             <div class="col-md-3">
-                <select asp-for="MemberDefinition.Role" asp-items="@Html.GetEnumSelectList<FacultyMembershipRole>()" class="form-control">
+                <select asp-for="MemberDefinition.Role" asp-items="@Model.FacultyRoles" class="form-control">
                     <option selected="selected" value=""> -- Please Select -- </option>
                 </select>
                 <span asp-validation-for="MemberDefinition.Role" class="text-danger"></span>

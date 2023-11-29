@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Presentation.Server.Helpers.TagHelpers;
 
-using Constellation.Application.Features.Faculties.Models;
+using Application.Faculties.GetFacultiesSummary;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 public class FacultyLabelTagHelper : TagHelper
 {
-    public FacultySummaryDto Faculty { get; set; }
+    public FacultySummaryResponse Faculty { get; set; }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
