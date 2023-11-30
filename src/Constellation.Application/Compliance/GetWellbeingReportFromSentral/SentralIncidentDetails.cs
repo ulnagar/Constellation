@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.DTOs;
+﻿namespace Constellation.Application.Compliance.GetWellbeingReportFromSentral;
 
 using Core.Enums;
 using System;

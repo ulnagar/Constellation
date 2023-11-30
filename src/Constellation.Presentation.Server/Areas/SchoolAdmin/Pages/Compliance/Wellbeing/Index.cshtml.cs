@@ -1,8 +1,9 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Compliance.Wellbeing;
 
+using Application.Compliance.ExportWellbeingReport;
 using Application.Compliance.GetWellbeingReportFromSentral;
+using Application.DTOs;
 using Application.Models.Auth;
-using Constellation.Application.DTOs;
 using Constellation.Presentation.Server.BaseModels;
 using Core.Shared;
 using MediatR;
@@ -26,7 +27,7 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet() => await GetClasses(_mediator);
 
-    public async Task OnPost()
+    public async Task OnGetUpdate()
     {
         Result<List<SentralIncidentDetails>> request = await _mediator.Send(new GetWellbeingReportFromSentralQuery());
 
@@ -42,5 +43,36 @@ public class IndexModel : BasePageModel
         }
 
         Data = request.Value;
+    }
+
+    public async Task<IActionResult> OnGetExport()
+    {
+        Result<List<SentralIncidentDetails>> dataRequest = await _mediator.Send(new GetWellbeingReportFromSentralQuery());
+
+        if (dataRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = dataRequest.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        Result<FileDto> fileRequest = await _mediator.Send(new ExportWellbeingReportCommand(dataRequest.Value));
+
+        if (fileRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = fileRequest.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
     }
 }

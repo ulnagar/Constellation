@@ -2,6 +2,7 @@
 
 using Application.Attendance.GenerateAttendanceReportForPeriod;
 using Application.Attendance.GetAttendanceDataFromSentral;
+using Application.Compliance.GetWellbeingReportFromSentral;
 using Application.Extensions;
 using Application.Rollover.ImportStudents;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
@@ -21,6 +22,7 @@ using Core.Abstractions.Clock;
 using Core.Extensions;
 using ExcelDataReader;
 using OfficeOpenXml;
+using OfficeOpenXml.ConditionalFormatting.Contracts;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Style;
@@ -1082,6 +1084,72 @@ public class ExcelService : IExcelService
         return results;
     }
 
+    public async Task<MemoryStream> CreateWellbeingExportFile(
+        List<SentralIncidentDetails> records,
+        CancellationToken cancellationToken = default)
+    {
+        List<IncidentRow> rows = records
+            .Select(entry =>
+                new IncidentRow()
+                {
+                    Age = entry.Severity,
+                    Date = entry.DateCreated,
+                    Subject = entry.Subject,
+                    Type = entry.Type,
+                    Teacher = entry.Teacher,
+                    Surname = entry.StudentLastName,
+                    Name = entry.StudentFirstName,
+                    Year = entry.Grade.AsName()
+                })
+            .ToList();
+
+        ExcelPackage excel = new();
+
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Sheet 1");
+
+        ExcelRangeBase table = worksheet.Cells[1, 1].LoadFromCollection(rows, true);
+        worksheet.Cells[1, 1, 1, worksheet.Dimension.Columns].Style.Font.Bold = true;
+
+        ExcelRangeBase data = worksheet.Cells[2, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns];
+
+        worksheet.View.FreezePanes(2, 1);
+
+        table.AutoFilter = true;
+        table.AutoFitColumns();
+
+        IExcelConditionalFormattingExpression bandFourFormat = worksheet.ConditionalFormatting.AddExpression(data);
+        bandFourFormat.Formula = "=$A2 > 34";
+        bandFourFormat.Style.Fill.PatternType = ExcelFillStyle.Solid;
+        bandFourFormat.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(0, 196, 89, 17));
+        bandFourFormat.Style.Font.Color.SetColor(Color.White);
+        bandFourFormat.StopIfTrue = true;
+
+        IExcelConditionalFormattingExpression bandThreeFormat = worksheet.ConditionalFormatting.AddExpression(data);
+        bandThreeFormat.Formula = "=$A2 > 27";
+        bandThreeFormat.Style.Fill.PatternType = ExcelFillStyle.Solid;
+        bandThreeFormat.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(0, 244, 176, 131));
+        bandThreeFormat.StopIfTrue = true;
+
+        IExcelConditionalFormattingExpression bandTwoFormat = worksheet.ConditionalFormatting.AddExpression(data);
+        bandTwoFormat.Formula = "=$A2 > 20";
+        bandTwoFormat.Style.Fill.PatternType = ExcelFillStyle.Solid;
+        bandTwoFormat.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(0, 241, 202, 172));
+        bandTwoFormat.StopIfTrue = true;
+
+        IExcelConditionalFormattingExpression bandOneFormat = worksheet.ConditionalFormatting.AddExpression(data);
+        bandOneFormat.Formula = "=$A2 > 13";
+        bandOneFormat.Style.Fill.PatternType = ExcelFillStyle.Solid;
+        bandOneFormat.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(0, 251, 228, 213));
+        bandOneFormat.StopIfTrue = true;
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+
+        memoryStream.Position = 0;
+
+        return memoryStream;
+    }
+
     public async Task<MemoryStream> CreateStudentAttendanceReport(
         string periodLabel,
         List<AttendanceRecord> records,
@@ -1630,5 +1698,17 @@ public class ExcelService : IExcelService
         public int Level { get; set; }
         public int Value { get; set; }
         public int Total { get; set; }
+    }
+
+    private class IncidentRow
+    {
+        public int Age { get; set; }
+        public DateOnly Date { get; set; }
+        public string Subject { get; set; }
+        public string Type { get; set; }
+        public string Teacher { get; set; }
+        public string Surname { get; set; }
+        public string Name { get; set; }
+        public string Year { get; set; }
     }
 }

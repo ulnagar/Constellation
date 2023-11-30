@@ -55,7 +55,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
     {
         List<DateOnly> excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(request.StartDate.Year.ToString());
 
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         DateOnly startDate = request.StartDate.VerifyStartOfFortnight();
         DateOnly endDate = startDate.AddDays(12);

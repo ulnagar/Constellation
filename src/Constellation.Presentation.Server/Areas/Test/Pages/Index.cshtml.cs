@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Application.Attendance.GenerateAttendanceReportForPeriod;
-using Application.DTOs;
+using Application.Compliance.GetWellbeingReportFromSentral;
 using BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

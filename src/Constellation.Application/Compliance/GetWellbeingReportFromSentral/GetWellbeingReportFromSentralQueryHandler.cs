@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Compliance.GetWellbeingReportFromSentral;
 
 using Abstractions.Messaging;
-using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Services;
 using Core.Shared;
 using Interfaces.Gateways;
