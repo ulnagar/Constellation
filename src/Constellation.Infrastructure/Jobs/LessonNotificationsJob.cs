@@ -132,6 +132,13 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
             // who are the school contacts to send the emails to?
             List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(school.Code, cancellationToken);
 
+            Result<EmailRecipient> schoolResult = EmailRecipient.Create(school.Name, school.EmailAddress);
+            if (!schoolResult.IsSuccess)
+            {
+                _logger.Log(LogSeverity.Error, $"Could not find School Email for {school.Name}");
+                continue;
+            }
+
             List<EmailRecipient> sptRecipients = new();
             List<EmailRecipient> accRecipients = new();
             List<EmailRecipient> principalRecipients = new();
@@ -144,6 +151,9 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
                     sptRecipients.Add(result.Value);
             }
 
+            if (!sptRecipients.Any())
+                sptRecipients.Add(schoolResult.Value);
+
             foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == SchoolContactRole.Coordinator && !role.IsDeleted)))
             {
                 Result<EmailRecipient> result = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
@@ -151,6 +161,9 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
                 if (result.IsSuccess && accRecipients.All(entry => entry.Email != result.Value.Email))
                     accRecipients.Add(result.Value);
             }
+
+            if (!accRecipients.Any())
+                accRecipients.Add(schoolResult.Value);
 
             foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == SchoolContactRole.Principal && !role.IsDeleted)))
             {
@@ -160,9 +173,8 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
                     principalRecipients.Add(result.Value);
             }
 
-            Result<EmailRecipient> schoolResult = EmailRecipient.Create(school.Name, school.EmailAddress);
-            if (!schoolResult.IsSuccess)
-                continue;
+            if (!principalRecipients.Any())
+                principalRecipients.Add(schoolResult.Value);
             
             // Break these down into the outstanding time
             // Eg 1. first email after due date (SPT & ACC)
@@ -170,24 +182,24 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
             // 3. third email a week after second (SPT, ACC, & SCHOOL)
             // 4. fourth email a week after third (SPT, ACC, SCHOOL, & PRINCIPAL)
             // 5. remaining emails sent to SPC/HT (SPC & HT)
-            var firstWarning = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount == 0).ToList();
-            var secondWarning = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount == 1).ToList();
-            var thirdWarning = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount == 2).ToList();
-            var finalWarning = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount == 3).ToList();
-            var alert = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount >= 4).ToList();
+            List<LessonEmail.LessonItem> firstWarning = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount == 0).ToList();
+            List<LessonEmail.LessonItem> secondWarning = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount == 1).ToList();
+            List<LessonEmail.LessonItem> thirdWarning = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount == 2).ToList();
+            List<LessonEmail.LessonItem> finalWarning = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount == 3).ToList();
+            List<LessonEmail.LessonItem> alert = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount >= 4).ToList();
 
             _logger.Log(LogSeverity.Information, $"");
             _logger.Log(LogSeverity.Information, $"Emails for {school.Name} to be delivered to:");
 
-            foreach (var contact in sptRecipients)
+            foreach (EmailRecipient contact in sptRecipients)
                 _logger.Log(LogSeverity.Information, $" (SPT) {contact.Name} - {contact.Email}");
 
-            foreach (var contact in accRecipients)
+            foreach (EmailRecipient contact in accRecipients)
                 _logger.Log(LogSeverity.Information, $" (ACC) {contact.Name} - {contact.Email}");
 
             _logger.Log(LogSeverity.Information, $" (SCH) {schoolResult.Value.Name} - {schoolResult.Value.Email}");
 
-            foreach (var contact in principalRecipients)
+            foreach (EmailRecipient contact in principalRecipients)
                 _logger.Log(LogSeverity.Information, $" (PRN) {contact.Name} - {contact.Email}");
 
             _logger.Log(LogSeverity.Information, $"");
@@ -340,7 +352,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
             await _unitOfWork.CompleteAsync(cancellationToken);
         }
 
-        var logNotification = new ServiceLogEmail
+        ServiceLogEmail logNotification = new()
         {
             Log = _logger.GetLogHistory(),
             Source = Assembly.GetEntryAssembly().GetName().Name,
