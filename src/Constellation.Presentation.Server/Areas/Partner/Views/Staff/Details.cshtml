@@ -138,10 +138,10 @@
                     @foreach (var item in Model.Faculties)
                     {
                         <tr>
-                            <td>@Html.DisplayFor(model => item.Name)</td>
-                            <td>@Html.DisplayFor(model => item.Role)</td>
+                            <td>@item.Name</td>
+                            <td>@item.Role</td>
                             <td>
-                                <a asp-area="Partner" asp-controller="Staff" asp-action="DeleteFacultyRole" asp-route-membershipId="@item.Id" class="btn btn-sm btn-warning btn-show-hover">Remove</a>
+                                <a asp-area="Partner" asp-controller="Staff" asp-action="DeleteFacultyRole" asp-route-staffId="@Model.Staff.StaffId" asp-route-faculty="@item.FacultyId.Value" class="btn btn-sm btn-warning btn-show-hover">Remove</a>
                             </td>
                         </tr>
                     }

@@ -43,6 +43,6 @@ public class DetailsModel : BasePageModel
 
         await _mediator.Send(new RemoveStaffFromFacultyCommand(staffId, facultyId));
 
-        return RedirectToPage();
+        return RedirectToPage("/Faculties/Details", routeValues: new { FacultyId, area = "Partner" });
     }
 }

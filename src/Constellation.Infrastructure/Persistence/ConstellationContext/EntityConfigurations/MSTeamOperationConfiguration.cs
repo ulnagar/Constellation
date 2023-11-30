@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations
 {
+    using Core.Models.Faculty.Identifiers;
+
     public class MSTeamOperationConfiguration : IEntityTypeConfiguration<MSTeamOperation>
     {
         public void Configure(EntityTypeBuilder<MSTeamOperation> builder)
@@ -57,7 +59,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
     {
         public void Configure(EntityTypeBuilder<GroupMSTeamOperation> builder)
         {
-            builder.HasOne(operation => operation.Faculty)
+            builder
+                .Property(operation => operation.FacultyId)
+                .HasConversion(
+                    id => id.Value,
+                    value => FacultyId.FromValue(value));
+
+            builder
+                .HasOne(operation => operation.Faculty)
                 .WithMany()
                 .HasForeignKey(operation => operation.FacultyId)
                 .OnDelete(DeleteBehavior.NoAction);

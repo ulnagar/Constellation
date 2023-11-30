@@ -8,6 +8,8 @@ using System;
 
 namespace Constellation.Core.Models
 {
+    using Faculty.Identifiers;
+
     public abstract class MSTeamOperation
     {
         public int Id { get; set; }
@@ -55,7 +57,7 @@ namespace Constellation.Core.Models
 
     public class GroupMSTeamOperation : OfferingMSTeamOperation
     {
-        public Guid FacultyId { get; set; }
+        public FacultyId FacultyId { get; set; }
         public Faculty.Faculty Faculty { get; set; }
     }
 

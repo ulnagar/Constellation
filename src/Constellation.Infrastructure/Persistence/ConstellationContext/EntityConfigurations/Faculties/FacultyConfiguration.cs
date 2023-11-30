@@ -5,7 +5,7 @@ using Core.Models.Faculty.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class FacultyConfiguration : IEntityTypeConfiguration<Faculty>
+internal sealed class FacultyConfiguration : IEntityTypeConfiguration<Faculty>
 {
     public void Configure(EntityTypeBuilder<Faculty> builder)
     {
@@ -25,6 +25,10 @@ public class FacultyConfiguration : IEntityTypeConfiguration<Faculty>
             .WithOne()
             .HasForeignKey(member => member.FacultyId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .Navigation(faculty => faculty.Members)
+            .AutoInclude();
 
     }
 }

@@ -1,13 +1,13 @@
-﻿using Constellation.Core.Models.Faculty;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Faculties;
+
+using Constellation.Core.Models.Faculty;
+using Core.Models;
+using Core.Models.Faculty.Identifiers;
+using Core.Models.Faculty.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Faculties;
-
-using Core.Models;
-using Core.Models.Faculty.Identifiers;
-
-public class FacultyMembershipConfiguration : IEntityTypeConfiguration<FacultyMembership>
+internal sealed class FacultyMembershipConfiguration : IEntityTypeConfiguration<FacultyMembership>
 {
     public void Configure(EntityTypeBuilder<FacultyMembership> builder)
     {
@@ -31,5 +31,11 @@ public class FacultyMembershipConfiguration : IEntityTypeConfiguration<FacultyMe
             .HasOne<Staff>()
             .WithMany(staff => staff.Faculties)
             .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .Property(member => member.Role)
+            .HasConversion(
+                entry => entry.Value,
+                value => FacultyMembershipRole.FromValue(value));
     }
 }

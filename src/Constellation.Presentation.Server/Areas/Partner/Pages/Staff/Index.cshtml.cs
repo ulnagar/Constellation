@@ -70,7 +70,7 @@ public class IndexModel : BasePageModel
             FilterDto.All => request.Value
         };
 
-        if (Faculty != Guid.NewGuid())
+        if (Faculty != Guid.Empty)
         {
             FacultyId facultyId = FacultyId.FromValue(Faculty);
 

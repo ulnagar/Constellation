@@ -32,7 +32,7 @@ public class AddMemberModel : BasePageModel
         [Required]
         public string StaffId { get; set; }
         [Required]
-        public FacultyMembershipRole Role { get; set; }
+        public string Role { get; set; }
     }
 
     [BindProperty(SupportsGet = true)]
@@ -71,11 +71,13 @@ public class AddMemberModel : BasePageModel
 
         if (MemberDefinition.FacultyId.HasValue)
         {
+            FacultyMembershipRole role = FacultyMembershipRole.FromValue(MemberDefinition.Role);
+
             FacultyId facultyId = Core.Models.Faculty.Identifiers.FacultyId.FromValue(MemberDefinition.FacultyId.Value);
             await _mediator.Send(new AddStaffToFacultyCommand(
                 MemberDefinition.StaffId,
                 facultyId,
-                MemberDefinition.Role));
+                role));
         }
         
         return RedirectToPage("Details", new { FacultyId = MemberDefinition.FacultyId });

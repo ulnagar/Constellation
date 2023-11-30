@@ -7,6 +7,8 @@ using ValueObjects;
 
 public sealed class FacultyMembership : IAuditableEntity
 {
+    private FacultyMembership() {}
+
     private FacultyMembership(
         string staffId,
         FacultyId facultyId,

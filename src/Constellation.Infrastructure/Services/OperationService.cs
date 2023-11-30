@@ -293,7 +293,7 @@ public class OperationService : IOperationService, IScopedService
         // Create Operation
         var operation = new GroupMSTeamOperation
         {
-            FacultyId = course.FacultyId.Value,
+            FacultyId = course.FacultyId,
             OfferingId = offering.Id,
             Offering = offering,
             Action = MSTeamOperationAction.Add,

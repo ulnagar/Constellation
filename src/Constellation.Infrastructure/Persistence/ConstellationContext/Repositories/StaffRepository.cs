@@ -38,6 +38,7 @@ public class StaffRepository : IStaffRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Staff>()
+            .Include(member => member.Faculties)
             .ToListAsync(cancellationToken);
 
     public async Task<Staff?> GetById(

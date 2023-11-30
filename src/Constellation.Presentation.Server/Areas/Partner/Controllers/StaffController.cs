@@ -15,6 +15,7 @@ using Constellation.Presentation.Server.Pages.Shared.Components.TeacherAddFacult
 using Core.Models.Faculty;
 using Core.Models.Faculty.Identifiers;
 using Core.Models.Faculty.Repositories;
+using Core.Models.Faculty.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -199,12 +200,15 @@ public class StaffController : BaseController
         viewModel.Sessions = sessionResponse;
         viewModel.SchoolStaff = staff.School.StaffAssignments.Where(role => !role.IsDeleted).Select(Staff_DetailsViewModel.ContactDto.ConvertFromRoleAssignment).ToList();
 
-        foreach (FacultyMembership membership in staff.Faculties.Where(membership => !membership.IsDeleted))
+        foreach (FacultyMembership membership in staff.Faculties)
         {
+            if (membership.IsDeleted) continue;
+
             Faculty faculty = await _facultyRepository.GetById(membership.FacultyId);
 
             Staff_DetailsViewModel.FacultyDto dto = new(
                 membership.Id,
+                faculty.Id,
                 faculty.Name,
                 membership.Role);
 
@@ -303,8 +307,10 @@ public class StaffController : BaseController
     }
 
     [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-    public async Task<IActionResult> DeleteFacultyRole(string staffId, FacultyId facultyId)
+    public async Task<IActionResult> DeleteFacultyRole(string staffId, Guid faculty)
     {
+        FacultyId facultyId = FacultyId.FromValue(faculty);
+
         await _mediator.Send(new RemoveStaffFromFacultyCommand(staffId, facultyId));
 
         return RedirectToPage("/Staff/Index", routeValues: new { area = "Partner" });
@@ -316,7 +322,10 @@ public class StaffController : BaseController
         if (!ModelState.IsValid)
             return RedirectToAction("Details", new { id = viewModel.StaffId });
 
-        await _mediator.Send(new AddStaffToFacultyCommand(viewModel.StaffId, viewModel.FacultyId, viewModel.Role));
+        FacultyMembershipRole role = FacultyMembershipRole.FromValue(viewModel.Role);
+        FacultyId facultyId = FacultyId.FromValue(viewModel.FacultyId);
+
+        await _mediator.Send(new AddStaffToFacultyCommand(viewModel.StaffId, facultyId, role));
 
         return RedirectToAction("Details", new { id = viewModel.StaffId });
     }

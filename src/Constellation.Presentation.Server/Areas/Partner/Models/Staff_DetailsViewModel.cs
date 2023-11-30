@@ -103,6 +103,7 @@ public class Staff_DetailsViewModel : BaseViewModel
 
     public sealed record FacultyDto(
         FacultyMembershipId Id,
+        FacultyId FacultyId,
         string Name,
         FacultyMembershipRole Role);
 }
