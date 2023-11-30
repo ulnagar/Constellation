@@ -141,6 +141,7 @@ public class StudentRepository : IStudentRepository
         var students = _context
             .Set<Student>()
             .Include(student => student.School)
+            .Include(student => student.Enrolments)
             .Where(student => !student.IsDeleted);
 
         if (OfferingIds.Count > 0)

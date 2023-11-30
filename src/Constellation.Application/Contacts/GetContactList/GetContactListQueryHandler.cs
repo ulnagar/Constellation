@@ -8,6 +8,14 @@ using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.Faculty;
+using Core.Models.Faculty.Repositories;
+using Core.Models.Faculty.ValueObjects;
+using Core.Models.Offerings;
+using Core.Models.Offerings.Identifiers;
+using Core.Models.Offerings.Repositories;
+using Core.Models.Offerings.ValueObjects;
+using Core.Models.Subjects;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -17,16 +25,28 @@ internal sealed class GetContactListQueryHandler
     : IQueryHandler<GetContactListQuery, List<ContactResponse>>
 {
     private readonly IStudentRepository _studentRepository;
+    private readonly IOfferingRepository _offeringRepository;
+    private readonly ICourseRepository _courseRepository;
+    private readonly IFacultyRepository _facultyRepository;
     private readonly IFamilyRepository _familyRepository;
+    private readonly IStaffRepository _staffRepository;
     private readonly ISchoolContactRepository _contactRepository;
 
     public GetContactListQueryHandler(
         IStudentRepository studentRepository,
+        IOfferingRepository offeringRepository,
+        ICourseRepository courseRepository,
+        IFacultyRepository facultyRepository,
         IFamilyRepository familyRepository,
+        IStaffRepository staffRepository,
         ISchoolContactRepository contactRepository)
     {
         _studentRepository = studentRepository;
+        _offeringRepository = offeringRepository;
+        _courseRepository = courseRepository;
+        _facultyRepository = facultyRepository;
         _familyRepository = familyRepository;
+        _staffRepository = staffRepository;
         _contactRepository = contactRepository;
     }
 
@@ -40,6 +60,18 @@ internal sealed class GetContactListQueryHandler
                 request.Grades,
                 request.SchoolCodes,
                 cancellationToken);
+
+        List<Offering> offerings = await _offeringRepository
+            .GetAll(cancellationToken);
+
+        List<Staff> staffMembers = await _staffRepository
+            .GetAll(cancellationToken);
+
+        List<Faculty> faculties = await _facultyRepository
+            .GetAll(cancellationToken);
+
+        List<Course> courses = await _courseRepository
+            .GetAll(cancellationToken);
 
         foreach (var student in students)
         {
@@ -116,16 +148,16 @@ internal sealed class GetContactListQueryHandler
                 }
             }
 
-            var families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
+            List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
 
             foreach (var family in families)
             {
-                var familyEmail = EmailAddress.Create(family.FamilyEmail);
+                Result<EmailAddress> familyEmail = EmailAddress.Create(family.FamilyEmail);
 
                 if (familyEmail.IsFailure) 
                     continue;
 
-                var isResidential = family.Students.Where(entry => entry.StudentId == student.StudentId).First().IsResidentialFamily;
+                bool isResidential = family.Students.First(entry => entry.StudentId == student.StudentId).IsResidentialFamily;
 
                 if (isResidential)
                 {
@@ -138,21 +170,21 @@ internal sealed class GetContactListQueryHandler
                         familyEmail.Value,
                         null));
 
-                    foreach (var parent in family.Parents)
+                    foreach (Parent parent in family.Parents)
                     {
-                        var parentName = Name.Create(parent.FirstName, null, parent.LastName);
+                        Result<Name> parentName = Name.Create(parent.FirstName, null, parent.LastName);
 
                         if (parentName.IsFailure)
                             continue;
 
-                        var parentEmail = EmailAddress.Create(parent.EmailAddress);
+                        Result<EmailAddress> parentEmail = EmailAddress.Create(parent.EmailAddress);
 
                         if (parentEmail.IsFailure)
                             continue;
 
-                        var parentPhone = PhoneNumber.Create(parent.MobileNumber);
+                        Result<PhoneNumber> parentPhone = PhoneNumber.Create(parent.MobileNumber);
 
-                        var category = parent.SentralLink switch
+                        ContactCategory category = parent.SentralLink switch
                         {
                             Parent.SentralReference.Father => ContactCategory.ResidentialFather,
                             Parent.SentralReference.Mother => ContactCategory.ResidentialMother,
@@ -203,6 +235,91 @@ internal sealed class GetContactListQueryHandler
                             parentEmail.Value,
                             parentPhone.IsSuccess ? parentPhone.Value : null));
                     }
+                }
+            }
+
+            List<OfferingId> offeringIds = student
+                .Enrolments
+                .Where(entry => !entry.IsDeleted)
+                .Select(entry => entry.OfferingId)
+                .ToList();
+
+            List<Offering> studentOfferings = offerings.Where(entry => offeringIds.Contains(entry.Id)).ToList();
+
+            foreach (Offering offering in studentOfferings)
+            {
+                List<string> staffIds = offering
+                    .Teachers
+                    .Where(teacher => 
+                        !teacher.IsDeleted && 
+                        teacher.Type == AssignmentType.ClassroomTeacher)
+                    .Select(entry => entry.StaffId)
+                    .ToList();
+
+                List<Staff> teachers = staffMembers.Where(entry => staffIds.Contains(entry.StaffId)).ToList();
+
+                foreach (Staff teacher in teachers)
+                {
+                    string teacherName = teacher.GetName().DisplayName;
+                    teacherName += $" ({offering.Name})";
+
+                    Result<EmailAddress> teacherEmail = EmailAddress.Create(teacher.EmailAddress);
+
+                    if (teacherEmail.IsFailure)
+                        continue;
+
+                    result.Add(new ContactResponse(
+                        student.StudentId,
+                        studentName.Value,
+                        student.CurrentGrade,
+                        ContactCategory.AuroraTeacher,
+                        teacherName,
+                        teacherEmail.Value,
+                        null));
+                }
+
+                Course course = courses.First(entry => entry.Id == offering.CourseId);
+
+                Faculty faculty = faculties.First(entry => entry.Id == course.FacultyId);
+
+                List<string> headTeacherIds = faculty
+                    .Members
+                    .Where(member => 
+                        !member.IsDeleted && 
+                        member.Role == FacultyMembershipRole.Manager)
+                    .Select(member => member.StaffId)
+                    .ToList();
+
+                teachers = staffMembers
+                    .Where(entry => headTeacherIds.Contains(entry.StaffId))
+                    .ToList();
+
+                foreach (Staff headTeacher in teachers)
+                {
+                    string teacherName = headTeacher.GetName().DisplayName;
+                    teacherName += $" ({faculty.Name})";
+
+                    Result<EmailAddress> teacherEmail = EmailAddress.Create(headTeacher.EmailAddress);
+
+                    if (teacherEmail.IsFailure)
+                        continue;
+
+                    bool existingEntry = result.Any(entry =>
+                        entry.Category.Equals(ContactCategory.AuroraHeadTeacher) &&
+                        entry.Contact == teacherName &&
+                        entry.StudentId == student.StudentId);
+
+                    if (existingEntry)
+                        continue;
+
+                    result.Add(new ContactResponse(
+                        student.StudentId,
+                        studentName.Value,
+                        student.CurrentGrade,
+                        ContactCategory.AuroraHeadTeacher,
+                        teacherName,
+                        teacherEmail.Value,
+                        null));
                 }
             }
         }

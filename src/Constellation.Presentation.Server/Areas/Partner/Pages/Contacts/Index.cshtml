@@ -94,6 +94,11 @@
                         {
                             <i class="fal fa-child" title="Student"></i>
                         }
+
+                        if (contact.Category.Value.Contains("Aurora."))
+                        {
+                            <i class="fal fa-chalkboard-teacher" title="Aurora College"></i>
+                        }
                     }
                 </td>
                 <td>@{
@@ -149,6 +154,16 @@
                         {
                             //<i class="fal fa-restroom" title="Other Staff"></i>
                             @:Other Staff
+                        }
+
+                        if (contact.Category.Value.Contains(".Teacher"))
+                        {
+                            @:Teacher
+                        }
+
+                        if (contact.Category.Value.Contains(".HeadTeacher"))
+                        {
+                            @:Head Teacher
                         }
                     }
                 </td>
@@ -342,6 +357,16 @@
                             <button id="categorySelect-@ContactCategory.PartnerSchoolACC.Value" type="button" class="btn btn-outline-info select-button" onClick="toggleCategory('@ContactCategory.PartnerSchoolACC.Value')">@ContactCategory.PartnerSchoolACC.Name</button>
                             <button id="categorySelect-@ContactCategory.PartnerSchoolSPT.Value" type="button" class="btn btn-outline-info select-button" onClick="toggleCategory('@ContactCategory.PartnerSchoolSPT.Value')">@ContactCategory.PartnerSchoolSPT.Name</button>
                             <button id="categorySelect-@ContactCategory.PartnerSchoolOtherStaff.Value" type="button" class="btn btn-outline-info select-button" onClick="toggleCategory('@ContactCategory.PartnerSchoolOtherStaff.Value')">@ContactCategory.PartnerSchoolOtherStaff.Name</button>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h5>Aurora College</h5>
+                        </div>
+                        <div class="col">
+                            <button id="categorySelect-@ContactCategory.AuroraTeacher.Value" type="button" class="btn btn-outline-info select-button" onClick="toggleCategory('@ContactCategory.AuroraTeacher.Value')">@ContactCategory.AuroraTeacher.Name</button>
+                            <button id="categorySelect-@ContactCategory.AuroraHeadTeacher.Value" type="button" class="btn btn-outline-info select-button" onClick="toggleCategory('@ContactCategory.AuroraHeadTeacher.Value')">@ContactCategory.AuroraHeadTeacher.Name</button>
                         </div>
                     </div>
                 </div>

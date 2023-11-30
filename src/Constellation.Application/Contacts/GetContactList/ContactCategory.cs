@@ -19,6 +19,9 @@ public class ContactCategory : StringEnumeration<ContactCategory>
     public static readonly ContactCategory PartnerSchoolSPT = new("PartnerSchool.SciencePracticalTeacher", "Partner School SPT");
     public static readonly ContactCategory PartnerSchoolOtherStaff = new("PartnerSchool.OtherStaff", "Partner School Staff");
 
+    public static readonly ContactCategory AuroraTeacher = new("Aurora.Staff.Teacher", "Class Teacher");
+    public static readonly ContactCategory AuroraHeadTeacher = new("Aurora.Staff.HeadTeacher", "Head Teacher");
+
     private ContactCategory(string value, string name) 
         : base(value, name)
     {

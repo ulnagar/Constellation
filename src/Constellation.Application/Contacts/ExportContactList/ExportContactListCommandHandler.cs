@@ -7,10 +7,18 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Faculty.ValueObjects;
 using Constellation.Core.Models.Families;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.Faculty;
+using Core.Models.Faculty.Repositories;
+using Core.Models.Offerings;
+using Core.Models.Offerings.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -22,17 +30,29 @@ internal sealed class ExportContactListCommandHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IFamilyRepository _familyRepository;
     private readonly ISchoolContactRepository _contactRepository;
+    private readonly IOfferingRepository _offeringRepository;
+    private readonly IStaffRepository _staffRepository;
+    private readonly IFacultyRepository _facultyRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly IExcelService _excelService;
 
     public ExportContactListCommandHandler(
         IStudentRepository studentRepository,
         IFamilyRepository familyRepository,
         ISchoolContactRepository contactRepository,
+        IOfferingRepository offeringRepository,
+        IStaffRepository staffRepository,
+        IFacultyRepository facultyRepository,
+        ICourseRepository courseRepository,
         IExcelService excelService)
     {
         _studentRepository = studentRepository;
         _familyRepository = familyRepository;
         _contactRepository = contactRepository;
+        _offeringRepository = offeringRepository;
+        _staffRepository = staffRepository;
+        _facultyRepository = facultyRepository;
+        _courseRepository = courseRepository;
         _excelService = excelService;
     }
 
@@ -46,6 +66,18 @@ internal sealed class ExportContactListCommandHandler
                 request.Grades,
                 request.SchoolCodes,
                 cancellationToken);
+
+        List<Offering> offerings = await _offeringRepository
+            .GetAll(cancellationToken);
+
+        List<Staff> staffMembers = await _staffRepository
+            .GetAll(cancellationToken);
+
+        List<Faculty> faculties = await _facultyRepository
+            .GetAll(cancellationToken);
+
+        List<Course> courses = await _courseRepository
+            .GetAll(cancellationToken);
 
         foreach (var student in students)
         {
@@ -209,6 +241,91 @@ internal sealed class ExportContactListCommandHandler
                             parentEmail.Value,
                             parentPhone.IsSuccess ? parentPhone.Value : null));
                     }
+                }
+            }
+
+            List<OfferingId> offeringIds = student
+                .Enrolments
+                .Where(entry => !entry.IsDeleted)
+                .Select(entry => entry.OfferingId)
+                .ToList();
+
+            List<Offering> studentOfferings = offerings.Where(entry => offeringIds.Contains(entry.Id)).ToList();
+
+            foreach (Offering offering in studentOfferings)
+            {
+                List<string> staffIds = offering
+                    .Teachers
+                    .Where(teacher =>
+                        !teacher.IsDeleted &&
+                        teacher.Type == AssignmentType.ClassroomTeacher)
+                    .Select(entry => entry.StaffId)
+                    .ToList();
+
+                List<Staff> teachers = staffMembers.Where(entry => staffIds.Contains(entry.StaffId)).ToList();
+
+                foreach (Staff teacher in teachers)
+                {
+                    string teacherName = teacher.GetName().DisplayName;
+                    teacherName += $" ({offering.Name})";
+
+                    Result<EmailAddress> teacherEmail = EmailAddress.Create(teacher.EmailAddress);
+
+                    if (teacherEmail.IsFailure)
+                        continue;
+
+                    result.Add(new ContactResponse(
+                        student.StudentId,
+                        studentName.Value,
+                        student.CurrentGrade,
+                        ContactCategory.AuroraTeacher,
+                        teacherName,
+                        teacherEmail.Value,
+                        null));
+                }
+
+                Course course = courses.First(entry => entry.Id == offering.CourseId);
+
+                Faculty faculty = faculties.First(entry => entry.Id == course.FacultyId);
+
+                List<string> headTeacherIds = faculty
+                    .Members
+                    .Where(member =>
+                        !member.IsDeleted &&
+                        member.Role == FacultyMembershipRole.Manager)
+                    .Select(member => member.StaffId)
+                    .ToList();
+
+                teachers = staffMembers
+                    .Where(entry => headTeacherIds.Contains(entry.StaffId))
+                    .ToList();
+
+                foreach (Staff headTeacher in teachers)
+                {
+                    string teacherName = headTeacher.GetName().DisplayName;
+                    teacherName += $" ({faculty.Name})";
+
+                    Result<EmailAddress> teacherEmail = EmailAddress.Create(headTeacher.EmailAddress);
+
+                    if (teacherEmail.IsFailure)
+                        continue;
+
+                    bool existingEntry = result.Any(entry =>
+                        entry.Category.Equals(ContactCategory.AuroraHeadTeacher) &&
+                        entry.Contact == teacherName &&
+                        entry.StudentId == student.StudentId);
+
+                    if (existingEntry)
+                        continue;
+
+                    result.Add(new ContactResponse(
+                        student.StudentId,
+                        studentName.Value,
+                        student.CurrentGrade,
+                        ContactCategory.AuroraHeadTeacher,
+                        teacherName,
+                        teacherEmail.Value,
+                        null));
                 }
             }
         }
