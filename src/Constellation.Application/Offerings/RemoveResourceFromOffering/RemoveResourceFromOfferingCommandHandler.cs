@@ -40,7 +40,7 @@ internal sealed class RemoveResourceFromOfferingCommandHandler
 
         Result<Resource> action = offering.RemoveResource(request.ResourceId);
 
-        if (action.IsSuccess)
+        if (action.IsFailure)
         {
             _logger.Warning(action.Error.Message);
 
