@@ -171,17 +171,26 @@
                 email += '; ' + value.replace(/<.*?>/ig, "");
             });
 
-            var arr =  $.unique(email.split(';'));
+            var arr = email.split(';');
+            arr = arr.filter((item, index) => arr.indexOf(item) === index);
             email = arr.join(";");
 
-            var dummy = document.createElement("textarea");
-            document.body.appendChild(dummy);
-            dummy.textContent = email;
-            dummy.select();
-            document.execCommand("copy");
-            document.body.removeChild(dummy);
+            if (email.length > 2048) {
+                console.log("This string is too long!");
 
-            alert('The email addresses of all contacts in the table displayed below have been copied to your clipboard. Please paste (with Ctrl+V) into your email client now.');
+                var dummy = document.createElement("textarea");
+                document.body.appendChild(dummy);
+                dummy.textContent = email;
+                dummy.select();
+                document.execCommand("copy");
+                document.body.removeChild(dummy);
+
+                var dummyModal = $(makeModal('<p>The email addresses of all contacts in the table displayed below have been copied to your clipboard.</p><p>Please paste (with Ctrl+V) into your email client <strong>BCC field</strong> now.</p>'));
+                dummyModal.modal('show');
+            }
+            else {
+                window.location = 'mailto:?bcc=' + email;
+            }
         }
 
         $('#custom-search-toggle').click(function() {
