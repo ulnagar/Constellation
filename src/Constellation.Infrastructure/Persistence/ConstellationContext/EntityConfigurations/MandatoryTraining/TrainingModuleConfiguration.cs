@@ -1,7 +1,7 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.MandatoryTraining;
 
-using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.MandatoryTraining.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -27,7 +27,17 @@ internal sealed class TrainingModuleConfiguration : IEntityTypeConfiguration<Tra
             .OnDelete(DeleteBehavior.ClientCascade);
 
         builder
+            .HasMany(module => module.Roles)
+            .WithOne(role => role.Module)
+            .HasForeignKey(role => role.ModuleId)
+            .OnDelete(DeleteBehavior.ClientCascade);
+
+        builder
             .Navigation(module => module.Completions)
+            .AutoInclude();
+
+        builder
+            .Navigation(module => module.Roles)
             .AutoInclude();
     }
 }

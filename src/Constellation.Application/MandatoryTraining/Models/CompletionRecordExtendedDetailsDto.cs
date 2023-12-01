@@ -2,11 +2,11 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Faculty;
-using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.MandatoryTraining.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.Faculty;
 using System;
 using System.Collections.Generic;
 using System.Linq;

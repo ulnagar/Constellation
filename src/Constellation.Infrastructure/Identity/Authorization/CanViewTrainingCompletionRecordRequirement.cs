@@ -2,7 +2,7 @@
 
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.MandatoryTraining.Identifiers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;

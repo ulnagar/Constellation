@@ -4,12 +4,12 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
 using Core.Models.Attachments;
 using Core.Models.Attachments.Services;
+using Core.Models.MandatoryTraining.Errors;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -49,10 +49,10 @@ internal sealed class UpdateTrainingCompletionCommandHandler
         {
             _logger
                 .ForContext(nameof(UpdateTrainingCompletionCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.MandatoryTraining.Module.NotFound(request.TrainingModuleId), true)
+                .ForContext(nameof(Error), TrainingErrors.Module.NotFound(request.TrainingModuleId), true)
                 .Warning("Failed to update Training Completion record");
 
-            return Result.Failure(DomainErrors.MandatoryTraining.Module.NotFound(request.TrainingModuleId));
+            return Result.Failure(TrainingErrors.Module.NotFound(request.TrainingModuleId));
         }
 
         TrainingCompletion record = module.Completions.FirstOrDefault(record => record.Id == request.CompletionId);
@@ -61,10 +61,10 @@ internal sealed class UpdateTrainingCompletionCommandHandler
         {
             _logger
                 .ForContext(nameof(UpdateTrainingCompletionCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.MandatoryTraining.Completion.NotFound(request.CompletionId), true)
+                .ForContext(nameof(Error), TrainingErrors.Completion.NotFound(request.CompletionId), true)
                 .Warning("Failed to update Training Completion record");
 
-            return Result.Failure(DomainErrors.MandatoryTraining.Completion.NotFound(request.CompletionId));
+            return Result.Failure(TrainingErrors.Completion.NotFound(request.CompletionId));
         }
 
         if (!string.IsNullOrWhiteSpace(request.StaffId))

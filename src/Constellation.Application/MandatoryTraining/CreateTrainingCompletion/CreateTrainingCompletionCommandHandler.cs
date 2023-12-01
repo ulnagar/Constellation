@@ -4,12 +4,12 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
 using Core.Models.Attachments;
 using Core.Models.Attachments.Services;
+using Core.Models.MandatoryTraining.Errors;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,10 +49,10 @@ internal sealed class CreateTrainingCompletionCommandHandler
         {
             _logger
                 .ForContext(nameof(CreateTrainingCompletionCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.MandatoryTraining.Module.NotFound(request.TrainingModuleId), true)
+                .ForContext(nameof(Error), TrainingErrors.Module.NotFound(request.TrainingModuleId), true)
                 .Warning("Failed to create Training Completion");
 
-            return Result.Failure(DomainErrors.MandatoryTraining.Module.NotFound(request.TrainingModuleId));
+            return Result.Failure(TrainingErrors.Module.NotFound(request.TrainingModuleId));
         }
 
         // Check that another record does not already exist for this user, module, and date.
@@ -71,10 +71,10 @@ internal sealed class CreateTrainingCompletionCommandHandler
         {
             _logger
                 .ForContext(nameof(CreateTrainingCompletionCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.MandatoryTraining.Module.NotFound(request.TrainingModuleId), true)
+                .ForContext(nameof(Error), TrainingErrors.Module.NotFound(request.TrainingModuleId), true)
                 .Warning("Failed to create Training Completion");
 
-            return Result.Failure(DomainErrors.MandatoryTraining.Completion.AlreadyExists);
+            return Result.Failure(TrainingErrors.Completion.AlreadyExists);
         }
 
         TrainingCompletion recordEntity = TrainingCompletion.Create(

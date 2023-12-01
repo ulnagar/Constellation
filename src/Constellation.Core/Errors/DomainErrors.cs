@@ -2,6 +2,7 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.MandatoryTraining.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using System;
@@ -296,30 +297,7 @@ public static class DomainErrors
 
     public static class MandatoryTraining
     {
-        public static class Completion
-        {
-            public static readonly Error AlreadyExists = new(
-                "MandatoryTraining.Completion.AlreadyExists",
-                "A completion record with these details already exists");
 
-            public static readonly Func<TrainingCompletionId, Error> NotFound = id => new(
-                "MandatoryTraining.Completion.NotFound",
-                $"A training completion record with the Id {id.Value} could not be found");
-        }
-
-        public static class Import
-        {
-            public static readonly Error NoDataFound = new(
-                "MandatoryTraining.Import.NoDataFound",
-                "Could not find any data in the import file");
-        }
-
-        public static class Module
-        {
-            public static readonly Func<TrainingModuleId, Error> NotFound = id => new Error(
-                "MandatoryTraining.Module.NotFound",
-                $"A training module with the Id {id.Value} could not be found");
-        }
     }
 
     public static class Partners

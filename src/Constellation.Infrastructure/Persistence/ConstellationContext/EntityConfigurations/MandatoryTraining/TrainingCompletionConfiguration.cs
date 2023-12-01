@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.MandatoryTraining;
 
 using Constellation.Core.Models;
-using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.MandatoryTraining.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -31,5 +31,9 @@ internal sealed class TrainingCompletionConfiguration : IEntityTypeConfiguration
             .HasOne(completion => completion.Module)
             .WithMany(module => module.Completions)
             .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .Navigation(completion => completion.Module)
+            .AutoInclude();
     }
 }

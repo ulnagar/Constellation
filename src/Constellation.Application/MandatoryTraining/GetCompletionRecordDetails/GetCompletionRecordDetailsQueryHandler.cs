@@ -11,8 +11,8 @@ using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
 using Core.Models.Faculty.Identifiers;
+using Core.Models.MandatoryTraining.Errors;
 using Serilog;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -46,7 +46,7 @@ internal sealed class GetCompletionRecordDetailsQueryHandler
         {
             _logger.Warning("Could not find Training Module with Id {id}", request.ModuleId);
 
-            return Result.Failure<CompletionRecordDto>(DomainErrors.MandatoryTraining.Module.NotFound(request.ModuleId));
+            return Result.Failure<CompletionRecordDto>(TrainingErrors.Module.NotFound(request.ModuleId));
         }
 
         TrainingCompletion record = module.Completions.FirstOrDefault(record => record.Id == request.CompletionId);
@@ -55,7 +55,7 @@ internal sealed class GetCompletionRecordDetailsQueryHandler
         {
             _logger.Warning("Could not find Training Completion with Id {completionId} in Module {moduleId}", request.CompletionId, request.ModuleId);
 
-            return Result.Failure<CompletionRecordDto>(DomainErrors.MandatoryTraining.Completion.NotFound(request.CompletionId));
+            return Result.Failure<CompletionRecordDto>(TrainingErrors.Completion.NotFound(request.CompletionId));
         }
 
         Staff staff = await _staffRepository.GetById(record.StaffId, cancellationToken);

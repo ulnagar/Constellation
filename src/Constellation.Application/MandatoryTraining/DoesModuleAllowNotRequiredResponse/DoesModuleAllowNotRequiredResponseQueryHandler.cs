@@ -2,8 +2,10 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
+using Constellation.Core.Models.MandatoryTraining.Errors;
 using Constellation.Core.Shared;
+using Core.Models.MandatoryTraining;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,13 +22,17 @@ internal sealed class DoesModuleAllowNotRequiredResponseQueryHandler
 
     public async Task<Result<bool>> Handle(DoesModuleAllowNotRequiredResponseQuery request, CancellationToken cancellationToken)
     {
-        var module = await _trainingModuleRepository.GetById(request.ModuleId);
+        TrainingModule module = await _trainingModuleRepository.GetById(request.ModuleId, cancellationToken);
         
         if (module is null)
         {
-            return Result.Failure<bool>(DomainErrors.MandatoryTraining.Module.NotFound(request.ModuleId));
+            return Result.Failure<bool>(TrainingErrors.Module.NotFound(request.ModuleId));
         }
 
-        return module.CanMarkNotRequired;
+        bool isRequired = module
+            .Roles
+            .Any(role => role.Role.Members.Any(member => member.StaffId == request.StaffId));
+
+        return !isRequired;
     }
 }

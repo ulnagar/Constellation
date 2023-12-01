@@ -8,7 +8,7 @@ using Constellation.Application.MandatoryTraining.RetireTrainingModule;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Errors;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.MandatoryTraining.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
