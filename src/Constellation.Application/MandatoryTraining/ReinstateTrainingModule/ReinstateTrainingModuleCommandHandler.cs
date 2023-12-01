@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
+using Core.Models.MandatoryTraining.Errors;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,7 +28,7 @@ internal sealed class ReinstateTrainingModuleCommandHandler
         var module = await _trainingModuleRepository.GetById(request.Id, cancellationToken);
 
         if (module is null)
-            return Result.Failure(DomainErrors.MandatoryTraining.Module.NotFound(request.Id));
+            return Result.Failure(TrainingErrors.Module.NotFound(request.Id));
 
         module.Reinstate();
 

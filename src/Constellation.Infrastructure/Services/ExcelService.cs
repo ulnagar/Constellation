@@ -20,6 +20,7 @@ using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Infrastructure.Jobs;
 using Core.Abstractions.Clock;
 using Core.Extensions;
+using Core.Models.MandatoryTraining.Identifiers;
 using ExcelDataReader;
 using OfficeOpenXml;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
@@ -418,8 +419,7 @@ public class ExcelService : IExcelService
                 new TrainingModuleId(),
                 workSheet.Cells[row, 1].GetCellValue<string>(),
                 (TrainingModuleExpiryFrequency)workSheet.Cells[row, 2].GetCellValue<int>(),
-                workSheet.Cells[row, 3].GetCellValue<string>(),
-                workSheet.Cells[row, 4].GetCellValue<bool>());
+                workSheet.Cells[row, 3].GetCellValue<string>());
 
             modules.Add(entry);
         }

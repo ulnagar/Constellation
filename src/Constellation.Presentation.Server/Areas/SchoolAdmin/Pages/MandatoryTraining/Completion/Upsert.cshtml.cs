@@ -10,7 +10,7 @@ using Constellation.Application.MandatoryTraining.GetUploadedTrainingCertificati
 using Constellation.Application.MandatoryTraining.UpdateTrainingCompletion;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.MandatoryTraining.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Validation;
 using Core.Models.Attachments;
@@ -254,7 +254,7 @@ public class UpsertModel : BasePageModel
         // Check if the Module allows not required if the not required has been selected.
         if (ModuleId is not null && NotRequired)
         {
-            var notRequiredRequest = await _mediator.Send(new DoesModuleAllowNotRequiredResponseQuery(TrainingModuleId.FromValue(ModuleId.Value)));
+            var notRequiredRequest = await _mediator.Send(new DoesModuleAllowNotRequiredResponseQuery(StaffId, TrainingModuleId.FromValue(ModuleId.Value)));
 
             if (notRequiredRequest.IsFailure || notRequiredRequest.Value == false)
             {

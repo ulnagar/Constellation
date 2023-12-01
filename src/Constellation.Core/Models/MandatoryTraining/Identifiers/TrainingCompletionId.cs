@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.Identifiers;
+﻿namespace Constellation.Core.Models.MandatoryTraining.Identifiers;
 
 using System;
 

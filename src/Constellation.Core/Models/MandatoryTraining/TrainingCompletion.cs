@@ -1,8 +1,9 @@
 ﻿namespace Constellation.Core.Models.MandatoryTraining;
 
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.MandatoryTraining.Identifiers;
 using Constellation.Core.Primitives;
 using System;
+using System.Linq;
 
 public class TrainingCompletion : IAuditableEntity
 {
@@ -47,10 +48,13 @@ public class TrainingCompletion : IAuditableEntity
     public void MarkNotRequired(TrainingModule module)
     {
         // Check that this is valid on the Module
-        bool canMarkNotRequired = module.CanMarkNotRequired;
+        bool isRequired = module
+            .Roles
+            .Any(role => role.Role.Members.Any(member => member.StaffId == StaffId));
+
         bool sameModule = module.Id == TrainingModuleId;
 
-        if (canMarkNotRequired && sameModule)
+        if (!isRequired && sameModule)
         {
             NotRequired = true;
             CompletedDate = null;

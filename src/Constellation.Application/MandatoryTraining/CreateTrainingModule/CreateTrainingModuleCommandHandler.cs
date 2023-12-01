@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Core.Models.MandatoryTraining.Identifiers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,8 +30,7 @@ internal sealed class CreateTrainingModuleCommandHandler
             new TrainingModuleId(),
             request.Name,
             request.Expiry,
-            request.Url,
-            request.CanMarkNotRequired);
+            request.Url);
 
         _trainingModuleRepository.Insert(entity);
         await _unitOfWork.CompleteAsync(cancellationToken);

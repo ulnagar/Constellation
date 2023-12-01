@@ -3,6 +3,7 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.MandatoryTraining;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,15 +20,14 @@ internal sealed class GetTrainingModuleEditContextQueryHandler
 
     public async Task<Result<ModuleEditContextDto>> Handle(GetTrainingModuleEditContextQuery request, CancellationToken cancellationToken)
     {
-        var module = await _trainingModuleRepository.GetById(request.Id, cancellationToken);
+        TrainingModule module = await _trainingModuleRepository.GetById(request.Id, cancellationToken);
 
         return new ModuleEditContextDto
         {
             Id = module.Id,
             Name = module.Name,
             Url = module.Url,
-            Expiry = module.Expiry,
-            CanMarkNotRequired = module.CanMarkNotRequired
+            Expiry = module.Expiry
         };
     }
 }

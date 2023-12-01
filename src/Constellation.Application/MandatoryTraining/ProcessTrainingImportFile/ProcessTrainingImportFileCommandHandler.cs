@@ -8,6 +8,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Core.Models.MandatoryTraining.Errors;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -38,7 +39,7 @@ internal sealed class ProcessTrainingImportFileCommandHandler
         List<TrainingModule> modules = _excelService.ImportMandatoryTrainingDataFromFile(request.Stream);
 
         if (modules is null || !modules.Any())
-            return Result.Failure(DomainErrors.MandatoryTraining.Import.NoDataFound);
+            return Result.Failure(TrainingErrors.Import.NoDataFound);
 
         foreach (TrainingModule module in modules)
         {

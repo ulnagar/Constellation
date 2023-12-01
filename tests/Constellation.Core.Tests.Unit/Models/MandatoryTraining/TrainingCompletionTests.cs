@@ -1,9 +1,8 @@
-﻿using Constellation.Core.Enums;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.MandatoryTraining;
-using System;
+﻿namespace Constellation.Core.Tests.Unit.Models.MandatoryTraining;
 
-namespace Constellation.Core.Tests.Unit.Models.MandatoryTraining;
+using Constellation.Core.Enums;
+using Constellation.Core.Models.MandatoryTraining;
+using Core.Models.MandatoryTraining.Identifiers;
 
 public class TrainingCompletionTests
 {
@@ -11,14 +10,20 @@ public class TrainingCompletionTests
     public void MarkNotRequired_DoesNothing_WhenModuleDoesNotAllowNotRequiredEntries()
     {
         // Arrange
-        var module = TrainingModule.Create(
+        TrainingRole role = TrainingRole.Create(
+            "Test Role");
+
+        role.AddMember("1");
+
+        TrainingModule? module = TrainingModule.Create(
             new TrainingModuleId(),
             "Test Module",
             TrainingModuleExpiryFrequency.OnceOff,
-            string.Empty,
-            false);
+            string.Empty);
 
-        var sut = TrainingCompletion.Create(
+        role.AddModule(module.Id);
+
+        TrainingCompletion? sut = TrainingCompletion.Create(
             "1",
             module.Id);
 
@@ -36,21 +41,23 @@ public class TrainingCompletionTests
     public void MarkNotRequired_ShouldUpdateEntity_WhenModuleAllowsNotRequiredEntries()
     {
         // Arrange
-        var module = TrainingModule.Create(
+        TrainingRole role = TrainingRole.Create(
+            "Test Role");
+
+        role.AddMember("1");
+
+        TrainingModule? module = TrainingModule.Create(
             new TrainingModuleId(),
             "Test Module",
             TrainingModuleExpiryFrequency.OnceOff,
-            string.Empty,
-            true);
+            string.Empty);
 
-        var sut = TrainingCompletion.Create(
+        TrainingCompletion? sut = TrainingCompletion.Create(
             "1",
             module.Id);
 
         sut.SetCompletedDate(DateTime.Today);
-
-        sut.SetCompletedDate(DateTime.Today);
-
+        
         // Act
         sut.MarkNotRequired(module);
 
@@ -63,14 +70,13 @@ public class TrainingCompletionTests
     public void SetCompletedDate_ShouldUpdateNotRequiredField_WhenSettingANewCompletionDate()
     {
         // Arrange
-        var module = TrainingModule.Create(
+        TrainingModule? module = TrainingModule.Create(
             new TrainingModuleId(),
             "Test Module",
             TrainingModuleExpiryFrequency.OnceOff,
-            string.Empty,
-            true);
+            string.Empty);
 
-        var sut = TrainingCompletion.Create(
+        TrainingCompletion? sut = TrainingCompletion.Create(
             "1",
             module.Id);
 

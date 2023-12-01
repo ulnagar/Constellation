@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.MandatoryTraining.Models;
 
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.MandatoryTraining.Identifiers;
 using Microsoft.VisualBasic;
 using System;
 

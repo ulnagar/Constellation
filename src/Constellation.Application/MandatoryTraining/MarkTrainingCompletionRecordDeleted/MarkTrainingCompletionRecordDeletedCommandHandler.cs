@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Core.Models.MandatoryTraining.Errors;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -36,7 +37,7 @@ internal sealed class MarkTrainingCompletionRecordDeletedCommandHandler
         {
             _logger.Warning("Could not find Training Module with Id {id}", request.ModuleId);
 
-            return Result.Failure(DomainErrors.MandatoryTraining.Module.NotFound(request.ModuleId));
+            return Result.Failure(TrainingErrors.Module.NotFound(request.ModuleId));
         }
 
         TrainingCompletion record = module.Completions.FirstOrDefault(record => record.Id == request.CompletionId);
@@ -45,7 +46,7 @@ internal sealed class MarkTrainingCompletionRecordDeletedCommandHandler
         {
             _logger.Warning("Could not find Training Completion with Id {id}", request.CompletionId);
 
-            return Result.Failure(DomainErrors.MandatoryTraining.Completion.NotFound(request.CompletionId));
+            return Result.Failure(TrainingErrors.Completion.NotFound(request.CompletionId));
         }
 
         record.Delete();

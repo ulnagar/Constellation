@@ -5,6 +5,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.MandatoryTraining;
 using Constellation.Core.Shared;
+using Core.Models.MandatoryTraining.Errors;
 using Serilog;
 using System;
 using System.Linq;
@@ -32,7 +33,7 @@ internal sealed class GetCompletionRecordEditContextQueryHandler
         if (module is null)
         {
             _logger.Warning("Could not find Training Module with Id {id}", request.ModuleId);
-            return Result.Failure<CompletionRecordEditContextDto>(DomainErrors.MandatoryTraining.Module.NotFound(request.ModuleId));
+            return Result.Failure<CompletionRecordEditContextDto>(TrainingErrors.Module.NotFound(request.ModuleId));
         }
 
         TrainingCompletion record = module.Completions.FirstOrDefault(record => record.Id == request.CompletionId);

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Abstractions.Repositories;
 
-using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.MandatoryTraining.Identifiers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

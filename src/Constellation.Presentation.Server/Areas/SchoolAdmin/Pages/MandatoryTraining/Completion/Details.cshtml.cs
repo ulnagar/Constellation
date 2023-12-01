@@ -5,7 +5,7 @@ using Constellation.Application.MandatoryTraining.GetUploadedTrainingCertificate
 using Constellation.Application.MandatoryTraining.MarkTrainingCompletionRecordDeleted;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.MandatoryTraining.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using Core.Models.Attachments.ValueObjects;

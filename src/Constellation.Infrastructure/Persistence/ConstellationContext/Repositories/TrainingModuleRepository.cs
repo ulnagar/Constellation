@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.MandatoryTraining.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 
