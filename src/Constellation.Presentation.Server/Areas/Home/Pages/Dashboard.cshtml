@@ -22,6 +22,10 @@
 
 <div class="text-center">
     <h2>Welcome, @Model.UserName</h2>
+    @if (Model.Message != string.Empty)
+    {
+        <h4>@Model.Message</h4>
+    }
 
 @*    <div class="alert alert-info text-left mt-3" role="alert">
         <h4 class="alert-heading">Stocktake</h4>

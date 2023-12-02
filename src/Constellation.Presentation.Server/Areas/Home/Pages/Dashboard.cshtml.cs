@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Server.Areas.Home.Pages;
 
+using Application.Affirmations;
 using Constellation.Application.MandatoryTraining.GetCountOfExpiringCertificatesForStaffMember;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.StaffMembers.GetStaffByEmail;
@@ -24,6 +25,8 @@ public class DashboardModel : BasePageModel
     public bool IsAdmin { get; set; }
     public string StaffId { get; set; }
 
+    public string Message { get; set; } = string.Empty;
+
     public int ExpiringTraining { get; set; } = 0;
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken = default)
@@ -39,8 +42,17 @@ public class DashboardModel : BasePageModel
 
         Result<StaffSelectionListResponse> teacherRequest = await _mediator.Send(new GetStaffByEmailQuery(username), cancellationToken);
 
-        if (teacherRequest.IsFailure) 
+        Result<string> messageRequest = await _mediator.Send(new GetAffirmationQuery(teacherRequest?.Value.StaffId));
+
+        if (messageRequest.IsSuccess)
+        {
+            Message = messageRequest.Value;
+        }
+
+        if (teacherRequest.IsFailure)
+        {
             return Page();
+        }
 
         StaffId = teacherRequest.Value.StaffId;
         UserName = $"{teacherRequest.Value.FirstName} {teacherRequest.Value.LastName}";
