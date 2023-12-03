@@ -46,6 +46,9 @@ internal sealed class GetLessonRollsForSchoolQueryHandler
             if (roll is null)
                 continue;
 
+            if (roll.Status == Core.Enums.LessonStatus.Cancelled)
+                continue;
+
             OfferingId offeringId = lesson.Offerings.First().OfferingId;
 
             Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
