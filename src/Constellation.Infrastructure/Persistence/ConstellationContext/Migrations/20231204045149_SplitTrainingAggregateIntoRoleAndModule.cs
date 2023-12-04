@@ -31,11 +31,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             migrationBuilder.DropForeignKey(
                 name: "FK_MandatoryTraining_RoleModules_MandatoryTraining_Roles_RoleId",
-                table: "MandatoryTraining_Roles");
+                table: "MandatoryTraining_RoleModules");
 
             migrationBuilder.DropForeignKey(
                 name: "FK_MandatoryTraining_RoleModules_MandatoryTraining_Modules_ModuleId",
-                table: "MandatoryTraining_Modules");
+                table: "MandatoryTraining_RoleModules");
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_MandatoryTraining_RoleModules",
@@ -91,12 +91,20 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 table: "Training_Roles_Roles",
                 column: "Id");
 
+            migrationBuilder.Sql(
+                @"DELETE FROM [dbo].[MandatoryTraining_Completions]
+                    WHERE [CompletedDate] is null");
+
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CompletedDate",
                 table: "MandatoryTraining_Completions",
                 type: "datetime2",
                 nullable: false,
-                defaultValue: new DateOnly(1900, 1, 1));
+                defaultValue: new DateTime(1900, 1, 1));
+
+            migrationBuilder.DropColumn(
+                name: "NotRequired",
+                table: "MandatoryTraining_Completions");
 
             migrationBuilder.RenameTable(
                 name: "MandatoryTraining_Completions",
