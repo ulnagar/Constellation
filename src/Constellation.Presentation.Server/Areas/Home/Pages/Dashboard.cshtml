@@ -22,10 +22,6 @@
 
 <div class="text-center">
     <h2>Welcome, @Model.UserName</h2>
-    @if (Model.Message != string.Empty)
-    {
-        <h4>@Model.Message</h4>
-    }
 
 @*    <div class="alert alert-info text-left mt-3" role="alert">
         <h4 class="alert-heading">Stocktake</h4>
@@ -53,5 +49,11 @@
 </div>
 
 <div class="main-content">
-    
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <div class="alert alert-success">
+            <h5 class="alert-heading">Daily Affirmation</h5>
+            <p>@Model.Message</p>
+        </div>
+    }
 </div>
