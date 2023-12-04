@@ -2,14 +2,14 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.DTOs;
-using Constellation.Core.Models.MandatoryTraining.Identifiers;
+using Core.Models.Training.Identifiers;
 using System;
 
 public sealed record UpdateTrainingCompletionCommand(
     TrainingCompletionId CompletionId,
     string StaffId,
     TrainingModuleId TrainingModuleId,
-    DateTime CompletedDate,
+    DateOnly CompletedDate,
     bool NotRequired,
     FileDto File) 
     : ICommand;

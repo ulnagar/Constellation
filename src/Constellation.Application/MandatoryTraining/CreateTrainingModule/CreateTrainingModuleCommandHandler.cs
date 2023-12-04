@@ -2,37 +2,36 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
-using Core.Models.MandatoryTraining.Identifiers;
+using Core.Models.Training.Identifiers;
+using Core.Models.Training.Repositories;
 using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class CreateTrainingModuleCommandHandler
     : ICommandHandler<CreateTrainingModuleCommand>
 {
-    private readonly ITrainingModuleRepository _trainingModuleRepository;
+    private readonly ITrainingModuleRepository _trainingRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateTrainingModuleCommandHandler(
-        ITrainingModuleRepository trainingModuleRepository,
+        ITrainingModuleRepository trainingRepository,
         IUnitOfWork unitOfWork)
     {
-        _trainingModuleRepository = trainingModuleRepository;
+        _trainingRepository = trainingRepository;
         _unitOfWork = unitOfWork;
     }
 
     public async Task<Result> Handle(CreateTrainingModuleCommand request, CancellationToken cancellationToken)
     {
-        var entity = TrainingModule.Create(
-            new TrainingModuleId(),
+        TrainingModule entity = TrainingModule.Create(
             request.Name,
             request.Expiry,
             request.Url);
 
-        _trainingModuleRepository.Insert(entity);
+        _trainingRepository.Insert(entity);
         await _unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();

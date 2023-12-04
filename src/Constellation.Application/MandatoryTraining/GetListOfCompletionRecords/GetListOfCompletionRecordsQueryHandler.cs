@@ -3,14 +3,14 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.MandatoryTraining.Models;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
+using Core.Abstractions.Clock;
 using Core.Models.Faculty.Identifiers;
-using System;
+using Core.Models.Training.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -21,16 +21,19 @@ internal sealed class GetListOfCompletionRecordsQueryHandler
 {
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
-    private readonly ITrainingModuleRepository _trainingModuleRepository;
+    private readonly ITrainingModuleRepository _trainingRepository;
+    private readonly IDateTimeProvider _dateTime;
 
     public GetListOfCompletionRecordsQueryHandler(
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
-        ITrainingModuleRepository trainingModuleRepository)
+        ITrainingModuleRepository trainingRepository,
+        IDateTimeProvider dateTime)
     {
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
-        _trainingModuleRepository = trainingModuleRepository;
+        _trainingRepository = trainingRepository;
+        _dateTime = dateTime;
     }
 
     public async Task<Result<List<CompletionRecordDto>>> Handle(GetListOfCompletionRecordsQuery request, CancellationToken cancellationToken)
@@ -43,7 +46,7 @@ internal sealed class GetListOfCompletionRecordsQueryHandler
         else
             staffMembers.Add(await _staffRepository.GetById(request.StaffId));
 
-        List<TrainingModule> modules = await _trainingModuleRepository.GetAllCurrent(cancellationToken);
+        List<TrainingModule> modules = await _trainingRepository.GetAllModules(cancellationToken);
 
         foreach (Staff staffMember in staffMembers)
         {
@@ -57,16 +60,13 @@ internal sealed class GetListOfCompletionRecordsQueryHandler
 
             foreach (TrainingModule module in modules)
             {
-                List<TrainingCompletion> records = module.Completions
+                if (module.IsDeleted) continue;
+
+                TrainingCompletion record = module.Completions
                     .Where(record =>
                         record.StaffId == staffMember.StaffId &&
                         !record.IsDeleted)
-                    .ToList();
-
-                TrainingCompletion record = records
-                    .OrderByDescending(record => 
-                        (record.CompletedDate.HasValue) ? record.CompletedDate.Value : record.CreatedAt)
-                    .FirstOrDefault();
+                    .MaxBy(record => record.CompletedDate);
 
                 if (record is null)
                     continue;
@@ -82,11 +82,10 @@ internal sealed class GetListOfCompletionRecordsQueryHandler
                     StaffLastName = staffMember.LastName,
                     StaffFaculty = string.Join(",", faculties.Select(faculty => faculty.Name)),
                     CompletedDate = record.CompletedDate,
-                    NotRequired = record.NotRequired,
                     CreatedAt = record.CreatedAt
                 };
 
-                entry.ExpiryCountdown = entry.CalculateExpiry();
+                entry.ExpiryCountdown = entry.CalculateExpiry(_dateTime);
                 entry.Status = CompletionRecordDto.ExpiryStatus.Active;
 
                 data.Add(entry);

@@ -1,11 +1,10 @@
 ﻿namespace Constellation.Application.MandatoryTraining.GetCompletionRecordEditContext;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
-using Core.Models.MandatoryTraining.Errors;
+using Core.Models.Training.Errors;
+using Core.Models.Training.Repositories;
 using Serilog;
 using System;
 using System.Linq;
@@ -15,20 +14,20 @@ using System.Threading.Tasks;
 internal sealed class GetCompletionRecordEditContextQueryHandler 
     : IQueryHandler<GetCompletionRecordEditContextQuery, CompletionRecordEditContextDto>
 {
-    private readonly ITrainingModuleRepository _moduleRepository;
+    private readonly ITrainingModuleRepository _repository;
     private readonly ILogger _logger;
 
     public GetCompletionRecordEditContextQueryHandler(
-        ITrainingModuleRepository moduleRepository,
+        ITrainingModuleRepository repository,
         ILogger logger)
     {
-        _moduleRepository = moduleRepository;
+        _repository = repository;
         _logger = logger;
     }
 
     public async Task<Result<CompletionRecordEditContextDto>> Handle(GetCompletionRecordEditContextQuery request, CancellationToken cancellationToken)
     {
-        TrainingModule module = await _moduleRepository.GetById(request.ModuleId, cancellationToken);
+        TrainingModule module = await _repository.GetModuleById(request.ModuleId, cancellationToken);
 
         if (module is null)
         {
@@ -38,13 +37,17 @@ internal sealed class GetCompletionRecordEditContextQueryHandler
 
         TrainingCompletion record = module.Completions.FirstOrDefault(record => record.Id == request.CompletionId);
 
+        if (record is null)
+        {
+            return Result.Failure<CompletionRecordEditContextDto>(TrainingErrors.Completion.NotFound(request.CompletionId));
+        }
+
         CompletionRecordEditContextDto entity = new()
         {
             Id = record.Id,
             TrainingModuleId = record.TrainingModuleId,
             StaffId = record.StaffId,
-            CompletedDate = record.CompletedDate.HasValue ? record.CompletedDate.Value : DateTime.Today,
-            NotRequired = record.NotRequired
+            CompletedDate = record.CompletedDate.ToDateTime(TimeOnly.MinValue)
         };
 
         return entity;

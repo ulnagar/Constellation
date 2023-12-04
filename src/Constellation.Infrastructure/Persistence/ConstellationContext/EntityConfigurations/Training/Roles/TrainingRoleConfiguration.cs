@@ -1,7 +1,7 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.MandatoryTraining;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Training.Roles;
 
-using Core.Models.MandatoryTraining;
-using Core.Models.MandatoryTraining.Identifiers;
+using Constellation.Core.Models.Training.Contexts.Roles;
+using Core.Models.Training.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -9,7 +9,7 @@ internal sealed class TrainingRoleConfiguration : IEntityTypeConfiguration<Train
 {
     public void Configure(EntityTypeBuilder<TrainingRole> builder)
     {
-        builder.ToTable("MandatoryTraining_Roles");
+        builder.ToTable("Training_Roles_Roles");
 
         builder
             .HasKey(role => role.Id);

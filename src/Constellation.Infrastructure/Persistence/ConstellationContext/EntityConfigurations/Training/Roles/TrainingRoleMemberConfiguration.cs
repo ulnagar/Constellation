@@ -1,8 +1,8 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.MandatoryTraining;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Training.Roles;
 
+using Constellation.Core.Models.Training.Contexts.Roles;
 using Core.Models;
-using Core.Models.MandatoryTraining;
-using Core.Models.MandatoryTraining.Identifiers;
+using Core.Models.Training.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,7 +10,7 @@ internal sealed class TrainingRoleMemberConfiguration : IEntityTypeConfiguration
 {
     public void Configure(EntityTypeBuilder<TrainingRoleMember> builder)
     {
-        builder.ToTable("MandatoryTraining_RoleMembers");
+        builder.ToTable("Training_Roles_Members");
 
         builder
             .HasKey(member => new { member.RoleId, member.StaffId });
@@ -32,9 +32,5 @@ internal sealed class TrainingRoleMemberConfiguration : IEntityTypeConfiguration
             .WithMany()
             .HasForeignKey(member => member.StaffId)
             .OnDelete(DeleteBehavior.ClientCascade);
-
-        builder
-            .Navigation(member => member.Role)
-            .AutoInclude();
     }
 }

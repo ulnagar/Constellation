@@ -3,13 +3,13 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.MandatoryTraining.Models;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
 using Core.Models.Faculty.ValueObjects;
+using Core.Models.Training.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -18,18 +18,18 @@ using System.Threading.Tasks;
 internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModulesQueryHandler 
     : IQueryHandler<GetListOfCertificatesForStaffMemberWithNotCompletedModulesQuery, StaffCompletionListDto>
 {
-    private readonly ITrainingModuleRepository _trainingModuleRepository;
+    private readonly ITrainingModuleRepository _trainingRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IFacultyRepository _facultyRepository;
 
     public GetListOfCertificatesForStaffMemberWithNotCompletedModulesQueryHandler(
-        ITrainingModuleRepository trainingModuleRepository,
+        ITrainingModuleRepository trainingRepository,
         IStaffRepository staffRepository,
         ISchoolRepository schoolRepository,
         IFacultyRepository facultyRepository)
     {
-        _trainingModuleRepository = trainingModuleRepository;
+        _trainingRepository = trainingRepository;
         _staffRepository = staffRepository;
         _schoolRepository = schoolRepository;
         _facultyRepository = facultyRepository;
@@ -40,7 +40,7 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
         StaffCompletionListDto data = new();
 
         // - Get all modules
-        List<TrainingModule> modules = await _trainingModuleRepository.GetAllCurrent(cancellationToken);
+        List<TrainingModule> modules = await _trainingRepository.GetAllModules(cancellationToken);
 
         // - Get staff member
         Staff staff = await _staffRepository.GetById(request.StaffId, cancellationToken);
@@ -59,16 +59,14 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
 
         foreach (TrainingModule module in modules)
         {
-            List<TrainingCompletion> records = module.Completions
+            if (module.IsDeleted)
+                continue;
+
+            TrainingCompletion record = module.Completions
                 .Where(record =>
                     record.StaffId == staff.StaffId &&
                     !record.IsDeleted)
-                .ToList();
-
-            TrainingCompletion record = records
-                .OrderByDescending(record =>
-                    (record.CompletedDate.HasValue) ? record.CompletedDate.Value : record.CreatedAt)
-                .FirstOrDefault();
+                .MaxBy(record => record.CompletedDate);
 
             CompletionRecordExtendedDetailsDto entry = new();
             entry.AddModuleDetails(module);

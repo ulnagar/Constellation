@@ -3,13 +3,13 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Attachments.Repository;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
 using Core.Models.Attachments;
 using Core.Models.Attachments.Services;
-using Core.Models.MandatoryTraining.Errors;
+using Core.Models.Training.Errors;
+using Core.Models.Training.Repositories;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 internal sealed class UpdateTrainingCompletionCommandHandler 
     : ICommandHandler<UpdateTrainingCompletionCommand>
 {
-    private readonly ITrainingModuleRepository _trainingModuleRepository;
+    private readonly ITrainingModuleRepository _trainingRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAttachmentRepository _attachmentRepository;
     private readonly IAttachmentService _attachmentService;
@@ -26,14 +26,14 @@ internal sealed class UpdateTrainingCompletionCommandHandler
     private readonly ILogger _logger;
 
     public UpdateTrainingCompletionCommandHandler(
-        ITrainingModuleRepository trainingModuleRepository,
+        ITrainingModuleRepository trainingRepository,
         IUnitOfWork unitOfWork,
         IAttachmentRepository attachmentRepository,
         IAttachmentService attachmentService,
         IDateTimeProvider dateTime,
         ILogger logger)
     {
-        _trainingModuleRepository = trainingModuleRepository;
+        _trainingRepository = trainingRepository;
         _unitOfWork = unitOfWork;
         _attachmentRepository = attachmentRepository;
         _attachmentService = attachmentService;
@@ -43,7 +43,7 @@ internal sealed class UpdateTrainingCompletionCommandHandler
 
     public async Task<Result> Handle(UpdateTrainingCompletionCommand request, CancellationToken cancellationToken)
     {
-        TrainingModule module = await _trainingModuleRepository.GetById(request.TrainingModuleId, cancellationToken);
+        TrainingModule module = await _trainingRepository.GetModuleById(request.TrainingModuleId, cancellationToken);
 
         if (module is null)
         {
@@ -67,20 +67,9 @@ internal sealed class UpdateTrainingCompletionCommandHandler
             return Result.Failure(TrainingErrors.Completion.NotFound(request.CompletionId));
         }
 
-        if (!string.IsNullOrWhiteSpace(request.StaffId))
-            record.UpdateStaffMember(request.StaffId);
-
-        if (request.TrainingModuleId is not null)
-            record.UpdateTrainingModule(request.TrainingModuleId);
-
-        if (request.NotRequired)
-            record.MarkNotRequired(module);
-        else
-            record.SetCompletedDate(request.CompletedDate);
-
         if (request.File is not null)
         {
-            Attachment existingFile = await _attachmentRepository.GetTrainingCertificateByLinkId(record.Id.ToString(), cancellationToken);
+            Attachment existingFile = await _attachmentRepository.GetTrainingCertificateByLinkId(record.Id.ToString()!, cancellationToken);
 
             if (existingFile is not null)
                 _attachmentService.DeleteAttachment(existingFile);

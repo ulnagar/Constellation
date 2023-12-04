@@ -1,12 +1,13 @@
 ﻿namespace Constellation.Infrastructure.Identity.Authorization;
 
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Models.MandatoryTraining.Identifiers;
+using Core.Models.Training.Contexts.Modules;
+using Core.Models.Training.Identifiers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
+using Persistence.ConstellationContext;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,16 +18,16 @@ public class CanViewTrainingCompletionRecordRequirement : IAuthorizationRequirem
 
 public class OwnsTrainingCompletionRecordByRoute : AuthorizationHandler<CanViewTrainingCompletionRecordRequirement>
 {
-    private readonly IAppDbContext _context;
+    private readonly AppDbContext _context;
 
-    public OwnsTrainingCompletionRecordByRoute(IAppDbContext context)
+    public OwnsTrainingCompletionRecordByRoute(AppDbContext context)
     {
         _context = context;
     }
 
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CanViewTrainingCompletionRecordRequirement requirement)
     {
-        var httpContext = context.Resource switch
+        HttpContext httpContext = context.Resource switch
         {
             AuthorizationFilterContext mvcContext => mvcContext.HttpContext,
             HttpContext razorPageContext => razorPageContext,
@@ -38,14 +39,19 @@ public class OwnsTrainingCompletionRecordByRoute : AuthorizationHandler<CanViewT
             return;
         }
 
-        var recordId = httpContext.Request.Path.ToString().Split('/').Last();
+        string recordId = httpContext.Request.Path.ToString().Split('/').Last();
 
-        var userStaffId = context.User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        string userStaffId = context.User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        if (recordId is not null && userStaffId is not null)
+        if (!string.IsNullOrWhiteSpace(recordId) && userStaffId is not null)
         {
-            var userOwns = await _context.MandatoryTraining.CompletionRecords
-                .AnyAsync(record => record.Id == TrainingCompletionId.FromValue(Guid.Parse(recordId)) && record.StaffId == userStaffId);
+            TrainingCompletionId completionId = TrainingCompletionId.FromValue(Guid.Parse(recordId));
+
+            bool userOwns = await _context
+                .Set<TrainingCompletion>()
+                .AnyAsync(record => 
+                    record.Id == completionId && 
+                    record.StaffId == userStaffId);
 
             if (userOwns)
                 context.Succeed(requirement);
@@ -57,21 +63,26 @@ public class OwnsTrainingCompletionRecordByRoute : AuthorizationHandler<CanViewT
 
 public class OwnsTrainingCompletionRecordByResource : AuthorizationHandler<CanViewTrainingCompletionRecordRequirement, Guid>
 {
-    private readonly IAppDbContext _context;
+    private readonly AppDbContext _context;
 
-    public OwnsTrainingCompletionRecordByResource(IAppDbContext context)
+    public OwnsTrainingCompletionRecordByResource(AppDbContext context)
     {
         _context = context;
     }
 
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CanViewTrainingCompletionRecordRequirement requirement, Guid resource)
     {
-        var userStaffId = context.User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        string userStaffId = context.User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         if (userStaffId is not null)
         {
-            var userOwns = await _context.MandatoryTraining.CompletionRecords
-                .AnyAsync(record => record.Id == TrainingCompletionId.FromValue(resource) && record.StaffId == userStaffId);
+            TrainingCompletionId completionId = TrainingCompletionId.FromValue(resource);
+
+            bool userOwns = await _context
+                .Set<TrainingCompletion>()
+                .AnyAsync(record => 
+                    record.Id == completionId && 
+                    record.StaffId == userStaffId);
 
             if (userOwns)
                 context.Succeed(requirement);

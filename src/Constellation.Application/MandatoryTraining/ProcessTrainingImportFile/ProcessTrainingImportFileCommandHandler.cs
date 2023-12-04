@@ -3,12 +3,12 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
-using Core.Models.MandatoryTraining.Errors;
+using Core.Models.Training.Errors;
+using Core.Models.Training.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -18,18 +18,18 @@ internal sealed class ProcessTrainingImportFileCommandHandler
     : ICommandHandler<ProcessTrainingImportFileCommand>
 {
     private readonly IExcelService _excelService;
-    private readonly ITrainingModuleRepository _trainingModuleRepository;
+    private readonly ITrainingModuleRepository _trainingRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public ProcessTrainingImportFileCommandHandler(
         IExcelService excelService,
-        ITrainingModuleRepository trainingModuleRepository,
+        ITrainingModuleRepository trainingRepository,
         IStaffRepository staffRepository,
         IUnitOfWork unitOfWork)
     {
         _excelService = excelService;
-        _trainingModuleRepository = trainingModuleRepository;
+        _trainingRepository = trainingRepository;
         _staffRepository = staffRepository;
         _unitOfWork = unitOfWork;
     }
@@ -38,13 +38,13 @@ internal sealed class ProcessTrainingImportFileCommandHandler
     {
         List<TrainingModule> modules = _excelService.ImportMandatoryTrainingDataFromFile(request.Stream);
 
-        if (modules is null || !modules.Any())
+        if (modules is null || modules.Count == 0)
             return Result.Failure(TrainingErrors.Import.NoDataFound);
 
         foreach (TrainingModule module in modules)
         {
             // check if it exists in the db
-            TrainingModule existing = await _trainingModuleRepository.GetByName(module.Name, cancellationToken);
+            TrainingModule existing = await _trainingRepository.GetModuleByName(module.Name, cancellationToken);
 
             List<string> staff = await _staffRepository.GetAllActiveStaffIds(cancellationToken);
 
@@ -63,14 +63,11 @@ internal sealed class ProcessTrainingImportFileCommandHandler
                     // Link the record to the database copy of the module
                     TrainingCompletion newRecord = TrainingCompletion.Create(
                         record.StaffId,
-                        existing.Id);
-
-                    newRecord.SetCompletedDate(record.CompletedDate.Value);
-
+                        existing.Id,
+                        record.CompletedDate);
+                    
                     module.AddCompletion(newRecord);
                 }
-
-                continue;
             }
             else
             {
@@ -80,7 +77,7 @@ internal sealed class ProcessTrainingImportFileCommandHandler
                         module.RemoveCompletion(record);
                 }
 
-                _trainingModuleRepository.Insert(module);
+                _trainingRepository.Insert(module);
             }
         }
 

@@ -33,9 +33,7 @@ public interface IAppDbContext
     DbSet<StocktakeEvent> StocktakeEvents { get; set; }
     DbSet<StocktakeSighting> StocktakeSightings { get; set; }
     DbSet<Faculty> Faculties { get; set; }
-
-    IMandatoryTrainingSets MandatoryTraining { get; }
-
+    
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     EntityEntry Add(object entity);
 }

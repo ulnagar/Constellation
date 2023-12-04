@@ -12,8 +12,7 @@
 
   <ItemGroup>
     <Folder Include="Models\Assignments\Services\" />
-    <Folder Include="Models\MandatoryTraining\Events\" />
-    <Folder Include="Models\MandatoryTraining\Repositories\" />
+    <Folder Include="Models\Training\Events\" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models;
 
 using Constellation.Core.Models.Faculty;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using System;

@@ -12,7 +12,7 @@ using Constellation.Application.ExternalDataConsistency;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Rollover.ImportStudents;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Infrastructure.Jobs;
 using Core.Models.Attendance;
 using System.Collections.Generic;

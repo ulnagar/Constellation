@@ -6,14 +6,16 @@ using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.Models;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
+using Constellation.Core.Models.Training.Contexts.Roles;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Models.Faculty.ValueObjects;
+using Core.Models.Training.Identifiers;
+using Core.Models.Training.Repositories;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System;
@@ -25,6 +27,7 @@ using System.Threading.Tasks;
 internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
 {
     private readonly AppConfiguration _configuration;
+    private readonly ITrainingRoleRepository _trainingRoleRepository;
     private readonly ITrainingModuleRepository _trainingModuleRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
@@ -35,6 +38,7 @@ internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJ
 
     public MandatoryTrainingReminderJob(
         IOptions<AppConfiguration> configuration,
+        ITrainingRoleRepository trainingRoleRepository,
         ITrainingModuleRepository trainingModuleRepository,
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
@@ -44,6 +48,7 @@ internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJ
         ILogger logger)
     {
         _configuration = configuration.Value;
+        _trainingRoleRepository = trainingRoleRepository;
         _trainingModuleRepository = trainingModuleRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
@@ -57,26 +62,33 @@ internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJ
     {
         List<CompletionRecordExtendedDetailsDto> detailedRecords = new();
 
-        // - Get all modules
-        List<TrainingModule> modules = await _trainingModuleRepository.GetAllCurrent(cancellationToken);
-
-        // - Get all staff
+        // Get all staff
         List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
 
-        foreach (TrainingModule module in modules)
+        foreach (Staff staffMember in staff)
         {
-            foreach (Staff staffMember in staff)
+            // Get all roles for the staff member
+            List<TrainingRole> roles = await _trainingRoleRepository.GetRolesForStaffMember(staffMember.StaffId, cancellationToken);
+
+            // Get all modules attached to roles
+            List<TrainingModuleId> moduleIds = roles
+                .SelectMany(role => role.Modules)
+                .Select(module => module.ModuleId)
+                .ToList();
+            
+            // Get all completions for staff member
+            foreach (TrainingModuleId moduleId in moduleIds)
             {
-                List<TrainingCompletion> records = module.Completions
+                TrainingModule module = await _trainingModuleRepository.GetModuleById(moduleId, cancellationToken);
+
+                if (module.IsDeleted) continue;
+
+                TrainingCompletion completion = module
+                    .Completions
                     .Where(record =>
                         record.StaffId == staffMember.StaffId &&
                         !record.IsDeleted)
-                    .ToList();
-
-                TrainingCompletion record = records
-                    .OrderByDescending(record =>
-                        (record.CompletedDate.HasValue) ? record.CompletedDate.Value : record.CreatedAt)
-                    .FirstOrDefault();
+                    .MaxBy(record => record.CompletedDate);
 
                 CompletionRecordExtendedDetailsDto entry = new();
                 entry.AddModuleDetails(module);
@@ -123,8 +135,8 @@ internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJ
                     entry.AddPrincipalDetails(principal, localSchool);
                 }
 
-                if (record is not null)
-                    entry.AddRecordDetails(record);
+                if (completion is not null)
+                    entry.AddRecordDetails(completion);
 
                 entry.CalculateExpiry();
 
@@ -139,7 +151,7 @@ internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJ
 
         // Group by staff member
         // - Send emails to each staff member
-        foreach (var teacher in latestRecords.GroupBy(record => record.StaffEntry))
+        foreach (IGrouping<EmailRecipient, CompletionRecordExtendedDetailsDto> teacher in latestRecords.GroupBy(record => record.StaffEntry))
         {
             await SendEmail(teacher.ToList(), cancellationToken);
         }
@@ -149,16 +161,14 @@ internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJ
     {
         Dictionary<string, string> warning = entries
             .Where(record => 
-                record.TimeToExpiry <= 30 && 
-                record.TimeToExpiry > 14)
+                record.TimeToExpiry is <= 30 and > 14)
             .ToDictionary(
                 record => $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", 
                 record => (record.DueDate.HasValue) ? record.DueDate.Value.ToShortDateString() : "Not Yet Completed");
 
         Dictionary<string, string> alert = entries
             .Where(record => 
-                record.TimeToExpiry <= 14 && 
-                record.TimeToExpiry > 0)
+                record.TimeToExpiry is <= 14 and > 0)
             .ToDictionary(
                 record => $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})", 
                 record => (record.DueDate.HasValue) ? record.DueDate.Value.ToShortDateString() : "Not Yet Completed");
@@ -169,9 +179,7 @@ internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJ
                 record => $"{record.ModuleName} ({record.ModuleFrequency.GetDisplayName()})",
                 record => (record.DueDate.HasValue) ? record.DueDate.Value.ToShortDateString() : "Not Yet Completed");
 
-        List<EmailRecipient> warningRecipients = new();
-
-        warningRecipients.Add(entries.First().StaffEntry);
+        List<EmailRecipient> warningRecipients = new() { entries.First().StaffEntry };
 
         List<EmailRecipient> alertRecipients = new(warningRecipients);
 

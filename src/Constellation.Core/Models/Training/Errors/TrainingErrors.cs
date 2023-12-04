@@ -1,12 +1,8 @@
-﻿namespace Constellation.Core.Models.MandatoryTraining.Errors;
-using Constellation.Core.Models.MandatoryTraining.Identifiers;
+﻿namespace Constellation.Core.Models.Training.Errors;
 
+using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 public static class TrainingErrors
 {

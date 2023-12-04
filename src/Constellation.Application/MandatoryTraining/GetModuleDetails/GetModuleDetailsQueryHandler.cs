@@ -4,14 +4,14 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.MandatoryTraining.Models;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
+using Core.Abstractions.Clock;
 using Core.Models.Faculty.Identifiers;
-using System;
+using Core.Models.Training.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -20,18 +20,21 @@ using System.Threading.Tasks;
 internal sealed class GetModuleDetailsQueryHandler 
     : IQueryHandler<GetModuleDetailsQuery, ModuleDetailsDto>
 {
-    private readonly ITrainingModuleRepository _trainingModuleRepository;
+    private readonly ITrainingModuleRepository _trainingRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
+    private readonly IDateTimeProvider _dateTime;
 
     public GetModuleDetailsQueryHandler(
-        ITrainingModuleRepository trainingModuleRepository,
+        ITrainingModuleRepository trainingRepository,
         IStaffRepository staffRepository,
-        IFacultyRepository facultyRepository)
+        IFacultyRepository facultyRepository,
+        IDateTimeProvider dateTime)
     {
-        _trainingModuleRepository = trainingModuleRepository;
+        _trainingRepository = trainingRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
+        _dateTime = dateTime;
     }
 
     public async Task<Result<ModuleDetailsDto>> Handle(GetModuleDetailsQuery request, CancellationToken cancellationToken)
@@ -39,7 +42,7 @@ internal sealed class GetModuleDetailsQueryHandler
         ModuleDetailsDto data = new();
 
         // Get info from database
-        TrainingModule module = await _trainingModuleRepository.GetById(request.Id, cancellationToken);
+        TrainingModule module = await _trainingRepository.GetModuleById(request.Id, cancellationToken);
 
         data.Id = module.Id;
         data.Name = module.Name;
@@ -48,6 +51,8 @@ internal sealed class GetModuleDetailsQueryHandler
         data.IsActive = !module.IsDeleted;
 
         List<Staff> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
+
+        //TODO: (R1.14) Add a check to see if each staff member is required to complete this module
 
         foreach (Staff staffMember in staffMembers)
         {
@@ -65,10 +70,7 @@ internal sealed class GetModuleDetailsQueryHandler
                         !record.IsDeleted)
                     .ToList();
 
-            TrainingCompletion record = records
-                .OrderByDescending(record =>
-                    (record.CompletedDate.HasValue) ? record.CompletedDate.Value : record.CreatedAt)
-                .FirstOrDefault();
+            TrainingCompletion record = records.MaxBy(record => record.CompletedDate);
 
             if (record is null)
             {
@@ -97,11 +99,10 @@ internal sealed class GetModuleDetailsQueryHandler
                     StaffLastName = staffMember.LastName,
                     StaffFaculty = string.Join(",", faculties.Select(faculty => faculty.Name)),
                     CompletedDate = record.CompletedDate,
-                    NotRequired = record.NotRequired,
                     CreatedAt = record.CreatedAt
                 };
 
-                entry.ExpiryCountdown = entry.CalculateExpiry();
+                entry.ExpiryCountdown = entry.CalculateExpiry(_dateTime);
                 entry.Status = CompletionRecordDto.ExpiryStatus.Active;
 
                 data.Completions.Add(entry);

@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.MandatoryTraining.Models;
 
 using Constellation.Core.Enums;
-using Constellation.Core.Models.MandatoryTraining.Identifiers;
-using Microsoft.VisualBasic;
+using Core.Abstractions.Clock;
+using Core.Models.Training.Identifiers;
 using System;
 
 public class CompletionRecordDto
@@ -15,26 +15,23 @@ public class CompletionRecordDto
     public string StaffFirstName { get; set; }
     public string StaffLastName { get; set; }
     public string StaffFaculty { get; set; }
-    public DateTime? CompletedDate { get; set; }
+    public DateOnly? CompletedDate { get; set; }
     public bool NotRequired { get; set; }
     public int ExpiryCountdown { get; set; }
     public ExpiryStatus Status { get; set; } = ExpiryStatus.Unknown;
     public DateTime CreatedAt { get; set; }
 
-    public int CalculateExpiry()
+    public int CalculateExpiry(IDateTimeProvider dateTime)
     {
-        if (!CompletedDate.HasValue && NotRequired)
-            return 999999;
-
         if (!CompletedDate.HasValue)
             return -9999;
 
-        var expirationDate = CompletedDate.Value.AddYears((int)ModuleExpiry);
+        DateOnly expirationDate = CompletedDate.Value.AddYears((int)ModuleExpiry);
 
-        if (expirationDate == CompletedDate.Value || NotRequired)
+        if (expirationDate == CompletedDate)
             return 999999;
 
-        return (int)expirationDate.Subtract(DateTime.Today).TotalDays;
+        return (int)expirationDate.ToDateTime(TimeOnly.MinValue).Subtract(DateTime.Today).TotalDays;
     }
 
     public enum ExpiryStatus
