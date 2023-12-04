@@ -25,7 +25,7 @@ public class DashboardModel : BasePageModel
     public bool IsAdmin { get; set; }
     public string StaffId { get; set; }
 
-    public string Message { get; set; } = string.Empty;
+    public string Message { get; set; }
 
     public int ExpiringTraining { get; set; } = 0;
 
