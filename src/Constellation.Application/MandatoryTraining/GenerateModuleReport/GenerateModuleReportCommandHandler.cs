@@ -5,17 +5,18 @@ using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.Models;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
+using Core.Abstractions.Clock;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Faculty.Identifiers;
+using Core.Models.Training.Repositories;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -27,27 +28,30 @@ using System.Threading.Tasks;
 internal sealed class GenerateModuleReportCommandHandler 
     : ICommandHandler<GenerateModuleReportCommand, ReportDto>
 {
-    private readonly ITrainingModuleRepository _trainingModuleRepository;
+    private readonly ITrainingModuleRepository _trainingRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
     private readonly IAttachmentRepository _attachmentRepository;
     private readonly IAttachmentService _attachmentService;
     private readonly IExcelService _excelService;
+    private readonly IDateTimeProvider _dateTime;
 
     public GenerateModuleReportCommandHandler(
-        ITrainingModuleRepository trainingModuleRepository,
+        ITrainingModuleRepository trainingRepository,
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
         IAttachmentRepository attachmentRepository,
         IAttachmentService attachmentService,
-        IExcelService excelService)
+        IExcelService excelService,
+        IDateTimeProvider dateTime)
     {
-        _trainingModuleRepository = trainingModuleRepository;
+        _trainingRepository = trainingRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
         _attachmentRepository = attachmentRepository;
         _attachmentService = attachmentService;
         _excelService = excelService;
+        _dateTime = dateTime;
     }
 
     public async Task<Result<ReportDto>> Handle(GenerateModuleReportCommand request, CancellationToken cancellationToken)
@@ -55,7 +59,7 @@ internal sealed class GenerateModuleReportCommandHandler
         ModuleDetailsDto data = new();
 
         // Get info from database
-        TrainingModule module = await _trainingModuleRepository.GetById(request.Id, cancellationToken);
+        TrainingModule module = await _trainingRepository.GetModuleById(request.Id, cancellationToken);
             
         data.Id = module.Id;
         data.Name = module.Name;
@@ -64,6 +68,8 @@ internal sealed class GenerateModuleReportCommandHandler
         data.IsActive = !module.IsDeleted;
 
         List<Staff> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
+        
+        //TODO: (R1.14) Add a check to see if each staff member is required to complete this module
 
         foreach (Staff staffMember in staffMembers)
         {
@@ -81,10 +87,7 @@ internal sealed class GenerateModuleReportCommandHandler
                         !record.IsDeleted)
                     .ToList();
 
-            TrainingCompletion record = records
-                .OrderByDescending(record =>
-                    (record.CompletedDate.HasValue) ? record.CompletedDate.Value : record.CreatedAt)
-                .FirstOrDefault();
+            TrainingCompletion record = records.MaxBy(record => record.CompletedDate);
 
             if (record is null)
             {
@@ -113,11 +116,10 @@ internal sealed class GenerateModuleReportCommandHandler
                     StaffLastName = staffMember.LastName,
                     StaffFaculty = string.Join(",", faculties.Select(faculty => faculty.Name)),
                     CompletedDate = record.CompletedDate,
-                    NotRequired = record.NotRequired,
                     CreatedAt = record.CreatedAt
                 };
 
-                entry.ExpiryCountdown = entry.CalculateExpiry();
+                entry.ExpiryCountdown = entry.CalculateExpiry(_dateTime);
                 entry.Status = CompletionRecordDto.ExpiryStatus.Active;
 
                 data.Completions.Add(entry);

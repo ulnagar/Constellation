@@ -3,13 +3,13 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Attachments.Repository;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
 using Core.Models.Attachments;
 using Core.Models.Attachments.Services;
-using Core.Models.MandatoryTraining.Errors;
+using Core.Models.Training.Errors;
+using Core.Models.Training.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 internal sealed class CreateTrainingCompletionCommandHandler 
     : ICommandHandler<CreateTrainingCompletionCommand>
 {
-    private readonly ITrainingModuleRepository _trainingModuleRepository;
+    private readonly ITrainingModuleRepository _trainingRepository;
     private readonly IAttachmentService _attachmentService;
     private readonly IAttachmentRepository _attachmentRepository;
     private readonly IDateTimeProvider _dateTime;
@@ -27,14 +27,14 @@ internal sealed class CreateTrainingCompletionCommandHandler
     private readonly ILogger _logger;
 
     public CreateTrainingCompletionCommandHandler(
-        ITrainingModuleRepository trainingModuleRepository,
+        ITrainingModuleRepository trainingRepository,
         IAttachmentService attachmentService,
         IAttachmentRepository attachmentRepository,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
-        _trainingModuleRepository = trainingModuleRepository;
+        _trainingRepository = trainingRepository;
         _attachmentService = attachmentService;
         _attachmentRepository = attachmentRepository;
         _dateTime = dateTime;
@@ -43,7 +43,7 @@ internal sealed class CreateTrainingCompletionCommandHandler
     }
     public async Task<Result> Handle(CreateTrainingCompletionCommand request, CancellationToken cancellationToken)
     {
-        TrainingModule module = await _trainingModuleRepository.GetById(request.TrainingModuleId, cancellationToken);
+        TrainingModule module = await _trainingRepository.GetModuleById(request.TrainingModuleId, cancellationToken);
 
         if (module is null)
         {
@@ -62,12 +62,9 @@ internal sealed class CreateTrainingCompletionCommandHandler
                 !record.IsDeleted)
             .ToList();
 
-        TrainingCompletion record = records.MaxBy(record =>
-            record.CompletedDate ?? record.CreatedAt);
+        TrainingCompletion record = records.MaxBy(record => record.CompletedDate);
 
-        if (record is not null &&
-            ((request.NotRequired && record.NotRequired) ||
-             (!request.NotRequired && record.CompletedDate!.Value == request.CompletedDate)))
+        if (record.CompletedDate == request.CompletedDate)
         {
             _logger
                 .ForContext(nameof(CreateTrainingCompletionCommand), request, true)
@@ -79,13 +76,9 @@ internal sealed class CreateTrainingCompletionCommandHandler
 
         TrainingCompletion recordEntity = TrainingCompletion.Create(
             request.StaffId,
-            request.TrainingModuleId);
-
-        if (request.NotRequired)
-            recordEntity.MarkNotRequired(module);
-        else
-            recordEntity.SetCompletedDate(request.CompletedDate);
-
+            request.TrainingModuleId,
+            request.CompletedDate);
+        
         if (request.File is null)
         {
             module.AddCompletion(recordEntity);

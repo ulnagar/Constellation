@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.MandatoryTraining.GetTrainingModuleEditContext;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Models.MandatoryTraining.Identifiers;
+using Core.Models.Training.Identifiers;
 
 public sealed record GetTrainingModuleEditContextQuery(
     TrainingModuleId Id)

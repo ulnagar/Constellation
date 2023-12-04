@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.MandatoryTraining.DoesModuleAllowNotRequiredResponse;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models.MandatoryTraining.Errors;
 using Constellation.Core.Shared;
-using Core.Models.MandatoryTraining;
+using Core.Models.Training.Contexts.Roles;
+using Core.Models.Training.Repositories;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,27 +12,18 @@ using System.Threading.Tasks;
 internal sealed class DoesModuleAllowNotRequiredResponseQueryHandler 
     : IQueryHandler<DoesModuleAllowNotRequiredResponseQuery, bool>
 {
-    private readonly ITrainingModuleRepository _trainingModuleRepository;
+    private readonly ITrainingRoleRepository _trainingRoleRepository;
 
     public DoesModuleAllowNotRequiredResponseQueryHandler(
-        ITrainingModuleRepository trainingModuleRepository)
+        ITrainingRoleRepository trainingRoleRepository)
     {
-        _trainingModuleRepository = trainingModuleRepository;
+        _trainingRoleRepository = trainingRoleRepository;
     }
 
     public async Task<Result<bool>> Handle(DoesModuleAllowNotRequiredResponseQuery request, CancellationToken cancellationToken)
     {
-        TrainingModule module = await _trainingModuleRepository.GetById(request.ModuleId, cancellationToken);
-        
-        if (module is null)
-        {
-            return Result.Failure<bool>(TrainingErrors.Module.NotFound(request.ModuleId));
-        }
+        List<TrainingRole> roles = await _trainingRoleRepository.GetRolesForModule(request.ModuleId, cancellationToken);
 
-        bool isRequired = module
-            .Roles
-            .Any(role => role.Role.Members.Any(member => member.StaffId == request.StaffId));
-
-        return !isRequired;
+        return roles.Any(role => role.Members.Any(member => member.StaffId == request.StaffId));
     }
 }

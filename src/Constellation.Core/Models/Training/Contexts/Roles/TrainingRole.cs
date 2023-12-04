@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.MandatoryTraining;
+﻿namespace Constellation.Core.Models.Training.Contexts.Roles;
 
 using Errors;
 using Identifiers;
@@ -19,7 +19,7 @@ public sealed class TrainingRole : AggregateRoot, IAuditableEntity
         Id = new();
         Name = name;
     }
-    
+
     public TrainingRoleId Id { get; private set; }
 
     public string Name { get; private set; }

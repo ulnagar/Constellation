@@ -1400,96 +1400,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.MandatoryTraining.TrainingCompletion", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("CompletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("NotRequired")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("StaffId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<Guid?>("TrainingModuleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StaffId");
-
-                    b.HasIndex("TrainingModuleId");
-
-                    b.ToTable("MandatoryTraining_Completions", (string)null);
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.MandatoryTraining.TrainingModule", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("CanMarkNotRequired")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Expiry")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MandatoryTraining_Modules", (string)null);
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.Offerings.Offering", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2413,6 +2323,154 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasKey("Id");
 
                     b.ToTable("Periods");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Training.Contexts.Modules.TrainingCompletion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CompletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StaffId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid?>("TrainingModuleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StaffId");
+
+                    b.HasIndex("TrainingModuleId");
+
+                    b.ToTable("Training_Modules_Completions", (string)null);
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Training.Contexts.Modules.TrainingModule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Expiry")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Training_Modules_Modules", (string)null);
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Training.Contexts.Roles.TrainingRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Training_Roles_Roles", (string)null);
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Training.Contexts.Roles.TrainingRoleMember", b =>
+                {
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("StaffId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("RoleId", "StaffId");
+
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("Training_Roles_Members", (string)null);
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Training.Contexts.Roles.TrainingRoleModule", b =>
+                {
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ModuleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("RoleId", "ModuleId");
+
+                    b.HasIndex("ModuleId");
+
+                    b.ToTable("Training_Roles_Modules", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.WholeAbsenceNotification", b =>
@@ -3510,21 +3568,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.MandatoryTraining.TrainingCompletion", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Staff", null)
-                        .WithMany("TrainingCompletionRecords")
-                        .HasForeignKey("StaffId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Constellation.Core.Models.MandatoryTraining.TrainingModule", "Module")
-                        .WithMany("Completions")
-                        .HasForeignKey("TrainingModuleId")
-                        .OnDelete(DeleteBehavior.ClientCascade);
-
-                    b.Navigation("Module");
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.Offerings.Offering", b =>
                 {
                     b.HasOne("Constellation.Core.Models.Subjects.Course", null)
@@ -3756,6 +3799,55 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .WithMany()
                         .HasForeignKey("FacultyId")
                         .OnDelete(DeleteBehavior.NoAction);
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Training.Contexts.Modules.TrainingCompletion", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Staff", null)
+                        .WithMany("TrainingCompletionRecords")
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Constellation.Core.Models.Training.Contexts.Modules.TrainingModule", "Module")
+                        .WithMany("Completions")
+                        .HasForeignKey("TrainingModuleId")
+                        .OnDelete(DeleteBehavior.ClientCascade);
+
+                    b.Navigation("Module");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Training.Contexts.Roles.TrainingRoleMember", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Training.Contexts.Roles.TrainingRole", "Role")
+                        .WithMany("Members")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.HasOne("Constellation.Core.Models.Staff", null)
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Training.Contexts.Roles.TrainingRoleModule", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Training.Contexts.Modules.TrainingModule", null)
+                        .WithMany()
+                        .HasForeignKey("ModuleId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.HasOne("Constellation.Core.Models.Training.Contexts.Roles.TrainingRole", "Role")
+                        .WithMany("Modules")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.WholeAbsenceNotification", b =>
@@ -4009,11 +4101,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Students");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.MandatoryTraining.TrainingModule", b =>
-                {
-                    b.Navigation("Completions");
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.Offerings.Offering", b =>
                 {
                     b.Navigation("Resources");
@@ -4114,6 +4201,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
             modelBuilder.Entity("Constellation.Core.Models.TimetablePeriod", b =>
                 {
                     b.Navigation("OfferingSessions");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Training.Contexts.Modules.TrainingModule", b =>
+                {
+                    b.Navigation("Completions");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Training.Contexts.Roles.TrainingRole", b =>
+                {
+                    b.Navigation("Members");
+
+                    b.Navigation("Modules");
                 });
 #pragma warning restore 612, 618
         }

@@ -5,9 +5,6 @@
 <h2>Sentral Incident Tracking Report</h2>
 
 <div class="page-menu">
-    <form method="post">
-        <button class="btn btn-success">Load Data</button>
-    </form>
 </div>
 
 <hr />
@@ -15,34 +12,16 @@
 <table class="table">
     <thead>
     <tr>
-        <th>Age</th>
-        <th>Date</th>
-        <th>Subject</th>
-        <th>Type</th>
-        <th>Teacher</th>
-        <th>Surname</th>
         <th>Name</th>
-        <th>Year</th>
+        <th># Members</th>
     </tr>
     </thead>
     <tbody>
-        @foreach (var entry in Model.Data.OrderByDescending(entry => entry.DateCreated))
+        @foreach (var entry in Model.Roles)
         {
-            var style = (entry.Severity < 14) ? "ffffff"
-                : (entry.Severity >= 14 & entry.Severity < 21) ? "fbe4d5"
-                : (entry.Severity >= 21 & entry.Severity < 28) ? "f7caac"
-                : (entry.Severity >= 28 & entry.Severity < 35) ? "f4b083"
-                : "c45911";
-
-            <tr style="background-color: #@style !important">
-                <td>@entry.Severity</td>
-                <td>@entry.DateCreated.ToShortDateString()</td>
-                <td>@entry.Subject</td>
-                <td>@entry.Type</td>
-                <td>@entry.Teacher</td>
-                <td>@entry.StudentLastName</td>
-                <td>@entry.StudentFirstName</td>
-                <td>@entry.Grade.AsName()</td>
+            <tr>
+                <td>@entry.Name</td>
+                <td>@entry.Members.Count()</td>
             </tr>
         }
     </tbody>

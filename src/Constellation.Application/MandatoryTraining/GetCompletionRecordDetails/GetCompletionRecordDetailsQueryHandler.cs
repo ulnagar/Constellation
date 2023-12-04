@@ -3,15 +3,16 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.MandatoryTraining.Models;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
+using Core.Abstractions.Clock;
 using Core.Models.Faculty.Identifiers;
-using Core.Models.MandatoryTraining.Errors;
+using Core.Models.Training.Errors;
+using Core.Models.Training.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,26 +22,29 @@ using System.Threading.Tasks;
 internal sealed class GetCompletionRecordDetailsQueryHandler 
     : IQueryHandler<GetCompletionRecordDetailsQuery, CompletionRecordDto>
 {
-    private readonly ITrainingModuleRepository _trainingModuleRepository;
+    private readonly ITrainingModuleRepository _trainingRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public GetCompletionRecordDetailsQueryHandler(
-        ITrainingModuleRepository trainingModuleRepository,
+        ITrainingModuleRepository trainingRepository,
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
-        _trainingModuleRepository = trainingModuleRepository;
+        _trainingRepository = trainingRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
+        _dateTime = dateTime;
         _logger = logger.ForContext<GetCompletionRecordDetailsQuery>();
     }
 
     public async Task<Result<CompletionRecordDto>> Handle(GetCompletionRecordDetailsQuery request, CancellationToken cancellationToken)
     {
-        TrainingModule module = await _trainingModuleRepository.GetById(request.ModuleId, cancellationToken);
+        TrainingModule module = await _trainingRepository.GetModuleById(request.ModuleId, cancellationToken);
 
         if (module is null)
         {
@@ -86,11 +90,10 @@ internal sealed class GetCompletionRecordDetailsQueryHandler
             StaffLastName = staff.LastName,
             StaffFaculty = string.Join(",", faculties.Select(faculty => faculty.Name).ToList()),
             CompletedDate = record.CompletedDate,
-            NotRequired = record.NotRequired,
             CreatedAt = record.CreatedAt
         };
 
-        entity.ExpiryCountdown = entity.CalculateExpiry();
+        entity.ExpiryCountdown = entity.CalculateExpiry(_dateTime);
         entity.Status = CompletionRecordDto.ExpiryStatus.Active;
 
         return entity;

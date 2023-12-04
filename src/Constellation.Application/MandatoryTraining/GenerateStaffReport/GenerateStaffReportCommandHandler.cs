@@ -4,17 +4,17 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.Models;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Faculty.ValueObjects;
+using Core.Models.Training.Repositories;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 internal sealed class GenerateStaffReportCommandHandler 
     : ICommandHandler<GenerateStaffReportCommand, ReportDto>
 {
-    private readonly ITrainingModuleRepository _trainingModuleRepository;
+    private readonly ITrainingModuleRepository _trainingRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
     private readonly ISchoolRepository _schoolRepository;
@@ -36,7 +36,7 @@ internal sealed class GenerateStaffReportCommandHandler
     private readonly IAttachmentService _attachmentService;
 
     public GenerateStaffReportCommandHandler(
-        ITrainingModuleRepository trainingModuleRepository,
+        ITrainingModuleRepository trainingRepository,
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
         ISchoolRepository schoolRepository,
@@ -45,7 +45,7 @@ internal sealed class GenerateStaffReportCommandHandler
         IAttachmentRepository attachmentRepository,
         IAttachmentService attachmentService)
     {
-        _trainingModuleRepository = trainingModuleRepository;
+        _trainingRepository = trainingRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
         _schoolRepository = schoolRepository;
@@ -60,7 +60,7 @@ internal sealed class GenerateStaffReportCommandHandler
         StaffCompletionListDto data = new();
 
         // - Get all modules
-        List<TrainingModule> modules = await _trainingModuleRepository.GetAllCurrent(cancellationToken);
+        List<TrainingModule> modules = await _trainingRepository.GetAllModules(cancellationToken);
 
         // - Get all staff
         Staff staff = await _staffRepository.GetById(request.StaffId, cancellationToken);
@@ -79,16 +79,13 @@ internal sealed class GenerateStaffReportCommandHandler
 
         foreach (TrainingModule module in modules)
         {
-            List<TrainingCompletion> records = module.Completions
+            if (module.IsDeleted) continue;
+
+            TrainingCompletion record = module.Completions
                 .Where(record =>
                     record.StaffId == staff.StaffId &&
                     !record.IsDeleted)
-                .ToList();
-
-            TrainingCompletion record = records
-                .OrderByDescending(record =>
-                    (record.CompletedDate.HasValue) ? record.CompletedDate.Value : record.CreatedAt)
-                .FirstOrDefault();
+                .MaxBy(record => record.CompletedDate);
 
             CompletionRecordExtendedDetailsDto entry = new();
             entry.AddModuleDetails(module);

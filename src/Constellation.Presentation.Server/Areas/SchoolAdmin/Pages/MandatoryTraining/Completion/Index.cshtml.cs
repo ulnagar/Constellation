@@ -7,6 +7,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.StaffTrainingReport;
+using Core.Abstractions.Clock;
 using Core.Models.Students.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -20,15 +21,18 @@ public class IndexModel : BasePageModel
     private readonly IMediator _mediator;
     private readonly IAuthorizationService _authorizationService;
     private readonly LinkGenerator _linkGenerator;
+    private readonly IDateTimeProvider _dateTime;
 
     public IndexModel(
         IMediator mediator, 
         IAuthorizationService authorizationService,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        IDateTimeProvider dateTime)
     {
         _mediator = mediator;
         _authorizationService = authorizationService;
         _linkGenerator = linkGenerator;
+        _dateTime = dateTime;
     }
 
     public List<CompletionRecordDto> CompletionRecords { get; set; } = new();
@@ -73,7 +77,7 @@ public class IndexModel : BasePageModel
 
         foreach (var record in CompletionRecords)
         {
-            record.ExpiryCountdown = record.CalculateExpiry();
+            record.ExpiryCountdown = record.CalculateExpiry(_dateTime);
             record.Status = CompletionRecordDto.ExpiryStatus.Active;
 
             if (CompletionRecords.Any(s => s.ModuleId == record.ModuleId && s.StaffId == record.StaffId && s.CompletedDate > record.CompletedDate))

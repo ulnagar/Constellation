@@ -2,11 +2,11 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
-using Constellation.Core.Models.MandatoryTraining;
-using Constellation.Core.Models.MandatoryTraining.Identifiers;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Models.Faculty;
+using Core.Models.Training.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -80,8 +80,7 @@ public class CompletionRecordExtendedDetailsDto
     public void AddRecordDetails(TrainingCompletion record)
     {
         RecordId = record.Id;
-        RecordNotRequired = record.NotRequired;
-        RecordEffectiveDate = record.NotRequired ? record.CreatedAt : record.CompletedDate.Value;
+        RecordEffectiveDate = record.CompletedDate.ToDateTime(TimeOnly.MinValue);
     }
 
     public void CalculateExpiry() 

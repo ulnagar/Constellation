@@ -1,24 +1,22 @@
-﻿namespace Constellation.Core.Models.MandatoryTraining;
+﻿namespace Constellation.Core.Models.Training.Contexts.Modules;
 
 using Constellation.Core.Enums;
-using Constellation.Core.Models.MandatoryTraining.Identifiers;
 using Constellation.Core.Primitives;
+using Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class TrainingModule : IAuditableEntity
+public class TrainingModule : AggregateRoot, IAuditableEntity
 {
     private readonly List<TrainingCompletion> _completions = new();
-    private readonly List<TrainingRoleModule> _roles = new();
 
     private TrainingModule(
-        TrainingModuleId id,
         string name,
         TrainingModuleExpiryFrequency expiry,
         string url)
     {
-        Id = id;
+        Id = new();
         Name = name;
         Expiry = expiry;
         Url = url;
@@ -29,7 +27,6 @@ public class TrainingModule : IAuditableEntity
     public TrainingModuleExpiryFrequency Expiry { get; private set; }
     public string Url { get; private set; }
     public IReadOnlyList<TrainingCompletion> Completions => _completions.ToList();
-    public IReadOnlyList<TrainingRoleModule> Roles => _roles.ToList();
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public string ModifiedBy { get; set; }
@@ -39,13 +36,11 @@ public class TrainingModule : IAuditableEntity
     public DateTime DeletedAt { get; set; }
 
     public static TrainingModule Create(
-        TrainingModuleId id,
         string name,
         TrainingModuleExpiryFrequency expiry,
         string url)
     {
         TrainingModule module = new(
-            id,
             name,
             expiry,
             url);

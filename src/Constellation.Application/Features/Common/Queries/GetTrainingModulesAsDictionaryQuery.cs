@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Features.Common.Queries;
 
-using Constellation.Application.Interfaces.Repositories;
+using Core.Models.Training.Contexts.Modules;
+using Core.Models.Training.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,18 +15,23 @@ public record GetTrainingModulesAsDictionaryQuery : IRequest<Dictionary<Guid, st
 
 public class GetTrainingModulesAsDictionaryQueryHandler : IRequestHandler<GetTrainingModulesAsDictionaryQuery, Dictionary<Guid, string>>
 {
-	private readonly IAppDbContext _context;
+    private readonly ITrainingModuleRepository _trainingModuleRepository;
 
-	public GetTrainingModulesAsDictionaryQueryHandler(IAppDbContext context)
-	{
-		_context = context;
-	}
+
+    public GetTrainingModulesAsDictionaryQueryHandler(
+        ITrainingModuleRepository trainingModuleRepository)
+    {
+        _trainingModuleRepository = trainingModuleRepository;
+    }
 
 	public async Task<Dictionary<Guid, string>> Handle(GetTrainingModulesAsDictionaryQuery request, CancellationToken cancellationToken)
 	{
-		return await _context.MandatoryTraining.Modules
-			.Where(module => !module.IsDeleted)
+		List<TrainingModule> modules = await _trainingModuleRepository
+            .GetAllModules(cancellationToken);
+
+		return modules
+            .Where(module => !module.IsDeleted)
 			.OrderBy(module => module.Name)
-			.ToDictionaryAsync(module => module.Id.Value, module => module.Name, cancellationToken);
+			.ToDictionary(module => module.Id.Value, module => module.Name);
 	}
 }

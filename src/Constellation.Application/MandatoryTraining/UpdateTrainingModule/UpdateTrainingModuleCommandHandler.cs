@@ -2,30 +2,31 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
-using Core.Models.MandatoryTraining.Errors;
+using Core.Models.Training.Contexts.Modules;
+using Core.Models.Training.Errors;
+using Core.Models.Training.Repositories;
 using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class UpdateTrainingModuleCommandHandler 
     : ICommandHandler<UpdateTrainingModuleCommand>
 {
-    private readonly ITrainingModuleRepository _trainingModuleRepository;
+    private readonly ITrainingModuleRepository _trainingRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public UpdateTrainingModuleCommandHandler(
-        ITrainingModuleRepository trainingModuleRepository,
+        ITrainingModuleRepository trainingRepository,
         IUnitOfWork unitOfWork)
     {
-        _trainingModuleRepository = trainingModuleRepository;
+        _trainingRepository = trainingRepository;
         _unitOfWork = unitOfWork;
     }
 
     public async Task<Result> Handle(UpdateTrainingModuleCommand request, CancellationToken cancellationToken)
     {
-        var module = await _trainingModuleRepository.GetById(request.Id, cancellationToken);
+        TrainingModule module = await _trainingRepository.GetModuleById(request.Id, cancellationToken);
 
         if (module is null)
             return Result.Failure(TrainingErrors.Module.NotFound(request.Id));

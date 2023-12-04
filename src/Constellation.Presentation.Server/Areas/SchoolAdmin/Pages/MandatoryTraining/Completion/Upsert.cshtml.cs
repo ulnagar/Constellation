@@ -10,11 +10,11 @@ using Constellation.Application.MandatoryTraining.GetUploadedTrainingCertificati
 using Constellation.Application.MandatoryTraining.UpdateTrainingCompletion;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
-using Constellation.Core.Models.MandatoryTraining.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Validation;
-using Core.Models.Attachments;
 using Core.Models.Attachments.ValueObjects;
+using Core.Models.Training.Identifiers;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -247,14 +247,15 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdate()
     {
-
         ViewData["ActivePage"] = "Completions";
         ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
+        DateOnly completedDate = DateOnly.FromDateTime(CompletedDate);
 
         // Check if the Module allows not required if the not required has been selected.
         if (ModuleId is not null && NotRequired)
         {
-            var notRequiredRequest = await _mediator.Send(new DoesModuleAllowNotRequiredResponseQuery(StaffId, TrainingModuleId.FromValue(ModuleId.Value)));
+            Result<bool> notRequiredRequest = await _mediator.Send(new DoesModuleAllowNotRequiredResponseQuery(StaffId, TrainingModuleId.FromValue(ModuleId.Value)));
 
             if (notRequiredRequest.IsFailure || notRequiredRequest.Value == false)
             {
@@ -273,15 +274,15 @@ public class UpsertModel : BasePageModel
         {
             // Update existing entry
 
-            var command = new UpdateTrainingCompletionCommand(
+            UpdateTrainingCompletionCommand command = new(
                 TrainingCompletionId.FromValue(Id.Value),
                 StaffId,
                 TrainingModuleId.FromValue(ModuleId.Value),
-                CompletedDate,
+                completedDate,
                 NotRequired,
                 await GetUploadedFile());
             
-            var result = await _mediator.Send(command);
+            Result result = await _mediator.Send(command);
 
             if (result.IsFailure)
             {
@@ -298,14 +299,13 @@ public class UpsertModel : BasePageModel
         {
             // Create new entry
 
-            var command = new CreateTrainingCompletionCommand(
+            CreateTrainingCompletionCommand command = new(
                 StaffId,
                 TrainingModuleId.FromValue(ModuleId.Value),
-                CompletedDate,
-                NotRequired,
+                completedDate,
                 await GetUploadedFile());
 
-            var result = await _mediator.Send(command);
+            Result result = await _mediator.Send(command);
 
             if (result.IsFailure)
             {

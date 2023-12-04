@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.MandatoryTraining.GetTrainingModuleEditContext;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
-using Core.Models.MandatoryTraining;
+using Core.Models.Training.Repositories;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,7 +20,7 @@ internal sealed class GetTrainingModuleEditContextQueryHandler
 
     public async Task<Result<ModuleEditContextDto>> Handle(GetTrainingModuleEditContextQuery request, CancellationToken cancellationToken)
     {
-        TrainingModule module = await _trainingModuleRepository.GetById(request.Id, cancellationToken);
+        TrainingModule module = await _trainingModuleRepository.GetModuleById(request.Id, cancellationToken);
 
         return new ModuleEditContextDto
         {

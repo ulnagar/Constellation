@@ -42,7 +42,7 @@ public class DashboardModel : BasePageModel
 
         Result<StaffSelectionListResponse> teacherRequest = await _mediator.Send(new GetStaffByEmailQuery(username), cancellationToken);
 
-        Result<string> messageRequest = await _mediator.Send(new GetAffirmationQuery(teacherRequest?.Value.StaffId));
+        Result<string> messageRequest = await _mediator.Send(new GetAffirmationQuery(teacherRequest?.Value.StaffId), cancellationToken);
 
         if (messageRequest.IsSuccess)
         {
@@ -57,7 +57,7 @@ public class DashboardModel : BasePageModel
         StaffId = teacherRequest.Value.StaffId;
         UserName = $"{teacherRequest.Value.FirstName} {teacherRequest.Value.LastName}";
 
-        Result<int> trainingExpiringSoonRequest = await _mediator.Send(new GetCountOfExpiringCertificatesForStaffMemberQuery(StaffId));
+        Result<int> trainingExpiringSoonRequest = await _mediator.Send(new GetCountOfExpiringCertificatesForStaffMemberQuery(StaffId), cancellationToken);
 
         if (trainingExpiringSoonRequest.IsSuccess)
             ExpiringTraining = trainingExpiringSoonRequest.Value;

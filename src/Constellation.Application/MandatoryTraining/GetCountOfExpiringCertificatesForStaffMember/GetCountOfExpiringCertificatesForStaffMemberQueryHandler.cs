@@ -3,10 +3,12 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.MandatoryTraining.Models;
-using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
+using Constellation.Core.Models.Training.Contexts.Roles;
 using Constellation.Core.Shared;
+using Core.Models.Training.Identifiers;
+using Core.Models.Training.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -15,13 +17,16 @@ using System.Threading.Tasks;
 internal sealed class GetCountOfExpiringCertificatesForStaffMemberQueryHandler 
     : IQueryHandler<GetCountOfExpiringCertificatesForStaffMemberQuery, int>
 {
+    private readonly ITrainingRoleRepository _trainingRoleRepository;
     private readonly ITrainingModuleRepository _trainingModuleRepository;
     private readonly IStaffRepository _staffRepository;
 
     public GetCountOfExpiringCertificatesForStaffMemberQueryHandler(
+        ITrainingRoleRepository trainingRoleRepository,
         ITrainingModuleRepository trainingModuleRepository,
         IStaffRepository staffRepository)
     {
+        _trainingRoleRepository = trainingRoleRepository;
         _trainingModuleRepository = trainingModuleRepository;
         _staffRepository = staffRepository;
     }
@@ -30,25 +35,28 @@ internal sealed class GetCountOfExpiringCertificatesForStaffMemberQueryHandler
     {
         StaffCompletionListDto data = new();
 
-        // - Get all modules
-        List<TrainingModule> modules = await _trainingModuleRepository.GetAllCurrent(cancellationToken);
+        // Get Roles that include staff member
+        List<TrainingRole> roles = await _trainingRoleRepository.GetRolesForStaffMember(request.StaffId, cancellationToken);
 
+        // Get Modules attached to roles
+        List<TrainingModuleId> moduleIds = roles      
+            .SelectMany(role => role.Modules)
+            .Select(module => module.ModuleId)
+            .ToList();
+        
         // - Get staff member
         Staff staff = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
-        foreach (TrainingModule module in modules)
+        foreach (TrainingModuleId moduleId in moduleIds)
         {
-            List<TrainingCompletion> records = module.Completions
+            TrainingModule module = await _trainingModuleRepository.GetModuleById(moduleId, cancellationToken);
+
+            TrainingCompletion record = module.Completions
                 .Where(record =>
                     record.StaffId == staff.StaffId &&
                     !record.IsDeleted)
-                .ToList();
-
-            TrainingCompletion record = records
-                .OrderByDescending(record =>
-                    (record.CompletedDate.HasValue) ? record.CompletedDate.Value : record.CreatedAt)
-                .FirstOrDefault();
-
+                .MaxBy(record => record.CompletedDate);
+                
             CompletionRecordExtendedDetailsDto entry = new();
             entry.AddModuleDetails(module);
             entry.AddStaffDetails(staff);
@@ -61,7 +69,7 @@ internal sealed class GetCountOfExpiringCertificatesForStaffMemberQueryHandler
             data.Modules.Add(entry);
         }
 
-        // - Count entried due for expiry within 30 days
+        // - Count entries due for expiry within 30 days
         return data.Modules.Count(record => record.TimeToExpiry <= 30);
     }
 }

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.MandatoryTraining.GetTrainingModuleEditContext;
 
 using Constellation.Core.Enums;
-using Constellation.Core.Models.MandatoryTraining.Identifiers;
+using Core.Models.Training.Identifiers;
 
 public class ModuleEditContextDto
 {

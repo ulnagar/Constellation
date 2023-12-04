@@ -15,12 +15,11 @@ using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.MandatoryTraining;
+using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Infrastructure.Jobs;
 using Core.Abstractions.Clock;
 using Core.Extensions;
-using Core.Models.MandatoryTraining.Identifiers;
+using Core.Models.Training.Identifiers;
 using ExcelDataReader;
 using OfficeOpenXml;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
@@ -406,17 +405,16 @@ public class ExcelService : IExcelService
 
     public List<TrainingModule> ImportMandatoryTrainingDataFromFile(MemoryStream excelFile)
     {
-        var excel = new ExcelPackage(excelFile);
-        var workSheet = excel.Workbook.Worksheets[0];
+        ExcelPackage excel = new ExcelPackage(excelFile);
+        ExcelWorksheet workSheet = excel.Workbook.Worksheets[0];
 
-        var numModules = workSheet.Dimension.Rows;
+        int numModules = workSheet.Dimension.Rows;
 
-        var modules = new List<TrainingModule>();
+        List<TrainingModule> modules = new List<TrainingModule>();
 
         for (int row = 2; row <= numModules; row++)
         {
-            var entry = TrainingModule.Create(
-                new TrainingModuleId(),
+            TrainingModule entry = TrainingModule.Create(
                 workSheet.Cells[row, 1].GetCellValue<string>(),
                 (TrainingModuleExpiryFrequency)workSheet.Cells[row, 2].GetCellValue<int>(),
                 workSheet.Cells[row, 3].GetCellValue<string>());
@@ -424,28 +422,27 @@ public class ExcelService : IExcelService
             modules.Add(entry);
         }
 
-        var numStaff = workSheet.Dimension.Columns;
+        int numStaff = workSheet.Dimension.Columns;
 
         for (int column = 5; column <= numStaff; column++)
         {
             for (int row = 2; row <= numModules; row++)
             {
-                var completed = workSheet.Cells[row, column].GetCellValue<string>();
+                string completed = workSheet.Cells[row, column].GetCellValue<string>();
                 if (string.IsNullOrWhiteSpace(completed))
                     continue;
 
-                var dateCompleted = DateTime.Parse(completed);
+                DateOnly dateCompleted = DateOnly.Parse(completed);
 
-                var moduleName = workSheet.Cells[row, 1].GetCellValue<string>();
-                var module = modules.FirstOrDefault(entry => entry.Name == moduleName);
+                string moduleName = workSheet.Cells[row, 1].GetCellValue<string>();
+                TrainingModule module = modules.FirstOrDefault(entry => entry.Name == moduleName);
                 if (module is null)
                     continue;
 
-                var entry = TrainingCompletion.Create(
+                TrainingCompletion entry = TrainingCompletion.Create(
                     workSheet.Cells[1, column].GetCellValue<string>(),
-                    module.Id);
-
-                entry.SetCompletedDate(dateCompleted);
+                    module.Id,
+                    dateCompleted);
 
                 module.AddCompletion(entry);
             }

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.MandatoryTraining.GetCompletionRecordEditContext;
 
-using Constellation.Core.Models.MandatoryTraining.Identifiers;
+using Core.Models.Training.Identifiers;
 using System;
 
 public class CompletionRecordEditContextDto
