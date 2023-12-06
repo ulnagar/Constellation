@@ -2,13 +2,13 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Models.Training.Contexts.Roles;
 using Constellation.Core.Shared;
 using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;
+using Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;

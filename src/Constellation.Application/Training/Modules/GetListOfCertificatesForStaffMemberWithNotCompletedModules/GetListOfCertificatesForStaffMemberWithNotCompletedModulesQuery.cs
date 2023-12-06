@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Training.Modules.GetListOfCertificatesForStaffMemberWithNotCompletedModules;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.MandatoryTraining.Models;
+using Models;
 
 public sealed record GetListOfCertificatesForStaffMemberWithNotCompletedModulesQuery(
     string StaffId)

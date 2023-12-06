@@ -1,6 +1,6 @@
-﻿namespace Constellation.Application.MandatoryTraining.Models;
+﻿namespace Constellation.Application.Training.Models;
 
-using Core.Models.Training.Identifiers;
+using Constellation.Core.Models.Training.Identifiers;
 
 public class ModuleSummaryDto
 {

@@ -1,6 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Staff;
 
-using Constellation.Application.MandatoryTraining.Models;
+using Application.Training.Models;
 using Constellation.Application.Training.Modules.GetListOfCertificatesForStaffMemberWithNotCompletedModules;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training;

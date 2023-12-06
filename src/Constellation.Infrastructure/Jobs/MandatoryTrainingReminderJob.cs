@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Training.Models;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;

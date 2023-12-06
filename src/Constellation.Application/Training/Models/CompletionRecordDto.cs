@@ -1,8 +1,8 @@
-﻿namespace Constellation.Application.MandatoryTraining.Models;
+﻿namespace Constellation.Application.Training.Models;
 
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Enums;
-using Core.Abstractions.Clock;
-using Core.Models.Training.Identifiers;
+using Constellation.Core.Models.Training.Identifiers;
 using System;
 
 public class CompletionRecordDto

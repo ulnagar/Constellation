@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.MandatoryTraining.Models;
+﻿namespace Constellation.Application.Training.Models;
 
 using System.Collections.Generic;
 

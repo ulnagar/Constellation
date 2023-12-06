@@ -1,6 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Modules;
 
-using Constellation.Application.MandatoryTraining.Models;
+using Application.Training.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Training.Modules.GenerateModuleReport;
 using Constellation.Application.Training.Modules.GetModuleDetails;
