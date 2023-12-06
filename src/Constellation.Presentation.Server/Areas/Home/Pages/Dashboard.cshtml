@@ -56,4 +56,18 @@
             <p>@Model.Message</p>
         </div>
     }
+    
+    <div class="row row-cols-1 row-cols-md-3">
+        @if (Model.WithoutRole.HasValue)
+        {
+            <div class="col mb4">
+                <div class="card h-100 @(Model.WithoutRole.Value > 0 ? "text-white bg-danger" : "")">
+                    <div class="card-body">
+                        <h3 class="card-title card-title-large">@Model.WithoutRole.Value</h3>
+                        <p class="card-text">staff members without an assigned Training Role</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 </div>

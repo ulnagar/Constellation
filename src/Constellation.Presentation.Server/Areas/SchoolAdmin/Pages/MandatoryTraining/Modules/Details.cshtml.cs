@@ -1,15 +1,16 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
 
-using Constellation.Application.MandatoryTraining.GenerateModuleReport;
-using Constellation.Application.MandatoryTraining.GetModuleDetails;
+using Application.Training.Modules.GenerateModuleReport;
+using Application.Training.Modules.GetModuleDetails;
+using Application.Training.Modules.ReinstateTrainingModule;
+using Application.Training.Modules.RetireTrainingModule;
 using Constellation.Application.MandatoryTraining.Models;
-using Constellation.Application.MandatoryTraining.ReinstateTrainingModule;
-using Constellation.Application.MandatoryTraining.RetireTrainingModule;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Errors;
 using Constellation.Presentation.Server.BaseModels;
 using Core.Models.Training.Identifiers;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -40,15 +41,16 @@ public class DetailsModel : BasePageModel
 
     public ModuleDetailsDto Module { get; set; }
 
+    [ViewData] public string ActivePage { get; set; } = TrainingPages.Modules;
+    [ViewData] public string StaffId { get; set; }
+
     public async Task OnGet()
     {
-
-        ViewData["ActivePage"] = "Modules";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         await GetClasses(_mediator);
 
-        var moduleRequest = await _mediator.Send(new GetModuleDetailsQuery(TrainingModuleId.FromValue(Id)));
+        Result<ModuleDetailsDto> moduleRequest = await _mediator.Send(new GetModuleDetailsQuery(TrainingModuleId.FromValue(Id)));
 
         if (moduleRequest.IsFailure)
         {
@@ -71,11 +73,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetDownloadReport()
     {
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        ViewData["ActivePage"] = "Modules";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
 
         if (!isAuthorised.Succeeded)
         {
@@ -88,7 +88,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        var reportRequest = await _mediator.Send(new GenerateModuleReportCommand(TrainingModuleId.FromValue(Id), false));
+        Result<ReportDto> reportRequest = await _mediator.Send(new GenerateModuleReportCommand(TrainingModuleId.FromValue(Id), false));
 
         if (reportRequest.IsFailure)
         {
@@ -106,11 +106,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetDownloadReportWithCertificates()
     {
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        ViewData["ActivePage"] = "Modules";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
 
         if (!isAuthorised.Succeeded)
         {
@@ -123,7 +121,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        var reportRequest = await _mediator.Send(new GenerateModuleReportCommand(TrainingModuleId.FromValue(Id), true));
+        Result<ReportDto> reportRequest = await _mediator.Send(new GenerateModuleReportCommand(TrainingModuleId.FromValue(Id), true));
 
         if (reportRequest.IsFailure)
         {
@@ -141,11 +139,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetRetireModule()
     {
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        ViewData["ActivePage"] = "Modules";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
 
         if (!isAuthorised.Succeeded)
         {
@@ -158,7 +154,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        var command = new RetireTrainingModuleCommand(TrainingModuleId.FromValue(Id));
+        RetireTrainingModuleCommand command = new RetireTrainingModuleCommand(TrainingModuleId.FromValue(Id));
 
         await _mediator.Send(command);
 
@@ -167,11 +163,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetReinstateModule()
     {
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        ViewData["ActivePage"] = "Modules";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
 
         if (!isAuthorised.Succeeded)
         {
@@ -184,7 +178,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        var command = new ReinstateTrainingModuleCommand(TrainingModuleId.FromValue(Id));
+        ReinstateTrainingModuleCommand command = new ReinstateTrainingModuleCommand(TrainingModuleId.FromValue(Id));
 
         await _mediator.Send(command);
 

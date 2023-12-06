@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
 
-using Constellation.Application.MandatoryTraining.GenerateStaffReport;
-using Constellation.Application.MandatoryTraining.GetListOfCompletionRecords;
+using Application.Training.Modules.GenerateStaffReport;
+using Application.Training.Modules.GetListOfCompletionRecords;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
@@ -9,6 +9,7 @@ using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.StaffTrainingReport;
 using Core.Abstractions.Clock;
 using Core.Models.Students.Errors;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,20 +42,21 @@ public class IndexModel : BasePageModel
     public FilterDto Filter { get; set; }
 
     [BindProperty]
-    public StaffTrainingReportSelection Report { get; set; } 
+    public StaffTrainingReportSelection Report { get; set; }
+
+    [ViewData] public string ActivePage { get; set; } = TrainingPages.Completions;
+    [ViewData] public string StaffId { get; set; }
 
     public async Task<IActionResult> OnGet()
-    {
-
-        ViewData["ActivePage"] = "Completions";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
+    { 
         await GetClasses(_mediator);
 
+        StaffId = User.FindFirst(AuthClaimType.StaffEmployeeId)?.Value;
+        
         // If user does not have details view permissions, only show their own records
         if (User.HasClaim(claim => claim.Type == AuthClaimType.Permission && claim.Value == AuthPermissions.MandatoryTrainingDetailsView))
         {
-            var recordsRequest = await _mediator.Send(new GetListOfCompletionRecordsQuery(null));
+            Result<List<CompletionRecordDto>> recordsRequest = await _mediator.Send(new GetListOfCompletionRecordsQuery(null));
 
             if (recordsRequest.IsFailure)
             {
@@ -71,11 +73,10 @@ public class IndexModel : BasePageModel
         }
         else
         {
-            var staffId = User.FindFirst(AuthClaimType.StaffEmployeeId).Value;
-            return RedirectToPage("/MandatoryTraining/Staff/Index", new { StaffId = staffId });
+            return RedirectToPage("/MandatoryTraining/Staff/Index", new { StaffId = StaffId });
         }
 
-        foreach (var record in CompletionRecords)
+        foreach (CompletionRecordDto record in CompletionRecords)
         {
             record.ExpiryCountdown = record.CalculateExpiry(_dateTime);
             record.Status = CompletionRecordDto.ExpiryStatus.Active;
@@ -101,11 +102,9 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostStaffReport()
     {
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        ViewData["ActivePage"] = "Completions";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
 
         if (!isAuthorised.Succeeded)
         {
@@ -129,7 +128,7 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
-        var reportRequest = await _mediator.Send(new GenerateStaffReportCommand(Report.StaffId, Report.IncludeCertificates));
+        Result<ReportDto> reportRequest = await _mediator.Send(new GenerateStaffReportCommand(Report.StaffId, Report.IncludeCertificates));
 
         if (reportRequest.IsFailure)
         {
