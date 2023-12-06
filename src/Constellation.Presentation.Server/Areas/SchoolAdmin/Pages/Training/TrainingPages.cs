@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining;
+﻿namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training;
 
 internal sealed class TrainingPages
 {

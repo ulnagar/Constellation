@@ -1,9 +1,10 @@
-namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Staff;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Staff;
 
-using Application.Training.Modules.GetListOfCertificatesForStaffMemberWithNotCompletedModules;
 using Constellation.Application.MandatoryTraining.Models;
+using Constellation.Application.Training.Modules.GetListOfCertificatesForStaffMemberWithNotCompletedModules;
+using Constellation.Core.Shared;
+using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training;
 using Constellation.Presentation.Server.BaseModels;
-using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;

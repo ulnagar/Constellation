@@ -1,20 +1,21 @@
-namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Completion;
 
-using Application.Training.Modules.DoesModuleAllowNotRequiredResponse;
-using Application.Training.Modules.GetCompletionRecordEditContext;
-using Application.Training.Modules.GetTrainingModuleEditContext;
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Common.Queries;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Training.Modules.CreateTrainingCompletion;
+using Constellation.Application.Training.Modules.DoesModuleAllowNotRequiredResponse;
+using Constellation.Application.Training.Modules.GetCompletionRecordEditContext;
+using Constellation.Application.Training.Modules.GetTrainingModuleEditContext;
 using Constellation.Application.Training.Modules.GetUploadedTrainingCertificationMetadata;
 using Constellation.Application.Training.Modules.UpdateTrainingCompletion;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Attachments.ValueObjects;
+using Constellation.Core.Models.Training.Identifiers;
+using Constellation.Core.Shared;
+using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Validation;
-using Core.Models.Attachments.ValueObjects;
-using Core.Models.Training.Identifiers;
-using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -98,7 +99,7 @@ public class UpsertModel : BasePageModel
             Error = new ErrorDisplay
             {
                 Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Index", values: new { area = "SchoolAdmin" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Training/Completion/Index", values: new { area = "SchoolAdmin" })
             };
 
             return Page();
@@ -109,7 +110,7 @@ public class UpsertModel : BasePageModel
             Error = new ErrorDisplay
             {
                 Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Details", values: new { area = "SchoolAdmin", Id = ModuleId.Value })
+                RedirectPath = _linkGenerator.GetPathByPage("/Training/Modules/Details", values: new { area = "SchoolAdmin", Id = ModuleId.Value })
             };
 
             return Page();
@@ -125,7 +126,7 @@ public class UpsertModel : BasePageModel
                 Error = new ErrorDisplay
                 {
                     Error = entityRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Details", values: new { area = "SchoolAdmin", Id = ModuleId.Value })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Training/Modules/Details", values: new { area = "SchoolAdmin", Id = ModuleId.Value })
                 };
 
                 return Page();
@@ -151,7 +152,7 @@ public class UpsertModel : BasePageModel
                 Error = new ErrorDisplay
                 {
                     Error = DomainErrors.Permissions.Unauthorised,
-                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Index", values: new { area = "SchoolAdmin" })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Training/Completion/Index", values: new { area = "SchoolAdmin" })
                 };
 
                 return Page();
@@ -282,7 +283,7 @@ public class UpsertModel : BasePageModel
                 Error = new()
                 {
                     Error = result.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Index", values: new { area = "SchoolAdmin" })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Training/Completion/Index", values: new { area = "SchoolAdmin" })
                 };
 
                 return Page();
@@ -305,7 +306,7 @@ public class UpsertModel : BasePageModel
                 Error = new()
                 {
                     Error = result.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Index", values: new { area = "SchoolAdmin" })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Training/Completion/Index", values: new { area = "SchoolAdmin" })
                 };
 
                 return Page();
@@ -314,7 +315,7 @@ public class UpsertModel : BasePageModel
 
         if (Mode == ModeOptions.SOLOMODULE)
         {
-            return RedirectToPage("/MandatoryTraining/Modules/Details", new { Id = ModuleId.Value });
+            return RedirectToPage("/Training/Modules/Details", new { Id = ModuleId.Value });
         }
 
         return RedirectToPage("Index");
