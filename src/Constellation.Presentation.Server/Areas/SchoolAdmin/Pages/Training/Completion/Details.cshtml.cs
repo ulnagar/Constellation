@@ -1,14 +1,15 @@
-namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Completion;
 
-using Application.Training.Modules.GetCompletionRecordDetails;
-using Application.Training.Modules.MarkTrainingCompletionRecordDeleted;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Training.Modules.GetCompletionRecordDetails;
 using Constellation.Application.Training.Modules.GetUploadedTrainingCertificateFileById;
+using Constellation.Application.Training.Modules.MarkTrainingCompletionRecordDeleted;
+using Constellation.Core.Models.Attachments.ValueObjects;
+using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training;
 using Constellation.Presentation.Server.BaseModels;
-using Core.Models.Attachments.ValueObjects;
-using Core.Models.Training.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -59,7 +60,7 @@ public class DetailsModel : BasePageModel
             Error = new ErrorDisplay
             {
                 Error = recordRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Index", values: new { area = "SchoolAdmin" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Training/Completion/Index", values: new { area = "SchoolAdmin" })
             };
 
             return;
@@ -88,7 +89,7 @@ public class DetailsModel : BasePageModel
             Error = new ErrorDisplay
             {
                 Error = certificateRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Index", values: new { area = "SchoolAdmin" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Training/Completion/Index", values: new { area = "SchoolAdmin" })
             };
 
             return Page();

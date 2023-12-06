@@ -1,10 +1,11 @@
-namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Completion;
 
-using Application.Training.Modules.ProcessTrainingImportFile;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Training.Modules.ProcessTrainingImportFile;
+using Constellation.Core.Shared;
+using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Validation;
-using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -57,7 +58,7 @@ public class UploadModel : BasePageModel
                     Error = new ErrorDisplay
                     {
                         Error = request.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Upload", values: new { area = "SchoolAdmin" })
+                        RedirectPath = _linkGenerator.GetPathByPage("/Training/Completion/Upload", values: new { area = "SchoolAdmin" })
                     };
 
                     return Page();
@@ -68,7 +69,7 @@ public class UploadModel : BasePageModel
                 Error = new ErrorDisplay
                 {
                     Error = new(ex.Source, ex.Message),
-                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Completion/Upload", values: new { area = "SchoolAdmin" })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Training/Completion/Upload", values: new { area = "SchoolAdmin" })
                 };
 
                 return Page();

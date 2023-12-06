@@ -1,12 +1,11 @@
 ﻿@page "{StaffId}"
-@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Staff.IndexModel
-
-@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Staff.IndexModel
+@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Completion
 
 <h2>Mandatory Training Completion Records</h2>
 
 <div>
-    <a asp-page="/MandatoryTraining/Completion/Upsert" class="btn btn-warning" asp-route-Mode="@UpsertModel.ModeOptions.SOLOSTAFF">Create New</a>
+    <a asp-page="/Training/Completion/Upsert" class="btn btn-warning" asp-route-Mode="@UpsertModel.ModeOptions.SOLOSTAFF">Create New</a>
     
     <button class="btn btn-secondary" data-toggle="modal" data-target="#legend">View Legend</button>
 </div>
@@ -64,7 +63,7 @@
                 @{
                     if (item.RecordEffectiveDate.HasValue)
                     {
-                        <a asp-page="/MandatoryTraining/Completion/Details" asp-route-moduleId="@item.ModuleId.Value" asp-route-completionId="@item.RecordId.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                        <a asp-page="/Training/Completion/Details" asp-route-moduleId="@item.ModuleId.Value" asp-route-completionId="@item.RecordId.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
                     }
                 }
             </td>

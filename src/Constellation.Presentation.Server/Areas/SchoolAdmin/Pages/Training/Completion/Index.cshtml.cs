@@ -1,15 +1,16 @@
-namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Completion;
 
-using Application.Training.Modules.GenerateStaffReport;
-using Application.Training.Modules.GetListOfCompletionRecords;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Training.Modules.GenerateStaffReport;
+using Constellation.Application.Training.Modules.GetListOfCompletionRecords;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Students.Errors;
+using Constellation.Core.Shared;
+using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.StaffTrainingReport;
-using Core.Abstractions.Clock;
-using Core.Models.Students.Errors;
-using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -73,7 +74,7 @@ public class IndexModel : BasePageModel
         }
         else
         {
-            return RedirectToPage("/MandatoryTraining/Staff/Index", new { StaffId = StaffId });
+            return RedirectToPage("/Training/Staff/Index", new { StaffId = StaffId });
         }
 
         foreach (CompletionRecordDto record in CompletionRecords)

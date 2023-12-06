@@ -1,10 +1,9 @@
-﻿@page "/SchoolAdmin/MandatoryTraining/Modules/{Id:Guid}"
-@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules.DetailsModel
+﻿@page "/SchoolAdmin/Training/Modules/{Id:Guid}"
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Modules.DetailsModel
 
 @inject IAuthorizationService AuthorizationService
-
-@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
 @using Constellation.Application.MandatoryTraining.Models;
+@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Completion
 
 @{
     var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
@@ -103,7 +102,7 @@
 <div class="mb-3">
     @if (canEditTest.Succeeded)
     {
-        <a asp-page="/MandatoryTraining/Completion/Upsert" class="btn btn-info" asp-route-ModuleId="@Model.Module.Id.Value" asp-route-Mode="@UpsertModel.ModeOptions.SOLOMODULE">Create New</a>
+        <a asp-page="/Training/Completion/Upsert" class="btn btn-info" asp-route-ModuleId="@Model.Module.Id.Value" asp-route-Mode="@UpsertModel.ModeOptions.SOLOMODULE">Create New</a>
     }
     <button class="btn btn-secondary" data-toggle="modal" data-target="#legend">View Legend</button>
 </div>
@@ -181,7 +180,7 @@
                                 }
                             </td>
                             <td>
-                                <a asp-page="/MandatoryTraining/Completion/Details" asp-route-moduleId="@item.ModuleId.Value" asp-route-completionId="@item.Id.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                                <a asp-page="/Training/Completion/Details" asp-route-moduleId="@item.ModuleId.Value" asp-route-completionId="@item.Id.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
                             </td>
                         </tr>
                     }
@@ -248,7 +247,7 @@
                                 <td>
                                     @if (item.Id is not null)
                                     {
-                                        <a asp-page="/MandatoryTraining/Completion/Details" asp-route-id="@item.Id.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                                        <a asp-page="/Training/Completion/Details" asp-route-id="@item.Id.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
                                     }
                                 </td>
                             </tr>

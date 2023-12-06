@@ -1,14 +1,15 @@
-namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Modules;
 
-using Application.Training.Modules.CreateTrainingModule;
-using Application.Training.Modules.GetTrainingModuleEditContext;
-using Application.Training.Modules.UpdateTrainingModule;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Training.Modules.CreateTrainingModule;
+using Constellation.Application.Training.Modules.GetTrainingModuleEditContext;
+using Constellation.Application.Training.Modules.UpdateTrainingModule;
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Training.Identifiers;
+using Constellation.Core.Shared;
+using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training;
 using Constellation.Presentation.Server.BaseModels;
-using Core.Models.Training.Identifiers;
-using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -60,7 +61,7 @@ public class UpsertModel : BasePageModel
                 Error = new ErrorDisplay
                 {
                     Error = DomainErrors.Permissions.Unauthorised,
-                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Index", values: new { area = "SchoolAdmin" })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Training/Modules/Index", values: new { area = "SchoolAdmin" })
                 };
 
                 return;
@@ -96,7 +97,7 @@ public class UpsertModel : BasePageModel
                 Error = new ErrorDisplay
                 {
                     Error = result.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Index", values: new { area = "SchoolAdmin" })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Training/Modules/Index", values: new { area = "SchoolAdmin" })
                 };
 
                 return Page();
@@ -118,7 +119,7 @@ public class UpsertModel : BasePageModel
                 Error = new ErrorDisplay
                 {
                     Error = result.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/MandatoryTraining/Modules/Index", values: new { area = "SchoolAdmin" })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Training/Modules/Index", values: new { area = "SchoolAdmin" })
                 };
 
                 return Page();
