@@ -1,7 +1,6 @@
 ﻿@page "{id:Guid?}"
 @model UpsertModel
 
-@using Constellation.Core.Enums
 @using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion
 
 @{
@@ -22,19 +21,19 @@
         @Html.HiddenFor(model => model.Id)
 
         <div class="form-group row">
-            <label asp-for="StaffId" class="col-md-2">Staff Member</label>
+            <label asp-for="SelectedStaffId" class="col-md-2">Staff Member</label>
             <div class="col-md-5">
                 @if (Model.Mode == UpsertModel.ModeOptions.SOLOSTAFF || Model.Mode == UpsertModel.ModeOptions.CERTUPLOAD)
                 {
-                    <input type="hidden" asp-for="StaffId" />
+                    <input type="hidden" asp-for="SelectedStaffId" />
                     <input type="text" class="form-control" readonly="readonly" value="@Model.SoloStaffMember.Value" />
                 } 
                 else
                 {
-                    <select asp-for="StaffId" asp-items="@(new SelectList(Model.StaffOptions, "Key", "Value"))" class="form-control combo custom-select">
+                    <select asp-for="SelectedStaffId" asp-items="@(new SelectList(Model.StaffOptions, "Key", "Value"))" class="form-control combo custom-select">
                         <option selected="selected" value=""> -- Please Select -- </option>
                     </select>
-                    <span asp-validation-for="StaffId" class="text-danger"></span>
+                    <span asp-validation-for="SelectedStaffId" class="text-danger"></span>
                 }
             </div>
         </div>

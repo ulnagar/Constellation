@@ -1,13 +1,14 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
 
-using Constellation.Application.MandatoryTraining.CreateTrainingModule;
-using Constellation.Application.MandatoryTraining.GetTrainingModuleEditContext;
-using Constellation.Application.MandatoryTraining.UpdateTrainingModule;
+using Application.Training.Modules.CreateTrainingModule;
+using Application.Training.Modules.GetTrainingModuleEditContext;
+using Application.Training.Modules.UpdateTrainingModule;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
 using Constellation.Presentation.Server.BaseModels;
 using Core.Models.Training.Identifiers;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -40,18 +41,19 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     public bool CanMarkNotRequired { get; set; }
 
+    [ViewData] public string ActivePage { get; set; } = TrainingPages.Modules;
+    [ViewData] public string StaffId { get; set; }
+
     public async Task OnGet()
     {
-
-        ViewData["ActivePage"] = "Modules";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         await GetClasses(_mediator);
 
         if (Id.HasValue)
         {
             // Get existing entry from database and populate fields
-            var entityRequest = await _mediator.Send(new GetTrainingModuleEditContextQuery(TrainingModuleId.FromValue(Id.Value)));
+            Result<ModuleEditContextDto> entityRequest = await _mediator.Send(new GetTrainingModuleEditContextQuery(TrainingModuleId.FromValue(Id.Value)));
 
             if (entityRequest.IsFailure)
             {
@@ -64,7 +66,7 @@ public class UpsertModel : BasePageModel
                 return;
             }
 
-            var entity = entityRequest.Value;
+            ModuleEditContextDto entity = entityRequest.Value;
 
             Name = entity.Name;
             Expiry = entity.Expiry;
@@ -75,21 +77,19 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdate()
     {
-
-        ViewData["ActivePage"] = "Modules";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         if (Id.HasValue)
         {
             // Update existing entry
-            var command = new UpdateTrainingModuleCommand(
+            UpdateTrainingModuleCommand command = new UpdateTrainingModuleCommand(
                 TrainingModuleId.FromValue(Id.Value),
                 Name,
                 Expiry,
                 ModelUrl,
                 CanMarkNotRequired);
 
-            var result = await _mediator.Send(command);
+            Result result = await _mediator.Send(command);
 
             if (result.IsFailure)
             {
@@ -105,13 +105,13 @@ public class UpsertModel : BasePageModel
         else
         {
             // Create new entry
-            var command = new CreateTrainingModuleCommand(
+            CreateTrainingModuleCommand command = new CreateTrainingModuleCommand(
                 Name,
                 Expiry,
                 ModelUrl,
                 CanMarkNotRequired);
 
-            var result = await _mediator.Send(command);
+            Result result = await _mediator.Send(command);
 
             if (result.IsFailure)
             {

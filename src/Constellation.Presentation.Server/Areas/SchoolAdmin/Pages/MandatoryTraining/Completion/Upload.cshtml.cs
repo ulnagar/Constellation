@@ -1,9 +1,10 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
 
-using Constellation.Application.MandatoryTraining.ProcessTrainingImportFile;
+using Application.Training.Modules.ProcessTrainingImportFile;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Validation;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,29 +29,28 @@ public class UploadModel : BasePageModel
     [AllowExtensions(FileExtensions: "xlsx", ErrorMessage = "You can only upload XLSX files")]
     public IFormFile UploadFile { get; set; }
 
+    [ViewData] public string ActivePage { get; set; } = TrainingPages.Completions;
+    [ViewData] public string StaffId { get; set; }
+
     public async Task OnGetAsync()
     {
-
-        ViewData["ActivePage"] = "Completions";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         await GetClasses(_mediator);
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
-
-        ViewData["ActivePage"] = "Completions";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         if (UploadFile is not null)
         {
             try
             {
-                await using var target = new MemoryStream();
+                await using MemoryStream target = new();
                 await UploadFile.CopyToAsync(target);
 
-                var request = await _mediator.Send(new ProcessTrainingImportFileCommand(target));
+                Result request = await _mediator.Send(new ProcessTrainingImportFileCommand(target));
 
                 if (request.IsFailure)
                 {

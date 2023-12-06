@@ -1,7 +1,9 @@
-﻿namespace Constellation.Presentation.Server.Areas.Home.Pages;
+﻿#nullable enable
+namespace Constellation.Presentation.Server.Areas.Home.Pages;
 
 using Application.Affirmations;
-using Constellation.Application.MandatoryTraining.GetCountOfExpiringCertificatesForStaffMember;
+using Application.Training.Modules.GetCountOfExpiringCertificatesForStaffMember;
+using Application.Training.Roles.CountStaffWithoutRole;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.StaffMembers.GetStaffByEmail;
 using Constellation.Application.StaffMembers.Models;
@@ -28,21 +30,23 @@ public class DashboardModel : BasePageModel
     public string Message { get; set; }
 
     public int ExpiringTraining { get; set; } = 0;
+    public int? WithoutRole { get; set; }
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken = default)
     {
         await GetClasses(_mediator);
 
-        string? username = User.Identity.Name;
-        bool IsStaff = User.IsInRole(AuthRoles.StaffMember);
+        string? username = User.Identity?.Name;
+        bool isStaff = User.IsInRole(AuthRoles.StaffMember);
         IsAdmin = User.IsInRole(AuthRoles.Admin);
+        bool isTrainingManager = User.IsInRole(AuthRoles.MandatoryTrainingEditor);
 
-        if (!IsStaff && !IsAdmin)
+        if (!isStaff && !IsAdmin)
             return RedirectToPage("Index", new { area = "" });
 
         Result<StaffSelectionListResponse> teacherRequest = await _mediator.Send(new GetStaffByEmailQuery(username), cancellationToken);
 
-        Result<string> messageRequest = await _mediator.Send(new GetAffirmationQuery(teacherRequest?.Value.StaffId), cancellationToken);
+        Result<string> messageRequest = await _mediator.Send(new GetAffirmationQuery(teacherRequest.Value?.StaffId), cancellationToken);
 
         if (messageRequest.IsSuccess)
         {
@@ -53,14 +57,22 @@ public class DashboardModel : BasePageModel
         {
             return Page();
         }
-
-        StaffId = teacherRequest.Value.StaffId;
+        
+        StaffId = teacherRequest.Value!.StaffId;
         UserName = $"{teacherRequest.Value.FirstName} {teacherRequest.Value.LastName}";
 
         Result<int> trainingExpiringSoonRequest = await _mediator.Send(new GetCountOfExpiringCertificatesForStaffMemberQuery(StaffId), cancellationToken);
 
         if (trainingExpiringSoonRequest.IsSuccess)
             ExpiringTraining = trainingExpiringSoonRequest.Value;
+
+        if (isTrainingManager || IsAdmin)
+        {
+            Result<int> countOfStaffWithoutRoles = await _mediator.Send(new CountStaffWithoutRoleQuery(), cancellationToken);
+
+            if (countOfStaffWithoutRoles.IsSuccess)
+                WithoutRole = countOfStaffWithoutRoles.Value;
+        }
 
         return Page();
     }

@@ -1,9 +1,10 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Modules;
 
-using Constellation.Application.MandatoryTraining.GetListOfModuleSummary;
+using Application.Training.Modules.GetListOfModuleSummary;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,15 +30,16 @@ public class IndexModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public FilterDto Filter { get; set; }
 
+    [ViewData] public string ActivePage { get; set; } = TrainingPages.Modules;
+    [ViewData] public string StaffId { get; set; }
+
     public async Task OnGet()
     {
-
-        ViewData["ActivePage"] = "Modules";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         await GetClasses(_mediator);
 
-        var moduleRequest = await _mediator.Send(new GetListOfModuleSummaryQuery());
+        Result<List<ModuleSummaryDto>> moduleRequest = await _mediator.Send(new GetListOfModuleSummaryQuery());
 
         if (moduleRequest.IsFailure)
         {

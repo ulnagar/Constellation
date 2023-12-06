@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.MandatoryTraining.Completion;
 
-using Constellation.Application.MandatoryTraining.GetCompletionRecordDetails;
-using Constellation.Application.MandatoryTraining.GetUploadedTrainingCertificateFileById;
-using Constellation.Application.MandatoryTraining.MarkTrainingCompletionRecordDeleted;
+using Application.Training.Modules.GetCompletionRecordDetails;
+using Application.Training.Modules.MarkTrainingCompletionRecordDeleted;
 using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Training.Modules.GetUploadedTrainingCertificateFileById;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using Core.Models.Attachments.ValueObjects;
@@ -40,11 +40,12 @@ public class DetailsModel : BasePageModel
     public CompletionRecordDto Record { get; set; } = new();
     public CompletionRecordCertificateDetailsDto UploadedCertificate { get; set; } = new();
 
+    [ViewData] public string ActivePage { get; set; } = TrainingPages.Completions;
+    [ViewData] public string StaffId { get; set; }
+
     public async Task OnGet()
     {
-
-        ViewData["ActivePage"] = "Completions";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         await GetClasses(_mediator);
 
@@ -76,13 +77,11 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetDownloadCertificate()
     {
-
-        ViewData["ActivePage"] = "Completions";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         await GetClasses(_mediator);
 
-        var certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateFileByIdQuery(AttachmentType.TrainingCertificate, Record.Id.ToString()));
+        Result<CompletionRecordCertificateDetailsDto> certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateFileByIdQuery(AttachmentType.TrainingCertificate, Record.Id.ToString()));
 
         if (certificateRequest.IsFailure)
         {
@@ -102,11 +101,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostDeleteRecord()
     {
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        ViewData["ActivePage"] = "Completions";
-        ViewData["StaffId"] = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-        var canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+        AuthorizationResult canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
         
         if (canEditTest.Succeeded)
         {
