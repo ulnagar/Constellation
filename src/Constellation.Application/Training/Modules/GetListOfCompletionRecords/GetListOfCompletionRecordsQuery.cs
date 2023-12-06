@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Training.Modules.GetListOfCompletionRecords;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.MandatoryTraining.Models;
+using Models;
 using System.Collections.Generic;
 
 public sealed record GetListOfCompletionRecordsQuery(

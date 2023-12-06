@@ -3,7 +3,6 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Faculty;
@@ -15,6 +14,7 @@ using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Faculty.ValueObjects;
 using Core.Models.Training.Repositories;
+using Models;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;

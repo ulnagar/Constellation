@@ -2,7 +2,6 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Faculty;
@@ -13,6 +12,7 @@ using Core.Abstractions.Clock;
 using Core.Models.Faculty.Identifiers;
 using Core.Models.Training.Errors;
 using Core.Models.Training.Repositories;
+using Models;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;

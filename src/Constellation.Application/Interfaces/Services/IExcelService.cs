@@ -10,7 +10,6 @@ using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.CSV;
 using Constellation.Application.ExternalDataConsistency;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
-using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Application.Rollover.ImportStudents;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Infrastructure.Jobs;
@@ -19,6 +18,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Training.Models;
 
 public interface IExcelService
 {

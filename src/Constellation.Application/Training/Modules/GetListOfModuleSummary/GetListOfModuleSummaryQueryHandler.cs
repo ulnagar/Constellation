@@ -2,10 +2,10 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Helpers;
-using Constellation.Application.MandatoryTraining.Models;
 using Constellation.Core.Shared;
 using Core.Models.Training.Contexts.Modules;
 using Core.Models.Training.Repositories;
+using Models;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
