@@ -61,10 +61,11 @@
         @if (Model.WithoutRole.HasValue)
         {
             <div class="col mb4">
-                <div class="card h-100 @(Model.WithoutRole.Value > 0 ? "text-white bg-danger" : "")">
+                <div class="card h-100 @(Model.WithoutRole.Value > 0 ? "text-white bg-danger" : "bg-success")">
                     <div class="card-body">
                         <h3 class="card-title card-title-large">@Model.WithoutRole.Value</h3>
                         <p class="card-text">staff members without an assigned Training Role</p>
+                        <a asp-page="/Training/Roles/Index" asp-area="SchoolAdmin" class="stretched-link"></a>
                     </div>
                 </div>
             </div>

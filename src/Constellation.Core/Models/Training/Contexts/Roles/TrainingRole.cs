@@ -42,6 +42,8 @@ public sealed class TrainingRole : AggregateRoot, IAuditableEntity
         return role;
     }
 
+    public void UpdateName(string name) => Name = name;
+    
     public Result AddMember(string staffId)
     {
         if (_members.Any(member => member.StaffId == staffId))
@@ -66,5 +68,45 @@ public sealed class TrainingRole : AggregateRoot, IAuditableEntity
         return Result.Success();
     }
 
-    public void Delete() => IsDeleted = true;
+    public Result RemoveMember(string staffId)
+    {
+        if (_members.All(member => member.StaffId != staffId))
+            return Result.Failure(TrainingErrors.Role.RemoveMember.NotFound(staffId));
+
+        TrainingRoleMember member = _members.First(member => member.StaffId == staffId);
+
+        _members.Remove(member);
+
+        return Result.Success();
+    }
+
+    public Result RemoveModule(TrainingModuleId moduleId)
+    {
+        if (_modules.All(module => module.ModuleId != moduleId))
+            return Result.Failure(TrainingErrors.Role.RemoveModule.NotFound(moduleId));
+
+        TrainingRoleModule module = _modules.First(module => module.ModuleId == moduleId);
+
+        _modules.Remove(module);
+
+        return Result.Success();
+    }
+
+    public void Delete()
+    {
+        IsDeleted = true;
+
+        foreach (TrainingRoleModule module in _modules)
+            RemoveModule(module.ModuleId);
+
+        foreach (TrainingRoleMember member in _members)
+            RemoveMember(member.StaffId);
+    }
+
+    public void Restore()
+    {
+        IsDeleted = false;
+        DeletedBy = null;
+        DeletedAt = DateTime.MinValue;
+    }
 }

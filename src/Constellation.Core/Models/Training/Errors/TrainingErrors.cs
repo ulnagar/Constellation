@@ -33,6 +33,14 @@ public static class TrainingErrors
 
     public static class Role
     {
+        public static readonly Func<TrainingRoleId, Error> NotFound = id => new(
+            "Training.Role.NotFound",
+            $"A Role with the id {id} could not be found");
+
+        public static readonly Func<string, Error> AlreadyExists = name => new(
+            "Training.Role.AlreadyExists",
+            $"A Role with the name {name} already exists");
+
         public static class AddMember
         {
             public static readonly Func<string, Error> AlreadyExists = id => new(
@@ -45,6 +53,20 @@ public static class TrainingErrors
             public static readonly Func<TrainingModuleId, Error> AlreadyExists = id => new(
                 "Training.Role.AddModule.AlreadyExists",
                 $"A module with the id {id.Value} already exists in the Role");
+        }
+
+        public static class RemoveMember
+        {
+            public static readonly Func<string, Error> NotFound = id => new(
+                "Training.Role.RemoveMember.NotFound",
+                $"A member with the id {id} could not be found in the Role");
+        }
+
+        public static class RemoveModule
+        {
+            public static readonly Func<TrainingModuleId, Error> NotFound = id => new(
+                "Training.Role.RemoveModule.NotFound",
+                $"A module with the id {id} could not found in the Role");
         }
     }
 }
