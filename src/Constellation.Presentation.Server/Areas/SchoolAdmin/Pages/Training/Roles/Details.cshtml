@@ -1,0 +1,96 @@
+﻿@page "{id:Guid}"
+@using Constellation.Application.Helpers
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Roles.DetailsModel
+
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult canEdit = await authService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+}
+
+<h2>Training Role: @Model.Role?.Name</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<h3>Members</h3>
+
+<div class="page-menu">
+    @if (canEdit.Succeeded)
+    {
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addStaffModal">Add Staff</button>
+        <a asp-page="/Training/Roles/BulkAddStaff" asp-area="SchoolAdmin" asp-route-id="@Model.Id" class="btn btn-success">Bulk Add Staff</a>
+    }
+</div>
+
+<hr />
+
+<table class="table table-striped data-table">
+    <thead>
+        <tr>
+            <th>Staff Id</th>
+            <th>Name</th>
+            <th>School</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @if (Model.Role != null)
+    {
+        foreach (var entry in Model.Role.Members)
+        {
+            <tr>
+                <td>@entry.StaffId</td>
+                <td>@entry.Name.DisplayName</td>
+                <td>@entry.School</td>
+                <td>
+                    @if (canEdit.Succeeded)
+                    {
+                        <a asp-page-handler="RemoveStaff" asp-route-staffId="@entry.StaffId" class="btn btn-danger btn-show-hover">Remove</a>
+                    }
+                </td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
+
+<hr />
+
+<h3>Modules</h3>
+
+<div class="page-menu">
+    @if (canEdit.Succeeded)
+    {
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModuleModal">Add Module</button>
+        <a asp-page="/Training/Roles/BulkAddModules" asp-area="SchoolAdmin" asp-route-id="@Model.Id" class="btn btn-success">Bulk Add Modules</a>
+    }
+</div>
+
+<hr />
+
+<table class="table table-striped data-table">
+    <thead>
+    <tr>
+        <th>Module</th>
+        <th>Expiry</th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (Model.Role != null)
+    {
+        foreach (var entry in Model.Role.Modules)
+        {
+            <tr>
+                <td>@entry.Name</td>
+                <td>@entry.Expiry.GetDisplayName()</td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
+
+<vc:add-staff-member-to-training-role id="Model.Id" />

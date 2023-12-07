@@ -15,7 +15,7 @@
 
 <hr />
 
-<form asp-page-handler="Update">
+<form>
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         @Html.HiddenFor(model => model.Id)
@@ -55,7 +55,14 @@
 
         <div class="form-group">
             <div class="col-md-3">
-                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                @if (Model.Id.HasValue)
+                {
+                    <input asp-page-handler="Update" type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                }
+                else
+                {
+                    <input asp-page-handler="Create" type="submit" value="Save" class="btn btn-primary btn-block btn-lg"/>
+                }
             </div>
         </div>
     </div>

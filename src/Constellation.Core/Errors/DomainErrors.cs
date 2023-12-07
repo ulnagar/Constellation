@@ -66,6 +66,10 @@ public static class DomainErrors
         public static readonly Func<string, Error> CannotUpdateRole = (role) => new Error(
             "Auth.CannotUpdateRole",
             $"Cannot update role {role}");
+
+        public static readonly Error NotAuthorised = new(
+            "Auth.NotAuthorised",
+            "The current user is not authorised to complete this action");
     }
 
     public static class Awards

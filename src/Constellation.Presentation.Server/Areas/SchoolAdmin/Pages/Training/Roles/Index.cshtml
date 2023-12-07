@@ -1,0 +1,71 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Roles.IndexModel
+
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult canEdit = await authService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+}
+
+<h2>Training Roles</h2>
+
+<div class="page-menu">
+    @if (canEdit.Succeeded)
+    {
+        <a asp-page="/Training/Roles/Upsert" asp-area="SchoolAdmin" class="btn btn-success">Create</a>
+    }
+</div>
+
+<hr />
+
+<table class="table table-striped data-table">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Members</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var entry in Model.Roles)
+    {
+        <tr>
+            <td>@entry.Name</td>
+            <td>@entry.MemberCount</td>
+            <td>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                    <div class="dropdown-menu">
+                        <a asp-page="Details" asp-route-id="@entry.Id.Value" asp-area="SchoolAdmin" class="dropdown-item">Details</a>
+                        @if (canEdit.Succeeded)
+                        {
+                            <a asp-page="Upsert" asp-route-Id="@entry.Id.Value" class="dropdown-item">Edit</a>
+                            <a href="#" data-role-id="@entry.Id.Value.ToString()" data-role-name="@entry.Name" class="dropdown-item delete-role-menu">Delete</a>
+                        }
+                    </div>
+                </div>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<partial name="_ConfirmRoleDeleteModalPartial" />
+
+@section scripts
+{
+    <script>
+        $('.delete-role-menu').click(function(event) {
+            event.preventDefault();
+
+            var roleId = $(this).data("roleId");
+            var roleName = $(this).data("roleName");
+
+            $('#roleName').text(roleName);
+            var url = $('#roleDeleteButton').attr('href');
+            url = url.replace('@Guid.Empty', roleId);
+            $('#roleDeleteButton').attr('href', url);
+            $('#page-modal').modal('show');
+        });
+    </script>
+}

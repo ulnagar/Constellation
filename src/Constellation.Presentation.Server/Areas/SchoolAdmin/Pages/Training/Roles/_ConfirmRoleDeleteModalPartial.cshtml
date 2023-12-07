@@ -1,0 +1,20 @@
+﻿<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Role</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group col">
+                        <span class="control-label">Are you sure you wish to remove the role <span id="roleName"></span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a asp-page-handler="Delete" asp-route-id="@Guid.Empty" id="roleDeleteButton" class="btn btn-danger">Delete Role</a>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
