@@ -40,7 +40,7 @@
                         @if (canEdit.Succeeded)
                         {
                             <a asp-page="Upsert" asp-route-Id="@entry.Id.Value" class="dropdown-item">Edit</a>
-                            <a href="#" data-role-id="@entry.Id.Value.ToString()" data-role-name="@entry.Name" class="dropdown-item delete-role-menu">Delete</a>
+                            <button data-role-id="@entry.Id.Value.ToString()" data-role-name="@entry.Name" class="dropdown-item delete-role-button">Remove</button>
                         }
                     </div>
                 </div>
@@ -50,22 +50,35 @@
     </tbody>
 </table>
 
-<partial name="_ConfirmRoleDeleteModalPartial" />
+@Html.AntiForgeryToken()
+
+<div class="modal fade" id="page-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
 
 @section scripts
 {
     <script>
-        $('.delete-role-menu').click(function(event) {
-            event.preventDefault();
-
+        $('.delete-role-button').click(function (event) {
             var roleId = $(this).data("roleId");
             var roleName = $(this).data("roleName");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
 
-            $('#roleName').text(roleName);
-            var url = $('#roleDeleteButton').attr('href');
-            url = url.replace('@Guid.Empty', roleId);
-            $('#roleDeleteButton').attr('href', url);
-            $('#page-modal').modal('show');
+            $.ajax({
+                url: "?handler=AjaxRemoveRole",
+                type: "POST",
+                data: {
+                    roleId: roleId,
+                    roleName: roleName,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
         });
     </script>
 }

@@ -1,0 +1,32 @@
+﻿@model AddModuleToTrainingRoleSelection
+
+<div class="modal fade" tabindex="-1" id="addModuleModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-page="/Training/Roles/Details" asp-area="SchoolAdmin" asp-route-id="@Model.RoleId.Value" asp-page-handler="AddModule">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Module to Training Role</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Module</span>
+                            <select asp-for="ModuleId" asp-items="@(new SelectList(Model.Modules, "Key", "Value"))" class="combo" style="width:100%">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col">
+                            <span>will be added to the <span clas="font-weight-bold">@Model.RoleName</span> Training Role.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg"/>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -5,12 +5,14 @@ using Application.Training.Roles.DeleteTrainingRole;
 using Application.Training.Roles.GetTrainingRoleList;
 using BaseModels;
 using Constellation.Application.Training.Models;
+using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveStaffMemberFromTrainingRoleModal;
 using Core.Errors;
 using Core.Models.Training.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Server.Pages.Shared.PartialViews.DeleteTrainingRoleModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
@@ -51,6 +53,19 @@ public class IndexModel : BasePageModel
         }
 
         Roles = request.Value;
+    }
+
+    public IActionResult OnPostAjaxRemoveRole(
+        string roleId,
+        string roleName)
+    {
+        TrainingRoleId RoleId = TrainingRoleId.FromValue(Guid.Parse(roleId));
+
+        DeleteTrainingRoleModalViewModel viewModel = new(
+            RoleId,
+            roleName);
+
+        return Partial("DeleteTrainingRoleModal", viewModel);
     }
 
     public async Task<IActionResult> OnGetDelete(Guid Id)

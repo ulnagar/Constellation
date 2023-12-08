@@ -42,7 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\Shared\Components\AddModuleToTrainingRole\" />
     <Folder Include="wwwroot\private\" />
   </ItemGroup>
 

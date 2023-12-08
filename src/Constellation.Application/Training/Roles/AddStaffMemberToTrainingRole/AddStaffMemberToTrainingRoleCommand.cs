@@ -2,8 +2,9 @@
 
 using Abstractions.Messaging;
 using Core.Models.Training.Identifiers;
+using System.Collections.Generic;
 
 public sealed record AddStaffMemberToTrainingRoleCommand(
         TrainingRoleId RoleId,
-        string StaffId)
+        List<string> StaffIds)
     : ICommand;
