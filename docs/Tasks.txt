@@ -2,10 +2,6 @@
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-TRAINING:
-	Finish Bulk Add Staff option for Role Details page
-	Implement Add Module, Bulk Add Modules, and Remove Module options on Role Details page
-	Implement Confirmation Modal for Remove Staff and Remove Module options on Role Details page
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS

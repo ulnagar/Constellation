@@ -1,0 +1,16 @@
+﻿@model RemoveModuleFromTrainingRoleModalViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">Remove Module</h5>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="form-group col">
+            <span class="control-label">Are you sure you wish to remove @Model.ModuleName from the Training Role @Model.RoleName?</span>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <a asp-page-handler="RemoveModule" asp-page="/Training/Roles/Details" asp-area="SchoolAdmin" asp-route-id="@Model.RoleId.Value" asp-route-moduleId="@Model.ModuleId.Value" class="btn btn-danger">Remove Module</a>
+    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+</div>

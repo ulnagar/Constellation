@@ -1,8 +1,9 @@
-﻿namespace Constellation.Application.Training.Roles.AddStaffMemberToTrainingRole;
+﻿namespace Constellation.Application.Training.Roles.AddModuleToTrainingRole;
 
 using Abstractions.Messaging;
-using Core.Models.Training.Contexts.Roles;
-using Core.Models.Training.Errors;
+using Constellation.Core.Models.Training.Contexts.Roles;
+using Constellation.Core.Models.Training.Errors;
+using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -10,48 +11,48 @@ using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class AddStaffMemberToTrainingRoleCommandHandler
-: ICommandHandler<AddStaffMemberToTrainingRoleCommand>
+internal sealed class AddModuleToTrainingRoleCommandHandler
+: ICommandHandler<AddModuleToTrainingRoleCommand>
 {
     private readonly ITrainingRoleRepository _roleRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
-    public AddStaffMemberToTrainingRoleCommandHandler(
+    public AddModuleToTrainingRoleCommandHandler(
         ITrainingRoleRepository roleRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _roleRepository = roleRepository;
         _unitOfWork = unitOfWork;
-        _logger = logger.ForContext<AddStaffMemberToTrainingRoleCommand>();
+        _logger = logger.ForContext<AddModuleToTrainingRoleCommand>();
     }
 
-    public async Task<Result> Handle(AddStaffMemberToTrainingRoleCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(AddModuleToTrainingRoleCommand request, CancellationToken cancellationToken)
     {
         TrainingRole role = await _roleRepository.GetRoleById(request.RoleId, cancellationToken);
 
         if (role is null)
         {
             _logger
-                .ForContext(nameof(AddStaffMemberToTrainingRoleCommand), request, true)
+                .ForContext(nameof(AddModuleToTrainingRoleCommand), request, true)
                 .ForContext(nameof(Error), TrainingErrors.Role.NotFound(request.RoleId), true)
-                .Warning("Failed to add staff member to training role");
+                .Warning("Failed to add module to training role");
 
             return Result.Failure(TrainingErrors.Role.NotFound(request.RoleId));
         }
 
-        foreach (string staffId in request.StaffIds)
+        foreach (TrainingModuleId moduleId in request.ModuleIds)
         {
-            Result result = role.AddMember(staffId);
+            Result result = role.AddModule(moduleId);
 
             if (result.IsFailure)
             {
                 _logger
-                    .ForContext(nameof(AddStaffMemberToTrainingRoleCommand), request, true)
-                    .ForContext(nameof(staffId), staffId)
+                    .ForContext(nameof(AddModuleToTrainingRoleCommand), request, true)
+                    .ForContext(nameof(moduleId), moduleId)
                     .ForContext(nameof(Error), result.Error, true)
-                    .Warning("Failed to add staff member to training role");
+                    .Warning("Failed to add module to training role");
 
                 return Result.Failure(result.Error);
             }

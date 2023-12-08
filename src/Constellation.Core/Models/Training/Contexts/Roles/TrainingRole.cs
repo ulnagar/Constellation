@@ -96,11 +96,8 @@ public sealed class TrainingRole : AggregateRoot, IAuditableEntity
     {
         IsDeleted = true;
 
-        foreach (TrainingRoleModule module in _modules)
-            RemoveModule(module.ModuleId);
-
-        foreach (TrainingRoleMember member in _members)
-            RemoveMember(member.StaffId);
+        _modules.RemoveAll(module => module is not null);
+        _members.RemoveAll(member => member is not null);
     }
 
     public void Restore()
