@@ -4,7 +4,6 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Features.Common.Queries;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Training.Modules.CreateTrainingCompletion;
-using Constellation.Application.Training.Modules.DoesModuleAllowNotRequiredResponse;
 using Constellation.Application.Training.Modules.GetCompletionRecordEditContext;
 using Constellation.Application.Training.Modules.GetTrainingModuleEditContext;
 using Constellation.Application.Training.Modules.GetUploadedTrainingCertificationMetadata;
@@ -65,9 +64,6 @@ public class UpsertModel : BasePageModel
     [NotFutureDate]
     public DateTime CompletedDate { get; set; } = DateTime.Today;
 
-    [BindProperty]
-    public bool NotRequired { get; set; }
-
     [AllowExtensions(FileExtensions: "pdf", ErrorMessage = "You can only upload PDF files")]
     [BindProperty]
     public IFormFile FormFile { get; set; }
@@ -93,7 +89,7 @@ public class UpsertModel : BasePageModel
         CanEditRecords = canEditTest.Succeeded;
 
         // Does the current user have permissons for the selected mode?
-        if (Mode == ModeOptions.FULL && !CanEditRecords)
+        if (Mode == ModeOptions.Full && !CanEditRecords)
         {
             // Editor mode selected without edit access
             Error = new ErrorDisplay
@@ -104,7 +100,7 @@ public class UpsertModel : BasePageModel
 
             return Page();
         } 
-        else if (Mode == ModeOptions.SOLOMODULE && !CanEditRecords)
+        else if (Mode == ModeOptions.SoloModule && !CanEditRecords)
         {
             // Editor insert mode selected without edit access
             Error = new ErrorDisplay
@@ -137,7 +133,6 @@ public class UpsertModel : BasePageModel
             SelectedStaffId = entity.StaffId;
             CompletedDate = entity.CompletedDate;
             ModuleId = entity.TrainingModuleId.Value;
-            NotRequired = entity.NotRequired;
 
             Result<CompletionRecordCertificateDto> certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateMetadataQuery(AttachmentType.TrainingCertificate, Id.Value.ToString()));
 
@@ -179,21 +174,21 @@ public class UpsertModel : BasePageModel
         ModuleOptions = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
 
         // Insert only mode allowing staff to create new records for themselves only
-        if (Mode == ModeOptions.SOLOSTAFF)
+        if (Mode == ModeOptions.SoloStaff)
         {
             SoloStaffMember = StaffOptions.FirstOrDefault(member => member.Key == StaffId);
             SelectedStaffId = StaffId;
         }
 
         // Insert only mode allowing editors to pre-select the module
-        if (Mode == ModeOptions.SOLOMODULE)
+        if (Mode == ModeOptions.SoloModule)
         {
             SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == ModuleId.Value);
             ModuleId = SoloModule.Key;
         }
 
         // Edit only mode allowing staff to upload certificate for existing records
-        if (Mode == ModeOptions.CERTUPLOAD)
+        if (Mode == ModeOptions.CertUpload)
         {
             SoloStaffMember = StaffOptions.FirstOrDefault(member => member.Key == StaffId);
             SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == ModuleId.Value);
@@ -217,7 +212,7 @@ public class UpsertModel : BasePageModel
 
             ModuleEditContextDto trainingModule = moduleRequest.Value;
 
-            FileDto file = new FileDto
+            FileDto file = new()
             {
                 FileName = $"{staffMember} - {CompletedDate:yyyy-MM-dd} - {trainingModule.Name}.pdf",
                 FileType = FormFile.ContentType
@@ -246,17 +241,6 @@ public class UpsertModel : BasePageModel
 
         DateOnly completedDate = DateOnly.FromDateTime(CompletedDate);
 
-        // Check if the Module allows not required if the not required has been selected.
-        if (ModuleId is not null && NotRequired)
-        {
-            Result<bool> notRequiredRequest = await _mediator.Send(new DoesModuleAllowNotRequiredResponseQuery(SelectedStaffId, TrainingModuleId.FromValue(ModuleId.Value)));
-
-            if (notRequiredRequest.IsFailure || notRequiredRequest.Value == false)
-            {
-                ModelState.AddModelError("NotRequired", "This Training Module does not allow Not Required responses.");
-            }
-        }
-
         if (!ModelState.IsValid)
         {
             await SetUpForm();
@@ -273,7 +257,6 @@ public class UpsertModel : BasePageModel
                 SelectedStaffId,
                 TrainingModuleId.FromValue(ModuleId.Value),
                 completedDate,
-                NotRequired,
                 await GetUploadedFile());
             
             Result result = await _mediator.Send(command);
@@ -313,7 +296,7 @@ public class UpsertModel : BasePageModel
             }
         }
 
-        if (Mode == ModeOptions.SOLOMODULE)
+        if (Mode == ModeOptions.SoloModule)
         {
             return RedirectToPage("/Training/Modules/Details", new { Id = ModuleId.Value });
         }
@@ -323,9 +306,9 @@ public class UpsertModel : BasePageModel
 
     public enum ModeOptions
     {
-        FULL,
-        SOLOSTAFF,
-        SOLOMODULE,
-        CERTUPLOAD
+        Full,
+        SoloStaff,
+        SoloModule,
+        CertUpload
     }
 }

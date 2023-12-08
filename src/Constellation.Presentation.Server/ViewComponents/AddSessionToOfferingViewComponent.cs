@@ -3,7 +3,6 @@
 using Constellation.Application.Offerings.GetOfferingDetails;
 using Constellation.Application.Periods.GetAllPeriods;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Pages.Shared.Components.AddSessionToOffering;
 using MediatR;

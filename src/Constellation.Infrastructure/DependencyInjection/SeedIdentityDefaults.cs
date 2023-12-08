@@ -74,11 +74,11 @@ public static class IdentityDefaults
                 AuthPermissions.GroupTutorialsView,
                 AuthPermissions.LessonsEdit,
                 AuthPermissions.LessonsView,
-                AuthPermissions.MandatoryTrainingBulkDownload,
-                AuthPermissions.MandatoryTrainingDetailsView,
-                AuthPermissions.MandatoryTrainingEdit,
-                AuthPermissions.MandatoryTrainingReportsRun,
-                AuthPermissions.MandatoryTrainingView,
+                //AuthPermissions.MandatoryTrainingBulkDownload,
+                //AuthPermissions.MandatoryTrainingDetailsView,
+                //AuthPermissions.MandatoryTrainingEdit,
+                //AuthPermissions.MandatoryTrainingReportsRun,
+                //AuthPermissions.MandatoryTrainingView,
                 AuthPermissions.PartnerDetailsView,
                 AuthPermissions.PartnerEdit,
                 AuthPermissions.PartnerView,
@@ -179,16 +179,26 @@ public static class IdentityDefaults
     {
         await CreateRole(roleManager, roleName);
 
-        var role = await roleManager.FindByNameAsync(roleName);
+        AppRole role = await roleManager.FindByNameAsync(roleName);
 
-        var claims = await roleManager.GetClaimsAsync(role);
+        IList<Claim> claims = await roleManager.GetClaimsAsync(role);
 
-        foreach (var permission in permissions)
+        List<Claim> permissionClaims = claims
+            .Where(claim => claim.Type == AuthClaimType.Permission)
+            .ToList();
+
+        foreach (Claim claim in permissionClaims)
         {
-            if (!claims.Any(claim => claim.Type == AuthClaimType.Permission && claim.Value == permission))
-            {
+            if (permissions.Contains(claim.Value))
+                continue;
+
+            await roleManager.RemoveClaimAsync(role, claim);
+        }
+
+        foreach (string permission in permissions)
+        {
+            if (permissionClaims.All(claim => claim.Value != permission))
                 await roleManager.AddClaimAsync(role, new Claim(AuthClaimType.Permission, permission));
-            }
         }
     }
 

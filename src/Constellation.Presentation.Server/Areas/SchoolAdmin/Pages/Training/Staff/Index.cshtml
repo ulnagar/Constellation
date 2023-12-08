@@ -5,7 +5,7 @@
 <h2>Mandatory Training Completion Records</h2>
 
 <div>
-    <a asp-page="/Training/Completion/Upsert" class="btn btn-warning" asp-route-Mode="@UpsertModel.ModeOptions.SOLOSTAFF">Create New</a>
+    <a asp-page="/Training/Completion/Upsert" class="btn btn-warning" asp-route-Mode="@UpsertModel.ModeOptions.SoloStaff">Create New</a>
     
     <button class="btn btn-secondary" data-toggle="modal" data-target="#legend">View Legend</button>
 </div>
@@ -20,6 +20,7 @@
             <th></th>
             <th>Module</th>
             <th>Date Completed</th>
+            <th>Date Due</th>
             <th></th>
         </tr>
     </thead>
@@ -27,44 +28,47 @@
     {
         <tr>
             <td>
-                @{
-                    if (item.TimeToExpiry > 31)
-                    {
+                @switch (item.TimeToExpiry)
+                {
+                    case > 31:
                         <img src="/images/GreenLight.png" class="training status-icon" title="@item.TimeToExpiry Days Remaining" />
-                    }
-                    else if (item.TimeToExpiry > 15)
-                    {
+                        break;
+                    case > 15:
                         <img src="/images/YellowLight.png" class="training status-icon" title="@item.TimeToExpiry Days Remaining" />
-                    }
-                    else if (item.TimeToExpiry > 1)
-                    {
+                        break;
+                    case > 1:
                         <img src="/images/RedLight.png" class="training status-icon" title="@item.TimeToExpiry Days Remaining" />
-                    }
-                    else
-                    {
+                        break;
+                    default:
                         <img src="/images/RedLight.png" class="training status-icon blink" title="@item.TimeToExpiry Days Remaining" />
-                    }
+                        break;
                 }
             </td>
             <td>@item.ModuleName</td>
             <td>
-                @{
-                    if (item.RecordNotRequired || !item.RecordEffectiveDate.HasValue)
-                    {
-                        @:N/A
-                    }
-                    else
-                    {
-                        @item.RecordEffectiveDate.Value.ToString("dd/MM/yyyy")
-                    }
+                @if (!item.RecordEffectiveDate.HasValue)
+                {
+                    @:N/A
+                }
+                else
+                {
+                    @item.RecordEffectiveDate.Value.ToString("dd/MM/yyyy")
                 }
             </td>
             <td>
-                @{
-                    if (item.RecordEffectiveDate.HasValue)
-                    {
-                        <a asp-page="/Training/Completion/Details" asp-route-moduleId="@item.ModuleId.Value" asp-route-completionId="@item.RecordId.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
-                    }
+                @if (!item.DueDate.HasValue)
+                {
+                    @:N/A
+                }
+                else
+                {
+                    @item.DueDate.Value.ToString("dd/MM/yyyy")
+                }
+            </td>
+            <td>
+                @if (item.RecordEffectiveDate.HasValue)
+                {
+                    <a asp-page="/Training/Completion/Details" asp-route-moduleId="@item.ModuleId.Value" asp-route-completionId="@item.RecordId.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
                 }
             </td>
         </tr>

@@ -64,7 +64,7 @@ internal sealed class CreateTrainingCompletionCommandHandler
 
         TrainingCompletion record = records.MaxBy(record => record.CompletedDate);
 
-        if (record.CompletedDate == request.CompletedDate)
+        if (record is not null && record.CompletedDate == request.CompletedDate)
         {
             _logger
                 .ForContext(nameof(CreateTrainingCompletionCommand), request, true)
