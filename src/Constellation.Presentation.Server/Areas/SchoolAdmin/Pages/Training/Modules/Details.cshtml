@@ -15,12 +15,10 @@
 
     var completionsGroupedByYear = Model.Module.Completions
         .GroupBy(record => {
-            if (!record.NotRequired && record.CompletedDate.HasValue)
+            if (record.CompletedDate.HasValue)
                 return record.CompletedDate.Value.Year.ToString();
-            if (!record.NotRequired && !record.CompletedDate.HasValue)
+            if (!record.CompletedDate.HasValue)
                 return "Never";
-            if (record.NotRequired)
-                return record.CreatedAt.Year.ToString();
             return "Unknown";
         })
         .OrderByDescending(group => group.Key);
@@ -169,7 +167,7 @@
                             <td>@item.StaffFaculty</td>
                             <td>
                                 @{
-                                    if (item.NotRequired)
+                                    if (!item.CompletedDate.HasValue)
                                     {
                                         @:N/A
                                     }
@@ -234,7 +232,7 @@
                                 <td>@item.StaffFaculty</td>
                                 <td>
                                     @{
-                                        if (item.NotRequired)
+                                        if (!item.CompletedDate.HasValue)
                                         {
                                             @:N/A
                                         }
