@@ -49,14 +49,14 @@
                 Create
             </button>
             <div class="dropdown-menu">
-                <a asp-page="Upsert" class="dropdown-item" asp-route-Mode="@UpsertModel.ModeOptions.FULL">Create New</a>
+                <a asp-page="Upsert" class="dropdown-item" asp-route-Mode="@UpsertModel.ModeOptions.Full">Create New</a>
                 <a asp-page="Upload" class="dropdown-item">Bulk Upload</a>
             </div>
         </div>
     } 
     else
     {
-        <a asp-page="Upsert" class="btn btn-warning" asp-route-Mode="@UpsertModel.ModeOptions.SOLOSTAFF">Create New</a>
+        <a asp-page="Upsert" class="btn btn-warning" asp-route-Mode="@UpsertModel.ModeOptions.SoloStaff">Create New</a>
     }
 
     <button class="btn btn-secondary" data-toggle="modal" data-target="#legend">View Legend</button>

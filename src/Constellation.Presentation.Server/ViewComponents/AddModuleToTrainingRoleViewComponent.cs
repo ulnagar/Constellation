@@ -7,13 +7,13 @@ using Core.Models.Training.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Pages.Shared.Components.AddStaffMemberToTrainingRole;
+using Pages.Shared.Components.AddModuleToTrainingRole;
 
-public class AddStaffMemberToTrainingRoleViewComponent : ViewComponent
+public class AddModuleToTrainingRoleViewComponent : ViewComponent
 {
     private readonly ISender _mediator;
 
-    public AddStaffMemberToTrainingRoleViewComponent(
+    public AddModuleToTrainingRoleViewComponent(
         ISender mediator)
     {
         _mediator = mediator;
@@ -23,15 +23,16 @@ public class AddStaffMemberToTrainingRoleViewComponent : ViewComponent
     {
         TrainingRoleId roleId = TrainingRoleId.FromValue(id);
         Result<TrainingRoleResponse> role = await _mediator.Send(new GetTrainingRoleQuery(roleId));
-        Dictionary<string, string> staffResult = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        Dictionary<Guid, string> modules = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
 
-        AddStaffMemberToTrainingRoleSelection viewModel = new()
+        AddModuleToTrainingRoleSelection viewModel = new()
         {
             RoleId = roleId,
             RoleName = role.Value.Name,
-            StaffMembers = staffResult
+            Modules = modules
         };
 
         return View(viewModel);
     }
+
 }

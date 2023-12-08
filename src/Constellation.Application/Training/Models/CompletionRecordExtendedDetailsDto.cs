@@ -23,7 +23,6 @@ public class CompletionRecordExtendedDetailsDto
     public List<EmailRecipient> PrincipalContacts { get; set; } = new();
 
     public TrainingCompletionId RecordId { get; set; }
-    public bool RecordNotRequired { get; set; }
     public DateTime? RecordEffectiveDate { get; set; }
 
     public bool IsLatest { get; set; }
@@ -92,7 +91,7 @@ public class CompletionRecordExtendedDetailsDto
             return;
         }
 
-        if (RecordNotRequired || ModuleFrequency == TrainingModuleExpiryFrequency.OnceOff && RecordEffectiveDate.HasValue)
+        if (ModuleFrequency == TrainingModuleExpiryFrequency.OnceOff && RecordEffectiveDate.HasValue)
         {
             DueDate = null;
             TimeToExpiry = 9999;

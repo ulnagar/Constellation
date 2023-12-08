@@ -1,14 +1,17 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Staff;
 
+using Application.Models.Auth;
 using Application.Training.Models;
 using Constellation.Application.Training.Modules.GetListOfCertificatesForStaffMemberWithNotCompletedModules;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
+[Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
@@ -28,7 +31,7 @@ public class IndexModel : BasePageModel
 
     public StaffCompletionListDto CompletionList { get; set; }
 
-    [ViewData] public string ActivePage { get; set; } = TrainingPages.Modules;
+    [ViewData] public string ActivePage { get; set; } = TrainingPages.Staff;
 
     public async Task OnGet()
     {

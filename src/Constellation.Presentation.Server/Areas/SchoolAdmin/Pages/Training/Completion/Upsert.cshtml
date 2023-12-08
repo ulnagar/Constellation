@@ -22,7 +22,7 @@
         <div class="form-group row">
             <label asp-for="SelectedStaffId" class="col-md-2">Staff Member</label>
             <div class="col-md-5">
-                @if (Model.Mode == UpsertModel.ModeOptions.SOLOSTAFF || Model.Mode == UpsertModel.ModeOptions.CERTUPLOAD)
+                @if (Model.Mode is UpsertModel.ModeOptions.SoloStaff or UpsertModel.ModeOptions.CertUpload)
                 {
                     <input type="hidden" asp-for="SelectedStaffId" />
                     <input type="text" class="form-control" readonly="readonly" value="@Model.SoloStaffMember.Value" />
@@ -40,7 +40,7 @@
         <div class="form-group row">
             <label asp-for="ModuleId" class="col-md-2">Training Module</label>
             <div class="col-md-8">
-                @if (Model.Mode == UpsertModel.ModeOptions.SOLOMODULE || Model.Mode == UpsertModel.ModeOptions.CERTUPLOAD)
+                @if (Model.Mode is UpsertModel.ModeOptions.SoloModule or UpsertModel.ModeOptions.CertUpload)
                 {
                     <input type="hidden" asp-for="ModuleId" />
                     <input type="text" class="form-control" readonly="readonly" value="@Model.SoloModule.Value" />
@@ -57,7 +57,7 @@
         <div class="form-group row">
             <label asp-for="CompletedDate" class="col-md-2">Date Completed</label>
             <div class="col-md-3">
-                @if (Model.Mode == UpsertModel.ModeOptions.CERTUPLOAD)
+                @if (Model.Mode == UpsertModel.ModeOptions.CertUpload)
                 {
                     <input asp-for="CompletedDate" class="form-control" readonly="readonly" />
                 } 
@@ -65,21 +65,6 @@
                 {
                     <input asp-for="CompletedDate" class="form-control" />
                     <span asp-validation-for="CompletedDate" class="text-danger"></span>
-                }
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <label asp-for="NotRequired" class="col-md-2">Not Required</label>
-            <div class="col-md-3">
-                @if (Model.Mode == UpsertModel.ModeOptions.CERTUPLOAD)
-                {
-                    <input asp-for="NotRequired" class="form-control" readonly="readonly" />
-                }
-                else
-                {
-                    <input asp-for="NotRequired" class="form-control" />
-                    <span asp-validation-for="NotRequired" class="text-danger"></span>
                 }
             </div>
         </div>

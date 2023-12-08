@@ -3,31 +3,31 @@
 
 @using Constellation.Application.Helpers
 @using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Completion
+
 @inject IAuthorizationService AuthorizationService
 
 <h2>Training Completion Record Details</h2>
 
 @{
-    var authorised = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
-
-    if (authorised.Succeeded)
-    {
-        <form asp-page-handler="DeleteRecord" asp-route-completionId="@Model.CompletionId" asp-route-moduleId="@Model.ModuleId" method="post">
-            <div class="page-menu">
-                <a asp-page="Upsert" asp-route-id="@Model.Record.Id.Value" asp-route-mode="@UpsertModel.ModeOptions.FULL" class="btn btn-warning">Edit</a>
-            
-                <button type="submit" class="btn btn-danger">Delete Entry</button>
-
-                <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
-            </div>
-        </form>
-    } else {
-        <div>
-            <a asp-page="Upsert" asp-route-id="@Model.Record.Id.Value" asp-route-mode="@UpsertModel.ModeOptions.CERTUPLOAD" class="btn btn-warning">Upload Certificate</a>
-            <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
-        </div>
-    }
+    var canManage = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
 }
+
+<div class="page-menu">
+    @if (canManage.Succeeded)
+    {
+        <a asp-page="Upsert" asp-route-id="@Model.Record.Id.Value" asp-route-moduleId="@Model.Record.ModuleId.Value" asp-route-mode="@UpsertModel.ModeOptions.Full" class="btn btn-warning">Edit</a>
+        
+        <form asp-page-handler="DeleteRecord" asp-route-completionId="@Model.CompletionId" asp-route-moduleId="@Model.ModuleId" method="post">
+            <button type="submit" class="btn btn-danger">Delete Entry</button>
+        </form>
+    }
+    else
+    {
+        <button class="btn btn-warning" data-toggle="modal" data-target="#uploadCertificateModal">Upload Certificate</button>
+    }
+    
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
 
 <hr />
 
@@ -65,16 +65,7 @@
             <label asp-for="Record.CompletedDate">Completed Date</label>
         </dt>
         <dd class="col-md-10">
-            @{
-                if (Model.Record.NotRequired)
-                {
-                    <span>Not Required</span>
-                }
-                else if (Model.Record.CompletedDate.HasValue)
-                {
-                    <span>@Model.Record.CompletedDate.Value.ToString("dd/MM/yyyy")</span>
-                }
-            }
+            <span>@Model.Record.CompletedDate!.Value.ToString("dd/MM/yyyy")</span>
         </dd>
     </dl>
 </div>
@@ -89,3 +80,5 @@
         <embed src="data:application/pdf;base64,@Model.UploadedCertificate.FileDataBase64" class="embed-responsive-item" />
     </div>
 }
+
+<vc:upload-training-completion-certificate module-id="@Model.ModuleId" completion-id="@Model.CompletionId" completion-date="@Model.Record.CompletedDate!.Value" />

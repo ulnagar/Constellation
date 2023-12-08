@@ -10,6 +10,5 @@ public sealed record UpdateTrainingCompletionCommand(
     string StaffId,
     TrainingModuleId TrainingModuleId,
     DateOnly CompletedDate,
-    bool NotRequired,
     FileDto File)
     : ICommand;

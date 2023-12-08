@@ -102,7 +102,7 @@
 <div class="mb-3">
     @if (canEditTest.Succeeded)
     {
-        <a asp-page="/Training/Completion/Upsert" class="btn btn-info" asp-route-ModuleId="@Model.Module.Id.Value" asp-route-Mode="@UpsertModel.ModeOptions.SOLOMODULE">Create New</a>
+        <a asp-page="/Training/Completion/Upsert" class="btn btn-info" asp-route-ModuleId="@Model.Module.Id.Value" asp-route-Mode="@UpsertModel.ModeOptions.SoloModule">Create New</a>
     }
     <button class="btn btn-secondary" data-toggle="modal" data-target="#legend">View Legend</button>
 </div>
