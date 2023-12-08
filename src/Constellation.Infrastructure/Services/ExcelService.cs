@@ -336,7 +336,6 @@ public class ExcelService : IExcelService
             {
                 completion.GetProperty("ModuleName"),
                 completion.GetProperty("ModuleFrequency"),
-                completion.GetProperty("NotMandatory"),
                 completion.GetProperty("RequiredByRoles"),
                 completion.GetProperty("TimeToExpiry"),
                 completion.GetProperty("RecordEffectiveDate"),
@@ -344,31 +343,25 @@ public class ExcelService : IExcelService
             };
         });
 
-        workSheet.Cells[7, 6, workSheet.Dimension.Rows, 7].Style.Numberformat.Format = "dd/MM/yyyy";
+        workSheet.Cells[7, 5, workSheet.Dimension.Rows, 6].Style.Numberformat.Format = "dd/MM/yyyy";
 
         // Highlight overdue entries
         ExcelAddress dataRange = new ExcelAddress(8, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
 
-        IExcelConditionalFormattingExpression formatNotRequired = workSheet.ConditionalFormatting.AddExpression(dataRange);
-        formatNotRequired.Formula = "=$C8 = TRUE";
-        formatNotRequired.Style.Font.Color.Color = Color.DarkOliveGreen;
-        formatNotRequired.Style.Font.Italic = true;
-        formatNotRequired.StopIfTrue = true;
-
         IExcelConditionalFormattingExpression formatNeverCompleted = workSheet.ConditionalFormatting.AddExpression(dataRange);
-        formatNeverCompleted.Formula = "=$E8 = -9999";
+        formatNeverCompleted.Formula = "=$D8 = -9999";
         formatNeverCompleted.Style.Fill.BackgroundColor.Color = Color.Gray;
         formatNeverCompleted.Style.Font.Color.Color = Color.White;
         formatNeverCompleted.StopIfTrue = true;
 
         IExcelConditionalFormattingExpression formatOverdue = workSheet.ConditionalFormatting.AddExpression(dataRange);
-        formatOverdue.Formula = "=$E8 < 1";
+        formatOverdue.Formula = "=$D8 < 1";
         formatOverdue.Style.Fill.BackgroundColor.Color = Color.Red;
         formatOverdue.Style.Font.Color.Color = Color.White;
         formatOverdue.StopIfTrue = true;
 
         IExcelConditionalFormattingExpression formatSoonExpire = workSheet.ConditionalFormatting.AddExpression(dataRange);
-        formatSoonExpire.Formula = "=$E8 < 14";
+        formatSoonExpire.Formula = "=$D8 < 14";
         formatSoonExpire.Style.Fill.BackgroundColor.Color = Color.Yellow;
         formatSoonExpire.StopIfTrue = true;
 
@@ -376,21 +369,18 @@ public class ExcelService : IExcelService
         workSheet.Cells[5, 2].Value = "Colour Legend";
         workSheet.Cells[5, 2].Style.Font.Bold = true;
         workSheet.Cells[5, 3].Value = "Expired";
-        workSheet.Cells[5, 3].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+        workSheet.Cells[5, 3].Style.Fill.PatternType = ExcelFillStyle.Solid;
         workSheet.Cells[5, 3].Style.Fill.BackgroundColor.SetColor(Color.Red);
         workSheet.Cells[5, 3].Style.Font.Color.SetColor(Color.White);
         workSheet.Cells[5, 4].Value = "Expiring Soon";
-        workSheet.Cells[5, 4].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+        workSheet.Cells[5, 4].Style.Fill.PatternType = ExcelFillStyle.Solid;
         workSheet.Cells[5, 4].Style.Fill.BackgroundColor.SetColor(Color.Yellow);
         workSheet.Cells[5, 5].Value = "Never Completed";
-        workSheet.Cells[5, 5].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+        workSheet.Cells[5, 5].Style.Fill.PatternType = ExcelFillStyle.Solid;
         workSheet.Cells[5, 5].Style.Fill.BackgroundColor.SetColor(Color.Gray);
         workSheet.Cells[5, 5].Style.Font.Color.SetColor(Color.White);
-        workSheet.Cells[5, 6].Value = "Not Required";
-        workSheet.Cells[5, 6].Style.Font.Color.SetColor(Color.DarkOliveGreen);
-        workSheet.Cells[5, 6].Style.Font.Italic = true;
-        workSheet.Cells[5, 2, 5, 6].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thick);
-        workSheet.Cells[5, 3, 5, 6].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+        workSheet.Cells[5, 2, 5, 5].Style.Border.BorderAround(ExcelBorderStyle.Thick);
+        workSheet.Cells[5, 3, 5, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
         // Freeze top rows
         workSheet.View.FreezePanes(8, 1);
