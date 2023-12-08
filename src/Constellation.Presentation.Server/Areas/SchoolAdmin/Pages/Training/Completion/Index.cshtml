@@ -106,7 +106,7 @@
             <td>@item.ModuleName</td>
             <td>
                 @{
-                    if (item.NotRequired)
+                    if (!item.CompletedDate.HasValue)
                     {
                         @:N/A
                     }

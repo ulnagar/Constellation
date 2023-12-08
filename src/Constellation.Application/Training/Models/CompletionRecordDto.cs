@@ -16,7 +16,7 @@ public class CompletionRecordDto
     public string StaffLastName { get; set; }
     public string StaffFaculty { get; set; }
     public DateOnly? CompletedDate { get; set; }
-    public bool NotRequired { get; set; }
+    public bool NotMandatory { get; set; }
     public int ExpiryCountdown { get; set; }
     public ExpiryStatus Status { get; set; } = ExpiryStatus.Unknown;
     public DateTime CreatedAt { get; set; }
