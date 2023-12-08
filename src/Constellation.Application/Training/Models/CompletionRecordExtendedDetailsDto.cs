@@ -16,6 +16,8 @@ public class CompletionRecordExtendedDetailsDto
     public TrainingModuleId ModuleId { get; set; }
     public string ModuleName { get; set; }
     public TrainingModuleExpiryFrequency ModuleFrequency { get; set; }
+    public bool NotMandatory { get; set; }
+    public List<string> RequiredByRoles { get; set; }
 
     public string StaffId { get; set; }
     public EmailRecipient StaffEntry { get; set; }

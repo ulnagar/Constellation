@@ -13,6 +13,8 @@ using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Faculty.ValueObjects;
+using Core.Models.Training.Contexts.Roles;
+using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;
 using Models;
 using System.Collections.Generic;
@@ -27,6 +29,7 @@ internal sealed class GenerateStaffReportCommandHandler
     : ICommandHandler<GenerateStaffReportCommand, ReportDto>
 {
     private readonly ITrainingModuleRepository _trainingRepository;
+    private readonly ITrainingRoleRepository _roleRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
     private readonly ISchoolRepository _schoolRepository;
@@ -37,6 +40,7 @@ internal sealed class GenerateStaffReportCommandHandler
 
     public GenerateStaffReportCommandHandler(
         ITrainingModuleRepository trainingRepository,
+        ITrainingRoleRepository roleRepository,
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
         ISchoolRepository schoolRepository,
@@ -46,6 +50,7 @@ internal sealed class GenerateStaffReportCommandHandler
         IAttachmentService attachmentService)
     {
         _trainingRepository = trainingRepository;
+        _roleRepository = roleRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
         _schoolRepository = schoolRepository;
@@ -58,9 +63,6 @@ internal sealed class GenerateStaffReportCommandHandler
     public async Task<Result<ReportDto>> Handle(GenerateStaffReportCommand request, CancellationToken cancellationToken)
     {
         StaffCompletionListDto data = new();
-
-        // - Get all modules
-        List<TrainingModule> modules = await _trainingRepository.GetAllModules(cancellationToken);
 
         // - Get all staff
         Staff staff = await _staffRepository.GetById(request.StaffId, cancellationToken);
@@ -77,8 +79,18 @@ internal sealed class GenerateStaffReportCommandHandler
         data.EmailAddress = staff.EmailAddress;
         data.Faculties = faculties.Select(faculty => faculty.Name).ToList();
 
-        foreach (TrainingModule module in modules)
+        List<TrainingRole> roles = await _roleRepository.GetRolesForStaffMember(staff.StaffId, cancellationToken);
+
+        List<TrainingModuleId> requiredModuleIds = roles
+            .SelectMany(role => role.Modules)
+            .Select(module => module.ModuleId)
+            .Distinct()
+            .ToList();
+
+        foreach (TrainingModuleId moduleId in requiredModuleIds)
         {
+            TrainingModule module = await _trainingRepository.GetModuleById(moduleId, cancellationToken);
+
             if (module.IsDeleted) continue;
 
             TrainingCompletion record = module.Completions
@@ -90,6 +102,13 @@ internal sealed class GenerateStaffReportCommandHandler
             CompletionRecordExtendedDetailsDto entry = new();
             entry.AddModuleDetails(module);
             entry.AddStaffDetails(staff);
+
+            entry.RequiredByRoles = roles
+                .Where(role => 
+                    role.Modules.Any(moduleEntry => 
+                        moduleEntry.ModuleId == module.Id))
+                .Select(role => role.Name)
+                .ToList();
 
             foreach (Faculty faculty in faculties)
             {

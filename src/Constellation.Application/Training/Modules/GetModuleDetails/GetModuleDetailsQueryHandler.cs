@@ -7,6 +7,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.Training.Contexts.Modules;
+using Constellation.Core.Models.Training.Contexts.Roles;
 using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
 using Core.Models.Faculty.Identifiers;
@@ -20,17 +21,20 @@ using System.Threading.Tasks;
 internal sealed class GetModuleDetailsQueryHandler
     : IQueryHandler<GetModuleDetailsQuery, ModuleDetailsDto>
 {
+    private readonly ITrainingRoleRepository _roleRepository;
     private readonly ITrainingModuleRepository _trainingRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
     private readonly IDateTimeProvider _dateTime;
 
     public GetModuleDetailsQueryHandler(
+        ITrainingRoleRepository roleRepository,
         ITrainingModuleRepository trainingRepository,
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
         IDateTimeProvider dateTime)
     {
+        _roleRepository = roleRepository;
         _trainingRepository = trainingRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
@@ -52,7 +56,12 @@ internal sealed class GetModuleDetailsQueryHandler
 
         List<Staff> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
 
-        //TODO: (R1.14) Add a check to see if each staff member is required to complete this module
+        List<TrainingRole> roles = await _roleRepository.GetRolesForModule(module.Id, cancellationToken);
+        List<string> requiredStaffIds = roles
+            .SelectMany(role => role.Members)
+            .Select(member => member.StaffId)
+            .Distinct()
+            .ToList();
 
         foreach (Staff staffMember in staffMembers)
         {

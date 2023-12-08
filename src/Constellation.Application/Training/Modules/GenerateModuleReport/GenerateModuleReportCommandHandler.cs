@@ -75,9 +75,7 @@ internal sealed class GenerateModuleReportCommandHandler
             .Select(member => member.StaffId)
             .Distinct()
             .ToList();
-
-        //TODO: (R1.14) Add a check to see if each staff member is required to complete this module
-
+        
         foreach (Staff staffMember in staffMembers)
         {
             List<FacultyId> facultyIds = staffMember
