@@ -304,16 +304,16 @@ public class ExcelService : IExcelService
 
     public async Task<MemoryStream> CreateTrainingModuleStaffReportFile(StaffCompletionListDto data)
     {
-        var completion = typeof(CompletionRecordExtendedDetailsDto);
+        Type completion = typeof(CompletionRecordExtendedDetailsDto);
 
-        var excel = new ExcelPackage();
-        var workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
+        ExcelPackage excel = new ExcelPackage();
+        ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
 
-        var nameDetail = workSheet.Cells[1, 1].RichText.Add(data.Name);
+        ExcelRichText nameDetail = workSheet.Cells[1, 1].RichText.Add(data.Name);
         nameDetail.Bold = true;
         nameDetail.Size = 16;
 
-        var facultyText = "Faculties: ";
+        string facultyText = "Faculties: ";
         for (int i = 0; i < data.Faculties.Count; i++)
         {
             if (i != 0)
@@ -336,38 +336,39 @@ public class ExcelService : IExcelService
             {
                 completion.GetProperty("ModuleName"),
                 completion.GetProperty("ModuleFrequency"),
-                completion.GetProperty("RecordNotRequired"),
+                completion.GetProperty("NotMandatory"),
+                completion.GetProperty("RequiredByRoles"),
                 completion.GetProperty("TimeToExpiry"),
                 completion.GetProperty("RecordEffectiveDate"),
                 completion.GetProperty("DueDate")
             };
         });
 
-        workSheet.Cells[7, 5, workSheet.Dimension.Rows, 6].Style.Numberformat.Format = "dd/MM/yyyy";
+        workSheet.Cells[7, 6, workSheet.Dimension.Rows, 7].Style.Numberformat.Format = "dd/MM/yyyy";
 
         // Highlight overdue entries
-        var dataRange = new ExcelAddress(8, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
+        ExcelAddress dataRange = new ExcelAddress(8, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
 
-        var formatNotRequired = workSheet.ConditionalFormatting.AddExpression(dataRange);
+        IExcelConditionalFormattingExpression formatNotRequired = workSheet.ConditionalFormatting.AddExpression(dataRange);
         formatNotRequired.Formula = "=$C8 = TRUE";
         formatNotRequired.Style.Font.Color.Color = Color.DarkOliveGreen;
         formatNotRequired.Style.Font.Italic = true;
         formatNotRequired.StopIfTrue = true;
 
-        var formatNeverCompleted = workSheet.ConditionalFormatting.AddExpression(dataRange);
-        formatNeverCompleted.Formula = "=$D8 = -9999";
+        IExcelConditionalFormattingExpression formatNeverCompleted = workSheet.ConditionalFormatting.AddExpression(dataRange);
+        formatNeverCompleted.Formula = "=$E8 = -9999";
         formatNeverCompleted.Style.Fill.BackgroundColor.Color = Color.Gray;
         formatNeverCompleted.Style.Font.Color.Color = Color.White;
         formatNeverCompleted.StopIfTrue = true;
 
-        var formatOverdue = workSheet.ConditionalFormatting.AddExpression(dataRange);
-        formatOverdue.Formula = "=$D8 < 1";
+        IExcelConditionalFormattingExpression formatOverdue = workSheet.ConditionalFormatting.AddExpression(dataRange);
+        formatOverdue.Formula = "=$E8 < 1";
         formatOverdue.Style.Fill.BackgroundColor.Color = Color.Red;
         formatOverdue.Style.Font.Color.Color = Color.White;
         formatOverdue.StopIfTrue = true;
 
-        var formatSoonExpire = workSheet.ConditionalFormatting.AddExpression(dataRange);
-        formatSoonExpire.Formula = "=$D8 < 14";
+        IExcelConditionalFormattingExpression formatSoonExpire = workSheet.ConditionalFormatting.AddExpression(dataRange);
+        formatSoonExpire.Formula = "=$E8 < 14";
         formatSoonExpire.Style.Fill.BackgroundColor.Color = Color.Yellow;
         formatSoonExpire.StopIfTrue = true;
 
@@ -395,7 +396,7 @@ public class ExcelService : IExcelService
         workSheet.View.FreezePanes(8, 1);
         workSheet.Cells[5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
-        var memoryStream = new MemoryStream();
+        MemoryStream memoryStream = new MemoryStream();
         await excel.SaveAsAsync(memoryStream);
         memoryStream.Position = 0;
 
