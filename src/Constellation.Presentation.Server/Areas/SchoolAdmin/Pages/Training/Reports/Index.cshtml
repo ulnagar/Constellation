@@ -21,7 +21,7 @@
         An Excel export of each module and the completion status for a single staff member
     </div>
     <div class="col-md-2">
-        <a asp-action="FTEBreakdown" asp-controller="Students" asp-area="Reports" class="btn btn-block btn-warning">Run Report</a>
+        <button type="button" data-is-detailed="false" class="btn btn-block btn-warning staff-report-button">Run Report</button>
     </div>
 </div>
 
@@ -33,7 +33,7 @@
         An Zip file containing both the Excel export of each module and the completion status, along with PDF copies of the most recent uploaded certificates for a single staff member
     </div>
     <div class="col-md-2">
-        <a asp-action="FTEBreakdown" asp-controller="Students" asp-area="Reports" class="btn btn-block btn-warning">Run Report</a>
+        <button type="button" data-is-detailed="true" class="btn btn-block btn-warning staff-report-button">Run Report</button>
     </div>
 </div>
 
@@ -104,6 +104,28 @@
                 $('#page-modal .modal-content').html(data);
                 $(".combo").select2({ theme: 'bootstrap' });
                 $('#moduleModal').submit(function (e) {
+                    $('#page-modal').modal('hide');
+                    return true;
+                });
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.staff-report-button').click(function (event) {
+            var isDetailed = $(this).data("isDetailed");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxStaffModal",
+                type: "POST",
+                data: {
+                    detailsRequested: isDetailed,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $(".combo").select2({ theme: 'bootstrap' });
+                $('#staffModal').submit(function (e) {
                     $('#page-modal').modal('hide');
                     return true;
                 });
