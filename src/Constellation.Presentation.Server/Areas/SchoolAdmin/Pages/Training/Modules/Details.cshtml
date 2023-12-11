@@ -7,11 +7,6 @@
 
 @{
     var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
-    var canRunReportsTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
-
-    //var completionsGroupedByYear = Model.Module.Completions
-    //    .GroupBy(record => (record.NotRequired) ? record.CreatedAt.Year : record.CompletedDate.Value.Year)
-    //    .OrderByDescending(group => group.Key);
 
     var completionsGroupedByYear = Model.Module.Completions
         .GroupBy(record => {
@@ -41,19 +36,6 @@
         {
             <a asp-page-handler="ReinstateModule" class="btn btn-danger">Reinstate Module</a>
         }
-    }
-
-    @if (canRunReportsTest.Succeeded)
-    {
-        <div class="btn-group">
-            <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">
-                Reports
-            </button>
-            <div class="dropdown-menu">
-                <a asp-page-handler="DownloadReport" class="dropdown-item">Overview Report</a>
-                <a asp-page-handler="DownloadReportWithCertificates" class="dropdown-item">Detailed Report</a>
-            </div>
-        </div>
     }
 
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>

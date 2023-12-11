@@ -1,0 +1,28 @@
+﻿@model SelectTrainingModuleForReportModalViewModel
+
+<form asp-page="/Training/Reports/Index" asp-area="SchoolAdmin" asp-page-handler="ModuleSummaryReport" id="moduleModal" method="post">
+    <div class="modal-header">
+        <h5 class="modal-title">Select Module for Report</h5>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="form-group col">
+                <span class="control-label">Module</span>
+                <select asp-for="ModuleId" asp-items="@(new SelectList(Model.Modules, "Key", "Value"))" class="combo" style="width:100%">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        @if (Model.DetailedReportRequested)
+        {
+            <input asp-page="/Training/Reports/Index" asp-area="SchoolAdmin" asp-page-handler="ModuleDetailReport" type="submit" value="Run Report" class="btn btn-primary" />
+        }
+        else
+        {
+            <input asp-page="/Training/Reports/Index" asp-area="SchoolAdmin" asp-page-handler="ModuleSummaryReport" type="submit" value="Run Report" class="btn btn-primary" />
+        }
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>
