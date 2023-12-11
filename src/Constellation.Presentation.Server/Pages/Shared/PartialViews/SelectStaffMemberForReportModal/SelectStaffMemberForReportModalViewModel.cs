@@ -7,6 +7,12 @@ public class SelectStaffMemberForReportModalViewModel
     [Required]
     public string StaffId { get; set; }
     public Dictionary<string, string> StaffMembers { get; set; } = new();
-    public bool DetailedReportRequested { get; set; }
-
+    public ReportType Type { get; set; }
+    
+    public enum ReportType
+    {
+        Summary,
+        Detail,
+        Module
+    }
 }

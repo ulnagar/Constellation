@@ -11,7 +11,6 @@ using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters.Xml;
 using Server.Pages.Shared.PartialViews.SelectStaffMemberForReportModal;
 using Server.Pages.Shared.PartialViews.SelectTrainingModuleForReportModal;
 
@@ -125,13 +124,17 @@ public class IndexModel : BasePageModel
         return File(reportRequest.Value.FileData, reportRequest.Value.FileType, reportRequest.Value.FileName);
     }
 
-    public async Task<IActionResult> OnPostAjaxStaffModal(bool detailsRequested)
+    public async Task<IActionResult> OnPostAjaxStaffModal(string reportType)
     {
         Dictionary<string, string> staffResult = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
 
+        SelectStaffMemberForReportModalViewModel.ReportType type = reportType == "summary" ? SelectStaffMemberForReportModalViewModel.ReportType.Summary
+            : reportType == "detail" ? SelectStaffMemberForReportModalViewModel.ReportType.Detail
+            : SelectStaffMemberForReportModalViewModel.ReportType.Module;
+
         SelectStaffMemberForReportModalViewModel viewModel = new()
         {
-            DetailedReportRequested = detailsRequested,
+            Type = type,
             StaffMembers = staffResult
         };
 
@@ -206,5 +209,24 @@ public class IndexModel : BasePageModel
         }
 
         return File(reportRequest.Value.FileData, reportRequest.Value.FileType, reportRequest.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnPostStaffModuleReport(SelectStaffMemberForReportModalViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+            await GetClasses(_mediator);
+
+            Error = new()
+            {
+                Error = new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage),
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return RedirectToPage("/Training/Reports/StaffMember", new { area = "SchoolAdmin", Id = viewModel.StaffId });
     }
 }
