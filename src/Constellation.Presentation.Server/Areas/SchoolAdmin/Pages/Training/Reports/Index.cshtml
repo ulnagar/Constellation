@@ -1,0 +1,114 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Reports.IndexModel
+
+<h2>Mandatory Training Reports</h2>
+
+<div class="page-menu">
+
+</div>
+
+<hr />
+
+<div class="row mt-3">
+    <div class="col-md-8">
+        <h3>Staff Reports</h3>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <h4>Summary Report</h4>
+        An Excel export of each module and the completion status for a single staff member
+    </div>
+    <div class="col-md-2">
+        <a asp-action="FTEBreakdown" asp-controller="Students" asp-area="Reports" class="btn btn-block btn-warning">Run Report</a>
+    </div>
+</div>
+
+<hr />
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <h4>Detail Report</h4>
+        An Zip file containing both the Excel export of each module and the completion status, along with PDF copies of the most recent uploaded certificates for a single staff member
+    </div>
+    <div class="col-md-2">
+        <a asp-action="FTEBreakdown" asp-controller="Students" asp-area="Reports" class="btn btn-block btn-warning">Run Report</a>
+    </div>
+</div>
+
+<hr />
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <h4>Required Module View</h4>
+        A page showing each module and the required status for a single staff member
+    </div>
+    <div class="col-md-2">
+        <a asp-action="FTEBreakdown" asp-controller="Students" asp-area="Reports" class="btn btn-block btn-warning">View Report</a>
+    </div>
+</div>
+
+<hr />
+
+<div class="row mt-3">
+    <div class="col-md-8">
+        <h3>Module Reports</h3>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-md-12">
+        <h4>Summary Report</h4>
+        An Excel export of each module and the completion status for a single training module
+    </div>
+    <div class="col-md-2">
+        <button type="button" data-is-detailed="false" class="btn btn-block btn-warning module-report-button">Run Report</button>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-md-12">
+        <h4>Detail Report</h4>
+        A Zip file containing both the Excel export of each module and the completion status, along with PDF copies of the most recent uploaded certificates for a single training module
+    </div>
+    <div class="col-md-2">
+        <button type="button" data-is-detailed="true" class="btn btn-block btn-warning module-report-button">Run Report</button>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+<div class="modal fade" id="page-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $('.module-report-button').click(function (event) {
+            var isDetailed = $(this).data("isDetailed");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxModuleModal",
+                type: "POST",
+                data: {
+                    detailsRequested: isDetailed,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $(".combo").select2({ theme: 'bootstrap' });
+                $('#moduleModal').submit(function (e) {
+                    $('#page-modal').modal('hide');
+                    return true;
+                });
+                $('#page-modal').modal('show');
+            });
+        });
+    </script>
+}
