@@ -1,0 +1,40 @@
+﻿@page "{id}"
+@using Constellation.Application.Helpers
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Reports.StaffMemberModel
+
+<h2>Training Modules for Staff Member</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<table class="table table-striped data-table">
+    <thead>
+        <tr>
+            <th>Module</th>
+            <th>Expiry</th>
+            <th>Mandatory?</th>
+            <th>Required By Roles</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.Modules)
+        {
+            <tr>
+                <td>@entry.ModuleName</td>
+                <td>@entry.Expiry.GetDisplayName()</td>
+                <td>@entry.IsRequired</td>
+                <td>
+                    @foreach (var item in entry.Roles)
+                    {
+                        <badge class="badge badge-info">@item.Value</badge>
+                    }
+                </td>
+                <td></td>
+            </tr>
+        }
+    </tbody>
+</table>

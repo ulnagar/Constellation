@@ -15,13 +15,17 @@
         </div>
     </div>
     <div class="modal-footer">
-        @if (Model.DetailedReportRequested)
+        @if (Model.Type == SelectStaffMemberForReportModalViewModel.ReportType.Detail)
         {
             <input asp-page="/Training/Reports/Index" asp-area="SchoolAdmin" asp-page-handler="StaffDetailReport" type="submit" value="Run Report" class="btn btn-primary" />
         }
-        else
+        else if (Model.Type == SelectStaffMemberForReportModalViewModel.ReportType.Summary)
         {
             <input asp-page="/Training/Reports/Index" asp-area="SchoolAdmin" asp-page-handler="StaffSummaryReport" type="submit" value="Run Report" class="btn btn-primary" />
+        }
+        else if (Model.Type == SelectStaffMemberForReportModalViewModel.ReportType.Module)
+        {
+            <input asp-page="/Training/Reports/Index" asp-area="SchoolAdmin" asp-page-handler="StaffModuleReport" type="submit" value="Run Report" class="btn btn-primary" />
         }
         <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
     </div>

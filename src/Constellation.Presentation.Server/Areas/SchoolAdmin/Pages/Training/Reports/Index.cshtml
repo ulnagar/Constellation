@@ -21,7 +21,7 @@
         An Excel export of each module and the completion status for a single staff member
     </div>
     <div class="col-md-2">
-        <button type="button" data-is-detailed="false" class="btn btn-block btn-warning staff-report-button">Run Report</button>
+        <button type="button" data-report-type="summary" class="btn btn-block btn-warning staff-report-button">Run Report</button>
     </div>
 </div>
 
@@ -33,7 +33,7 @@
         An Zip file containing both the Excel export of each module and the completion status, along with PDF copies of the most recent uploaded certificates for a single staff member
     </div>
     <div class="col-md-2">
-        <button type="button" data-is-detailed="true" class="btn btn-block btn-warning staff-report-button">Run Report</button>
+        <button type="button" data-report-type="detail" class="btn btn-block btn-warning staff-report-button">Run Report</button>
     </div>
 </div>
 
@@ -45,7 +45,7 @@
         A page showing each module and the required status for a single staff member
     </div>
     <div class="col-md-2">
-        <a asp-action="FTEBreakdown" asp-controller="Students" asp-area="Reports" class="btn btn-block btn-warning">View Report</a>
+        <button type="button" data-report-type="module" class="btn btn-block btn-warning staff-report-button">Run Report</button>
     </div>
 </div>
 
@@ -112,14 +112,14 @@
         });
 
         $('.staff-report-button').click(function (event) {
-            var isDetailed = $(this).data("isDetailed");
+            var reportType = $(this).data("reportType");
             var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
 
             $.ajax({
                 url: "?handler=AjaxStaffModal",
                 type: "POST",
                 data: {
-                    detailsRequested: isDetailed,
+                    reportType: reportType,
                     __RequestVerificationToken: xsrfHeader
                 }
             }).done(function (data) {
