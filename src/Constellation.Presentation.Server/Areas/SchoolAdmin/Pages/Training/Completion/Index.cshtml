@@ -37,11 +37,6 @@
         <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Expiring" class="btn @expiring_style">Expiring Soon</a>
     </div>
 
-    @if (canRunReportsTest.Succeeded)
-    {
-        <button class="btn btn-warning" data-toggle="modal" data-target="#staffReport">Staff Report</button>
-    }
-
     @if (isEditorTest.Succeeded)
     {
         <div class="btn-group">
@@ -129,15 +124,3 @@
         </tr>
     }
 </table>
-
-<vc:staff-training-report></vc:staff-training-report>
-
-@section scripts {
-    <script>
-        $('#staffReportSubmitButton').click(function (e) {
-            e.preventDefault();
-            $('#staffReport').modal('hide');
-            $('#staffReportForm').submit();
-        });
-    </script>
-}

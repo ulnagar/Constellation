@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Reports;
 
 using Application.Models.Auth;
+using Application.Training.Modules.GenerateStaffReport;
 using BaseModels;
 using Constellation.Application.Features.Common.Queries;
 using Constellation.Application.Training.Models;
@@ -10,6 +11,8 @@ using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters.Xml;
+using Server.Pages.Shared.PartialViews.SelectStaffMemberForReportModal;
 using Server.Pages.Shared.PartialViews.SelectTrainingModuleForReportModal;
 
 [Authorize(Policy = AuthPolicies.CanRunTrainingModuleReports)]
@@ -52,6 +55,19 @@ public class IndexModel : BasePageModel
     {
         StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
+        if (!ModelState.IsValid)
+        {
+            await GetClasses(_mediator);
+
+            Error = new()
+            {
+                Error = new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage),
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
         TrainingModuleId moduleId = TrainingModuleId.FromValue(viewModel.ModuleId);
 
         Result<ReportDto> reportRequest = await _mediator.Send(new GenerateModuleReportCommand(moduleId, false));
@@ -76,9 +92,105 @@ public class IndexModel : BasePageModel
     {
         StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
+        if (!ModelState.IsValid)
+        {
+            await GetClasses(_mediator);
+
+            Error = new()
+            {
+                Error = new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage),
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
         TrainingModuleId moduleId = TrainingModuleId.FromValue(viewModel.ModuleId);
 
         Result<ReportDto> reportRequest = await _mediator.Send(new GenerateModuleReportCommand(moduleId, true));
+
+        if (reportRequest.IsFailure)
+        {
+            await GetClasses(_mediator);
+
+            Error = new ErrorDisplay
+            {
+                Error = reportRequest.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return File(reportRequest.Value.FileData, reportRequest.Value.FileType, reportRequest.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnPostAjaxStaffModal(bool detailsRequested)
+    {
+        Dictionary<string, string> staffResult = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+
+        SelectStaffMemberForReportModalViewModel viewModel = new()
+        {
+            DetailedReportRequested = detailsRequested,
+            StaffMembers = staffResult
+        };
+
+        return Partial("SelectStaffMemberForReportModal", viewModel);
+    }
+
+    public async Task<IActionResult> OnPostStaffSummaryReport(SelectStaffMemberForReportModalViewModel viewModel)
+    {
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
+        if (!ModelState.IsValid)
+        {
+            await GetClasses(_mediator);
+
+            Error = new()
+            {
+                Error = new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage),
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        Result<ReportDto> reportRequest = await _mediator.Send(new GenerateStaffReportCommand(viewModel.StaffId, false));
+
+        if (reportRequest.IsFailure)
+        {
+            await GetClasses(_mediator);
+
+            Error = new ErrorDisplay
+            {
+                Error = reportRequest.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return File(reportRequest.Value.FileData, reportRequest.Value.FileType, reportRequest.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnPostStaffDetailReport(SelectStaffMemberForReportModalViewModel viewModel)
+    {
+        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
+        if (!ModelState.IsValid)
+        {
+            await GetClasses(_mediator);
+
+            Error = new()
+            {
+                Error = new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage),
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        Result<ReportDto> reportRequest = await _mediator.Send(new GenerateStaffReportCommand(viewModel.StaffId, true));
 
         if (reportRequest.IsFailure)
         {

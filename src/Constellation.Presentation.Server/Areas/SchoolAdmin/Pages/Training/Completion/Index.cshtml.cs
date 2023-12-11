@@ -101,50 +101,6 @@ public class IndexModel : BasePageModel
         return Page();
     }
 
-    public async Task<IActionResult> OnPostStaffReport()
-    {
-        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
-
-        if (!isAuthorised.Succeeded)
-        {
-            Error = new ErrorDisplay
-            {
-                Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
-            };
-
-            return Page();
-        }
-
-        if (string.IsNullOrWhiteSpace(Report.StaffId))
-        {
-            Error = new ErrorDisplay
-            {
-                Error = StudentErrors.NotFound(""),
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
-            };
-
-            return Page();
-        }
-
-        Result<ReportDto> reportRequest = await _mediator.Send(new GenerateStaffReportCommand(Report.StaffId, Report.IncludeCertificates));
-
-        if (reportRequest.IsFailure)
-        {
-            Error = new ErrorDisplay
-            {
-                Error = reportRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
-            };
-
-            return Page();
-        }
-
-        return File(reportRequest.Value.FileData, reportRequest.Value.FileType, reportRequest.Value.FileName);
-    }
-
     public enum FilterDto
     {
         All,
