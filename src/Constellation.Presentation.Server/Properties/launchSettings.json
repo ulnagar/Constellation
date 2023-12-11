@@ -28,6 +28,13 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development.local"
       }
+    },
+    "IIS Express (PROD)": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      }
     }
   },
   "iisSettings": {

@@ -6,6 +6,7 @@ public interface IDateTimeProvider
 {
     DateTime Now { get; }
     DateOnly Today { get; }
+    DateOnly Yesterday { get; }
     DateOnly LastDayOfYear { get; }
     DateOnly FirstDayOfYear { get; }
 

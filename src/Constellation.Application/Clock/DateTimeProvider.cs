@@ -7,6 +7,7 @@ public class DateTimeProvider : IDateTimeProvider
 {
     public DateTime Now => DateTime.Now;
     public DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
+    public DateOnly Yesterday => DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
 
     public DateOnly LastDayOfYear => new DateOnly(CurrentYear, 12, 31);
 

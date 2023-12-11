@@ -44,7 +44,7 @@ internal sealed class SentralAttendancePercentageSyncJob : ISentralAttendancePer
     public async Task StartJob(Guid jobId, CancellationToken cancellationToken)
     {
         // Figure out which period should be scanned
-        Result<(string week, string term)> periodRequest = await _sentralGateway.GetWeekForDate(_dateTime.Today);
+        Result<(string week, string term)> periodRequest = await _sentralGateway.GetWeekForDate(_dateTime.Yesterday);
         if (periodRequest.IsFailure)
         {
             _logger
@@ -70,9 +70,17 @@ internal sealed class SentralAttendancePercentageSyncJob : ISentralAttendancePer
         DateOnly startDate = dateRequest.Value.StartDate;
         DateOnly endDate = dateRequest.Value.EndDate;
 
-        // Check to see if it has already been scanned
-        // If it has, delete existing entries and reimport
-
+        if (endDate > _dateTime.Today)
+        {
+            // This is for the current week, therefore the data will be incomplete. Cancel operation
+            _logger
+                .ForContext(nameof(startDate), startDate)
+                .ForContext(nameof(endDate), endDate)
+                .ForContext(nameof(term), term)
+                .ForContext(nameof(week), week)
+                .ForContext(nameof(_dateTime.Today), _dateTime.Today)
+                .Warning("Could not sync the Attendance Percentages");
+        }
 
         // Grab the file from Sentral
         SystemAttendanceData request = await _sentralGateway.GetAttendancePercentages(term, week, _dateTime.CurrentYear.ToString(), startDate, endDate);

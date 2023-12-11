@@ -34,7 +34,7 @@ public class HangfireDashboardModel : BasePageModel
         JobDefinitions.Add(new (typeof(ITrackItSyncJob), nameof(ITrackItSyncJob), "30 17 * * *"));
         JobDefinitions.Add(new (typeof(ISentralFamilyDetailsSyncJob), nameof(ISentralFamilyDetailsSyncJob), "0 9 * * 1-6"));
         JobDefinitions.Add(new (typeof(IAttendanceReportJob), nameof(IAttendanceReportJob), "0 12 29 2 1"));
-        JobDefinitions.Add(new (typeof(ISentralAttendancePercentageSyncJob), nameof(ISentralAttendancePercentageSyncJob), "0 17 * * 0"));
+        JobDefinitions.Add(new (typeof(ISentralAttendancePercentageSyncJob), nameof(ISentralAttendancePercentageSyncJob), "0 5 * * 1"));
         JobDefinitions.Add(new (typeof(ISentralPhotoSyncJob), nameof(ISentralPhotoSyncJob), "15 9 * * 1-6"));
         JobDefinitions.Add(new (typeof(ISentralReportSyncJob), nameof(ISentralReportSyncJob), "* 18 * * 1-6"));
         JobDefinitions.Add(new (typeof(ISentralAwardSyncJob), nameof(ISentralAwardSyncJob), "15 8 * * 1-6"));
