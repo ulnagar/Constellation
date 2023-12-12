@@ -19,6 +19,13 @@ $(document).ready(function () {
     // Activate any datatables
     $('.data-table').DataTable({ "order": [] });
 
+    $('.data-table-25')
+        .DataTable({
+            "order": [],
+            "pageLength": 25
+        });
+
+
     $('.grouped-data-table')
         .DataTable({
             "order": [],

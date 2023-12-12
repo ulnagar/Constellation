@@ -83,15 +83,20 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
 
         List<TrainingRole> roles = await _roleRepository.GetRolesForStaffMember(request.StaffId, cancellationToken);
 
-        List<TrainingModuleId> moduleIds = roles
-            .SelectMany(role => role.Modules)
-            .Select(module => module.ModuleId)
-            .Distinct()
-            .ToList();
-        
-        foreach (TrainingModuleId moduleId in moduleIds)
+        List<TrainingModule> modules = await _trainingRepository.GetAllModules(cancellationToken);
+
+        foreach (TrainingModule module in modules)
         {
-            TrainingModule module = await _trainingRepository.GetModuleById(moduleId, cancellationToken);
+            bool required = roles.SelectMany(role => role.Modules).Any(entry => entry.ModuleId == module.Id);
+
+            List<string> roleList = required
+                ? roles
+                    .Where(role =>
+                        role.Modules.Any(entry =>
+                            entry.ModuleId == module.Id))
+                    .Select(entry => entry.Name)
+                    .ToList()
+                : new();
 
             if (module.IsDeleted)
                 continue;
@@ -105,6 +110,7 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
             CompletionRecordExtendedDetailsDto entry = new();
             entry.AddModuleDetails(module);
             entry.AddStaffDetails(staff);
+            entry.RequiredByRoles = roleList;
 
             foreach (Faculty faculty in faculties)
             {
@@ -128,8 +134,11 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
 
             entry.CalculateExpiry();
 
-            data.Modules.Add(entry);
+            if (required || record is not null)
+                data.Modules.Add(entry);
         }
+
+        data.Modules = data.Modules.OrderBy(entry => entry.DueDate).ToList();
 
         return data;
     }

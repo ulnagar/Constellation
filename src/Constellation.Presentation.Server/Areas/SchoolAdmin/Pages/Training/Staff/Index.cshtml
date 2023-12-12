@@ -1,76 +1,74 @@
 ﻿@page "{StaffId}"
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Staff.IndexModel
-@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Completion
 
-<h2>Mandatory Training Completion Records</h2>
+@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Completion
+@using Constellation.Core.Enums
+@using Constellation.Application.Helpers
+
+<h2>Mandatory Training Register</h2>
 
 <div>
     <a asp-page="/Training/Completion/Upsert" class="btn btn-warning" asp-route-Mode="@UpsertModel.ModeOptions.SoloStaff">Create New</a>
-    
-    <button class="btn btn-secondary" data-toggle="modal" data-target="#legend">View Legend</button>
 </div>
-
-<partial name="_StatusIconModalPartial" />
 
 <hr />
 
-<table class="table-striped table-hover data-table">
+<table class="table table-striped data-table-25">
     <thead>
         <tr>
-            <th></th>
             <th>Module</th>
-            <th>Date Completed</th>
-            <th>Date Due</th>
+            <th>Expiry</th>
+            <th>Mandatory?</th>
+            <th>Required By Roles</th>
+            <th>Date Last Completed</th>
+            <th>Date Next Due</th>
             <th></th>
         </tr>
     </thead>
-    @foreach (var item in Model.CompletionList.Modules)
-    {
-        <tr>
-            <td>
-                @switch (item.TimeToExpiry)
-                {
-                    case > 31:
-                        <img src="/images/GreenLight.png" class="training status-icon" title="@item.TimeToExpiry Days Remaining" />
-                        break;
-                    case > 15:
-                        <img src="/images/YellowLight.png" class="training status-icon" title="@item.TimeToExpiry Days Remaining" />
-                        break;
-                    case > 1:
-                        <img src="/images/RedLight.png" class="training status-icon" title="@item.TimeToExpiry Days Remaining" />
-                        break;
-                    default:
-                        <img src="/images/RedLight.png" class="training status-icon blink" title="@item.TimeToExpiry Days Remaining" />
-                        break;
-                }
-            </td>
-            <td>@item.ModuleName</td>
-            <td>
-                @if (!item.RecordEffectiveDate.HasValue)
-                {
-                    @:N/A
-                }
-                else
-                {
-                    @item.RecordEffectiveDate.Value.ToString("dd/MM/yyyy")
-                }
-            </td>
-            <td>
-                @if (!item.DueDate.HasValue)
-                {
-                    @:N/A
-                }
-                else
-                {
-                    @item.DueDate.Value.ToString("dd/MM/yyyy")
-                }
-            </td>
-            <td>
-                @if (item.RecordEffectiveDate.HasValue)
-                {
-                    <a asp-page="/Training/Completion/Details" asp-route-moduleId="@item.ModuleId.Value" asp-route-completionId="@item.RecordId.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
-                }
-            </td>
-        </tr>
-    }
+    <tbody>
+        @foreach (var entry in Model.Modules)
+        {
+            <tr>
+                <td>@entry.ModuleName</td>
+                <td>@entry.Expiry.GetDisplayName()</td>
+                <td>
+                    @if (entry.IsRequired)
+                    {
+                        <badge class="badge badge-success">Yes</badge>
+                    }
+                    else
+                    {
+                        <badge class="badge badge-danger">No</badge>
+                    }
+                </td>
+                <td>
+                    @foreach (var item in entry.Roles)
+                    {
+                        <a asp-page="/Training/Roles/Details" asp-area="SchoolAdmin" asp-route-id="@item.Key" class="badge badge-info">@item.Value</a>
+                    }
+                </td>
+                <td>
+                    @if (entry.IsCompleted)
+                    {
+                        @entry.DateCompleted!.Value.ToShortDateString()
+                    }
+                </td>
+                <td>
+                    @if (entry.IsCompleted && entry.IsRequired)
+                    {
+                        if (entry.Expiry != TrainingModuleExpiryFrequency.OnceOff)
+                        {
+                            @entry.DueDate!.Value.ToShortDateString()
+                        }
+                    }
+                </td>
+                <td>
+                    @if (entry.IsCompleted)
+                    {
+                        <a asp-page="/Training/Completion/Details" asp-route-moduleId="@entry.ModuleId.Value" asp-route-completionId="@entry.CompletionId.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
 </table>
