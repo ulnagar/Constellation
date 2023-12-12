@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Reports;
 
 using Application.Models.Auth;
+using Application.StaffMembers.GetStaffById;
 using Application.Training.Modules.GetModuleStatusByStaffMember;
 using BaseModels;
 using Core.Shared;
@@ -26,6 +27,7 @@ public class StaffMemberModel : BasePageModel
     public string Id { get; set; }
 
     public List<ModuleStatusResponse> Modules { get; set; } = new();
+    public StaffResponse StaffMember { get; set; }
 
     [ViewData] public string ActivePage { get; set; } = TrainingPages.Reports;
     [ViewData] public string StaffId { get; set; }
@@ -36,19 +38,34 @@ public class StaffMemberModel : BasePageModel
 
         await GetClasses(_mediator);
 
-        Result<List<ModuleStatusResponse>> request = await _mediator.Send(new GetModuleStatusByStaffMemberQuery(Id));
+        Result<StaffResponse> staffRequest = await _mediator.Send(new GetStaffByIdQuery(Id));
 
-        if (request.IsFailure)
+        if (staffRequest.IsFailure)
         {
             Error = new()
             {
-                Error = request.Error,
+                Error = staffRequest.Error,
                 RedirectPath = _linkGenerator.GetPathByPage("/Training/Reports/Index", values: new { area = "SchoolAdmin" })
             };
 
             return;
         }
 
-        Modules = request.Value;
+        StaffMember = staffRequest.Value;
+
+        Result<List<ModuleStatusResponse>> moduleRequest = await _mediator.Send(new GetModuleStatusByStaffMemberQuery(Id));
+
+        if (moduleRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = moduleRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Training/Reports/Index", values: new { area = "SchoolAdmin" })
+            };
+
+            return;
+        }
+
+        Modules = moduleRequest.Value;
     }
 }

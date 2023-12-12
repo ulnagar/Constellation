@@ -2,6 +2,7 @@
 
 using Core.Enums;
 using Core.Models.Training.Identifiers;
+using System;
 using System.Collections.Generic;
 
 public sealed record ModuleStatusResponse(
@@ -9,4 +10,8 @@ public sealed record ModuleStatusResponse(
     string ModuleName,
     TrainingModuleExpiryFrequency Expiry,
     bool IsRequired,
-    Dictionary<TrainingRoleId, string> Roles);
+    Dictionary<TrainingRoleId, string> Roles,
+    bool IsCompleted,
+    TrainingCompletionId CompletionId,
+    DateOnly? DateCompleted,
+    DateOnly? DueDate);

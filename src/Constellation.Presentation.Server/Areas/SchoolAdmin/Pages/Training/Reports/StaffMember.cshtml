@@ -1,8 +1,10 @@
 ﻿@page "{id}"
-@using Constellation.Application.Helpers
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Reports.StaffMemberModel
 
-<h2>Training Modules for Staff Member</h2>
+@using Constellation.Application.Helpers
+@using Constellation.Core.Enums
+
+<h2>Training Modules for @Model.StaffMember?.Name.DisplayName</h2>
 
 <div class="page-menu">
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -17,7 +19,8 @@
             <th>Expiry</th>
             <th>Mandatory?</th>
             <th>Required By Roles</th>
-            <th></th>
+            <th>Date Last Completed</th>
+            <th>Date Next Due</th>
         </tr>
     </thead>
     <tbody>
@@ -30,10 +33,24 @@
                 <td>
                     @foreach (var item in entry.Roles)
                     {
-                        <badge class="badge badge-info">@item.Value</badge>
+                        <a asp-page="/Training/Roles/Details" asp-area="SchoolAdmin" asp-route-id="@item.Key" class="badge badge-info">@item.Value</a>
                     }
                 </td>
-                <td></td>
+                <td>
+                    @if (entry.IsCompleted)
+                    {
+                        @entry.DateCompleted!.Value.ToShortDateString()
+                    }
+                </td>
+                <td>
+                    @if (entry.IsCompleted && entry.IsRequired)
+                    {
+                        if (entry.Expiry != TrainingModuleExpiryFrequency.OnceOff)
+                        {
+                            @entry.DateCompleted!.Value.AddYears((int)@entry.Expiry).ToShortDateString()
+                        }
+                    }
+                </td>
             </tr>
         }
     </tbody>

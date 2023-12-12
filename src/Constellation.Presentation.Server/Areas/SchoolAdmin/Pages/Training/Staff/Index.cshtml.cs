@@ -2,6 +2,7 @@ namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Sta
 
 using Application.Models.Auth;
 using Application.Training.Models;
+using Application.Training.Modules.GetModuleStatusByStaffMember;
 using Constellation.Application.Training.Modules.GetListOfCertificatesForStaffMemberWithNotCompletedModules;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training;
@@ -29,7 +30,7 @@ public class IndexModel : BasePageModel
     [ViewData]
     public string StaffId { get; set; }
 
-    public StaffCompletionListDto CompletionList { get; set; }
+    public List<ModuleStatusResponse> Modules { get; set; }
 
     [ViewData] public string ActivePage { get; set; } = TrainingPages.Staff;
 
@@ -37,7 +38,7 @@ public class IndexModel : BasePageModel
     {
         await GetClasses(_mediator);
 
-        Result<StaffCompletionListDto> completionRequest = await _mediator.Send(new GetListOfCertificatesForStaffMemberWithNotCompletedModulesQuery(StaffId));
+        Result<List<ModuleStatusResponse>> completionRequest = await _mediator.Send(new GetModuleStatusByStaffMemberQuery(StaffId));
 
         if (completionRequest.IsFailure)
         {
@@ -50,6 +51,6 @@ public class IndexModel : BasePageModel
             return;
         }
 
-        CompletionList = completionRequest.Value;
+        Modules = completionRequest.Value;
     }
 }
