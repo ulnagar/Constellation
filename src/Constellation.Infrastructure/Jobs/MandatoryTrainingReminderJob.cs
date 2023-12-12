@@ -126,14 +126,14 @@ internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJ
                     }
                 }
 
-                School localSchool = await _schoolRepository.GetById("8912", cancellationToken);
+                //School localSchool = await _schoolRepository.GetById("8912", cancellationToken);
 
-                List<SchoolContact> localPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(localSchool.Code, cancellationToken);
+                //List<SchoolContact> localPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(localSchool.Code, cancellationToken);
 
-                foreach (SchoolContact principal in localPrincipals)
-                {
-                    entry.AddPrincipalDetails(principal, localSchool);
-                }
+                //foreach (SchoolContact principal in localPrincipals)
+                //{
+                //    entry.AddPrincipalDetails(principal, localSchool);
+                //}
 
                 if (completion is not null)
                     entry.AddRecordDetails(completion);
