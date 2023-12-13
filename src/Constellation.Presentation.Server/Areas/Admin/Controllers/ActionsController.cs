@@ -1,15 +1,18 @@
 ﻿using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.Areas.Admin.Models;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Constellation.Presentation.Server.Areas.Admin.Controllers
 {
+    [Authorize(Roles = AuthRoles.StaffMember)]
     [Area("Admin")]
     public class ActionsController : BaseController
     {
