@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Portal.Controllers
 {
+    using Application.Models.Auth;
+    using Microsoft.AspNetCore.Authorization;
+
+    [Authorize(Policy = AuthPolicies.IsStaffMember)]
     [Area("Portal")]
     public class MonitorController : Controller
     {

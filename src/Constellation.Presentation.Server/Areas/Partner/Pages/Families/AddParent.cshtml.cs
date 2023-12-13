@@ -1,13 +1,16 @@
 namespace Constellation.Presentation.Server.Areas.Partner.Pages.Families;
 
+using Application.Models.Auth;
 using Constellation.Application.Families.CreateParent;
 using Constellation.Application.Helpers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
+[Authorize(Policy = AuthPolicies.CanEditStudents)]
 public class AddParentModel : BasePageModel
 {
     private readonly IMediator _mediator;

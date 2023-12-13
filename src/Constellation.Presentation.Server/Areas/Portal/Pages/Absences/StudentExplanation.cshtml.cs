@@ -4,11 +4,13 @@ using Constellation.Application.Absences.CreateAbsenceResponseFromStudent;
 using Constellation.Application.Absences.GetAbsenceForStudentResponse;
 using Constellation.Core.Models.Identifiers;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Threading.Tasks;
 
+[AllowAnonymous]
 public class StudentExplanationModel : PageModel
 {
     private readonly IMediator _mediator;

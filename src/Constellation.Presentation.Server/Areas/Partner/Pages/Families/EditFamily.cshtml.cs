@@ -2,12 +2,15 @@ namespace Constellation.Presentation.Server.Areas.Partner.Pages.Families;
 
 using Constellation.Application.Families.GetFamilyEditContext;
 using Constellation.Application.Families.UpdateFamily;
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
+[Authorize(Policy = AuthPolicies.CanEditStudents)]
 public class EditFamilyModel : BasePageModel
 {
     private readonly IMediator _mediator;

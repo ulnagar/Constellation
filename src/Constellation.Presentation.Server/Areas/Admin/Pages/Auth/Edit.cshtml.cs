@@ -1,11 +1,14 @@
 namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth;
 
+using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
+[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
 public class EditModel : BasePageModel
 {
     private readonly IMediator _mediator;

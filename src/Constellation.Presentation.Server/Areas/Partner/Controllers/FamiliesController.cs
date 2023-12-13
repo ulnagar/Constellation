@@ -1,13 +1,16 @@
 ﻿namespace Constellation.Presentation.Server.Areas.Partner.Controllers;
 
+using Application.Models.Auth;
 using Constellation.Application.Families.GetFamilyById;
 using Constellation.Application.Families.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.Areas.Partner.Models.Families;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+[Authorize(Policy = AuthPolicies.IsStaffMember)]
 [Area("Partner")]
 public class FamiliesController : BaseController
 {

@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences;
 using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
 using Constellation.Application.Students.GetStudentById;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
@@ -10,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+[AllowAnonymous]
 public class StudentsModel : PageModel
 {
     private readonly IMediator _mediator;
