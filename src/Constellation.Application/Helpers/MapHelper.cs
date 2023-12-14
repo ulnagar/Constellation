@@ -1,24 +1,26 @@
-﻿using Constellation.Application.DTOs;
+﻿namespace Constellation.Application.Helpers;
+
+using Constellation.Application.DTOs;
 using Constellation.Core.Models;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace Constellation.Application.Helpers
+public static class MapHelpers
 {
-    public static class MapHelpers
+    public static MapLayer MapLayerBuilder(IQueryable<School> schools, string name, string colour)
     {
-        public static MapLayer MapLayerBuilder(IQueryable<School> schools, string name, string colour)
-        {
-            var markers = schools.Select(school => MapItem.ConvertFromSchool(school)).ToList();
+        List<MapItem> markers = schools
+            .Select(school => MapItem.ConvertFromSchool(school))
+            .ToList();
             
-            var layer = new MapLayer
-            {
-                Colour = colour,
-                Name = name
-            };
+        MapLayer layer = new()
+        {
+            Colour = colour,
+            Name = name
+        };
 
-            markers.ForEach(marker => layer.AddMarker(marker));
+        markers.ForEach(marker => layer.AddMarker(marker));
 
-            return layer;
-        }
+        return layer;
     }
 }
