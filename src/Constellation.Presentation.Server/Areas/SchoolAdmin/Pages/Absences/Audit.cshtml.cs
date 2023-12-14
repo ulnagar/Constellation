@@ -2,9 +2,12 @@ namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Absences;
 
 using Application.Models.Auth;
 using Constellation.Application.Students.GetStudentsWithAbsenceSettings;
+using Constellation.Core.Models.Absences;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class AuditModel : BasePageModel
@@ -20,6 +23,9 @@ public class AuditModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
+    [BindProperty(SupportsGet = true)]
+    public FilterDto Filter { get; set; } = FilterDto.All;
+
     public List<StudentAbsenceSettingsResponse> Students { get; set; } = new();
 
     public async Task OnGet()
@@ -28,7 +34,7 @@ public class AuditModel : BasePageModel
 
         await GetClasses(_mediator);
 
-        var studentRequest = await _mediator.Send(new GetStudentsWithAbsenceSettingsQuery());
+        Result<List<StudentAbsenceSettingsResponse>> studentRequest = await _mediator.Send(new GetStudentsWithAbsenceSettingsQuery());
 
         if (studentRequest.IsFailure)
         {
@@ -48,6 +54,37 @@ public class AuditModel : BasePageModel
             .ThenBy(student => student.Name)
             .ToList();
 
-        return;
+        if (Filter == FilterDto.Disabled)
+        {
+            Students = Students
+                .Where(student =>
+                {
+                    bool anyWholeAbsences = student.AbsenceSettings.Any(entry => entry.AbsenceType == AbsenceType.Whole);
+                    bool anyPartialAbsences = student.AbsenceSettings.Any(entry => entry.AbsenceType == AbsenceType.Partial);
+
+                    return (!anyWholeAbsences || !anyPartialAbsences);
+                })
+                .ToList();
+        }
+
+        if (Filter == FilterDto.Enabled)
+        {
+            Students = Students
+                .Where(student =>
+                {
+                    bool anyWholeAbsences = student.AbsenceSettings.Any(entry => entry.AbsenceType == AbsenceType.Whole);
+                    bool anyPartialAbsences = student.AbsenceSettings.Any(entry => entry.AbsenceType == AbsenceType.Partial);
+
+                    return (anyWholeAbsences || anyPartialAbsences);
+                })
+                .ToList();
+        }
+    }
+
+    public enum FilterDto
+    {
+        All,
+        Enabled,
+        Disabled
     }
 }
