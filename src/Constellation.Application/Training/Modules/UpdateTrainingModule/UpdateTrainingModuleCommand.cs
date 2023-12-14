@@ -8,6 +8,5 @@ public sealed record UpdateTrainingModuleCommand(
     TrainingModuleId Id,
     string Name,
     TrainingModuleExpiryFrequency Expiry,
-    string Url,
-    bool CanMarkNotRequired)
+    string Url)
     : ICommand;

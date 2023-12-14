@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 [Authorize(Policy = AuthPolicies.CanEditTrainingModuleContent)]
@@ -34,13 +35,12 @@ public class UpsertModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public Guid? Id { get; set; }
     [BindProperty]
+    [Required]
     public string Name { get; set; }
     [BindProperty]
     public TrainingModuleExpiryFrequency Expiry { get; set; }
     [BindProperty]
     public string ModelUrl { get; set; }
-    [BindProperty]
-    public bool CanMarkNotRequired { get; set; }
 
     [ViewData] public string ActivePage { get; set; } = TrainingPages.Modules;
     [ViewData] public string StaffId { get; set; }
@@ -72,58 +72,79 @@ public class UpsertModel : BasePageModel
             Name = entity.Name;
             Expiry = entity.Expiry;
             ModelUrl = entity.Url;
-            CanMarkNotRequired = entity.CanMarkNotRequired;
         }
+    }
+
+    public async Task<IActionResult> OnPostCreate()
+    {
+        if (!ModelState.IsValid)
+        {
+            StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
+            await GetClasses(_mediator);
+
+            return Page();
+        }
+
+        // Create new entry
+        CreateTrainingModuleCommand command = new(
+            Name,
+            Expiry,
+            ModelUrl);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
+            await GetClasses(_mediator);
+
+            Error = new ErrorDisplay
+            {
+                Error = result.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Training/Modules/Index", values: new { area = "SchoolAdmin" })
+            };
+
+            return Page();
+        }
+
+        return RedirectToPage("Index");
     }
 
     public async Task<IActionResult> OnPostUpdate()
     {
-        StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-        if (Id.HasValue)
+        if (!ModelState.IsValid)
         {
-            // Update existing entry
-            UpdateTrainingModuleCommand command = new UpdateTrainingModuleCommand(
-                TrainingModuleId.FromValue(Id.Value),
-                Name,
-                Expiry,
-                ModelUrl,
-                CanMarkNotRequired);
+            StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-            Result result = await _mediator.Send(command);
+            await GetClasses(_mediator);
 
-            if (result.IsFailure)
-            {
-                Error = new ErrorDisplay
-                {
-                    Error = result.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Training/Modules/Index", values: new { area = "SchoolAdmin" })
-                };
-
-                return Page();
-            }
+            return Page();
         }
-        else
+
+        // Update existing entry
+        UpdateTrainingModuleCommand command = new UpdateTrainingModuleCommand(
+            TrainingModuleId.FromValue(Id!.Value),
+            Name,
+            Expiry,
+            ModelUrl);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
         {
-            // Create new entry
-            CreateTrainingModuleCommand command = new CreateTrainingModuleCommand(
-                Name,
-                Expiry,
-                ModelUrl,
-                CanMarkNotRequired);
+            StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-            Result result = await _mediator.Send(command);
+            await GetClasses(_mediator);
 
-            if (result.IsFailure)
+            Error = new ErrorDisplay
             {
-                Error = new ErrorDisplay
-                {
-                    Error = result.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Training/Modules/Index", values: new { area = "SchoolAdmin" })
-                };
+                Error = result.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Training/Modules/Index", values: new { area = "SchoolAdmin" })
+            };
 
-                return Page();
-            }
+            return Page();
         }
 
         return RedirectToPage("Index");

@@ -6,6 +6,5 @@ using Constellation.Core.Enums;
 public sealed record CreateTrainingModuleCommand(
     string Name,
     TrainingModuleExpiryFrequency Expiry,
-    string Url,
-    bool CanMarkNotRequired
-    ) : ICommand;
+    string Url)
+    : ICommand;

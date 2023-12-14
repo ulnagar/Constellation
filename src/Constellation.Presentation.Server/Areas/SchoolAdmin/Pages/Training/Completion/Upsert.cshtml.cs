@@ -100,7 +100,8 @@ public class UpsertModel : BasePageModel
 
             return Page();
         } 
-        else if (Mode == ModeOptions.SoloModule && !CanEditRecords)
+        
+        if (Mode == ModeOptions.SoloModule && !CanEditRecords)
         {
             // Editor insert mode selected without edit access
             Error = new ErrorDisplay
