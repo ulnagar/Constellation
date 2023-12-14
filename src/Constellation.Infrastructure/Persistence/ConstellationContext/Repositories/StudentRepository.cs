@@ -8,6 +8,7 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Models.Absences;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -186,6 +187,32 @@ public class StudentRepository : IStudentRepository
                 student.IsDeleted == false &&
                 student.CurrentGrade == grade)
             .ToListAsync(cancellationToken);
+
+    public async Task<int> GetCountCurrentStudentsWithPartialAbsenceScanDisabled(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student => student.IsDeleted == false)
+            .Where(student => !student.AbsenceConfigurations.Any(configuration =>
+                configuration.AbsenceType == AbsenceType.Partial &&
+                !configuration.IsDeleted &&
+                configuration.CalendarYear == _dateTime.CurrentYear &&
+                configuration.ScanStartDate <= _dateTime.Today &&
+                configuration.ScanEndDate >= _dateTime.Today))
+            .CountAsync(cancellationToken);
+
+    public async Task<int> GetCountCurrentStudentsWithWholeAbsenceScanDisabled(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student => student.IsDeleted == false)
+            .Where(student => !student.AbsenceConfigurations.Any(configuration =>
+                configuration.AbsenceType == AbsenceType.Whole &&
+                !configuration.IsDeleted &&
+                configuration.CalendarYear == _dateTime.CurrentYear &&
+                configuration.ScanStartDate <= _dateTime.Today &&
+                configuration.ScanEndDate >= _dateTime.Today))
+            .CountAsync(cancellationToken);
 
     public void Insert(Student student) => _context.Set<Student>().Add(student);
 

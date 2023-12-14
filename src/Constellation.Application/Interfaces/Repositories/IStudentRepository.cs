@@ -42,6 +42,9 @@ public interface IStudentRepository
         /// <returns></returns>
         Task<Student?> GetAnyByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
 
+    Task<int> GetCountCurrentStudentsWithPartialAbsenceScanDisabled(CancellationToken cancellationToken = default);
+    Task<int> GetCountCurrentStudentsWithWholeAbsenceScanDisabled(CancellationToken cancellationToken = default);
+
     Task <Student> GetForExistCheck(string id);
     Task<ICollection<Student>> AllActiveForFTECalculations();
     Task<ICollection<Student>> AllActiveForClassAuditAsync();

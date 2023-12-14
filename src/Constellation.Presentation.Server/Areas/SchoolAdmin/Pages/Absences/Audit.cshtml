@@ -1,16 +1,40 @@
 ﻿@page
 @using Constellation.Core.Models.Absences;
+@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Absences
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Absences.AuditModel
 
 @inject IAuthorizationService authorisationService
 
 @{
     var authorised = await authorisationService.AuthorizeAsync(User, AuthPolicies.CanManageAbsences);
+
+    var allStyle = "btn-outline-secondary";
+    var enabledStyle = allStyle;
+    var disabledStyle = allStyle;
+
+    switch (Model.Filter)
+    {
+        case AuditModel.FilterDto.Enabled:
+            enabledStyle = "btn-primary";
+            break;
+        case AuditModel.FilterDto.Disabled:
+            disabledStyle = "btn-primary";
+            break;
+        default:
+            allStyle = "btn-primary";
+            break;
+    }
 }
 
 <h2>Student Absence Settings</h2>
 
 <div class="page-menu">
+    <div class="btn-group" role="group">
+        <a asp-route-filter="@AuditModel.FilterDto.All" class="btn @allStyle">All</a>
+        <a asp-route-filter="@AuditModel.FilterDto.Enabled" class="btn @enabledStyle">Enabled</a>
+        <a asp-route-filter="@AuditModel.FilterDto.Disabled" class="btn @disabledStyle">Disabled</a>
+    </div>
+
     @if (authorised.Succeeded)
     {
         <div class="btn-group new-group" role="group">
