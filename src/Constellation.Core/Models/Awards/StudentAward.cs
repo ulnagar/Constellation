@@ -1,11 +1,9 @@
 ﻿namespace Constellation.Core.Models.Awards;
 
-using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
+using Events;
 using System;
-using System.Data;
 
 public class StudentAward : AggregateRoot
 {
@@ -15,13 +13,12 @@ public class StudentAward : AggregateRoot
     public const string Universal = "Aurora Universal Achiever";
 
     private StudentAward(
-        StudentAwardId id,
         string studentId,
         string category,
         string type,
         DateTime awardedOn)
     {
-        Id = id;
+        Id = new();
         StudentId = studentId;
         Category = category;
         Type = type;
@@ -38,26 +35,21 @@ public class StudentAward : AggregateRoot
     public string Reason { get; private set; }
 
     public static StudentAward Create(
-        StudentAwardId id,
         string studentId,
         string category,
         string type,
         DateTime awardedOn)
     {
         StudentAward award = new(
-            id,
             studentId,
             category,
             type,
             awardedOn);
-
-        award.RaiseDomainEvent(new AwardCreatedDomainEvent(new DomainEventId(), id));
-
+        
         return award;
     }
 
     public static StudentAward Create(
-        StudentAwardId id,
         DateTime awardedOn,
         string incidentId,
         string teacherId,
@@ -65,19 +57,16 @@ public class StudentAward : AggregateRoot
         string studentId)
     {
         StudentAward award = new(
-            id,
             studentId,
-            "Astra Award",
-            "Astra Award",
+            Astra,
+            Astra,
             awardedOn)
         {
             IncidentId = incidentId,
             TeacherId = teacherId,
             Reason = reason
         };
-
-        award.RaiseDomainEvent(new AwardCreatedDomainEvent(new DomainEventId(), id));
-
+        
         return award;
     }
 
@@ -89,5 +78,9 @@ public class StudentAward : AggregateRoot
         IncidentId = incidentId;
         TeacherId = teacherId;
         Reason = reason;
+
+        RaiseDomainEvent(new AwardMatchedToIncidentDomainEvent(new DomainEventId(), Id));
     }
+
+    public void CertificateDownloaded() => RaiseDomainEvent(new AwardCertificateDownloadedDomainEvent(new DomainEventId(), Id));
 }

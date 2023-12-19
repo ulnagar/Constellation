@@ -74,6 +74,7 @@ public class Student : AggregateRoot
     public string EmailAddress => PortalUsername + "@education.nsw.gov.au";
     public byte[] Photo { get; set; }
 
+    public readonly AwardTally AwardTally = new ();
     public List<StudentFamilyMembership> FamilyMemberships { get; set; } = new();
     public ICollection<Enrolment> Enrolments { get; set; }
     public ICollection<DeviceAllocation> Devices { get; set; }

@@ -37,6 +37,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
             builder
                 .Navigation(student => student.AbsenceConfigurations)
                 .AutoInclude();
+
+            builder
+                .OwnsOne(student => student.AwardTally);
         }
     }
 }

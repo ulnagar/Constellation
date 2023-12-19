@@ -3,29 +3,22 @@
 using Application.Attendance.GetAttendanceDataFromSentral;
 using Constellation.Application.Attendance.GetValidAttendanceReportDates;
 using Constellation.Application.DTOs;
-using Constellation.Application.DTOs.Awards;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
-using Constellation.Core.Models;
 using Core.Abstractions.Clock;
-using Core.Errors;
 using Core.Shared;
-using ExcelDataReader;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.IO;
-using System.Net;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
-using static Constellation.Core.Errors.ValidationErrors;
 
-public partial class Gateway : ISentralGateway
+public class Gateway : ISentralGateway
 {
     private readonly IDateTimeProvider _dateTime;
     private readonly SentralGatewayConfiguration _settings;
@@ -58,58 +51,63 @@ public partial class Gateway : ISentralGateway
         _client = factory.CreateClient("sentral");
     }
 
-    private async Task Login()
+    private async Task Login(CancellationToken cancellationToken)
     {
-        var uri = $"{_settings.ServerUrl}/check_login";
+        string uri = $"{_settings.ServerUrl}/check_login";
 
-        var request = new HttpRequestMessage();
+        HttpRequestMessage request = new();
         request.Headers.CacheControl = new CacheControlHeaderValue
         {
             NoCache = true
         };
 
-        var formData = new List<KeyValuePair<string, string>>
+        List<KeyValuePair<string, string>> formData = new()
         {
             new KeyValuePair<string, string>("sentral-username", _settings.Username),
             new KeyValuePair<string, string>("sentral-password", _settings.Password)
         };
-        var formDataEncoded = new FormUrlEncodedContent(formData);
+
+        FormUrlEncodedContent formDataEncoded = new(formData);
 
         for (int i = 1; i < 6; i++)
         {
             try
             {
-                var response = await _client.PostAsync(uri, formDataEncoded);
+                HttpResponseMessage response = await _client.PostAsync(uri, formDataEncoded, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
                 return;
             }
             catch (Exception ex)
             {
-                _logger.Warning($"Failed to login to Sentral Server with error: {ex.Message}");
+                _logger
+                    .ForContext("Method", nameof(Login))
+                    .Warning($"Failed to login to Sentral Server with error: {ex.Message}");
+
                 if (ex.InnerException != null)
                     _logger.Warning($"Inner Exception: {ex.InnerException.Message}");
 
                 // Wait and retry
-                await Task.Delay(5000);
+                await Task.Delay(5000, cancellationToken);
             }
         }
 
         throw new Exception($"Could not connect to Sentral Server");
     }
 
-    private async Task<HtmlDocument> GetPageAsync(string uri)
+    private async Task<HtmlDocument> GetPageByGet(string uri, CancellationToken cancellationToken)
     {
         for (int i = 1; i < 6; i++)
         {
             try
             {
-                await Login();
+                await Login(cancellationToken);
 
-                var response = await _client.GetAsync(uri);
-
-                var page = new HtmlDocument();
-                page.LoadHtml(await response.Content.ReadAsStringAsync());
+                HttpResponseMessage response = await _client.GetAsync(uri, cancellationToken);
+                string content = await response.Content.ReadAsStringAsync(cancellationToken);
+                
+                HtmlDocument page = new();
+                page.LoadHtml(content);
 
                 return page;
             }
@@ -120,32 +118,26 @@ public partial class Gateway : ISentralGateway
                     _logger.Warning($"Inner Exception: {ex.InnerException.Message}");
 
                 // Wait and retry
-                await Task.Delay(5000);
+                await Task.Delay(5000, cancellationToken);
             }
         }
 
         return null;
     }
 
-    private async Task<HtmlDocument> PostPageAsync(string uri, List<KeyValuePair<string, string>> payload)
+    private async Task<HtmlDocument> GetPageByPost(string uri, List<KeyValuePair<string, string>> payload, CancellationToken cancellationToken)
     {
         for (int i = 1; i < 6; i++)
         {
             try
             {
-                await Login();
+                await Login(cancellationToken);
 
-                var request = new HttpRequestMessage(HttpMethod.Post, uri)
-                {
-                    Content = new FormUrlEncodedContent(payload)
-                };
-
-                var response = await _client.SendAsync(request);
-
-                //var response = await _client.PostAsJsonAsync(uri, content);
-
-                var page = new HtmlDocument();
-                page.LoadHtml(await response.Content.ReadAsStringAsync());
+                HttpResponseMessage response = await _client.PostAsync(uri, new FormUrlEncodedContent(payload), cancellationToken);
+                string content = await response.Content.ReadAsStringAsync(cancellationToken);
+                
+                HtmlDocument page = new();
+                page.LoadHtml(content);
 
                 return page;
             }
@@ -156,24 +148,24 @@ public partial class Gateway : ISentralGateway
                     _logger.Warning($"Inner Exception: {ex.InnerException.Message}");
 
                 // Wait and retry
-                await Task.Delay(5000);
+                await Task.Delay(5000, cancellationToken);
             }
         }
 
         return null;
     }
 
-    private async Task<Stream> GetStreamAsync(string uri)
+    private async Task<Stream> GetStreamByGet(string uri, CancellationToken cancellationToken)
     {
         for (int i = 1; i < 6; i++)
         {
             try
             {
-                await Login();
+                await Login(cancellationToken);
 
-                HttpResponseMessage response = await _client.GetAsync(uri);
+                HttpResponseMessage response = await _client.GetAsync(uri, cancellationToken);
 
-                return await response.Content.ReadAsStreamAsync();
+                return await response.Content.ReadAsStreamAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -182,11 +174,64 @@ public partial class Gateway : ISentralGateway
                     _logger.Warning($"Inner Exception: {ex.InnerException.Message}");
 
                 // Wait and retry
-                await Task.Delay(5000);
+                await Task.Delay(5000, cancellationToken);
             }
         }
 
         return Stream.Null;
+    }
+
+    private async Task<byte[]> GetByteArrayByGet(string uri, CancellationToken cancellationToken)
+    {
+        for (int i = 1; i < 6; i++)
+        {
+            try
+            {
+                await Login(cancellationToken);
+
+                HttpResponseMessage response = await _client.GetAsync(uri, cancellationToken);
+
+                return await response.Content.ReadAsByteArrayAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning($"Failed to retrieve information from Sentral Server with error: {ex.Message}");
+                if (ex.InnerException != null)
+                    _logger.Warning($"Inner Exception: {ex.InnerException.Message}");
+
+                // Wait and retry
+                await Task.Delay(5000, cancellationToken);
+            }
+        }
+
+        return null;
+    }
+
+    private async Task<byte[]> GetByteArrayByPost(string uri, List<KeyValuePair<string, string>> payload, CancellationToken cancellationToken)
+    {
+        for (int i = 1; i < 6; i++)
+        {
+            try
+            {
+                await Login(cancellationToken);
+
+                HttpResponseMessage response = await _client.PostAsync(uri, new FormUrlEncodedContent(payload), cancellationToken);
+                byte[] content = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+
+                return content;
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning($"Failed to retrieve information from Sentral Server with error: {ex.Message}");
+                if (ex.InnerException != null)
+                    _logger.Warning($"Inner Exception: {ex.InnerException.Message}");
+
+                // Wait and retry
+                await Task.Delay(5000, cancellationToken);
+            }
+        }
+
+        return null;
     }
 
     public async Task<string> GetSentralStudentIdAsync(string studentName)
@@ -198,7 +243,7 @@ public partial class Gateway : ISentralGateway
             return null;
         }
 
-        _studentListPage ??= await GetPageAsync($"{_settings.ServerUrl}/profiles/main/search?eduproq=&search=advanced&plan_type=plans");
+        _studentListPage ??= await GetPageByGet($"{_settings.ServerUrl}/profiles/main/search?eduproq=&search=advanced&plan_type=plans", default);
 
         if (_studentListPage == null)
             return null;
@@ -245,7 +290,7 @@ public partial class Gateway : ISentralGateway
         }
 
         HtmlNode reportTable = null;
-        var page = await GetPageAsync($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history");
+        var page = await GetPageByGet($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history", default);
 
         var dataList = new List<SentralReportDto>();
 
@@ -263,7 +308,7 @@ public partial class Gateway : ISentralGateway
             if (string.IsNullOrWhiteSpace(linkRef))
                 continue;
 
-            var reportPage = await GetPageAsync($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history?type=sreport&page=printed_report&reporting_period={linkRef}");
+            var reportPage = await GetPageByGet($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history?type=sreport&page=printed_report&reporting_period={linkRef}", default);
             reportTable = reportPage.DocumentNode.SelectSingleNode("//*[@id='layout-2col-content']/div/div/div[2]/table/tbody");
 
             if (reportTable != null)
@@ -318,26 +363,22 @@ public partial class Gateway : ISentralGateway
 
     public async Task<byte[]> GetStudentReport(string sentralStudentId, string reportId)
     {
-
-        var formData = new List<KeyValuePair<string, string>>
-        {
-            new KeyValuePair<string, string>("file_id", reportId),
-            new KeyValuePair<string, string>("action", "download_file")
-        };
-        var formDataEncoded = new FormUrlEncodedContent(formData);
-
         if (_logOnly)
         {
-            _logger.Information("GetStudentReport: sentralStudentId={sentralStudentId}, reportId={reportId}, formData={@formData}", sentralStudentId, reportId, formData);
+            _logger.Information("GetStudentReport: sentralStudentId={sentralStudentId}, reportId={reportId}", sentralStudentId, reportId);
 
             return null;
         }
 
-        await Login();
+        List<KeyValuePair<string, string>> formData = new()
+        {
+            new KeyValuePair<string, string>("file_id", reportId),
+            new KeyValuePair<string, string>("action", "download_file")
+        };
+        
+        byte[] response = await GetByteArrayByPost($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history?type=sreport&page=printed_report", formData, default);
 
-        var response = await _client.PostAsync($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history?type=sreport&page=printed_report", formDataEncoded);
-
-        return await response.Content.ReadAsByteArrayAsync();
+        return response;
     }
 
     public async Task<byte[]> GetSentralStudentPhoto(string studentId)
@@ -349,11 +390,9 @@ public partial class Gateway : ISentralGateway
             return null;
         }
 
-        await Login();
+        byte[] response = await GetByteArrayByGet($"{_settings.ServerUrl}/_common/lib/photo?type=student&id={studentId}&w=250&h=250", default);
 
-        var response = await _client.GetAsync($"{_settings.ServerUrl}/_common/lib/photo?type=student&id={studentId}&w=250&h=250");
-
-        return await response.Content.ReadAsByteArrayAsync();
+        return response;
     }
 
     public async Task<string> GetSentralStudentIdFromSRN(string srn, string grade)
@@ -365,7 +404,7 @@ public partial class Gateway : ISentralGateway
             return null;
         }
 
-        var page = await GetPageAsync($"{_settings.ServerUrl}/admin/datasync/students?year={grade}&type=active");
+        var page = await GetPageByGet($"{_settings.ServerUrl}/admin/datasync/students?year={grade}&type=active", default);
 
         if (page == null)
             return null;
@@ -412,7 +451,7 @@ public partial class Gateway : ISentralGateway
             return new List<SentralPeriodAbsenceDto>();
         }
 
-        var page = await GetPageAsync($"{_settings.ServerUrl}/attendancepxp/administration/student?id={sentralStudentId}");
+        var page = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/administration/student?id={sentralStudentId}", default);
 
         if (page == null)
             return new List<SentralPeriodAbsenceDto>();
@@ -543,7 +582,7 @@ public partial class Gateway : ISentralGateway
             return new List<SentralPeriodAbsenceDto>();
         }
 
-        var page = await GetPageAsync($"{_settings.ServerUrl}/attendance/administration/student/{sentralStudentId}?term={term}");
+        var page = await GetPageByGet($"{_settings.ServerUrl}/attendance/administration/student/{sentralStudentId}?term={term}", default);
 
         if (page == null)
             return new List<SentralPeriodAbsenceDto>();
@@ -661,7 +700,7 @@ public partial class Gateway : ISentralGateway
             return new List<DateOnly>();
         }
 
-        var page = await GetPageAsync($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/month");
+        var page = await GetPageByGet($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/month", default);
 
         if (page == null)
             return new List<DateOnly>();
@@ -710,7 +749,7 @@ public partial class Gateway : ISentralGateway
 
         string year = date.Year.ToString();
 
-        HtmlDocument page = await GetPageAsync($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term");
+        HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term", default);
 
         if (page == null)
             return Result.Failure<(string, string)>(new("SentralGateway.GetPage.Failure", "Could not retrieve page from Sentral Server"));
@@ -778,7 +817,7 @@ public partial class Gateway : ISentralGateway
         DateOnly startDate;
         DateOnly endDate;
 
-        HtmlDocument page = await GetPageAsync($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term");
+        HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term", default);
 
         if (page == null)
             return Result.Failure<(DateOnly, DateOnly)>(new("SentralGateway.GetPage.Failure", "Could not retrieve page from Sentral Server"));
@@ -866,7 +905,7 @@ public partial class Gateway : ISentralGateway
 
         var validDates = new List<ValidAttendenceReportDate>();
 
-        var page = await GetPageAsync($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term");
+        var page = await GetPageByGet($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term", default);
 
         if (page == null)
             return validDates;
@@ -986,7 +1025,7 @@ public partial class Gateway : ISentralGateway
         if (string.IsNullOrWhiteSpace(sentralStudentId))
             return result;
 
-        var page = await GetPageAsync($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/family");
+        var page = await GetPageByGet($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/family", default);
 
         if (page == null)
             return result;
@@ -1067,8 +1106,8 @@ public partial class Gateway : ISentralGateway
 
         var sentralDate = date.ToString("yyyy-MM-dd");
 
-        var primaryPage = await GetPageAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id={1}&range=single_day&date={sentralDate}&export=1");
-        var secondaryPage = await GetPageAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id={2}&range=single_day&date={sentralDate}&export=1");
+        var primaryPage = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id={1}&range=single_day&date={sentralDate}&export=1", default);
+        var secondaryPage = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id={2}&range=single_day&date={sentralDate}&export=1", default);
 
         if (primaryPage == null || secondaryPage == null)
             return new List<RollMarkReportDto>();
@@ -1137,9 +1176,9 @@ public partial class Gateway : ISentralGateway
 
         var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
 
-        var familiesPage = await GetPageAsync($"{_settings.ServerUrl}/enquiry/export/view_export?name=families&format=csv&headings=1&action=Download");
-        var emailPage = await GetPageAsync($"{_settings.ServerUrl}/enquiry/export/view_export?name=email&inputs[only_eldest]=no&inputs[addresses]=all&format=csv&headings=1&action=Download");
-        var linkPage = await GetPageAsync($"{_settings.ServerUrl}/enquiry/export/view_export?name=advstudent&inputs%5Bclass%5D=&inputs%5Broll_class%5D=&format=csv&headings=1&action=Download");
+        var familiesPage = await GetPageByGet($"{_settings.ServerUrl}/enquiry/export/view_export?name=families&format=csv&headings=1&action=Download", default);
+        var emailPage = await GetPageByGet($"{_settings.ServerUrl}/enquiry/export/view_export?name=email&inputs[only_eldest]=no&inputs[addresses]=all&format=csv&headings=1&action=Download", default);
+        var linkPage = await GetPageByGet($"{_settings.ServerUrl}/enquiry/export/view_export?name=advstudent&inputs%5Bclass%5D=&inputs%5Broll_class%5D=&format=csv&headings=1&action=Download", default);
 
         if (familiesPage == null || emailPage == null || linkPage == null)
             return data;
@@ -1280,138 +1319,51 @@ public partial class Gateway : ISentralGateway
         return data.Where(entry => entry.StudentIds.Any()).ToList();
     }
 
-    public async Task<ICollection<AwardDetailDto>> GetAwardsReport()
+    public async Task<HtmlDocument> GetAwardsReport(CancellationToken cancellationToken = default)
     {
         if (_logOnly)
         {
             _logger.Information("GetAwardsReport");
 
-            return new List<AwardDetailDto>();
+            return new HtmlDocument();
         }
-
-        var data = new List<AwardDetailDto>();
-
-        var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
-
-        var payload = new List<KeyValuePair<string, string>>
+        
+        List<KeyValuePair<string, string>> payload = new()
         {
             new KeyValuePair<string, string>("action", "exportStudentAwards")
         };
 
-        var report = await PostPageAsync($"{_settings.ServerUrl}/wellbeing/awards/export", payload);
+        HtmlDocument report = await GetPageByPost($"{_settings.ServerUrl}/wellbeing/awards/export", payload, cancellationToken);
 
-        if (report == null)
-            return data;
-
-        var list = report.DocumentNode.InnerHtml.Split('\u000A').ToList();
-
-        // Remove first and last entry
-        list.RemoveAt(0);
-        list.RemoveAt(list.Count - 1);
-
-        for (var i = 0; i < list.Count; i++)
-        {
-            var entry = list[i];
-            var split = CSVParser.Split(entry);
-
-            // Index 0 = Award Category
-            // Index 1 = Award Type
-            // Index 2 = Awarded Date
-            // Index 3 = Award Created DateTime
-            // Index 4 = Award Source
-            // Index 5 = Student Id (Sentral)
-            // Index 6 = Student Id (StudentId)
-            // Index 7 = First Name
-            // Index 8 = Last Name
-
-            var dto = AwardDetailDto.ConvertFromFileLine(split);
-
-            //if (dto.AwardCategory != "Astra Award")
-                data.Add(dto);
-        }
-
-        return data;
+        return report;
     }
 
-    public async Task<List<AwardIncidentDto>> GetAwardsListing(string sentralStudentId, string calYear)
+    public async Task<HtmlDocument> GetAwardsListing(string sentralStudentId, string calYear, CancellationToken cancellationToken = default)
     {
-        List<AwardIncidentDto> data = new();
-
         if (_logOnly)
         {
             _logger.Information("GetAwardsListing: sentralStudentId={sentralStudentId}, calYear={calYear}", sentralStudentId, calYear);
 
-            return data;
+            return new HtmlDocument();
         }
 
-        var page = await GetPageAsync($"{_settings.ServerUrl}/wellbeing/students/incidents?id={sentralStudentId}&category=1&year={calYear}");
+        HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/wellbeing/students/incidents?id={sentralStudentId}&category=1&year={calYear}", cancellationToken);
 
-        var awardsList = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "WellbeingStudentAwardsList").Value);
+        return page;
+    }
 
-        if (awardsList is not null)
+    public async Task<HtmlDocument> GetIncidentDetailsPage(string uri, CancellationToken cancellationToken = default)
+    {
+        if (_logOnly)
         {
-            var rows = awardsList.Descendants("tr");
+            _logger.Information("GetIncidentDetailsPage: uri={uri}", uri);
 
-            foreach (var row in rows)
-            {
-                var cellNumber = 0;
-
-                AwardIncidentDto entry = new();
-
-                foreach (var cell in row.Descendants("td"))
-                {
-                    cellNumber++;
-
-                    switch (cellNumber)
-                    {
-                        case 1:
-                            // Date Issued Column includes date and name of day
-                            var dateText = cell.InnerHtml.Split("<br>")[0];
-
-                            var success = DateOnly.TryParse(cell.InnerText, out var issueDate);
-
-                            if (!success)
-                                continue;
-
-                            entry.DateIssued = issueDate;
-
-                            break;
-                        case 2:
-                            // Incident link and type
-                            var href = cell.ChildNodes.FindFirst("a").GetAttributeValue("href", "");
-
-                            if (!string.IsNullOrWhiteSpace(href))
-                            {
-                                entry.IncidentId = href.Split('=')[1].Split('&')[0];
-                            }
-
-                            break;
-                        case 3:
-                            // Incident Type
-                            if (cell.InnerText.Trim() != "Astra Award")
-                                continue;
-
-                            break;
-                        case 4:
-                            // issuing teacher name
-                            var name = cell.InnerText.Split(',');
-
-                            entry.TeacherName = $"{name[1].Trim()} {name[0].Trim()}";
-
-                            break;
-                        case 6:
-                            // Issuing reason
-                            entry.IssueReason = cell.InnerText.Trim();
-
-                            break;
-                    }
-                }
-
-                data.Add(entry);
-            }
+            return new HtmlDocument();
         }
 
-        return data;
+        HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}{uri}", cancellationToken);
+
+        return page;
     }
 
     public async Task<byte[]> GetAwardDocument(string sentralStudentId, string incidentId)
@@ -1423,25 +1375,21 @@ public partial class Gateway : ISentralGateway
             return null;
         }
 
-        await Login();
-
         // Get the Issue Id first
         // https://admin.aurora.dec.nsw.gov.au/wellbeing/letters/print?letter_type=incident&id=30133&student_id=1868
 
-        var previewPage = await GetPageAsync($"{_settings.ServerUrl}/wellbeing/letters/print?letter_type=incident&id={incidentId}&student_id={sentralStudentId}");
+        HtmlDocument previewPage = await GetPageByGet($"{_settings.ServerUrl}/wellbeing/letters/print?letter_type=incident&id={incidentId}&student_id={sentralStudentId}", default);
 
-        var inputs = previewPage.DocumentNode.SelectNodes("//input[@name='selected_issues[]']");
+        HtmlNodeCollection inputs = previewPage.DocumentNode.SelectNodes("//input[@name='selected_issues[]']");
 
         string issue = string.Empty;
 
-        foreach (var input in inputs)
-        {
+        foreach (HtmlNode input in inputs)
             issue = input.Attributes["value"].Value;
-        }
 
         // Use the Issue Id to generate the certificate
 
-        var formData = new List<KeyValuePair<string, string>>
+        List<KeyValuePair<string, string>> formData = new()
         {
             new KeyValuePair<string, string>("selected_issues[]", issue),
             new KeyValuePair<string, string>("letter_template_id", "31"),
@@ -1451,32 +1399,30 @@ public partial class Gateway : ISentralGateway
             new KeyValuePair<string, string>("issue_id", "")
         };
 
-        var formDataEncoded = new FormUrlEncodedContent(formData);
+        byte[] response = await GetByteArrayByPost($"{_settings.ServerUrl}/wellbeing/letters/print", formData, default);
 
-        var response = await _client.PostAsync($"{_settings.ServerUrl}/wellbeing/letters/print", formDataEncoded);
-
-        if (response.StatusCode != HttpStatusCode.OK)
+        if (response is null)
         {
             _logger.Warning("Did not successfully generate the certificate: {@formData}", formData);
             return Array.Empty<byte>();
         }
 
-        var code = await response.Content.ReadAsStringAsync();
+        string code = response.ToString();
 
-        var document = await _client.GetAsync($"{_settings.ServerUrl}/jasperreports/createReport?format=pdf&key={code}");
+        byte[] document = await GetByteArrayByGet($"{_settings.ServerUrl}/jasperreports/createReport?format=pdf&key={code}", default);
 
-        if (document.StatusCode != HttpStatusCode.OK)
+        if (document is null)
         {
             _logger.Warning("Did not successfully download certificate: {@formData} ({code})", formData, code);
             return Array.Empty<byte>();
         }
 
-        return await document.Content.ReadAsByteArrayAsync();
+        return document;
     }
 
     public async Task<Stream> GetNAwardReport()
     {
-        Stream file = await GetStreamAsync($"{_settings.ServerUrl}/wellbeing/reports/incidents?report_id=4154&export-xls&victims-witnesses=All");
+        Stream file = await GetStreamByGet($"{_settings.ServerUrl}/wellbeing/reports/incidents?report_id=4154&export-xls&victims-witnesses=All", default);
 
         return file;
     }
@@ -1542,9 +1488,9 @@ public partial class Gateway : ISentralGateway
             new("action", "export")
         };
 
-        response.YearToDateDayCalculationDocument = await PostPageAsync($"{_settings.ServerUrl}/attendance/reports/percentage", payload);
+        response.YearToDateDayCalculationDocument = await GetPageByPost($"{_settings.ServerUrl}/attendance/reports/percentage", payload, default);
 
-        Stream perMinuteYearToDateCalculationFile = await GetStreamAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={year}&start_date={_dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")}&end_date={endDate.ToString("yyyy-MM-dd")}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
+        Stream perMinuteYearToDateCalculationFile = await GetStreamByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={year}&start_date={_dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")}&end_date={endDate.ToString("yyyy-MM-dd")}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export", default);
         response.YearToDateMinuteCalculationDocument = perMinuteYearToDateCalculationFile.IsExcelFile() ? perMinuteYearToDateCalculationFile : null;
 
         payload = new()
@@ -1597,9 +1543,9 @@ public partial class Gateway : ISentralGateway
             new("action", "export")
         };
 
-        response.WeekDayCalculationDocument = await PostPageAsync($"{_settings.ServerUrl}/attendance/reports/percentage", payload);
+        response.WeekDayCalculationDocument = await GetPageByPost($"{_settings.ServerUrl}/attendance/reports/percentage", payload, default);
 
-        Stream perMinuteWeekCalculationFile = await GetStreamAsync($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=week&term={term}&week={week}&year={year}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export");
+        Stream perMinuteWeekCalculationFile = await GetStreamByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=week&term={term}&week={week}&year={year}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export", default);
         response.WeekMinuteCalculationDocument = perMinuteWeekCalculationFile.IsExcelFile() ? perMinuteWeekCalculationFile : null;
 
         return response;

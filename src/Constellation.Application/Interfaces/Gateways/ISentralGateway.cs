@@ -2,13 +2,15 @@
 
 using Constellation.Application.Attendance.GetAttendanceDataFromSentral;
 using Constellation.Application.Attendance.GetValidAttendanceReportDates;
+using Constellation.Application.Awards.GetAwardIncidentsFromSentral;
 using Constellation.Application.DTOs;
-using Constellation.Application.DTOs.Awards;
 using Constellation.Core.Shared;
+using HtmlAgilityPack;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 public interface ISentralGateway
@@ -25,8 +27,9 @@ public interface ISentralGateway
     Task<byte[]> GetSentralStudentPhoto(string studentId);
     Task<ICollection<SentralReportDto>> GetStudentReportList(string sentralStudentId);
     Task<byte[]> GetStudentReport(string sentralStudentId, string reportId);
-    Task<ICollection<AwardDetailDto>> GetAwardsReport();
-    Task<List<AwardIncidentDto>> GetAwardsListing(string sentralStudentId, string calYear);
+    Task<HtmlDocument> GetAwardsReport(CancellationToken cancellationToken = default);
+    Task<HtmlDocument> GetAwardsListing(string sentralStudentId, string calYear, CancellationToken cancellationToken = default);
+    Task<HtmlDocument> GetIncidentDetailsPage(string uri, CancellationToken cancellationToken = default);
     Task<byte[]> GetAwardDocument(string sentralStudentId, string incidentId);
     Task<SystemAttendanceData> GetAttendancePercentages(string term, string week, string year, DateOnly startDate, DateOnly endDate);
     Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForWeek(string year, string term, string week);
