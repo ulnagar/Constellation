@@ -2,7 +2,6 @@
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards.ChangesModel
 
 @using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards
-@using Constellation.Application.Extensions
 @using Constellation.Core.Extensions
 
 <h2>Student Award Changes</h2>
@@ -32,7 +31,8 @@
         <a asp-route-filter="@ChangesModel.FilterDto.Additions" class="btn @additions_style">Additions</a>
         <a asp-route-filter="@ChangesModel.FilterDto.Overages" class="btn @overages_style">Overages</a>
     </div>
-
+    
+    <a asp-page-handler="AuditValues" class="btn btn-danger">Audit Calculations</a>
 </div>
 
 <hr />

@@ -2,7 +2,13 @@
 
 public sealed class AwardTally
 {
-    public AwardTally() { }
+    public AwardTally()
+    {
+        Astras = 0;
+        Stellars = 0;
+        GalaxyMedals = 0;
+        UniversalAchievers = 0;
+    }
 
     public int Astras { get; private set; }
     public int Stellars { get; private set; }

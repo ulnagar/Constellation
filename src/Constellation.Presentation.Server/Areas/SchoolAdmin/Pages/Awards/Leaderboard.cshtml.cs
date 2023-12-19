@@ -4,6 +4,7 @@ using Constellation.Application.Awards.GetStudentAwardStatistics;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +20,9 @@ public class LeaderboardModel : BasePageModel
         _mediator = mediator;
     }
 
+    [ViewData] public string ActivePage => AwardsPages.Leaderboard;
+
+
     [BindProperty]
     public DateOnly FromDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
@@ -31,11 +35,9 @@ public class LeaderboardModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
-        ViewData["ActivePage"] = "Leaderboard";
-
         await GetClasses(_mediator);
 
-        var statisticsRequest = await _mediator.Send(new GetStudentAwardStatisticsQuery(), cancellationToken);
+        Result<List<StudentAwardStatisticsResponse>> statisticsRequest = await _mediator.Send(new GetStudentAwardStatisticsQuery(), cancellationToken);
 
         if (statisticsRequest.IsFailure)
         {
@@ -44,7 +46,7 @@ public class LeaderboardModel : BasePageModel
 
         foreach (Grade grade in Enum.GetValues(typeof(Grade)))
         {
-            var studentWinners = statisticsRequest.Value
+            List<StudentAwardStatisticsResponse> studentWinners = statisticsRequest.Value
                 .Where(student => student.Grade == grade)
                 .GroupBy(student => student.AwardedAstras)
                 .OrderByDescending(group => group.Key)
@@ -58,11 +60,9 @@ public class LeaderboardModel : BasePageModel
 
     public async Task OnPostFilter(CancellationToken cancellationToken = default)
     {
-        ViewData["ActivePage"] = "Leaderboard";
-
         await GetClasses(_mediator);
 
-        var statisticsRequest = await _mediator.Send(new GetStudentAwardStatisticsQuery(FromDate, ToDate), cancellationToken);
+        Result<List<StudentAwardStatisticsResponse>> statisticsRequest = await _mediator.Send(new GetStudentAwardStatisticsQuery(FromDate, ToDate), cancellationToken);
 
         if (statisticsRequest.IsFailure)
         {
@@ -71,7 +71,7 @@ public class LeaderboardModel : BasePageModel
 
         foreach (Grade grade in Enum.GetValues(typeof(Grade)))
         {
-            var studentWinners = statisticsRequest.Value
+            List<StudentAwardStatisticsResponse> studentWinners = statisticsRequest.Value
                 .Where(student => student.Grade == grade)
                 .GroupBy(student => student.AwardedAstras)
                 .OrderByDescending(group => group.Key)

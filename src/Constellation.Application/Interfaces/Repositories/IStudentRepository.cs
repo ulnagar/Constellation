@@ -44,8 +44,11 @@ public interface IStudentRepository
 
     Task<int> GetCountCurrentStudentsWithPartialAbsenceScanDisabled(CancellationToken cancellationToken = default);
     Task<int> GetCountCurrentStudentsWithWholeAbsenceScanDisabled(CancellationToken cancellationToken = default);
+    Task<int> GetCountCurrentStudentsWithoutSentralId(CancellationToken cancellationToken = default);
+    Task<List<Student>> GetCurrentStudentsWithoutSentralId(CancellationToken cancellationToken = default);
 
-    Task <Student> GetForExistCheck(string id);
+
+    Task<Student> GetForExistCheck(string id);
     Task<ICollection<Student>> AllActiveForFTECalculations();
     Task<ICollection<Student>> AllActiveForClassAuditAsync();
     Task<ICollection<Student>> ForListAsync(Expression<Func<Student, bool>> predicate);

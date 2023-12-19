@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Server.Areas.Home.Pages;
 
 using Application.Affirmations;
 using Application.Students.CountStudentsWithAbsenceScanDisabled;
+using Application.Students.CountStudentsWithoutSentralId;
 using Application.Training.Modules.GetCountOfExpiringCertificatesForStaffMember;
 using Application.Training.Roles.CountStaffWithoutRole;
 using Constellation.Application.Models.Auth;
@@ -42,6 +43,9 @@ public class DashboardModel : BasePageModel
     public bool ShowAwardsWidgets { get; set; }
     public int AwardOverages { get; set; }
     public int AwardAdditions { get; set; }
+
+    public bool ShowSentralIdWidgets { get; set; }
+    public int StudentsWithoutSentralId { get; set; }
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken = default)
     {
@@ -108,6 +112,18 @@ public class DashboardModel : BasePageModel
 
             //TODO: Find a way to easily and quickly determine how many awards each student has, and should have
             // Possibly creating read-model properties on the Student model to include a count of awards types
+        }
+
+        if (IsAdmin)
+        {
+            ShowSentralIdWidgets = true;
+
+            Result<int> sentralIdRequest = await _mediator.Send(new CountStudentsWithoutSentralIdQuery(), cancellationToken);
+
+            if (sentralIdRequest.IsSuccess)
+            {
+                StudentsWithoutSentralId = sentralIdRequest.Value;
+            }
         }
 
         return Page();

@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards;
 using Constellation.Application.Awards.GetAwardCountsByTypeByGrade;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,18 +19,14 @@ public class DashboardModel : BasePageModel
         _mediator = mediator;
     }
 
-    public async Task OnGet()
-    {
-        ViewData["ActivePage"] = "Dashboard";
+    [ViewData] public string ActivePage => AwardsPages.Dashboard;
 
-        await GetClasses(_mediator);
-    }
+
+    public async Task OnGet() => await GetClasses(_mediator);
 
     public async Task<IActionResult> OnPostGetData(CancellationToken cancellationToken = default)
     {
-        ViewData["ActivePage"] = "Dashboard";
-
-        var request = await _mediator.Send(new GetAwardCountsByTypeByGradeQuery(DateTime.Today.Year), cancellationToken);
+        Result<List<AwardCountByTypeByGradeResponse>> request = await _mediator.Send(new GetAwardCountsByTypeByGradeQuery(DateTime.Today.Year), cancellationToken);
 
         if (request.IsFailure)
         {

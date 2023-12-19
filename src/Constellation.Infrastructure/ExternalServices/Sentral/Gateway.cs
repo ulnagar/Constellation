@@ -404,38 +404,28 @@ public class Gateway : ISentralGateway
             return null;
         }
 
-        var page = await GetPageByGet($"{_settings.ServerUrl}/admin/datasync/students?year={grade}&type=active", default);
-
-        if (page == null)
-            return null;
+        HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/admin/datasync/students?year={grade}&type=active", default);
 
         // OLD XPATH - CHANGED 2023-02-24
         //var studentTable = page.DocumentNode.SelectSingleNode("/html/body/div[6]/div/div/div[3]/div/div/div/div[2]/table");
-        var studentTable = page.DocumentNode.SelectSingleNode("/html/body/div[7]/div/div/div[3]/div/div/div/div[2]/table");
+        HtmlNode studentTable = page?.DocumentNode.SelectSingleNode("/html/body/div[7]/div/div/div[3]/div/div/div/div[2]/table");
 
-        if (studentTable != null)
+        if (studentTable == null) return null;
+        
+        foreach (HtmlNode row in studentTable.Descendants("tr"))
         {
-            foreach (var row in studentTable.Descendants("tr"))
+            HtmlNode cell = row.ChildNodes.FindFirst("td");
+            if (cell == null)
+                continue;
+
+            string sentralSRN = cell.InnerText.Trim();
+
+            if (sentralSRN != srn) continue;
+                
+            string href = cell.ChildNodes.FindFirst("a").GetAttributeValue("href", "");
+            if (!string.IsNullOrWhiteSpace(href))
             {
-                var cell = row.ChildNodes.FindFirst("td");
-                if (cell == null)
-                    continue;
-
-                var sentralSRN = cell.InnerText.Trim();
-
-                if (sentralSRN == srn)
-                {
-                    var href = cell.ChildNodes.FindFirst("a").GetAttributeValue("href", "");
-                    if (string.IsNullOrWhiteSpace(href))
-                    {
-                        // Something went wrong? What now?
-                        throw new NodeAttributeNotFoundException();
-                    }
-                    else
-                    {
-                        return href.Split('=').Last();
-                    }
-                }
+                return href.Split('=').Last();
             }
         }
 

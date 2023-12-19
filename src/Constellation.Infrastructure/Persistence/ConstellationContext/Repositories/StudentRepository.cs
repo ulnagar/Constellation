@@ -214,6 +214,23 @@ public class StudentRepository : IStudentRepository
                 configuration.ScanEndDate >= _dateTime.Today))
             .CountAsync(cancellationToken);
 
+    public async Task<int> GetCountCurrentStudentsWithoutSentralId(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student => student.IsDeleted == false)
+            .Where(student => string.IsNullOrWhiteSpace(student.SentralStudentId))
+            .CountAsync(cancellationToken);
+
+    public async Task<List<Student>> GetCurrentStudentsWithoutSentralId(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Include(student => student.School)
+            .Where(student => student.IsDeleted == false)
+            .Where(student => string.IsNullOrWhiteSpace(student.SentralStudentId))
+            .ToListAsync(cancellationToken);
+    
     public void Insert(Student student) => _context.Set<Student>().Add(student);
 
     public async Task<Student> GetForExistCheck(string id)

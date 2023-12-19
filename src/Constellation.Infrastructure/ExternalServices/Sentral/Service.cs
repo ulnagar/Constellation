@@ -3,6 +3,7 @@
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Core.Models.Students;
 using System.Threading.Tasks;
 
 public class Service : ISentralService
@@ -18,12 +19,12 @@ public class Service : ISentralService
 
     public async Task<string> UpdateSentralStudentId(string studentId)
     {
-        var student = await _unitOfWork.Students.GetForExistCheck(studentId);
+        Student student = await _unitOfWork.Students.GetForExistCheck(studentId);
 
         if (!string.IsNullOrWhiteSpace(student.SentralStudentId))
             return student.SentralStudentId;
 
-        var newId = await _sentralGateway.GetSentralStudentIdFromSRN(student.StudentId, ((int)student.CurrentGrade).ToString());
+        string newId = await _sentralGateway.GetSentralStudentIdFromSRN(student.StudentId, ((int)student.CurrentGrade).ToString());
 
         if (student.SentralStudentId != newId)
         {

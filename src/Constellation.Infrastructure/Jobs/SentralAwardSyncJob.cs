@@ -91,9 +91,23 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
             _logger
                 .Debug("Found {count} total awards for student {name} ({grade})", reportAwards.Count, name.DisplayName, student.CurrentGrade.AsName());
 
+            Result<List<AwardIncidentResponse>> awardIncidentsRequest = await _mediator.Send(new GetAwardIncidentsFromSentralQuery(student.SentralStudentId, _dateTime.CurrentYear.ToString()), cancellationToken);
+
+            if (awardIncidentsRequest.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(Error), awardIncidentsRequest.Error, true)
+                    .Warning("Failed to process Awards");
+
+                return;
+            }
+
+            _logger
+                .Debug("Found {count} award incidents for student {name} ({grade})", awardIncidentsRequest.Value.Count, name.DisplayName, student.CurrentGrade.AsName());
+
             foreach (AwardDetailResponse item in reportAwards)
             {
-                if (!existingAwards.Any(award => award.Type == item.Type && award.AwardedOn == item.AwardCreated))
+                if (!existingAwards.Any(award => award.Type == item.Type && award.AwardedOn.AddSeconds(-award.AwardedOn.Second) == item.AwardCreated))
                 {
                     _logger
                         .Debug("Found new {type} on {date}", item.Type, item.AwardCreated.ToShortDateString());
@@ -108,6 +122,14 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
                     {
                         case StudentAward.Astra:
                             student.AwardTally.AddAstra();
+
+                            AwardIncidentResponse matchingIncident = awardIncidentsRequest.Value
+                                .FirstOrDefault(incident =>
+                                    incident.AwardedAt == entry.AwardedOn);
+
+                            if (matchingIncident is not null)
+                                await ProcessAward(matchingIncident, entry, student, cancellationToken);
+
                             break;
 
                         case StudentAward.Stellar:
@@ -124,51 +146,9 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
                     }
 
                     _awardRepository.Insert(entry);
+
+                    existingAwards.Add(entry);
                 }
-            }
-
-            await _unitOfWork.CompleteAsync(cancellationToken);
-
-            existingAwards = await _awardRepository.GetByStudentId(student.StudentId, cancellationToken);
-
-            Result<List<AwardIncidentResponse>> checkAwardRequest = await _mediator.Send(new GetAwardIncidentsFromSentralQuery(student.SentralStudentId, _dateTime.CurrentYear.ToString()), cancellationToken);
-
-            if (checkAwardRequest.IsFailure)
-            {
-                _logger
-                    .ForContext(nameof(Error), checkAwardRequest.Error, true)
-                    .Warning("Failed to process Awards");
-
-                return;
-            }
-
-            _logger
-                .Debug("Found {count} award certificates for student {name} ({grade})", checkAwardRequest.Value.Count, name.DisplayName, student.CurrentGrade.AsName());
-
-            List<AwardIncidentResponse> missingAwards = checkAwardRequest.Value
-                .Where(award => 
-                    existingAwards.All(existing => 
-                        existing.IncidentId != award.IncidentId))
-                .ToList();
-            
-            foreach (AwardIncidentResponse award in missingAwards)
-            {
-                StudentAward matchingAward = existingAwards
-                    .FirstOrDefault(entry =>
-                        entry.Category == StudentAward.Astra &&
-                        entry.Type == StudentAward.Astra &&
-                        entry.AwardedOn == award.AwardedAt &&
-                        string.IsNullOrEmpty(entry.IncidentId));
-
-                if (matchingAward is null)
-                    continue;
-
-                _logger
-                    .ForContext(nameof(AwardIncidentResponse), award, true)
-                    .ForContext(nameof(StudentAward), matchingAward, true)
-                    .Debug("Matched new award certificate with Incident Id {inc} for student {name} ({grade})", award.IncidentId, name.DisplayName, student.CurrentGrade.AsName());
-
-                await ProcessAward(award, matchingAward, student, cancellationToken);
             }
 
             await _unitOfWork.CompleteAsync(cancellationToken);

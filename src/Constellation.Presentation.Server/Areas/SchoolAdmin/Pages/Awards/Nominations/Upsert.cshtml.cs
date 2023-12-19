@@ -25,8 +25,7 @@ public class UpsertModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData]
-    public string ActivePage => "Nominations";
+    [ViewData] public string ActivePage => "Nominations";
 
     [BindProperty(SupportsGet = true)]
     public Guid? Id { get; set; }

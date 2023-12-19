@@ -22,8 +22,7 @@ public class IndexModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData]
-    public string ActivePage => "Nominations";
+    [ViewData] public string ActivePage => "Nominations";
 
     public List<NominationPeriodResponse> Periods { get; set; } = new();
 

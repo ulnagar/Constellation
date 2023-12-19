@@ -58,6 +58,20 @@
     }
     
     <div class="row row-cols-1 row-cols-md-3">
+        @if (Model.ShowSentralIdWidgets)
+        {
+            <div class="col mb-4">
+                <div class="card h-100 @(Model.StudentsWithoutSentralId > 0 ? "text-white bg-danger" : "text-white bg-success")">
+                    <div class="card-header">Student Configuration</div>
+                    <div class="card-body">
+                        <h3 class="card-title card-title-large">@Model.StudentsWithoutSentralId</h3>
+                        <p class="card-text">students without a linked Sentral Student Id</p>
+                        <a asp-page="/Students/WithoutSentralId" asp-area="Partner" class="stretched-link"></a>
+                    </div>
+                </div>
+            </div>
+        }
+
         @if (Model.ShowTrainingWidgets)
         {
             <div class="col mb-4">
@@ -96,7 +110,7 @@
                 </div>
             </div>
         }
-        
+
         @if (Model.ShowAbsenceWidgets)
         {
             <div class="col mb-4">
@@ -121,7 +135,7 @@
                 </div>
             </div>
         }
-        
+
         @if (Model.ShowAbsenceWidgets)
         {
             <div class="col mb-4">
@@ -146,7 +160,7 @@
                 </div>
             </div>
         }
-        
+
         @if (Model.ShowAbsenceWidgets)
         {
             <div class="col mb-4">

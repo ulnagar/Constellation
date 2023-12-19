@@ -2,7 +2,6 @@
 
 using Constellation.Application.Attendance.GetAttendanceDataFromSentral;
 using Constellation.Application.Attendance.GetValidAttendanceReportDates;
-using Constellation.Application.Awards.GetAwardIncidentsFromSentral;
 using Constellation.Application.DTOs;
 using Constellation.Core.Shared;
 using HtmlAgilityPack;

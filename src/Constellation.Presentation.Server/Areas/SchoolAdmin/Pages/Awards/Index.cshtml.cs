@@ -9,6 +9,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.ValueObjects;
 using Hangfire;
 using MediatR;
@@ -38,7 +39,8 @@ public class IndexModel : BasePageModel
         Recent,
         ThisYear
     }
-
+    [ViewData] public string ActivePage => AwardsPages.List;
+    
     [BindProperty(SupportsGet = true)]
     public FilterDto Filter { get; set; } = FilterDto.Recent;
 
@@ -46,8 +48,6 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
-        ViewData["ActivePage"] = "List";
-
         await GetClasses(_mediator);
 
         Result<List<AwardResponse>> awardRequest = Filter switch
@@ -76,11 +76,9 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGetAttemptDownload(string Id, CancellationToken cancellationToken = default)
     {
-        ViewData["ActivePage"] = "List";
+        StudentAwardId awardId = StudentAwardId.FromValue(Guid.Parse(Id));
 
-        var awardId = StudentAwardId.FromValue(Guid.Parse(Id));
-
-        var fileRequest = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.AwardCertificate, awardId.ToString()), cancellationToken);
+        Result<AttachmentResponse> fileRequest = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.AwardCertificate, awardId.ToString()), cancellationToken);
 
         if (fileRequest.IsFailure)
         {

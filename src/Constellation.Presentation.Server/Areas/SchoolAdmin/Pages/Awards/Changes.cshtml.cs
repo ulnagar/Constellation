@@ -1,8 +1,10 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards;
 
+using Application.Students.AuditAwardTallyValues;
 using Constellation.Application.Awards.GetStudentAwardStatistics;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +28,8 @@ public class ChangesModel : BasePageModel
         Overages
     }
 
+    [ViewData] public string ActivePage => AwardsPages.Changes;
+
     [BindProperty(SupportsGet = true)]
     public FilterDto Filter { get; set; } = FilterDto.All;
 
@@ -33,11 +37,9 @@ public class ChangesModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
-        ViewData["ActivePage"] = "Changes";
-
         await GetClasses(_mediator);
 
-        var statisticsRequest = await _mediator.Send(new GetStudentAwardStatisticsQuery(), cancellationToken);
+        Result<List<StudentAwardStatisticsResponse>> statisticsRequest = await _mediator.Send(new GetStudentAwardStatisticsQuery(), cancellationToken);
 
         if (statisticsRequest.IsFailure)
         {
@@ -67,5 +69,12 @@ public class ChangesModel : BasePageModel
                     entry.AwardedUniversals != entry.CalculatedUniversals)
                 .ToList()
         };
+    }
+
+    public async Task<IActionResult> OnGetAuditValues()
+    {
+        await _mediator.Send(new AuditAwardTallyValuesCommand());
+
+        return RedirectToPage();
     }
 }
