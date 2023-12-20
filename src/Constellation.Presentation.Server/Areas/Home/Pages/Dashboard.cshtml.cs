@@ -3,7 +3,9 @@ namespace Constellation.Presentation.Server.Areas.Home.Pages;
 
 using Application.Affirmations;
 using Application.Students.CountStudentsWithAbsenceScanDisabled;
+using Application.Students.CountStudentsWithAwardOverages;
 using Application.Students.CountStudentsWithoutSentralId;
+using Application.Students.CountStudentsWithPendingAwards;
 using Application.Training.Modules.GetCountOfExpiringCertificatesForStaffMember;
 using Application.Training.Roles.CountStaffWithoutRole;
 using Constellation.Application.Models.Auth;
@@ -110,8 +112,19 @@ public class DashboardModel : BasePageModel
         {
             ShowAwardsWidgets = true;
 
-            //TODO: Find a way to easily and quickly determine how many awards each student has, and should have
-            // Possibly creating read-model properties on the Student model to include a count of awards types
+            Result<int> overages = await _mediator.Send(new CountStudentsWithAwardOveragesQuery(), cancellationToken);
+
+            if (overages.IsSuccess)
+            {
+                AwardOverages = overages.Value;
+            }
+
+            Result<int> pending = await _mediator.Send(new CountStudentsWithPendingAwardsQuery(), cancellationToken);
+
+            if (pending.IsSuccess)
+            {
+                AwardAdditions = pending.Value;
+            }
         }
 
         if (IsAdmin)

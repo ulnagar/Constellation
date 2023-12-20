@@ -230,7 +230,29 @@ public class StudentRepository : IStudentRepository
             .Where(student => student.IsDeleted == false)
             .Where(student => string.IsNullOrWhiteSpace(student.SentralStudentId))
             .ToListAsync(cancellationToken);
-    
+
+    public async Task<int> GetCountCurrentStudentsWithAwardOverages(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student => student.IsDeleted == false)
+            .Where(student =>
+                student.AwardTally.Stellars > student.AwardTally.Astras / 5 ||
+                student.AwardTally.GalaxyMedals > student.AwardTally.Astras / 25 ||
+                student.AwardTally.UniversalAchievers > student.AwardTally.Astras / 125)
+            .CountAsync(cancellationToken);
+
+    public async Task<int> GetCountCurrentStudentsWithPendingAwards(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student => student.IsDeleted == false)
+            .Where(student =>
+                student.AwardTally.Stellars < student.AwardTally.Astras / 5 ||
+                student.AwardTally.GalaxyMedals < student.AwardTally.Astras / 25 ||
+                student.AwardTally.UniversalAchievers < student.AwardTally.Astras / 125)
+            .CountAsync(cancellationToken);
+
     public void Insert(Student student) => _context.Set<Student>().Add(student);
 
     public async Task<Student> GetForExistCheck(string id)

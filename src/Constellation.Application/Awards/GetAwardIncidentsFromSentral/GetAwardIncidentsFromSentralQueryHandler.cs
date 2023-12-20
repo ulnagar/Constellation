@@ -11,7 +11,6 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -40,112 +39,109 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
 
         HtmlNode awardsList = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "WellbeingStudentAwardsList").Value);
 
-        if (awardsList is not null)
+        if (awardsList is null) return response;
+        
+        IEnumerable<HtmlNode> rows = awardsList.Descendants("tr");
+
+        foreach (HtmlNode row in rows)
         {
-            IEnumerable<HtmlNode> rows = awardsList.Descendants("tr");
+            int cellNumber = 0;
 
-            foreach (HtmlNode row in rows)
-            {
-                int cellNumber = 0;
-
-                DateTime createdOn = DateTime.MinValue;
-                DateOnly issuedFor;
-                string incidentId = string.Empty;
-                string teacherName = string.Empty;
-                string issueReason = string.Empty;
+            DateTime createdOn = DateTime.MinValue;
+            DateOnly issuedFor;
+            string incidentId = string.Empty;
+            string teacherName = string.Empty;
+            string issueReason = string.Empty;
                 
-                foreach (HtmlNode cell in row.Descendants("td"))
-                {
-                    cellNumber++;
+            foreach (HtmlNode cell in row.Descendants("td"))
+            {
+                cellNumber++;
                     
-                    switch (cellNumber)
-                    {
-                        case 1:
-                            // Date the award was for (i.e. events on this date are the reason for the award)
-                            DateOnly.TryParse(cell.InnerText, out issuedFor);
+                switch (cellNumber)
+                {
+                    case 1:
+                        // Date the award was for (i.e. events on this date are the reason for the award)
+                        DateOnly.TryParse(cell.InnerText, out issuedFor);
 
-                            break;
-                        case 2:
-                            // Incident link and type
-                            string href = cell.ChildNodes.FindFirst("a").GetAttributeValue("href", "");
+                        break;
+                    case 2:
+                        // Incident link and type
+                        string href = cell.ChildNodes.FindFirst("a").GetAttributeValue("href", "");
 
-                            if (!string.IsNullOrWhiteSpace(href))
+                        if (!string.IsNullOrWhiteSpace(href))
+                        {
+                            // Date the award was created (i.e. when the award was entered into Sentral)
+                            HtmlDocument incidentPage = await _gateway.GetIncidentDetailsPage(href, cancellationToken);
+
+                            if (incidentPage is not null)
                             {
-                                // Date the award was created (i.e. when the award was entered into Sentral)
-                                HtmlDocument incidentPage = await _gateway.GetIncidentDetailsPage(href, cancellationToken);
+                                string xpath = "/html/body/div[7]/div/div/div[3]/div/div/div[1]/div[1]/div/div/div[1]/span";
+                                HtmlNode entry = incidentPage.DocumentNode.SelectSingleNode(xpath);
 
-                                if (incidentPage is not null)
-                                {
-                                    string xpath = "/html/body/div[7]/div/div/div[3]/div/div/div[1]/div[1]/div/div/div[1]/span";
-                                    HtmlNode entry = incidentPage.DocumentNode.SelectSingleNode(xpath);
-
-                                    string text = entry.InnerText.Trim();
-                                    string[] split = text.Split(' ');
+                                string text = entry.InnerText.Trim();
+                                string[] split = text.Split(' ');
                                     
-                                    if (split[1].Contains("on"))
-                                    {
-                                        string dateTimeString = $"{split[2]} {split[4]}";
-                                        bool success = DateTime.TryParse(dateTimeString, out createdOn);
+                                if (split[1].Contains("on"))
+                                {
+                                    string dateTimeString = $"{split[2]} {split[4]}";
+                                    bool success = DateTime.TryParse(dateTimeString, out createdOn);
 
-                                        if (!success)
-                                        {
-                                            _logger
-                                                .ForContext("String Date", text)
-                                                //.ForContext(nameof(Match), match, true)
-                                                .Warning("Failed to extract date from Sentral Incident timestamp");
+                                    if (!success)
+                                    {
+                                        _logger
+                                            .ForContext("String Date", dateTimeString)
+                                            .Warning("Failed to extract date from Sentral Incident timestamp");
                                             
-                                            continue;
-                                        }
-                                    }
-                                    else if (split[1].Contains("at"))
-                                    {
-                                        string dateTimeString = $"{issuedFor} {split[2]}";
-                                        bool success = DateTime.TryParse(dateTimeString, out createdOn);
-
-                                        if (!success)
-                                        {
-                                            _logger
-                                                .ForContext("String Date", text)
-                                                //.ForContext(nameof(Match), match, true)
-                                                .Warning("Failed to extract date from Sentral Incident timestamp");
-
-                                            continue;
-                                        }
+                                        continue;
                                     }
                                 }
+                                else if (split[1].Contains("at"))
+                                {
+                                    string dateTimeString = $"{issuedFor} {split[2]}";
+                                    bool success = DateTime.TryParse(dateTimeString, out createdOn);
 
-                                incidentId = href.Split('=')[1].Split('&')[0];
+                                    if (!success)
+                                    {
+                                        _logger
+                                            .ForContext("String Date", dateTimeString)
+                                            .Warning("Failed to extract date from Sentral Incident timestamp");
+
+                                        continue;
+                                    }
+                                }
                             }
 
-                            break;
-                        case 3:
-                            // Incident Type
-                            if (cell.InnerText.Trim() != StudentAward.Astra)
-                                continue;
+                            incidentId = href.Split('=')[1].Split('&')[0];
+                        }
 
-                            break;
-                        case 4:
-                            // issuing teacher name
-                            string[] name = cell.InnerText.Split(',');
+                        break;
+                    case 3:
+                        // Incident Type
+                        if (cell.InnerText.Trim() != StudentAward.Astra)
+                            continue;
 
-                            teacherName = $"{name[1].Trim()} {name[0].Trim()}";
+                        break;
+                    case 4:
+                        // issuing teacher name
+                        string[] name = cell.InnerText.Split(',');
 
-                            break;
-                        case 6:
-                            // Issuing reason
-                            issueReason = cell.InnerText.Trim();
+                        teacherName = $"{name[1].Trim()} {name[0].Trim()}";
 
-                            break;
-                    }
+                        break;
+                    case 6:
+                        // Issuing reason
+                        issueReason = cell.InnerText.Trim();
+
+                        break;
                 }
-
-                response.Add(new(
-                    createdOn,
-                    issuedFor,
-                    incidentId,
-                    teacherName,
-                    issueReason));
             }
+
+            response.Add(new(
+                createdOn,
+                issuedFor,
+                incidentId,
+                teacherName,
+                issueReason));
         }
 
         return response;

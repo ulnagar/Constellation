@@ -14,7 +14,7 @@ public static class LoggingConfiguration
         string seqKey = configuration["Constellation:LoggingServer:ApiKey"];
 
         LoggerConfiguration logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
+            .MinimumLevel.Debug()
             .Enrich.FromLogContext()
             .WriteTo.Logger(config =>
             {

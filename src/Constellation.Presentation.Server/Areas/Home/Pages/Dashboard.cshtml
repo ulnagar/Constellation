@@ -111,76 +111,26 @@
             </div>
         }
 
-        @if (Model.ShowAbsenceWidgets)
+        @if (Model.ShowAwardsWidgets)
         {
             <div class="col mb-4">
-                <div class="card h-100 @(Model.PartialScanDisabled > 0 ? "text-white bg-danger" : "text-white bg-success")">
-                    <div class="card-header">Absence Scanning</div>
+                <div class="card h-100 @(Model.AwardAdditions > 0 ? "text-white bg-danger" : "text-white bg-success")">
+                    <div class="card-header">Awards</div>
                     <div class="card-body">
-                        <h3 class="card-title card-title-large">@Model.PartialScanDisabled</h3>
-                        <p class="card-text">students with Partial Absence Scanning disabled</p>
-                        <a asp-page="/Absences/Audit" asp-area="SchoolAdmin" class="stretched-link"></a>
+                        <h3 class="card-title card-title-large">@Model.AwardAdditions</h3>
+                        <p class="card-text">students with Pending Award Additions</p>
+                        <a asp-page="/Awards/Changes" asp-area="SchoolAdmin" class="stretched-link"></a>
                     </div>
                 </div>
             </div>
 
             <div class="col mb-4">
-                <div class="card h-100 @(Model.WholeScanDisabled > 0 ? "text-white bg-danger" : "text-white bg-success")">
-                    <div class="card-header">Absence Scanning</div>
+                <div class="card h-100 @(Model.AwardOverages > 0 ? "text-white bg-danger" : "text-white bg-success")">
+                    <div class="card-header">Awards</div>
                     <div class="card-body">
-                        <h3 class="card-title card-title-large">@Model.WholeScanDisabled</h3>
-                        <p class="card-text">students with Whole Absence Scanning disabled</p>
-                        <a asp-page="/Absences/Audit" asp-area="SchoolAdmin" class="stretched-link"></a>
-                    </div>
-                </div>
-            </div>
-        }
-
-        @if (Model.ShowAbsenceWidgets)
-        {
-            <div class="col mb-4">
-                <div class="card h-100 @(Model.PartialScanDisabled > 0 ? "text-white bg-danger" : "text-white bg-success")">
-                    <div class="card-header">Absence Scanning</div>
-                    <div class="card-body">
-                        <h3 class="card-title card-title-large">@Model.PartialScanDisabled</h3>
-                        <p class="card-text">students with Partial Absence Scanning disabled</p>
-                        <a asp-page="/Absences/Audit" asp-area="SchoolAdmin" class="stretched-link"></a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col mb-4">
-                <div class="card h-100 @(Model.WholeScanDisabled > 0 ? "text-white bg-danger" : "text-white bg-success")">
-                    <div class="card-header">Absence Scanning</div>
-                    <div class="card-body">
-                        <h3 class="card-title card-title-large">@Model.WholeScanDisabled</h3>
-                        <p class="card-text">students with Whole Absence Scanning disabled</p>
-                        <a asp-page="/Absences/Audit" asp-area="SchoolAdmin" class="stretched-link"></a>
-                    </div>
-                </div>
-            </div>
-        }
-
-        @if (Model.ShowAbsenceWidgets)
-        {
-            <div class="col mb-4">
-                <div class="card h-100 @(Model.PartialScanDisabled > 0 ? "text-white bg-danger" : "text-white bg-success")">
-                    <div class="card-header">Absence Scanning</div>
-                    <div class="card-body">
-                        <h3 class="card-title card-title-large">@Model.PartialScanDisabled</h3>
-                        <p class="card-text">students with Partial Absence Scanning disabled</p>
-                        <a asp-page="/Absences/Audit" asp-area="SchoolAdmin" class="stretched-link"></a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col mb-4">
-                <div class="card h-100 @(Model.WholeScanDisabled > 0 ? "text-white bg-danger" : "text-white bg-success")">
-                    <div class="card-header">Absence Scanning</div>
-                    <div class="card-body">
-                        <h3 class="card-title card-title-large">@Model.WholeScanDisabled</h3>
-                        <p class="card-text">students with Whole Absence Scanning disabled</p>
-                        <a asp-page="/Absences/Audit" asp-area="SchoolAdmin" class="stretched-link"></a>
+                        <h3 class="card-title card-title-large">@Model.AwardOverages</h3>
+                        <p class="card-text">students with Award Overages</p>
+                        <a asp-page="/Awards/Changes" asp-area="SchoolAdmin" class="stretched-link"></a>
                     </div>
                 </div>
             </div>

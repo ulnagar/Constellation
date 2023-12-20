@@ -1397,7 +1397,7 @@ public class Gateway : ISentralGateway
             return Array.Empty<byte>();
         }
 
-        string code = response.ToString();
+        string code = System.Text.Encoding.Default.GetString(response);
 
         byte[] document = await GetByteArrayByGet($"{_settings.ServerUrl}/jasperreports/createReport?format=pdf&key={code}", default);
 

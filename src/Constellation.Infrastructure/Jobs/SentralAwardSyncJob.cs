@@ -70,6 +70,8 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
             .ThenBy(student => student.FirstName)
             .ToList();
 
+        List<Staff> teachers = await _staffRepository.GetAllActive(cancellationToken);
+
         _logger
             .Debug("Found {count} students to process.", students.Count);
 
@@ -99,7 +101,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
                     .ForContext(nameof(Error), awardIncidentsRequest.Error, true)
                     .Warning("Failed to process Awards");
 
-                return;
+                continue;
             }
 
             _logger
@@ -128,7 +130,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
                                     incident.AwardedAt == entry.AwardedOn);
 
                             if (matchingIncident is not null)
-                                await ProcessAward(matchingIncident, entry, student, cancellationToken);
+                                ProcessAward(matchingIncident, entry, student, teachers);
 
                             break;
 
@@ -155,9 +157,19 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
         }
     }
 
-    private async Task ProcessAward(AwardIncidentResponse award, StudentAward matchingAward, Student student, CancellationToken cancellationToken = default)
+    private void ProcessAward(AwardIncidentResponse award, StudentAward matchingAward, Student student, List<Staff> teachers)
     {
-        Staff teacher = await _staffRepository.GetFromName(award.TeacherName);
+        Staff teacher = teachers.FirstOrDefault(staff =>
+        {
+            string[] splitName = award.TeacherName.ToLowerInvariant().Trim().Split(' ');
+
+            if (staff.FirstName.Contains(splitName[0]) && staff.LastName.Contains(splitName[1]))
+                return true;
+
+            string username = award.TeacherName.ToLowerInvariant().Trim().Replace(' ', '.');
+
+            return staff.PortalUsername.Contains(username);
+        });
 
         if (teacher is null)
         {

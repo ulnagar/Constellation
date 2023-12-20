@@ -46,7 +46,8 @@ public interface IStudentRepository
     Task<int> GetCountCurrentStudentsWithWholeAbsenceScanDisabled(CancellationToken cancellationToken = default);
     Task<int> GetCountCurrentStudentsWithoutSentralId(CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentStudentsWithoutSentralId(CancellationToken cancellationToken = default);
-
+    Task<int> GetCountCurrentStudentsWithAwardOverages(CancellationToken cancellationToken = default);
+    Task<int> GetCountCurrentStudentsWithPendingAwards(CancellationToken cancellationToken = default);
 
     Task<Student> GetForExistCheck(string id);
     Task<ICollection<Student>> AllActiveForFTECalculations();

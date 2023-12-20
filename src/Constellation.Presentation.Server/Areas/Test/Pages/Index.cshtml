@@ -9,21 +9,4 @@
 
 <hr />
 
-<table class="table">
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th># Members</th>
-    </tr>
-    </thead>
-    <tbody>
-        @foreach (var entry in Model.Roles)
-        {
-            <tr>
-                <td>@entry.Name</td>
-                <td>@entry.Members.Count()</td>
-            </tr>
-        }
-    </tbody>
-</table>
 
