@@ -1,6 +1,8 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Reports;
 
+using Application.DTOs;
 using Application.Models.Auth;
+using Application.Training.Modules.GenerateOverallReport;
 using Application.Training.Modules.GenerateStaffReport;
 using BaseModels;
 using Constellation.Application.Features.Common.Queries;
@@ -70,6 +72,26 @@ public class IndexModel : BasePageModel
         TrainingModuleId moduleId = TrainingModuleId.FromValue(viewModel.ModuleId);
 
         Result<ReportDto> reportRequest = await _mediator.Send(new GenerateModuleReportCommand(moduleId, false));
+
+        if (reportRequest.IsFailure)
+        {
+            await GetClasses(_mediator);
+
+            Error = new ErrorDisplay
+            {
+                Error = reportRequest.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return File(reportRequest.Value.FileData, reportRequest.Value.FileType, reportRequest.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnGetOverviewReport()
+    {
+        Result<FileDto> reportRequest = await _mediator.Send(new GenerateOveralReportCommand());
 
         if (reportRequest.IsFailure)
         {

@@ -4,6 +4,7 @@ using Application.Attendance.GenerateAttendanceReportForPeriod;
 using Application.Attendance.GetAttendanceDataFromSentral;
 using Application.Compliance.GetWellbeingReportFromSentral;
 using Application.Extensions;
+using Application.Helpers;
 using Application.Rollover.ImportStudents;
 using Application.Training.Models;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
@@ -27,6 +28,7 @@ using OfficeOpenXml.ConditionalFormatting.Contracts;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Style;
+using Persistence.ConstellationContext.Migrations;
 using System.Data;
 using System.Drawing;
 using System.Reflection;
@@ -1173,6 +1175,105 @@ public class ExcelService : IExcelService
 
         ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Sheet 1");
 
+        worksheet.Cells[2, 1].Value = "Staff Id";
+        worksheet.Cells[2, 1].Style.Font.Bold = true;
+        worksheet.Cells[2, 1].Style.Font.Size = 14;
+        worksheet.Cells[2, 2].Value = "Name";
+        worksheet.Cells[2, 2].Style.Font.Bold = true;
+        worksheet.Cells[2, 2].Style.Font.Size = 14;
+        worksheet.Cells[2, 3].Value = "School";
+        worksheet.Cells[2, 3].Style.Font.Bold = true;
+        worksheet.Cells[2, 3].Style.Font.Size = 14;
+        worksheet.Cells[2, 4].Value = "Faculties";
+        worksheet.Cells[2, 4].Style.Font.Bold = true;
+        worksheet.Cells[2, 4].Style.Font.Size = 14;
+
+        for (int row = 3; row < staffStatuses.Count + 3; row++)
+        {
+            worksheet.Cells[row, 1].Value = staffStatuses[row - 3].StaffId;
+            worksheet.Cells[row, 2].Value = staffStatuses[row - 3].Name.DisplayName;
+            worksheet.Cells[row, 3].Value = staffStatuses[row - 3].School;
+
+            string facultiesList = string.Join("; ", staffStatuses[row - 3].Faculties);
+            worksheet.Cells[row, 4].Value = facultiesList;
+        }
+
+        for (int col = 5; col < moduleDetails.Count + 5; col++)
+        {
+            ModuleDetails module = moduleDetails[col - 5];
+
+            worksheet.Cells[1, col].Value = module.Name;
+            worksheet.Cells[1, col].Style.TextRotation = 90;
+            worksheet.Cells[1, col].Style.Font.Bold = true;
+            worksheet.Cells[1, col].Style.Font.Size = 14;
+            worksheet.Cells[2, col].Value = module.Expiry.GetDisplayName();
+            worksheet.Cells[2, col].Style.Font.Bold = true;
+            worksheet.Cells[2, col].Style.Font.Size = 14;
+
+            for (int row = 3; row < staffStatuses.Count + 3; row++)
+            {
+                ModuleStatus status = staffStatuses[row - 3].Modules.FirstOrDefault(entry => entry.ModuleId == module.ModuleId);
+
+                if (status is null)
+                    continue;
+
+                DateOnly nextDueDate = status.LastCompletionDate?.AddYears((int)module.Expiry) ?? DateOnly.MinValue;
+                
+                worksheet.Cells[row, col].Value = status.LastCompletionDate.HasValue ? status.LastCompletionDate.Value.ToDateTime(TimeOnly.MaxValue) : "-";
+                worksheet.Cells[row, col].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                worksheet.Cells[row, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells[row, col].Style.Numberformat.Format = "dd/MM/yyyy";
+
+                if (module.Expiry == TrainingModuleExpiryFrequency.OnceOff)
+                {
+                    if (status.LastCompletionDate.HasValue)
+                    {
+                        worksheet.Cells[row, col].Style.Fill.BackgroundColor.SetColor(Color.Green);
+                        worksheet.Cells[row, col].Style.Font.Color.SetAuto();
+                    }
+                    else
+                    {
+                        worksheet.Cells[row, col].Style.Fill.BackgroundColor.SetColor(Color.DarkRed);
+                        worksheet.Cells[row, col].Style.Font.Color.SetColor(Color.White);
+                    }
+
+                    continue;
+                } 
+                
+                if (!status.Required)
+                {
+                    worksheet.Cells[row, col].Style.Fill.BackgroundColor.SetColor(Color.DarkGray);
+                    continue;
+                }
+
+                if (status.LastCompletionDate.HasValue && nextDueDate < _dateTime.Today || !status.LastCompletionDate.HasValue)
+                {
+                    worksheet.Cells[row, col].Style.Fill.BackgroundColor.SetColor(Color.DarkRed);
+                    worksheet.Cells[row, col].Style.Font.Color.SetColor(Color.White);
+                    continue;
+                }
+
+                if (status.LastCompletionDate.HasValue && nextDueDate.AddDays(-30) < _dateTime.Today)
+                {
+                    worksheet.Cells[row, col].Style.Fill.BackgroundColor.SetColor(Color.Orange);
+                    worksheet.Cells[row, col].Style.Font.Color.SetAuto();
+                    continue;
+                }
+
+                worksheet.Cells[row, col].Style.Fill.BackgroundColor.SetColor(Color.Green);
+                worksheet.Cells[row, col].Style.Font.Color.SetAuto();
+            }
+        }
+
+        worksheet.Cells[2, 1, 2, worksheet.Dimension.Columns].AutoFilter = true;
+        worksheet.Cells[1, 1, worksheet.Dimension.Rows, 4].AutoFitColumns();
+        worksheet.Cells[1, 5, worksheet.Dimension.Rows, worksheet.Dimension.Columns].EntireColumn.Width = 16;
+        worksheet.View.FreezePanes(3, 1);
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+        return memoryStream;
     }
 
     public async Task<MemoryStream> CreateStudentAttendanceReport(

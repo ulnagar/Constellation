@@ -11,6 +11,7 @@ using Constellation.Application.DTOs.CSV;
 using Constellation.Application.ExternalDataConsistency;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Rollover.ImportStudents;
+using Constellation.Application.Training.Modules.GenerateOverallReport;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Infrastructure.Jobs;
 using SciencePracs.GenerateOverdueReport;
@@ -42,8 +43,7 @@ public interface IExcelService
     Task<List<StudentImportRecord>> ConvertStudentImportFile(MemoryStream importFile, CancellationToken cancellationToken = default);
     Task<List<SentralIncidentDetails>> ConvertSentralIncidentReport(Stream reportFile, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateWellbeingExportFile(List<SentralIncidentDetails> records, CancellationToken cancellationToken = default);
-
     Task<MemoryStream> CreateStudentAttendanceReport(string periodLabel, List<AttendanceRecord> records, List<AbsenceRecord> absenceRecords, CancellationToken cancellationToken = default);
-
     Task<MemoryStream> CreateSciencePracOverdueReport(List<OverdueRollResponse> records, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateTrainingModuleOverallReportFile(List<ModuleDetails> moduleDetails, List<StaffStatus> staffStatuses, CancellationToken cancellationToken = default);
 }

@@ -10,14 +10,14 @@ using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;
 using Core.Shared;
 using DTOs;
-using GroupTutorials.Events;
+using Helpers;
 using Interfaces.Repositories;
 using Interfaces.Services;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -109,7 +109,7 @@ internal sealed class GenerateOveralReportCommandHandler
                     .Completions
                     .Where(entry => entry.StaffId == member.StaffId)
                     .MaxBy(entry => entry.CompletedDate)
-                    .CompletedDate;
+                    ?.CompletedDate;
 
                 moduleStatuses.Add(new(
                     module.Id,
@@ -126,6 +126,13 @@ internal sealed class GenerateOveralReportCommandHandler
                 moduleStatuses));
         }
 
-        var fileStream = await _excelService.CreateTrainingModuleOverallReportFile(moduleDetails, staffStatuses, cancellationToken);
+        MemoryStream fileStream = await _excelService.CreateTrainingModuleOverallReportFile(moduleDetails, staffStatuses, cancellationToken);
+
+        return new FileDto()
+        {
+            FileData = fileStream.ToArray(),
+            FileName = "Mandatory Training Overview Report.xlsx",
+            FileType = FileContentTypes.ExcelModernFile
+        };
     }
 }

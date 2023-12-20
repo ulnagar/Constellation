@@ -11,6 +11,24 @@
 
 <div class="row mt-3">
     <div class="col-md-8">
+        <h3>Overview Reports</h3>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <h4>Summary Report</h4>
+        An Excel export of each module and the completion status for all staff members
+    </div>
+    <div class="col-md-2">
+        <a asp-page-handler="OverviewReport" class="btn btn-block btn-warning">Run Report</a>
+    </div>
+</div>
+
+<hr />
+
+<div class="row mt-3">
+    <div class="col-md-8">
         <h3>Staff Reports</h3>
     </div>
 </div>
@@ -67,6 +85,8 @@
     </div>
 </div>
 
+<hr />
+
 <div class="row mt-2">
     <div class="col-md-12">
         <h4>Detail Report</h4>
@@ -76,6 +96,8 @@
         <button type="button" data-is-detailed="true" class="btn btn-block btn-warning module-report-button">Run Report</button>
     </div>
 </div>
+
+<hr />
 
 @Html.AntiForgeryToken()
 
