@@ -137,7 +137,7 @@ internal sealed class GenerateModuleReportCommandHandler
             {
                 FileData = fileData.ToArray(),
                 FileName = $"Mandatory Training Report - {data.Name}.xlsx",
-                FileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                FileType = FileContentTypes.ExcelModernFile
             };
 
             // Return for download
@@ -147,7 +147,7 @@ internal sealed class GenerateModuleReportCommandHandler
         List<AttachmentResponse> fileList = new();
 
         fileList.Add(new(
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            FileContentTypes.ExcelModernFile,
             $"Mandatory Training Report - {data.Name}.xlsx",
             fileData.ToArray()));
 

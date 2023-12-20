@@ -13,7 +13,7 @@ using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Rollover.ImportStudents;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Infrastructure.Jobs;
-using Core.Models.Attendance;
+using SciencePracs.GenerateOverdueReport;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -44,4 +44,6 @@ public interface IExcelService
     Task<MemoryStream> CreateWellbeingExportFile(List<SentralIncidentDetails> records, CancellationToken cancellationToken = default);
 
     Task<MemoryStream> CreateStudentAttendanceReport(string periodLabel, List<AttendanceRecord> records, List<AbsenceRecord> absenceRecords, CancellationToken cancellationToken = default);
+
+    Task<MemoryStream> CreateSciencePracOverdueReport(List<OverdueRollResponse> records, CancellationToken cancellationToken = default);
 }

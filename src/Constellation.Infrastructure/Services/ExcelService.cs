@@ -14,6 +14,7 @@ using Constellation.Application.DTOs.CSV;
 using Constellation.Application.ExternalDataConsistency;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.SciencePracs.GenerateOverdueReport;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Infrastructure.Jobs;
@@ -1128,6 +1129,32 @@ public class ExcelService : IExcelService
         bandOneFormat.Style.Fill.PatternType = ExcelFillStyle.Solid;
         bandOneFormat.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(0, 251, 228, 213));
         bandOneFormat.StopIfTrue = true;
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+
+        memoryStream.Position = 0;
+
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateSciencePracOverdueReport(
+        List<OverdueRollResponse> records,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Overdue Lesson Rolls");
+        worksheet.Cells[1, 1].LoadFromCollection(records, opt =>
+        {
+            opt.HeaderParsingType = OfficeOpenXml.LoadFunctions.Params.HeaderParsingTypes.CamelCaseToSpace;
+            opt.PrintHeaders = true;
+        });
+        worksheet.Cells[1, 4, worksheet.Dimension.Rows, 4].Style.Numberformat.Format = "dd/MM/yyyy";
+
+        worksheet.View.FreezePanes(2, 1);
+        worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
+        worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFilter = true;
 
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);

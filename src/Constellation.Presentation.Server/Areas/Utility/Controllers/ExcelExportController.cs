@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Utility.Controllers
 {
+    using Application.Helpers;
+
     [Area("Utility")]
     [Authorize]
     public class ExcelExportController : BaseController
@@ -38,7 +40,7 @@ namespace Constellation.Presentation.Server.Areas.Utility.Controllers
 
         //    var stream = await _excelService.CreateAbsencesFile(data, title);
 
-        //    var fs = new FileStreamResult(stream, "application/vnd.openxmlformats-office")
+        //    var fs = new FileStreamResult(stream, FileContentTypes.ExcelModernFile)
         //    {
         //        FileDownloadName = "AbsencesExport.xlsx"
         //    };
@@ -54,7 +56,7 @@ namespace Constellation.Presentation.Server.Areas.Utility.Controllers
 
             var stream = await _excelService.CreatePTOFile(exportDto);
 
-            var fs = new FileStreamResult(stream, "application/vnd.openxmlformats-office")
+            var fs = new FileStreamResult(stream, FileContentTypes.ExcelModernFile)
             {
                 FileDownloadName = "PTO Export.xlsx"
             };

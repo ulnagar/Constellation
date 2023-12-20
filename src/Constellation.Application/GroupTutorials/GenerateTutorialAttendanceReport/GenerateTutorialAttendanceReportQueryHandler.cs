@@ -12,6 +12,7 @@ using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Core.Extensions;
+using Helpers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -94,7 +95,7 @@ internal sealed class GenerateTutorialAttendanceReportQueryHandler
         FileDto response = new()
         {
             FileData = fileStream.ToArray(),
-            FileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            FileType = FileContentTypes.ExcelModernFile,
             FileName = "Tutorial Report.xlsx"
         };
 

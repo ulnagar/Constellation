@@ -14,6 +14,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -105,7 +106,7 @@ internal sealed class ExportAbsencesReportCommandHandler
         {
             FileData = stream.ToArray(),
             FileName = "Absences Report.xlsx",
-            FileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            FileType = FileContentTypes.ExcelModernFile
         };
 
         return file;

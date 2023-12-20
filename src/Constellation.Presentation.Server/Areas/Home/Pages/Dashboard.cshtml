@@ -1,5 +1,6 @@
 ﻿@page
-@model DashboardModel
+@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards
+@model Constellation.Presentation.Server.Areas.Home.Pages.DashboardModel
 
 <style>
     .quick-links {
@@ -119,7 +120,7 @@
                     <div class="card-body">
                         <h3 class="card-title card-title-large">@Model.AwardAdditions</h3>
                         <p class="card-text">students with Pending Award Additions</p>
-                        <a asp-page="/Awards/Changes" asp-area="SchoolAdmin" class="stretched-link"></a>
+                        <a asp-page="/Awards/Changes" asp-area="SchoolAdmin" asp-route-filter="@ChangesModel.FilterDto.Additions" class="stretched-link"></a>
                     </div>
                 </div>
             </div>
@@ -130,7 +131,7 @@
                     <div class="card-body">
                         <h3 class="card-title card-title-large">@Model.AwardOverages</h3>
                         <p class="card-text">students with Award Overages</p>
-                        <a asp-page="/Awards/Changes" asp-area="SchoolAdmin" class="stretched-link"></a>
+                        <a asp-page="/Awards/Changes" asp-area="SchoolAdmin" asp-route-filter="@ChangesModel.FilterDto.Overages" class="stretched-link"></a>
                     </div>
                 </div>
             </div>

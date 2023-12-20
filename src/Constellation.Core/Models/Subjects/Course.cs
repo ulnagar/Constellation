@@ -6,6 +6,7 @@ using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
+using Extensions;
 using Faculty.Identifiers;
 using System.Collections.Generic;
 
@@ -80,4 +81,6 @@ public sealed class Course : AggregateRoot
 
         return Result.Success();
     }
+
+    public override string ToString() => $"{Grade} {Name}";
 }

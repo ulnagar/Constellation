@@ -16,6 +16,7 @@ public interface ILessonRepository
     Task<List<SciencePracLesson>> GetAllForOffering(OfferingId OfferingId, CancellationToken cancellationToken = default);
     Task<List<SciencePracLesson>> GetAllForCourse(CourseId CourseId, CancellationToken cancellationToken = default);
     Task<List<SciencePracLesson>> GetAllForStudent(string StudentId, CancellationToken cancellationToken = default);
+    Task<List<SciencePracLesson>> GetAllWithOverdueRolls(CancellationToken cancellationToken = default);
     Task<SciencePracLesson> GetById(SciencePracLessonId LessonId, CancellationToken cancellationToken = default);
     void Insert(SciencePracLesson lesson);
     void Delete(SciencePracLesson lesson);

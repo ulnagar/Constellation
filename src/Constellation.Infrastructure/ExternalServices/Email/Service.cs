@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email;
 
+using Application.Helpers;
 using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
 using Constellation.Application.Absences.ConvertResponseToAbsenceExplanation;
 using Constellation.Application.DTOs;
@@ -446,7 +447,7 @@ public class Service : IEmailService
 
         var attachments = new List<Attachment>
         {
-            new Attachment(report, "Change Report.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            new Attachment(report, "Change Report.xlsx", FileContentTypes.ExcelModernFile)
         };
 
         await _emailSender.Send(toRecipients, null, $"[Aurora College] Parent Contact Change Report - {DateTime.Today.ToLongDateString()}", body, attachments, cancellationToken);
@@ -1103,7 +1104,7 @@ public class Service : IEmailService
 
         var attachments = new List<Attachment>
         {
-            new Attachment(report, "Consistency Report.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            new Attachment(report, "Consistency Report.xlsx", FileContentTypes.ExcelModernFile)
         };
 
         await _emailSender.Send(toRecipients, null, $"[Aurora College] MasterFile Consistency Report - {DateTime.Today.ToLongDateString()}", body, attachments, cancellationToken);

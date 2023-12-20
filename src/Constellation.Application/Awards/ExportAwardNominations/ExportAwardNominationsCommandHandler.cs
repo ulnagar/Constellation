@@ -12,6 +12,7 @@ using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Core.Extensions;
+using Helpers;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -86,7 +87,7 @@ internal sealed class ExportAwardNominationsCommandHandler
         {
             FileData = stream.ToArray(),
             FileName = "Award Nominations.xlsx",
-            FileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            FileType = FileContentTypes.ExcelModernFile
         };
 
         return file;

@@ -19,6 +19,7 @@ using Core.Models.Faculty;
 using Core.Models.Faculty.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
+using Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -344,7 +345,7 @@ internal sealed class ExportContactListCommandHandler
         {
             FileData = stream.ToArray(),
             FileName = "Contacts List.xlsx",
-            FileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            FileType = FileContentTypes.ExcelModernFile
         };
 
         return file;

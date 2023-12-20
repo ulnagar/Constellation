@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Compliance.Attendance;
 
 using Application.Attendance.GetAttendancePeriodLabels;
+using Application.Helpers;
 using Application.Models.Auth;
 using BaseModels;
 using Constellation.Application.Attendance.GenerateAttendanceReportForPeriod;
@@ -65,7 +66,7 @@ public class ReportModel : BasePageModel
 
         byte[] fileData = request.Value.ToArray();
         string fileName = $"Attendance Report {SelectedPeriod.Replace(",", "")}.xlsx";
-        string fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        string fileType = FileContentTypes.ExcelModernFile;
 
         return File(fileData, fileType, fileName);
     }

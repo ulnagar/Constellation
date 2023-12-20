@@ -16,6 +16,7 @@ using Core.Models.Faculty.ValueObjects;
 using Core.Models.Training.Contexts.Roles;
 using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;
+using Helpers;
 using Models;
 using System.Collections.Generic;
 using System.IO;
@@ -148,7 +149,7 @@ internal sealed class GenerateStaffReportCommandHandler
             {
                 FileData = fileData.ToArray(),
                 FileName = $"Mandatory Training Report - {data.Name}.xlsx",
-                FileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                FileType = FileContentTypes.ExcelModernFile
             };
 
             // Return for download
@@ -158,7 +159,7 @@ internal sealed class GenerateStaffReportCommandHandler
         List<AttachmentResponse> fileList = new();
 
         fileList.Add(new(
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            FileContentTypes.ExcelModernFile,
             $"Mandatory Training Report - {data.Name}.xlsx",
             fileData.ToArray()));
 

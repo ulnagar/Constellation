@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Utility.Controllers
 {
+    using Application.Helpers;
+
     [Area("Utility")]
     [Authorize]
     public class DocumentExportController : BaseController
@@ -72,7 +74,7 @@ namespace Constellation.Presentation.Server.Areas.Utility.Controllers
             var resultStream = await _excelService.CreateAwardsCalculationFile(stream);
 
             var fileName = $"Awards {DateTime.Now:yyyy-MM-dd}.xlsx";
-            var contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            var contentType = FileContentTypes.ExcelModernFile;
 
             return File(resultStream, contentType, fileName);
         }
