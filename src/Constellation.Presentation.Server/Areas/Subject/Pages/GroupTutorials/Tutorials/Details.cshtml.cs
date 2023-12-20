@@ -39,8 +39,7 @@ public class DetailsModel : BasePageModel
         _authorizationService = authorizationService;
     }
 
-    [ViewData]
-    public string ActivePage => "Tutorials";
+    [ViewData] public string ActivePage => SubjectPages.Tutorials;
 
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }

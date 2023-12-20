@@ -36,8 +36,7 @@ public class RollModel : BasePageModel
         _authorizationService = authorizationService;
     }
 
-    [ViewData]
-    public string ActivePage => "Tutorials";
+    [ViewData] public string ActivePage => SubjectPages.Tutorials;
 
     [BindProperty(SupportsGet = true)]
     public Guid TutorialId { get; set; }

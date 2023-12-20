@@ -24,8 +24,7 @@ public class AuditModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData]
-    public string ActivePage => "Teachers";
+    [ViewData] public string ActivePage => SubjectPages.Teachers;
 
     [BindProperty(SupportsGet = true)]
     public int Id { get; set; }

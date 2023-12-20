@@ -12,17 +12,17 @@
             </h4>
             <ul class="nav flex-column mx-2">
                 <li class="nav-item">
-                    <a class="nav-link @(activePage == "Courses" ? "active" : "")" href="/Subject/Courses">
+                    <a class="nav-link @(activePage == SubjectPages.Courses ? "active" : "")" asp-page="/Courses/Index" asp-area="Subject">
                         Courses
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @(activePage == "Offerings" ? "active" : "")" href="/Subject/Offerings">
+                    <a class="nav-link @(activePage == SubjectPages.Offerings ? "active" : "")" asp-page="/Offerings/Index" asp-area="Subject">
                         Offerings
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @(activePage == "Assignments" ? "active" : "")" href="/Subject/Assignments">
+                    <a class="nav-link @(activePage == SubjectPages.Assignments ? "active" : "")" asp-page="/Assignments/Index" asp-area="Subject">
                         Assignments
                     </a>
                 </li>
@@ -33,17 +33,17 @@
             </h4>
             <ul class="nav flex-column mx-2">
                 <li class="nav-item">
-                    <a class="nav-link @(activePage == "Lessons" ? "active" : "")" href="/Subject/SciencePracs/Lessons">
+                    <a class="nav-link @(activePage == SubjectPages.Lessons ? "active" : "")" asp-page="/SciencePracs/Lessons/Index" asp-area="Subject">
                         Lessons
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @(activePage == "Teachers" ? "active" : "")" href="/Subject/SciencePracs/Teachers">
+                    <a class="nav-link @(activePage == SubjectPages.Teachers ? "active" : "")" asp-page="/SciencePracs/Teachers/Index" asp-area="Subject">
                         Teachers
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @(activePage == "Reports" ? "active" : "")" href="/Subject/SciencePracs/Reports">
+                    <a class="nav-link @(activePage == SubjectPages.Reports ? "active" : "")" asp-page="/SciencePracs/Reports/Index" asp-area="Subject">
                         Reports
                     </a>
                 </li>
@@ -54,7 +54,7 @@
             </h4>
             <ul class="nav flex-column mx-2">
                 <li class="nav-item">
-                    <a class="nav-link @(activePage == "Tutorials" ? "active" : "")" href="/Subject/GroupTutorials/Tutorials">
+                    <a class="nav-link @(activePage == SubjectPages.Tutorials ? "active" : "")" asp-page="/GroupTutorials/Tutorials/Index" asp-area="Subject">
                         Tutorials
                     </a>
                 </li>
@@ -75,5 +75,5 @@
         });
     </script>
 
-  @RenderSection("scripts", required: false)
+    @await RenderSectionAsync("scripts", required: false)
 }

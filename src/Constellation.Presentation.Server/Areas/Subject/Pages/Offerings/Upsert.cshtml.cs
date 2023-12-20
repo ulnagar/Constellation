@@ -34,8 +34,7 @@ public class UpsertModel : BasePageModel
         _dateTime = dateTime;
     }
 
-    [ViewData]
-    public string ActivePage => "Offerings";
+    [ViewData] public string ActivePage => SubjectPages.Offerings;
 
     [BindProperty(SupportsGet = true)]
     public Guid? Id { get; set; }

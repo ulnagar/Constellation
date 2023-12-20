@@ -23,8 +23,7 @@ public class DetailsModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData]
-    public string ActivePage => "Courses";
+    [ViewData] public string ActivePage => SubjectPages.Courses;
 
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }

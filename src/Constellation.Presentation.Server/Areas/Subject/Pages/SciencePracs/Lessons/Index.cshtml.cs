@@ -19,8 +19,7 @@ public class IndexModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData]
-    public string ActivePage => "Lessons";
+    [ViewData] public string ActivePage => SubjectPages.Lessons;
 
     [BindProperty(SupportsGet = true)]
     public FilterDto Filter { get; set; } = FilterDto.Current;

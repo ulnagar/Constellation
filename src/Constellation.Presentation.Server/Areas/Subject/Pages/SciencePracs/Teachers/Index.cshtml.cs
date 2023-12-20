@@ -31,7 +31,7 @@ public class IndexModel : BasePageModel
     }
 
     [ViewData]
-    public string ActivePage => "Teachers";
+    public string ActivePage => SubjectPages.Teachers;
 
     public List<ContactResponse> Contacts = new();
 

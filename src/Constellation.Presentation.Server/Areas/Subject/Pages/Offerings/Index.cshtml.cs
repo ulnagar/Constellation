@@ -21,8 +21,7 @@ public class IndexModel : BasePageModel
         _sender = sender;
     }
 
-    [ViewData]
-    public string ActivePage => "Offerings";
+    [ViewData] public string ActivePage => SubjectPages.Offerings;
 
     [BindProperty(SupportsGet = true)]
     public GetAllOfferingSummariesQuery.FilterEnum Filter { get; set; } = GetAllOfferingSummariesQuery.FilterEnum.Active;

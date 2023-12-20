@@ -17,8 +17,7 @@ public class IndexModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData]
-    public string ActivePage => "Tutorials";
+    [ViewData] public string ActivePage => SubjectPages.Tutorials;
 
     [BindProperty(SupportsGet = true)]
     public GetAllTutorialsQuery.FilterEnum Filter { get; set; } = GetAllTutorialsQuery.FilterEnum.Active;

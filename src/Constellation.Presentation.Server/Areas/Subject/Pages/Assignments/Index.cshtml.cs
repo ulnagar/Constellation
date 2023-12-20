@@ -21,8 +21,7 @@ public class IndexModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData]
-    public string ActivePage => "Assignments";
+    [ViewData] public string ActivePage => SubjectPages.Assignments;
 
     public List<CurrentAssignmentSummaryResponse> Assignments { get; set; } = new();
 

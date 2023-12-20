@@ -26,8 +26,7 @@ public class RollModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData]
-    public string ActivePage => "Lessons";
+    [ViewData] public string ActivePage => SubjectPages.Lessons;
 
     [BindProperty(SupportsGet = true)]
     public Guid LessonId { get; set; }

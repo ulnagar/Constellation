@@ -29,8 +29,7 @@ public class DetailsModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData]
-    public string ActivePage => "Assignments";
+    [ViewData] public string ActivePage => SubjectPages.Assignments;
 
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }

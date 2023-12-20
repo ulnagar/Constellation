@@ -31,8 +31,7 @@ public class CreateModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData]
-    public string ActivePage => "Assignments";
+    [ViewData] public string ActivePage => SubjectPages.Assignments;
 
     public Phase ProgressPhase { get; set; }
 
