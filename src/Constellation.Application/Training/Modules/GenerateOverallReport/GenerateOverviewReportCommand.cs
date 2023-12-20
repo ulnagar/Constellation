@@ -3,5 +3,5 @@
 using Abstractions.Messaging;
 using DTOs;
 
-public sealed record GenerateOveralReportCommand
+public sealed record GenerateOverviewReportCommand
     : ICommand<FileDto>;

@@ -91,7 +91,7 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGetOverviewReport()
     {
-        Result<FileDto> reportRequest = await _mediator.Send(new GenerateOveralReportCommand());
+        Result<FileDto> reportRequest = await _mediator.Send(new GenerateOverviewReportCommand());
 
         if (reportRequest.IsFailure)
         {

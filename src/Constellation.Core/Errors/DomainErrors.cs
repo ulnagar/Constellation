@@ -339,6 +339,10 @@ public static class DomainErrors
             public static readonly Func<string, Error> NotFoundByEmail = email => new Error(
                 "Partners.Staff.TeacherNotFound",
                 $"A teacher with the Email Address {email} could not be found");
+
+            public static readonly Error NoneFound = new(
+                "Partners.Staff.NoneFound",
+                "Could not find any active staff in the database");
         }
     }
 

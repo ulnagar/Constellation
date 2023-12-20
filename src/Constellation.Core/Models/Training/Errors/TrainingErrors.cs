@@ -26,6 +26,10 @@ public static class TrainingErrors
 
     public static class Module
     {
+        public static readonly Error NoneFound = new(
+            "Training.Module.NoneFound",
+            "Could not find any Modules in the database");
+
         public static readonly Func<TrainingModuleId, Error> NotFound = id => new Error(
             "MandatoryTraining.Module.NotFound",
             $"A training module with the Id {id.Value} could not be found");
@@ -33,6 +37,10 @@ public static class TrainingErrors
 
     public static class Role
     {
+        public static readonly Error NoneFound = new (
+            "Training.Role.NoneFound",
+            "Could not find any Roles in the database");
+
         public static readonly Func<TrainingRoleId, Error> NotFound = id => new(
             "Training.Role.NotFound",
             $"A Role with the id {id} could not be found");

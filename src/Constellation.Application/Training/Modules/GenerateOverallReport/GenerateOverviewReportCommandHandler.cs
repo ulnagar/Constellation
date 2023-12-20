@@ -1,11 +1,13 @@
 ﻿namespace Constellation.Application.Training.Modules.GenerateOverallReport;
 
 using Abstractions.Messaging;
+using Core.Errors;
 using Core.Models;
 using Core.Models.Faculty;
 using Core.Models.Faculty.Repositories;
 using Core.Models.Training.Contexts.Modules;
 using Core.Models.Training.Contexts.Roles;
+using Core.Models.Training.Errors;
 using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;
 using Core.Shared;
@@ -21,8 +23,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class GenerateOveralReportCommandHandler
-: ICommandHandler<GenerateOveralReportCommand, FileDto>
+internal sealed class GenerateOverviewReportCommandHandler
+: ICommandHandler<GenerateOverviewReportCommand, FileDto>
 {
     private readonly ITrainingRoleRepository _roleRepository;
     private readonly ITrainingModuleRepository _moduleRepository;
@@ -32,7 +34,7 @@ internal sealed class GenerateOveralReportCommandHandler
     private readonly IExcelService _excelService;
     private readonly ILogger _logger;
 
-    public GenerateOveralReportCommandHandler(
+    public GenerateOverviewReportCommandHandler(
         ITrainingRoleRepository roleRepository,
         ITrainingModuleRepository moduleRepository,
         IStaffRepository staffRepository,
@@ -47,16 +49,43 @@ internal sealed class GenerateOveralReportCommandHandler
         _schoolRepository = schoolRepository;
         _facultyRepository = facultyRepository;
         _excelService = excelService;
-        _logger = logger;
+        _logger = logger.ForContext<GenerateOverviewReportCommand>();
     }
 
-    public async Task<Result<FileDto>> Handle(GenerateOveralReportCommand request, CancellationToken cancellationToken)
+    public async Task<Result<FileDto>> Handle(GenerateOverviewReportCommand request, CancellationToken cancellationToken)
     {
         List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
 
+        if (!staff.Any())
+        {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NoneFound, true)
+                .Warning("Could not generate Overview Report");
+
+            return Result.Failure<FileDto>(DomainErrors.Partners.Staff.NoneFound);
+        }
+
         List<TrainingRole> roles = await _roleRepository.GetAllRoles(cancellationToken);
 
+        if (!roles.Any())
+        {
+            _logger
+                .ForContext(nameof(Error), TrainingErrors.Role.NoneFound, true)
+                .Warning("Could not generate Overview Report");
+
+            return Result.Failure<FileDto>(TrainingErrors.Role.NoneFound);
+        }
+
         List<TrainingModule> modules = await _moduleRepository.GetAllModules(cancellationToken);
+
+        if (!roles.Any())
+        {
+            _logger
+                .ForContext(nameof(Error), TrainingErrors.Module.NoneFound, true)
+                .Warning("Could not generate Overview Report");
+
+            return Result.Failure<FileDto>(TrainingErrors.Module.NoneFound);
+        }
 
         List<School> schools = await _schoolRepository.GetAllActive(cancellationToken);
 
@@ -80,8 +109,10 @@ internal sealed class GenerateOveralReportCommandHandler
 
             if (school is null)
             {
-
-                continue;
+                _logger
+                    .ForContext(nameof(Staff), member, true)
+                    .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(member.SchoolCode), true)
+                    .Warning("Could not include staff member in report");
             }
 
             List<Faculty> memberFaculties = faculties
@@ -120,8 +151,8 @@ internal sealed class GenerateOveralReportCommandHandler
             staffStatuses.Add(new(
                 member.StaffId,
                 member.GetName(),
-                school.Code,
-                school.Name,
+                school?.Code ?? string.Empty,
+                school?.Name ?? string.Empty,
                 memberFaculties.Select(entry => entry.Name).ToArray(),
                 moduleStatuses));
         }
