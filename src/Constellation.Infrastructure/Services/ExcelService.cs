@@ -15,6 +15,7 @@ using Constellation.Application.ExternalDataConsistency;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.SciencePracs.GenerateOverdueReport;
+using Constellation.Application.Training.Modules.GenerateOverallReport;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Infrastructure.Jobs;
@@ -30,6 +31,7 @@ using System.Data;
 using System.Drawing;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 public class ExcelService : IExcelService
 {
@@ -1158,15 +1160,24 @@ public class ExcelService : IExcelService
 
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
-
         memoryStream.Position = 0;
-
         return memoryStream;
     }
 
+    public async Task<MemoryStream> CreateTrainingModuleOverallReportFile(
+        List<ModuleDetails> moduleDetails,
+        List<StaffStatus> staffStatuses,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Sheet 1");
+
+    }
+
     public async Task<MemoryStream> CreateStudentAttendanceReport(
-        string periodLabel,
-        List<AttendanceRecord> records,
+    string periodLabel,
+    List<AttendanceRecord> records,
         List<AbsenceRecord> absenceRecords,
         CancellationToken cancellationToken = default)
     {
