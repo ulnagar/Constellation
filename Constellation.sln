@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{380C8D8E-1770-4044-BF34-EB2BD3888599}"
 	ProjectSection(SolutionItems) = preProject
 		docs\Application Deployment.txt = docs\Application Deployment.txt
+		docs\Job Timings.txt = docs\Job Timings.txt
 		docs\Tasks.txt = docs\Tasks.txt
 	EndProjectSection
 EndProject

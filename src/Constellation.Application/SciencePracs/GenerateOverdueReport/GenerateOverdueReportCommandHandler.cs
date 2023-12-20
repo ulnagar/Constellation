@@ -58,6 +58,8 @@ internal sealed class GenerateOverdueReportCommandHandler
 
                 if (school is null)
                 {
+                    //TODO: Properly log error
+
                     continue;
                 }
 
@@ -65,6 +67,8 @@ internal sealed class GenerateOverdueReportCommandHandler
 
                 if (course is null)
                 {
+                    //TODO: Properly log error
+
                     continue;
                 }
 

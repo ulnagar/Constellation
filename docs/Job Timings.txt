@@ -1,0 +1,18 @@
+IAbsenceMonitorJob - 11:00 Mon-Sat
+IAssignmentSubmissionJob - 12:30 Every Day
+IAttachmentManagementJob - 04:00 Every Day
+IAttendanceReportJob - 12:00 (Every other Monday)
+IClassMonitorJob - 07:00 - 16:00 Mon-Fri
+IGroupTutorialExpiryScanJob - 07:00 Mon-Fri
+ILessonNotificationsJob - 10:00 Mon
+IMandatoryTrainingReminderJob - 12:00 Mon
+IPermissionUpdateJob - 07:00 - 16:00 Mon-Fri
+IProcessOutboxMessagesJob - 02:00 - 23:00 Every Day
+IRollMarkingReportJob - 17:00 Mon-Fri
+ISchoolRegisterJob - 18:15 First Of Month
+ISentralAttendancePercentageSyncJob - 05:00 Mon
+ISentralAwardSyncJob - 08:15 Mon-Sat
+ISentralFamilyDetailsSyncJob - 09:00 Mon-Sat
+ISentralPhotoSyncJob - 09:15 Mon-Sat
+ITrackItSyncJob - 17:30 Every Day
+IUserManagerJob - 06:00 First Of Month
