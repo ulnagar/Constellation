@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
 using Application.DTOs;
-using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
@@ -64,6 +63,8 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
         _logger
             .Information("Found {count} families", families.Count);
 
+        List<Family> dbFamilies = await _familyRepository.GetAll(token);
+
         // Check objects against database
         foreach (FamilyDetailsDto family in families)
         {
@@ -77,7 +78,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
             family.FatherMobile = family.FatherMobile.Replace(" ", "");
 
             // Check family exists in database
-            Family entry = await _familyRepository.GetFamilyBySentralId(family.FamilyId, token);
+            Family entry = dbFamilies.FirstOrDefault(entry => entry.SentralId == family.FamilyId);
 
             if (entry is null)
             {
@@ -188,6 +189,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                 _logger
                     .Information("Found existing entry for {family} ({code}). Updating details.", family.AddressName, family.FamilyId);
 
+                if (entry.IsDeleted)
+                    entry.Reinstate();
+
                 entry.UpdateFamilyAddress(
                     family.AddressName,
                     family.AddressLine1,
@@ -290,10 +294,6 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                         changeLog.Add(logEntry);
                 }
 
-                // Has the family email changed between scans?
-                // First check whether either one is blank
-                // Then if not, compare the values
-
                 Result<EmailAddress> entryEmail = EmailAddress.Create(entry.FamilyEmail);
 
                 if (entryEmail.IsFailure)
@@ -370,6 +370,25 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
             await _unitOfWork.CompleteAsync(token);
         }
 
+        List<string> dbFamilySentralIds = dbFamilies.Select(family => family.SentralId).ToList();
+        List<string> familySentralIds = families.Select(family => family.FamilyId).ToList();
+
+        IEnumerable<string> staleDbFamilySentralIds = dbFamilySentralIds.Except(familySentralIds).ToList();
+
+        if (staleDbFamilySentralIds.Any())
+        {
+            foreach (string familyId in staleDbFamilySentralIds)
+            {
+                if (string.IsNullOrEmpty(familyId)) continue;
+
+                Family family = dbFamilies.First(entry => entry.SentralId == familyId);
+
+                family.Delete();
+            }
+
+            await _unitOfWork.CompleteAsync(token);
+        }
+        
         if (changeLog.Count > 0)
             await _mediator.Send(new SendFamilyContactChangesReportCommand(changeLog), token);
     }
@@ -441,12 +460,14 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
         Result<Name> name = Name.Create(firstName, string.Empty, lastName);
         string displayName = name.IsSuccess ? name.Value.DisplayName : $"{firstName} {lastName}";
 
-        _logger.Information("{id}: Updating parent details for {parentName} in family {family} ({code})", _jobId, displayName, entry.FamilyTitle, entry.SentralId);
+        _logger
+            .Information("Updating parent details for {parentName} in family {family} ({code})", displayName, entry.FamilyTitle, entry.SentralId);
 
         Result<EmailAddress> email = EmailAddress.Create(emailAddress);
         if (email.IsFailure)
         {
-            _logger.Information("{id}: Parent email has changed from {oldEntry} to {newEntry} however new entry is invalid", _jobId, existingParent.EmailAddress, emailAddress);
+            _logger
+                .Information("Parent email has changed from {oldEntry} to {newEntry} however new entry is invalid", existingParent.EmailAddress, emailAddress);
 
             return new ParentContactChangeDto(
                 displayName,
@@ -461,25 +482,29 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
         if (existingParent.EmailAddress != email.Value.Email)
         {
             // Email has changed
-            _logger.Information("{id}: Parent email has changed from {oldEntry} to {newEntry}", _jobId, existingParent.EmailAddress, emailAddress);
+            _logger
+                .Information("Parent email has changed from {oldEntry} to {newEntry}", existingParent.EmailAddress, emailAddress);
         }
 
         if (existingParent.Title != title)
         {
             // Title has changed
-            _logger.Information("{id}: Parent title has changed from {oldEntry} to {newEntry}", _jobId, existingParent.Title, title);
+            _logger
+                .Information("Parent title has changed from {oldEntry} to {newEntry}", existingParent.Title, title);
         }
 
         if (existingParent.FirstName != firstName)
         {
             // FirstName has changed
-            _logger.Information("{id}: Parent first name has changed from {oldEntry} to {newEntry}", _jobId, existingParent.FirstName, firstName);
+            _logger
+                .Information("Parent first name has changed from {oldEntry} to {newEntry}", existingParent.FirstName, firstName);
         }
 
         if (existingParent.LastName != lastName)
         {
             // LastName has changed
-            _logger.Information("{id}: Parent last name has changed from {oldEntry} to {newEntry}", _jobId, existingParent.LastName, lastName);
+            _logger
+                .Information("Parent last name has changed from {oldEntry} to {newEntry}", existingParent.LastName, lastName);
         }
 
         Result<PhoneNumber> mobileCheck = PhoneNumber.Create(mobile);
@@ -488,7 +513,8 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
         if (existingParent.MobileNumber != mobileNumber)
         {
             // MobileNumber has changed
-            _logger.Information("{id}: Parent mobile number has changed from {oldEntry} to {newEntry}", _jobId, existingParent.MobileNumber, mobileNumber);
+            _logger
+                .Information("Parent mobile number has changed from {oldEntry} to {newEntry}", existingParent.MobileNumber, mobileNumber);
         }
 
         bool emailChanged = existingParent.EmailAddress != email.Value.Email;
@@ -505,7 +531,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
 
         if (result.IsFailure)
         {
-            _logger.Warning("{id}: Parent update failed due to error {@error}", _jobId, result.Error);
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Parent update failed due to error");
             
             return null;
         }

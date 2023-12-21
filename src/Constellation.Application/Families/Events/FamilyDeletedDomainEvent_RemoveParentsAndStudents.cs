@@ -3,9 +3,9 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.DomainEvents;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Families;
+using Constellation.Core.Models.Families.Events;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Linq;

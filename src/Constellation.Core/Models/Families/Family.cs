@@ -7,6 +7,7 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -245,5 +246,14 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         IsDeleted = true;
 
         RaiseDomainEvent(new FamilyDeletedDomainEvent(new DomainEventId(), Id));
+    }
+
+    public void Reinstate()
+    {
+        IsDeleted = false;
+        DeletedAt = DateTime.MinValue;
+        DeletedBy = string.Empty;
+
+        RaiseDomainEvent(new FamilyReinstatedDomainEvent(new DomainEventId(), Id));
     }
 }

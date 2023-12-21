@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 public interface IFamilyRepository
 {
     Task<bool> DoesFamilyWithEmailExist(EmailAddress email, CancellationToken cancellationToken = default);
+    Task<List<Family>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Family>> GetAllCurrent(CancellationToken cancellationToken = default);
     Task<Family> GetFamilyBySentralId(string SentralId, CancellationToken cancellationToken = default);
     Task<Family> GetFamilyById(FamilyId Id, CancellationToken cancellationToken = default);

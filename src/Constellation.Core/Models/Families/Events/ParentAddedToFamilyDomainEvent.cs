@@ -1,7 +1,7 @@
-﻿namespace Constellation.Core.DomainEvents;
+﻿namespace Constellation.Core.Models.Families.Events;
 
+using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
-using System;
 
 public sealed record ParentAddedToFamilyDomainEvent(
     DomainEventId Id,

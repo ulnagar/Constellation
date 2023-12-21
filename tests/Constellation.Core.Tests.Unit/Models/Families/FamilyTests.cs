@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Core.Tests.Unit.Models.Families;
 
-using Constellation.Core.DomainEvents;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Families;
+using Constellation.Core.Models.Families.Events;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 
