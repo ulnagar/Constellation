@@ -80,30 +80,30 @@ input:not(:placeholder-shown) ~ label {
     top: -5px;
 }
 
-.inputbox:has(input.is-invalid) {
+.inputbox:has(input.input-validation-error) {
     color: red;
     animation: shake 0.2s ease-in-out 0s 2;
     /*box-shadow: 0 0 0.6rem red;*/
     border-bottom: 2px solid red;
 }
 
-.inputbox:has(input.is-invalid) label {
-    color: red;
-}
+    .inputbox:has(input.input-validation-error) label {
+        color: red;
+    }
 
-.inputbox:has(input.is-invalid) span.glyphicon {
-    color: red;
-}
+    .inputbox:has(input.input-validation-error) span.glyphicon {
+        color: red;
+    }
 
-.inputbox:has(input.is-valid) {
+.inputbox:has(input.valid) {
     border-bottom: 2px solid #00DD00;
 }
 
-.inputbox:has(input.is-valid) label {
+.inputbox:has(input.valid) label {
     color: #00DD00;
 }
 
-.inputbox:has(input.is-valid) span.glyphicon {
+.inputbox:has(input.valid) span.glyphicon {
     color: #00DD00;
 }
 

@@ -45,6 +45,7 @@
                     <label class="form-label col-md-2">Date Delivered</label>
                     <div class="col-md-6">
                         <InputDate @bind-Value="Roll.LessonDate" />
+                        <ValidationMessage For="() => Roll.LessonDate"></ValidationMessage>
                     </div>
                 </div>
 
@@ -112,8 +113,8 @@
 
     public ScienceLessonRollForSubmit Roll { get; set; } = new();
 
-    private EditContext? _editContext;
-    private ValidationMessageStore? _messageStore;
+    private EditContext _editContext;
+    private ValidationMessageStore _messageStore;
 
     protected override void OnInitialized()
     {
@@ -162,11 +163,14 @@
             _editContext.NotifyValidationStateChanged();
         }
 
-        _editContext.Validate();
-
         if (presentStudents.Count == 0 && (string.IsNullOrWhiteSpace(Roll.Comment) || Roll.Comment.Length < 5))
-        {
             _messageStore.Add(() => Roll.Comment, "You must provide a comment if none of the students were present");
+
+        if (Roll.LessonDate > DateTime.Today)
+            _messageStore.Add(() => Roll.LessonDate, "You cannot mark a roll for the future");
+
+        if (!_editContext!.Validate())
+        {
             IsLoading = false;
             return;
         }
