@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.DTOs;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
@@ -11,6 +12,7 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students;
 using Constellation.Core.ValueObjects;
 using Core.Extensions;
+using Core.Shared;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -48,34 +50,40 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
     public async Task StartJob(Guid jobId, CancellationToken token)
     {
         _jobId = jobId;
+        _logger.ForContext(nameof(jobId), jobId);
 
-        _logger.Information("{id}: Starting Sentral Family Details Scan.", jobId);
+        _logger
+            .Information("Starting Sentral Family Details Scan.");
 
-        var changeLog = new List<ParentContactChangeDto>();
+        List<ParentContactChangeDto> changeLog = new();
 
         // Get the CSV file from Sentral
         // Convert to temporary objects
-        var families = await _gateway.GetFamilyDetailsReport(_logger);
+        ICollection<FamilyDetailsDto> families = await _gateway.GetFamilyDetailsReport(_logger);
 
-        _logger.Information("{id}: Found {count} families", jobId, families.Count);
+        _logger
+            .Information("Found {count} families", families.Count);
 
         // Check objects against database
-        foreach (var family in families)
+        foreach (FamilyDetailsDto family in families)
         {
             if (token.IsCancellationRequested)
                 return;
 
-            _logger.Information("{id}: Checking family: {name} ({code})", jobId, family.AddressName, family.FamilyId);
+            _logger
+                .Information("Checking family: {name} ({code})", family.AddressName, family.FamilyId);
 
             family.MotherMobile = family.MotherMobile.Replace(" ", "");
             family.FatherMobile = family.FatherMobile.Replace(" ", "");
 
             // Check family exists in database
-            var entry = await _familyRepository.GetFamilyBySentralId(family.FamilyId, token);
+            Family entry = await _familyRepository.GetFamilyBySentralId(family.FamilyId, token);
 
-            if (entry == null)
+            if (entry is null)
             {
-                _logger.Information("{id}: No existing entry for {name} ({code}). Creating new family.", jobId, family.AddressName, family.FamilyId);
+                _logger
+                    .Information("No existing entry for {name} ({code}). Creating new family.", family.AddressName, family.FamilyId);
+
                 // New Family... Add to database
                 entry = Family.Create(new FamilyId(), family.AddressName);
                 entry.LinkFamilyToSentralDetails(family.FamilyId);
@@ -86,18 +94,19 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     family.AddressTown,
                     family.AddressPostCode);
 
-                var familyStudents = await _studentRepository.GetListFromIds(family.StudentIds, token);
+                List<Student> familyStudents = await _studentRepository.GetListFromIds(family.StudentIds, token);
 
-                foreach (var student in familyStudents)
+                foreach (Student student in familyStudents)
                 {
-                    _logger.Information("{id}: Adding student {name} to family {family} ({code})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
+                    _logger
+                        .Information("Adding student {name} to family {family} ({code})", student.DisplayName, family.AddressName, family.FamilyId);
 
                     entry.AddStudent(student.StudentId, true);
                 }
 
                 if (!string.IsNullOrWhiteSpace(family.FatherFirstName))
                 {
-                    var logEntry = CreateNewParent(
+                    ParentContactChangeDto logEntry = CreateNewParent(
                         family.FatherTitle,
                         family.FatherFirstName,
                         family.FatherLastName,
@@ -113,7 +122,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
 
                 if (!string.IsNullOrWhiteSpace(family.MotherFirstName))
                 {
-                    var logEntry = CreateNewParent(
+                    ParentContactChangeDto logEntry = CreateNewParent(
                         family.MotherTitle,
                         family.MotherFirstName,
                         family.MotherLastName,
@@ -141,7 +150,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                 } 
                 else
                 {
-                    var email = EmailAddress.Create(family.FamilyEmail);
+                    Result<EmailAddress> email = EmailAddress.Create(family.FamilyEmail);
 
                     if (email.IsFailure)
                     {
@@ -156,7 +165,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     }
                     else
                     {
-                        var result = entry.UpdateFamilyEmail(family.FamilyEmail);
+                        Result result = entry.UpdateFamilyEmail(family.FamilyEmail);
 
                         if (result.IsSuccess)
                         {
@@ -176,7 +185,8 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
             } 
             else
             {
-                _logger.Information("{id}: Found existing entry for {family} ({code}). Updating details.", jobId, family.AddressName, family.FamilyId);
+                _logger
+                    .Information("Found existing entry for {family} ({code}). Updating details.", family.AddressName, family.FamilyId);
 
                 entry.UpdateFamilyAddress(
                     family.AddressName,
@@ -185,36 +195,38 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     family.AddressTown,
                     family.AddressPostCode);
 
-                var familyStudents = await _studentRepository.GetListFromIds(family.StudentIds, token);
+                List<Student> familyStudents = await _studentRepository.GetListFromIds(family.StudentIds, token);
 
-                foreach (var student in familyStudents)
+                foreach (Student student in familyStudents)
                 {
-                    if (entry.Students.All(student => student.StudentId != student.StudentId))
+                    if (entry.Students.All(entry => entry.StudentId != student.StudentId))
                     {
                         // Student is not currently linked
-                        _logger.Information("{id}: Adding student {name} to family {family} ({code})", jobId, student.DisplayName, family.AddressName, family.FamilyId);
+                        _logger
+                            .Information("Adding student {name} to family {family} ({code})", student.DisplayName, family.AddressName, family.FamilyId);
 
                         entry.AddStudent(student.StudentId, true);
                     }
                 }
 
-                var linkedStudents = entry.Students.ToList();
-                foreach (var student in linkedStudents)
+                List<StudentFamilyMembership> linkedStudents = entry.Students.ToList();
+                foreach (StudentFamilyMembership student in linkedStudents)
                 {
                     if (!family.StudentIds.Contains(student.StudentId))
                     {
-                        _logger.Information("{id}: Removing student {name} from family {family} ({code})", jobId, student.StudentId, family.AddressName, family.FamilyId);
+                        _logger
+                            .Information("Removing student {name} from family {family} ({code})", student.StudentId, family.AddressName, family.FamilyId);
 
                         // Student should not be linked
                         entry.RemoveStudent(student.StudentId);
                     }
                 }
 
-                var fatherEntry = entry.Parents.FirstOrDefault(parent => parent.SentralLink == Parent.SentralReference.Father);
+                Parent fatherEntry = entry.Parents.FirstOrDefault(parent => parent.SentralLink == Parent.SentralReference.Father);
 
                 if (fatherEntry is null && !string.IsNullOrWhiteSpace(family.FatherFirstName))
                 {
-                    var logEntry = CreateNewParent(
+                    ParentContactChangeDto logEntry = CreateNewParent(
                         family.FatherTitle,
                         family.FatherFirstName,
                         family.FatherLastName,
@@ -229,7 +241,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                 } 
                 else if (!string.IsNullOrWhiteSpace(family.FatherFirstName))
                 {
-                    var logEntry = UpdateParent(
+                    ParentContactChangeDto logEntry = UpdateParent(
                         fatherEntry,
                         family.FatherTitle,
                         family.FatherFirstName,
@@ -244,11 +256,11 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                         changeLog.Add(logEntry);
                 }
 
-                var motherEntry = entry.Parents.FirstOrDefault(parent => parent.SentralLink == Parent.SentralReference.Mother);
+                Parent motherEntry = entry.Parents.FirstOrDefault(parent => parent.SentralLink == Parent.SentralReference.Mother);
 
                 if (motherEntry is null && !string.IsNullOrWhiteSpace(family.MotherFirstName))
                 {
-                    var logEntry = CreateNewParent(
+                    ParentContactChangeDto logEntry = CreateNewParent(
                         family.MotherTitle,
                         family.MotherFirstName,
                         family.MotherLastName,
@@ -263,7 +275,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                 }
                 else if (!string.IsNullOrWhiteSpace(family.MotherFirstName))
                 {
-                    var logEntry = UpdateParent(
+                    ParentContactChangeDto logEntry = UpdateParent(
                         motherEntry,
                         family.MotherTitle,
                         family.MotherFirstName,
@@ -278,32 +290,41 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                         changeLog.Add(logEntry);
                 }
 
-                if (entry.FamilyEmail != family.FamilyEmail)
+                // Has the family email changed between scans?
+                // First check whether either one is blank
+                // Then if not, compare the values
+
+                Result<EmailAddress> entryEmail = EmailAddress.Create(entry.FamilyEmail);
+
+                if (entryEmail.IsFailure)
                 {
-                    var email = EmailAddress.Create(family.FamilyEmail);
+                    entryEmail = EmailAddress.Create("a@a.com");
+                }
 
-                    if (email.IsFailure)
-                    {
-                        _logger.Warning("{id}: {family} ({code}): Family email address has changed from {oldEntry} to {newEntry} and is invalid", jobId, family.AddressName, family.FamilyId, entry.FamilyEmail, family.FamilyEmail);
+                Result<EmailAddress> familyEmail = EmailAddress.Create(family.FamilyEmail);
+                
+                if (familyEmail.IsFailure)
+                {
+                    _logger
+                        .Warning("{family} ({code}): Family email address has changed from {oldEntry} to {newEntry} and is invalid", family.AddressName, family.FamilyId, entry.FamilyEmail, family.FamilyEmail);
 
-                        changeLog.Add(new ParentContactChangeDto(
-                            "Family Email",
-                            string.Empty,
-                            family.FamilyEmail,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().FirstName : string.Empty,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().LastName : string.Empty,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentGrade.AsName() : string.Empty,
-                            "Family Email Invalid"));
-                    }
+                    changeLog.Add(new ParentContactChangeDto(
+                        "Family Email",
+                        string.Empty,
+                        family.FamilyEmail,
+                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().FirstName : string.Empty,
+                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().LastName : string.Empty,
+                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentGrade.AsName() : string.Empty,
+                        "Family Email Invalid"));
+                }
+                else if (familyEmail.Value != entryEmail.Value)
+                {
+                    string oldEmail = entry.FamilyEmail;
 
-                    var oldEmail = entry.FamilyEmail;
-
-                    var result = entry.UpdateFamilyEmail(family.FamilyEmail);
+                    Result result = entry.UpdateFamilyEmail(family.FamilyEmail);
 
                     if (result.IsFailure)
-                    {
                         continue;
-                    }
 
                     if (string.IsNullOrWhiteSpace(oldEmail) && !string.IsNullOrWhiteSpace(family.FamilyEmail))
                     {
@@ -321,7 +342,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     {
                         changeLog.Add(new ParentContactChangeDto(
                             "Family Email",
-                            entry.FamilyEmail,
+                            oldEmail,
                             family.FamilyEmail,
                             (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().FirstName : string.Empty,
                             (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().LastName : string.Empty,
@@ -333,7 +354,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     {
                         changeLog.Add(new ParentContactChangeDto(
                             "Family Email",
-                            entry.FamilyEmail,
+                            oldEmail,
                             string.Empty,
                             (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().FirstName : string.Empty,
                             (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().LastName : string.Empty,
@@ -341,7 +362,8 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                             "Family Email Removed"));
                     }
 
-                    _logger.Information("{id}: {family} ({code}): Updated Family Email Address from {old} to {new}", jobId, family.AddressName, family.FamilyId, oldEmail, family.FamilyEmail);
+                    _logger
+                        .Information("{family} ({code}): Updated Family Email Address from {old} to {new}", family.AddressName, family.FamilyId, oldEmail, family.FamilyEmail);
                 }
             }
 
@@ -362,9 +384,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
         Student? firstStudent,
         Family entry)
     {
-        var email = EmailAddress.Create(emailAddress);
-        var name = Name.Create(firstName, string.Empty, lastName);
-        var displayName = name.IsSuccess ? name.Value.DisplayName : $"{firstName} {lastName}";
+        Result<EmailAddress> email = EmailAddress.Create(emailAddress);
+        Result<Name> name = Name.Create(firstName, string.Empty, lastName);
+        string displayName = name.IsSuccess ? name.Value.DisplayName : $"{firstName} {lastName}";
 
         if (email.IsFailure)
         {
@@ -378,7 +400,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                 "Parent Email Invalid");
         }
         
-        var result = entry.AddParent(
+        Result<Parent> result = entry.AddParent(
             title,
             firstName,
             lastName,
@@ -388,7 +410,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
 
         if (result.IsFailure)
         {
-            _logger.Warning("{id}: Parent update failed due to error {@error}", _jobId, result.Error);
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Parent update failed due to error");
 
             return null;
         }
@@ -414,12 +438,12 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
         Student? firstStudent,
         Family entry)
     {
-        var name = Name.Create(firstName, string.Empty, lastName);
-        var displayName = name.IsSuccess ? name.Value.DisplayName : $"{firstName} {lastName}";
+        Result<Name> name = Name.Create(firstName, string.Empty, lastName);
+        string displayName = name.IsSuccess ? name.Value.DisplayName : $"{firstName} {lastName}";
 
         _logger.Information("{id}: Updating parent details for {parentName} in family {family} ({code})", _jobId, displayName, entry.FamilyTitle, entry.SentralId);
 
-        var email = EmailAddress.Create(emailAddress);
+        Result<EmailAddress> email = EmailAddress.Create(emailAddress);
         if (email.IsFailure)
         {
             _logger.Information("{id}: Parent email has changed from {oldEntry} to {newEntry} however new entry is invalid", _jobId, existingParent.EmailAddress, emailAddress);
@@ -433,7 +457,8 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                 (firstStudent is not null) ? firstStudent.CurrentGrade.AsName() : string.Empty,
                 "Parent Email Invalid");
         }
-        else if (existingParent.EmailAddress != email.Value.Email)
+        
+        if (existingParent.EmailAddress != email.Value.Email)
         {
             // Email has changed
             _logger.Information("{id}: Parent email has changed from {oldEntry} to {newEntry}", _jobId, existingParent.EmailAddress, emailAddress);
@@ -457,8 +482,8 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
             _logger.Information("{id}: Parent last name has changed from {oldEntry} to {newEntry}", _jobId, existingParent.LastName, lastName);
         }
 
-        var mobileCheck = PhoneNumber.Create(mobile);
-        var mobileNumber = mobileCheck.IsSuccess ? mobileCheck.Value.ToString(PhoneNumber.Format.None) : string.Empty;
+        Result<PhoneNumber> mobileCheck = PhoneNumber.Create(mobile);
+        string mobileNumber = mobileCheck.IsSuccess ? mobileCheck.Value.ToString(PhoneNumber.Format.None) : string.Empty;
 
         if (existingParent.MobileNumber != mobileNumber)
         {
@@ -466,10 +491,10 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
             _logger.Information("{id}: Parent mobile number has changed from {oldEntry} to {newEntry}", _jobId, existingParent.MobileNumber, mobileNumber);
         }
 
-        var emailChanged = existingParent.EmailAddress != email.Value.Email;
-        var oldEmail = existingParent.EmailAddress;
+        bool emailChanged = existingParent.EmailAddress != email.Value.Email;
+        string oldEmail = existingParent.EmailAddress;
 
-        var result = entry.UpdateParent(
+        Result<Parent> result = entry.UpdateParent(
             existingParent.Id,
             title,
             firstName,
