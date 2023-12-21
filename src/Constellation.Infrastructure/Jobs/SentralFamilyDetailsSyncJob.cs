@@ -370,8 +370,16 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
             await _unitOfWork.CompleteAsync(token);
         }
 
-        List<string> dbFamilySentralIds = dbFamilies.Select(family => family.SentralId).ToList();
-        List<string> familySentralIds = families.Select(family => family.FamilyId).ToList();
+        List<string> dbFamilySentralIds = dbFamilies
+            .Where(family => 
+                !family.IsDeleted &&
+                !string.IsNullOrWhiteSpace(family.SentralId))
+            .Select(family => family.SentralId)
+            .ToList();
+
+        List<string> familySentralIds = families
+            .Select(family => family.FamilyId)
+            .ToList();
 
         IEnumerable<string> staleDbFamilySentralIds = dbFamilySentralIds.Except(familySentralIds).ToList();
 
@@ -379,8 +387,6 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
         {
             foreach (string familyId in staleDbFamilySentralIds)
             {
-                if (string.IsNullOrEmpty(familyId)) continue;
-
                 Family family = dbFamilies.First(entry => entry.SentralId == familyId);
 
                 family.Delete();
