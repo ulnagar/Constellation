@@ -26,7 +26,7 @@ public class ScienceLessonRollForSubmit
     [Display(Name = DisplayNameDefaults.SubmittedDate)]
     public DateTime LessonDate { get; set; } = DateTime.Today;
 
-    public string Comment { get; set; }
+    public string Comment { get; set; } = string.Empty;
 
     public List<StudentAttendance> Attendance { get; set; } = new();
 

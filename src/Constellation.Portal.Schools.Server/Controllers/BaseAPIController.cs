@@ -20,12 +20,12 @@ public class BaseAPIController : ControllerBase
     {
         if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            Claim userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
             if (userIdClaim == null)
                 return null;
 
-            var userId = userIdClaim.Value;
+            string userId = userIdClaim.Value;
 
             return await UserManager.FindByIdAsync(userId);
         }
@@ -37,7 +37,7 @@ public class BaseAPIController : ControllerBase
     {
         if (User.Identity is not null && User.Identity.IsAuthenticated)
         {
-            var roles = await UserManager.GetRolesAsync(user);
+            IList<string> roles = await UserManager.GetRolesAsync(user);
             if (roles.Contains(AuthRoles.Admin))
             {
                 return true;
@@ -49,30 +49,30 @@ public class BaseAPIController : ControllerBase
 
     protected async Task<List<string>> GetCurrentUserSchools()
     {
-        var schoolCodes = new List<string>();
+        List<string> schoolCodes = new List<string>();
 
         if (User.Identity is not null && User.Identity.IsAuthenticated)
         {
-            var schoolCodeClaims = User.FindAll(AuthClaimType.SchoolCode);
+            IEnumerable<Claim> schoolCodeClaims = User.FindAll(AuthClaimType.SchoolCode);
 
-            if (schoolCodes is null || !schoolCodes.Any())
+            if (!schoolCodes.Any())
             {
-                var user = await GetCurrentUser();
+                AppUser user = await GetCurrentUser();
 
-                var claims = await _userManager.GetClaimsAsync(user);
+                IList<Claim> claims = await _userManager.GetClaimsAsync(user);
 
                 schoolCodeClaims = claims.Where(claim => claim.Type == "Schools").ToList();
             }
 
-            if (schoolCodeClaims is null || !schoolCodeClaims.Any())
+            if (!schoolCodeClaims.Any())
                 return schoolCodes;
 
-            foreach (var claim in schoolCodeClaims)
+            foreach (Claim claim in schoolCodeClaims)
             {
                 if (claim.Value.Contains(','))
                 {
-                    var codes = claim.Value.Split(',');
-                    foreach (var code in codes)
+                    string[] codes = claim.Value.Split(',');
+                    foreach (string code in codes)
                     {
                         schoolCodes.Add(code);
                     }
