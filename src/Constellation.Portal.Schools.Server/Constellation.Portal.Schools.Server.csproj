@@ -15,6 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\css\login.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="11.0.0" />
     <PackageReference Include="Duende.IdentityServer" Version="6.0.4" />
     <PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="6.0.4" />
@@ -48,6 +52,10 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\lib\server\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\css\login.css" />
   </ItemGroup>
 
 	<PropertyGroup>

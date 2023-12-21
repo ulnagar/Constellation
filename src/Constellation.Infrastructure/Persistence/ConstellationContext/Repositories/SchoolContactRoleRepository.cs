@@ -34,6 +34,16 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                     role.Role == Position,
                 cancellationToken);
 
+        public async Task<List<SchoolContactRole>> GetForContact(
+            int ContactId,
+            CancellationToken cancellationToken = default) =>
+            await _context
+                .Set<SchoolContactRole>()
+                .Where(role => 
+                    role.SchoolContactId == ContactId &&
+                    !role.IsDeleted)
+                .ToListAsync(cancellationToken);
+
         private IQueryable<SchoolContactRole> Collection()
         {
             return _context.SchoolContactRoles
