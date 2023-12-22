@@ -22,7 +22,7 @@ public class DashboardModel : BasePageModel
     [ViewData] public string ActivePage => AwardsPages.Dashboard;
 
 
-    public async Task OnGet() => await GetClasses(_mediator);
+    public async Task OnGet() { }
 
     public async Task<IActionResult> OnPostGetData(CancellationToken cancellationToken = default)
     {

@@ -44,8 +44,6 @@ public class BulkAddModulesModel : BasePageModel
     {
         StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        await GetClasses(_mediator);
-
         TrainingRoleId roleId = TrainingRoleId.FromValue(Id);
 
         Result<TrainingRoleDetailResponse> roleRequest = await _mediator.Send(new GetTrainingRoleDetailsQuery(roleId));
@@ -97,8 +95,6 @@ public class BulkAddModulesModel : BasePageModel
         if (request.IsFailure)
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-            await GetClasses(_mediator);
 
             Error = new()
             {

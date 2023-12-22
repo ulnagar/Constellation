@@ -94,8 +94,6 @@ public class CreateModel : BasePageModel
 
     private async Task<bool> PreparePage(CancellationToken cancellationToken = default)
     {
-        await GetClasses(_mediator);
-
         var teacherResponse = await _mediator.Send(new GetStaffForSelectionListQuery(), cancellationToken);
         var casualResponse = await _mediator.Send(new GetCasualsForSelectionListQuery(), cancellationToken);
 

@@ -40,8 +40,6 @@ public class CreateModel : BasePageModel
     {
         StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        await GetClasses(_mediator);
-
         if (Id.HasValue)
         {
             TrainingRoleId roleId = TrainingRoleId.FromValue(Id.Value);

@@ -166,8 +166,6 @@ public class NominateModel : BasePageModel
 
     private async Task PreparePage()
     {
-        await GetClasses(_mediator);
-
         AwardNominationPeriodId AwardPeriodId = AwardNominationPeriodId.FromValue(PeriodId);
 
         Result<NominationPeriodDetailResponse> periodRequest = await _mediator.Send(new GetNominationPeriodRequest(AwardPeriodId));

@@ -1,0 +1,18 @@
+﻿@model ClassListNavBarViewModel
+
+<li class="nav-item dropdown">
+    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">My Classes <span class="caret"></span></a>
+    <div class="dropdown-menu">
+        @if (Model.Classes.Count == 0)
+        {
+            <a class="dropdown-item" href="#">None Found</a>
+        }
+        else
+        {
+            foreach (var entry in Model.Classes.OrderBy(x => x.Key))
+            {
+                <a class="dropdown-item" asp-area="Subject" asp-page="/Offerings/Details" asp-route-id="@entry.Value.Value">@entry.Key</a>
+            }
+        }
+    </div>
+</li>

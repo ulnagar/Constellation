@@ -19,7 +19,7 @@
                         <a class="dropdown-item" asp-area="Partner" asp-page="/Families/Index">Families</a>
                         <a class="dropdown-item" asp-area="Partner" asp-page="/Contacts/Index">Contacts</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" asp-area="Partner" asp-controller="Staff" asp-action="Index">Staff</a>
+                        <a class="dropdown-item" asp-area="Partner" asp-page="/Staff/Index">Staff</a>
                         <a class="dropdown-item" asp-area="Partner" asp-page="/Faculties/Index">Faculties</a>
                     </div>
                 </li>
@@ -32,7 +32,7 @@
                         <a class="dropdown-item" asp-area="Subject" asp-page="/Assignments/Index">Assignments</a>
                         <a class="dropdown-item" asp-area="Subject" asp-controller="Periods" asp-action="Index">Periods</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" asp-page="/SciencePracs/Lessons/Index" asp-area="Subject">Science Pracs</a>
+                        <a class="dropdown-item" asp-area="Subject" asp-page="/SciencePracs/Lessons/Index">Science Pracs</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" asp-area="Subject" asp-page="/GroupTutorials/Tutorials/Index">Tutorials</a>
                     </div>
@@ -43,7 +43,6 @@
                     <div class="dropdown-menu">
                         <a class="dropdown-item" asp-area="ShortTerm" asp-page="/Casuals/Index">Casuals</a>
                         <a class="dropdown-item" asp-area="ShortTerm" asp-page="/Covers/Index">Covers</a>
-                        <a class="dropdown-item" asp-area="Admin" asp-controller="Actions" asp-action="Index">Operations</a>
                     </div>
                 </li>
 
@@ -72,14 +71,6 @@
                         <a class="dropdown-item" asp-area="Equipment" asp-controller="Stocktake" asp-action="Index">Stocktake</a>
                     </div>
                 </li>
-
-                @*<li class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Portals <span class="caret"></span></a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" asp-area="Portal" asp-controller="Monitor" asp-action="Index">Room Monitor</a>
-                        <a class="dropdown-item" href="https://web1.auroracoll-h.schools.nsw.edu.au/Portal/School">School Portal</a>
-                    </div>
-                </li>*@
             </ul>
 
             <ul class="navbar-nav navbar-right">
@@ -88,23 +79,7 @@
                     var isAdmin = User.IsInRole(AuthRoles.Admin);
                 }
                 
-                <li class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">My Classes <span class="caret"></span></a>
-                    <div class="dropdown-menu">
-                        @if (Model.Classes.Count == 0)
-                        {
-                                    
-                            <a class="dropdown-item" href="#">None Found</a>
-                        }
-                        else
-                        {
-                            foreach (var entry in Model.Classes.OrderBy(x => x.Key))
-                            {
-                                    <a class="dropdown-item" asp-area="Subject" asp-page="/Offerings/Details" asp-route-id="@entry.Value.Value">@entry.Key</a>
-                            }
-                        }
-                    </div>
-                </li>
+                <vc:class-list-nav-bar></vc:class-list-nav-bar>
 
                 <li class="nav-item dropdown">
                     <a href="#" id="nav-user-dropdown" class="nav-link glyphicon-dropdown" data-toggle="dropdown" role="button" aria-expanded="false"><i class="glyphicon glyphicon-user glyphicon-dropdown @(loggedIn ? "glyph-color-orange" : "")"></i></a>

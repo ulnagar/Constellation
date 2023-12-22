@@ -36,8 +36,6 @@ public class DetailsModel : BasePageModel
     {
         ViewData["ActivePage"] = "Report";
 
-        await GetClasses(_mediator);
-
         AbsenceId absenceId = AbsenceId.FromValue(Id);
 
         Result<AbsenceDetailsResponse> result = await _mediator.Send(new GetAbsenceDetailsQuery(absenceId), cancellationToken);

@@ -34,8 +34,6 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken)
     {
-        await GetClasses(_mediator);
-
         await PreparePage(cancellationToken);
     }
 

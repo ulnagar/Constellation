@@ -16,8 +16,5 @@ public class IndexModel : BasePageModel
         _mediator = mediator;
     }
 
-    public async Task OnGet()
-    {
-        await GetClasses(_mediator);
-    }
+    public async Task OnGet() { }
 }

@@ -64,8 +64,6 @@ public class UpdateModel : BasePageModel
 
     private async Task<bool> PreparePage(CancellationToken cancellationToken = default)
     {
-        await GetClasses(_mediator);
-
         var coverResult = await _mediator.Send(new GetCoverWithDetailsQuery(ClassCoverId.FromValue(Id)), cancellationToken);
 
         if (coverResult.IsFailure)

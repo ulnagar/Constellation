@@ -35,8 +35,6 @@ public class LeaderboardModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
-        await GetClasses(_mediator);
-
         Result<List<StudentAwardStatisticsResponse>> statisticsRequest = await _mediator.Send(new GetStudentAwardStatisticsQuery(), cancellationToken);
 
         if (statisticsRequest.IsFailure)
@@ -60,8 +58,6 @@ public class LeaderboardModel : BasePageModel
 
     public async Task OnPostFilter(CancellationToken cancellationToken = default)
     {
-        await GetClasses(_mediator);
-
         Result<List<StudentAwardStatisticsResponse>> statisticsRequest = await _mediator.Send(new GetStudentAwardStatisticsQuery(FromDate, ToDate), cancellationToken);
 
         if (statisticsRequest.IsFailure)

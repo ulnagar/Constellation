@@ -69,8 +69,6 @@ public class AddStudentsModel : BasePageModel
 
     private async Task PreparePage()
     {
-        await GetClasses(_mediator);
-
         OfferingId offeringId = OfferingId.FromValue(Id);
 
         Result<List<EnrolmentResponse>> enrolmentRequest =

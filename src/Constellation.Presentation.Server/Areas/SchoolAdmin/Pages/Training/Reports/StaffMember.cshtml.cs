@@ -36,8 +36,6 @@ public class StaffMemberModel : BasePageModel
     {
         StaffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        await GetClasses(_mediator);
-
         Result<StaffResponse> staffRequest = await _mediator.Send(new GetStaffByIdQuery(Id));
 
         if (staffRequest.IsFailure)

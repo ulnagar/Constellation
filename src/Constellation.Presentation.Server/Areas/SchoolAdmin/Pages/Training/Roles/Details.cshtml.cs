@@ -47,8 +47,6 @@ public class DetailsModel : BasePageModel
     {
         StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        await GetClasses(_mediator);
-
         TrainingRoleId roleId = TrainingRoleId.FromValue(Id);
 
         Result<TrainingRoleDetailResponse> request = await _mediator.Send(new GetTrainingRoleDetailsQuery(roleId));
@@ -94,8 +92,6 @@ public class DetailsModel : BasePageModel
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-            await GetClasses(_mediator);
-
             Error = new()
             {
                 Error = DomainErrors.Auth.NotAuthorised,
@@ -112,7 +108,6 @@ public class DetailsModel : BasePageModel
         if (request.IsFailure)
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-            await GetClasses(_mediator);
 
             Error = new()
             {
@@ -132,8 +127,6 @@ public class DetailsModel : BasePageModel
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-            await GetClasses(_mediator);
-
             Error = new()
             {
                 Error = Core.Shared.Error.NullValue,
@@ -148,8 +141,6 @@ public class DetailsModel : BasePageModel
         if (!canEdit.Succeeded)
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-            await GetClasses(_mediator);
 
             Error = new()
             {
@@ -167,8 +158,6 @@ public class DetailsModel : BasePageModel
         if (request.IsFailure)
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-            await GetClasses(_mediator);
 
             Error = new()
             {
@@ -188,8 +177,6 @@ public class DetailsModel : BasePageModel
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-            await GetClasses(_mediator);
-
             Error = new()
             {
                 Error = Core.Shared.Error.NullValue,
@@ -204,8 +191,6 @@ public class DetailsModel : BasePageModel
         if (!canEdit.Succeeded)
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-            await GetClasses(_mediator);
 
             Error = new()
             {
@@ -224,8 +209,6 @@ public class DetailsModel : BasePageModel
         if (request.IsFailure)
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-            await GetClasses(_mediator);
 
             Error = new()
             {
@@ -265,8 +248,6 @@ public class DetailsModel : BasePageModel
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-            await GetClasses(_mediator);
-
             Error = new()
             {
                 Error = DomainErrors.Auth.NotAuthorised,
@@ -284,7 +265,6 @@ public class DetailsModel : BasePageModel
         if (request.IsFailure)
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-            await GetClasses(_mediator);
 
             Error = new()
             {

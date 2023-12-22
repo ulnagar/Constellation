@@ -51,8 +51,6 @@ public class RolloverModel : BasePageModel
 
     public async Task OnGetAsync()
     {
-        await GetClasses(_mediator);
-
         _rolloverRepository.Reset();
 
         await GetStudents(Grade.Y12);

@@ -83,8 +83,6 @@ public class UpsertModel : BasePageModel
     {
         StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        await GetClasses(_mediator);
-
         AuthorizationResult canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
         CanEditRecords = canEditTest.Succeeded;
 

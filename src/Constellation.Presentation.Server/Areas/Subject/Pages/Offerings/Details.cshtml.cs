@@ -49,8 +49,6 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_sender);
-
         OfferingId offeringId = OfferingId.FromValue(Id);
 
         Result<OfferingDetailsResponse> query = await _sender.Send(new GetOfferingDetailsQuery(offeringId));

@@ -1,5 +1,4 @@
-﻿using Constellation.Application.Extensions;
-using Constellation.Application.Models.Auth;
+﻿using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.Areas.Reports.Models;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -16,7 +15,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
 
     [Area("Reports")]
     [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
-    public class StudentsController : BaseController
+    public class StudentsController : Controller
     {
         private readonly IOfferingRepository _offeringRepository;
         private readonly IMediator _mediator;
@@ -24,7 +23,6 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
         public StudentsController(
             IOfferingRepository offeringRepository,
             IMediator mediator)
-            : base(mediator)
         {
             _offeringRepository = offeringRepository;
             _mediator = mediator;
@@ -32,7 +30,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var viewModel = await CreateViewModel<BaseViewModel>();
+            var viewModel = new BaseViewModel();
 
             return View(viewModel);
         }
@@ -46,7 +44,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
                 return BadRequest();
             }
             
-            Student_FTEBreakdown_ViewModel viewModel = await CreateViewModel<Student_FTEBreakdown_ViewModel>();
+            Student_FTEBreakdown_ViewModel viewModel = new Student_FTEBreakdown_ViewModel();
 
             foreach (GradeFTESummaryResponse entry in request.Value)
             {
@@ -75,7 +73,7 @@ namespace Constellation.Presentation.Server.Areas.Reports.Controllers
         {
             var offerings = await _offeringRepository.GetAllActive();
 
-            var viewModel = await CreateViewModel<Student_InterviewDetails_ViewModel>();
+            var viewModel = new Student_InterviewDetails_ViewModel();
             viewModel.AllClasses = new SelectList(offerings, "Id", "Name");
 
             return View(viewModel);

@@ -47,8 +47,6 @@ public class AddMemberModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         StaffList = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
         MemberDefinition.FacultyId = FacultyId;
         

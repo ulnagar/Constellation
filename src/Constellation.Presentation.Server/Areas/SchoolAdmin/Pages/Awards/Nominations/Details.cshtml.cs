@@ -35,8 +35,6 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
-        await GetClasses(_mediator);
-
         AwardNominationPeriodId awardNominationPeriodId = AwardNominationPeriodId.FromValue(PeriodId);
 
         Result<NominationPeriodDetailResponse> periodRequest = await _mediator.Send(new GetNominationPeriodRequest(awardNominationPeriodId), cancellationToken);

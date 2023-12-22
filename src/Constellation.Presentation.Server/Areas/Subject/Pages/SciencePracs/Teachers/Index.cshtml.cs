@@ -37,8 +37,6 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         Result<List<ContactResponse>> contactRequest = await _mediator.Send(new GetAllSciencePracTeachersQuery());
 
         if (contactRequest.IsFailure)

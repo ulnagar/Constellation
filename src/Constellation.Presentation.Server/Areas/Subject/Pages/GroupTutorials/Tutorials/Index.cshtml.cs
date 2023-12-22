@@ -26,8 +26,6 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         var tutorialResponse = await _mediator.Send(new GetAllTutorialsQuery { Filter = Filter });
 
         if (tutorialResponse.IsFailure) 

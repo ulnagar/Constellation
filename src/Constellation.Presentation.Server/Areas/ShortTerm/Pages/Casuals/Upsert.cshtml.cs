@@ -54,8 +54,6 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
     {
-        await GetClasses(_mediator);
-
         if (Id.HasValue)
         {
             var casualResponse = await _mediator.Send(new GetCasualByIdQuery(CasualId.FromValue(Id.Value)), cancellationToken);

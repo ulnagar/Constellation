@@ -53,8 +53,6 @@ public class RoleModel : BasePageModel
 
     public async Task<IActionResult> OnGet()
     {
-        await GetClasses(_mediator);
-
         var role = await _roleManager.FindByIdAsync(RoleId.ToString());
 
         if (role is null)

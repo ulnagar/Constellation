@@ -38,8 +38,6 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
     {
-        await GetClasses(_mediator);
-
         var assignmentId = AssignmentId.FromValue(Id);
 
         var request = await _mediator.Send(new GetAssignmentByIdQuery(assignmentId), cancellationToken);

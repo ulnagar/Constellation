@@ -39,8 +39,6 @@ public class IndexModel : BasePageModel
     
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         if (!string.IsNullOrWhiteSpace(StudentId))
         {
             Result<List<RollSummaryResponse>> request = await _mediator.Send(new GetFilteredRollsForStudentQuery(StudentId));
@@ -102,8 +100,6 @@ public class IndexModel : BasePageModel
             RedirectPath = null
         };
 
-        await GetClasses(_mediator);
-        
         return Page();
     }
 }

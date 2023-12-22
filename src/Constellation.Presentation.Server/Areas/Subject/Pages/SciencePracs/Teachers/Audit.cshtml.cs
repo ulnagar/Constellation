@@ -33,8 +33,6 @@ public class AuditModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         Result<UserAuditDto> auditRequest = await _mediator.Send(new VerifySchoolContactAccessQuery(Id));
 
         if (auditRequest.IsFailure)

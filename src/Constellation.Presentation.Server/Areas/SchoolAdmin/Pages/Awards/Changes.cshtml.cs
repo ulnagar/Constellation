@@ -37,8 +37,6 @@ public class ChangesModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
-        await GetClasses(_mediator);
-
         Result<List<StudentAwardStatisticsResponse>> statisticsRequest = await _mediator.Send(new GetStudentAwardStatisticsQuery(), cancellationToken);
 
         if (statisticsRequest.IsFailure)

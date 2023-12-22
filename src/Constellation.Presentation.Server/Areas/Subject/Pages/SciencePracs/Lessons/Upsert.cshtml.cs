@@ -47,8 +47,6 @@ public class UpsertModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         await BuildCourseSelectList();
 
         DueDate = DateOnly.FromDateTime(DateTime.Today);

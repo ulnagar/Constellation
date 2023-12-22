@@ -8,7 +8,6 @@ using Constellation.Application.SchoolContacts.CreateContactWithRole;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Partner.Models;
-using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +17,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 {
     [Area("Partner")]
     [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
-    public class SchoolContactsController : BaseController
+    public class SchoolContactsController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
@@ -32,7 +31,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             ISchoolContactService schoolContactService, 
             IOperationService operationService,
             IMediator mediator)
-            : base(mediator)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;
@@ -55,7 +53,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             var contactList = withoutRole.Select(SchoolStaff_ViewModel.ContactDto.ConvertFromContact).ToList();
             contactList.AddRange(withRole.SelectMany(SchoolStaff_ViewModel.ContactDto.ConvertFromContactWithRole));
 
-            var viewModel = await CreateViewModel<SchoolStaff_ViewModel>();
+            var viewModel = new SchoolStaff_ViewModel();
             viewModel.Contacts = contactList.OrderBy(contact => contact.Name).ToList();
             viewModel.RoleList = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
 
@@ -68,7 +66,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             var contactList = withRole.Select(SchoolStaff_ViewModel.ContactDto.ConvertFromAssignment).ToList();
 
-            var viewModel = await CreateViewModel<SchoolStaff_ViewModel>();
+            var viewModel = new SchoolStaff_ViewModel();
             viewModel.Contacts = contactList.OrderBy(contact => contact.Name).ToList();
             viewModel.RoleList = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
 
@@ -81,7 +79,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             var contactList = withRole.Select(SchoolStaff_ViewModel.ContactDto.ConvertFromAssignment).ToList();
 
-            var viewModel = await CreateViewModel<SchoolStaff_ViewModel>();
+            var viewModel = new SchoolStaff_ViewModel();
             viewModel.Contacts = contactList.OrderBy(contact => contact.Name).ToList();
             viewModel.RoleList = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
 
@@ -111,7 +109,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             var contactList = filteredContacts.Distinct().Select(SchoolStaff_ViewModel.ContactDto.ConvertFromAssignment).ToList();
 
-            var viewModel = await CreateViewModel<SchoolStaff_ViewModel>();
+            var viewModel = new SchoolStaff_ViewModel();
             viewModel.Contacts = contactList.OrderBy(contact => contact.Name).ToList();
             viewModel.RoleList = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
 
@@ -126,7 +124,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
             var schools = await _unitOfWork.Schools.ForSelectionAsync();
 
-            var viewModel = await CreateViewModel<Contacts_AssignmentViewModel>();
+            var viewModel = new Contacts_AssignmentViewModel();
             viewModel.SchoolList = new SelectList(schools, "Code", "Name");
             viewModel.ContactRole = new SchoolContactRoleDto
             {
@@ -170,7 +168,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 RedirectToAction("Index");
             }
 
-            var viewModel = await CreateViewModel<SchoolStaff_UpdateViewModel>();
+            var viewModel = new SchoolStaff_UpdateViewModel();
             viewModel.Contact = new SchoolContactDto
             {
                 Id = id,
@@ -193,7 +191,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         {
             if (!ModelState.IsValid)
             {
-                await UpdateViewModel(viewModel);
                 return View("Update", viewModel);
             }
 
@@ -236,7 +233,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
                 if (!result.Success)
                 {
-                    await UpdateViewModel(viewModel);
                     return View("Update", viewModel);
                 }
 
@@ -264,7 +260,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             var roles = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
             var schools = await _unitOfWork.Schools.ForSelectionAsync();
 
-            var viewModel = await CreateViewModel<SchoolStaff_UpdateViewModel>();
+            var viewModel = new SchoolStaff_UpdateViewModel();
             viewModel.IsNew = true;
             viewModel.ContactRole = new();
             viewModel.SchoolList = new SelectList(schools, "Code", "Name");

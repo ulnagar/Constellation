@@ -54,8 +54,6 @@ public class EditFamilyModel : BasePageModel
 
     public async Task<IActionResult> OnGetAsync(CancellationToken cancellationToken)
     {
-        await GetClasses(_mediator);
-
         var familyId = FamilyId.FromValue(Id);
 
         var familyResult = await _mediator.Send(new GetFamilyEditContextQuery(familyId), cancellationToken);

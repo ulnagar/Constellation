@@ -25,7 +25,7 @@ public class IndexModel : BasePageModel
 
     public List<SentralIncidentDetails> Data { get; set; } = new();
 
-    public async Task OnGet() => await GetClasses(_mediator);
+    public async Task OnGet() { }
 
     public async Task OnGetUpdate()
     {

@@ -56,8 +56,6 @@ public class UpsertModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         if (Id.HasValue)
         {
             OfferingId offeringId = OfferingId.FromValue(Id.Value);
@@ -95,7 +93,6 @@ public class UpsertModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            await GetClasses(_mediator);
             await BuildCourseSelectList();
 
             return Page();
@@ -107,8 +104,6 @@ public class UpsertModel : BasePageModel
 
         if (request.IsFailure)
         {
-            await GetClasses(_mediator);
-
             Error = new()
             {
                 Error = request.Error,
@@ -125,8 +120,6 @@ public class UpsertModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            await GetClasses(_mediator);
-
             return Page();
         }
 
@@ -136,8 +129,6 @@ public class UpsertModel : BasePageModel
 
         if (request.IsFailure)
         {
-            await GetClasses(_mediator);
-
             Result<OfferingSummaryResponse> offering = await _mediator.Send(new GetOfferingSummaryQuery(offeringId));
 
             if (offering.IsFailure)

@@ -46,8 +46,6 @@ public class UpsertModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         if (Id.HasValue)
         {
             CourseId courseId = CourseId.FromValue(Id.Value);

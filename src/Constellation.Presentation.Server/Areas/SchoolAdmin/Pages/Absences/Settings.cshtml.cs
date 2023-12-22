@@ -50,8 +50,6 @@ public class SettingsModel : BasePageModel
 
         ViewData["ActivePage"] = "Audit";
 
-        await GetClasses(_mediator);
-
         var students = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery(), cancellationToken);
 
         if (students.IsFailure)
@@ -99,8 +97,6 @@ public class SettingsModel : BasePageModel
                 Error = new("Validation.Page.EmptyValues", "You must select a value for either Student or School to continue"),
                 RedirectPath = null
             };
-
-            await GetClasses(_mediator);
 
             var students = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery(), cancellationToken);
 

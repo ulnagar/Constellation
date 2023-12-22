@@ -87,8 +87,6 @@ public class ReportModel : BasePageModel
     {
         ViewData["ActivePage"] = "Report";
 
-        await GetClasses(_mediator);
-
         var classesResponse = await _mediator.Send(new GetOfferingsForSelectionListQuery(), cancellationToken);
 
         if (classesResponse.IsFailure)

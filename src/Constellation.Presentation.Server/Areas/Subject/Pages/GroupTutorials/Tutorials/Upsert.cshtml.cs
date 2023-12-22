@@ -39,8 +39,6 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnGet()
     {
-        await GetClasses(_mediator);
-
         // If ID is empty, this is a create action
         // otherwise this is an edit and we need to populate the current values
         if (Id.HasValue)

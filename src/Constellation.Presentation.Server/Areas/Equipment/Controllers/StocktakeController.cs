@@ -1,28 +1,22 @@
-﻿using Constellation.Application.Features.Equipment.Stocktake.Commands;
-using Constellation.Application.Features.Equipment.Stocktake.Queries;
+﻿using Constellation.Application.Features.Equipment.Stocktake.Queries;
 using Constellation.Application.Features.Portal.School.Home.Queries;
 using Constellation.Application.Features.Portal.School.Stocktake.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Stocktake;
 using Constellation.Presentation.Server.Areas.Equipment.Models.Stocktake;
-using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using Constellation.Presentation.Server.Helpers.Validation;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
 {
     [Area("Equipment")]
     [Roles(AuthRoles.Admin, AuthRoles.EquipmentEditor, AuthRoles.Editor, AuthRoles.StaffMember)]
-    public class StocktakeController : BaseController
+    public class StocktakeController : Controller
     {
         private readonly IMediator _mediator;
         private readonly IUnitOfWork _unitOfWork;
@@ -32,7 +26,6 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
             IMediator mediator, 
             IUnitOfWork unitOfWork,
             IValidator<RegisterSightedDeviceForStocktakeCommand> validator)
-            : base(mediator)
         {
             _mediator = mediator;
             _unitOfWork = unitOfWork;
@@ -44,7 +37,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         {
             var stocktakes = await _mediator.Send(new GetStocktakeEventListQuery());
 
-            var viewModel = await CreateViewModel<ListStocktakeEventsViewModel>();
+            var viewModel = new ListStocktakeEventsViewModel();
             foreach (var item in stocktakes)
             {
                 var entry = new ListStocktakeEventsViewModel.StocktakeEventItem
@@ -65,7 +58,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         [Roles(AuthRoles.Admin, AuthRoles.EquipmentEditor, AuthRoles.Editor)]
         public async Task<IActionResult> Create()
         {
-            var viewModel = await CreateViewModel<UpsertStocktakeEventViewModel>();
+            var viewModel = new UpsertStocktakeEventViewModel();
 
             viewModel.Command.StartDate = DateTime.Today;
             viewModel.Command.EndDate = DateTime.Today;
@@ -76,7 +69,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         [Roles(AuthRoles.Admin, AuthRoles.EquipmentEditor, AuthRoles.Editor)]
         public async Task<IActionResult> Update(Guid id)
         {
-            var viewModel = await CreateViewModel<UpsertStocktakeEventViewModel>();
+            var viewModel = new UpsertStocktakeEventViewModel();
 
             var stocktake = await _mediator.Send(new GetStocktakeEventQuery { StocktakeId = id });
 
@@ -107,8 +100,6 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
 
             if (!ModelState.IsValid)
             {
-                await UpdateViewModel(viewModel);
-
                 return View("Upsert", viewModel);
             }
 
@@ -120,7 +111,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         [Roles(AuthRoles.Admin, AuthRoles.EquipmentEditor, AuthRoles.Editor)]
         public async Task<IActionResult> Details(Guid id)
         {
-            var viewModel = await CreateViewModel<StocktakeEventDetailsViewModel>();
+            var viewModel = new StocktakeEventDetailsViewModel();
 
             var stocktake = await _mediator.Send(new GetStocktakeEventQuery { StocktakeId = id, IncludeSightings = true }); ;
 
@@ -156,7 +147,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
 
         public async Task<IActionResult> StaffDashboard(Guid id)
         {
-            var viewModel = await CreateViewModel<StaffDashboardViewModel>();
+            var viewModel = new StaffDashboardViewModel();
 
             var staffMember = await GetStaffMember();
 
@@ -192,7 +183,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         {
             var staffMember = await GetStaffMember();
 
-            var viewModel = await CreateViewModel<StaffStocktakeSightingViewModel>();
+            var viewModel = new StaffStocktakeSightingViewModel();
             viewModel.Command.StocktakeEventId = id;
 
             var students = await _mediator.Send(new GetStudentsFromSchoolForSelectionQuery { SchoolCode = staffMember.SchoolCode });
@@ -219,8 +210,6 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
 
             if (!ModelState.IsValid)
             {
-                await UpdateViewModel(viewModel);
-
                 var students = await _mediator.Send(new GetStudentsFromSchoolForSelectionQuery { SchoolCode = staffMember.SchoolCode });
                 viewModel.Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
                 var staffMembers = await _mediator.Send(new GetStaffForSelectionQuery());

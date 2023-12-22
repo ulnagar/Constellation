@@ -21,8 +21,6 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         Result<List<FacultySummaryResponse>> faculties = await _mediator.Send(new GetFacultiesSummaryQuery());
 
         if (faculties.IsFailure)

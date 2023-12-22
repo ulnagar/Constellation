@@ -25,8 +25,6 @@ public class WithoutSentralIdModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         Result<List<StudentResponse>> request = await _mediator.Send(new GetCurrentStudentsWithoutSentralIdQuery());
 
         if (request.IsFailure)

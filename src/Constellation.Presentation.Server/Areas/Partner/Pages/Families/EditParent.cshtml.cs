@@ -52,8 +52,6 @@ public class EditParentModel : BasePageModel
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
     {
-        await GetClasses(_mediator);
-
         var parentId = ParentId.FromValue(ParentIdentifier);
         var familyId = FamilyId.FromValue(FamilyIdentifier);
 

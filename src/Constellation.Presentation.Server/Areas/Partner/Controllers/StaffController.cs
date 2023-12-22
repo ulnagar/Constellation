@@ -22,7 +22,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 [Area("Partner")]
 [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
-public class StaffController : BaseController
+public class StaffController : Controller
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuthService _authService;
@@ -37,7 +37,6 @@ public class StaffController : BaseController
         IOperationService operationsService,
         IFacultyRepository facultyRepository,
         IMediator mediator)
-        : base(mediator)
     {
         _unitOfWork = unitOfWork;
         _authService = authService;
@@ -58,7 +57,7 @@ public class StaffController : BaseController
         var staff = await _unitOfWork.Staff.ForEditAsync(id);
         var schools = await _unitOfWork.Schools.ForSelectionAsync();
 
-        var viewModel = await CreateViewModel<Staff_UpdateViewModel>();
+        var viewModel = new Staff_UpdateViewModel();
         viewModel.Staff = new StaffDto
         {
             StaffId = staff.StaffId,
@@ -82,7 +81,6 @@ public class StaffController : BaseController
     {
         if (!ModelState.IsValid)
         {
-            await UpdateViewModel(viewModel);
             var schools = await _unitOfWork.Schools.ForSelectionAsync();
             viewModel.SchoolList = new SelectList(schools, "Code", "Name", viewModel.Staff.SchoolCode);
             return View("Update", viewModel);
@@ -141,7 +139,7 @@ public class StaffController : BaseController
     {
         var schools = await _unitOfWork.Schools.ForSelectionAsync();
 
-        var viewModel = await CreateViewModel<Staff_UpdateViewModel>();
+        var viewModel = new Staff_UpdateViewModel();
         viewModel.IsNew = true;
         viewModel.SchoolList = new SelectList(schools, "Code", "Name");
 
@@ -194,7 +192,7 @@ public class StaffController : BaseController
         }
 
         // Build the master form view model
-        Staff_DetailsViewModel viewModel = await CreateViewModel<Staff_DetailsViewModel>();
+        Staff_DetailsViewModel viewModel = new Staff_DetailsViewModel();
         viewModel.Staff = Staff_DetailsViewModel.StaffDto.ConvertFromStaff(staff);
         viewModel.Offerings = offeringResponse;
         viewModel.Sessions = sessionResponse;

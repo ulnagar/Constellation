@@ -5,20 +5,16 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Equipment.Models;
-using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
 {
     [Area("Equipment")]
     [Roles(AuthRoles.Admin, AuthRoles.EquipmentEditor, AuthRoles.Editor, AuthRoles.StaffMember)]
-    public class DevicesController : BaseController
+    public class DevicesController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDeviceService _deviceService;
@@ -27,7 +23,6 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
             IUnitOfWork unitOfWork, 
             IDeviceService deviceService,
             IMediator mediator)
-            : base(mediator)
         {
             _unitOfWork = unitOfWork;
             _deviceService = deviceService;
@@ -43,7 +38,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         {
             var devices = await _unitOfWork.Devices.ForListAsync(device => device.Status < Status.WrittenOffWithdrawn);
 
-            var viewModel = await CreateViewModel<Devices_ViewModel>();
+            var viewModel = new Devices_ViewModel();
             viewModel.Devices = devices.Select(Devices_ViewModel.DeviceDto.ConvertFromDevice).ToList();
             viewModel.ListOfMakes = await _unitOfWork.Devices.ListOfMakesAsync();
 
@@ -54,7 +49,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         {
             var devices = await _unitOfWork.Devices.ForListAsync(device => true);
 
-            var viewModel = await CreateViewModel<Devices_ViewModel>();
+            var viewModel = new Devices_ViewModel();
             viewModel.Devices = devices.Select(Devices_ViewModel.DeviceDto.ConvertFromDevice).ToList();
             viewModel.ListOfMakes = await _unitOfWork.Devices.ListOfMakesAsync();
 
@@ -65,7 +60,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         {
             var devices = await _unitOfWork.Devices.ForListAsync(device => device.Status >= Status.WrittenOffWithdrawn);
 
-            var viewModel = await CreateViewModel<Devices_ViewModel>();
+            var viewModel = new Devices_ViewModel();
             viewModel.Devices = devices.Select(Devices_ViewModel.DeviceDto.ConvertFromDevice).ToList();
             viewModel.ListOfMakes = await _unitOfWork.Devices.ListOfMakesAsync();
 
@@ -76,7 +71,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         {
             var devices = await _unitOfWork.Devices.ForListAsync(device => device.Status == (Status)id);
 
-            var viewModel = await CreateViewModel<Devices_ViewModel>();
+            var viewModel = new Devices_ViewModel();
             viewModel.Devices = devices.Select(Devices_ViewModel.DeviceDto.ConvertFromDevice).ToList();
             viewModel.ListOfMakes = await _unitOfWork.Devices.ListOfMakesAsync();
 
@@ -87,7 +82,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         {
             var devices = await _unitOfWork.Devices.ForListAsync(device => device.Make == make);
 
-            var viewModel = await CreateViewModel<Devices_ViewModel>();
+            var viewModel = new Devices_ViewModel();
             viewModel.Devices = devices.Select(Devices_ViewModel.DeviceDto.ConvertFromDevice).ToList();
             viewModel.ListOfMakes = await _unitOfWork.Devices.ListOfMakesAsync();
 
@@ -112,7 +107,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
                 filteredDevices.AddRange(await _unitOfWork.Devices.ForListAsync(device => make.Contains(device.Make)));
             }
 
-            var viewModel = await CreateViewModel<Devices_ViewModel>();
+            var viewModel = new Devices_ViewModel();
             viewModel.Devices = filteredDevices.Select(Devices_ViewModel.DeviceDto.ConvertFromDevice).ToList();
             viewModel.ListOfMakes = await _unitOfWork.Devices.ListOfMakesAsync();
 
@@ -121,7 +116,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
 
         public async Task<IActionResult> ReportUsage()
         {
-            var viewModel = await CreateViewModel<Devices_ReportsStatus>();
+            var viewModel = new Devices_ReportsStatus();
             var devices = await _unitOfWork.Devices.ForReportingAsync();
             var makes = devices.Select(d => d.Make).Distinct();
 
@@ -201,7 +196,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
                 return RedirectToAction("Index");
             }
 
-            var viewModel = await CreateViewModel<Devices_DetailsViewModel>();
+            var viewModel = new Devices_DetailsViewModel();
             viewModel.Device = Devices_DetailsViewModel.DeviceDto.ConvertFromDevice(device);
             viewModel.Allocations = device.Allocations.Select(Devices_DetailsViewModel.AllocationDto.ConvertFromAllocation).ToList();
             viewModel.Notes = device.Notes.Select(Devices_DetailsViewModel.NoteDto.ConvertFromNote).ToList();
@@ -257,7 +252,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
 
             var students = await _unitOfWork.Students.ForSelectionListAsync();
 
-            var viewModel = await CreateViewModel<Devices_AssignViewModel>();
+            var viewModel = new Devices_AssignViewModel();
             viewModel.SerialNumber = device.SerialNumber;
             viewModel.Model = device.Model;
             viewModel.Make = device.Make;
@@ -280,8 +275,6 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
 
             if (!ModelState.IsValid)
             {
-                await UpdateViewModel(viewModel);
-
                 //Recreate viewModel!
                 viewModel.SerialNumber = device.SerialNumber;
                 viewModel.Model = device.Model;
@@ -321,7 +314,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
                 return RedirectToAction("Index");
             }
 
-            var viewModel = await CreateViewModel<Devices_StatusUpdateViewModel>();
+            var viewModel = new Devices_StatusUpdateViewModel();
             viewModel.SerialNumber = device.SerialNumber;
             viewModel.Model = device.Model;
             viewModel.Make = device.Make;
@@ -341,8 +334,6 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
 
             if (!ModelState.IsValid)
             {
-                await UpdateViewModel(viewModel);
-
                 //Recreate viewModel!
                 viewModel.SerialNumber = device.SerialNumber;
                 viewModel.Model = device.Model;
@@ -374,7 +365,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
                 return RedirectToAction("Index");
             }
 
-            var viewModel = await CreateViewModel<Devices_CreateNoteViewModel>();
+            var viewModel = new Devices_CreateNoteViewModel();
             viewModel.SerialNumber = device.SerialNumber;
             viewModel.Model = device.Model;
             viewModel.Make = device.Make;
@@ -393,8 +384,6 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
 
             if (!ModelState.IsValid)
             {
-                await UpdateViewModel(viewModel);
-
                 //Recreate viewModel!
                 viewModel.SerialNumber = device.SerialNumber;
                 viewModel.Model = device.Model;
@@ -414,7 +403,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         [Roles(AuthRoles.Admin, AuthRoles.EquipmentEditor)]
         public async Task<IActionResult> Create()
         {
-            var viewModel = await CreateViewModel<Devices_UpdateViewModel>();
+            var viewModel = new Devices_UpdateViewModel();
             viewModel.Device = new DeviceResource();
             viewModel.IsNew = true;
 
@@ -441,7 +430,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
                 return RedirectToAction("Index");
             }
 
-            var viewModel = await CreateViewModel<Devices_UpdateViewModel>();
+            var viewModel = new Devices_UpdateViewModel();
             viewModel.Device = new DeviceResource
             {
                 SerialNumber = device.SerialNumber,
@@ -463,7 +452,6 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         {
             if (!ModelState.IsValid)
             {
-                await UpdateViewModel(viewModel);
                 return View("Update", viewModel);
             }
 

@@ -27,8 +27,6 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
     {
-        await GetClasses(_mediator);
-
         var assignmentRequest = await _mediator.Send(new GetCurrentAssignmentsListingQuery(), cancellationToken);
 
         if (assignmentRequest.IsFailure)

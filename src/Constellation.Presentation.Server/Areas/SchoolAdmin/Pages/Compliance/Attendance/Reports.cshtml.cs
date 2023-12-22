@@ -30,8 +30,6 @@ public class ReportModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         // Get list of periods
         var request = await _mediator.Send(new GetAttendancePeriodLabelsQuery());
 

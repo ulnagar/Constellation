@@ -11,7 +11,6 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Areas.Partner.Models;
-using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +20,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 {
     [Area("Partner")]
     [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
-    public class StudentsController : BaseController
+    public class StudentsController : Controller
     {
         private readonly IOfferingRepository _offeringRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -35,7 +34,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             IStudentService studentService,
             IOperationService operationService, 
             IMediator mediator)
-            : base(mediator)
         {
             _offeringRepository = offeringRepository;
             _unitOfWork = unitOfWork;
@@ -53,7 +51,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         {
             var students = await _unitOfWork.Students.ForListAsync(student => true);
 
-            var viewModel = await CreateViewModel<Student_ViewModel>();
+            var viewModel = new Student_ViewModel();
             viewModel.Students = students.Select(Student_ViewModel.StudentDto.ConvertFromStudent).ToList();
 
             return View("Index", viewModel);
@@ -81,7 +79,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 }
             }
 
-            var viewModel = await CreateViewModel<Student_ViewModel>();
+            var viewModel = new Student_ViewModel();
             viewModel.Students = students.Select(Student_ViewModel.StudentDto.ConvertFromStudent).ToList();
 
             return View("Index", viewModel);
@@ -91,7 +89,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         {
             var students = await _unitOfWork.Students.ForListAsync(student => student.IsDeleted);
 
-            var viewModel = await CreateViewModel<Student_ViewModel>();
+            var viewModel = new Student_ViewModel();
             viewModel.Students = students.Select(Student_ViewModel.StudentDto.ConvertFromStudent).ToList();
 
             return View("Index", viewModel);
@@ -101,7 +99,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         {
             var students = await _unitOfWork.Students.ForListAsync(student => string.IsNullOrWhiteSpace(student.AdobeConnectPrincipalId));
 
-            var viewModel = await CreateViewModel<Student_ViewModel>();
+            var viewModel = new Student_ViewModel();
             viewModel.Students = students.Select(Student_ViewModel.StudentDto.ConvertFromStudent).ToList();
 
             return View("Index", viewModel);
@@ -111,7 +109,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         {
             var students = await _unitOfWork.Students.ForListAsync(student => student.Devices.Any(device => !device.IsDeleted));
 
-            var viewModel = await CreateViewModel<Student_ViewModel>();
+            var viewModel = new Student_ViewModel();
             viewModel.Students = students.Select(Student_ViewModel.StudentDto.ConvertFromStudent).ToList();
 
             return View("Index", viewModel);
@@ -121,7 +119,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         {
             var students = await _unitOfWork.Students.AllActiveForClassAuditAsync();
 
-            var viewModel = await CreateViewModel<Student_ViewModel>();
+            var viewModel = new Student_ViewModel();
             viewModel.Students = students.Select(Student_ViewModel.StudentDto.ConvertFromStudent).ToList();
 
             return View("ClassAudit", viewModel);
@@ -150,7 +148,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 new SelectListItem() { Text = "Female", Value = "F" }
             };
 
-            var viewModel = await CreateViewModel<Student_UpdateViewModel>();
+            var viewModel = new Student_UpdateViewModel();
             viewModel.Student = new StudentDto
             {
                 StudentId = student.StudentId,
@@ -184,7 +182,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                     new SelectListItem() { Text ="Male", Value = "M" },
                     new SelectListItem() { Text = "Female", Value = "F" }
                 };
-                await UpdateViewModel(viewModel);
+
                 viewModel.SchoolList = new SelectList(schools, "Code", "Name", viewModel.Student.SchoolCode);
                 viewModel.GenderList = new SelectList(genders, "Value", "Text", viewModel.Student.Gender);
 
@@ -225,7 +223,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 new SelectListItem() { Text = "Female", Value = "F" }
             };
 
-            var viewModel = await CreateViewModel<Student_UpdateViewModel>();
+            var viewModel = new Student_UpdateViewModel();
             viewModel.IsNew = true;
             viewModel.SchoolList = new SelectList(schools, "Code", "Name");
             viewModel.GenderList = new SelectList(genders, "Value", "Text");
@@ -274,7 +272,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 return RedirectToAction("Index");
             }
 
-            var viewModel = await CreateViewModel<Student_BulkEnrolViewModel>();
+            var viewModel = new Student_BulkEnrolViewModel();
             viewModel.StudentId = student.StudentId;
 
             var offerings = await _mediator.Send(new GetOfferingsForBulkEnrolQuery(student.CurrentGrade));

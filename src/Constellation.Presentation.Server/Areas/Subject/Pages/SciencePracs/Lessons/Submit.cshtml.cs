@@ -46,8 +46,6 @@ public class SubmitModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         SciencePracLessonId sciencePracLessonId = SciencePracLessonId.FromValue(LessonId);
         SciencePracRollId sciencePracRollId = SciencePracRollId.FromValue(RollId);
 

@@ -31,8 +31,6 @@ public class InfoModel : BasePageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
-        await GetClasses(_mediator);
-
         if (string.IsNullOrWhiteSpace(EmailAddress))
         {
             return RedirectToPage("Index");    

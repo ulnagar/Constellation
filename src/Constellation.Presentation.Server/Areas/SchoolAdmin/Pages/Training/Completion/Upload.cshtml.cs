@@ -36,8 +36,6 @@ public class UploadModel : BasePageModel
     public async Task OnGetAsync()
     {
         StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-        await GetClasses(_mediator);
     }
 
     public async Task<IActionResult> OnPostAsync()

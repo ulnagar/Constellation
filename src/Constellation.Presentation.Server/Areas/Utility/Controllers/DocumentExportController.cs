@@ -2,15 +2,11 @@
 using Constellation.Application.Interfaces.Services;
 using Constellation.Infrastructure.Templates.Views.Documents.Attendance;
 using Constellation.Presentation.Server.Areas.Utility.Models;
-using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System;
-using System.IO;
 using System.Net.Mime;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Utility.Controllers
 {
@@ -18,7 +14,7 @@ namespace Constellation.Presentation.Server.Areas.Utility.Controllers
 
     [Area("Utility")]
     [Authorize]
-    public class DocumentExportController : BaseController
+    public class DocumentExportController : Controller
     {
         private readonly IRazorViewToStringRenderer _renderService;
         private readonly IPDFService _pdfService;
@@ -30,7 +26,6 @@ namespace Constellation.Presentation.Server.Areas.Utility.Controllers
             IPDFService pdfService, 
             IExcelService excelService,
             IMediator mediator)
-            : base(mediator)
         {
             _renderService = renderService;
             _pdfService = pdfService;
@@ -56,7 +51,7 @@ namespace Constellation.Presentation.Server.Areas.Utility.Controllers
 
         public async Task<IActionResult> Awards()
         {
-            var viewModel = await CreateViewModel<Export_Awards_ViewModel>();
+            var viewModel = new Export_Awards_ViewModel();
 
             return View("Awards", viewModel);
         }

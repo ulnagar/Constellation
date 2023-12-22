@@ -49,8 +49,6 @@ public class UpsertModel : BasePageModel
     {
         StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        await GetClasses(_mediator);
-
         if (Id.HasValue)
         {
             // Get existing entry from database and populate fields
@@ -81,8 +79,6 @@ public class UpsertModel : BasePageModel
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-            await GetClasses(_mediator);
-
             return Page();
         }
 
@@ -97,8 +93,6 @@ public class UpsertModel : BasePageModel
         if (result.IsFailure)
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-            await GetClasses(_mediator);
 
             Error = new ErrorDisplay
             {
@@ -118,8 +112,6 @@ public class UpsertModel : BasePageModel
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-            await GetClasses(_mediator);
-
             return Page();
         }
 
@@ -135,8 +127,6 @@ public class UpsertModel : BasePageModel
         if (result.IsFailure)
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-            await GetClasses(_mediator);
 
             Error = new ErrorDisplay
             {

@@ -48,8 +48,6 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
-        await GetClasses(_mediator);
-
         Result<List<AwardResponse>> awardRequest = Filter switch
         {
             FilterDto.All => await _mediator.Send(new GetAllAwardsQuery(false), cancellationToken),

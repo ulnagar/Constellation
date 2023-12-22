@@ -27,8 +27,6 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         FacultyId facultyId = Core.Models.Faculty.Identifiers.FacultyId.FromValue(FacultyId);
 
         Result<FacultyDetailsResponse> facultyRequest = await _mediator.Send(new GetFacultyDetailsQuery(facultyId));

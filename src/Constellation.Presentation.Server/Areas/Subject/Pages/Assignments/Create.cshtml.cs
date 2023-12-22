@@ -72,8 +72,6 @@ public class CreateModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         await SetupCourseList();
 
         ProgressPhase = Phase.SelectCourse;

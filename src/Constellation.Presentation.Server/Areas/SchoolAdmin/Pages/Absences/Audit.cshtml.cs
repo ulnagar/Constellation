@@ -32,8 +32,6 @@ public class AuditModel : BasePageModel
     {
         ViewData["ActivePage"] = "Audit";
 
-        await GetClasses(_mediator);
-
         Result<List<StudentAbsenceSettingsResponse>> studentRequest = await _mediator.Send(new GetStudentsWithAbsenceSettingsQuery());
 
         if (studentRequest.IsFailure)

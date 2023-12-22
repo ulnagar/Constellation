@@ -49,8 +49,6 @@ public class AddParentModel : BasePageModel
 
     public async Task<IActionResult> OnGet()
     {
-        await GetClasses(_mediator);
-
         return Page();
     }
 

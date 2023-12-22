@@ -253,8 +253,6 @@ public class DetailsModel : BasePageModel
 
     private async Task GetPageInformation(CancellationToken cancellationToken = default)
     {
-        await GetClasses(_mediator);
-
         var result = await _mediator.Send(new GetTutorialWithDetailsByIdQuery(GroupTutorialId.FromValue(Id)), cancellationToken);
 
         if (result.IsFailure)

@@ -60,8 +60,6 @@ public class UpsertModel : BasePageModel
     
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         if (Id.HasValue)
         {
             Result<ContactSummaryResponse> contactRequest = await _mediator.Send(new GetContactSummaryQuery(Id.Value));

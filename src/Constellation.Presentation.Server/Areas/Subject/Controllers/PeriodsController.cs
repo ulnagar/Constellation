@@ -3,19 +3,16 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.Areas.Subject.Models;
-using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 {
     [Area("Subject")]
     [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
-    public class PeriodsController : BaseController
+    public class PeriodsController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPeriodService _sessionService;
@@ -24,7 +21,6 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             IUnitOfWork unitOfWork, 
             IPeriodService sessionService,
             IMediator mediator)
-            : base(mediator)
         {
             _unitOfWork = unitOfWork;
             _sessionService = sessionService;
@@ -32,7 +28,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var viewModel = await CreateViewModel<Periods_ViewModel>();
+            var viewModel = new Periods_ViewModel();
             viewModel.Periods = await _unitOfWork.Periods.ForGraphicalDisplayAsync();
 
             return View(viewModel);
@@ -45,7 +41,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             var timetables = periods.Select(period => period.Timetable).Distinct().ToList();
             var types = periods.Select(period => period.Type).Distinct().ToList();
 
-            var viewModel = await CreateViewModel<Periods_UpdateViewModel>();
+            var viewModel = new Periods_UpdateViewModel();
             viewModel.IsNew = true;
             viewModel.TimetableList = new SelectList(timetables);
             viewModel.TypeList = new SelectList(types);
@@ -73,7 +69,7 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
             var timetables = periods.Select(period => period.Timetable).Distinct().ToList();
             var types = periods.Select(period => period.Type).Distinct().ToList();
 
-            var viewModel = await CreateViewModel<Periods_UpdateViewModel>();
+            var viewModel = new Periods_UpdateViewModel();
             viewModel.Period = new PeriodDto
             {
                 Id = period.Id,
@@ -98,7 +94,6 @@ namespace Constellation.Presentation.Server.Areas.Subject.Controllers
         {
             if (!ModelState.IsValid)
             {
-                await UpdateViewModel(viewModel);
                 var periods = await _unitOfWork.Periods.ForSelectionAsync();
                 var timetables = periods.Select(period => period.Timetable).Distinct().ToList();
                 var types = periods.Select(period => period.Type).Distinct().ToList();

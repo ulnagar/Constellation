@@ -1,68 +1,63 @@
-﻿using Constellation.Application.Interfaces.Repositories;
+﻿namespace Constellation.Presentation.Server.Areas.Admin.Controllers;
+
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
-using Constellation.Presentation.Server.Areas.Admin.Models;
 using Constellation.Presentation.Server.Areas.Admin.Models.AdobeConnect;
-using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using System.Threading.Tasks;
 
-namespace Constellation.Presentation.Server.Areas.Admin.Controllers
+[Area("Admin")]
+[Authorize(Roles = AuthRoles.Admin)]
+public class AdobeConnectController : Controller
 {
-    [Area("Admin")]
-    [Authorize(Roles = AuthRoles.Admin)]
-    public class AdobeConnectController : BaseController
+    private readonly IAdobeConnectService _adobeConnectService;
+
+    public AdobeConnectController(
+        IUnitOfWork unitOfWork, 
+        IAdobeConnectService adobeConnectService,
+        IMediator mediator)
     {
-        private readonly IAdobeConnectService _adobeConnectService;
+        _adobeConnectService = adobeConnectService;
+    }
 
-        public AdobeConnectController(
-            IUnitOfWork unitOfWork, 
-            IAdobeConnectService adobeConnectService,
-            IMediator mediator)
-            : base(mediator)
+    public async Task<IActionResult> _getUserACPID(string username)
+    {
+        string acpid = await _adobeConnectService.GetUserPrincipalId(username);
+
+        if (acpid == null)
         {
-            _adobeConnectService = adobeConnectService;
+            Response.StatusCode = (int)HttpStatusCode.NotFound;
+            return Json(new { });
         }
-
-        public async Task<IActionResult> _getUserACPID(string username)
+        else
         {
-            var acpid = await _adobeConnectService.GetUserPrincipalId(username);
-
-            if (acpid == null)
-            {
-                Response.StatusCode = (int)HttpStatusCode.NotFound;
-                return Json(new { });
-            }
-            else
-            {
-                return Json(acpid);
-            }
+            return Json(acpid);
         }
+    }
 
-        public async Task<IActionResult> Actions()
-        {
-            var viewModel = await CreateViewModel<ActionsViewModel>();
+    public async Task<IActionResult> Actions()
+    {
+        ActionsViewModel viewModel = new();
 
-            return View(viewModel);
-        }
+        return View(viewModel);
+    }
 
-        public async Task<IActionResult> GetNewRooms(string scoId)
-        {
-            var viewModel = await CreateViewModel<ActionsViewModel>();
-            viewModel.Rooms = await _adobeConnectService.UpdateRooms("3229451");
+    public async Task<IActionResult> GetNewRooms(string scoId)
+    {
+        ActionsViewModel viewModel = new();
+        viewModel.Rooms = await _adobeConnectService.UpdateRooms("3229451");
 
-            return View("NewRooms", viewModel);
-        }
+        return View("NewRooms", viewModel);
+    }
 
-        public async Task<IActionResult> UpdateUsers()
-        {
-            var viewModel = await CreateViewModel<ActionsViewModel>();
-            viewModel.Users = await _adobeConnectService.UpdateUsers();
+    public async Task<IActionResult> UpdateUsers()
+    {
+        ActionsViewModel viewModel = new();
+        viewModel.Users = await _adobeConnectService.UpdateUsers();
 
-            return View("NewUsers", viewModel);
-        }
+        return View("NewUsers", viewModel);
     }
 }

@@ -9,7 +9,6 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
 using Constellation.Presentation.Server.Areas.Partner.Models;
-using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +17,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 [Area("Partner")]
 [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
-public class SchoolsController : BaseController
+public class SchoolsController : Controller
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISchoolService _schoolService;
@@ -28,7 +27,6 @@ public class SchoolsController : BaseController
         IUnitOfWork unitOfWork, 
         ISchoolService schoolService,
         IMediator mediator)
-        : base(mediator)
     {
         _unitOfWork = unitOfWork;
         _schoolService = schoolService;
@@ -44,7 +42,7 @@ public class SchoolsController : BaseController
     {
         var schools = await _unitOfWork.Schools.ForListAsync(school => true);
 
-        var viewModel = await CreateViewModel<School_ViewModel>();
+        var viewModel = new School_ViewModel();
         viewModel.Schools = schools.Select(School_ViewModel.SchoolDto.ConvertFromSchool).ToList();
 
         return View("Index", viewModel);
@@ -54,7 +52,7 @@ public class SchoolsController : BaseController
     {
         var schools = await _unitOfWork.Schools.ForListAsync(school => school.Students.Any(student => !student.IsDeleted));
 
-        var viewModel = await CreateViewModel<School_ViewModel>();
+        var viewModel = new School_ViewModel();
         viewModel.Schools = schools.Select(School_ViewModel.SchoolDto.ConvertFromSchool).ToList();
 
         return View("Index", viewModel);
@@ -64,7 +62,7 @@ public class SchoolsController : BaseController
     {
         var schools = await _unitOfWork.Schools.ForListAsync(school => school.Staff.Any(staff => !staff.IsDeleted));
 
-        var viewModel = await CreateViewModel<School_ViewModel>();
+        var viewModel = new School_ViewModel();
         viewModel.Schools = schools.Select(School_ViewModel.SchoolDto.ConvertFromSchool).ToList();
 
         return View("Index", viewModel);
@@ -74,7 +72,7 @@ public class SchoolsController : BaseController
     {
         var schools = await _unitOfWork.Schools.ForListAsync(school => school.Students.Any(student => !student.IsDeleted) && school.Staff.Any(staff => !staff.IsDeleted));
 
-        var viewModel = await CreateViewModel<School_ViewModel>();
+        var viewModel = new School_ViewModel();
         viewModel.Schools = schools.Select(School_ViewModel.SchoolDto.ConvertFromSchool).ToList();
 
         return View("Index", viewModel);
@@ -85,7 +83,7 @@ public class SchoolsController : BaseController
         var schools = await _unitOfWork.Schools.ForListAsync(school => school.Students.Any(student => !student.IsDeleted) || school.Staff.Any(staff => !staff.IsDeleted));
 
 
-        var viewModel = await CreateViewModel<School_ViewModel>();
+        var viewModel = new School_ViewModel();
         viewModel.Schools = schools.Select(School_ViewModel.SchoolDto.ConvertFromSchool).ToList();
 
         return View("Index", viewModel);
@@ -95,7 +93,7 @@ public class SchoolsController : BaseController
     {
         var schools = await _unitOfWork.Schools.ForListAsync(school => !school.Students.Any(student => !student.IsDeleted) && !school.Staff.Any(staff => !staff.IsDeleted));
 
-        var viewModel = await CreateViewModel<School_ViewModel>();
+        var viewModel = new School_ViewModel();
         viewModel.Schools = schools.Select(School_ViewModel.SchoolDto.ConvertFromSchool).ToList();
 
         return View("Index", viewModel);
@@ -123,7 +121,7 @@ public class SchoolsController : BaseController
             return RedirectToAction("Index");
         }
 
-        var viewModel = await CreateViewModel<School_UpdateViewModel>();
+        var viewModel = new School_UpdateViewModel();
         viewModel.Resource = new SchoolDto
         {
             Code = school.Code,
@@ -155,7 +153,6 @@ public class SchoolsController : BaseController
     {
         if (!ModelState.IsValid)
         {
-            await UpdateViewModel(returnModel);
             return View("Update", returnModel);
         }
 
@@ -176,7 +173,7 @@ public class SchoolsController : BaseController
     [Roles(AuthRoles.Admin, AuthRoles.Editor)]
     public async Task<IActionResult> Create()
     {
-        var viewModel = await CreateViewModel<School_UpdateViewModel>();
+        var viewModel = new School_UpdateViewModel();
         viewModel.Resource = new SchoolDto();
         viewModel.IsNew = true;
 
@@ -201,7 +198,7 @@ public class SchoolsController : BaseController
         var roles = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
 
         // Build the master form viewmodel
-        var viewModel = await CreateViewModel<School_DetailsViewModel>();
+        var viewModel = new School_DetailsViewModel();
         viewModel.School = School_DetailsViewModel.SchoolDto.ConvertFromSchool(school);
         viewModel.Contacts = school.StaffAssignments.Where(role => !role.IsDeleted).Select(School_DetailsViewModel.ContactDto.ConvertFromAssignment).ToList();
             
@@ -275,7 +272,7 @@ public class SchoolsController : BaseController
     [HttpPost("/Partner/Schools/Map")]
     public async Task<IActionResult> ViewMap(IList<string> schoolCodes)
     {
-        var vm = await CreateViewModel<School_MapViewModel>();
+        var vm = new School_MapViewModel();
 
         vm.Layers = _unitOfWork.Schools.GetForMapping(schoolCodes);
         vm.PageHeading = "Map of Schools";
@@ -287,7 +284,7 @@ public class SchoolsController : BaseController
     [HttpGet("/Partner/Schools/Map")]
     public async Task<IActionResult> ViewAnonMap()
     {
-        School_MapViewModel vm = await CreateViewModel<School_MapViewModel>();
+        School_MapViewModel vm = new School_MapViewModel();
 
         vm.Layers = _unitOfWork.Schools.GetForMapping(new List<string>());
         vm.PageHeading = "Map of Schools";

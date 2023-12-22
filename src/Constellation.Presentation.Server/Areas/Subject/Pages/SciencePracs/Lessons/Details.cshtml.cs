@@ -33,8 +33,6 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         SciencePracLessonId lessonId = SciencePracLessonId.FromValue(Id);
 
         Result<LessonDetailsResponse> lessonRequest = await _mediator.Send(new GetLessonDetailsQuery(lessonId));

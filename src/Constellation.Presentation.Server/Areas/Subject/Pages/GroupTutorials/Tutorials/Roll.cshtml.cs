@@ -67,8 +67,6 @@ public class RollModel : BasePageModel
             }
         }
 
-        await GetClasses(_mediator);
-
         await GetPageInformation();
 
         return Page();

@@ -49,9 +49,7 @@ public class IndexModel : BasePageModel
     [ViewData] public string StaffId { get; set; }
 
     public async Task<IActionResult> OnGet()
-    { 
-        await GetClasses(_mediator);
-
+    {
         StaffId = User.FindFirst(AuthClaimType.StaffEmployeeId)?.Value;
         
         // If user does not have details view permissions, only show their own records

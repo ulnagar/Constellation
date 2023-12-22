@@ -39,8 +39,6 @@ public class StudentModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         if (string.IsNullOrWhiteSpace(StudentId))
         {
             Error = new()

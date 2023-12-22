@@ -88,8 +88,6 @@ public class IndexModel : BasePageModel
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken)
     {
-        await GetClasses(_mediator);
-
         var classesResponse = await _mediator.Send(new GetOfferingsForSelectionListQuery(), cancellationToken);
 
         if (classesResponse.IsFailure)

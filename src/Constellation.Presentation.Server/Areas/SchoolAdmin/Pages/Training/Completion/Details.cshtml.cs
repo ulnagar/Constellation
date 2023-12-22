@@ -48,8 +48,6 @@ public class DetailsModel : BasePageModel
     {
         StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        await GetClasses(_mediator);
-
         Result<CompletionRecordDto> recordRequest = await _mediator.Send(
             new GetCompletionRecordDetailsQuery(
                 TrainingModuleId.FromValue(ModuleId),
@@ -79,8 +77,6 @@ public class DetailsModel : BasePageModel
     public async Task<IActionResult> OnGetDownloadCertificate()
     {
         StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-        await GetClasses(_mediator);
 
         Result<CompletionRecordCertificateDetailsDto> certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateFileByIdQuery(AttachmentType.TrainingCertificate, Record.Id.ToString()));
 

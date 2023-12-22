@@ -34,8 +34,6 @@ public class UsersModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         Users = SelectedUserType switch
         {
             UserType.Staff => _userManager.Users.Where(user => user.IsStaffMember).ToList(),

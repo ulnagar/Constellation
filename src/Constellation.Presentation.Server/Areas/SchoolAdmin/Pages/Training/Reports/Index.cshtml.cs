@@ -34,9 +34,6 @@ public class IndexModel : BasePageModel
     {
         StaffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        await GetClasses(_mediator);
-
-
     }
 
     public async Task<IActionResult> OnPostAjaxModuleModal(bool detailsRequested)
@@ -58,8 +55,6 @@ public class IndexModel : BasePageModel
 
         if (!ModelState.IsValid)
         {
-            await GetClasses(_mediator);
-
             Error = new()
             {
                 Error = new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage),
@@ -75,8 +70,6 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            await GetClasses(_mediator);
-
             Error = new ErrorDisplay
             {
                 Error = reportRequest.Error,
@@ -95,8 +88,6 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            await GetClasses(_mediator);
-
             Error = new ErrorDisplay
             {
                 Error = reportRequest.Error,
@@ -115,8 +106,6 @@ public class IndexModel : BasePageModel
 
         if (!ModelState.IsValid)
         {
-            await GetClasses(_mediator);
-
             Error = new()
             {
                 Error = new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage),
@@ -132,8 +121,6 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            await GetClasses(_mediator);
-
             Error = new ErrorDisplay
             {
                 Error = reportRequest.Error,
@@ -169,8 +156,6 @@ public class IndexModel : BasePageModel
 
         if (!ModelState.IsValid)
         {
-            await GetClasses(_mediator);
-
             Error = new()
             {
                 Error = new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage),
@@ -184,8 +169,6 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            await GetClasses(_mediator);
-
             Error = new ErrorDisplay
             {
                 Error = reportRequest.Error,
@@ -204,8 +187,6 @@ public class IndexModel : BasePageModel
 
         if (!ModelState.IsValid)
         {
-            await GetClasses(_mediator);
-
             Error = new()
             {
                 Error = new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage),
@@ -219,8 +200,6 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            await GetClasses(_mediator);
-
             Error = new ErrorDisplay
             {
                 Error = reportRequest.Error,
@@ -238,7 +217,6 @@ public class IndexModel : BasePageModel
         if (!ModelState.IsValid)
         {
             StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-            await GetClasses(_mediator);
 
             Error = new()
             {

@@ -64,8 +64,6 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGet()
     {
-        await GetClasses(_mediator);
-
         var users = await _userManager.Users.ToListAsync();
 
         var roles = await _roleManager.Roles.ToListAsync();

@@ -102,8 +102,6 @@ public class RollModel : BasePageModel
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken = default)
     {
-        await GetClasses(_mediator);
-
         SciencePracLessonId sciencePracLessonId = SciencePracLessonId.FromValue(LessonId);
         SciencePracRollId sciencePracRollId = SciencePracRollId.FromValue(RollId);
 

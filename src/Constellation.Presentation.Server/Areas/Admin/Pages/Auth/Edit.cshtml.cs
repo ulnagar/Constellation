@@ -46,8 +46,6 @@ public class EditModel : BasePageModel
 
     public async Task<IActionResult> OnGet()
     {
-        await GetClasses(_mediator);
-
         var user = await _userManager.FindByIdAsync(Id.ToString());
 
         if (user is null)

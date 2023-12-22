@@ -38,8 +38,6 @@ public class IndexModel : BasePageModel
     {
         StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        await GetClasses(_mediator);
-
         Result<List<ModuleSummaryDto>> moduleRequest = await _mediator.Send(new GetListOfModuleSummaryQuery());
 
         if (moduleRequest.IsFailure)

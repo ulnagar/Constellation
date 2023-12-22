@@ -33,8 +33,6 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         Result<Dictionary<FacultyId, string>> facultyRequest = await _mediator.Send(new GetFacultiesAsDictionaryQuery());
 
         if (facultyRequest.IsFailure)

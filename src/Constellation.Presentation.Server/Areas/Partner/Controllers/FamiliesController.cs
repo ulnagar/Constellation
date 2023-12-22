@@ -5,22 +5,20 @@ using Constellation.Application.Families.GetFamilyById;
 using Constellation.Application.Families.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.Areas.Partner.Models.Families;
-using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 [Area("Partner")]
-public class FamiliesController : BaseController
+public class FamiliesController : Controller
 {
     private readonly IMediator _mediator;
     private readonly LinkGenerator _linkGenerator;
 
     public FamiliesController(
         IMediator mediator,
-        LinkGenerator linkGenerator) 
-        : base(mediator)
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;

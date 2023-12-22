@@ -33,8 +33,6 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken)
     {
-        await GetClasses(_mediator);
-
         var coverRequest = Filter switch
         {
             FilterDto.All => await _mediator.Send(new GetAllCoversForCalendarYearQuery(), cancellationToken),

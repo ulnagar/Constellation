@@ -28,10 +28,7 @@ public class MasterFileModel : BasePageModel
 
     public List<UpdateItem> UpdateItems { get; set; } = new();
 
-    public async Task OnGet()
-    {
-        await GetClasses(_mediator);
-    }
+    public async Task OnGet() { }
 
     public async Task<IActionResult> OnPost(CancellationToken cancellationToken)
     {

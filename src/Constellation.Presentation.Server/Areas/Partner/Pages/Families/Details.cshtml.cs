@@ -38,8 +38,6 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
     {
-        await GetClasses(_mediator);
-
         return await PreparePage(cancellationToken);
     }
 

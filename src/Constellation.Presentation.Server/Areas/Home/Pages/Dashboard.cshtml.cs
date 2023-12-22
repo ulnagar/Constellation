@@ -9,10 +9,12 @@ using Application.Students.CountStudentsWithPendingAwards;
 using Application.Training.Modules.GetCountOfExpiringCertificatesForStaffMember;
 using Application.Training.Roles.CountStaffWithoutRole;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
 using Constellation.Application.StaffMembers.GetStaffByEmail;
 using Constellation.Application.StaffMembers.Models;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Models.Offerings.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -49,11 +51,20 @@ public class DashboardModel : BasePageModel
     public bool ShowSentralIdWidgets { get; set; }
     public int StudentsWithoutSentralId { get; set; }
 
+    public Dictionary<string, OfferingId> Classes { get; set; } = new();
+
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken = default)
     {
-        await GetClasses(_mediator);
-
         string? username = User.Identity?.Name;
+
+        if (username is not null)
+        {
+            Result<List<TeacherOfferingResponse>> query = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(null, username));
+
+            if (query.IsSuccess)
+                Classes = query.Value.ToDictionary(k => k.OfferingName.Value, k => k.OfferingId);
+        }
+
         bool isStaff = User.IsInRole(AuthRoles.StaffMember);
         IsAdmin = User.IsInRole(AuthRoles.Admin);
         bool isTrainingManager = User.IsInRole(AuthRoles.MandatoryTrainingEditor);

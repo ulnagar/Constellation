@@ -57,8 +57,6 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken)
     {
-        await GetClasses(_mediator);
-
         if (string.IsNullOrWhiteSpace(Id))
         {
             GenerateError(new("Page.Parameter.NotFound", "You must specify a value for the Student Id parameter"));

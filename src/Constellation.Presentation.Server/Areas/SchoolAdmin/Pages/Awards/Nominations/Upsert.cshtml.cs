@@ -39,8 +39,6 @@ public class UpsertModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
-        await GetClasses(_mediator);
-
         if (Id.HasValue)
         {
             // This is an edit action

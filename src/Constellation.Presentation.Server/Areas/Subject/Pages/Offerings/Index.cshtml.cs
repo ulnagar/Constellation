@@ -37,8 +37,6 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_sender);
-
         Result<List<OfferingSummaryResponse>> request = await _sender.Send(new GetAllOfferingSummariesQuery { Filter = Filter });
 
         if (request.IsFailure)

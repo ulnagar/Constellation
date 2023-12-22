@@ -37,8 +37,6 @@ public class MapModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         OfferingId offeringId = OfferingId.FromValue(Id);
 
         Result<OfferingSummaryResponse> offeringResult = await _mediator.Send(new GetOfferingSummaryQuery(offeringId));

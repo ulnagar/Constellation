@@ -2,7 +2,6 @@ namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Training.Mod
 
 using Application.Training.Models;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Training.Modules.GenerateModuleReport;
 using Constellation.Application.Training.Modules.GetModuleDetails;
 using Constellation.Application.Training.Modules.ReinstateTrainingModule;
 using Constellation.Application.Training.Modules.RetireTrainingModule;
@@ -48,8 +47,6 @@ public class DetailsModel : BasePageModel
     public async Task OnGet()
     {
         StaffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
-
-        await GetClasses(_mediator);
 
         Result<ModuleDetailsDto> moduleRequest = await _mediator.Send(new GetModuleDetailsQuery(TrainingModuleId.FromValue(Id)));
 

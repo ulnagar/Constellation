@@ -29,10 +29,7 @@ public class ImportModel : BasePageModel
 
     public List<ImportResult> Results { get; set; } = new();
     
-    public async Task OnGet()
-    {
-        await GetClasses(_mediator);
-    }
+    public async Task OnGet() { }
 
     public async Task<IActionResult> OnPost(CancellationToken cancellationToken = default)
     {

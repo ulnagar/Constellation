@@ -71,8 +71,6 @@ public class AddSessionsModel : BasePageModel
 
     private async Task PreparePage()
     {
-        await GetClasses(_mediator);
-
         Result<List<PeriodVisualSelectResponse>> periodRequest =
             await _mediator.Send(new GetPeriodsForVisualSelectionQuery());
 

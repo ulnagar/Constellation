@@ -60,15 +60,11 @@ public class ResourceModel : BasePageModel
 
     public async Task OnGet()
     {
-        await GetClasses(_mediator);
-
         CurrentStep = Phase.StartEntry;
     }
 
     public async Task<IActionResult> OnPost()
     {
-        await GetClasses(_mediator);
-
         if (CurrentStep == Phase.StartEntry)
         {
             if (Type == ResourceType.AdobeConnectRoom.Value)
