@@ -6,7 +6,6 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Offerings;
@@ -14,6 +13,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Abstractions.Clock;
 using Core.Models.Students.Errors;
 using Serilog;
 using System.Collections.Generic;
@@ -29,6 +29,7 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
     private readonly IFamilyRepository _familyRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly IEmailService _emailService;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public SendAbsenceDigestToParentCommandHandler(
@@ -37,6 +38,7 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
         IFamilyRepository familyRepository,
         IOfferingRepository offeringRepository,
         IEmailService emailService,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _studentRepository = studentRepository;
@@ -44,6 +46,7 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
         _familyRepository = familyRepository;
         _offeringRepository = offeringRepository;
         _emailService = emailService;
+        _dateTime = dateTime;
         _logger = logger.ForContext<SendAbsenceDigestToParentCommand>();
     }
 
@@ -117,9 +120,11 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
                 foreach (Absence absence in digestAbsences)
                 {
                     absence.AddNotification(
-                    NotificationType.Email,
+                        NotificationType.Email,
                         sentmessage.message,
-                        emails);
+                        emails,
+                        sentmessage.id,
+                        _dateTime.Now);
 
                     foreach (var recipient in recipients)
                         _logger.Information("{id}: Parent digest sent to {address} for {student}", request.JobId, recipient.Email, student.DisplayName);

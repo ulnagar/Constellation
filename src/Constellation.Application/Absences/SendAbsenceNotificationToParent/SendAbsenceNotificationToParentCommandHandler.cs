@@ -15,6 +15,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Abstractions.Clock;
 using Core.Models.Students.Errors;
 using Serilog;
 using System;
@@ -32,6 +33,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
     private readonly IOfferingRepository _offeringRepository;
     private readonly ISMSService _smsService;
     private readonly IEmailService _emailService;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public SendAbsenceNotificationToParentCommandHandler(
@@ -41,6 +43,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
         IOfferingRepository offeringRepository,
         ISMSService smsService,
         IEmailService emailService,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
@@ -49,6 +52,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
         _offeringRepository = offeringRepository;
         _smsService = smsService;
         _emailService = emailService;
+        _dateTime = dateTime;
         _logger = logger.ForContext<SendAbsenceNotificationToParentCommand>();
     }
 
@@ -172,7 +176,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                             string emails = string.Join(", ", recipients.Select(entry => entry.Email));
                             Absence absence = absences.First(absence => absence.Id == entry.Id);
 
-                            absence.AddNotification(NotificationType.Email, message.message, emails);
+                            absence.AddNotification(NotificationType.Email, message.message, emails, message.id, _dateTime.Now);
 
                             foreach (EmailRecipient recipient in recipients)
                                 _logger.Information("{id}: Message sent via Email to {email} for Whole Absence on {Date}", request.JobId, recipient.Email, group.Key.ToShortDateString());
@@ -192,7 +196,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                         string sentToNumbers = string.Join(", ", phoneNumbers.Select(entry => entry.ToString(PhoneNumber.Format.Mobile)));
                         Absence absence = absences.First(absence => absence.Id == entry.Id);
 
-                        absence.AddNotification(NotificationType.SMS, sentMessages.Messages.First().MessageBody, sentToNumbers);
+                        absence.AddNotification(NotificationType.SMS, sentMessages.Messages.First().MessageBody, sentToNumbers, sentMessages.Messages.First().OutgoingId, _dateTime.Now);
 
                         foreach (PhoneNumber number in phoneNumbers)
                             _logger.Information("{id}: Message sent via SMS to {number} for Whole Absence on {Date}", request.JobId, number.ToString(PhoneNumber.Format.Mobile), group.Key.ToShortDateString());
@@ -208,7 +212,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                     string emails = string.Join(", ", recipients.Select(entry => entry.Email));
                     Absence absence = absences.First(absence => absence.Id == entry.Id);
 
-                    absence.AddNotification(NotificationType.Email, message.message, emails);
+                    absence.AddNotification(NotificationType.Email, message.message, emails, message.id, _dateTime.Now);
 
                     foreach (EmailRecipient recipient in recipients)
                         _logger.Information("{id}: Message sent via Email to {email} for Whole Absence on {Date}", request.JobId, recipient.Email, group.Key.ToShortDateString());

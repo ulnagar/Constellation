@@ -13,6 +13,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Abstractions.Clock;
 using Core.Models.Students.Errors;
 using Serilog;
 using System.Collections.Generic;
@@ -26,6 +27,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly IEmailService _emailService;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public SendAbsenceNotificationToStudentCommandHandler(
@@ -33,12 +35,14 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
         IAbsenceRepository absenceRepository,
         IOfferingRepository offeringRepository,
         IEmailService emailService,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _studentRepository = studentRepository;
         _absenceRepository = absenceRepository;
         _offeringRepository = offeringRepository;
         _emailService = emailService;
+        _dateTime = dateTime;
         _logger = logger.ForContext<SendAbsenceNotificationToStudentCommand>();
     }
 
@@ -101,7 +105,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
         EmailDtos.SentEmail sentEmail = await _emailService.SendStudentPartialAbsenceExplanationRequest(absenceEntries, student, recipients, cancellationToken);
         foreach (Absence absence in absences)
         {
-            absence.AddNotification(NotificationType.Email, sentEmail.message, student.EmailAddress);
+            absence.AddNotification(NotificationType.Email, sentEmail.message, student.EmailAddress, sentEmail.id, _dateTime.Now);
 
             foreach (EmailRecipient recipient in recipients)
                 _logger.Information("{id}: Message sent via Email to {student} ({email}) for Partial Absence on {Date}", request.JobId, recipient.Name, recipient.Email, absence.Date.ToShortDateString());

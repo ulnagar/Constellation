@@ -14,6 +14,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Abstractions.Clock;
 using Core.Models.Students.Errors;
 using Serilog;
 using System.Collections.Generic;
@@ -30,6 +31,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
     private readonly IOfferingRepository _offeringRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IEmailService _emailService;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public SendAbsenceDigestToCoordinatorCommandHandler(
@@ -39,6 +41,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
         IOfferingRepository offeringRepository,
         ISchoolRepository schoolRepository,
         IEmailService emailService,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _studentRepository = studentRepository;
@@ -47,6 +50,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
         _offeringRepository = offeringRepository;
         _schoolRepository = schoolRepository;
         _emailService = emailService;
+        _dateTime = dateTime;
         _logger = logger.ForContext<SendAbsenceDigestToCoordinatorCommand>();
     }
 
@@ -138,7 +142,9 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
                 absence.AddNotification(
                     NotificationType.Email,
                     message.message,
-                    emails);
+                    emails,
+                    message.id,
+                    _dateTime.Now);
 
                 foreach (EmailRecipient recipient in recipients)
                     _logger.Information("{id}: School digest sent to {recipient} for {student}", request.JobId, recipient.Name, student.DisplayName);

@@ -3,7 +3,6 @@
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System;
@@ -100,6 +99,22 @@ public class Absence : AggregateRoot
         string recipients)
     {
         Notification notification = Notification.Create(Id, type, message, recipients);
+        
+        _notifications.Add(notification);
+
+        return notification;
+    }
+
+    public Result<Notification> AddNotification(
+        NotificationType type,
+        string message,
+        string recipients,
+        string messageId,
+        DateTime sentAt)
+    {
+        Notification notification = Notification.Create(Id, type, message, recipients);
+
+        notification.UpdateSentFields(messageId, sentAt);
 
         _notifications.Add(notification);
 

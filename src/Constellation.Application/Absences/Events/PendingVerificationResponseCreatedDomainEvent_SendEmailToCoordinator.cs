@@ -13,6 +13,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Abstractions.Clock;
 using MediatR;
 using Serilog;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
     private readonly IOfferingRepository _offeringRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IEmailService _emailService;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordinator(
@@ -38,6 +40,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
         IOfferingRepository offeringRepository,
         ISchoolRepository schoolRepository,
         IEmailService emailService,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
@@ -46,6 +49,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
         _offeringRepository = offeringRepository;
         _schoolRepository = schoolRepository;
         _emailService = emailService;
+        _dateTime = dateTime;
         _logger = logger.ForContext<PendingVerificationResponseCreatedDomainEvent>();
     }
 
@@ -147,7 +151,9 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
         absence.AddNotification(
             NotificationType.Email,
             message.message,
-            emails);
+            emails,
+            message.id,
+            _dateTime.Now);
 
         foreach (EmailRecipient recipient in recipients)
             _logger.Information("Partial Absence Verification Request send to {recipient} for absence by {student} on {date}", recipient.Name, student.DisplayName, absence.Date);

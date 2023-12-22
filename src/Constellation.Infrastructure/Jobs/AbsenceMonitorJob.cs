@@ -131,6 +131,10 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 
                 foreach (Absence absence in yesterdaysAbsences)
                 {
+                    if (absence.AbsenceReason == AbsenceReason.Leave ||
+                        absence.AbsenceReason == AbsenceReason.Suspended)
+                        continue;
+
                     // Send missed work generic email
                     await _mediator.Send(new SendMissedWorkEmailToStudentCommand(
                         jobId, 
