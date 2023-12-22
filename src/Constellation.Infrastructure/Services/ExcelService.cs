@@ -27,6 +27,7 @@ using OfficeOpenXml;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
+using OfficeOpenXml.LoadFunctions.Params;
 using OfficeOpenXml.Style;
 using Persistence.ConstellationContext.Migrations;
 using System.Data;
@@ -706,16 +707,20 @@ public class ExcelService : IExcelService
 
     public async Task<MemoryStream> CreateContactExportFile(List<ContactResponse> contacts, CancellationToken cancellationToken = default)
     {
-        var excel = new ExcelPackage();
-        var workSheet = excel.Workbook.Worksheets.Add("Contacts");
+        ExcelPackage excel = new();
+        ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Contacts");
 
-        workSheet.Cells[1, 1].LoadFromCollection(contacts, true);
+        workSheet.Cells[1, 1].LoadFromCollection(contacts, opt =>
+        {
+            opt.PrintHeaders = true;
+            opt.HeaderParsingType = OfficeOpenXml.LoadFunctions.Params.HeaderParsingTypes.CamelCaseToSpace;
+        });
 
         workSheet.View.FreezePanes(2, 1);
         workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFilter = true;
         workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
-        var memoryStream = new MemoryStream();
+        MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
 
         memoryStream.Position = 0;

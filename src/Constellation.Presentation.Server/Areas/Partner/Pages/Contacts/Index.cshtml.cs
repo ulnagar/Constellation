@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Partner.Pages.Contacts;
 
+using Application.DTOs;
 using Constellation.Application.Contacts.ExportContactList;
 using Constellation.Application.Contacts.GetContactList;
 using Constellation.Application.Models.Auth;
@@ -11,6 +12,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Shared.Models;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -58,12 +60,12 @@ public class IndexModel : BasePageModel
     {
         List<ContactCategory> filterCategories = new();
 
-        foreach (var entry in Filter.Categories)
+        foreach (string entry in Filter.Categories)
             filterCategories.Add(ContactCategory.FromValue(entry));
 
         List<OfferingId> offeringIds = Filter.Offerings.Select(id => OfferingId.FromValue(id)).ToList();
 
-        var file = await _mediator.Send(new ExportContactListCommand(
+        Result<FileDto> file = await _mediator.Send(new ExportContactListCommand(
                 offeringIds,
                 Filter.Grades,
                 Filter.Schools,

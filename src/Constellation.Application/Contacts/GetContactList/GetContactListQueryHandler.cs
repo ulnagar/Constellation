@@ -73,18 +73,18 @@ internal sealed class GetContactListQueryHandler
         List<Course> courses = await _courseRepository
             .GetAll(cancellationToken);
 
-        foreach (var student in students)
+        foreach (Student student in students)
         {
-            var studentName = Name.Create(student.FirstName, null, student.LastName);
+            Result<Name> studentName = Name.Create(student.FirstName, null, student.LastName);
 
             if (studentName.IsFailure)
             {
                 // Dunno what to do here!
             }
 
-            var studentEmail = EmailAddress.Create(student.EmailAddress);
+            Result<EmailAddress> studentEmail = EmailAddress.Create(student.EmailAddress);
 
-            var schoolEmail = EmailAddress.Create(student.School.EmailAddress);
+            Result<EmailAddress> schoolEmail = EmailAddress.Create(student.School.EmailAddress);
 
             if (schoolEmail.IsFailure)
             {
@@ -95,41 +95,43 @@ internal sealed class GetContactListQueryHandler
                 student.StudentId,
                 studentName.Value,
                 student.CurrentGrade,
+                student.School.Name,
                 ContactCategory.Student,
                 studentName.Value.DisplayName,
                 studentEmail.Value,
                 null));
 
-            var schoolPhone = PhoneNumber.Create(student.School.PhoneNumber);
+            Result<PhoneNumber> schoolPhone = PhoneNumber.Create(student.School.PhoneNumber);
 
             result.Add(new ContactResponse(
                 student.StudentId,
                 studentName.Value,
                 student.CurrentGrade,
+                student.School.Name,
                 ContactCategory.PartnerSchoolSchool,
                 student.School.Name,
                 schoolEmail.Value,
                 schoolPhone.IsSuccess ? schoolPhone.Value : null));
 
-            var contacts = await _contactRepository.GetWithRolesBySchool(student.SchoolCode, cancellationToken);
+            List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(student.SchoolCode, cancellationToken);
 
-            foreach (var contact in contacts)
+            foreach (SchoolContact contact in contacts)
             {
-                var contactName = Name.Create(contact.FirstName, null, contact.LastName);
+                Result<Name> contactName = Name.Create(contact.FirstName, null, contact.LastName);
 
                 if (contactName.IsFailure)
                     continue;
 
-                var contactEmail = EmailAddress.Create(contact.EmailAddress);
+                Result<EmailAddress> contactEmail = EmailAddress.Create(contact.EmailAddress);
 
                 if (contactEmail.IsFailure)
                     continue;
 
-                var contactPhone = PhoneNumber.Create(contact.PhoneNumber);
+                Result<PhoneNumber> contactPhone = PhoneNumber.Create(contact.PhoneNumber);
 
-                foreach (var role in contact.Assignments.Where(role => role.SchoolCode == student.SchoolCode))
+                foreach (SchoolContactRole role in contact.Assignments.Where(role => role.SchoolCode == student.SchoolCode))
                 {
-                    var category = role.Role switch
+                    ContactCategory category = role.Role switch
                     {
                         SchoolContactRole.Principal => ContactCategory.PartnerSchoolPrincipal,
                         SchoolContactRole.Coordinator => ContactCategory.PartnerSchoolACC,
@@ -141,6 +143,7 @@ internal sealed class GetContactListQueryHandler
                         student.StudentId,
                         studentName.Value,
                         student.CurrentGrade,
+                        student.School.Name,
                         category,
                         contactName.Value.DisplayName,
                         contactEmail.Value,
@@ -150,7 +153,7 @@ internal sealed class GetContactListQueryHandler
 
             List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
 
-            foreach (var family in families)
+            foreach (Family family in families)
             {
                 Result<EmailAddress> familyEmail = EmailAddress.Create(family.FamilyEmail);
 
@@ -165,6 +168,7 @@ internal sealed class GetContactListQueryHandler
                         student.StudentId,
                         studentName.Value,
                         student.CurrentGrade,
+                        student.School.Name,
                         ContactCategory.ResidentialFamily,
                         family.FamilyTitle,
                         familyEmail.Value,
@@ -195,6 +199,7 @@ internal sealed class GetContactListQueryHandler
                             student.StudentId,
                             studentName.Value,
                             student.CurrentGrade,
+                            student.School.Name,
                             category,
                             parentName.Value.DisplayName,
                             parentEmail.Value,
@@ -207,29 +212,31 @@ internal sealed class GetContactListQueryHandler
                         student.StudentId,
                         studentName.Value,
                         student.CurrentGrade,
+                        student.School.Name,
                         ContactCategory.NonResidentialFamily,
                         family.FamilyTitle,
                         familyEmail.Value,
                         null));
 
-                    foreach (var parent in family.Parents)
+                    foreach (Parent parent in family.Parents)
                     {
-                        var parentName = Name.Create(parent.FirstName, null, parent.LastName);
+                        Result<Name> parentName = Name.Create(parent.FirstName, null, parent.LastName);
 
                         if (parentName.IsFailure)
                             continue;
 
-                        var parentEmail = EmailAddress.Create(parent.EmailAddress);
+                        Result<EmailAddress> parentEmail = EmailAddress.Create(parent.EmailAddress);
 
                         if (parentEmail.IsFailure)
                             continue;
 
-                        var parentPhone = PhoneNumber.Create(parent.MobileNumber);
+                        Result<PhoneNumber> parentPhone = PhoneNumber.Create(parent.MobileNumber);
 
                         result.Add(new ContactResponse(
                             student.StudentId,
                             studentName.Value,
                             student.CurrentGrade,
+                            student.School.Name,
                             ContactCategory.NonResidentialParent,
                             parentName.Value.DisplayName,
                             parentEmail.Value,
@@ -272,6 +279,7 @@ internal sealed class GetContactListQueryHandler
                         student.StudentId,
                         studentName.Value,
                         student.CurrentGrade,
+                        student.School.Name,
                         ContactCategory.AuroraTeacher,
                         teacherName,
                         teacherEmail.Value,
@@ -316,6 +324,7 @@ internal sealed class GetContactListQueryHandler
                         student.StudentId,
                         studentName.Value,
                         student.CurrentGrade,
+                        student.School.Name,
                         ContactCategory.AuroraHeadTeacher,
                         teacherName,
                         teacherEmail.Value,
