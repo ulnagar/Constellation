@@ -105,6 +105,9 @@ public class IndexModel : BasePageModel
         {
             var teachers = await _mediator.Send(new GetStaffLinkedToOfferingQuery(course.Id), cancellationToken);
 
+            if (teachers.Value.Count == 0)
+                continue;
+
             var frequency = teachers
                 .Value
                 .GroupBy(x => x.StaffId)
