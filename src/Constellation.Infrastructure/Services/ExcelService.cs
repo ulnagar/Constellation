@@ -449,28 +449,43 @@ public class ExcelService : IExcelService
 
     public async Task<MemoryStream> CreateGroupTutorialAttendanceFile(TutorialDetailsDto data)
     {
-        var excel = new ExcelPackage();
-        var workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
+        ExcelPackage excel = new ExcelPackage();
+        ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
 
-        var nameDetail = workSheet.Cells[1, 1].RichText.Add(data.Name);
+        ExcelRichText nameDetail = workSheet.Cells[1, 1].RichText.Add(data.Name);
         nameDetail.Bold = true;
         nameDetail.Size = 16;
 
-        var dateDetail = workSheet.Cells[2, 1].RichText.Add($"From {data.StartDate.ToShortDateString()} to {data.EndDate.ToShortDateString()}");
+        ExcelRichText dateDetail = workSheet.Cells[2, 1].RichText.Add($"From {data.StartDate.ToShortDateString()} to {data.EndDate.ToShortDateString()}");
         dateDetail.Bold = true;
         dateDetail.Size = 16;
 
-        var students = data.Rolls
+        workSheet.Cells[4, 1].RichText.Add("Not Enrolled");
+        workSheet.Cells[4, 2].RichText.Add("-");
+        workSheet.Cells[4, 2].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+        workSheet.Cells[4, 2].Style.Fill.BackgroundColor.SetColor(Color.LightGray);
+
+        workSheet.Cells[5, 1].RichText.Add("Enrolled, Not Present");
+        workSheet.Cells[5, 2].RichText.Add("N");
+        workSheet.Cells[5, 2].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+        workSheet.Cells[5, 2].Style.Fill.BackgroundColor.SetColor(Color.LightGreen);
+
+        workSheet.Cells[6, 1].RichText.Add("Enrolled, Present");
+        workSheet.Cells[6, 2].RichText.Add("Y");
+        workSheet.Cells[6, 2].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+        workSheet.Cells[6, 2].Style.Fill.BackgroundColor.SetColor(Color.LightGreen);
+
+        List<IGrouping<string, TutorialRollStudentDetailsDto>> students = data.Rolls
             .SelectMany(roll => roll.Students)
             .OrderBy(student => student.Grade)
             .ThenBy(student => student.Name)
             .GroupBy(student => student.StudentId)
             .ToList();
 
-        var rolls = data.Rolls.OrderBy(roll => roll.SessionDate).ToList();
+        List<TutorialRollDetailsDto> rolls = data.Rolls.OrderBy(roll => roll.SessionDate).ToList();
 
         int startColumn = 3;
-        int startRow = 5;
+        int startRow = 8;
 
         for (int i = 0; i < rolls.Count; i++)
         {
@@ -485,7 +500,7 @@ public class ExcelService : IExcelService
 
         for (int i = 0; i < students.Count; i++)
         {
-            var student = students[i];
+            IGrouping<string, TutorialRollStudentDetailsDto> student = students[i];
 
             workSheet.Cells[startRow + i, startColumn].Value = student.First().Name;
             workSheet.Cells[startRow + i, startColumn + 1].Value = student.First().Grade;
@@ -495,7 +510,7 @@ public class ExcelService : IExcelService
                 string text = string.Empty;
                 bool enrolled = false;
 
-                var entry = rolls[j].Students.FirstOrDefault(student => student.StudentId == students[i].Key);
+                TutorialRollStudentDetailsDto entry = rolls[j].Students.FirstOrDefault(student => student.StudentId == students[i].Key);
 
                 if (entry is null)
                 {
@@ -509,6 +524,7 @@ public class ExcelService : IExcelService
                 }
 
                 workSheet.Cells[startRow + i, startColumn + 2 + j].Value = text;
+                workSheet.Cells[startRow + i, startColumn + 2 + j].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
                 if (enrolled)
                 {
@@ -523,10 +539,10 @@ public class ExcelService : IExcelService
             }
         }
 
-        workSheet.View.FreezePanes(7, 3);
-        workSheet.Cells[5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
+        workSheet.View.FreezePanes(10, 3);
+        workSheet.Cells[4, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
-        var memoryStream = new MemoryStream();
+        MemoryStream memoryStream = new MemoryStream();
         await excel.SaveAsAsync(memoryStream);
         memoryStream.Position = 0;
 
