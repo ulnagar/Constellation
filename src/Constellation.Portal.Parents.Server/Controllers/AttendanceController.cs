@@ -69,14 +69,16 @@ public class AttendanceController : BaseAPIController
     [HttpPost("ParentExplanation")]
     public async Task<IActionResult> Explain([FromBody] ProvideParentWholeAbsenceExplanationCommand command)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
-        _logger.Information("Requested to record explanation of absence for id {id} by parent {name}", command.AbsenceId, user.UserName);
+        _logger
+            .ForContext(nameof(ProvideParentWholeAbsenceExplanationCommand), command, true)
+            .Information("Requested to record explanation of absence for id {id} by parent {name}", command.AbsenceId, user.UserName);
 
         command.ParentEmail = user.Email;
 
         // This Mediator Handler is secured so that the data is only saved if the parent email matches the absence id.
-        await _mediator.Send(command);
+        Result? response = await _mediator.Send(command);
 
         return Ok();
     }
