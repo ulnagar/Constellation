@@ -2,12 +2,17 @@
 
 @using Constellation.Application.Absences.GetAbsenceDetailsForParent;
 @using Constellation.Application.Absences.ProvideParentWholeAbsenceExplanation;
-@using Constellation.Core.Models.Absences;
 @using Constellation.Core.Models.Identifiers;
 @using Constellation.Portal.Parents.Client.Shared.Models;
+@using Blazored.FluentValidation
+@using Blazored.Modal
+@using Blazored.Modal.Services
+@using Constellation.Core.Shared
+@using Constellation.Portal.Parents.Client.Components
 
 @inject HttpClient Http
 @inject NavigationManager navManager
+@inject IModalService Modal
 
 @attribute [Authorize]
 
@@ -23,8 +28,9 @@
     <h2>@Absence.Type for @Absence.Student</h2>
 
     <EditForm Model="FormModel" OnValidSubmit="SubmitResponse">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+        @* <FluentValidationValidator /> *@
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
 
         <div class="d-sm-flex flex-column flex-lg-row border-bottom mt-3">
             <div class="mb-2 col-md-2">
@@ -35,10 +41,11 @@
                 {
                     @if (Absence.Explained)
                     {
-                        <span><i class="fas fa-check" /> Explained Whole Absence</span>
-                    } else
+                        <span><i class="fas fa-check"/> Explained Whole Absence</span>
+                    }
+                    else
                     {
-                        <span><i class="fas fa-exclamation" /> Unexplained Whole Absence</span>
+                        <span><i class="fas fa-exclamation"/> Unexplained Whole Absence</span>
                     }
                 }
 
@@ -46,26 +53,27 @@
                 {
                     @if (Absence.Explained && Absence.Reason != "Absent" && Absence.VerificationStatus != notRequiredResponse)
                     {
-                        <span><i class="fas fa-check" /> Explained Partial Absence via @Absence.AbsenceReason</span>
+                        <span><i class="fas fa-check"/> Explained Partial Absence via @Absence.AbsenceReason</span>
                     }
                     else if (Absence.Explained && Absence.VerificationStatus == notRequiredResponse)
                     {
-                        <span><i class="fas fa-check" /> Explained Partial Absence</span>
+                        <span><i class="fas fa-check"/> Explained Partial Absence</span>
                     }
                     else if (Absence.VerificationStatus == verifiedResponse)
                     {
-                        <span><i class="fas fa-check" /> @Absence.VerificationStatus Partial Absence</span>
+                        <span><i class="fas fa-check"/> @Absence.VerificationStatus Partial Absence</span>
                     }
                     else if (Absence.VerificationStatus == rejectedResponse)
                     {
-                        <span><i class="fas fa-exclamation" /> @Absence.VerificationStatus Partial Absence</span>
+                        <span><i class="fas fa-exclamation"/> @Absence.VerificationStatus Partial Absence</span>
                     }
                     else if (Absence.VerificationStatus == pendingResponse)
                     {
-                        <span><i class="fas fa-question" /> @Absence.VerificationStatus Partial Absence</span>
-                    } else
+                        <span><i class="fas fa-question"/> @Absence.VerificationStatus Partial Absence</span>
+                    }
+                    else
                     {
-                        <span><i class="fas fa-exclamation" /> Unexplained Partial Absence</span>
+                        <span><i class="fas fa-exclamation"/> Unexplained Partial Absence</span>
                     }
                 }
             </div>
@@ -108,9 +116,11 @@
                     @if (Absence.Explained || !Absence.CanBeExplainedByParent)
                     {
                         <span>"@Absence.Reason"</span>
-                    } else
+                    }
+                    else
                     {
-                        <InputTextArea @bind-Value="FormModel.Comment" rows="5" cols="100" class="form-control" />
+                        <InputTextArea @bind-Value="FormModel.Comment" rows="5" cols="100" class="form-control"/>
+                        <ValidationMessage For="() => FormModel.Comment"></ValidationMessage>
                     }
                 }
 
@@ -125,24 +135,24 @@
                     else if (Absence.Explained && Absence.VerificationStatus == notRequiredResponse)
                     {
                         <span>
-                            @Absence.Reason<br />
+                            @Absence.Reason<br/>
                             @Absence.ValidatedBy
                         </span>
                     }
                     else if (Absence.Explained)
                     {
                         <span>
-                            "@Absence.Reason"<br />
+                            "@Absence.Reason"<br/>
                             @Absence.VerificationStatus by @Absence.ValidatedBy
                         </span>
-                    } 
+                    }
                     else if (Absence.VerificationStatus == pendingResponse)
                     {
                         <span>
-                            "@Absence.Reason"<br />
+                            "@Absence.Reason"<br/>
                             Pending verification by Aurora College Coordinator
                         </span>
-                    } 
+                    }
                     else
                     {
                         <span>Pending explanation by @Absence.Student</span>
@@ -162,6 +172,11 @@
             </div>
         }
     </EditForm>
+    
+    @if (Error is not null)
+    {
+        
+    }
 </Loader>
 @code {
     [Parameter] public Guid Id { get; set; }
@@ -177,6 +192,8 @@
     string verifiedResponse = "Verified";
     string rejectedResponse = "Rejected";
     string notRequiredResponse = "NR";
+
+    Error Error { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -205,8 +222,25 @@
             ProvideParentWholeAbsenceExplanationCommand Command = new(
                 absenceId,
                 FormModel.Comment);
+                
+            HttpResponseMessage response = await Http.PostAsJsonAsync($"Attendance/ParentExplanation", Command);
+            Result result = await response.Content.ReadFromJsonAsync<Result>();
 
-            await Http.PostAsJsonAsync<ProvideParentWholeAbsenceExplanationCommand>($"Attendance/ParentExplanation", Command);
+            if (result.IsFailure)
+            {
+                var parameters = new ModalParameters();
+                parameters.Add("Text", result.Error.Message);
+
+                var options = new ModalOptions()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                var modal = Modal.Show<ErrorModal>(result.Error.Code, parameters, options);
+                await modal.Result;
+
+                return;
+            }
         }
 
         navManager.NavigateTo("Attendance/Absences");

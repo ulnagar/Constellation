@@ -1,7 +1,10 @@
 ﻿namespace Constellation.Core.Shared;
 
+using System.Text.Json.Serialization;
+
 public sealed class ValidationResult : Result, IValidationResult
 {
+    [JsonConstructor]
     private ValidationResult(Error[] errors)
         : base(false, IValidationResult.ValidationError) =>
         Errors = errors;

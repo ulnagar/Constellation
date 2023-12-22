@@ -80,7 +80,7 @@ public class AttendanceController : BaseAPIController
         // This Mediator Handler is secured so that the data is only saved if the parent email matches the absence id.
         Result? response = await _mediator.Send(command);
 
-        return Ok();
+        return Ok(response);
     }
 
     [HttpGet("Reports/Dates")]

@@ -2,9 +2,11 @@
 namespace Constellation.Core.Shared;
 
 using System;
+using System.Text.Json.Serialization;
 
 public class Result
 {
+    [JsonConstructor]
     protected internal Result(bool isSuccess, Error error)
     {
         if (isSuccess && error != Error.None)
