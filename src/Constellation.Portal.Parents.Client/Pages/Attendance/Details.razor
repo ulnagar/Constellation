@@ -4,11 +4,9 @@
 @using Constellation.Application.Absences.ProvideParentWholeAbsenceExplanation;
 @using Constellation.Core.Models.Identifiers;
 @using Constellation.Portal.Parents.Client.Shared.Models;
-@using Blazored.FluentValidation
 @using Blazored.Modal
 @using Blazored.Modal.Services
 @using Constellation.Core.Shared
-@using Constellation.Portal.Parents.Client.Components
 
 @inject HttpClient Http
 @inject NavigationManager navManager
@@ -224,12 +222,13 @@
                 FormModel.Comment);
                 
             HttpResponseMessage response = await Http.PostAsJsonAsync($"Attendance/ParentExplanation", Command);
-            Result result = await response.Content.ReadFromJsonAsync<Result>();
+            ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
 
-            if (result.IsFailure)
+            if (!result.IsSuccess)
             {
+                Console.WriteLine("Returned Failed Result Object");
                 var parameters = new ModalParameters();
-                parameters.Add("Text", result.Error.Message);
+                parameters.Add("Text", result.Error!.Message);
 
                 var options = new ModalOptions()
                 {

@@ -33,6 +33,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 table: "Students",
                 type: "int",
                 nullable: true);
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[Students]
+                    SET AwardTally_Astras = 0,
+                        AwardTally_GalaxyMedals = 0,
+                        AwardTally_Stellars = 0,
+                        AwardTally_UniversalAchievers = 0
+                    WHERE 1 = 1");
         }
 
         /// <inheritdoc />

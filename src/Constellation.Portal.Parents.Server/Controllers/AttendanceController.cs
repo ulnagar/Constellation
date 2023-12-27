@@ -9,7 +9,6 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
-using Core.Models.Attachments;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,7 +33,7 @@ public class AttendanceController : BaseAPIController
 
         _logger.Information("Requested to retrieve attendance data for parent {name}", user.UserName);
 
-        var request = await _mediator.Send(new GetAbsencesForFamilyQuery(user.Email));
+        Result<List<AbsenceForFamilyResponse>>? request = await _mediator.Send(new GetAbsencesForFamilyQuery(user.Email));
 
         if (request.IsFailure)
         {
@@ -47,14 +46,14 @@ public class AttendanceController : BaseAPIController
     [HttpGet("Details/{id:guid}")]
     public async Task<ParentAbsenceDetailsResponse?> GetDetails([FromRoute] Guid Id)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve absence details for id {id} by parent {name}", Id, user.UserName);
 
         // This Mediator Handler is secured so that data is only returned if the parent email matches the absence id.
-        var absenceId = AbsenceId.FromValue(Id);
+        AbsenceId? absenceId = AbsenceId.FromValue(Id);
 
-        var response = await _mediator.Send(new GetAbsenceDetailsForParentQuery(user.Email, absenceId));
+        Result<ParentAbsenceDetailsResponse>? response = await _mediator.Send(new GetAbsenceDetailsForParentQuery(user.Email, absenceId));
 
         if (response.IsFailure)
         {
@@ -80,13 +79,13 @@ public class AttendanceController : BaseAPIController
         // This Mediator Handler is secured so that the data is only saved if the parent email matches the absence id.
         Result? response = await _mediator.Send(command);
 
-        return Ok(response);
+        return Ok(ApiResult.FromResult(response));
     }
 
     [HttpGet("Reports/Dates")]
     public async Task<List<ValidAttendenceReportDate>> GetReportDates()
     {
-        var request = await _mediator.Send(new GetValidAttendenceReportDatesQuery());
+        Result<List<ValidAttendenceReportDate>>? request = await _mediator.Send(new GetValidAttendenceReportDatesQuery());
 
         if (request.IsFailure)
         {
