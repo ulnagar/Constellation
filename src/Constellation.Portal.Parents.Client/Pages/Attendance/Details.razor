@@ -4,9 +4,6 @@
 @using Constellation.Application.Absences.ProvideParentWholeAbsenceExplanation;
 @using Constellation.Core.Models.Identifiers;
 @using Constellation.Portal.Parents.Client.Shared.Models;
-@using Blazored.Modal
-@using Blazored.Modal.Services
-@using Constellation.Core.Shared
 
 @inject HttpClient Http
 @inject NavigationManager navManager
@@ -26,7 +23,6 @@
     <h2>@Absence.Type for @Absence.Student</h2>
 
     <EditForm Model="FormModel" OnValidSubmit="SubmitResponse">
-        @* <FluentValidationValidator /> *@
         <DataAnnotationsValidator/>
         <ValidationSummary/>
 
@@ -199,7 +195,30 @@
 
         try
         {
-            Absence = await Http.GetFromJsonAsync<ParentAbsenceDetailsResponse>($"Attendance/Details/{Id}");
+            var absenceRequest = await Http.GetFromJsonAsync<ApiResult<ParentAbsenceDetailsResponse>>($"Attendance/Details/{Id}");
+
+            if (!absenceRequest.IsSuccess)
+            {
+                Console.WriteLine("Returned Failed Result Object");
+                var parameters = new ModalParameters();
+                parameters.Add("Text", absenceRequest.Error!.Message);
+
+                var options = new ModalOptions()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                var modal = Modal.Show<ErrorModal>(absenceRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                ShowLoader = false;
+
+                return;
+            }
+            else
+            {
+                Absence = absenceRequest.Value;
+            }
         }
         catch (AccessTokenNotAvailableException exception)
         {

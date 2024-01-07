@@ -1,11 +1,13 @@
 ﻿@page "/Attendance/Reports/"
 
-@using Constellation.Application.Attendance.GetValidAttendanceReportDates;
+@using Constellation.Application.Students.GetStudentsByParentEmail
+@using Constellation.Application.Attendance.GetValidAttendanceReportDates
 @using Constellation.Application.DTOs
-@using Constellation.Application.Features.Partners.Students.Queries
+@using System.Net.Mime
 
 @inject HttpClient Http
 @inject IJSRuntime JS
+@inject IModalService Modal
 
 @attribute [Authorize]
 
@@ -100,12 +102,12 @@
 </Loader>
 
 @code {
-    public List<ValidAttendenceReportDate> ValidDates { get; set; } = new();
-    public List<StudentOfParent> Students { get; set; } = new();
-    public StudentOfParent SelectedStudent { get; set; } = new();
+    private List<ValidAttendenceReportDate> ValidDates { get; set; } = new();
+    private List<StudentResponse> Students { get; set; } = new();
+    private StudentResponse SelectedStudent { get; set; }
 
     public bool ShowLoader { get; set; } = false;
-    public bool SelectingStudent { get; set; } = false;
+    private bool SelectingStudent { get; set; } = false;
 
     public string BaseUrl = "";
 
@@ -117,19 +119,58 @@
         {
             BaseUrl = Http.BaseAddress.AbsoluteUri;
 
-            Students = await Http.GetFromJsonAsync<List<StudentOfParent>>($"Students");
-            Students = Students.OrderBy(student => student.CurrentGrade).ToList();
+            ApiResult<List<StudentResponse>> studentsRequest = await Http.GetFromJsonAsync<ApiResult<List<StudentResponse>>>($"Students");
+
+            if (!studentsRequest.IsSuccess)
+            {
+                Console.WriteLine("Returned Failed Result Object");
+                ModalParameters parameters = new() { { "Text", studentsRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(studentsRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                ShowLoader = false;
+
+                return;
+            }
+            else
+            {
+                Students = Students.OrderBy(student => student.CurrentGrade).ToList();
+            }
 
             if (Students.Count > 0)
             {
                 SelectedStudent = Students.First();
             }
+
+            ApiResult<List<ValidAttendenceReportDate>> validDatesRequest = await Http.GetFromJsonAsync<ApiResult<List<ValidAttendenceReportDate>>>($"Attendance/Reports/Dates");
+
+            if (!validDatesRequest.IsSuccess)
+            {
+                Console.WriteLine("Returned Failed Result Object");
+                ModalParameters parameters = new() { { "Text", validDatesRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(validDatesRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                ShowLoader = false;
+
+                return;
+            }
             else
             {
-                // Throw error?
+                ValidDates = validDatesRequest.Value;
             }
-
-            ValidDates = await Http.GetFromJsonAsync<List<ValidAttendenceReportDate>>($"Attendance/Reports/Dates");
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -145,17 +186,39 @@
         {
             ShowLoader = true;
 
-            var a = new AttendanceReportRequest { StudentId = SelectedStudent.StudentId, StartDate = reportDate.StartDate, EndDate = reportDate.EndDate };
+            AttendanceReportRequest request = new() { StudentId = SelectedStudent.StudentId, StartDate = reportDate.StartDate, EndDate = reportDate.EndDate };
 
-            var response = await Http.PostAsJsonAsync($"Attendance/Reports/Download", a);
+            HttpResponseMessage response = await Http.PostAsJsonAsync($"Attendance/ParentExplanation", request);
+
+            IEnumerable<string> contentType = response.Content.Headers.GetValues("Content-Type");
+
+            if (contentType.Any(entry => entry == MediaTypeNames.Application.Json))
+            {
+                ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
+
+                Console.WriteLine("Returned Failed Result Object");
+                ModalParameters parameters = new() { { "Text", result.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(result.Error.Code, parameters, options);
+                await modal.Result;
+
+                return;
+            }
+
+            //var response = await Http.PostAsJsonAsync($"Attendance/Reports/Download", request);
             // This returns the file in the response variable.
             // Need to push it to the browser as a file download, possibly using JS
             // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0
 
-            var fileStream = response.Content.ReadAsStream();
-            var fileName = $"Attendance Report - {SelectedStudent.DisplayName} - {reportDate.StartDate:yyyy-MM-dd}.pdf";
+            Stream fileStream = await response.Content.ReadAsStreamAsync();
+            string fileName = $"Attendance Report - {SelectedStudent.DisplayName} - {reportDate.StartDate:yyyy-MM-dd}.pdf";
 
-            using var streamRef = new DotNetStreamReference(stream: fileStream);
+            using DotNetStreamReference streamRef = new(stream: fileStream);
 
             await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
         }
@@ -174,7 +237,7 @@
         SelectingStudent = true;
     }
 
-    void SelectNewStudent(StudentOfParent student)
+    void SelectNewStudent(StudentResponse student)
     {
         SelectedStudent = student;
 

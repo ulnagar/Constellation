@@ -4,6 +4,7 @@
 
 @inject HttpClient Http
 @inject IJSRuntime JS
+@inject IModalService Modal
 
 @attribute [Authorize]
 
@@ -155,9 +156,30 @@
 
         try
         {
-            List<AbsenceForFamilyResponse> absenceRequest = await Http.GetFromJsonAsync<List<AbsenceForFamilyResponse>>($"Attendance");
+            ApiResult<List<AbsenceForFamilyResponse>> absenceRequest = await Http.GetFromJsonAsync<ApiResult<List<AbsenceForFamilyResponse>>>($"Attendance");
 
-            AbsencesList = absenceRequest;
+            if (!absenceRequest.IsSuccess)
+            {
+                Console.WriteLine("Returned Failed Result Object");
+                var parameters = new ModalParameters();
+                parameters.Add("Text", absenceRequest.Error!.Message);
+
+                var options = new ModalOptions()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                var modal = Modal.Show<ErrorModal>(absenceRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                ShowLoader = false;
+
+                return;
+            }
+            else
+            {
+                AbsencesList = absenceRequest.Value;
+            }
         }
         catch (AccessTokenNotAvailableException exception)
         {

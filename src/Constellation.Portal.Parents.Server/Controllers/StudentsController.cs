@@ -1,6 +1,8 @@
 namespace Constellation.Portal.Parents.Server.Controllers;
 
-using Constellation.Application.Features.Partners.Students.Queries;
+using Application.Models.Identity;
+using Constellation.Application.Students.GetStudentsByParentEmail;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,10 +19,12 @@ public class StudentsController : BaseAPIController
     }
 
     [HttpGet]
-    public async Task<ICollection<StudentOfParent>> Get()
+    public async Task<ApiResult<List<StudentResponse>>> Get()
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
-        return await _mediator.Send(new GetStudentsOfParentQuery { ParentEmail = user.Email });
+        Result<List<StudentResponse>>? request = await _mediator.Send(new GetStudentsByParentEmailQuery(user.Email));
+        
+        return ApiResult.FromResult(request);
     }
 }

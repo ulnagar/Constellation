@@ -9,6 +9,7 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Core.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,7 +28,7 @@ public class AttendanceController : BaseAPIController
     }
 
     [HttpGet]
-    public async Task<List<AbsenceForFamilyResponse>> Get()
+    public async Task<ApiResult<List<AbsenceForFamilyResponse>>> Get()
     {
         AppUser user = await GetCurrentUser();
 
@@ -35,16 +36,11 @@ public class AttendanceController : BaseAPIController
 
         Result<List<AbsenceForFamilyResponse>>? request = await _mediator.Send(new GetAbsencesForFamilyQuery(user.Email));
 
-        if (request.IsFailure)
-        {
-            return new List<AbsenceForFamilyResponse>();
-        }
-
-        return request.Value;
+        return ApiResult.FromResult(request);
     }
 
     [HttpGet("Details/{id:guid}")]
-    public async Task<ParentAbsenceDetailsResponse?> GetDetails([FromRoute] Guid Id)
+    public async Task<ApiResult<ParentAbsenceDetailsResponse>> GetDetails([FromRoute] Guid Id)
     {
         AppUser? user = await GetCurrentUser();
 
@@ -56,17 +52,13 @@ public class AttendanceController : BaseAPIController
         Result<ParentAbsenceDetailsResponse>? response = await _mediator.Send(new GetAbsenceDetailsForParentQuery(user.Email, absenceId));
 
         if (response.IsFailure)
-        {
             _logger.Information("Failed to retrieve absence details for id {id} by parent {name} with error {@error}", Id, user.UserName, response.Error);
 
-            return null;
-        }
-
-        return response.Value;
+        return ApiResult.FromResult(response);
     }
 
     [HttpPost("ParentExplanation")]
-    public async Task<IActionResult> Explain([FromBody] ProvideParentWholeAbsenceExplanationCommand command)
+    public async Task<ApiResult> Explain([FromBody] ProvideParentWholeAbsenceExplanationCommand command)
     {
         AppUser? user = await GetCurrentUser();
 
@@ -79,38 +71,61 @@ public class AttendanceController : BaseAPIController
         // This Mediator Handler is secured so that the data is only saved if the parent email matches the absence id.
         Result? response = await _mediator.Send(command);
 
-        return Ok(ApiResult.FromResult(response));
+        return ApiResult.FromResult(response);
     }
 
     [HttpGet("Reports/Dates")]
-    public async Task<List<ValidAttendenceReportDate>> GetReportDates()
+    public async Task<ApiResult<List<ValidAttendenceReportDate>>> GetReportDates()
     {
-        Result<List<ValidAttendenceReportDate>>? request = await _mediator.Send(new GetValidAttendenceReportDatesQuery());
+        AppUser? user = await GetCurrentUser();
 
-        if (request.IsFailure)
-        {
-            return new List<ValidAttendenceReportDate>();
-        }
+        _logger.Information("Requested to retrieve absence report dates by parent {name}", user.UserName);
 
-        return request.Value;
+        Result<List<ValidAttendenceReportDate>> request = await _mediator.Send(new GetValidAttendenceReportDatesQuery());
+
+        return ApiResult.FromResult(request);
     }
 
     [HttpPost("Reports/Download")]
     public async Task<IActionResult> GetAttendanceReport([FromBody] AttendanceReportRequest request, CancellationToken cancellationToken = default)
     {
+        AppUser? user = await GetCurrentUser();
+
+        _logger
+            .ForContext(nameof(AttendanceReportRequest), request, true)
+            .Information("Requested to retrieve attendance report by parent {name}", user.UserName);
+
+
         bool authorised = await HasAuthorizedAccessToStudent(_mediator, request.StudentId);
 
         if (!authorised)
         {
-            return BadRequest();
+            _logger
+                .ForContext(nameof(AttendanceReportRequest), request, true)
+                .ForContext(nameof(AppUser), user, true)
+                .Warning("Unauthorised attempt to download attendance report by parent {name}", user.UserName);
+
+            return Ok(ApiResult.FromResult(Result.Failure(DomainErrors.Auth.NotAuthorised)));
         }
 
         // Create file as stream
-        Result<FileDto> fileRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(request.StudentId, DateOnly.FromDateTime(request.StartDate), DateOnly.FromDateTime(request.EndDate)), cancellationToken);
+        GenerateAttendanceReportForStudentQuery attendanceReportRequest = new(
+            request.StudentId,
+            DateOnly.FromDateTime(request.StartDate), 
+            DateOnly.FromDateTime(request.EndDate));
+
+        Result<FileDto> fileRequest = await _mediator.Send(attendanceReportRequest, cancellationToken);
 
         if (fileRequest.IsFailure)
         {
-            return BadRequest();
+            _logger
+                .ForContext(nameof(GenerateAttendanceReportForStudentQuery), attendanceReportRequest, true)
+                .ForContext(nameof(AttendanceReportRequest), request, true)
+                .ForContext(nameof(AppUser), user, true)
+                .ForContext(nameof(Error), fileRequest.Error, true)
+                .Warning("Failed attempt to download attendance report by parent {name}", user.UserName);
+
+            return Ok(ApiResult.FromResult(Result.Failure(fileRequest.Error)));
         }
 
         return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);

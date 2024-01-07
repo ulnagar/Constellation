@@ -4,6 +4,7 @@ namespace Constellation.Portal.Parents.Server.Controllers;
 
 using Constellation.Application.Models.Identity;
 using Constellation.Application.Parents.GetParentWithStudentIds;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -39,12 +40,12 @@ public class BaseAPIController : ControllerBase
         if (string.IsNullOrWhiteSpace(studentId)) 
             return false;
 
-        var user = await GetCurrentUser();
+        AppUser user = await GetCurrentUser();
 
         if (user is null)
             return false;
 
-        var studentIdRequest = await mediator.Send(new GetParentWithStudentIdsQuery(user.Email));
+        Result<List<string>> studentIdRequest = await mediator.Send(new GetParentWithStudentIdsQuery(user.Email));
 
         if (studentIdRequest.IsFailure)
             return false;

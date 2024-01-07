@@ -1,12 +1,12 @@
 ﻿@page "/Timetable/"
+
 @using Constellation.Application.DTOs
 @using Constellation.Application.Extensions
-@using Constellation.Application.Features.Partners.Students.Queries
-@using System.ComponentModel
-@using System.ComponentModel.DataAnnotations
+@using Constellation.Application.Students.GetStudentsByParentEmail
 
 @inject HttpClient Http
 @inject IJSRuntime JS
+@inject IModalService Modal
 
 @attribute [Authorize]
 
@@ -145,24 +145,45 @@
 </Loader>
 
 @code {
-    public List<StudentOfParent> Students { get; set; } = new();
-    public StudentOfParent SelectedStudent { get; set; } = new();
-    public StudentTimetableDataDto StudentTimetableData { get; set; } = new();
-    public Dictionary<int, string> Weeks { get; set; } = new();
-    public KeyValuePair<int, string> SelectedWeek { get; set; } 
-    public Day SelectedDay { get; set; }
+    private List<StudentResponse> Students { get; set; } = new();
+    private StudentResponse SelectedStudent { get; set; }
+    private StudentTimetableDataDto StudentTimetableData { get; set; } = new();
+    private Dictionary<int, string> Weeks { get; set; } = new();
+    private KeyValuePair<int, string> SelectedWeek { get; set; }
+    private Day SelectedDay { get; set; }
 
-    private bool ShowLoader = false;
+    public bool ShowLoader = false;
     private bool SelectingStudent = false;
     private bool SelectingWeek = false;
     private bool SelectingDay = false;
 
     protected override async Task OnParametersSetAsync()
-    {        
+    {
+        ShowLoader = true;
+
         try
         {
-            Students = await Http.GetFromJsonAsync<List<StudentOfParent>>($"Students");
-            Students = Students.OrderBy(student => student.CurrentGrade).ToList();
+            var studentsRequest = await Http.GetFromJsonAsync<ApiResult<List<StudentResponse>>>($"Students");
+
+            if (!studentsRequest.IsSuccess)
+            {
+                Console.WriteLine("Returned Failed Result Object");
+                ModalParameters parameters = new() { { "Text", studentsRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(studentsRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                ShowLoader = false;
+
+                return;
+            }
+
+            Students = studentsRequest.Value.OrderBy(student => student.CurrentGrade).ToList();
 
             if (Students.Count == 1)
             {
@@ -180,6 +201,7 @@
             exception.Redirect();
         }
 
+        ShowLoader = false;
     }
 
     async Task GetStudentTimetable()
@@ -222,7 +244,7 @@
         SelectingStudent = true;
     }
 
-    async void SelectNewStudent(StudentOfParent student)
+    async void SelectNewStudent(StudentResponse student)
     {
         ShowLoader = true;
 
