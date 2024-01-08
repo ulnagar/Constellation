@@ -1,10 +1,15 @@
 ﻿namespace Constellation.Portal.Parents.Server.Controllers;
 
 using Application.Attachments.GetAttachmentFile;
+using Application.Models.Identity;
 using Constellation.Application.Awards.GetSummaryForStudent;
+using Core.Errors;
+using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.ValueObjects;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.DirectoryServices.ActiveDirectory;
 
 [Route("[controller]")]
 public class AwardsController : BaseAPIController
@@ -19,46 +24,46 @@ public class AwardsController : BaseAPIController
     }
 
     [HttpGet("Student/{id}")]
-    public async Task<StudentAwardSummaryResponse> GetDetails([FromRoute] string Id)
+    public async Task<ApiResult<StudentAwardSummaryResponse>> GetDetails([FromRoute] string Id)
     {
-        var authorised = await HasAuthorizedAccessToStudent(_mediator, Id);
+        bool authorised = await HasAuthorizedAccessToStudent(_mediator, Id);
 
         if (!authorised)
-            return new StudentAwardSummaryResponse(0, 0, 0, 0, new());
+            return ApiResult.FromResult(Result.Failure<StudentAwardSummaryResponse>(DomainErrors.Auth.NotAuthorised));
 
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.LogInformation("Requested to retrieve award details for student {id} by parent {name}", Id, user.UserName);
 
-        var summary = await _mediator.Send(new GetSummaryForStudentQuery(Id));
+        Result<StudentAwardSummaryResponse>? summary = await _mediator.Send(new GetSummaryForStudentQuery(Id));
 
-        return summary.Value;
+        return ApiResult.FromResult(summary);
     }
 
     [HttpPost("Student/{studentId}/Download/{awardId}")]
     public async Task<IActionResult> GetAwardCertificate([FromRoute] string studentId, [FromRoute] string awardId)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.LogInformation("Requested to retrieve award certificate for student {id} by parent {name}", studentId, user.UserName);
 
-        var authorised = await HasAuthorizedAccessToStudent(_mediator, studentId);
+        bool authorised = await HasAuthorizedAccessToStudent(_mediator, studentId);
 
         if (!authorised)
         {
             _logger.LogWarning("UNAUTHORISED Requested to retrieve award certificate for student {id} by parent {name}", studentId, user.UserName);
 
-            return BadRequest();
+            return Ok(ApiResult.FromResult(Result.Failure(DomainErrors.Auth.NotAuthorised)));
         }
 
         // Create file as stream
-        var fileEntry = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.AwardCertificate, awardId));
+        Result<AttachmentResponse>? fileEntry = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.AwardCertificate, awardId));
 
         if (fileEntry.IsFailure)
         {
             _logger.LogWarning("Failed to retrieve file from database");
 
-            return BadRequest();
+            return Ok(ApiResult.FromResult(fileEntry));
         }
 
         return File(new MemoryStream(fileEntry.Value.FileData), "application/pdf");

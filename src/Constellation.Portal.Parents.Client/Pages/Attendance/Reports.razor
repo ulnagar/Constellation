@@ -205,7 +205,7 @@
 
             IEnumerable<string> contentType = response.Content.Headers.GetValues("Content-Type");
 
-            if (contentType.Any(entry => entry == MediaTypeNames.Application.Json))
+            if (contentType.Any(entry => entry.Contains(MediaTypeNames.Application.Json)))
             {
                 ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
 

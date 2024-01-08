@@ -3,6 +3,7 @@
 @using Constellation.Application.Students.GetStudentsByParentEmail;
 @using Constellation.Core.Models.Identifiers
 @using Constellation.Application.Awards.GetSummaryForStudent
+@using System.Net.Mime
 
 @inject HttpClient Http
 @inject IJSRuntime JS
@@ -178,7 +179,27 @@
             {
                 SelectedStudent = Students.First();
 
-                AwardSummary = await Http.GetFromJsonAsync<StudentAwardSummaryResponse>($"Awards/Student/{SelectedStudent.StudentId}");
+                ApiResult<StudentAwardSummaryResponse> awardSummaryRequest = await Http.GetFromJsonAsync<ApiResult<StudentAwardSummaryResponse>>($"Awards/Student/{SelectedStudent.StudentId}");
+
+                if (!awardSummaryRequest.IsSuccess)
+                {
+                    Console.WriteLine("Returned Failed Result Object");
+                    ModalParameters parameters = new() { { "Text", awardSummaryRequest.Error!.Message } };
+
+                    ModalOptions options = new()
+                    {
+                        Size = ModalSize.Automatic
+                    };
+
+                    IModalReference modal = Modal.Show<ErrorModal>(awardSummaryRequest.Error.Code, parameters, options);
+                    await modal.Result;
+
+                    ShowLoader = false;
+
+                    return;
+                }
+
+                AwardSummary = awardSummaryRequest.Value;
             }
 
             if (Students.Count > 1)
@@ -208,7 +229,27 @@
 
         try
         {
-            AwardSummary = await Http.GetFromJsonAsync<StudentAwardSummaryResponse>($"Awards/Student/{SelectedStudent.StudentId}");
+            ApiResult<StudentAwardSummaryResponse> awardSummaryRequest = await Http.GetFromJsonAsync<ApiResult<StudentAwardSummaryResponse>>($"Awards/Student/{SelectedStudent.StudentId}");
+
+            if (!awardSummaryRequest.IsSuccess)
+            {
+                Console.WriteLine("Returned Failed Result Object");
+                ModalParameters parameters = new() { { "Text", awardSummaryRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(awardSummaryRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                ShowLoader = false;
+
+                return;
+            }
+
+            AwardSummary = awardSummaryRequest.Value;
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -233,18 +274,39 @@
         {
             ShowLoader = true;
 
-            var response = await Http.PostAsJsonAsync($"Awards/Student/{SelectedStudent.StudentId}/Download/{awardId.ToString()}", new { });
+            HttpResponseMessage response = await Http.PostAsJsonAsync($"Awards/Student/{SelectedStudent.StudentId}/Download/{awardId.ToString()}", new { });
+            
+            IEnumerable<string> contentType = response.Content.Headers.GetValues("Content-Type").ToList();
+
+            if (contentType.Any(entry => entry.Contains(MediaTypeNames.Application.Json)))
+            {
+                ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
+
+                Console.WriteLine("Returned Failed Result Object");
+                ModalParameters parameters = new() { { "Text", result.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(result.Error.Code, parameters, options);
+                await modal.Result;
+
+                return;
+            }
+            
             // This returns the file in the response variable.
             // Need to push it to the browser as a file download, possibly using JS
             // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0
 
             if (response.IsSuccessStatusCode)
             {
-                var fileStream = response.Content.ReadAsStream();
-                var award = AwardSummary.RecentAwards.First(award => award.AwardId == awardId);
-                var filename = $"{SelectedStudent.DisplayName} - Astra Award - {award.AwardedOn:dd-MM-yyyy} - {award.IncidentId}.pdf";
+                Stream fileStream = await response.Content.ReadAsStreamAsync();
+                StudentAwardSummaryResponse.StudentAwardResponse award = AwardSummary.RecentAwards.First(award => award.AwardId == awardId);
+                string filename = $"{SelectedStudent.DisplayName} - Astra Award - {award.AwardedOn:dd-MM-yyyy} - {award.IncidentId}.pdf";
 
-                using var streamRef = new DotNetStreamReference(stream: fileStream);
+                using DotNetStreamReference streamRef = new(stream: fileStream);
 
                 await JS.InvokeVoidAsync("downloadFileFromStream", filename, streamRef);
             }

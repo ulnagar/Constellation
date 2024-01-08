@@ -26,6 +26,9 @@ public class ApiResult
             return new() { IsSuccess = validationResult.IsSuccess, Error = validationError };
         }
 
+        if (result.IsSuccess)
+            return new() { IsSuccess = true };
+
         return new() { IsSuccess = result.IsSuccess, Error = result.Error };
     }
 
@@ -44,7 +47,10 @@ public class ApiResult
             return new() { IsSuccess = validationResult.IsSuccess, Error = validationError, Value = result.Value };
         }
 
-        return new() { IsSuccess = result.IsSuccess, Error = result.Error, Value = result.Value };
+        if (result.IsSuccess)
+            return new() { IsSuccess = true, Value = result.Value };
+        
+        return new() { IsSuccess = result.IsSuccess, Error = result.Error };
     }
 }
 
