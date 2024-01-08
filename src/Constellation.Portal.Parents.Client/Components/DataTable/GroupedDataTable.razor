@@ -1,4 +1,6 @@
-﻿@typeparam TItem
+﻿@namespace Constellation.Portal.Parents.Client.Components
+
+@typeparam TItem
 @typeparam TKey
 
 @using System.Linq.Expressions
@@ -26,8 +28,6 @@
 </div>
 
 @code {
-    @namespace Constellation.Portal.Parents.Client.Components
-
     [Parameter]
     public RenderFragment TableHeader { get; set; }
 

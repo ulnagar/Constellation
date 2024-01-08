@@ -72,7 +72,13 @@
 
 @code {
     private List<StudentResponse> Students { get; set; } = new();
-    private StudentResponse SelectedStudent { get; set; }
+
+    private StudentResponse SelectedStudent { get; set; } = new(
+        string.Empty,
+        string.Empty,
+        string.Empty,
+        string.Empty);
+
     private List<StudentSupportContactResponse> Contacts { get; set; } = new();
 
     public bool ShowLoader = false;
@@ -84,11 +90,10 @@
 
         try
         {
-            var studentsRequest = await Http.GetFromJsonAsync<ApiResult<List<StudentResponse>>>($"Students");
+            ApiResult<List<StudentResponse>> studentsRequest = await Http.GetFromJsonAsync<ApiResult<List<StudentResponse>>>($"Students");
 
             if (!studentsRequest.IsSuccess)
             {
-                Console.WriteLine("Returned Failed Result Object");
                 ModalParameters parameters = new() { { "Text", studentsRequest.Error!.Message } };
 
                 ModalOptions options = new()
@@ -104,7 +109,7 @@
                 return;
             }
 
-            Students = Students.OrderBy(student => student.CurrentGrade).ToList();
+            Students = studentsRequest.Value.OrderBy(student => student.CurrentGrade).ToList();
 
             if (Students.Count == 1)
             {
@@ -129,7 +134,26 @@
     {
         try
         {
-            Contacts = await Http.GetFromJsonAsync<List<StudentSupportContactResponse>>($"Contacts/All/{SelectedStudent.StudentId}");
+            ApiResult<List<StudentSupportContactResponse>> contactsRequest = await Http.GetFromJsonAsync<ApiResult<List<StudentSupportContactResponse>>>($"Contacts/All/{SelectedStudent.StudentId}");
+
+            if (!contactsRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", contactsRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(contactsRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                ShowLoader = false;
+
+                return;
+            }
+
+            Contacts = contactsRequest.Value;
         }
         catch (AccessTokenNotAvailableException exception)
         {
