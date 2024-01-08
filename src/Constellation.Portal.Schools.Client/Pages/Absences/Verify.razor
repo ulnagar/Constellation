@@ -1,16 +1,14 @@
 ﻿@page "/Absences/Partial/{AbsenceId:guid}/Response/{ResponseId:guid}/Verify"
 
 @using Constellation.Application.Absences.GetAbsenceResponseDetailsForSchool;
-@using Constellation.Application.Absences.RejectStudentExplanation;
-@using Constellation.Application.Absences.VerifyStudenExplanation;
 @using Constellation.Core.Models.Identifiers;
-@using Constellation.Portal.Schools.Client.Shared.Models;
 
 @attribute [Authorize]
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IModalService Modal
 
 <Loader IsLoading="@IsLoading">
     <h1>Partial Absence Verification</h1>
@@ -68,21 +66,23 @@
 @code {
     [CascadingParameter]
     public SchoolDto SelectedSchool { get; set; }
-    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    private SchoolDto CurrentlySelectedSchool { get; set; }
 
     private bool IsLoading { get; set; } = false;
 
     [Parameter]
     public Guid ResponseId { get; set; }
-    public Guid CurrentResponseId { get; set; }
+
+    private Guid CurrentResponseId { get; set; }
 
     [Parameter]
     public Guid AbsenceId { get; set; }
 
-    public SchoolAbsenceResponseDetailsResponse Response { get; set; }
+    private SchoolAbsenceResponseDetailsResponse Response { get; set; }
 
-    public string Comment { get; set; }
-    public string CommentValidationText { get; set; }
+    private string Comment { get; set; }
+    private string CommentValidationText { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -102,8 +102,27 @@
         {
             if (ResponseId != CurrentResponseId)
             {
-                Response = await Http.GetFromJsonAsync<SchoolAbsenceResponseDetailsResponse?>($"api/Absences/Partial/{AbsenceId}/Response/{ResponseId}");
+                ApiResult<SchoolAbsenceResponseDetailsResponse> responseRequest = await Http.GetFromJsonAsync<ApiResult<SchoolAbsenceResponseDetailsResponse>>($"api/Absences/Partial/{AbsenceId}/Response/{ResponseId}");
 
+                if (!responseRequest.IsSuccess)
+                {
+                    Console.WriteLine("Returned Failed Result Object");
+                    ModalParameters parameters = new() { { "Text", responseRequest.Error!.Message } };
+
+                    ModalOptions options = new()
+                    {
+                        Size = ModalSize.Automatic
+                    };
+
+                    IModalReference modal = Modal.Show<ErrorModal>(responseRequest.Error.Code, parameters, options);
+                    await modal.Result;
+
+                    IsLoading = false;
+
+                    return;
+                }
+
+                Response = responseRequest.Value;
                 Comment = "";
                 CommentValidationText = "";    
             }
@@ -120,7 +139,7 @@
 
         CommentValidationText = "";
 
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        AuthenticationState authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
         AbsenceResponseId responseId = AbsenceResponseId.FromValue(ResponseId);
 
@@ -132,7 +151,38 @@
             Comment = Comment
         };
 
-        await Http.PostAsJsonAsync<AbsencesVerifyFormModel>($"api/Absences/Partial/{AbsenceId}/Response/{ResponseId}/Verify", command);
+        HttpResponseMessage request = await Http.PostAsJsonAsync($"api/Absences/Partial/{AbsenceId}/Response/{ResponseId}/Verify", command);
+        ApiResult response = await request.Content.ReadFromJsonAsync<ApiResult>();
+
+        if (!response.IsSuccess)
+        {
+            Console.WriteLine("Returned Failed Result Object");
+            ModalParameters parameters = new() { { "Text", response.Error!.Message } };
+
+            ModalOptions options = new()
+            {
+                Size = ModalSize.Automatic
+            };
+
+            IModalReference modal = Modal.Show<ErrorModal>(response.Error.Code, parameters, options);
+            await modal.Result;
+
+            IsLoading = false;
+
+            return;
+        }
+        else
+        {
+            ModalParameters parameters = new() { { "Text", "Absence explanation verification has been forwarded to our Administration Team. Thank you!" } };
+
+            ModalOptions options = new()
+            {
+                Size = ModalSize.Automatic
+            };
+
+            IModalReference modal = Modal.Show<FeedbackModal>("Verification Saved", parameters, options);
+            await modal.Result;
+        }
 
         NavigationManager.NavigateTo("Absences");
 
@@ -163,9 +213,40 @@
             Comment = Comment
         };
 
-        await Http.PostAsJsonAsync<AbsencesVerifyFormModel>($"api/Absences/Partial/{AbsenceId}/Response/{ResponseId}/Reject", command);
+        HttpResponseMessage request = await Http.PostAsJsonAsync($"api/Absences/Partial/{AbsenceId}/Response/{ResponseId}/Reject", command);
+        ApiResult response = await request.Content.ReadFromJsonAsync<ApiResult>();
 
-        NavigationManager.NavigateTo("Absences");
+        if (!response.IsSuccess)
+        {
+            Console.WriteLine("Returned Failed Result Object");
+            ModalParameters parameters = new() { { "Text", response.Error!.Message } };
+
+            ModalOptions options = new()
+            {
+                Size = ModalSize.Automatic
+            };
+
+            IModalReference modal = Modal.Show<ErrorModal>(response.Error.Code, parameters, options);
+            await modal.Result;
+
+            IsLoading = false;
+
+            return;
+        }
+        else
+        {
+            ModalParameters parameters = new() { { "Text", "Absence explanation rejection has been forwarded to our Administration Team. Thank you!" } };
+
+            ModalOptions options = new()
+            {
+                Size = ModalSize.Automatic
+            };
+
+            IModalReference modal = Modal.Show<FeedbackModal>("Rejection Saved", parameters, options);
+            await modal.Result;
+
+            NavigationManager.NavigateTo("Absences");
+        }
 
         IsLoading = false;
     }

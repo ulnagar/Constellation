@@ -1,17 +1,14 @@
 ﻿@page "/Absences/Reports/"
 
-@using System.Text
-@using System.ComponentModel.DataAnnotations
-@using Constellation.Application.Extensions;
 @using Constellation.Core.Extensions
-@using Constellation.Core.Models;
-@using Constellation.Portal.Schools.Client.Shared.Models;
+@using System.Net.Mime
 
 @attribute [Authorize]
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
+@inject IModalService Modal
 
 <Loader IsLoading="@IsLoading">
     <h1>Attendance Report</h1>
@@ -68,13 +65,14 @@
 @code {
     [CascadingParameter]
     public SchoolDto SelectedSchool { get; set; }
-    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    private SchoolDto CurrentlySelectedSchool { get; set; }
 
     private bool IsLoading { get; set; } = false;
 
-    public List<StudentDto> AllStudents { get; set; } = new();
-    public List<StudentDto> StudentsToSelect { get; set; } = new();
-    public List<StudentDto> SelectedStudents { get; set; } = new();
+    private List<StudentDto> AllStudents { get; set; } = new();
+    private List<StudentDto> StudentsToSelect { get; set; } = new();
+    private List<StudentDto> SelectedStudents { get; set; } = new();
 
     public AttendanceReportSelectForm formModel { get; set; } = new();
 
@@ -86,8 +84,27 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            var students = await Http.GetFromJsonAsync<List<StudentDto>>($"api/Students/FromSchool/{SelectedSchool.Code}");
-            AllStudents = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+            ApiResult<List<StudentDto>> studentsRequest = await Http.GetFromJsonAsync<ApiResult<List<StudentDto>>>($"api/Students/FromSchool/{SelectedSchool.Code}");
+
+            if (!studentsRequest.IsSuccess)
+            {
+                Console.WriteLine("Returned Failed Result Object");
+                ModalParameters parameters = new() { { "Text", studentsRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(studentsRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+
+            AllStudents = studentsRequest.Value.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
             StudentsToSelect = AllStudents;
             SelectedStudents = new();
         }
@@ -151,13 +168,32 @@
                 formModel.Students.Add(student.StudentId);
             }
 
-            var response = await Http.PostAsJsonAsync<AttendanceReportSelectForm>($"api/Absences/Report", formModel);
+            HttpResponseMessage response = await Http.PostAsJsonAsync($"api/Absences/Report", formModel);
+
+            IEnumerable<string> contentType = response.Content.Headers.GetValues("Content-Type").ToList();
+
+            if (contentType.Any(entry => entry.Contains(MediaTypeNames.Application.Json)))
+            {
+                ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
+
+                ModalParameters parameters = new() { { "Text", result.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(result.Error.Code, parameters, options);
+                await modal.Result;
+
+                return;
+            }
 
             // This returns the file in the response variable.
             // Need to push it to the browser as a file download, possibly using JS
             // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0
 
-            var fileStream = response.Content.ReadAsStream();
+            Stream fileStream = await response.Content.ReadAsStreamAsync();
             string fileName = string.Empty;
 
             if (SelectedStudents.Count > 1)
@@ -166,12 +202,12 @@
             }
             else
             {
-                var student = SelectedStudents.First();
+                StudentDto student = SelectedStudents.First();
 
                 fileName = $"{student.LastName}, {student.FirstName} - {formModel.StartDate:yyyy-MM-dd} - Attendance Report.pdf";
             }
 
-            using var streamRef = new DotNetStreamReference(stream: fileStream);
+            using DotNetStreamReference streamRef = new(stream: fileStream);
 
             await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
         }

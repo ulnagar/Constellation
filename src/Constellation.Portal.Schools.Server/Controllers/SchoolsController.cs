@@ -2,31 +2,29 @@
 
 using Application.Schools.GetSchoolsFromList;
 using Constellation.Application.DTOs;
-using Constellation.Application.Features.Portal.School.Contacts.Models;
-using Constellation.Application.Features.Portal.School.Contacts.Queries;
 using Constellation.Application.Features.Portal.School.Home.Queries;
 using Constellation.Application.Models.Identity;
+using Constellation.Application.Schools.GetSchoolContactDetails;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]")]
 public class SchoolsController : BaseAPIController
 {
     private readonly IMediator _mediator;
-    private readonly UserManager<AppUser> _userManager;
     private readonly Serilog.ILogger _logger;
 
-    public SchoolsController(IMediator mediator, Serilog.ILogger logger, UserManager<AppUser> userManager)
+    public SchoolsController(
+        IMediator mediator, 
+        Serilog.ILogger logger)
 	{
         _mediator = mediator;
-        _userManager = userManager;
         _logger = logger.ForContext<SchoolsController>();
     }
 
     [HttpGet]
-    public async Task<List<SchoolDto>> Get()
+    public async Task<ApiResult<List<SchoolDto>>> Get()
     {
         AppUser? user = await GetCurrentUser();
 
@@ -45,18 +43,15 @@ public class SchoolsController : BaseAPIController
 
         Result<List<SchoolDto>>? request = await _mediator.Send(new GetSchoolsFromListQuery(schoolCodes));
 
-        if (request.IsFailure)
-        {
-            return new List<SchoolDto>();
-        }
-
-        return request.Value;
+        return ApiResult.FromResult(request);
     }
 
     [HttpGet("{code}/Details")]
-    public async Task<SchoolContactDetails> GetDetails(string code)
+    public async Task<ApiResult<SchoolContactDetailsResponse>> GetDetails(string code)
     {
-        return await _mediator.Send(new GetSchoolContactDetailsQuery { Code = code });
+        Result<SchoolContactDetailsResponse>? request = await _mediator.Send(new GetSchoolContactDetailsQuery(code));
+
+        return ApiResult.FromResult(request);
     }
 
 }

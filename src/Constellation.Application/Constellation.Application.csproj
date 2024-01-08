@@ -26,6 +26,8 @@
     <Folder Include="Features\Documents\Queries\" />
     <Folder Include="Features\Partners\SchoolContacts\Commands\" />
     <Folder Include="Features\Partners\Students\Queries\" />
+    <Folder Include="Features\Portal\School\Contacts\Models\" />
+    <Folder Include="Features\Portal\School\Contacts\Queries\" />
     <Folder Include="Features\Portal\School\Home\Commands\" />
     <Folder Include="Features\Portal\School\Timetables\Models\" />
   </ItemGroup>

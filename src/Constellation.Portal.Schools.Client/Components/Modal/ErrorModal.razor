@@ -1,5 +1,4 @@
-﻿@using Blazored.Modal
-@using Blazored.Modal.Services
+﻿@namespace Constellation.Portal.Schools.Client.Components
 
 <div class="row">
     <div class="col w-auto">
@@ -16,8 +15,6 @@
 </div>
 
 @code {
-    @namespace Constellation.Portal.Schools.Client.Components
-
     [CascadingParameter] public BlazoredModalInstance BlazoredModal { get; set; }
 
     [Parameter] public string Text { get; set; }

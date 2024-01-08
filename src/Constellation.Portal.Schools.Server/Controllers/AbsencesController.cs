@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
 using Application.DTOs;
+using Application.Models.Identity;
 using Constellation.Application.Absences.CreateAbsenceResponseFromSchool;
 using Constellation.Application.Absences.GetAbsenceDetailsForSchool;
 using Constellation.Application.Absences.GetAbsenceResponseDetailsForSchool;
@@ -11,7 +12,7 @@ using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Portal.Schools.Client.Shared.Models;
-using Core.Models.Attachments;
+using Core.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.IO.Compression;
@@ -23,16 +24,18 @@ public class AbsencesController : BaseAPIController
     private readonly IMediator _mediator;
     private readonly Serilog.ILogger _logger;
 
-    public AbsencesController(IMediator mediator, Serilog.ILogger logger)
+    public AbsencesController(
+        IMediator mediator, 
+        Serilog.ILogger logger)
     {
         _mediator = mediator;
         _logger = logger.ForContext<AbsencesController>();
     }
 
     [HttpGet("{schoolCode}/All")]
-    public async Task<List<OutstandingAbsencesForSchoolResponse>> GetForSchool(string schoolCode, CancellationToken cancellationToken = default)
+    public async Task<ApiResult<List<OutstandingAbsencesForSchoolResponse>>> GetForSchool(string schoolCode, CancellationToken cancellationToken = default)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve absences for school {code} by user {user}", schoolCode, user.DisplayName);
 
@@ -40,36 +43,33 @@ public class AbsencesController : BaseAPIController
 
         if (request.IsFailure)
         {
-            _logger.Warning("Could not retrieve absences for school {code} due to error {@error}", schoolCode, request.Error);
-            return new List<OutstandingAbsencesForSchoolResponse>();
+            _logger
+                .ForContext(nameof(schoolCode), schoolCode)
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Could not retrieve absences for school {code} due to error {@error}", schoolCode, request.Error);
         }
 
-        return request.Value;
+        return ApiResult.FromResult(request);
     }
 
     [HttpGet("Whole/{absenceId:guid}")]
-    public async Task<SchoolAbsenceDetailsResponse?> GetWholeAbsenceForExplanation(Guid absenceId, CancellationToken cancellationToken = default)
+    public async Task<ApiResult<SchoolAbsenceDetailsResponse>> GetWholeAbsenceForExplanation(Guid absenceId, CancellationToken cancellationToken = default)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve absence for explanation by user {user} with id {id}", user.DisplayName, absenceId.ToString());
 
-        AbsenceId Id = AbsenceId.FromValue(absenceId);
+        AbsenceId id = AbsenceId.FromValue(absenceId);
 
-        Result<SchoolAbsenceDetailsResponse> request = await _mediator.Send(new GetAbsenceDetailsForSchoolQuery(Id), cancellationToken);
+        Result<SchoolAbsenceDetailsResponse> request = await _mediator.Send(new GetAbsenceDetailsForSchoolQuery(id), cancellationToken);
 
-        if (request.IsFailure)
-        {
-            return null;
-        }
-
-        return request.Value;
+        return ApiResult.FromResult(request);
     }
 
     [HttpPost("Whole/{absenceId:guid}/Explain")]
-    public async Task ExplainWholeAbsence(Guid absenceId, AbsencesExplainFormModel Form)
+    public async Task<ApiResult> ExplainWholeAbsence(Guid absenceId, AbsencesExplainFormModel Form)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         if (absenceId != Form.AbsenceId)
         {
@@ -79,7 +79,10 @@ public class AbsencesController : BaseAPIController
                 .ForContext(nameof(AbsencesExplainFormModel), Form, true)
                 .Warning("Route AbsenceId does not match Form AbsenceId");
 
-            return;
+            return ApiResult.FromResult(Result.Failure(
+                new(
+                    "Application.Error",
+                    "Routing Error: Route does not match supplied form")));
         }
 
         AbsenceId AbsenceId = AbsenceId.FromValue(Form.AbsenceId);
@@ -91,13 +94,15 @@ public class AbsencesController : BaseAPIController
 
         _logger.Information("Requested to explain absence by user {user} with details {@absence}", user.DisplayName, Command);
 
-        await _mediator.Send(Command);
+        Result result = await _mediator.Send(Command);
+
+        return ApiResult.FromResult(result);
     }
 
     [HttpGet("Partial/{absenceId:guid}/Response/{responseId:guid}")]
-    public async Task<SchoolAbsenceResponseDetailsResponse?> GetPartialAbsenceForVerification(Guid absenceId, Guid responseId, CancellationToken cancellationToken = default)
+    public async Task<ApiResult<SchoolAbsenceResponseDetailsResponse>> GetPartialAbsenceForVerification(Guid absenceId, Guid responseId, CancellationToken cancellationToken = default)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve absence for verification by user {user} with id {id}", user.DisplayName, responseId.ToString());
 
@@ -106,16 +111,13 @@ public class AbsencesController : BaseAPIController
 
         Result<SchoolAbsenceResponseDetailsResponse> request = await _mediator.Send(new GetAbsenceResponseDetailsForSchoolQuery(AbsenceId, ResponseId), cancellationToken);
 
-        if (request.IsFailure)
-            return null;
-
-        return request.Value;
+        return ApiResult.FromResult(request);
     }
 
     [HttpPost("Partial/{absenceId:guid}/Response/{responseId:guid}/Verify")]
-    public async Task VerifyPartialAbsence(Guid absenceId, Guid responseId, AbsencesVerifyFormModel Form)
+    public async Task<ApiResult> VerifyPartialAbsence(Guid absenceId, Guid responseId, AbsencesVerifyFormModel Form)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         if (absenceId != Form.AbsenceId)
         {
@@ -125,7 +127,10 @@ public class AbsencesController : BaseAPIController
                 .ForContext(nameof(AbsencesVerifyFormModel), Form, true)
                 .Warning("Route AbsenceId does not match Form AbsenceId");
 
-            return;
+            return ApiResult.FromResult(Result.Failure(
+                new(
+                    "Application.Error",
+                    "Routing Error: Route does not match supplied form")));
         }
 
         if (responseId != Form.ResponseId)
@@ -136,7 +141,10 @@ public class AbsencesController : BaseAPIController
                 .ForContext(nameof(AbsencesVerifyFormModel), Form, true)
                 .Warning("Route ResponseId does not match Form ResponseId");
 
-            return;
+            return ApiResult.FromResult(Result.Failure(
+                new(
+                    "Application.Error",
+                    "Routing Error: Route does not match supplied form")));
         }
 
         AbsenceId AbsenceId = AbsenceId.FromValue(absenceId);
@@ -150,13 +158,15 @@ public class AbsencesController : BaseAPIController
 
         _logger.Information("Requested to verify absence explanation by user {user} with details {@absence}", user.DisplayName, command);
 
-        await _mediator.Send(command);
+        Result response = await _mediator.Send(command);
+
+        return ApiResult.FromResult(response);
     }
 
     [HttpPost("Partial/{absenceId:guid}/Response/{responseId:guid}/Reject")]
-    public async Task RejectPartialAbsence(Guid absenceId, Guid responseId, AbsencesVerifyFormModel Form)
+    public async Task<ApiResult> RejectPartialAbsence(Guid absenceId, Guid responseId, AbsencesVerifyFormModel Form)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         if (absenceId != Form.AbsenceId)
         {
@@ -166,7 +176,10 @@ public class AbsencesController : BaseAPIController
                 .ForContext(nameof(AbsencesVerifyFormModel), Form, true)
                 .Warning("Route AbsenceId does not match Form AbsenceId");
 
-            return;
+            return ApiResult.FromResult(Result.Failure(
+                new(
+                    "Application.Error",
+                    "Routing Error: Route does not match supplied form")));
         }
 
         if (responseId != Form.ResponseId)
@@ -177,7 +190,10 @@ public class AbsencesController : BaseAPIController
                 .ForContext(nameof(AbsencesVerifyFormModel), Form, true)
                 .Warning("Route ResponseId does not match Form ResponseId");
 
-            return;
+            return ApiResult.FromResult(Result.Failure(
+                new(
+                    "Application.Error",
+                    "Routing Error: Route does not match supplied form")));
         }
 
         AbsenceId AbsenceId = AbsenceId.FromValue(absenceId);
@@ -191,14 +207,16 @@ public class AbsencesController : BaseAPIController
 
         _logger.Information("Requested to reject absence explanation by user {user} with details {@absence}", user.DisplayName, command);
 
-        await _mediator.Send(command);
+        Result response = await _mediator.Send(command);
+
+        return ApiResult.FromResult(response);
     }
 
     [HttpPost("Report")]
     public async Task<IActionResult> GenerateAttendanceReports([FromBody] AttendanceReportSelectForm Request, CancellationToken cancellationToken = default)
     {
-        var startDate = DateOnly.FromDateTime(Request.StartDate);
-        var endDate = startDate.AddDays(12);
+        DateOnly startDate = DateOnly.FromDateTime(Request.StartDate);
+        DateOnly endDate = startDate.AddDays(12);
 
         if (Request.Students.Count > 1)
         {
@@ -208,37 +226,38 @@ public class AbsencesController : BaseAPIController
             foreach (string studentId in Request.Students)
             {
                 Result<FileDto> reportRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(studentId, startDate, endDate), cancellationToken);
-                
+
+                if (reportRequest.IsFailure)
+                    return Ok(ApiResult.FromResult(reportRequest));
+
                 if (reportRequest.IsSuccess)
                     reports.Add(reportRequest.Value);
             }
 
             // Zip all reports
-            using MemoryStream memoryStream = new MemoryStream();
+            using MemoryStream memoryStream = new();
             using (ZipArchive zipArchive = new(memoryStream, ZipArchiveMode.Create))
             {
                 foreach (FileDto file in reports)
                 {
                     ZipArchiveEntry zipArchiveEntry = zipArchive.CreateEntry(file.FileName);
-                    using StreamWriter streamWriter = new StreamWriter(zipArchiveEntry.Open());
+                    await using StreamWriter streamWriter = new(zipArchiveEntry.Open());
                     byte[] fileData = file.FileData;
-                    streamWriter.BaseStream.Write(fileData, 0, fileData.Length);
+                    await streamWriter.BaseStream.WriteAsync(fileData, 0, fileData.Length, cancellationToken);
                 }
             }
 
-            MemoryStream attachmentStream = new MemoryStream(memoryStream.ToArray());
+            MemoryStream attachmentStream = new(memoryStream.ToArray());
 
             return File(attachmentStream.ToArray(), MediaTypeNames.Application.Zip, "Attendance Reports.zip");
         }
-        else
-        {
-            // We only have one student, so just download that file.
-            Result<FileDto> fileRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(Request.Students.First(), startDate, endDate), cancellationToken);
 
-            if (fileRequest.IsFailure)
-                return BadRequest();
+        // We only have one student, so just download that file.
+        Result<FileDto> fileRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(Request.Students.First(), startDate, endDate), cancellationToken);
 
-            return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
-        }
+        if (fileRequest.IsFailure)
+            return Ok(ApiResult.FromResult(fileRequest));
+
+        return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
     }
 }

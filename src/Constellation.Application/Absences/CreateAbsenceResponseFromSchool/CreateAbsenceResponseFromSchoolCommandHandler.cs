@@ -1,17 +1,12 @@
 ﻿namespace Constellation.Application.Absences.CreateAbsenceResponseFromSchool;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
-using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
-using MediatR;
 using Serilog;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,7 +29,7 @@ internal sealed class CreateAbsenceResponseFromSchoolCommandHandler
 
     public async Task<Result> Handle(CreateAbsenceResponseFromSchoolCommand request, CancellationToken cancellationToken)
     {
-        var absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
+        Absence absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
 
         if (absence is null)
         {

@@ -1,4 +1,6 @@
-﻿@typeparam TItem
+﻿@namespace Constellation.Portal.Schools.Client.Components
+
+@typeparam TItem
 
 <table class="table table-striped">
     <thead>
@@ -17,8 +19,6 @@
 </table>
 
 @code {
-    @namespace Constellation.Portal.Schools.Client.Components
-
     [Parameter]
     public RenderFragment TableHeader { get; set; }
 

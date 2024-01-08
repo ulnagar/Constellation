@@ -1,4 +1,6 @@
-﻿@if (IsLoading)
+﻿@namespace Constellation.Portal.Schools.Client.Components
+
+@if (IsLoading)
 {
     <div class="loader">
         <div class="wave"></div>
@@ -19,8 +21,6 @@ else
 }
 
 @code {
-    @namespace Constellation.Portal.Schools.Client.Components
-
     [Parameter] public RenderFragment ChildContent { get; set; }
     [Parameter] public bool IsLoading { get; set; }
 }

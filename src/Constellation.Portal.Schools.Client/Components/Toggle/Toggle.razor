@@ -1,8 +1,8 @@
-﻿<input type="checkbox" @bind="Value" /> <span class="ml-3 h5">@(Value ? "Yes" : "No")</span>
+﻿@namespace Constellation.Portal.Schools.Client.Components
+
+<input type="checkbox" @bind="Value" /> <span class="ml-3 h5">@(Value ? "Yes" : "No")</span>
 
 @code {
-    @namespace Constellation.Portal.Schools.Client.Components
-
     [Parameter]
     public EventCallback<bool> ValueChanged { get; set; }
 
@@ -11,14 +11,13 @@
     [Parameter]
     public bool Value
     {
-        get { return _value; }
+        get => _value;
         set
         {
-            if (_value != value)
-            {
-                _value = value;
-                ValueChanged.InvokeAsync(_value);
-            }
+            if (_value == value) return;
+            
+            _value = value;
+            ValueChanged.InvokeAsync(_value);
         }
     }
 }

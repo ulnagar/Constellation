@@ -3,9 +3,12 @@
 @inject HttpClient Http
 @inject NavigationManager NavManager
 @inject SignOutSessionStateManager SignOutManager
+@inject IModalService Modal
 
-@using Constellation.Application.DTOs;
 @using System.Security.Claims;
+@using Blazored.Modal
+@using Blazored.Modal.Services
+@using Constellation.Core.Shared
 
 <CascadingValue Value="@SelectedSchool">
     <div class="page">
@@ -82,13 +85,35 @@
 
                 FetchingData = true;
 
-                Schools = await Http.GetFromJsonAsync<List<SchoolDto>>($"api/Schools");
+                var schoolsRequest = await Http.GetFromJsonAsync<ApiResult<List<SchoolDto>>>($"api/Schools");
+
+                if (!schoolsRequest.IsSuccess)
+                {
+                    Console.WriteLine("Returned Failed Result Object");
+                    ModalParameters parameters = new() { { "Text", schoolsRequest.Error!.Message } };
+
+                    ModalOptions options = new()
+                    {
+                        Size = ModalSize.Automatic
+                    };
+
+                    IModalReference modal = Modal.Show<ErrorModal>(schoolsRequest.Error.Code, parameters, options);
+                    await modal.Result;
+
+                    FetchingData = false;
+                    
+                    return;
+                }
+
+                Schools = schoolsRequest.Value;
+
                 SelectedSchool = Schools.OrderBy(school => school.Code).First();
 
                 FetchingData = false;
 
                 StateHasChanged();
-            } else
+            } 
+            else
             {
                 Console.WriteLine("Already retrieving schools list - skipping - OnAfterRenderAsync");
             }
@@ -98,24 +123,6 @@
             Console.WriteLine("User Not Logged In - OnAfterRenderAsync");
         }
     }
-
-    //protected override async Task OnInitializedAsync()
-    //{
-    //    var authState = await authenticationStateTask;
-    //    User = authState.User;
-
-    //    if (User.Identity.IsAuthenticated)
-    //    {
-    //        Console.WriteLine("User Logged In - OnInitializedAsync");
-
-    //        Schools = await Http.GetFromJsonAsync<List<SchoolDto>>($"api/Schools");
-    //        SelectedSchool = Schools.OrderBy(school => school.Code).First();
-    //    }
-    //    else
-    //    {
-    //        Console.WriteLine("User Not Logged In - OnInitializedAsync");
-    //    }
-    //}
 
     private void ToggleChangeSchoolBox()
     {

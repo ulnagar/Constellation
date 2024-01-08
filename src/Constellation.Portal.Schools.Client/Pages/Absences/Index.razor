@@ -2,7 +2,8 @@
 
 @using System.Threading
 @using Constellation.Application.Absences.GetOutstandingAbsencesForSchool;
-@using Constellation.Core.Extensions;
+@using Constellation.Core.Extensions
+@using Constellation.Core.Shared
 
 @attribute [Authorize]
 
@@ -10,7 +11,7 @@
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
-
+@inject IModalService Modal
 
 <Loader IsLoading="@IsLoading">
     <h2>Student Absences</h2>
@@ -105,17 +106,18 @@
 
     [CascadingParameter]
     public SchoolDto SelectedSchool { get; set; }
-    public SchoolDto CurrentlySelectedSchool { get; set; }
 
-    public int UnexplainedPartialsCount { get; set; }
-    public int UnverifiedPartialsCount { get; set; }
-    public int UnexplainedWholesCount { get; set; }
+    private SchoolDto CurrentlySelectedSchool { get; set; }
 
-    public List<OutstandingAbsencesForSchoolResponse> Absences { get; set; } = new();
-    public List<OutstandingAbsencesForSchoolResponse> FilteredAbsences { get; set; } = new();
-    public AbsenceCategory AbsencesType { get; set; } = AbsenceCategory.UnverifiedPartials;
+    private int UnexplainedPartialsCount { get; set; }
+    private int UnverifiedPartialsCount { get; set; }
+    private int UnexplainedWholesCount { get; set; }
 
-    public CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+    private List<OutstandingAbsencesForSchoolResponse> Absences { get; set; } = new();
+    private List<OutstandingAbsencesForSchoolResponse> FilteredAbsences { get; set; } = new();
+    private AbsenceCategory AbsencesType { get; set; } = AbsenceCategory.UnverifiedPartials;
+
+    private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -125,7 +127,27 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            Absences = await Http.GetFromJsonAsync<List<OutstandingAbsencesForSchoolResponse>>($"api/Absences/{SelectedSchool.Code}/All", cancellationTokenSource.Token);
+            ApiResult<List<OutstandingAbsencesForSchoolResponse>> absencesRequest = await Http.GetFromJsonAsync<ApiResult<List<OutstandingAbsencesForSchoolResponse>>>($"api/Absences/{SelectedSchool.Code}/All", cancellationTokenSource.Token);
+
+            if (!absencesRequest.IsSuccess)
+            {
+                Console.WriteLine("Returned Failed Result Object");
+                ModalParameters parameters = new() { { "Text", absencesRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(absencesRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+
+            Absences = absencesRequest.Value;
 
             UnexplainedPartialsCount = Absences.Count(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.AbsenceResponseId == null);
             UnverifiedPartialsCount = Absences.Count(absence =>  absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.AbsenceResponseId != null);

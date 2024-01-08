@@ -1,4 +1,6 @@
-﻿@using Constellation.Application.DTOs
+﻿@namespace Constellation.Portal.Schools.Client.Components
+
+@using Constellation.Application.DTOs
 
 <div class="card m-3 float-start">
     <img class="card-img-top" src="@Student.PhotoSrc">
@@ -9,8 +11,6 @@
 </div>
 
 @code {
-    @namespace Constellation.Portal.Schools.Client.Components
-
     [Parameter]
     public StudentDto Student { get; set; }
 }

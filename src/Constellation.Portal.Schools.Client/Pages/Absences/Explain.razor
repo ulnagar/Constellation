@@ -1,15 +1,14 @@
 ﻿@page "/Absences/Whole/{absenceId:guid}/Explain"
 
-@using Constellation.Application.Absences.CreateAbsenceResponseFromSchool;
 @using Constellation.Application.Absences.GetAbsenceDetailsForSchool;
-@using Constellation.Core.Models.Identifiers;
-@using Constellation.Portal.Schools.Client.Shared.Models;
+@using Constellation.Core.Shared
 
 @attribute [Authorize]
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IModalService Modal
 
 <Loader IsLoading="@IsLoading">
     <h1>Whole Absence Explanation</h1>
@@ -63,15 +62,15 @@
 @code {
     [CascadingParameter]
     public SchoolDto SelectedSchool { get; set; }
-    public SchoolDto CurrentlySelectedSchool { get; set; }
+    private SchoolDto CurrentlySelectedSchool { get; set; }
 
     private bool IsLoading { get; set; } = false;
 
     [Parameter]
     public Guid absenceId { get; set; }
-    public Guid CurrentAbsenceId { get; set; }
+    private Guid CurrentAbsenceId { get; set; }
 
-    public SchoolAbsenceDetailsResponse Absence { get; set; }
+    private SchoolAbsenceDetailsResponse Absence { get; set; }
     public AbsencesExplainFormModel FormModel { get; set; } = new();
 
     protected override async Task OnParametersSetAsync()
@@ -91,7 +90,29 @@
         if (absenceId != Guid.NewGuid())
         {
             if (absenceId != CurrentAbsenceId)
-                Absence = await Http.GetFromJsonAsync<SchoolAbsenceDetailsResponse>($"api/Absences/Whole/{absenceId}");
+            {
+                ApiResult<SchoolAbsenceDetailsResponse> absenceRequest = await Http.GetFromJsonAsync<ApiResult<SchoolAbsenceDetailsResponse>>($"api/Absences/Whole/{absenceId}");
+
+                if (!absenceRequest.IsSuccess)
+                {
+                    Console.WriteLine("Returned Failed Result Object");
+                    ModalParameters parameters = new() { { "Text", absenceRequest.Error!.Message } };
+
+                    ModalOptions options = new()
+                    {
+                        Size = ModalSize.Automatic
+                    };
+
+                    IModalReference modal = Modal.Show<ErrorModal>(absenceRequest.Error.Code, parameters, options);
+                    await modal.Result;
+
+                    IsLoading = false;
+
+                    return;
+                }
+
+                Absence = absenceRequest.Value;
+            }
 
             CurrentAbsenceId = absenceId;
         }
@@ -108,7 +129,38 @@
         FormModel.AbsenceId = absenceId;
         FormModel.Username = authState.User.Identity.Name;
 
-        await Http.PostAsJsonAsync<AbsencesExplainFormModel>($"api/Absences/Whole/{absenceId}/Explain", FormModel);
+        HttpResponseMessage request = await Http.PostAsJsonAsync($"api/Absences/Whole/{absenceId}/Explain", FormModel);
+        ApiResult response = await request.Content.ReadFromJsonAsync<ApiResult>();
+
+        if (!response.IsSuccess)
+        {
+            Console.WriteLine("Returned Failed Result Object");
+            ModalParameters parameters = new() { { "Text", response.Error!.Message } };
+
+            ModalOptions options = new()
+            {
+                Size = ModalSize.Automatic
+            };
+
+            IModalReference modal = Modal.Show<ErrorModal>(response.Error.Code, parameters, options);
+            await modal.Result;
+
+            IsLoading = false;
+
+            return;
+        }
+        else
+        {
+            ModalParameters parameters = new() { { "Text", "Absence explanation has been forwarded to our Administration Team. Thank you!" } };
+
+            ModalOptions options = new()
+            {
+                Size = ModalSize.Automatic
+            };
+
+            IModalReference modal = Modal.Show<FeedbackModal>("Explanation Saved", parameters, options);
+            await modal.Result;
+        }
 
         NavigationManager.NavigateTo("Absences");
 

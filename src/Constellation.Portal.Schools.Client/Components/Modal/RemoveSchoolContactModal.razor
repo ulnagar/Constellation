@@ -1,4 +1,6 @@
-﻿@using Blazored.Modal
+﻿@namespace Constellation.Portal.Schools.Client.Components
+
+@using Blazored.Modal
 @using Blazored.Modal.Services
 @using Constellation.Application.Features.Portal.School.Contacts.Commands
 @using Constellation.Application.Features.Partners.SchoolContacts.Models
@@ -57,8 +59,6 @@
 </div>
 
 @code {
-    @namespace Constellation.Portal.Schools.Client.Components
-
     [CascadingParameter] public BlazoredModalInstance BlazoredModal { get; set; }
 
     [Parameter] public ContactWithRoleForList Contact { get; set; }
