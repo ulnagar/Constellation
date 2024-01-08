@@ -136,7 +136,7 @@
 </Loader>
 
 @code {
-        [CascadingParameter] private Task<AuthenticationState> authenticationStateTask { get; set; }
+    [CascadingParameter] private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     private bool ShowLoader { get; set; } = false;
 
@@ -176,10 +176,8 @@
 
                 return;
             }
-            else
-            {
-                AbsencesList = absenceRequest.Value;
-            }
+
+            AbsencesList = absenceRequest.Value;
         }
         catch (AccessTokenNotAvailableException exception)
         {

@@ -55,46 +55,59 @@
         </div>
     
         <div class="accordion accordion-flush" id="accordion">
-            @foreach (var term in ValidDates.OrderBy(entry => entry.StartDate).GroupBy(entry => entry.TermGroup).ToList())
+            @if (ValidDates.Any())
             {
-                var termId = term.First().TermGroup.Replace(' ', '-');
+                foreach (var term in ValidDates.OrderBy(entry => entry.StartDate).GroupBy(entry => entry.TermGroup).ToList())
+                {
+                    var termId = term.First().TermGroup.Replace(' ', '-');
 
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="accordion-header-@termId">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-@termId" aria-expanded="false" aria-controls="accordion-item-@termId">
-                            @term.First().TermGroup
-                        </button>
-                    </h2>
-                    <div id="accordion-item-@termId" class="accordion-collapse collapse" aria-labelledby="accordion-header-@termId" data-bs-parent="#accordion">
-                        <div class="accordion-body">
-                            @foreach (var entry in term)
-                            {
-                                var disabled = entry.EndDate > DateTime.Today;
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="accordion-header-@termId">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-@termId" aria-expanded="false" aria-controls="accordion-item-@termId">
+                                @term.First().TermGroup
+                            </button>
+                        </h2>
+                        <div id="accordion-item-@termId" class="accordion-collapse collapse" aria-labelledby="accordion-header-@termId" data-bs-parent="#accordion">
+                            <div class="accordion-body">
+                                @foreach (var entry in term)
+                                {
+                                    var disabled = entry.EndDate > DateTime.Today;
 
-                                <div class="w-auto p-3 ms-3 me-3 mb-2 shadow position-relative @(disabled ? "disabled" : "")">
-                                    <div class="row d-flex align-items-center">
-                                        @*Display as flex to enable vertical centering of the button in the second div*@
-                                        <div class="col-lg-8">
-                                            <div class="h5">@entry.Description</div>
-                                            <div class="mb-1">
-                                                <span>@entry.StartDate.ToShortDateString() - @entry.EndDate.ToShortDateString()</span>
-                                            </div>
-
-                                            @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
-                                            @if (!disabled)
-                                            {
-                                                <span class="fst-italic">Click or tap to download</span>
-
-                                                <div class="d-block">
-                                                    <a @onclick="() => DownloadReport(entry)" href="javascript:void(0)" class="stretched-link"></a>
+                                    <div class="w-auto p-3 ms-3 me-3 mb-2 shadow position-relative @(disabled ? "disabled" : "")">
+                                        <div class="row d-flex align-items-center">
+                                            @*Display as flex to enable vertical centering of the button in the second div*@
+                                            <div class="col-lg-8">
+                                                <div class="h5">@entry.Description</div>
+                                                <div class="mb-1">
+                                                    <span>@entry.StartDate.ToShortDateString() - @entry.EndDate.ToShortDateString()</span>
                                                 </div>
-                                            }
+
+                                                @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
+                                                @if (!disabled)
+                                                {
+                                                    <span class="fst-italic">Click or tap to download</span>
+
+                                                    <div class="d-block">
+                                                        <a @onclick="() => DownloadReport(entry)" href="javascript:void(0)" class="stretched-link"></a>
+                                                    </div>
+                                                }
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            }
+                                }
+                            </div>
                         </div>
                     </div>
+                }
+            }
+            else
+            {
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button">
+                            No Valid Reporting Dates Found
+                        </button>
+                    </h2>
                 </div>
             }
         </div>
@@ -140,7 +153,7 @@
             }
             else
             {
-                Students = Students.OrderBy(student => student.CurrentGrade).ToList();
+                Students = studentsRequest.Value.OrderBy(student => student.CurrentGrade).ToList();
             }
 
             if (Students.Count > 0)
@@ -169,7 +182,7 @@
             }
             else
             {
-                ValidDates = validDatesRequest.Value;
+                ValidDates = validDatesRequest.Value ?? new();
             }
         }
         catch (AccessTokenNotAvailableException exception)
