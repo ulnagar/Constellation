@@ -1,65 +1,66 @@
 ﻿namespace Constellation.Portal.Parents.Server.Controllers;
 
 using Application.Attachments.GetAttachmentFile;
+using Application.Models.Identity;
 using Constellation.Application.Reports.GetAcademicReportList;
+using Core.Errors;
+using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.ValueObjects;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mime;
 
 [Route("[controller]")]
 public class ReportsController : BaseAPIController
 {
-	private readonly ILogger<ReportsController> _logger;
+	private readonly Serilog.ILogger _logger;
 	private readonly IMediator _mediator;
 
-	public ReportsController(ILogger<ReportsController> logger, IMediator mediator)
+	public ReportsController(
+        Serilog.ILogger logger, 
+        IMediator mediator)
 	{
-		_logger = logger;
+		_logger = logger.ForContext<ReportsController>();
 		_mediator = mediator;
 	}
 
 	[HttpGet("Student/{studentId}")]
-	public async Task<List<AcademicReportResponse>> GetReportsList([FromRoute] string studentId)
+	public async Task<ApiResult<List<AcademicReportResponse>>> GetReportsList([FromRoute] string studentId)
 	{
-		var authorised = await HasAuthorizedAccessToStudent(_mediator, studentId);
+		bool authorised = await HasAuthorizedAccessToStudent(_mediator, studentId);
 
 		if (!authorised)
-		{
-			return new List<AcademicReportResponse>();
-		}
+            return ApiResult.FromResult(Result.Failure<List<AcademicReportResponse>>(DomainErrors.Auth.NotAuthorised));
 
-		var user = await GetCurrentUser();
+		AppUser? user = await GetCurrentUser();
 
-		_logger.LogInformation("Requested to retrieve reports for student {studentId} by user {user}", studentId, user.UserName);
+		_logger
+            .Information("Requested to retrieve reports for student {studentId} by user {user}", studentId, user.UserName);
 
-		var result = await _mediator.Send(new GetAcademicReportListQuery(studentId));
+		Result<List<AcademicReportResponse>>? result = await _mediator.Send(new GetAcademicReportListQuery(studentId));
 
-		if (result.IsSuccess)
-		{
-			return result.Value;
-		}
-
-		return new List<AcademicReportResponse>();
-	}
+        return ApiResult.FromResult(result);
+    }
 
     [HttpPost("Student/{studentId}/Download/{entryId}")]
     public async Task<IActionResult> GetAcademicReport([FromRoute] string entryId, [FromRoute] string studentId)
     {
-		var authorised = await HasAuthorizedAccessToStudent(_mediator, studentId);
+		bool authorised = await HasAuthorizedAccessToStudent(_mediator, studentId);
 
-		if (!authorised)
-			return BadRequest();
+        if (!authorised)
+            return Ok(ApiResult.FromResult(Result.Failure(DomainErrors.Auth.NotAuthorised)));
 
         // Create file as stream
-        var fileEntry = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.StudentReport, entryId));
+        Result<AttachmentResponse>? fileEntry = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.StudentReport, entryId));
 
         if (fileEntry.IsFailure)
         {
             return BadRequest();
         }
 
-        var filename = $"Academic Report - {DateTime.Today:yyyy-MM-dd}.pdf";
+        string filename = $"Academic Report - {DateTime.Today:yyyy-MM-dd}.pdf";
 
-		return File(new MemoryStream(fileEntry.Value.FileData), "application/pdf", filename);
+		return File(new MemoryStream(fileEntry.Value.FileData), MediaTypeNames.Application.Pdf, filename);
     }
 }

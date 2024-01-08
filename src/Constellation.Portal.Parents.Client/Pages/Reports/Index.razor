@@ -2,6 +2,7 @@
 
 @using Constellation.Application.Reports.GetAcademicReportList;
 @using Constellation.Application.Students.GetStudentsByParentEmail;
+@using System.Net.Mime
 
 @inject HttpClient Http
 @inject IJSRuntime JS
@@ -87,7 +88,13 @@
 
 @code {
     private List<StudentResponse> Students { get; set; } = new();
-    private StudentResponse SelectedStudent { get; set; }
+
+    private StudentResponse SelectedStudent { get; set; } = new(
+        string.Empty,
+        string.Empty,
+        string.Empty,
+        string.Empty);
+
     private List<AcademicReportResponse> Reports { get; set; } = new();
 
     public bool ShowLoader = false;
@@ -103,7 +110,6 @@
 
             if (!studentsRequest.IsSuccess)
             {
-                Console.WriteLine("Returned Failed Result Object");
                 ModalParameters parameters = new() { { "Text", studentsRequest.Error!.Message } };
 
                 ModalOptions options = new()
@@ -144,7 +150,26 @@
     {
         try
         {
-            Reports = await Http.GetFromJsonAsync<List<AcademicReportResponse>>($"Reports/Student/{SelectedStudent.StudentId}");
+            ApiResult<List<AcademicReportResponse>> reportsRequest = await Http.GetFromJsonAsync<ApiResult<List<AcademicReportResponse>>>($"Reports/Student/{SelectedStudent.StudentId}");
+
+            if (!reportsRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", reportsRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(reportsRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                ShowLoader = false;
+
+                return;
+            }
+
+            Reports = reportsRequest.Value;
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -177,17 +202,37 @@
         {
             ShowLoader = true;
 
-            var response = await Http.PostAsJsonAsync($"Reports/Student/{SelectedStudent.StudentId}/Download/{reportEntry.Id}", new { });
+            HttpResponseMessage response = await Http.PostAsJsonAsync($"Reports/Student/{SelectedStudent.StudentId}/Download/{reportEntry.Id}", new { });
+
+            IEnumerable<string> contentType = response.Content.Headers.GetValues("Content-Type").ToList();
+
+            if (contentType.Any(entry => entry.Contains(MediaTypeNames.Application.Json)))
+            {
+                ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
+
+                ModalParameters parameters = new() { { "Text", result.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(result.Error.Code, parameters, options);
+                await modal.Result;
+
+                return;
+            }
+
             // This returns the file in the response variable.
             // Need to push it to the browser as a file download, possibly using JS
             // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0
 
             if (response.IsSuccessStatusCode)
             {
-                var fileStream = response.Content.ReadAsStream();
-                var fileName = $"Academic Report - {SelectedStudent.DisplayName} - {reportEntry.ReportingPeriod}.pdf";
+                Stream fileStream = await response.Content.ReadAsStreamAsync();
+                string fileName = $"Academic Report - {SelectedStudent.DisplayName} - {reportEntry.ReportingPeriod}.pdf";
 
-                using var streamRef = new DotNetStreamReference(stream: fileStream);
+                using DotNetStreamReference streamRef = new(stream: fileStream);
 
                 await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
             }
