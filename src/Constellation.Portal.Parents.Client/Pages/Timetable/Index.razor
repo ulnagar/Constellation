@@ -3,6 +3,7 @@
 @using Constellation.Application.DTOs
 @using Constellation.Application.Extensions
 @using Constellation.Application.Students.GetStudentsByParentEmail
+@using System.Net.Mime
 
 @inject HttpClient Http
 @inject IJSRuntime JS
@@ -53,7 +54,6 @@
 
         // Show Today shortcut
 
-        
         <div class="w-auto d-flex">
             <div class="w-50 p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
                 <span class="row d-flex flex-column align-items-center">
@@ -146,7 +146,11 @@
 
 @code {
     private List<StudentResponse> Students { get; set; } = new();
-    private StudentResponse SelectedStudent { get; set; }
+    private StudentResponse SelectedStudent { get; set; } = new(
+        string.Empty,
+        string.Empty,
+        string.Empty,
+        string.Empty);
     private StudentTimetableDataDto StudentTimetableData { get; set; } = new();
     private Dictionary<int, string> Weeks { get; set; } = new();
     private KeyValuePair<int, string> SelectedWeek { get; set; }
@@ -206,15 +210,35 @@
 
     async Task GetStudentTimetable()
     {
-        StudentTimetableData = await Http.GetFromJsonAsync<StudentTimetableDataDto>($"timetables/{SelectedStudent.StudentId}");
+        ApiResult<StudentTimetableDataDto> timetableRequest = await Http.GetFromJsonAsync<ApiResult<StudentTimetableDataDto>>($"timetables/{SelectedStudent.StudentId}");
 
-        var dayList = StudentTimetableData.Timetables.Select(data => data.Day).Distinct().ToList();
-        var weekList = dayList.Max();
-        var numWeeks = weekList / 5;
+        if (!timetableRequest.IsSuccess)
+        {
+            Console.WriteLine("Returned Failed Result Object");
+            ModalParameters parameters = new() { { "Text", timetableRequest.Error!.Message } };
+
+            ModalOptions options = new()
+            {
+                Size = ModalSize.Automatic
+            };
+
+            IModalReference modal = Modal.Show<ErrorModal>(timetableRequest.Error.Code, parameters, options);
+            await modal.Result;
+
+            ShowLoader = false;
+
+            return;
+        }
+
+        StudentTimetableData = timetableRequest.Value;
+
+        List<int> dayList = StudentTimetableData.Timetables.Select(data => data.Day).Distinct().ToList();
+        int weekList = dayList.Max();
+        int numWeeks = weekList / 5;
 
         Weeks = new();
 
-        foreach (var entry in Enumerable.Range(1, numWeeks)) 
+        foreach (int entry in Enumerable.Range(1, numWeeks)) 
         {
             switch (entry)
             {
@@ -290,17 +314,37 @@
         {
             ShowLoader = true;
 
-            var response = await Http.PostAsJsonAsync($"Timetables/Download/{SelectedStudent.StudentId}", new { });
+            HttpResponseMessage response = await Http.PostAsJsonAsync($"Timetables/Download/{SelectedStudent.StudentId}", new { });
+
+            IEnumerable<string> contentType = response.Content.Headers.GetValues("Content-Type").ToList();
+
+            if (contentType.Any(entry => entry.Contains(MediaTypeNames.Application.Json)))
+            {
+                ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
+
+                ModalParameters parameters = new() { { "Text", result.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(result.Error.Code, parameters, options);
+                await modal.Result;
+
+                return;
+            }
+
             // This returns the file in the response variable.
             // Need to push it to the browser as a file download, possibly using JS
             // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0
 
             if (response.IsSuccessStatusCode)
             {
-                var fileStream = response.Content.ReadAsStream();
-                var fileName = $"{SelectedStudent.DisplayName} - Timetable.pdf";
+                Stream fileStream = await response.Content.ReadAsStreamAsync();
+                string fileName = $"{SelectedStudent.DisplayName} - Timetable.pdf";
 
-                using var streamRef = new DotNetStreamReference(stream: fileStream);
+                using DotNetStreamReference streamRef = new(stream: fileStream);
 
                 await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
             }
