@@ -23,7 +23,7 @@ public class RollsController : BaseAPIController
     }
 
     [HttpGet("ForSchool/{code}")]
-    public async Task<List<ScienceLessonRollSummary>> GetForSchool([FromRoute] string code)
+    public async Task<ApiResult<List<ScienceLessonRollSummary>>> GetForSchool([FromRoute] string code)
     {
         AppUser? user = await GetCurrentUser();
 
@@ -31,16 +31,11 @@ public class RollsController : BaseAPIController
 
         Result<List<ScienceLessonRollSummary>>? rollsRequest = await _mediator.Send(new GetLessonRollsForSchoolQuery(code));
 
-        if (rollsRequest.IsFailure)
-        {
-            return new List<ScienceLessonRollSummary>();
-        }
-
-        return rollsRequest.Value;
+        return ApiResult.FromResult(rollsRequest);
     }
 
     [HttpGet("Details/{rollId:guid}")]
-    public async Task<ScienceLessonRollDetails> GetRollDetails([FromRoute] Guid rollId, Guid lessonId)
+    public async Task<ApiResult<ScienceLessonRollDetails>> GetRollDetails([FromRoute] Guid rollId, Guid lessonId)
     {
         AppUser? user = await GetCurrentUser();
 
@@ -50,17 +45,12 @@ public class RollsController : BaseAPIController
         SciencePracRollId RollId = SciencePracRollId.FromValue(rollId);
 
         Result<ScienceLessonRollDetails>? request = await _mediator.Send(new GetLessonRollDetailsForSchoolsPortalQuery(LessonId, RollId));
-    
-        if (request.IsFailure)
-        {
-            return null;
-        }
 
-        return request.Value;
+        return ApiResult.FromResult(request);
     }
 
     [HttpGet("ForSubmit/{rollId:guid}")]
-    public async Task<ScienceLessonRollForSubmit> GetRollForSubmit([FromRoute] Guid rollId, Guid lessonId)
+    public async Task<ApiResult<ScienceLessonRollForSubmit>> GetRollForSubmit([FromRoute] Guid rollId, Guid lessonId)
     {
         AppUser? user = await GetCurrentUser();
 
@@ -70,22 +60,21 @@ public class RollsController : BaseAPIController
         SciencePracRollId RollId = SciencePracRollId.FromValue(rollId);
 
         Result<ScienceLessonRollForSubmit>? request = await _mediator.Send(new GetLessonRollSubmitContextForSchoolsPortalQuery(LessonId, RollId));
-    
-        if (request.IsFailure)
-        {
-            return null;
-        }
 
-        return request.Value;
+        return ApiResult.FromResult(request);
     }
 
     [HttpPost("Submit/{rollId:guid}")]
-    public async Task SubmitMarkedRoll([FromRoute] Guid rollId, [FromBody] SubmitRollCommand command)
+    public async Task<ApiResult> SubmitMarkedRoll(
+        [FromRoute] Guid rollId, 
+        [FromBody] SubmitRollCommand command)
     {
         AppUser? user = await GetCurrentUser();
 
         _logger.Information("Requested to submit roll with details {@details} by user {user}", command, user.DisplayName);
 
-        await _mediator.Send(command);
+        Result? response = await _mediator.Send(command);
+
+        return ApiResult.FromResult(response);
     }
 }

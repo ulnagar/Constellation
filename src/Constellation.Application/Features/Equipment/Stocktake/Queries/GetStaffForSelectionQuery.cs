@@ -1,10 +1,9 @@
-﻿using Constellation.Application.Features.Portal.School.Home.Models;
+﻿namespace Constellation.Application.Features.Equipment.Stocktake.Queries;
+
 using MediatR;
 using System.Collections.Generic;
+using StaffMembers.Models;
 
-namespace Constellation.Application.Features.Equipment.Stocktake.Queries
+public class GetStaffForSelectionQuery : IRequest<ICollection<StaffSelectionListResponse>>
 {
-    public class GetStaffForSelectionQuery : IRequest<ICollection<StaffFromSchoolForDropdownSelection>>
-    {
-    }
 }

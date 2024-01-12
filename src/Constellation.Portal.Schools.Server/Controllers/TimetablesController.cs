@@ -4,7 +4,6 @@ using Application.Models.Identity;
 using Application.Timetables.GetStudentTimetableData;
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.Portal.School.Timetables.Queries;
-using Core.Models.Attachments;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +21,7 @@ public class TimetablesController : BaseAPIController
     }
 
     [HttpGet("ForStudent/{studentId}")]
-    public async Task<StudentTimetableDataDto> GetForSchool([FromRoute] string studentId)
+    public async Task<ApiResult<StudentTimetableDataDto>> GetForSchool([FromRoute] string studentId)
     {
         AppUser? user = await GetCurrentUser();
 
@@ -30,12 +29,7 @@ public class TimetablesController : BaseAPIController
 
         Result<StudentTimetableDataDto> request = await _mediator.Send(new GetStudentTimetableDataQuery(studentId));
 
-        if (request.IsFailure)
-        {
-            return new StudentTimetableDataDto();
-        }
-
-        return request.Value;
+        return ApiResult.FromResult(request);
     }
 
     [HttpPost("Download")]
@@ -49,7 +43,7 @@ public class TimetablesController : BaseAPIController
 
         if (request.IsFailure)
         {
-            return BadRequest();
+            return Ok(ApiResult.FromResult(request));
         }
 
         FileDto? file = await _mediator.Send(new GetStudentTimetableExportQuery { Data = request.Value });

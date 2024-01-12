@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Constellation.Application.Features.Equipment.Stocktake.Queries;
-using Constellation.Application.Features.Portal.School.Home.Models;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.StaffMembers.GetStaffFromSchool;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

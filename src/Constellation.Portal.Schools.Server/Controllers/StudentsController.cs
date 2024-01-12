@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
+using Application.Models.Identity;
+using Application.Students.GetCurrentStudentsFromSchool;
 using Constellation.Application.DTOs;
-using Constellation.Application.Features.Portal.School.Home.Models;
-using Constellation.Application.Features.Portal.School.Home.Queries;
+using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,22 +21,22 @@ public class StudentsController : BaseAPIController
     }
 
     [HttpGet("FromSchool/{schoolCode}")]
-    public async Task<List<StudentDto>> GetForSchool(string schoolCode)
+    public async Task<ApiResult<List<StudentDto>>> GetForSchool(string schoolCode)
     {
-        var students = await _mediator.Send(new GetStudentsFromSchoolQuery { SchoolCode = schoolCode });
+        Result<List<StudentDto>>? students = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(schoolCode));
 
-        return students.ToList();
+        return ApiResult.FromResult(students);
     }
 
     [HttpGet("ForDropdown/{schoolCode}")]
-    public async Task<List<StudentFromSchoolForDropdownSelection>> GetStudentsForDropdown([FromRoute] string schoolCode)
+    public async Task<ApiResult<List<StudentSelectionResponse>>> GetStudentsForDropdown([FromRoute] string schoolCode)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve students for school {schoolCode} by user {user}", schoolCode, user.DisplayName);
 
-        var students = await _mediator.Send(new GetStudentsFromSchoolForSelectionQuery { SchoolCode = schoolCode });
+        Result<List<StudentSelectionResponse>>? students = await _mediator.Send(new GetStudentsFromSchoolForSelectionQuery(schoolCode));
 
-        return students.ToList();
+        return ApiResult.FromResult(students);
     }
 }

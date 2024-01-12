@@ -1,17 +1,27 @@
 ﻿using Constellation.Application.Features.Equipment.Stocktake.Models;
-using Constellation.Application.Features.Portal.School.Home.Models;
-using Constellation.Application.Features.Portal.School.Stocktake.Commands;
+using Constellation.Application.StaffMembers.Models;
+using Constellation.Application.Stocktake.RegisterSighting;
+using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
 using Constellation.Presentation.Server.BaseModels;
-using System.Collections.Generic;
 
 namespace Constellation.Presentation.Server.Areas.Equipment.Models.Stocktake
 {
     public class StaffStocktakeSightingViewModel : BaseViewModel
     {
-        public RegisterSightedDeviceForStocktakeCommand Command { get; set; } = new();
+        public Guid StocktakeEventId { get; set; }
+        public string SerialNumber { get; set; }
+        public string AssetNumber { get; set; }
+        public string Description { get; set; }
+        public string LocationCategory { get; set; }
+        public string LocationName { get; set; }
+        public string LocationCode { get; set; }
+        public string UserType { get; set; }
+        public string UserName { get; set; }
+        public string UserCode { get; set; }
+        public string Comment { get; set; }
 
-        public List<StudentFromSchoolForDropdownSelection> Students { get; set; } = new();
-        public List<StaffFromSchoolForDropdownSelection> Staff { get; set; } = new();
+        public List<StudentSelectionResponse> Students { get; set; } = new();
+        public List<StaffSelectionListResponse> Staff { get; set; } = new();
         public List<PartnerSchoolForDropdownSelection> Schools { get; set; } = new();
     }
 }

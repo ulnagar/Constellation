@@ -22,7 +22,7 @@ public class ExamsController : BaseAPIController
     }
 
     [HttpGet("{studentId}/Courses")]
-    public async Task<List<StudentCourseResponse>> GetStudentCourses([FromRoute] string studentId)
+    public async Task<ApiResult<List<StudentCourseResponse>>> GetStudentCourses([FromRoute] string studentId)
     {
         AppUser? user = await GetCurrentUser();
 
@@ -30,16 +30,11 @@ public class ExamsController : BaseAPIController
 
         Result<List<StudentCourseResponse>> coursesRequest = await _mediator.Send(new GetCoursesForStudentQuery(studentId));
 
-        if (coursesRequest.IsFailure)
-        {
-            return new List<StudentCourseResponse>();
-        }
-
-        return coursesRequest.Value;
+        return ApiResult.FromResult(coursesRequest);
     }
 
     [HttpGet("{studentId}/{courseId}/Assignments")]
-    public async Task<List<CourseAssignmentResponse>> GetCourseAssignments([FromRoute] string studentId, [FromRoute] Guid courseId)
+    public async Task<ApiResult<List<CourseAssignmentResponse>>> GetCourseAssignments([FromRoute] string studentId, [FromRoute] Guid courseId)
     {
         AppUser? user = await GetCurrentUser();
 
@@ -49,16 +44,11 @@ public class ExamsController : BaseAPIController
 
         Result<List<CourseAssignmentResponse>>? assignments = await _mediator.Send(new GetAssignmentsByCourseQuery(course, studentId));
 
-        if (assignments.IsFailure)
-        {
-            return new List<CourseAssignmentResponse>();
-        }
-
-        return assignments.Value;
+        return ApiResult.FromResult(assignments);
     }
 
     [HttpPost("Upload")]
-    public async Task<bool> UploadAssignment([FromBody] UploadAssignmentSubmissionCommand command)
+    public async Task<ApiResult> UploadAssignment([FromBody] UploadAssignmentSubmissionCommand command)
     {
         AppUser? user = await GetCurrentUser();
 
@@ -68,9 +58,6 @@ public class ExamsController : BaseAPIController
 
         Result request = await _mediator.Send(command);
 
-        if (request.IsFailure)
-            return false;
-
-        return true;
+        return ApiResult.FromResult(request);
     }
 }

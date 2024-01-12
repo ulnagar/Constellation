@@ -1,5 +1,4 @@
 ﻿#nullable disable
-
 namespace Constellation.Portal.Schools.Server.Controllers;
 
 using Constellation.Application.Models.Auth;
@@ -18,69 +17,58 @@ public class BaseAPIController : ControllerBase
 
     protected async Task<AppUser> GetCurrentUser()
     {
-        if (User.Identity != null && User.Identity.IsAuthenticated)
-        {
-            Claim userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (User.Identity is not { IsAuthenticated: true }) return null;
+        
+        Claim userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
-            if (userIdClaim == null)
-                return null;
+        if (userIdClaim == null)
+            return null;
 
-            string userId = userIdClaim.Value;
+        string userId = userIdClaim.Value;
 
-            return await UserManager.FindByIdAsync(userId);
-        }
+        return await UserManager.FindByIdAsync(userId);
 
-        return null;
     }
 
     protected async Task<bool> IsUserAdmin(AppUser user)
     {
-        if (User.Identity is not null && User.Identity.IsAuthenticated)
-        {
-            IList<string> roles = await UserManager.GetRolesAsync(user);
-            if (roles.Contains(AuthRoles.Admin))
-            {
-                return true;
-            }
-        }
-
-        return false;
+        if (User.Identity is null || !User.Identity.IsAuthenticated) return false;
+        
+        IList<string> roles = await UserManager.GetRolesAsync(user);
+        
+        return roles.Contains(AuthRoles.Admin);
     }
 
     protected async Task<List<string>> GetCurrentUserSchools()
     {
         List<string> schoolCodes = new List<string>();
 
-        if (User.Identity is not null && User.Identity.IsAuthenticated)
+        if (User.Identity is null || !User.Identity.IsAuthenticated) return schoolCodes;
+        
+        List<Claim> schoolCodeClaims = User.FindAll(AuthClaimType.SchoolCode).ToList();
+
+        if (!schoolCodes.Any())
         {
-            IEnumerable<Claim> schoolCodeClaims = User.FindAll(AuthClaimType.SchoolCode);
+            AppUser user = await GetCurrentUser();
 
-            if (!schoolCodes.Any())
+            IList<Claim> claims = await _userManager.GetClaimsAsync(user);
+
+            schoolCodeClaims = claims.Where(claim => claim.Type == "Schools").ToList();
+        }
+
+        if (!schoolCodeClaims.Any())
+            return schoolCodes;
+
+        foreach (Claim claim in schoolCodeClaims)
+        {
+            if (claim.Value.Contains(','))
             {
-                AppUser user = await GetCurrentUser();
-
-                IList<Claim> claims = await _userManager.GetClaimsAsync(user);
-
-                schoolCodeClaims = claims.Where(claim => claim.Type == "Schools").ToList();
+                string[] codes = claim.Value.Split(',');
+                schoolCodes.AddRange(codes);
             }
-
-            if (!schoolCodeClaims.Any())
-                return schoolCodes;
-
-            foreach (Claim claim in schoolCodeClaims)
+            else
             {
-                if (claim.Value.Contains(','))
-                {
-                    string[] codes = claim.Value.Split(',');
-                    foreach (string code in codes)
-                    {
-                        schoolCodes.Add(code);
-                    }
-                }
-                else
-                {
-                    schoolCodes.Add(claim.Value);
-                }
+                schoolCodes.Add(claim.Value);
             }
         }
 

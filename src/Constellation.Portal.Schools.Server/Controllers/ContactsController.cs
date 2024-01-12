@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
-using Constellation.Application.Features.Partners.SchoolContacts.Models;
-using Constellation.Application.Features.Partners.SchoolContacts.Queries;
-using Constellation.Application.Features.Portal.School.Contacts.Commands;
+using Application.Models.Identity;
 using Constellation.Application.SchoolContacts.CreateContactWithRole;
+using Constellation.Application.SchoolContacts.GetContactsWithRoleFromSchool;
+using Constellation.Application.SchoolContacts.RequestContactRemoval;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,41 +14,49 @@ public class ContactsController : BaseAPIController
     private readonly IMediator _mediator;
     private readonly Serilog.ILogger _logger;
 
-    public ContactsController(IMediator mediator, Serilog.ILogger logger)
+    public ContactsController(
+        IMediator mediator, 
+        Serilog.ILogger logger)
 	{
         _mediator = mediator;
         _logger = logger.ForContext<SchoolsController>();
     }
 
     [HttpGet("FromSchool/{code}")]
-    public async Task<List<ContactWithRoleForList>> Get(string code)
+    public async Task<ApiResult<List<ContactResponse>>> Get(string code)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.Information("Requested to get list of school contacts for user {user}", user.DisplayName);
 
-        var contacts = await _mediator.Send(new GetContactsWithRoleFromSchoolQuery { Code = code });
+        Result<List<ContactResponse>> contacts = await _mediator.Send(new GetContactsWithRoleFromSchoolQuery(code));
 
-        return contacts.ToList();
+        return ApiResult.FromResult(contacts);
     }
 
-    [HttpPost("{id}/Remove")]
-    public async Task Remove([FromRoute] int ContactId, [FromBody] RequestRemovalOfSchoolContactCommand Command)
+    [HttpPost("{id:int}/Remove")]
+    public async Task<ApiResult> Remove(
+        [FromRoute] int id, 
+        [FromBody] RequestContactRemovalCommand command)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
-        _logger.Information("Requested to remove School Contact by {user} with details {@details}", user.DisplayName, Command);
+        _logger.Information("Requested to remove School Contact by {user} with details {@details}", user.DisplayName, command);
 
-        await _mediator.Send(Command);
+        Result? response = await _mediator.Send(command);
+
+        return ApiResult.FromResult(response);
     }
 
     [HttpPost("new")]
-    public async Task Createnew([FromBody] CreateContactWithRoleCommand Command)
+    public async Task<ApiResult> CreateNew([FromBody] CreateContactWithRoleCommand command)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
-        _logger.Information("Requested to create new School Contact by {user} with details {@details}", user.DisplayName, Command);
+        _logger.Information("Requested to create new School Contact by {user} with details {@details}", user.DisplayName, command);
 
-        await _mediator.Send(Command);
+        Result? response = await _mediator.Send(command);
+
+        return ApiResult.FromResult(response);
     }
 }

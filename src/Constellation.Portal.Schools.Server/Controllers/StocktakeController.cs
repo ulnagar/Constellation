@@ -1,8 +1,11 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
-using Constellation.Application.Features.Portal.School.Stocktake.Commands;
-using Constellation.Application.Features.Portal.School.Stocktake.Models;
-using Constellation.Application.Features.Portal.School.Stocktake.Queries;
+using Application.Models.Identity;
+using Constellation.Application.Stocktake.CancelSighting;
+using Constellation.Application.Stocktake.GetCurrentStocktakeEvents;
+using Constellation.Application.Stocktake.GetStocktakeSightingsForSchool;
+using Constellation.Application.Stocktake.RegisterSighting;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,48 +22,57 @@ public class StocktakeController : BaseAPIController
     }
 
     [HttpGet("Events")]
-    public async Task<List<StocktakeEventsForList>> GetEvents()
+    public async Task<ApiResult<List<StocktakeEventResponse>>> GetEvents()
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve list of current stocktake events by user {user}", user.DisplayName);
 
-        var events = await _mediator.Send(new GetCurrentStocktakeEventsQuery());
+        Result<List<StocktakeEventResponse>>? events = await _mediator.Send(new GetCurrentStocktakeEventsQuery());
 
-        return events.ToList();
+        return ApiResult.FromResult(events);
     }
 
     [HttpGet("Events/{eventId:guid}/Sightings/{schoolCode}")]
-    public async Task<List<StocktakeSightingsForList>> GetSightings([FromRoute] Guid eventId, [FromRoute] string schoolCode)
+    public async Task<ApiResult<List<StocktakeSightingResponse>>> GetSightings(
+        [FromRoute] Guid eventId, 
+        [FromRoute] string schoolCode)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve list of sightings for school {code} for event {event} by user {user}", schoolCode, eventId, user.DisplayName);
 
-        var sightings = await _mediator.Send(new GetStocktakeSightingsForSchoolQuery { SchoolCode = schoolCode, StocktakeEvent = eventId });
+        Result<List<StocktakeSightingResponse>>? sightings = await _mediator.Send(new GetStocktakeSightingsForSchoolQuery(schoolCode, eventId));
 
-        return sightings.ToList();
+        return ApiResult.FromResult(sightings);
     }
 
     [HttpPost("{id:guid}/Remove")]
-    public async Task Remove([FromRoute] Guid StocktakeId, [FromBody] CancelStocktakeSightingCommand Command)
+    public async Task<ApiResult> Remove(
+        [FromRoute] Guid stocktakeId, 
+        [FromBody] CancelSightingCommand command)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
-        Command.CancelledBy = user.Email;
+        CancelSightingCommand completeCommand = command with { CancelledBy = user.Email };
 
-        _logger.Information("Requested to remove Stocktake Sighting by {user} with details {@details}", user.DisplayName, Command);
+        _logger.Information("Requested to remove Stocktake Sighting by {user} with details {@details}", user.DisplayName, command);
 
-        await _mediator.Send(Command);
+        Result? response = await _mediator.Send(completeCommand);
+
+        return ApiResult.FromResult(response);
     }
 
     [HttpPost("Submit")]
-    public async Task SubmitSighting([FromBody] RegisterSightedDeviceForStocktakeCommand command)
+    public async Task<ApiResult> SubmitSighting(
+        [FromBody] RegisterSightingCommand command)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.Information("Submitting stocktake sighting by user {user} with details {@details}", user.DisplayName, command);
 
-        await _mediator.Send(command);
+        Result? response = await _mediator.Send(command);
+
+        return ApiResult.FromResult(response);
     }
 }

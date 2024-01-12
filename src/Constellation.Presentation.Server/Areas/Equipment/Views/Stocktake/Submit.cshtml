@@ -1,14 +1,14 @@
-﻿@using Constellation.Application.Features.Portal.School.Stocktake.Commands
+﻿@model StaffStocktakeSightingViewModel
+
 @using Constellation.Core.Models.Stocktake
 @using Constellation.Presentation.Server.Areas.Equipment.Models.Stocktake
-@model StaffStocktakeSightingViewModel
 
 <h2>Stocktake Device Sighting</h2>
 
 <form asp-action="Submit" asp-controller="Stocktake" asp-area="Equipment" method="post">
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.HiddenFor(model => model.Command.StocktakeEventId)
+        @Html.HiddenFor(model => model.StocktakeEventId)
 
         <div class="form-group row">
             <div class="col-md-8 alert alert-warning">
@@ -26,8 +26,8 @@
         <div class="form-group row">
             <label class="col-md-2">Asset Number</label>
             <div class="col-md-3">
-                <input asp-for="Command.AssetNumber" class="form-control" placeholder="AC00000000" />
-                <span asp-validation-for="Command.AssetNumber" class="text-danger"></span>
+                <input asp-for="AssetNumber" class="form-control" placeholder="AC00000000" />
+                <span asp-validation-for="AssetNumber" class="text-danger"></span>
             </div>
             <div class="col-md-5 alert alert-warning">
                 The Aurora College asset number is on a white label with a black barcode. Asset numbers start with AC and contain eight digits. You only need to enter the digits, without the leading zeroes. E.g. AC00001234 becomes 1234.
@@ -37,8 +37,8 @@
         <div class="form-group row">
             <label class="col-md-2">Serial Number</label>
             <div class="col-md-3">
-                <input asp-for="Command.SerialNumber" class="form-control" placeholder="LT01F123" />
-                <span asp-validation-for="Command.SerialNumber" class="text-danger"></span>
+                <input asp-for="SerialNumber" class="form-control" placeholder="LT01F123" />
+                <span asp-validation-for="SerialNumber" class="text-danger"></span>
             </div>
             <div class="col-md-5 alert alert-warning">
                 The vendor serial number for the equipment. This can be in a range of locations, depending on the vendor. Student laptop serial numbers are usually on a sticker on the bottom of the device.
@@ -48,8 +48,8 @@
         <div class="form-group row">
             <label class="col-md-2">Device Description</label>
             <div class="col-md-3">
-                <input asp-for="Command.Description" class="form-control" placeholder="Lenovo Laptop" />
-                <span asp-validation-for="Command.Description" class="text-danger"></span>
+                <input asp-for="Description" class="form-control" placeholder="Lenovo Laptop" />
+                <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <div class="col-md-5 alert alert-warning">
                 A description or the type of the device. E.g. "Lenovo Laptop", or "HP Monitor", etc.
@@ -61,7 +61,7 @@
                 <div class="form-group row">
                     <label class="col-md-5">User Type</label>
                     <div class="col-md-7 pl-1">
-                        <select asp-for="Command.UserType" onchange="UpdateUserType()" class="form-control" id="UserType">
+                        <select asp-for="UserType" onchange="UpdateUserType()" class="form-control" id="UserType">
                             <option value="">-- Select --</option>
                             <option value="@StocktakeSighting.UserTypes.Student">@StocktakeSighting.UserTypes.Student</option>
                             <option value="@StocktakeSighting.UserTypes.Staff">@StocktakeSighting.UserTypes.Staff</option>
@@ -69,13 +69,13 @@
                             <option value="@StocktakeSighting.UserTypes.CommunityMember">@StocktakeSighting.UserTypes.CommunityMember</option>
                             <option value="@StocktakeSighting.UserTypes.Other">@StocktakeSighting.UserTypes.Other</option>
                         </select>
-                        <span asp-validation-for="Command.UserType" class="text-danger"></span>
-                        <span asp-validation-for="Command.UserName" class="text-danger"></span>
+                        <span asp-validation-for="UserType" class="text-danger"></span>
+                        <span asp-validation-for="UserName" class="text-danger"></span>
                     </div>
                     <div class="w-100"></div>
                     <label class="col-md-5 mt-3">User</label>
                     <div class="col-md-7 mt-3 pl-1">
-                        @Html.HiddenFor(model => model.Command.UserCode)
+                        @Html.HiddenFor(model => model.UserCode)
                         <div id="UserTypeStudent">
                             <select id="Student_UserCode" onchange="UpdateStudent()" class="form-control">
                                 <option value="">-- Select --</option>
@@ -84,8 +84,8 @@
                                     <option value="@student.StudentId">@student.DisplayName (@student.CurrentGrade)</option>
                                 }
                             </select>
-                            <span asp-validation-for="Command.UserCode" class="text-danger"></span>
-                            <span asp-validation-for="Command.UserName" class="text-danger"></span>
+                            <span asp-validation-for="UserCode" class="text-danger"></span>
+                            <span asp-validation-for="UserName" class="text-danger"></span>
                         </div>
                         <div id="UserTypeStaff">
                             <select id="Staff_UserCode" onchange="UpdateStaff()" class="form-control">
@@ -95,8 +95,8 @@
                                     <option value="@staff.StaffId">@staff.DisplayName</option>
                                 }
                             </select>
-                            <span asp-validation-for="Command.UserCode" class="text-danger"></span>
-                            <span asp-validation-for="Command.UserName" class="text-danger"></span>
+                            <span asp-validation-for="UserCode" class="text-danger"></span>
+                            <span asp-validation-for="UserName" class="text-danger"></span>
                         </div>
                         <div id="UserTypeSchool">
                             <select id="School_UserCode" onchange="UpdateSchool()" class="form-control">
@@ -106,12 +106,12 @@
                                     <option value="@school.Code">@school.Name</option>
                                 }
                             </select>
-                            <span asp-validation-for="Command.UserCode" class="text-danger"></span>
-                            <span asp-validation-for="Command.UserName" class="text-danger"></span>
+                            <span asp-validation-for="UserCode" class="text-danger"></span>
+                            <span asp-validation-for="UserName" class="text-danger"></span>
                         </div>
                         <div id="UserTypeOther">
-                            <input asp-for="Command.UserName" class="form-control" />
-                            <span asp-validation-for="Command.UserName" class="text-danger"></span>
+                            <input asp-for="UserName" class="form-control" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
                         </div>
                     </div>
                 </div>
@@ -124,7 +124,7 @@
         <div class="form-group row">
             <label class="col-md-2">Location Type</label>
             <div class="col-md-3">
-                <select asp-for="Command.LocationCategory" onchange="UpdateLocationType()" class="form-control" id="LocationType">
+                <select asp-for="LocationCategory" onchange="UpdateLocationType()" class="form-control" id="LocationType">
                     <option value="">-- Select --</option>
                     <option value="@StocktakeSighting.LocationCategories.AuroraCollege">@StocktakeSighting.LocationCategories.AuroraCollege</option>
                     <option value="@StocktakeSighting.LocationCategories.PublicSchool">@StocktakeSighting.LocationCategories.PublicSchool</option>
@@ -132,8 +132,8 @@
                     <option value="@StocktakeSighting.LocationCategories.PrivateResidence">@StocktakeSighting.LocationCategories.PrivateResidence</option>
                     <option value="@StocktakeSighting.LocationCategories.Other">@StocktakeSighting.LocationCategories.Other</option>
                 </select>
-                <span asp-validation-for="Command.LocationCategory" class="text-danger"></span>
-                <span asp-validation-for="Command.LocationName" class="text-danger"></span>
+                <span asp-validation-for="LocationCategory" class="text-danger"></span>
+                <span asp-validation-for="LocationName" class="text-danger"></span>
             </div>
             <div class="col-md-5 alert alert-warning">
                 Select the type of location (Aurora College Coordinating Office, Partner School, State Office, Private Residence, or Other).
@@ -143,7 +143,7 @@
         <div class="form-group row">
             <label class="col-md-2">Location</label>
             <div class="col-md-3">
-                @Html.HiddenFor(model => model.Command.LocationCode)
+                @Html.HiddenFor(model => model.LocationCode)
                 <div id="LocationTypeSchool">
                     <select id="School_LocationCode" onchange="UpdateSchoolLocation()" class="form-control">
                         <option value="">-- Select --</option>
@@ -152,12 +152,12 @@
                             <option value="@school.Code">@school.Name</option>
                         }
                     </select>
-                    <span asp-validation-for="Command.LocationCode" class="text-danger"></span>
-                    <span asp-validation-for="Command.LocationName" class="text-danger"></span>
+                    <span asp-validation-for="LocationCode" class="text-danger"></span>
+                    <span asp-validation-for="LocationName" class="text-danger"></span>
                 </div>
                 <div id="LocationTypeOther">
-                    <input asp-for="Command.LocationName" class="form-control" />
-                    <span asp-validation-for="Command.LocationName" class="text-danger"></span>
+                    <input asp-for="LocationName" class="form-control" />
+                    <span asp-validation-for="LocationName" class="text-danger"></span>
                 </div>
             </div>
             <div class="col-md-5 alert alert-warning" id="LocationHelpText"></div>
@@ -166,8 +166,8 @@
         <div class="form-group row">
             <label class="col-md-2">Comment</label>
             <div class="col-md-3">
-                <input asp-for="Command.Comment" rows="5" cols="100" class="form-control" />
-                <span asp-validation-for="Command.Comment" class="text-danger"></span>
+                <input asp-for="Comment" rows="5" cols="100" class="form-control" />
+                <span asp-validation-for="Comment" class="text-danger"></span>
             </div>
             <div class="col-md-5 alert alert-warning">
                 Any notes you have about the condition of the device. E.g. "Has a cracked screen", or "Missing pen", etc.
@@ -230,8 +230,8 @@
             var studentName = $('#Student_UserCode option:selected').text();
 
             // Set the UserCode field to that value
-            $('#Command_UserCode').val(studentId);
-            $('#Command_UserName').val(studentName);
+            $('#UserCode').val(studentId);
+            $('#UserName').val(studentName);
         }
 
         function UpdateStaff() {
@@ -240,8 +240,8 @@
             var staffName = $('#Staff_UserCode option:selected').text();
 
             // Set the UserCode field to that value
-            $('#Command_UserCode').val(staffId);
-            $('#Command_UserName').val(staffName);
+            $('#UserCode').val(staffId);
+            $('#UserName').val(staffName);
         }
 
         function UpdateSchool() {
@@ -263,9 +263,9 @@
             $('#LocationTypeOther').hide();
 
             // Reset all Location options to blank
-            $('#Command_LocationCode').val('');
+            $('#LocationCode').val('');
             $('#School_LocationCode').val('');
-            $('#Command_LocationName').val('');
+            $('#LocationName').val('');
             $('#LocationHelpText').html('');
 
             // Show appropriate UserName option based on UserType value
@@ -293,8 +293,8 @@
             var schoolName = $('#School_LocationCode option:selected').text();
 
             // Set the UserCode field to that value
-            $('#Command_LocationCode').val(schoolId);
-            $('#Command_LocationName').val(schoolName);
+            $('#LocationCode').val(schoolId);
+            $('#LocationName').val(schoolName);
         }
     </script>
 }

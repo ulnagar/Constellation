@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Constellation.Application.Features.Portal.School.Home.Models;
-using Constellation.Application.Features.Portal.School.Home.Queries;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.StaffMembers.GetStaffFromSchool;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Constellation.Infrastructure.Features.Portal.School.Home.Queries
 {
-    public class GetStaffFromSchoolForSelectionQueryHandler : IRequestHandler<GetStaffFromSchoolForSelectionQuery, ICollection<StaffFromSchoolForDropdownSelection>>
+    public class GetStaffFromSchoolForSelectionQueryHandler : IRequestHandler<GetStaffFromSchoolQuery, ICollection<StaffFromSchoolForDropdownSelection>>
     {
         private readonly IAppDbContext _context;
         private readonly IMapper _mapper;
@@ -24,7 +23,7 @@ namespace Constellation.Infrastructure.Features.Portal.School.Home.Queries
             _mapper = mapper;
         }
 
-        public async Task<ICollection<StaffFromSchoolForDropdownSelection>> Handle(GetStaffFromSchoolForSelectionQuery request, CancellationToken cancellationToken)
+        public async Task<ICollection<StaffFromSchoolForDropdownSelection>> Handle(GetStaffFromSchoolQuery request, CancellationToken cancellationToken)
         {
             var staff = await _context.Staff
                 .Where(staff => staff.SchoolCode == request.SchoolCode && !staff.IsDeleted)

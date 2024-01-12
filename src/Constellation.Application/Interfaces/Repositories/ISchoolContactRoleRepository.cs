@@ -12,7 +12,8 @@ namespace Constellation.Application.Interfaces.Repositories
     {
         Task<bool> Exists(int ContactId, string SchoolCode, string Position, CancellationToken cancellationToken = default);
         Task<List<SchoolContactRole>> GetForContact(int ContactId, CancellationToken cancellationToken = default);
-
+        Task<SchoolContactRole> GetWithContactById(int assignmentId, CancellationToken cancellationToken = default);
+        
         Task<SchoolContactRole> WithDetails(int id);
         SchoolContactRole WithFilter(Expression<Func<SchoolContactRole, bool>> predicate);
         ICollection<SchoolContactRole> All();

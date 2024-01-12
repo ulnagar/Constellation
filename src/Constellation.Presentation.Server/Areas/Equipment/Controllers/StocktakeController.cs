@@ -1,8 +1,7 @@
 ﻿using Constellation.Application.Features.Equipment.Stocktake.Queries;
-using Constellation.Application.Features.Portal.School.Home.Queries;
-using Constellation.Application.Features.Portal.School.Stocktake.Commands;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Stocktake.RegisterSighting;
 using Constellation.Core.Models;
 using Constellation.Presentation.Server.Areas.Equipment.Models.Stocktake;
 using Constellation.Presentation.Server.Helpers.Attributes;
@@ -14,18 +13,24 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
 {
+    using Application.Features.Equipment.Stocktake.Models;
+    using Application.StaffMembers.Models;
+    using Application.Students.GetStudentsFromSchoolForSelectionList;
+    using Core.Shared;
+    using ValidationResult = FluentValidation.Results.ValidationResult;
+
     [Area("Equipment")]
     [Roles(AuthRoles.Admin, AuthRoles.EquipmentEditor, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class StocktakeController : Controller
     {
         private readonly IMediator _mediator;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IValidator<RegisterSightedDeviceForStocktakeCommand> _validator;
+        private readonly IValidator<RegisterSightingCommand> _validator;
 
         public StocktakeController(
             IMediator mediator, 
             IUnitOfWork unitOfWork,
-            IValidator<RegisterSightedDeviceForStocktakeCommand> validator)
+            IValidator<RegisterSightingCommand> validator)
         {
             _mediator = mediator;
             _unitOfWork = unitOfWork;
@@ -181,16 +186,18 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
 
         public async Task<IActionResult> Submit(Guid id)
         {
-            var staffMember = await GetStaffMember();
+            Staff staffMember = await GetStaffMember();
 
-            var viewModel = new StaffStocktakeSightingViewModel();
-            viewModel.Command.StocktakeEventId = id;
+            StaffStocktakeSightingViewModel viewModel = new() { StocktakeEventId = id };
 
-            var students = await _mediator.Send(new GetStudentsFromSchoolForSelectionQuery { SchoolCode = staffMember.SchoolCode });
-            viewModel.Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
-            var staffMembers = await _mediator.Send(new GetStaffForSelectionQuery());
+            Result<List<StudentSelectionResponse>> students = await _mediator.Send(new GetStudentsFromSchoolForSelectionQuery(staffMember.SchoolCode));
+            if (students.IsSuccess)
+                viewModel.Students = students.Value.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+            
+            ICollection<StaffSelectionListResponse> staffMembers = await _mediator.Send(new GetStaffForSelectionQuery());
             viewModel.Staff = staffMembers.OrderBy(staff => staff.LastName).ToList();
-            var schools = await _mediator.Send(new GetSchoolsForSelectionQuery());
+            
+            ICollection<PartnerSchoolForDropdownSelection> schools = await _mediator.Send(new GetSchoolsForSelectionQuery());
             viewModel.Schools = schools.OrderBy(school => school.Name).ToList();
 
             return View(viewModel);
@@ -200,30 +207,44 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Submit(StaffStocktakeSightingViewModel viewModel)
         {
-            var staffMember = await GetStaffMember();
+            Staff staffMember = await GetStaffMember();
 
-            var result = await _validator.ValidateAsync(viewModel.Command);
+            RegisterSightingCommand command = new(
+                viewModel.StocktakeEventId,
+                viewModel.SerialNumber,
+                viewModel.AssetNumber,
+                viewModel.Description,
+                viewModel.LocationCategory,
+                viewModel.LocationName,
+                viewModel.LocationCode,
+                viewModel.UserType,
+                viewModel.UserName,
+                viewModel.UserCode,
+                viewModel.Comment,
+                staffMember.EmailAddress,
+                DateTime.Now);
+            
+            ValidationResult result = await _validator.ValidateAsync(command);
             if (!result.IsValid)
             {
-                result.AddToModelState(this.ModelState, "Command");
+                result.AddToModelState(this.ModelState);
             }
 
             if (!ModelState.IsValid)
             {
-                var students = await _mediator.Send(new GetStudentsFromSchoolForSelectionQuery { SchoolCode = staffMember.SchoolCode });
-                viewModel.Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
-                var staffMembers = await _mediator.Send(new GetStaffForSelectionQuery());
+                Result<List<StudentSelectionResponse>> students = await _mediator.Send(new GetStudentsFromSchoolForSelectionQuery(staffMember.SchoolCode));
+                if (students.IsSuccess)
+                    viewModel.Students = students.Value.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+                
+                ICollection<StaffSelectionListResponse> staffMembers = await _mediator.Send(new GetStaffForSelectionQuery());
                 viewModel.Staff = staffMembers.OrderBy(staff => staff.LastName).ToList();
-                var schools = await _mediator.Send(new GetSchoolsForSelectionQuery());
+                
+                ICollection<PartnerSchoolForDropdownSelection> schools = await _mediator.Send(new GetSchoolsForSelectionQuery());
                 viewModel.Schools = schools.OrderBy(school => school.Name).ToList();
 
                 return View(viewModel);
             }
-
-            var command = viewModel.Command;
-            command.SightedAt = DateTime.Now;
-            command.SightedBy = staffMember.EmailAddress;
-
+            
             await _mediator.Send(command);
 
             return RedirectToAction("StaffDashboard", new { id = command.StocktakeEventId });

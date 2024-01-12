@@ -149,6 +149,16 @@ public class StaffRepository : IStaffRepository
             .Where(staff => !staff.IsDeleted)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Staff>> GetActiveFromSchool(
+        string schoolCode, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Staff>()
+            .Where(staff => 
+                !staff.IsDeleted &&
+                staff.SchoolCode == schoolCode)
+            .ToListAsync(cancellationToken);
+
     public async Task<List<string>> GetAllActiveStaffIds(
         CancellationToken cancellationToken = default) =>
         await _context

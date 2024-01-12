@@ -20,6 +20,7 @@ public interface IStaffRepository
     Task<List<Staff>> GetFacultyHeadTeachersForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Staff>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<string>> GetAllActiveStaffIds(CancellationToken cancellationToken = default);
+    Task<List<Staff>> GetActiveFromSchool(string schoolCode, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get current staff member with the specified email address.

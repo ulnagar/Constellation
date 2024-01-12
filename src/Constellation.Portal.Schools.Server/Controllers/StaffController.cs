@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
-using Constellation.Application.Features.Portal.School.Home.Models;
-using Constellation.Application.Features.Portal.School.Home.Queries;
+using Application.Models.Identity;
+using Application.StaffMembers.Models;
+using Constellation.Application.StaffMembers.GetStaffFromSchool;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,14 +20,14 @@ public class StaffController : BaseAPIController
     }
 
     [HttpGet("ForDropdown/{schoolCode}")]
-    public async Task<List<StaffFromSchoolForDropdownSelection>> GetStaffForDropdown([FromRoute] string schoolCode)
+    public async Task<ApiResult<List<StaffSelectionListResponse>>> GetStaffForDropdown([FromRoute] string schoolCode)
     {
-        var user = await GetCurrentUser();
+        AppUser? user = await GetCurrentUser();
 
         _logger.Information("Requested to retrieve staff members for school {schoolCode} by user {user}", schoolCode, user.DisplayName);
 
-        var staff = await _mediator.Send(new GetStaffFromSchoolForSelectionQuery { SchoolCode = schoolCode });
+        Result<List<StaffSelectionListResponse>>? staff = await _mediator.Send(new GetStaffFromSchoolQuery(schoolCode));
 
-        return staff.ToList();
+        return ApiResult.FromResult(staff);
     }
 }
