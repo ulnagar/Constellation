@@ -1,15 +1,16 @@
 ﻿@page "/Awards/"
 
-@    using Constellation.Application.Features.Portal.School.Home.Models;
-@    using Constellation.Application.Awards.GetSummaryForStudent;
-@    using Constellation.Core.Models.Identifiers;
-    using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
+@using Constellation.Application.Awards.GetSummaryForStudent;
+@using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList
+@using Constellation.Core.Models.Identifiers;
+@using System.Net.Mime
 
 @attribute [Authorize]
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
+@inject IModalService Modal
 
 <Loader IsLoading="@IsLoading">
     <h2>Student Awards</h2>
@@ -131,8 +132,8 @@
 
     private bool IsLoading { get; set; } = false;
 
-    public ICollection<StudentFromSchoolForDropdownSelection> Students { get; set; } = new List<StudentFromSchoolForDropdownSelection>();
-    public StudentFromSchoolForDropdownSelection SelectedStudent { get; set; }
+    public ICollection<StudentSelectionResponse> Students { get; set; } = new List<StudentSelectionResponse>();
+    public StudentSelectionResponse SelectedStudent { get; set; }
 
     public StudentAwardSummaryResponse AwardSummary { get; set; } = new(0, 0, 0, 0, new());
 
@@ -144,9 +145,30 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            var students = await Http.GetFromJsonAsync<List<StudentFromSchoolForDropdownSelection>>($"api/Students/ForDropdown/{SelectedSchool.Code}");
+            ApiResult<List<StudentSelectionResponse>> studentsRequest = await Http.GetFromJsonAsync<ApiResult<List<StudentSelectionResponse>>>($"api/Students/ForDropdown/{SelectedSchool.Code}");
 
-            Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+            if (!studentsRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", studentsRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(studentsRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+
+            Students = studentsRequest.Value
+                .OrderBy(student => student.CurrentGrade)
+                .ThenBy(student => student.LastName)
+                .ThenBy(student => student.FirstName)
+                .ToList();
 
             SelectedStudent = null;
         }
@@ -176,7 +198,24 @@
 
         if (SelectedStudent != null)
         {
-            AwardSummary = await Http.GetFromJsonAsync<StudentAwardSummaryResponse>($"api/Awards/ForStudent/{SelectedStudent.StudentId}");
+            ApiResult<StudentAwardSummaryResponse> awardSummaryRequest = await Http.GetFromJsonAsync<ApiResult<StudentAwardSummaryResponse>>($"api/Awards/ForStudent/{SelectedStudent.StudentId}");
+
+            if (!awardSummaryRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", awardSummaryRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(awardSummaryRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
         }
 
         IsLoading = false;
@@ -190,18 +229,37 @@
         {
             IsLoading = true;
 
-            var response = await Http.PostAsJsonAsync($"api/Awards/ForStudent/{SelectedStudent.StudentId}/Download/{awardId.ToString()}", new { });
+            HttpResponseMessage response = await Http.PostAsJsonAsync($"api/Awards/ForStudent/{SelectedStudent.StudentId}/Download/{awardId.ToString()}", new { });
+            IEnumerable<string> contentType = response.Content.Headers.GetValues("Content-Type").ToList();
+
+            if (contentType.Any(entry => entry.Contains(MediaTypeNames.Application.Json)))
+            {
+                ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
+
+                ModalParameters parameters = new() { { "Text", result.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(result.Error.Code, parameters, options);
+                await modal.Result;
+
+                return;
+            }
+            
             // This returns the file in the response variable.
             // Need to push it to the browser as a file download, possibly using JS
             // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0
 
             if (response.IsSuccessStatusCode)
             {
-                var fileStream = response.Content.ReadAsStream();
-                var award = AwardSummary.RecentAwards.First(award => award.AwardId == awardId);
-                var filename = $"{SelectedStudent.DisplayName} - Astra Award - {award.AwardedOn:dd-MM-yyyy} - {award.IncidentId}.pdf";
+                Stream fileStream = await response.Content.ReadAsStreamAsync();
+                StudentAwardSummaryResponse.StudentAwardResponse award = AwardSummary.RecentAwards.First(award => award.AwardId == awardId);
+                string filename = $"{SelectedStudent.DisplayName} - Astra Award - {award.AwardedOn:dd-MM-yyyy} - {award.IncidentId}.pdf";
 
-                using var streamRef = new DotNetStreamReference(stream: fileStream);
+                using DotNetStreamReference streamRef = new(stream: fileStream);
 
                 await JS.InvokeVoidAsync("downloadFileFromStream", filename, streamRef);
             }

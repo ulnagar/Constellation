@@ -1,9 +1,7 @@
 ﻿@page "/Contacts/"
-@    using Blazored.Modal.Services;
-@    using Blazored.Modal;
-@    using Constellation.Application.Features.Partners.SchoolContacts.Models;
-@    using Constellation.Application.Features.Portal.School.Contacts.Models;
-    using Constellation.Application.Schools.GetSchoolContactDetails;
+
+@using Constellation.Application.SchoolContacts.GetContactsWithRoleFromSchool
+@using Constellation.Application.Schools.GetSchoolContactDetails;
 
 @attribute [Authorize]
 
@@ -49,7 +47,7 @@
         <div class="offset-1 col-md-3"><button class="btn btn-success" @onclick="NewContact">Add New Contact</button></div>
     </div>
 
-    <GroupedDataTable Items="Contacts.GroupBy(contact => contact.Position).ToList()" TItem="ContactWithRoleForList" TKey="string">
+    <GroupedDataTable Items="Contacts.GroupBy(contact => contact.Position).ToList()" TItem="ContactResponse" TKey="string">
         <TableHeader>
             <th>Name</th>
             <th>Phone</th>
@@ -75,8 +73,8 @@
 
     private bool IsLoading { get; set; } = false;
 
-    public SchoolContactDetails SchoolDetails { get; set; } = new();
-    public ICollection<ContactWithRoleForList> Contacts { get; set; } = new List<ContactWithRoleForList>();
+    public SchoolContactDetailsResponse SchoolDetails { get; set; }
+    public List<ContactResponse> Contacts { get; set; } = new List<ContactResponse>();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -86,8 +84,42 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            SchoolDetails = await Http.GetFromJsonAsync<SchoolContactDetails>($"api/Schools/{SelectedSchool.Code}/Details");
-            Contacts = await Http.GetFromJsonAsync<List<ContactWithRoleForList>>($"api/Contacts/FromSchool/{SelectedSchool.Code}");
+            ApiResult<SchoolContactDetailsResponse> schoolDetailsRequest = await Http.GetFromJsonAsync<ApiResult<SchoolContactDetailsResponse>>($"api/Schools/{SelectedSchool.Code}/Details");
+            if (!schoolDetailsRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", schoolDetailsRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(schoolDetailsRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+            
+            ApiResult<List<ContactResponse>> contactsRequest = await Http.GetFromJsonAsync<ApiResult<List<ContactResponse>>>($"api/Contacts/FromSchool/{SelectedSchool.Code}");
+            if (!contactsRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", contactsRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(contactsRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+            
             OrderContacts();
         }
 

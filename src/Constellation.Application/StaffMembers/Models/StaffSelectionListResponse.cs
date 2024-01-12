@@ -3,4 +3,7 @@
 public sealed record StaffSelectionListResponse(
     string StaffId,
     string FirstName,
-    string LastName);
+    string LastName)
+{
+    public string DisplayName => $"{FirstName} {LastName}";
+}

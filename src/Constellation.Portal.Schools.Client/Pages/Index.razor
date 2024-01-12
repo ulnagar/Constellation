@@ -3,6 +3,7 @@
 @attribute [Authorize]
 
 @inject HttpClient Http
+@inject IModalService Modal
 
 <Loader IsLoading="@IsLoading">
     <h1>Aurora College Schools Portal</h1>
@@ -25,11 +26,11 @@
 @code{
     [CascadingParameter]
     public SchoolDto SelectedSchool { get; set; }
-    public SchoolDto CurrentlySelectedSchool { get; set; }
+    private SchoolDto CurrentlySelectedSchool { get; set; }
 
     private bool IsLoading { get; set; } = false;
 
-    public List<StudentDto> Students { get; set; } = new List<StudentDto>();
+    private List<StudentDto> Students { get; set; } = new List<StudentDto>();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -39,8 +40,30 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            var students = await Http.GetFromJsonAsync<List<StudentDto>>($"api/Students/FromSchool/{SelectedSchool.Code}");
-            Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();    
+            var studentsRequest = await Http.GetFromJsonAsync<ApiResult<List<StudentDto>>>($"api/Students/FromSchool/{SelectedSchool.Code}");
+            if (!studentsRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", studentsRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(studentsRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+            
+            
+            Students = studentsRequest.Value
+                .OrderBy(student => student.CurrentGrade)
+                .ThenBy(student => student.LastName)
+                .ThenBy(student => student.FirstName)
+                .ToList();    
         }
 
         IsLoading = false;

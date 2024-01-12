@@ -5,6 +5,7 @@
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
+@inject IModalService Modal
 
 <Loader IsLoading="@IsLoading">
     <h2>Science Practical Roll</h2>
@@ -105,7 +106,25 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            MarkedRoll = await Http.GetFromJsonAsync<ScienceLessonRollDetails>($"api/Rolls/Details/{RollId}?lessonId={LessonId}");
+            ApiResult<ScienceLessonRollDetails> rollRequest = await Http.GetFromJsonAsync<ApiResult<ScienceLessonRollDetails>>($"api/Rolls/Details/{RollId}?lessonId={LessonId}");
+            if (!rollRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", rollRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(rollRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+
+            MarkedRoll = rollRequest.Value;
 
             if (MarkedRoll.LessonDate > DateTime.Today.AddDays(-14))
             {

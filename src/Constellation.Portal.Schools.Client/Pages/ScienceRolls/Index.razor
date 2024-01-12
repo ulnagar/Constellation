@@ -6,6 +6,7 @@
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
+@inject IModalService Modal
 
 <Loader IsLoading="@IsLoading">
     <h2>Science Practical Rolls</h2>
@@ -106,8 +107,25 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            Lessons = await Http.GetFromJsonAsync<List<ScienceLessonRollSummary>>($"api/Rolls/ForSchool/{SelectedSchool.Code}");
+            var lessonsRequest = await Http.GetFromJsonAsync<ApiResult<List<ScienceLessonRollSummary>>>($"api/Rolls/ForSchool/{SelectedSchool.Code}");
+            if (!lessonsRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", lessonsRequest.Error!.Message } };
 
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(lessonsRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+
+            Lessons = lessonsRequest.Value;
             FilterLessons();
         }
 

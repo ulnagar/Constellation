@@ -1,4 +1,5 @@
 ﻿@page "/ScienceRolls/{LessonId:guid}/{RollId:guid}/Submit"
+
 @using Constellation.Application.SciencePracs.GetLessonRollSubmitContextForSchoolsPortal;
 @using Constellation.Application.SciencePracs.SubmitRoll;
 @using Constellation.Core.Models.Identifiers;
@@ -8,6 +9,7 @@
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IModalService Modal
 
 <Loader IsLoading="@IsLoading">
     <h2>Science Practical Roll</h2>
@@ -138,11 +140,29 @@
 
         if (RollId != Guid.Empty && RollId != CurrentRollId)
         {
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            AuthenticationState authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
             CurrentRollId = RollId;
 
-            Roll = await Http.GetFromJsonAsync<ScienceLessonRollForSubmit>($"api/Rolls/ForSubmit/{RollId}?lessonId={LessonId}");
+            ApiResult<ScienceLessonRollForSubmit> rollRequest = await Http.GetFromJsonAsync<ApiResult<ScienceLessonRollForSubmit>>($"api/Rolls/ForSubmit/{RollId}?lessonId={LessonId}");
+            if (!rollRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", rollRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(rollRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+
+            Roll = rollRequest.Value;
         }
 
         IsLoading = false;
@@ -191,8 +211,24 @@
             presentStudents,
             absentStudents);
 
-        await Http.PostAsJsonAsync<SubmitRollCommand>($"api/Rolls/Submit/{RollId}?lessonId={LessonId}", command);
+        HttpResponseMessage response = await Http.PostAsJsonAsync($"api/Rolls/Submit/{RollId}?lessonId={LessonId}", command);
+        ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
 
+        if (!result.IsSuccess)
+        {
+            ModalParameters parameters = new() { { "Text", result.Error!.Message } };
+
+            ModalOptions options = new()
+            {
+                Size = ModalSize.Automatic
+            };
+
+            IModalReference modal = Modal.Show<ErrorModal>(result.Error.Code, parameters, options);
+            await modal.Result;
+
+            return;
+        }
+        
         IsLoading = false;
 
         NavigationManager.NavigateTo("ScienceRolls");

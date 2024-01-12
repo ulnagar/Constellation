@@ -8,6 +8,7 @@
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
+@inject IModalService Modal
 
 <Loader IsLoading="@IsLoading">
     <h2>New School Contact</h2>
@@ -116,7 +117,23 @@
 
         CreateContactWithRoleCommand command = Context.ConvertToCommand();
 
-        await Http.PostAsJsonAsync<CreateContactWithRoleCommand>($"api/Contacts/New", command);
+        HttpResponseMessage response = await Http.PostAsJsonAsync($"api/Contacts/New", command);
+        ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
+
+        if (!result.IsSuccess)
+        {
+            ModalParameters parameters = new() { { "Text", result.Error!.Message } };
+
+            ModalOptions options = new()
+            {
+                Size = ModalSize.Automatic
+            };
+
+            IModalReference modal = Modal.Show<ErrorModal>(result.Error.Code, parameters, options);
+            await modal.Result;
+
+            return;
+        }
 
         IsLoading = false;
 

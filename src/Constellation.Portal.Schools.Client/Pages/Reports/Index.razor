@@ -2,12 +2,14 @@
 
 @using Constellation.Core.Extensions;
 @using Constellation.Application.Reports.GetStudentReportsForSchool;
+@using System.Net.Mime
 
 @attribute [Authorize]
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
+@inject IModalService Modal
 
 <Loader IsLoading="@IsLoading">
     <h2>School Reports</h2>
@@ -50,9 +52,25 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            Reports = await Http.GetFromJsonAsync<List<SchoolStudentReportResponse>>($"api/Reports/ForSchool/{SelectedSchool.Code}");
+            ApiResult<List<SchoolStudentReportResponse>> reportsResponse = await Http.GetFromJsonAsync<ApiResult<List<SchoolStudentReportResponse>>>($"api/Reports/ForSchool/{SelectedSchool.Code}");
+            if (!reportsResponse.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", reportsResponse.Error!.Message } };
 
-            Reports = Reports
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(reportsResponse.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+            
+            Reports = reportsResponse.Value
                 .OrderBy(report => report.Grade)
                 .ThenBy(report => report.LastName)
                 .ThenBy(report => report.FirstName)
@@ -68,20 +86,38 @@
         {
             IsLoading = true;
 
-            var response = await Http.PostAsJsonAsync<Guid>($"api/Reports/Download", ReportId);
+            HttpResponseMessage response = await Http.PostAsJsonAsync($"api/Reports/Download", ReportId);
+            IEnumerable<string> contentType = response.Content.Headers.GetValues("Content-Type").ToList();
+
+            if (contentType.Any(entry => entry.Contains(MediaTypeNames.Application.Json)))
+            {
+                ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
+
+                ModalParameters parameters = new() { { "Text", result.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(result.Error.Code, parameters, options);
+                await modal.Result;
+
+                return;
+            }
 
             // This returns the file in the response variable.
             // Need to push it to the browser as a file download, possibly using JS
             // https://docs.microsoft.com/en-us/aspnet/core/blazor/file-downloads?view=aspnetcore-6.0
 
-            var fileStream = response.Content.ReadAsStream();
+            Stream fileStream = await response.Content.ReadAsStreamAsync();
             string fileName = string.Empty;
 
-            var report = Reports.First(report => report.ReportId.Value == ReportId);
+            SchoolStudentReportResponse report = Reports.First(report => report.ReportId.Value == ReportId);
 
             fileName = $"{report.LastName}, {report.FirstName} - {report.ReportingPeriod}.pdf";
 
-            using var streamRef = new DotNetStreamReference(stream: fileStream);
+            using DotNetStreamReference streamRef = new(stream: fileStream);
 
             await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
         }

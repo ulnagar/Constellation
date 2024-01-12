@@ -1,11 +1,14 @@
 ﻿@page "/Timetables/View/{StudentId}"
+
 @using Constellation.Application.Extensions;
+@using System.Net.Mime
 
 @attribute [Authorize]
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
+@inject IModalService Modal
 
 <Loader IsLoading="@IsLoading">
     <h2>Student Timetables</h2>
@@ -146,7 +149,23 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            StudentTimetableData = await Http.GetFromJsonAsync<StudentTimetableDataDto>($"api/Timetables/ForStudent/{StudentId}");
+            var timetableRequest = await Http.GetFromJsonAsync<ApiResult<StudentTimetableDataDto>>($"api/Timetables/ForStudent/{StudentId}");
+            if (!timetableRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", timetableRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(timetableRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
         }
 
         if (SelectedSchool != null && CurrentlySelectedSchool != SelectedSchool && CurrentlySelectedSchool != null)
@@ -163,7 +182,25 @@
         {
             IsLoading = true;
 
-            var response = await Http.PostAsJsonAsync<string>($"api/Timetables/Download", StudentId);
+            HttpResponseMessage response = await Http.PostAsJsonAsync($"api/Timetables/Download", StudentId);
+            IEnumerable<string> contentType = response.Content.Headers.GetValues("Content-Type").ToList();
+
+            if (contentType.Any(entry => entry.Contains(MediaTypeNames.Application.Json)))
+            {
+                ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
+
+                ModalParameters parameters = new() { { "Text", result.Error!.Message } };
+
+                ModalOptions options = new()
+                    {
+                        Size = ModalSize.Automatic
+                    };
+
+                IModalReference modal = Modal.Show<ErrorModal>(result.Error.Code, parameters, options);
+                await modal.Result;
+
+                return;
+            }
 
             // This returns the file in the response variable.
             // Need to push it to the browser as a file download, possibly using JS

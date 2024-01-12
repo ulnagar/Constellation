@@ -1,21 +1,23 @@
 ﻿@page "/Stocktake/Submit/{StocktakeId:guid}"
 
-@    using Blazored.FluentValidation
-@    using Constellation.Application.Features.Portal.School.Home.Models;
-@    using Constellation.Application.Features.Portal.School.Stocktake.Commands;
-@    using Constellation.Core.Models.Stocktake
+@using Blazored.FluentValidation
+@using Constellation.Application.StaffMembers.Models
+@using Constellation.Application.Stocktake.RegisterSighting
+@using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList
+@using Constellation.Core.Models.Stocktake
 
 @attribute [Authorize]
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IModalService Modal
 
 <Loader IsLoading="@IsLoading">
     <h2>Stocktake Device Sighting</h2>
 
     <div class="form-horizontal">
-        <EditForm Model="Command" OnValidSubmit="SubmitResponse">
+        <EditForm Model="Form" OnValidSubmit="SubmitResponse">
             <FluentValidationValidator />
             <ValidationSummary />
 
@@ -35,7 +37,7 @@
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Asset Number</label>
                 <div class="col-md-3">
-                    <InputText @bind-Value="Command.AssetNumber" class="form-control" placeholder="e.g. AC00000000" />
+                    <InputText @bind-Value="Form.AssetNumber" class="form-control" placeholder="e.g. AC00000000" />
                 </div>
                 <div class="col-md-5 alert alert-warning">
                     The Aurora College asset number is on a white label with a black barcode. Asset numbers start with AC and contain eight digits. You only need to enter the digits, without the leading zeroes. E.g. AC00001234 becomes 1234.
@@ -45,7 +47,7 @@
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Serial Number</label>
                 <div class="col-md-3">
-                    <InputText @bind-Value="Command.SerialNumber" class="form-control" placeholder="e.g. LT01F123" />
+                    <InputText @bind-Value="Form.SerialNumber" class="form-control" placeholder="e.g. LT01F123" />
                 </div>
                 <div class="col-md-5 alert alert-warning">
                     The vendor serial number for the equipment. This can be in a range of locations, depending on the vendor. Student laptop serial numbers are usually on a sticker on the bottom of the device.
@@ -55,7 +57,7 @@
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Device Description</label>
                 <div class="col-md-3">
-                    <InputText @bind-Value="Command.Description" class="form-control" placeholder="e.g. Lenovo Laptop" />
+                    <InputText @bind-Value="Form.Description" class="form-control" placeholder="e.g. Lenovo Laptop" />
                 </div>
                 <div class="col-md-5 alert alert-warning">
                     A description or the type of the device. E.g. "Lenovo Laptop", or "HP Monitor", etc.
@@ -79,7 +81,7 @@
                         <div class="w-100"></div>
                         <label class="form-label col-md-5 mt-3">User</label>
                         <div class="col-md-7 mt-3 ps-1">
-                            @if (Command.UserType == StocktakeSighting.UserTypes.Student)
+                            @if (Form.UserType == StocktakeSighting.UserTypes.Student)
                             {
                                 // Show student list
                                 <select @onchange="UpdateStudentUser" class="form-control">
@@ -89,7 +91,7 @@
                                         <option value="@student.DisplayName">@student.DisplayName (@student.CurrentGrade)</option>
                                     }
                                 </select>
-                            } else if (Command.UserType == StocktakeSighting.UserTypes.Staff)
+                            } else if (Form.UserType == StocktakeSighting.UserTypes.Staff)
                             {
                                 // Show staff list
                                 <select @onchange="UpdateStaffUser" class="form-control">
@@ -99,14 +101,14 @@
                                         <option value="@staff.DisplayName">@staff.DisplayName</option>
                                     }
                                 </select>
-                            } else if (Command.UserType == StocktakeSighting.UserTypes.School)
+                            } else if (Form.UserType == StocktakeSighting.UserTypes.School)
                             {
                                 // Show school list
-                                <InputText @bind-Value="Command.UserName" class="form-control" />
-                            } else if (Command.UserType == StocktakeSighting.UserTypes.CommunityMember || Command.UserType == StocktakeSighting.UserTypes.Other)
+                                <InputText @bind-Value="Form.UserName" class="form-control" />
+                            } else if (Form.UserType == StocktakeSighting.UserTypes.CommunityMember || Form.UserType == StocktakeSighting.UserTypes.Other)
                             {
                                 // Show text box
-                                <InputText @bind-Value="Command.UserName" class="form-control" />
+                                <InputText @bind-Value="Form.UserName" class="form-control" />
                             }
                         </div>
                     </div>
@@ -119,7 +121,7 @@
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Comment</label>
                 <div class="col-md-3">
-                    <InputTextArea @bind-Value="Command.Comment" rows="5" cols="100" class="form-control" />
+                    <InputTextArea @bind-Value="Form.Comment" rows="5" cols="100" class="form-control" />
                 </div>
                 <div class="col-md-5 alert alert-warning">
                     Any notes you have about the condition of the device. E.g. "Has a cracked screen", or "Missing pen", etc.
@@ -141,18 +143,20 @@
 @code {
     [CascadingParameter]
     public SchoolDto SelectedSchool { get; set; }
-    public SchoolDto CurrentlySelectedSchool { get; set; }
+    private SchoolDto CurrentlySelectedSchool { get; set; }
+
+    public FormModel Form { get; set; } = new();
 
     private bool IsLoading { get; set; } = false;
 
     [Parameter]
     public Guid StocktakeId { get; set; }
-    public Guid CurrentStocktakeId { get; set; }
 
-    public RegisterSightedDeviceForStocktakeCommand Command { get; set; } = new();
+    private Guid CurrentStocktakeId { get; set; }
 
-    public List<StudentFromSchoolForDropdownSelection> Students { get; set; } = new();
-    public List<StaffFromSchoolForDropdownSelection> StaffMembers { get; set; } = new();
+
+    private List<StudentSelectionResponse> Students { get; set; } = new();
+    private List<StaffSelectionListResponse> StaffMembers { get; set; } = new();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -179,20 +183,32 @@
             // (Parameter Id is not Page Cached Id)
             if (StocktakeId != CurrentStocktakeId)
             {
-                Command = new();
-
-                Command.StocktakeEventId = StocktakeId;
                 CurrentStocktakeId = StocktakeId;
 
-                var students = await Http.GetFromJsonAsync<List<StudentFromSchoolForDropdownSelection>>($"api/Students/ForDropdown/{SelectedSchool.Code}");
-                Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+                var studentsRequest = await Http.GetFromJsonAsync<ApiResult<List<StudentSelectionResponse>>>($"api/Students/ForDropdown/{SelectedSchool.Code}");
+                if (!studentsRequest.IsSuccess)
+                {
 
-                var staffMembers = await Http.GetFromJsonAsync<List<StaffFromSchoolForDropdownSelection>>($"api/Staff/ForDropdown/{SelectedSchool.Code}");
-                StaffMembers = staffMembers.OrderBy(staff => staff.LastName).ToList();
+                }
+                Students = studentsRequest.Value
+                    .OrderBy(student => student.CurrentGrade)
+                    .ThenBy(student => student.LastName)
+                    .ThenBy(student => student.FirstName)
+                    .ToList();
 
-                Command.LocationCategory = StocktakeSighting.LocationCategories.PublicSchool;
-                Command.LocationName = CurrentlySelectedSchool.Name;
-                Command.LocationCode = CurrentlySelectedSchool.Code;
+                var staffMembersRequest = await Http.GetFromJsonAsync<ApiResult<List<StaffSelectionListResponse>>>($"api/Staff/ForDropdown/{SelectedSchool.Code}");
+                if (!staffMembersRequest.IsSuccess)
+                {
+
+                }
+                StaffMembers = staffMembersRequest.Value
+                    .OrderBy(staff => staff.LastName)
+                    .ToList();
+
+                Form.StocktakeEventId = StocktakeId;
+                Form.LocationCategory = StocktakeSighting.LocationCategories.PublicSchool;
+                Form.LocationName = CurrentlySelectedSchool.Name;
+                Form.LocationCode = CurrentlySelectedSchool.Code;
             }
         } else
         {
@@ -208,13 +224,13 @@
     {
         var userType = e.Value.ToString();
 
-        Command.UserType = userType;
-        Command.UserName = "";
+        Form.UserType = userType;
+        Form.UserName = "";
 
         if (userType == StocktakeSighting.UserTypes.School)
         {
-            Command.UserName = CurrentlySelectedSchool.Name;
-            Command.UserCode = CurrentlySelectedSchool.Code;        
+            Form.UserName = CurrentlySelectedSchool.Name;
+            Form.UserCode = CurrentlySelectedSchool.Code;        
         }
     }
 
@@ -222,24 +238,24 @@
     {
         var userName = e.Value.ToString();
 
-        Command.UserName = userName;
+        Form.UserName = userName;
 
         if (string.IsNullOrWhiteSpace(userName))
         {
-            Command.UserCode = null;
+            Form.UserCode = null;
             return;
         }
 
-        Command.UserCode = Students.Where(student => student.DisplayName == userName).Select(student => student.StudentId).First();
+        Form.UserCode = Students.Where(student => student.DisplayName == userName).Select(student => student.StudentId).First();
     }
 
     private void UpdateStaffUser(ChangeEventArgs e)
     {
         var userName = e.Value.ToString();
 
-        Command.UserName = userName;
+        Form.UserName = userName;
 
-        Command.UserCode = StaffMembers.Where(staff => staff.DisplayName == userName).Select(staff => staff.StaffId).First();
+        Form.UserCode = StaffMembers.Where(staff => staff.DisplayName == userName).Select(staff => staff.StaffId).First();
     }
 
     private async Task SubmitResponse()
@@ -248,12 +264,59 @@
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-        Command.SightedBy = authState.User.Identity.Name;
-        Command.SightedAt = DateTime.Now;
+        RegisterSightingCommand command = new(
+            Form.StocktakeEventId,
+            Form.SerialNumber,
+            Form.AssetNumber,
+            Form.Description,
+            Form.LocationCategory,
+            Form.LocationName,
+            Form.LocationCode,
+            Form.UserType,
+            Form.UserName,
+            Form.UserCode,
+            Form.Comment,
+            authState.User.Identity.Name,
+            DateTime.Now);
 
-        await Http.PostAsJsonAsync<RegisterSightedDeviceForStocktakeCommand>($"api/Stocktake/Submit", Command);
+        var response = await Http.PostAsJsonAsync($"api/Stocktake/Submit", command);
+        ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
+
+        if (!result.IsSuccess)
+        {
+            ModalParameters parameters = new() { { "Text", result.Error!.Message } };
+
+            ModalOptions options = new()
+            {
+                Size = ModalSize.Automatic
+            };
+
+            IModalReference modal = Modal.Show<ErrorModal>(result.Error.Code, parameters, options);
+            await modal.Result;
+
+            IsLoading = false;
+
+            return;
+        }
 
         IsLoading = false;
         NavigationManager.NavigateTo("Stocktake");
+    }
+
+    public sealed class FormModel
+    {
+        public Guid StocktakeEventId { get; set; }
+        public string SerialNumber { get; set; }
+        public string AssetNumber { get; set; }
+        public string Description { get; set; }
+        public string LocationCategory { get; set; }
+        public string LocationName { get; set; }
+        public string LocationCode { get; set; }
+        public string UserType { get; set; }
+        public string UserName { get; set; }
+        public string UserCode { get; set; }
+        public string Comment { get; set; }
+        public string SightedBy { get; set; }
+        public DateTime SightedAt { get; set; }
     }
 }

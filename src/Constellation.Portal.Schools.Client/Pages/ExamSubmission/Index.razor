@@ -1,14 +1,11 @@
 ﻿@page "/Exams/"
 
-@    using Constellation.Application.Assignments.GetAssignmentsByCourse;
-@    using Constellation.Application.Features.Portal.School.Home.Models;
-@    using Constellation.Application.Assignments.UploadAssignmentSubmission;
-@    using Constellation.Application.Courses.GetCoursesForStudent
-@    using Constellation.Core.Models.Assignments.Identifiers;
-@    using Constellation.Core.Models.Subjects.Identifiers
-@    using Blazored.Modal
-@    using Blazored.Modal.Services;
-    using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
+@using Constellation.Application.Assignments.GetAssignmentsByCourse;
+@using Constellation.Application.Assignments.UploadAssignmentSubmission;
+@using Constellation.Application.Courses.GetCoursesForStudent
+@using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList
+@using Constellation.Core.Models.Assignments.Identifiers;
+@using Constellation.Core.Models.Subjects.Identifiers
 
 @attribute [Authorize]
 
@@ -113,31 +110,32 @@
 @code {
     [CascadingParameter]
     public SchoolDto SelectedSchool { get; set; }
-    public SchoolDto CurrentlySelectedSchool { get; set; }
+
+    private SchoolDto CurrentlySelectedSchool { get; set; }
 
     private bool IsLoading { get; set; } = false;
 
-    public List<StudentFromSchoolForDropdownSelection> Students { get; set; } = new();
+    private List<StudentSelectionResponse> Students { get; set; } = new();
 
-    public StudentFromSchoolForDropdownSelection SelectedStudent { get; set; }
+    private StudentSelectionResponse SelectedStudent { get; set; }
 
-    public List<StudentCourseResponse> Courses { get; set; } = new();
+    private List<StudentCourseResponse> Courses { get; set; } = new();
 
-    public StudentCourseResponse SelectedCourse { get; set; }
+    private StudentCourseResponse SelectedCourse { get; set; }
 
-    public List<CourseAssignmentResponse> Assignments { get; set; } = new();
+    private List<CourseAssignmentResponse> Assignments { get; set; } = new();
 
-    public CourseAssignmentResponse SelectedAssignment { get; set; }
+    private CourseAssignmentResponse SelectedAssignment { get; set; }
 
-    public UploadAssignmentSubmissionCommand Command { get; set; }
+    private UploadAssignmentSubmissionCommand Command { get; set; }
 
-    public IBrowserFile File { get; set; }
+    private IBrowserFile File { get; set; }
 
-    public FileDto SelectedFile { get; set; } = new();
+    private FileDto SelectedFile { get; set; } = new();
 
-    public bool OkToSubmit = false;
+    private bool OkToSubmit = false;
 
-    public string Message { get; set; }
+    private string Message { get; set; }
 
     // Allow user to select:
     // 1. A Student
@@ -155,9 +153,25 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            var students = await Http.GetFromJsonAsync<List<StudentFromSchoolForDropdownSelection>>($"api/Students/ForDropdown/{SelectedSchool.Code}");
+            ApiResult<List<StudentSelectionResponse>> studentsRequest = await Http.GetFromJsonAsync<ApiResult<List<StudentSelectionResponse>>>($"api/Students/ForDropdown/{SelectedSchool.Code}");
+            if (!studentsRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", studentsRequest.Error!.Message } };
 
-            Students = students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(studentsRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+            
+            Students = studentsRequest.Value.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName).ToList();
         }
 
         IsLoading = false;
@@ -171,11 +185,28 @@
         
         if (SelectedStudent != null)
         {
-            var courses = await Http.GetFromJsonAsync<List<StudentCourseResponse>>($"api/Exams/{SelectedStudent.StudentId}/Courses");
+            var coursesRequest = await Http.GetFromJsonAsync<ApiResult<List<StudentCourseResponse>>>($"api/Exams/{SelectedStudent.StudentId}/Courses");
 
-            if (courses.Count != 0)
+            if (!coursesRequest.IsSuccess)
             {
-                Courses = courses.OrderBy(course => course.Name).ToList();
+                ModalParameters parameters = new() { { "Text", coursesRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(coursesRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+
+            if (coursesRequest.Value!.Count != 0)
+            {
+                Courses = coursesRequest.Value.OrderBy(course => course.Name).ToList();
             }
         }
 
@@ -186,8 +217,25 @@
     {
         if (SelectedCourse != null)
         {
-            var assignments = await Http.GetFromJsonAsync<List<CourseAssignmentResponse>>($"api/Exams/{SelectedStudent.StudentId}/{SelectedCourse.Id}/Assignments/");
-            Assignments = assignments.OrderBy(assignment => assignment.DueDate).ToList();
+            var assignmentsRequest = await Http.GetFromJsonAsync<ApiResult<List<CourseAssignmentResponse>>>($"api/Exams/{SelectedStudent.StudentId}/{SelectedCourse.Id}/Assignments/");
+            if (!assignmentsRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", assignmentsRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(assignmentsRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+            
+            Assignments = assignmentsRequest.Value.OrderBy(assignment => assignment.DueDate).ToList();
         } else
         {
             Assignments = new List<CourseAssignmentResponse>();
@@ -296,21 +344,25 @@
             SelectedStudent.StudentId,
             SelectedFile);
 
-        using var response = await Http.PostAsJsonAsync<UploadAssignmentSubmissionCommand>($"api/Exams/Upload", Command);
+        using HttpResponseMessage response = await Http.PostAsJsonAsync($"api/Exams/Upload", Command);
+        ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
 
-        bool success = await response.Content.ReadFromJsonAsync<bool>();
-
-        if (success)
+        if (result.IsSuccess)
         {
             navManager.NavigateTo("");
             return;
         }
 
-        var parameters = new ModalParameters();
-        parameters.Add("Text", "An error occurred while trying to upload the file.");
+        ModalParameters parameters = new() { { "Text", result.Error!.Message } };
 
-        var modal = Modal.Show<FeedbackModal>("Submit Exam", parameters);
+        ModalOptions options = new()
+        {
+            Size = ModalSize.Automatic
+        };
 
+        IModalReference modal = Modal.Show<ErrorModal>(result.Error.Code, parameters, options);
+        await modal.Result;
+        
         OkToSubmit = false;
     }
 }

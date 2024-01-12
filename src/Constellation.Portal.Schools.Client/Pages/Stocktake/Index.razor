@@ -1,8 +1,7 @@
 ﻿@page "/Stocktake/"
-@    using Blazored.Modal.Services;
-@    using Blazored.Modal;
-@    using Constellation.Application.Features.Portal.School.Stocktake.Models;
-    using Constellation.Application.Stocktake.GetCurrentStocktakeEvents;
+@using Constellation.Application.Stocktake.GetStocktakeSightingsForSchool
+@using Constellation.Application.Stocktake.GetCurrentStocktakeEvents
+
 
 @attribute [Authorize]
 
@@ -61,7 +60,7 @@
         <div class="offset-1 col-md-3"><input @oninput="ChangeFilter" class="form-control" placeholder="Search" /></div>
     </div>
 
-    <DataTable Items="FilteredSightings.ToList()" TItem="StocktakeSightingsForList">
+    <DataTable Items="FilteredSightings.ToList()" TItem="StocktakeSightingResponse">
         <TableHeader>
                 <th>Serial / Asset</th>
                 <th>Description</th>
@@ -86,10 +85,10 @@
 
     private bool IsLoading { get; set; } = false;
 
-    public ICollection<StocktakeEventsForList> StocktakeEvents { get; set; } = new List<StocktakeEventsForList>();
-    public StocktakeEventsForList CurrentlySelectedStocktake { get; set; }
-    public ICollection<StocktakeSightingsForList> Sightings { get; set; } = new List<StocktakeSightingsForList>();
-    public ICollection<StocktakeSightingsForList> FilteredSightings { get; set; } = new List<StocktakeSightingsForList>();
+    public ICollection<StocktakeEventResponse> StocktakeEvents { get; set; } = new List<StocktakeEventResponse>();
+    public StocktakeEventResponse CurrentlySelectedStocktake { get; set; }
+    public List<StocktakeSightingResponse> Sightings { get; set; } = new();
+    public List<StocktakeSightingResponse> FilteredSightings { get; set; } = new();
 
     public Guid StocktakeEventId { get; set; } = Guid.Empty;
     public string Filter { get; set; } = "";
@@ -104,7 +103,25 @@
         {
             CurrentlySelectedSchool = SelectedSchool;
 
-            StocktakeEvents = await Http.GetFromJsonAsync<List<StocktakeEventsForList>>($"api/Stocktake/Events");
+            var eventsRequest = await Http.GetFromJsonAsync<ApiResult<List<StocktakeEventResponse>>>($"api/Stocktake/Events");
+            if (!eventsRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", eventsRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(eventsRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+
+            StocktakeEvents = eventsRequest.Value;
 
             if (StocktakeEvents.Any())
             {
@@ -139,7 +156,25 @@
 
         if (StocktakeEventId != Guid.Empty)
         {
-            Sightings = await Http.GetFromJsonAsync<List<StocktakeSightingsForList>>($"api/Stocktake/Events/{StocktakeEventId}/Sightings/{SelectedSchool.Code}");
+            var sightingsRequest = await Http.GetFromJsonAsync<ApiResult<List<StocktakeSightingResponse>>>($"api/Stocktake/Events/{StocktakeEventId}/Sightings/{SelectedSchool.Code}");
+            if (!sightingsRequest.IsSuccess)
+            {
+                ModalParameters parameters = new() { { "Text", sightingsRequest.Error!.Message } };
+
+                ModalOptions options = new()
+                {
+                    Size = ModalSize.Automatic
+                };
+
+                IModalReference modal = Modal.Show<ErrorModal>(sightingsRequest.Error.Code, parameters, options);
+                await modal.Result;
+
+                IsLoading = false;
+
+                return;
+            }
+
+            Sightings = sightingsRequest.Value;
             FilteredSightings = Sightings;
         }
 
@@ -197,7 +232,7 @@
         ShowChangeStocktakeBox = false;
     }
 
-    async Task CancelSighting(StocktakeSightingsForList sighting)
+    async Task CancelSighting(StocktakeSightingResponse sighting)
     {
         var parameters = new ModalParameters();
         parameters.Add("Sighting", sighting);
