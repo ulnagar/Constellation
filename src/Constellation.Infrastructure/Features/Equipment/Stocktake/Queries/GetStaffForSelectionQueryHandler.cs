@@ -1,37 +1,35 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
+﻿namespace Constellation.Infrastructure.Features.Equipment.Stocktake.Queries;
+
 using Constellation.Application.Features.Equipment.Stocktake.Queries;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.StaffMembers.GetStaffFromSchool;
-using FluentValidation;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using Constellation.Application.StaffMembers.Models;
+using Core.Models;
 
-namespace Constellation.Infrastructure.Features.Portal.School.Home.Queries
+public class GetStaffForSelectionQueryHandler 
+    : IRequestHandler<GetStaffForSelectionQuery, ICollection<StaffSelectionListResponse>>
 {
-    public class GetStaffForSelectionQueryHandler : IRequestHandler<GetStaffForSelectionQuery, ICollection<StaffFromSchoolForDropdownSelection>>
+    private readonly IStaffRepository _staffRepository;
+
+    public GetStaffForSelectionQueryHandler(
+        IStaffRepository staffRepository)
     {
-        private readonly IAppDbContext _context;
-        private readonly IMapper _mapper;
+        _staffRepository = staffRepository;
+    }
 
-        public GetStaffForSelectionQueryHandler(IAppDbContext context, IMapper mapper)
+    public async Task<ICollection<StaffSelectionListResponse>> Handle(GetStaffForSelectionQuery request, CancellationToken cancellationToken)
+    {
+        List<StaffSelectionListResponse> response = new();
+
+        List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
+
+        foreach (Staff member in staff)
         {
-            _context = context;
-            _mapper = mapper;
+            response.Add(new(
+                member.StaffId,
+                member.FirstName,
+                member.LastName));
         }
 
-        public async Task<ICollection<StaffFromSchoolForDropdownSelection>> Handle(GetStaffForSelectionQuery request, CancellationToken cancellationToken)
-        {
-            var staff = await _context.Staff
-                .Where(staff => !staff.IsDeleted)
-                .ProjectTo<StaffFromSchoolForDropdownSelection>(_mapper.ConfigurationProvider)
-                .ToListAsync();
-
-            return staff;
-        }
+        return response;
     }
 }

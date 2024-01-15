@@ -27,14 +27,6 @@ internal sealed class GetStudentsFromSchoolQueryHandler
         _logger = logger;
     }
 
-    public async Task<ICollection<StudentDto>> Handler(GetCurrentStudentsFromSchoolQuery request,
-        CancellationToken cancellationToken)
-    {
-        var students = await _context.Students
-            .Where(student => student.SchoolCode == request.SchoolCode && !student.IsDeleted).ToListAsync();
-        return students.Select(StudentDto.ConvertFromStudent).ToList();
-    }
-
     public async Task<Result<List<StudentDto>>> Handle(GetCurrentStudentsFromSchoolQuery request, CancellationToken cancellationToken)
     {
         List<StudentDto> response = new();

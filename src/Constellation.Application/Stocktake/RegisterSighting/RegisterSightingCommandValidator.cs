@@ -29,4 +29,4 @@ internal sealed class RegisterSightingCommandValidator : AbstractValidator<Regis
             .NotEmpty()
             .WithMessage("You must specify a user for this device.");
     }
-}S
+}

@@ -28,17 +28,81 @@
 
 <h1>Constellation Changelog</h1>
 
-<h3>Current version: Release V1.14 (Build @version)</h3>
+<h3>Current version: Release V1.14.1 (Build @version)</h3>
 
 <div class="changelog">
     <ul>
-        <li>
-            Constellation Web
+        <li>Constellation Web
             <ul>
-                <li>
-                    School Admin section
+                <li>Absences section
+                    <ul>
+                        <li>Fix bug that prevented the SentAt field from being populated for Absence Notifications</li>
+                    </ul>
+                </li>
+                <li>Class Covers section
+                    <ul>
+                        <li>Removed list of outstanding Adobe Connect operations</li>
+                    </ul>
+                </li>
+                <li>Contacts section
+                    <ul>
+                        <li>Include the School details in the Export file</li>
+                    </ul>
+                </li>
+                <li>Group Tutorials section
+                    <ul>
+                        <li>Updated export file to include a legend of the colours and symbols used in the list</li>
+                    </ul>
+                </li>
+                <li>School Admin section
                     <ul>
                         <li>Update Training area to include Roles</li>
+                        <li>Add master/overall details export for Training area</li>
+                    </ul>
+                </li>
+                <li>Science Pracs section
+                    <ul>
+                        <li>Add Reports pages to filter rolls by school or student</li>
+                        <li>Add Overdue Report which allows staff to download an Excel file with all outstanding/overdue rolls</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Constellation Infrastructure
+            <ul>
+                <li>Jobs (Recurring scheduled tasks)
+                    <ul>
+                        <li>Update Family Details Sync job to remove any orphaned Families during a scan</li>
+                        <li>Fixed a bug in the Family Details Sync job that reported a family email address changed when it had not</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Parents Portal
+            <ul>
+                <li>System-wide
+                    <ul>
+                        <li>Provide status feedback to users when an action fails for any reason</li>
+                    </ul>
+                </li>
+                <li>Absences section
+                    <ul>
+                        <li>Fixed a bug that did not show validation errors to users when attempting to explain an absence</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Schools Portal
+            <ul>
+                <li>System-wide
+                    <ul>
+                        <li>Provide status feedback to users when an action fails for any reason</li>
+                    </ul>
+                </li>
+                <li>Science Pracs section
+                    <ul>
+                        <li>Update roll submission to prevent users from setting a future date for the roll</li>
+                        <li>Update roll submission to require a comment if none of the students are present</li>
                     </ul>
                 </li>
             </ul>
@@ -185,7 +249,7 @@
     </ul>
 </div>
 
-<h3>Previous version: Release V1.9 (Build 202304.29)</h3>
+<h3>Previous version: Release V1.9 (Build 2304.29)</h3>
 
 <div class="changelog">
     <ul>

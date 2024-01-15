@@ -104,6 +104,17 @@ public class ReportModel : BasePageModel
         {
             var teachers = await _mediator.Send(new GetStaffLinkedToOfferingQuery(course.Id), cancellationToken);
 
+            if (teachers.IsFailure || teachers.Value.Count == 0)
+            {
+                ClassSelectionList.Add(new ClassRecord(
+                    course.Id,
+                    course.Name,
+                    string.Empty,
+                    $"Year {course.Name[..2]}"));
+
+                continue;
+            }
+
             var frequency = teachers
                 .Value
                 .GroupBy(x => x.StaffId)

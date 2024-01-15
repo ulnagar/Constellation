@@ -107,7 +107,7 @@ else
             authState.User.Identity.Name,
             string.Empty);
 
-        HttpResponseMessage response = await Http.PostAsJsonAsync($"api/Contacts/{Contact.ContactId}/Remove", Command);
+        HttpResponseMessage response = await Http.PostAsJsonAsync($"api/Contacts/{Contact.ContactId}/Remove", command);
         ApiResult result = await response.Content.ReadFromJsonAsync<ApiResult>();
 
         if (!result.IsSuccess)
