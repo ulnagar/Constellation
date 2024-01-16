@@ -58,10 +58,10 @@
         </div>
     }
     
-    <div class="row row-cols-1 row-cols-md-3">
+    <div class="row row-cols-1 row-cols-md-3" id="sortable-cards">
         @if (Model.ShowSentralIdWidgets)
         {
-            <div class="col mb-4">
+            <div class="col mb-4 sortable">
                 <div class="card h-100 @(Model.StudentsWithoutSentralId > 0 ? "text-white bg-danger" : "text-white bg-success")">
                     <div class="card-header">Student Configuration</div>
                     <div class="card-body">
@@ -75,7 +75,7 @@
 
         @if (Model.ShowTrainingWidgets)
         {
-            <div class="col mb-4">
+            <div class="col mb-4 sortable">
                 <div class="card h-100 @(Model.WithoutRole > 0 ? "text-white bg-danger" : "text-white bg-success")">
                     <div class="card-header">Mandatory Training</div>
                     <div class="card-body">
@@ -89,7 +89,7 @@
 
         @if (Model.ShowAbsenceWidgets)
         {
-            <div class="col mb-4">
+            <div class="col mb-4 sortable">
                 <div class="card h-100 @(Model.PartialScanDisabled > 0 ? "text-white bg-danger" : "text-white bg-success")">
                     <div class="card-header">Absence Scanning</div>
                     <div class="card-body">
@@ -100,7 +100,7 @@
                 </div>
             </div>
 
-            <div class="col mb-4">
+            <div class="col mb-4 sortable">
                 <div class="card h-100 @(Model.WholeScanDisabled > 0 ? "text-white bg-danger" : "text-white bg-success")">
                     <div class="card-header">Absence Scanning</div>
                     <div class="card-body">
@@ -114,7 +114,7 @@
 
         @if (Model.ShowAwardsWidgets)
         {
-            <div class="col mb-4">
+            <div class="col mb-4 sortable">
                 <div class="card h-100 @(Model.AwardAdditions > 0 ? "text-white bg-danger" : "text-white bg-success")">
                     <div class="card-header">Awards</div>
                     <div class="card-body">
@@ -125,7 +125,7 @@
                 </div>
             </div>
 
-            <div class="col mb-4">
+            <div class="col mb-4 sortable">
                 <div class="card h-100 @(Model.AwardOverages > 0 ? "text-white bg-danger" : "text-white bg-success")">
                     <div class="card-header">Awards</div>
                     <div class="card-body">
@@ -138,3 +138,24 @@
         }
     </div>
 </div>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            $('#sortable-cards').sortable({
+                group: 'dashboard-cards',
+                store: {
+                    get: function (sortable) {
+                        var order = localStorage.getItem(sortable.options.group.name);
+                        return order ? order.split('|') : [];
+                    },
+                    set: function (sortable) {
+                        var order = sortable.toArray();
+                        localStorage.setItem(sortable.options.group.name, order.join('|'));
+                    }
+                }
+            });
+        });
+    </script>
+}
