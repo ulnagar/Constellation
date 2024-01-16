@@ -81,10 +81,10 @@ public partial class EmailDtos
         public string CoveringTeacherEmail { get; set; }
         public bool CoveringTeacherAdobeAccount { get; set; }
 
-        public IDictionary<string, string> ClassroomTeachers { get; set; }
-        public IDictionary<string, string> SecondaryRecipients { get; set; }
+        public Dictionary<string, string> ClassroomTeachers { get; set; }
+        public Dictionary<string, string> SecondaryRecipients { get; set; }
 
-        public IDictionary<string, string> ClassesIncluded { get; set; }
+        public Dictionary<string, string> ClassesIncluded { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public ICollection<Attachment> Attachments { get; set; }

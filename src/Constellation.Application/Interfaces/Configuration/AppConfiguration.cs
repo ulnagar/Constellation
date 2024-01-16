@@ -16,6 +16,7 @@ public sealed class AppConfiguration
     public MandatoryTrainingConfiguration MandatoryTraining { get; set; }
     public ContactsConfiguration Contacts { get; set; }
     public AttachmentsConfiguration Attachments { get; set; }
+    public CoversConfiguration Covers { get; set; }
 
 
     public class AbsencesConfiguration
@@ -63,5 +64,12 @@ public sealed class AppConfiguration
     {
         public string BaseFilePath { get; set; }
         public int MaxDBStoreSize { get; set; }
+    }
+
+    public class CoversConfiguration
+    {
+        public string ContactName { get; set; }
+        public string ContactTitle { get; set; }
+        public string ContactPhone { get; set; }
     }
 }

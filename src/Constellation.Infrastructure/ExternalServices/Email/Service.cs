@@ -7,7 +7,6 @@ using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Assignments;
@@ -32,22 +31,19 @@ using System.Net.Mail;
 using System.Threading;
 using Templates.Views.Emails.Assignments;
 
-public class Service : IEmailService
+public sealed class Service : IEmailService
 {
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IEmailGateway _emailSender;
     private readonly ICalendarService _calendarService;
     private readonly IRazorViewToStringRenderer _razorService;
     private readonly AppConfiguration _configuration;
 
     public Service(
-        IUnitOfWork unitOfWork,
         IEmailGateway emailSender,
         ICalendarService calendarService,
         IRazorViewToStringRenderer razorService,
         IOptions<AppConfiguration> configuration)
     {
-        _unitOfWork = unitOfWork;
         _emailSender = emailSender;
         _calendarService = calendarService;
         _razorService = razorService;
@@ -547,15 +543,17 @@ public class Service : IEmailService
         CancellationToken cancellationToken = default)
     {
         // Determine whether email or invite
-        var singleDayCover = cover.StartDate == cover.EndDate;
+        bool singleDayCover = cover.StartDate == cover.EndDate;
 
         // Send
-        var viewModel = new NewCoverEmailViewModel
+        NewCoverEmailViewModel viewModel = new()
         {
+            ContactName = _configuration.Covers.ContactName,
+            ContactPhone = _configuration.Covers.ContactPhone,
             ToName = coveringTeacher.Name,
             Title = $"Aurora Class Cover - {offering.Name}",
-            SenderName = "Cathy Crouch",
-            SenderTitle = "Casual Coordinator",
+            SenderName = _configuration.Covers.ContactName ?? string.Empty,
+            SenderTitle = _configuration.Covers.ContactTitle ?? string.Empty,
             StartDate = cover.StartDate.ToDateTime(TimeOnly.MinValue),
             EndDate = cover.EndDate.ToDateTime(TimeOnly.MinValue),
             HasAdobeAccount = true,
@@ -565,27 +563,26 @@ public class Service : IEmailService
 
         if (singleDayCover)
         {
-            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverAppointment.cshtml", viewModel);
+            string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverAppointment.cshtml", viewModel);
 
             // Create and add ICS files
-            var uid = $"{cover.Id}-{cover.OfferingId}-{cover.StartDate:yyyyMMdd}";
-            var summary = $"Aurora College Cover - {offering.Name}";
-            var location = $"Class Team ({teamLink})";
-            var description = body;
+            string uid = $"{cover.Id}-{cover.OfferingId}-{cover.StartDate:yyyyMMdd}";
+            string summary = $"Aurora College Cover - {offering.Name}";
+            string location = $"Class Team ({teamLink})";
 
             // What cycle day does the cover fall on?
             // What periods exist for this class on that cycle day?
             // Extract start and end times for the periods to use in the appointment
-            var appointmentStart = cover.StartDate.ToDateTime(startTime);
-            var appointmentEnd = cover.EndDate.ToDateTime(endTime);
+            DateTime appointmentStart = cover.StartDate.ToDateTime(startTime);
+            DateTime appointmentEnd = cover.EndDate.ToDateTime(endTime);
 
-            var icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, description, appointmentStart, appointmentEnd, 0);
+            string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
 
             await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData, cancellationToken);
         }
         else
         {
-            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverEmail.cshtml", viewModel);
+            string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverEmail.cshtml", viewModel);
 
             await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, cancellationToken);
         }
@@ -598,8 +595,8 @@ public class Service : IEmailService
         {
             ToName = resource.CoveringTeacherName,
             Title = "Class Cover Information",
-            SenderName = "Cathy Crouch",
-            SenderTitle = "Casual Coordinator",
+            SenderName = _configuration.Covers.ContactName ?? string.Empty,
+            SenderTitle = _configuration.Covers.ContactTitle ?? string.Empty,
             StartDate = resource.StartDate,
             EndDate = resource.EndDate,
             HasAdobeAccount = resource.CoveringTeacherAdobeAccount,
@@ -607,21 +604,21 @@ public class Service : IEmailService
             ClassWithLink = resource.ClassesIncluded
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new()
         {
             { resource.CoveringTeacherName, resource.CoveringTeacherEmail }
         };
 
-        var ccRecipients = new Dictionary<string, string>();
+        Dictionary<string, string> ccRecipients = new();
 
-        foreach (var entry in resource.ClassroomTeachers)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Value))
+        foreach (KeyValuePair<string, string> entry in resource.ClassroomTeachers)
+            if (toRecipients.All(recipient => recipient.Value != entry.Value))
                 toRecipients.Add(entry.Key, entry.Value);
 
         foreach (var entry in resource.SecondaryRecipients)
-            if (!ccRecipients.Any(recipient => recipient.Value == entry.Value))
+            if (ccRecipients.All(recipient => recipient.Value != entry.Value))
                 ccRecipients.Add(entry.Key, entry.Value);
 
         await _emailSender.Send(toRecipients, ccRecipients, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
@@ -641,14 +638,16 @@ public class Service : IEmailService
         CancellationToken cancellationToken = default)
     {
         // Determine whether email or invite
-        var singleDayCover = cover.StartDate == cover.EndDate;
+        bool singleDayCover = cover.StartDate == cover.EndDate;
 
-        var viewModel = new UpdatedCoverEmailViewModel
+        UpdatedCoverEmailViewModel viewModel = new()
         {
+            ContactName = _configuration.Covers.ContactName,
+            ContactPhone = _configuration.Covers.ContactPhone,
             ToName = coveringTeacher.Name,
             Title = $"[UPDATED] Aurora Class Cover - {offering.Name}",
-            SenderName = "Cathy Crouch",
-            SenderTitle = "Casual Coordinator",
+            SenderName = _configuration.Covers.ContactName ?? string.Empty,
+            SenderTitle = _configuration.Covers.ContactTitle ?? string.Empty,
             StartDate = cover.StartDate.ToDateTime(TimeOnly.MinValue),
             EndDate = cover.EndDate.ToDateTime(TimeOnly.MinValue),
             HasAdobeAccount = true,
@@ -658,27 +657,26 @@ public class Service : IEmailService
 
         if (singleDayCover)
         {
-            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverAppointment.cshtml", viewModel);
+            string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverAppointment.cshtml", viewModel);
 
             // Create and add ICS files
-            var uid = $"{cover.Id}-{cover.OfferingId}-{originalStartDate:yyyyMMdd}";
-            var summary = $"[UPDATED] Aurora Class Cover - {offering.Name}";
-            var location = $"Class Team ({teamLink})";
-            var description = body;
+            string uid = $"{cover.Id}-{cover.OfferingId}-{originalStartDate:yyyyMMdd}";
+            string summary = $"[UPDATED] Aurora Class Cover - {offering.Name}";
+            string location = $"Class Team ({teamLink})";
 
             // What cycle day does the cover fall on?
             // What periods exist for this class on that cycle day?
             // Extract start and end times for the periods to use in the appointment
-            var appointmentStart = cover.StartDate.ToDateTime(startTime);
-            var appointmentEnd = cover.EndDate.ToDateTime(endTime);
+            DateTime appointmentStart = cover.StartDate.ToDateTime(startTime);
+            DateTime appointmentEnd = cover.EndDate.ToDateTime(endTime);
 
-            var icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, description, appointmentStart, appointmentEnd, 0);
+            string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
 
             await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData, cancellationToken);
         }
         else
         {
-            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverEmail.cshtml", viewModel);
+            string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverEmail.cshtml", viewModel);
 
             await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, cancellationToken);
         }
@@ -686,12 +684,12 @@ public class Service : IEmailService
 
     public async Task SendUpdatedCoverEmail(EmailDtos.CoverEmail resource)
     {
-        var viewModel = new UpdatedCoverEmailViewModel
+        UpdatedCoverEmailViewModel viewModel = new()
         {
             ToName = resource.CoveringTeacherName,
             Title = "[UPDATED] Class Cover Information",
-            SenderName = "Cathy Crouch",
-            SenderTitle = "Casual Coordinator",
+            SenderName = _configuration.Covers.ContactName ?? string.Empty,
+            SenderTitle = _configuration.Covers.ContactTitle ?? string.Empty,
             StartDate = resource.StartDate,
             EndDate = resource.EndDate,
             HasAdobeAccount = resource.CoveringTeacherAdobeAccount,
@@ -699,21 +697,21 @@ public class Service : IEmailService
             ClassWithLink = resource.ClassesIncluded
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new Dictionary<string, string>
         {
             { resource.CoveringTeacherName, resource.CoveringTeacherEmail }
         };
 
-        var ccRecipients = new Dictionary<string, string>();
+        Dictionary<string, string> ccRecipients = new Dictionary<string, string>();
 
         foreach (var entry in resource.ClassroomTeachers)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Value))
+            if (toRecipients.All(recipient => recipient.Value != entry.Value))
                 toRecipients.Add(entry.Key, entry.Value);
 
         foreach (var entry in resource.SecondaryRecipients)
-            if (!ccRecipients.Any(recipient => recipient.Value == entry.Value))
+            if (ccRecipients.All(recipient => recipient.Value != entry.Value))
                 ccRecipients.Add(entry.Key, entry.Value);
 
         await _emailSender.Send(toRecipients, ccRecipients, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
@@ -732,15 +730,17 @@ public class Service : IEmailService
         CancellationToken cancellationToken = default)
     {
         // Determine whether email or invite
-        var singleDayCover = cover.StartDate == cover.EndDate;
+        bool singleDayCover = cover.StartDate == cover.EndDate;
 
         // Send
-        var viewModel = new CancelledCoverEmailViewModel
+        CancelledCoverEmailViewModel viewModel = new()
         {
+            ContactName = _configuration.Covers.ContactName,
+            ContactPhone = _configuration.Covers.ContactPhone,
             ToName = coveringTeacher.Name,
             Title = $"Cancelled Aurora Class Cover - {offering.Name}",
-            SenderName = "Cathy Crouch",
-            SenderTitle = "Casual Coordinator",
+            SenderName = _configuration.Covers.ContactName ?? string.Empty,
+            SenderTitle = _configuration.Covers.ContactTitle ?? string.Empty,
             StartDate = cover.StartDate.ToDateTime(TimeOnly.MinValue),
             EndDate = cover.EndDate.ToDateTime(TimeOnly.MinValue),
             HasAdobeAccount = true,
@@ -750,23 +750,22 @@ public class Service : IEmailService
 
         if (singleDayCover)
         {
-            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverAppointment.cshtml", viewModel);
+            string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverAppointment.cshtml", viewModel);
 
             // Create and add ICS files
-            var uid = $"{cover.Id}-{cover.OfferingId}-{cover.StartDate:yyyyMMdd}";
-            var summary = $"Aurora College Cover - {offering.Name}";
-            var location = $"Class Team ({teamLink}";
-            var description = body;
+            string uid = $"{cover.Id}-{cover.OfferingId}-{cover.StartDate:yyyyMMdd}";
+            string summary = $"Aurora College Cover - {offering.Name}";
+            string location = $"Class Team ({teamLink}";
 
-            var appointmentStart = cover.StartDate.ToDateTime(startTime);
-            var appointmentEnd = cover.EndDate.ToDateTime(endTime);
-            var icsData = _calendarService.CancelInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, description, appointmentStart, appointmentEnd, 0);
+            DateTime appointmentStart = cover.StartDate.ToDateTime(startTime);
+            DateTime appointmentEnd = cover.EndDate.ToDateTime(endTime);
+            string icsData = _calendarService.CancelInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
 
             await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData, cancellationToken);
         }
         else
         {
-            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverEmail.cshtml", viewModel);
+            string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverEmail.cshtml", viewModel);
 
             await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, cancellationToken);
         }
@@ -774,12 +773,12 @@ public class Service : IEmailService
 
     public async Task SendCancelledCoverEmail(EmailDtos.CoverEmail resource)
     {
-        var viewModel = new CancelledCoverEmailViewModel
+        CancelledCoverEmailViewModel viewModel = new()
         {
             ToName = resource.CoveringTeacherName,
             Title = "[CANCELLED] Class Cover Information",
-            SenderName = "Cathy Crouch",
-            SenderTitle = "Casual Coordinator",
+            SenderName = _configuration.Covers.ContactName ?? string.Empty,
+            SenderTitle = _configuration.Covers.ContactTitle ?? string.Empty,
             StartDate = resource.StartDate,
             EndDate = resource.EndDate,
             HasAdobeAccount = resource.CoveringTeacherAdobeAccount,
@@ -787,21 +786,21 @@ public class Service : IEmailService
             ClassWithLink = resource.ClassesIncluded
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new()
         {
             { resource.CoveringTeacherName, resource.CoveringTeacherEmail }
         };
 
-        var ccRecipients = new Dictionary<string, string>();
+        Dictionary<string, string> ccRecipients = new();
 
         foreach (var entry in resource.ClassroomTeachers)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Value))
+            if (toRecipients.All(recipient => recipient.Value != entry.Value))
                 toRecipients.Add(entry.Key, entry.Value);
 
         foreach (var entry in resource.SecondaryRecipients)
-            if (!ccRecipients.Any(recipient => recipient.Value == entry.Value))
+            if (ccRecipients.All(recipient => recipient.Value != entry.Value))
                 ccRecipients.Add(entry.Key, entry.Value);
 
         await _emailSender.Send(toRecipients, ccRecipients, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
