@@ -15,6 +15,8 @@ public sealed class Transaction : AggregateRoot
 {
     private readonly List<Consent> _consents = new();
 
+    private Transaction() { } // Required by EF Core
+
     private Transaction(
         string studentId,
         string submittedBy,

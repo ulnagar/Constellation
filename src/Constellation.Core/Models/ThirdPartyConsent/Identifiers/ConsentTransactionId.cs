@@ -4,7 +4,7 @@ using System;
 
 public sealed record ConsentTransactionId(Guid Value)
 {
-    public static ConsentId FromValue(Guid value) =>
+    public static ConsentTransactionId FromValue(Guid value) =>
         new(value);
 
     public ConsentTransactionId()

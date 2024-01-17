@@ -11,6 +11,8 @@ public sealed class Application : IAuditableEntity
 {
     private readonly List<Consent> _consents = new();
 
+    private Application() { } // Required by EF Core
+
     private Application(
         string name,
         string purpose,
