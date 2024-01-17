@@ -7,6 +7,8 @@ using ApplicationId = Identifiers.ApplicationId;
 
 public sealed class Consent
 {
+    private Consent() { } // Required by EF Core
+
     private Consent(
         ConsentTransactionId transactionId,
         ApplicationId applicationId,
