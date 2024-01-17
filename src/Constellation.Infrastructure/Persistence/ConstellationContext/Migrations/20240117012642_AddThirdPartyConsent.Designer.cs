@@ -4,6 +4,7 @@ using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240117012642_AddThirdPartyConsent")]
+    partial class AddThirdPartyConsent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -696,6 +699,42 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("Awards_StudentAwards", (string)null);
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.CanvasOperation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OperationType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ScheduledFor")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CanvasOperations");
+
+                    b.HasDiscriminator<string>("OperationType").HasValue("CanvasOperation");
+
+                    b.UseTphMappingStrategy();
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.Casuals.Casual", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1091,10 +1130,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MobileNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SentralId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -1507,42 +1542,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("StaffId");
 
                     b.ToTable("Offerings_Teachers", (string)null);
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Operations.CanvasOperation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("OperationType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ScheduledFor")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CanvasOperations");
-
-                    b.HasDiscriminator<string>("OperationType").HasValue("CanvasOperation");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.PartialAbsenceNotification", b =>
@@ -3206,6 +3205,48 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasDiscriminator().HasValue("Universal Achiever");
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.CreateUserCanvasOperation", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.CanvasOperation");
+
+                    b.Property<string>("EmailAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PortalUsername")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasDiscriminator().HasValue("CreateUser");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.DeleteUserCanvasOperation", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.CanvasOperation");
+
+                    b.HasDiscriminator().HasValue("DeleteUser");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.ModifyEnrolmentCanvasOperation", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.CanvasOperation");
+
+                    b.Property<string>("Action")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CourseId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasDiscriminator().HasValue("ModifyEnrolment");
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.ContactAddedMSTeamOperation", b =>
                 {
                     b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
@@ -3348,48 +3389,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Offerings.Resource");
 
                     b.HasDiscriminator().HasValue("Microsoft Team");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Operations.CreateUserCanvasOperation", b =>
-                {
-                    b.HasBaseType("Constellation.Core.Models.Operations.CanvasOperation");
-
-                    b.Property<string>("EmailAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PortalUsername")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasDiscriminator().HasValue("CreateUser");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Operations.DeleteUserCanvasOperation", b =>
-                {
-                    b.HasBaseType("Constellation.Core.Models.Operations.CanvasOperation");
-
-                    b.HasDiscriminator().HasValue("DeleteUser");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Operations.ModifyEnrolmentCanvasOperation", b =>
-                {
-                    b.HasBaseType("Constellation.Core.Models.Operations.CanvasOperation");
-
-                    b.Property<string>("Action")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CourseId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasDiscriminator().HasValue("ModifyEnrolment");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.CasualMSTeamOperation", b =>
@@ -3617,7 +3616,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasOne("Constellation.Core.Models.Families.Family", null)
                         .WithMany("Parents")
                         .HasForeignKey("FamilyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

@@ -1,12 +1,55 @@
 ﻿@page
-@using Constellation.Core.Extensions
+
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
 
-<h2>Sentral Incident Tracking Report</h2>
+<h2>Third Party Consent</h2>
 
 <div class="page-menu">
+    <a asp-page-handler="AddDummyData" class="btn btn-success">Add Data</a>
 </div>
 
 <hr />
 
+<h4>Applications</h4>
 
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th># Consents</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var application in Model.Applications)
+        {
+            <tr>
+                <td>@application.Name</td>
+                <td>@application.Consents.Count</td>
+                <td></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h4>Transactions</h4>
+
+<table>
+    <thead>
+        <tr>
+            <th>StudentId</th>
+            <th># Consents</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var transaction in Model.Transactions)
+        {
+            <tr>
+                <td>@transaction.StudentId</td>
+                <td>@transaction.Consents.Count</td>
+                <td></td>
+            </tr>
+        }
+    </tbody>
+</table>
