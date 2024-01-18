@@ -50,15 +50,11 @@ public interface IStudentRepository
     Task<int> GetCountCurrentStudentsWithPendingAwards(CancellationToken cancellationToken = default);
 
     Task<Student> GetForExistCheck(string id);
-    Task<ICollection<Student>> AllActiveForFTECalculations();
-    Task<ICollection<Student>> AllActiveForClassAuditAsync();
     Task<ICollection<Student>> ForListAsync(Expression<Func<Student, bool>> predicate);
     Task<Student> ForEditAsync(string studentId);
     Task<Student> ForBulkUnenrolAsync(string studentId);
     Task<ICollection<Student>> ForSelectionListAsync();
-    Task<Student> ForAttendanceQueryReport(string studentId);
     Task<List<Student>> ForInterviewsExportAsync(InterviewExportSelectionDto filter, CancellationToken cancellationToken = default);
-    Task<bool> AnyWithId(string id);
     Task<ICollection<Student>> WithoutAdobeConnectDetailsForUpdate();
 
     void Insert(Student student);

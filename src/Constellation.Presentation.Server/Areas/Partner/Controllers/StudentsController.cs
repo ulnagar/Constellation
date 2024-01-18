@@ -115,16 +115,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             return View("Index", viewModel);
         }
 
-        public async Task<IActionResult> ClassAudit()
-        {
-            var students = await _unitOfWork.Students.AllActiveForClassAuditAsync();
-
-            var viewModel = new Student_ViewModel();
-            viewModel.Students = students.Select(Student_ViewModel.StudentDto.ConvertFromStudent).ToList();
-
-            return View("ClassAudit", viewModel);
-        }
-
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
         public async Task<IActionResult> Update(string id)
         {

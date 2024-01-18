@@ -261,25 +261,6 @@ public class StudentRepository : IStudentRepository
             .SingleOrDefaultAsync(student => student.StudentId == id);
     }
 
-    public async Task<ICollection<Student>> AllActiveForFTECalculations()
-    {
-        return await _context.Students
-            .Include(student => student.Enrolments)
-            .Where(student => !student.IsDeleted)
-            .ToListAsync();
-    }
-
-    public async Task<ICollection<Student>> AllActiveForClassAuditAsync()
-    {
-        return await _context.Students
-            .Include(student => student.School)
-            .Include(student => student.Enrolments)
-            .Where(student => !student.IsDeleted)
-            .OrderBy(student => student.CurrentGrade)
-            .ThenBy(student => student.LastName)
-            .ToListAsync();
-    }
-
     public async Task<ICollection<Student>> ForListAsync(Expression<Func<Student, bool>> predicate)
     {
         return await _context.Students
@@ -311,13 +292,6 @@ public class StudentRepository : IStudentRepository
             .ToListAsync();
     }
 
-    public async Task<Student> ForAttendanceQueryReport(string studentId)
-    {
-        return await _context.Students
-            .Include(student => student.Enrolments)
-            .SingleOrDefaultAsync(student => student.StudentId == studentId);
-    }
-
     public async Task<List<Student>> ForInterviewsExportAsync(
         InterviewExportSelectionDto filter,
         CancellationToken cancellationToken = default) =>
@@ -327,12 +301,6 @@ public class StudentRepository : IStudentRepository
             .Where(student => !student.IsDeleted)
             .Where(FilterStudent(filter))
             .ToListAsync(cancellationToken);
-
-    public async Task<bool> AnyWithId(string id)
-    {
-        return await _context.Students
-            .AnyAsync(student => student.StudentId == id);
-    }
 
     public async Task<ICollection<Student>> WithoutAdobeConnectDetailsForUpdate()
     {
