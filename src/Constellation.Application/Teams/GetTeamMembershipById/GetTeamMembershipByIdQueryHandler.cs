@@ -15,6 +15,8 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Core.Models.Offerings;
 using Core.Models.Offerings.ValueObjects;
+using Core.Models.Subjects;
+using Org.BouncyCastle.Cms;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -32,6 +34,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
     private readonly IStaffRepository _staffRepository;
     private readonly IClassCoverRepository _coverRepository;
     private readonly IGroupTutorialRepository _groupTutorialRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly ILogger _logger;
 
     public GetTeamMembershipByIdQueryHandler(
@@ -41,6 +44,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
         IGroupTutorialRepository groupTutorialRepository,
+        ICourseRepository courseRepository,
         Serilog.ILogger logger,
         IClassCoverRepository coverRepository)
     {
@@ -51,6 +55,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         _staffRepository = staffRepository;
         _coverRepository = coverRepository;
         _groupTutorialRepository = groupTutorialRepository;
+        _courseRepository = courseRepository;
         _logger = logger.ForContext<GetTeamMembershipByIdQuery>();
     }
 
@@ -163,8 +168,52 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                     if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
                         returnData.Add(entry);
                 }
+
+                Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+
+                if (course is not null)
+                {
+                    switch (course.Grade)
+                    {
+                        case Grade.Y05:
+                        case Grade.Y06:
+                        case Grade.Y07:
+                            Staff deputyMiddleSchool = await _staffRepository.GetById("1102472", cancellationToken);
+
+                            if (deputyMiddleSchool is not null)
+                            {
+                                TeamMembershipResponse entry = new(
+                                    team.Id,
+                                    deputyMiddleSchool.EmailAddress,
+                                    TeamsMembershipLevel.Owner.Value);
+
+                                if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
+                                    returnData.Add(entry);
+                            }
+
+                            break;
+                        case Grade.Y08:
+                        case Grade.Y09:
+                        case Grade.Y10:
+                        case Grade.Y11:
+                        case Grade.Y12:
+                            Staff deputySecondarySchool = await _staffRepository.GetById("1055721", cancellationToken);
+
+                            if (deputySecondarySchool is not null)
+                            {
+                                TeamMembershipResponse entry = new(
+                                    team.Id,
+                                    deputySecondarySchool.EmailAddress,
+                                    TeamsMembershipLevel.Owner.Value);
+
+                                if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
+                                    returnData.Add(entry);
+                            }
+
+                            break;
+                    }
+                }
             }
-            
         }
 
         if (team.Description.Split(';').Contains("GTUT"))
@@ -230,7 +279,6 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         {
             "michael.necovski2@det.nsw.edu.au",
             "christopher.robertson@det.nsw.edu.au",
-            "carolyn.hungerford@det.nsw.edu.au",
             "virginia.cluff@det.nsw.edu.au",
             "scott.new@det.nsw.edu.au",
             "julie.dent@det.nsw.edu.au",
