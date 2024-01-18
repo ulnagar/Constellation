@@ -3,7 +3,8 @@
 using Constellation.Application.DTOs;
 using Constellation.Application.Features.API.Operations.Commands;
 using Constellation.Application.Interfaces.Gateways;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Operations;
+using Core.Models.Operations.Enums;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
@@ -62,14 +63,14 @@ public class ProcessCanvasOperationCommandHandler : IRequestHandler<ProcessCanva
 
                 bool modifySuccess = false;
 
-                if (modifyOperation.Action == CanvasOperation.EnrolmentAction.Add)
+                if (modifyOperation.Action.Equals(CanvasAction.Add))
                 {
                     result.Errors.Add($"  Attempting to enrol user {modifyOperation.UserId} in course {modifyOperation.CourseId} as {modifyOperation.UserType}");
 
-                    modifySuccess = await _canvasGateway.EnrolUser(modifyOperation.UserId, modifyOperation.CourseId, modifyOperation.UserType);
+                    modifySuccess = await _canvasGateway.EnrolUser(modifyOperation.UserId, modifyOperation.CourseId, modifyOperation.UserType.Value);
                 }
 
-                if (modifyOperation.Action == CanvasOperation.EnrolmentAction.Remove)
+                if (modifyOperation.Action.Equals(CanvasAction.Remove))
                 {
                     result.Errors.Add($"  Attempting to remove user {modifyOperation.UserId} from course {modifyOperation.CourseId}");
 

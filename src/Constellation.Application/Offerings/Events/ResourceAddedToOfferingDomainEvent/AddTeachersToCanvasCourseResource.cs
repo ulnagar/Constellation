@@ -9,7 +9,9 @@ using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.Operations;
 using Constellation.Core.Shared;
+using Core.Models.Operations.Enums;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,14 +79,12 @@ internal sealed class AddTeachersToCanvasCourseResource
 
         foreach (Staff staffMember in staffMembers)
         {
-            ModifyEnrolmentCanvasOperation operation = new()
-            {
-                UserId = staffMember.StaffId,
-                //CourseId = $"{offering.EndDate.Year}-{offering.Name.Substring(0, offering.Name.Length - 2)}",
-                CourseId = resource.CourseId,
-                Action = CanvasOperation.EnrolmentAction.Add,
-                ScheduledFor = _dateTime.Now
-            };
+            ModifyEnrolmentCanvasOperation operation = new(
+                staffMember.StaffId,
+                resource.CourseId,
+                CanvasAction.Add,
+                CanvasUserType.Teacher,
+                _dateTime.Now);
 
             _operationsRepository.Insert(operation);
         }

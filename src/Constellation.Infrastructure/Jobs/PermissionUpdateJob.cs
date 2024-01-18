@@ -4,7 +4,7 @@ using Application.DTOs;
 using Constellation.Application.Features.API.Operations.Commands;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Operations;
 using MediatR;
 using System;
 using System.Threading;

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Operations;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

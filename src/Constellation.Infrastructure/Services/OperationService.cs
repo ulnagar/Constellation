@@ -10,9 +10,10 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.DependencyInjection;
+using Core.Models.Operations.Enums;
 using System;
 using System.Threading.Tasks;
 
@@ -739,53 +740,44 @@ public class OperationService : IOperationService, IScopedService
 
     public async Task EnrolStudentInCanvasCourse(Student student, Offering offering, DateTime? scheduledFor = null)
     {
-        var resources = offering
+        List<CanvasCourseResource> resources = offering
             .Resources
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
             .Select(resource => resource as CanvasCourseResource)
             .ToList();
 
-        foreach (var resource in resources)
+        foreach (CanvasCourseResource resource in resources)
         {
-            var operation = new ModifyEnrolmentCanvasOperation()
-            {
-                UserId = student.StudentId,
-                UserType = "Student",
-                CourseId = resource.CourseId,
-                Action = CanvasOperation.EnrolmentAction.Add
-            };
-
-            if (scheduledFor != null)
-                operation.ScheduledFor = scheduledFor.Value;
+            ModifyEnrolmentCanvasOperation operation = new(
+                student.StudentId,
+                resource.CourseId,
+                CanvasAction.Add,
+                CanvasUserType.Student,
+                scheduledFor);
 
             _unitOfWork.Add(operation);
         }
-
 
         await _unitOfWork.CompleteAsync();
     }
 
     public Task EnrolStaffInCanvasCourse(Staff staff, Offering offering, DateTime? scheduledFor = null)
     {
-        var resources = offering
+        List<CanvasCourseResource> resources = offering
             .Resources
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
             .Select(resource => resource as CanvasCourseResource)
             .ToList();
 
-        foreach (var resource in resources)
+        foreach (CanvasCourseResource resource in resources)
         {
-            var operation = new ModifyEnrolmentCanvasOperation()
-            {
-                UserId = staff.StaffId,
-                UserType = "Teacher",
-                CourseId = resource.CourseId,
-                Action = CanvasOperation.EnrolmentAction.Add
-            };
-
-            if (scheduledFor != null)
-                operation.ScheduledFor = scheduledFor.Value;
-
+            ModifyEnrolmentCanvasOperation operation = new(
+                staff.StaffId,
+                resource.CourseId,
+                CanvasAction.Add,
+                CanvasUserType.Teacher,
+                scheduledFor);
+            
             _unitOfWork.Add(operation);
         }
 
@@ -794,23 +786,20 @@ public class OperationService : IOperationService, IScopedService
 
     public Task UnenrolStudentFromCanvasCourse(Student student, Offering offering, DateTime? scheduledFor = null)
     {
-        var resources = offering
+        List<CanvasCourseResource> resources = offering
             .Resources
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
             .Select(resource => resource as CanvasCourseResource)
             .ToList();
 
-        foreach (var resource in resources)
+        foreach (CanvasCourseResource resource in resources)
         {
-            var operation = new ModifyEnrolmentCanvasOperation()
-            {
-                UserId = student.StudentId,
-                CourseId = resource.CourseId,
-                Action = CanvasOperation.EnrolmentAction.Remove
-            };
-
-            if (scheduledFor != null)
-                operation.ScheduledFor = scheduledFor.Value;
+            ModifyEnrolmentCanvasOperation operation = new(
+                student.StudentId,
+                resource.CourseId,
+                CanvasAction.Remove,
+                CanvasUserType.Student,
+                scheduledFor);
 
             _unitOfWork.Add(operation);
         }
@@ -820,23 +809,20 @@ public class OperationService : IOperationService, IScopedService
 
     public Task UnenrolStaffFromCanvasCourse(Staff staff, Offering offering, DateTime? scheduledFor = null)
     {
-        var resources = offering
+        List<CanvasCourseResource> resources = offering
             .Resources
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
             .Select(resource => resource as CanvasCourseResource)
             .ToList();
 
-        foreach (var resource in resources)
+        foreach (CanvasCourseResource resource in resources)
         {
-            var operation = new ModifyEnrolmentCanvasOperation()
-            {
-                UserId = staff.StaffId,
-                CourseId = resource.CourseId,
-                Action = CanvasOperation.EnrolmentAction.Remove
-            };
-
-            if (scheduledFor != null)
-                operation.ScheduledFor = scheduledFor.Value;
+            ModifyEnrolmentCanvasOperation operation = new(
+                staff.StaffId,
+                resource.CourseId,
+                CanvasAction.Remove,
+                CanvasUserType.Teacher,
+                scheduledFor);
 
             _unitOfWork.Add(operation);
         }

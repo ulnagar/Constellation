@@ -2,7 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
+using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Events;
 using Serilog;

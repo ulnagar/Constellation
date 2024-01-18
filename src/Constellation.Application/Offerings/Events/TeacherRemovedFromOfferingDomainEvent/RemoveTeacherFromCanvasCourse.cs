@@ -3,13 +3,14 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.Operations;
 using Constellation.Core.Shared;
+using Core.Models.Operations.Enums;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -66,14 +67,12 @@ internal sealed class RemoveTeacherFromCanvasCourse
 
         foreach (Resource resource in offering.Resources.Where(resource => resource.Type == ResourceType.CanvasCourse))
         {
-            ModifyEnrolmentCanvasOperation operation = new()
-            {
-                UserId = assignment.StaffId,
-                //CourseId = $"{offering.EndDate.Year}-{offering.Name.Substring(0, offering.Name.Length - 2)}",
-                CourseId = resource.ResourceId,
-                Action = CanvasOperation.EnrolmentAction.Remove,
-                ScheduledFor = _dateTime.Now
-            };
+            ModifyEnrolmentCanvasOperation operation = new(
+                assignment.StaffId,
+                resource.ResourceId,
+                CanvasAction.Remove,
+                CanvasUserType.Teacher,
+                _dateTime.Now);
 
             _operationsRepository.Insert(operation);
         }

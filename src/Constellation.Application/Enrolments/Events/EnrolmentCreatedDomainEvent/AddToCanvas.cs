@@ -3,14 +3,15 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
+using Core.Models.Operations.Enums;
 using Core.Models.Students.Errors;
 using Serilog;
 using System;
@@ -81,13 +82,12 @@ internal sealed class AddToCanvas
 
         foreach (CanvasCourseResource resource in resources)
         {
-            ModifyEnrolmentCanvasOperation operation = new()
-            {
-                UserId = student.StudentId,
-                CourseId = resource.CourseId,
-                Action = CanvasOperation.EnrolmentAction.Add,
-                ScheduledFor = offering.IsCurrent ? _dateTime.Now : offering.StartDate.ToDateTime(TimeOnly.MinValue)
-            };
+            ModifyEnrolmentCanvasOperation operation = new(
+                student.StudentId,
+                resource.CourseId,
+                CanvasAction.Add,
+                CanvasUserType.Student,
+                offering.IsCurrent ? _dateTime.Now : offering.StartDate.ToDateTime(TimeOnly.MinValue));
 
             _operationRepository.Insert(operation);
         }
