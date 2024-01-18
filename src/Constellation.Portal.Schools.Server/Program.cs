@@ -3,12 +3,17 @@ using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Identity.ProfileService;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
+using Constellation.Portal.Schools.Server;
 using Constellation.Portal.Schools.Server.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddRazorComponents()
+    .AddInteractiveWebAssemblyComponents();
 
 builder.Host.UseSerilog();
 LoggingConfiguration.SetupLogging(builder.Configuration, Serilog.Events.LogEventLevel.Debug);
@@ -71,11 +76,13 @@ else
     app.UseHsts();
 }
 
+
 app.UsePathBase("/schools/");
 app.UseHttpsRedirection();
 
-app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
+
+app.UseAntiforgery();
 
 app.UseRouting();
 
@@ -85,6 +92,9 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapControllers();
-app.MapFallbackToFile("index.html");
+
+app.MapRazorComponents<App>()
+    .AddInteractiveWebAssemblyRenderMode()
+    .AddAdditionalAssemblies(typeof(Constellation.Portal.Schools.Client._Imports).Assembly);
 
 app.Run();

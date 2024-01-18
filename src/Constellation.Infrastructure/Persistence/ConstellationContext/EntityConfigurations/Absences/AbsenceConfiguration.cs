@@ -25,17 +25,17 @@ public class AbsenceConfiguration : IEntityTypeConfiguration<Absence>
                 id => id.Value,
                 value => AbsenceId.FromValue(value));
 
-        builder
-            .Property(absence => absence.Date)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(absence => absence.Date)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
-        builder
-            .Property(absence => absence.StartTime)
-            .HasConversion<TimeOnlyConverter, TimeOnlyComparer>();
+        //builder
+        //    .Property(absence => absence.StartTime)
+        //    .HasConversion<TimeOnlyConverter, TimeOnlyComparer>();
 
-        builder
-            .Property(absence => absence.EndTime)
-            .HasConversion<TimeOnlyConverter, TimeOnlyComparer>();
+        //builder
+        //    .Property(absence => absence.EndTime)
+        //    .HasConversion<TimeOnlyConverter, TimeOnlyComparer>();
 
         builder
             .Property(absence => absence.Type)

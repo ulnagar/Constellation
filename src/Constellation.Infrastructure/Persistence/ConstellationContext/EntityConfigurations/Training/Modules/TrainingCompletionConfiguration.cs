@@ -22,9 +22,9 @@ internal sealed class TrainingCompletionConfiguration : IEntityTypeConfiguration
                 recordId => recordId.Value,
                 value => TrainingCompletionId.FromValue(value));
 
-        builder
-            .Property(completion => completion.CompletedDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(completion => completion.CompletedDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .HasOne<Staff>()

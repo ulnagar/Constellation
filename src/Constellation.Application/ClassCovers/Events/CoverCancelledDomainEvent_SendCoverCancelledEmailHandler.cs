@@ -176,7 +176,7 @@ internal sealed class CoverCancelledDomainEvent_SendCoverCancelledEmailHandler
 
         var teamLink = await _teamRepository.GetLinkByOffering(offering.Name, offering.EndDate.Year.ToString(), cancellationToken);
 
-        TimeOnly startTime, endTime;
+        TimeOnly startTime = TimeOnly.MinValue, endTime = TimeOnly.MaxValue;
 
         if (cover.StartDate == cover.EndDate)
         {

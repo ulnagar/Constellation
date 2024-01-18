@@ -27,7 +27,7 @@ namespace Constellation.Infrastructure.Features.Auth.Commands
             _adContext = new PrincipalContext(ContextType.Domain, "DETNSW.WIN");
         }
 
-        public async Task<Unit> Handle(RegisterADUserAsSchoolContactCommand request, CancellationToken cancellationToken)
+        public async Task Handle(RegisterADUserAsSchoolContactCommand request, CancellationToken cancellationToken)
         {
             var contact = new SchoolContact();
 
@@ -57,8 +57,6 @@ namespace Constellation.Infrastructure.Features.Auth.Commands
             await _context.SaveChangesAsync(cancellationToken);
 
             await _mediator.Send(new SchoolContactCreatedNotification { Id = contact.Id }, cancellationToken);
-
-            return Unit.Value;
         }
     }
 }

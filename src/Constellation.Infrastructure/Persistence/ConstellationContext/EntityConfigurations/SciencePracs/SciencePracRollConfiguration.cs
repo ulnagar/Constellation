@@ -22,9 +22,9 @@ public class SciencePracRollConfiguration : IEntityTypeConfiguration<SciencePrac
                 id => id.Value,
                 value => SciencePracRollId.FromValue(value));
 
-        builder
-            .Property(roll => roll.LessonDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(roll => roll.LessonDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .HasOne<School>()

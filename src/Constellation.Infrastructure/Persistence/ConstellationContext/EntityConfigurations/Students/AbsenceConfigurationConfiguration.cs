@@ -34,13 +34,13 @@ internal sealed class AbsenceConfigurationConfiguration : IEntityTypeConfigurati
                 entry => entry.Value,
                 value => AbsenceType.FromValue(value));
         
-        builder
-            .Property(config => config.ScanStartDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(config => config.ScanStartDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
-        builder
-            .Property(config => config.ScanEndDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(config => config.ScanEndDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .HasIndex(config => new { 

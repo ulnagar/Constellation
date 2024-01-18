@@ -1,13 +1,9 @@
 using Blazored.Modal;
-using Constellation.Portal.Schools.Client;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using System.Globalization;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
-builder.RootComponents.Add<App>("#app");
-builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddHttpClient("Constellation.Portal.Schools.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
     .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
@@ -16,6 +12,8 @@ builder.Services.AddHttpClient("Constellation.Portal.Schools.ServerAPI", client 
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("Constellation.Portal.Schools.ServerAPI"));
 
 builder.Services.AddApiAuthorization();
+
+builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddBlazoredModal();
 

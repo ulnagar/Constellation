@@ -51,13 +51,13 @@ internal sealed class GroupTutorialConfiguration : IEntityTypeConfiguration<Grou
             .Navigation(tutorial => tutorial.Enrolments)
             .AutoInclude();
 
-        builder
-            .Property(tutorial => tutorial.StartDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(tutorial => tutorial.StartDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
-        builder
-            .Property(tutorial => tutorial.EndDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(tutorial => tutorial.EndDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .Ignore(tutorial => tutorial.CurrentEnrolments);

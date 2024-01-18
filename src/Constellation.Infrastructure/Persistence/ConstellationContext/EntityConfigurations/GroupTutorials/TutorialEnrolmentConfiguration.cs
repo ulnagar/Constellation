@@ -34,12 +34,12 @@ internal sealed class TutorialEnrolmentConfiguration : IEntityTypeConfiguration<
             .HasForeignKey(e => e.TutorialId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder
-            .Property(e => e.EffectiveFrom)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(e => e.EffectiveFrom)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
-        builder
-            .Property(e => e.EffectiveTo)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(e => e.EffectiveTo)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }

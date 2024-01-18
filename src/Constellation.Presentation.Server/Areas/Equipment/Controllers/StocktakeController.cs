@@ -227,7 +227,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
             ValidationResult result = await _validator.ValidateAsync(command);
             if (!result.IsValid)
             {
-                result.AddToModelState(this.ModelState);
+                result.AddToModelState(this.ModelState, string.Empty);
             }
 
             if (!ModelState.IsValid)

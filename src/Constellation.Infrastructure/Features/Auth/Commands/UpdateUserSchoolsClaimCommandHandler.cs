@@ -21,7 +21,7 @@ namespace Constellation.Infrastructure.Features.Auth.Commands
             _adService = adService;
         }
 
-        public async Task<Unit> Handle(UpdateUserSchoolsClaimCommand request, CancellationToken cancellationToken)
+        public async Task Handle(UpdateUserSchoolsClaimCommand request, CancellationToken cancellationToken)
         {
             var idUser = await _userManager.FindByEmailAsync(request.EmailAddress);
 
@@ -65,8 +65,6 @@ namespace Constellation.Infrastructure.Features.Auth.Commands
                     await _userManager.AddClaimAsync(idUser, claim);
                 }
             }
-
-            return Unit.Value;
         }
     }
 }

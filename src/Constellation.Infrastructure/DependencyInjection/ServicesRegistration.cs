@@ -39,10 +39,15 @@ public static class ServicesRegistration
 
         // Add Mediatr
 
-        services.AddMediatR(new[] {
-            Constellation.Application.AssemblyReference.Assembly,
-            Constellation.Infrastructure.AssemblyReference.Assembly,
-            Constellation.Core.AssemblyReference.Assembly });
+        services.AddMediatR(config =>
+        {
+            config.RegisterServicesFromAssemblies(new[]
+            {
+                Constellation.Application.AssemblyReference.Assembly,
+                Constellation.Infrastructure.AssemblyReference.Assembly,
+                Constellation.Core.AssemblyReference.Assembly
+            });
+        });
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(BusinessValidationBehaviour<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));

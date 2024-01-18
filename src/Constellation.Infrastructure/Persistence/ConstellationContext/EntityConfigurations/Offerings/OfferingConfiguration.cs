@@ -31,13 +31,13 @@ public class OfferingConfiguration : IEntityTypeConfiguration<Offering>
                 name => name.Value,
                 value => OfferingName.FromValue(value).Value);
 
-        builder
-            .Property(offering => offering.StartDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(offering => offering.StartDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
-        builder
-            .Property(offering => offering.EndDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(offering => offering.EndDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .HasOne<Course>()

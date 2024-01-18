@@ -30,15 +30,15 @@ internal sealed class AttendanceValueConfiguration
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder
-            .Property(value => value.StartDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>()
-            .IsRequired();
+        //builder
+        //    .Property(value => value.StartDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>()
+        //    .IsRequired();
 
-        builder
-            .Property(value => value.EndDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>()
-            .IsRequired();
+        //builder
+        //    .Property(value => value.EndDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>()
+        //    .IsRequired();
 
         builder
             .Property(value => value.PerMinuteYearToDatePercentage)

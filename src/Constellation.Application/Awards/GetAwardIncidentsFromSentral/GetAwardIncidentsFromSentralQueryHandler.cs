@@ -48,7 +48,7 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
             int cellNumber = 0;
 
             DateTime createdOn = DateTime.MinValue;
-            DateOnly issuedFor;
+            DateOnly? issuedFor = null;
             string incidentId = string.Empty;
             string teacherName = string.Empty;
             string issueReason = string.Empty;
@@ -61,7 +61,16 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
                 {
                     case 1:
                         // Date the award was for (i.e. events on this date are the reason for the award)
-                        DateOnly.TryParse(cell.InnerText, out issuedFor);
+                        bool parseAttempt = DateOnly.TryParse(cell.InnerText, out DateOnly attemptedIssuedFor);
+
+                        if (parseAttempt)
+                        {
+                            issuedFor = attemptedIssuedFor;
+                        }
+                        else
+                        {
+                            issuedFor = null;
+                        }
 
                         break;
                     case 2:
@@ -138,7 +147,7 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
 
             response.Add(new(
                 createdOn,
-                issuedFor,
+                issuedFor ?? DateOnly.FromDateTime(createdOn),
                 incidentId,
                 teacherName,
                 issueReason));

@@ -17,7 +17,7 @@ namespace Constellation.Infrastructure.Features.Equipment.Stocktake.Commands
             _context = context;
         }
 
-        public async Task<Unit> Handle(UpsertStocktakeEventCommand request, CancellationToken cancellationToken)
+        public async Task Handle(UpsertStocktakeEventCommand request, CancellationToken cancellationToken)
         {
             var existingEvent = await _context.StocktakeEvents
                 .FirstOrDefaultAsync(stocktake => stocktake.Id == request.Id, cancellationToken);
@@ -31,7 +31,7 @@ namespace Constellation.Infrastructure.Features.Equipment.Stocktake.Commands
 
                 await _context.SaveChangesAsync(cancellationToken);
 
-                return Unit.Value;
+                return;
             }
 
             var stocktake = new StocktakeEvent
@@ -44,8 +44,6 @@ namespace Constellation.Infrastructure.Features.Equipment.Stocktake.Commands
 
             _context.Add(stocktake);
             await _context.SaveChangesAsync(cancellationToken);
-
-            return Unit.Value;
         }
     }
 }

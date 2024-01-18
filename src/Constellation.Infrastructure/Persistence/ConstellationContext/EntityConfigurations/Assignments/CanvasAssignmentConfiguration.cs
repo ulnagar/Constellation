@@ -38,8 +38,8 @@ internal sealed class CanvasAssignmentConfiguration : IEntityTypeConfiguration<C
             .HasForeignKey(assignment => assignment.CourseId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder
-            .Property(assignment => assignment.ForwardingDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(assignment => assignment.ForwardingDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }

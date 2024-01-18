@@ -178,7 +178,7 @@ internal sealed class CoverStartDateChangedDomainEvent_SendCoverUpdatedEmailHand
         }
 
         var teamLink = await _teamRepository.GetLinkByOffering(offering.Name, offering.EndDate.Year.ToString(), cancellationToken);
-        TimeOnly startTime, endTime;
+        TimeOnly startTime = TimeOnly.MinValue, endTime = TimeOnly.MaxValue;
 
         var attachments = new List<Attachment>();
 

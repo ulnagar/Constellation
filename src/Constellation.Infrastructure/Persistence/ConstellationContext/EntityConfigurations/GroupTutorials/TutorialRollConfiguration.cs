@@ -37,9 +37,9 @@ internal sealed class TutorialRollConfiguration : IEntityTypeConfiguration<Tutor
         builder
             .HasMany(roll => roll.Students);
 
-        builder
-            .Property(roll => roll.SessionDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(roll => roll.SessionDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .Navigation(roll => roll.Students)

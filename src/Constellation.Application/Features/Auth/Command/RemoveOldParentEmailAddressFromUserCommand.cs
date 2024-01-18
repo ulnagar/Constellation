@@ -25,7 +25,7 @@ public class RemoveOldParentEmailAddressFromUserCommandHandler : IRequestHandler
         _logger = logger;
     }
 
-    public async Task<Unit> Handle(RemoveOldParentEmailAddressFromUserCommand request, CancellationToken cancellationToken)
+    public async Task Handle(RemoveOldParentEmailAddressFromUserCommand request, CancellationToken cancellationToken)
     {
         var id = Guid.NewGuid();
 
@@ -53,7 +53,5 @@ public class RemoveOldParentEmailAddressFromUserCommandHandler : IRequestHandler
         {
             _logger.LogInformation("{id}: Could not find user {email} to remove", id, request.Email);
         }
-
-        return Unit.Value;
     }
 }

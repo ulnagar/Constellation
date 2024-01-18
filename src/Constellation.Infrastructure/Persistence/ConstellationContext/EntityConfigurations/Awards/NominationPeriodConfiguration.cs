@@ -23,9 +23,9 @@ internal sealed class NominationPeriodConfiguration
                 id => id.Value,
                 value => AwardNominationPeriodId.FromValue(value));
 
-        builder
-            .Property(period => period.LockoutDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(period => period.LockoutDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .HasMany(period => period.Nominations)

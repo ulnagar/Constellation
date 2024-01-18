@@ -21,9 +21,9 @@ public class SciencePracLessonConfiguration : IEntityTypeConfiguration<SciencePr
                 id => id.Value,
                 value => SciencePracLessonId.FromValue(value));
 
-        builder
-            .Property(lesson => lesson.DueDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(lesson => lesson.DueDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .HasMany(lesson => lesson.Offerings)

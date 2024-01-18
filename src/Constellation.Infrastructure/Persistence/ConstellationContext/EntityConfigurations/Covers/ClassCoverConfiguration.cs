@@ -43,12 +43,12 @@ internal sealed class ClassCoverConfiguration : IEntityTypeConfiguration<ClassCo
                 teacherType => teacherType.Value, 
                 value => CoverTeacherType.ByValue(value));
 
-        builder
-            .Property(cover => cover.StartDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(cover => cover.StartDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
-        builder
-            .Property(cover => cover.EndDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+        //builder
+        //    .Property(cover => cover.EndDate)
+        //    .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }

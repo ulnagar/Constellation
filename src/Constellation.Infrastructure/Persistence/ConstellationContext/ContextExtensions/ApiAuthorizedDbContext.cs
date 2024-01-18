@@ -45,6 +45,7 @@ public class KeyApiAuthorizationDbContext<TUser, TRole, TKey> : IdentityDbContex
     /// </summary>
     public DbSet<DeviceFlowCodes> DeviceFlowCodes { get; set; }
     public DbSet<Key> Keys { get; set; }
+    public DbSet<ServerSideSession> ServerSideSessions { get; set; }
 
     Task<int> IPersistedGrantDbContext.SaveChangesAsync() => base.SaveChangesAsync();
 
