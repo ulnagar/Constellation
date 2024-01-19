@@ -4,7 +4,6 @@ using Constellation.Application.Enrolments.UnenrolStudent;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Offerings.GetOfferingsForBulkEnrol;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
@@ -245,55 +244,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             await _mediator.Send(new UnenrolStudentCommand(id, offeringId));
 
             return RedirectToPage("/Students/Details", new { area = "Partner", id });
-        }
-
-        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> BulkEnrol(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return RedirectToAction("Index");
-            }
-
-            var student = await _unitOfWork.Students.ForEditAsync(id);
-
-            if (student == null)
-            {
-                return RedirectToAction("Index");
-            }
-
-            var viewModel = new Student_BulkEnrolViewModel();
-            viewModel.StudentId = student.StudentId;
-
-            var offerings = await _mediator.Send(new GetOfferingsForBulkEnrolQuery(student.CurrentGrade));
-            
-            viewModel.OfferingList = offerings.Value;
-
-            return View("BulkEnrol", viewModel);
-        }
-
-        [HttpPost]
-        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> BulkEnrol(Student_BulkEnrolViewModel viewModel)
-        {
-            var student = await _unitOfWork.Students.ForEditAsync(viewModel.StudentId);
-
-            if (student != null)
-            {
-                foreach (var classId in viewModel.SelectedClasses)
-                {
-                    OfferingId offeringId = OfferingId.FromValue(classId);
-
-                    var offering = await _offeringRepository.GetById(offeringId);
-
-                    if (offering == null)
-                        continue;
-
-                    await _mediator.Send(new EnrolStudentCommand(student.StudentId, offering.Id));
-                }
-            }
-
-            return RedirectToPage("/Students/Details", new { area = "Partner", id = viewModel.StudentId });
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]

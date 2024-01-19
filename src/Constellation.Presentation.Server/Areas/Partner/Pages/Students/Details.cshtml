@@ -191,7 +191,8 @@
 
             @if (authorised.Succeeded)
             {
-                <a asp-action="BulkEnrol" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Bulk Enrol</a>
+                @* <a asp-action="BulkEnrol" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Bulk Enrol</a> *@
+                <a asp-page="/Students/BulkEnrol" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Bulk Enrol</a>
                 <a asp-action="UnenrolAll" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Bulk Unenrol</a>
             }
 
