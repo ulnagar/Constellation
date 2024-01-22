@@ -22,6 +22,7 @@
         }
         else
         {
+            <a asp-page="/Consent/Applications/Upsert" asp-area="SchoolAdmin" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
             <a asp-page-handler="Deactivate" class="btn btn-warning">Deactivate</a>
         }
     }

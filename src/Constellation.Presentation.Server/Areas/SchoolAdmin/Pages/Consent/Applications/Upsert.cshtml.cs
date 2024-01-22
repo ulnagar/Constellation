@@ -1,7 +1,9 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Consent.Applications;
 
 using Application.Models.Auth;
+using Application.ThirdPartyConsent.CreateApplication;
 using Application.ThirdPartyConsent.GetApplicationById;
+using Application.ThirdPartyConsent.UpdateApplication;
 using BaseModels;
 using Core.Models.ThirdPartyConsent.Identifiers;
 using Core.Shared;
@@ -80,7 +82,58 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
+        if (Id.HasValue)
+        {
+            ApplicationId applicationId = ApplicationId.FromValue(Id.Value);
 
-        return Page();
+            UpdateApplicationCommand command = new(
+                applicationId,
+                Name,
+                Purpose,
+                InformationCollected.ToArray(),
+                StoredCountry,
+                SharedWith.ToArray(),
+                ConsentRequired);
+
+            Result result = await _mediator.Send(command);
+
+            if (result.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = result.Error,
+                    RedirectPath = null
+                };
+
+                return Page();
+            }
+
+            return RedirectToPage("/Consent/Applications/Details", new { area = "SchoolAdmin", Id = Id.Value });
+        }
+        else
+        {
+            CreateApplicationCommand command = new(
+                Name,
+                Purpose,
+                InformationCollected.ToArray(),
+                StoredCountry,
+                SharedWith.ToArray(),
+                ConsentRequired);
+
+            Result<ApplicationId> result = await _mediator.Send(command);
+
+            if (result.IsFailure)
+            {
+                Error = new()
+                {
+                    Error = result.Error,
+                    RedirectPath = null
+                };
+
+                return Page();
+            }
+
+            return RedirectToPage("/Consent/Applications/Details", new { area = "SchoolAdmin", Id = result.Value.Value });
+        }
     }
 }
