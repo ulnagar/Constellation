@@ -1,0 +1,81 @@
+﻿@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Constellation.Presentation.Server.Pages.Shared.Components.ShowDashboardWidgets.ShowDashboardWidgetsViewComponentModel
+
+@if (Model.ShowSentralIdWidgets)
+{
+    <div class="col mb-4 sortable">
+        <div class="card h-100 @(Model.StudentsWithoutSentralId > 0 ? "text-white bg-danger" : "text-white bg-success")">
+            <div class="card-header">Student Configuration</div>
+            <div class="card-body">
+                <h3 class="card-title card-title-large">@Model.StudentsWithoutSentralId</h3>
+                <p class="card-text">students without a linked Sentral Student Id</p>
+                <a asp-page="/Students/WithoutSentralId" asp-area="Partner" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.ShowTrainingWidgets)
+{
+    <div class="col mb-4 sortable">
+        <div class="card h-100 @(Model.WithoutRole > 0 ? "text-white bg-danger" : "text-white bg-success")">
+            <div class="card-header">Mandatory Training</div>
+            <div class="card-body">
+                <h3 class="card-title card-title-large">@Model.WithoutRole</h3>
+                <p class="card-text">staff members without an assigned Training Role</p>
+                <a asp-page="/Training/Roles/Index" asp-area="SchoolAdmin" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.ShowAbsenceWidgets)
+{
+    <div class="col mb-4 sortable">
+        <div class="card h-100 @(Model.PartialScanDisabled > 0 ? "text-white bg-danger" : "text-white bg-success")">
+            <div class="card-header">Absence Scanning</div>
+            <div class="card-body">
+                <h3 class="card-title card-title-large">@Model.PartialScanDisabled</h3>
+                <p class="card-text">students with Partial Absence Scanning disabled</p>
+                <a asp-page="/Absences/Audit" asp-area="SchoolAdmin" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col mb-4 sortable">
+        <div class="card h-100 @(Model.WholeScanDisabled > 0 ? "text-white bg-danger" : "text-white bg-success")">
+            <div class="card-header">Absence Scanning</div>
+            <div class="card-body">
+                <h3 class="card-title card-title-large">@Model.WholeScanDisabled</h3>
+                <p class="card-text">students with Whole Absence Scanning disabled</p>
+                <a asp-page="/Absences/Audit" asp-area="SchoolAdmin" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.ShowAwardsWidgets)
+{
+    <div class="col mb-4 sortable">
+        <div class="card h-100 @(Model.AwardAdditions > 0 ? "text-white bg-danger" : "text-white bg-success")">
+            <div class="card-header">Awards</div>
+            <div class="card-body">
+                <h3 class="card-title card-title-large">@Model.AwardAdditions</h3>
+                <p class="card-text">students with Pending Award Additions</p>
+                <a asp-page="/Awards/Changes" asp-area="SchoolAdmin" asp-route-filter="@ChangesModel.FilterDto.Additions" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col mb-4 sortable">
+        <div class="card h-100 @(Model.AwardOverages > 0 ? "text-white bg-danger" : "text-white bg-success")">
+            <div class="card-header">Awards</div>
+            <div class="card-body">
+                <h3 class="card-title card-title-large">@Model.AwardOverages</h3>
+                <p class="card-text">students with Award Overages</p>
+                <a asp-page="/Awards/Changes" asp-area="SchoolAdmin" asp-route-filter="@ChangesModel.FilterDto.Overages" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+}
