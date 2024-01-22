@@ -2,12 +2,7 @@
 namespace Constellation.Presentation.Server.Areas.Home.Pages;
 
 using Application.Affirmations;
-using Application.Students.CountStudentsWithAbsenceScanDisabled;
-using Application.Students.CountStudentsWithAwardOverages;
-using Application.Students.CountStudentsWithoutSentralId;
-using Application.Students.CountStudentsWithPendingAwards;
 using Application.Training.Modules.GetCountOfExpiringCertificatesForStaffMember;
-using Application.Training.Roles.CountStaffWithoutRole;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
 using Constellation.Application.StaffMembers.GetStaffByEmail;
@@ -19,7 +14,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-[Authorize]
+[Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DashboardModel : BasePageModel
 {
     private readonly IMediator _mediator;
@@ -29,27 +24,13 @@ public class DashboardModel : BasePageModel
         _mediator = mediator;
     }
 
-    public string UserName { get; set; }
+    public string UserName { get; set; } = string.Empty;
     public bool IsAdmin { get; set; }
-    public string StaffId { get; set; }
+    public string StaffId { get; set; } = string.Empty;
 
-    public string Message { get; set; }
+    public string Message { get; set; } = string.Empty;
 
     public int ExpiringTraining { get; set; } = 0;
-
-    public bool ShowTrainingWidgets { get; set; }
-    public int WithoutRole { get; set; }
-
-    public bool ShowAbsenceWidgets { get; set; }
-    public int PartialScanDisabled { get; set; }
-    public int WholeScanDisabled { get; set; }
-
-    public bool ShowAwardsWidgets { get; set; }
-    public int AwardOverages { get; set; }
-    public int AwardAdditions { get; set; }
-
-    public bool ShowSentralIdWidgets { get; set; }
-    public int StudentsWithoutSentralId { get; set; }
 
     public Dictionary<string, OfferingId> Classes { get; set; } = new();
 
@@ -65,14 +46,7 @@ public class DashboardModel : BasePageModel
                 Classes = query.Value.ToDictionary(k => k.OfferingName.Value, k => k.OfferingId);
         }
 
-        bool isStaff = User.IsInRole(AuthRoles.StaffMember);
         IsAdmin = User.IsInRole(AuthRoles.Admin);
-        bool isTrainingManager = User.IsInRole(AuthRoles.MandatoryTrainingEditor);
-        bool isAbsencesManager = User.IsInRole(AuthRoles.AbsencesEditor);
-        bool isAwardsManager = User.IsInRole(AuthRoles.AwardsManager);
-
-        if (!isStaff && !IsAdmin)
-            return RedirectToPage("Index", new { area = "" });
 
         Result<StaffSelectionListResponse> teacherRequest = await _mediator.Send(new GetStaffByEmailQuery(username), cancellationToken);
 
@@ -87,7 +61,7 @@ public class DashboardModel : BasePageModel
         {
             return Page();
         }
-        
+
         StaffId = teacherRequest.Value!.StaffId;
         UserName = $"{teacherRequest.Value.FirstName} {teacherRequest.Value.LastName}";
 
@@ -95,60 +69,6 @@ public class DashboardModel : BasePageModel
 
         if (trainingExpiringSoonRequest.IsSuccess)
             ExpiringTraining = trainingExpiringSoonRequest.Value;
-
-        if (isTrainingManager || IsAdmin)
-        {
-            ShowTrainingWidgets = true;
-
-            Result<int> countOfStaffWithoutRoles = await _mediator.Send(new CountStaffWithoutRoleQuery(), cancellationToken);
-
-            if (countOfStaffWithoutRoles.IsSuccess)
-                WithoutRole = countOfStaffWithoutRoles.Value;
-        }
-
-        if (isAbsencesManager || IsAdmin)
-        {
-            ShowAbsenceWidgets = true;
-
-            Result<(int Whole, int Partial)> absenceScanRequest = await _mediator.Send(new CountStudentsWithAbsenceScanDisabledQuery(), cancellationToken);
-
-            if (absenceScanRequest.IsSuccess)
-            {
-                WholeScanDisabled = absenceScanRequest.Value.Whole;
-                PartialScanDisabled = absenceScanRequest.Value.Partial;
-            }
-        }
-
-        if (isAwardsManager || IsAdmin)
-        {
-            ShowAwardsWidgets = true;
-
-            Result<int> overages = await _mediator.Send(new CountStudentsWithAwardOveragesQuery(), cancellationToken);
-
-            if (overages.IsSuccess)
-            {
-                AwardOverages = overages.Value;
-            }
-
-            Result<int> pending = await _mediator.Send(new CountStudentsWithPendingAwardsQuery(), cancellationToken);
-
-            if (pending.IsSuccess)
-            {
-                AwardAdditions = pending.Value;
-            }
-        }
-
-        if (IsAdmin)
-        {
-            ShowSentralIdWidgets = true;
-
-            Result<int> sentralIdRequest = await _mediator.Send(new CountStudentsWithoutSentralIdQuery(), cancellationToken);
-
-            if (sentralIdRequest.IsSuccess)
-            {
-                StudentsWithoutSentralId = sentralIdRequest.Value;
-            }
-        }
 
         return Page();
     }
