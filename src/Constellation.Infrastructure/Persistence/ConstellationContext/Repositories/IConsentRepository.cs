@@ -33,6 +33,12 @@ internal sealed class ConsentRepository : IConsentRepository
             .Where(application => !application.IsDeleted)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Application>> GetAllApplications(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Application>()
+            .ToListAsync(cancellationToken);
+
     public async Task<Transaction> GetTransactionById(
         ConsentTransactionId transactionId,
         CancellationToken cancellationToken = default) =>
