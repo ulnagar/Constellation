@@ -1,0 +1,113 @@
+﻿@page "{id:Guid?}"
+
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Consent.Applications.UpsertModel
+
+@{
+    var title = Model.Id.HasValue ? "Edit Application Record" : "Create New Application Record";
+}
+
+<h2>@title</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form>
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="form-group row">
+            <label asp-for="Name" class="col-md-2">Name</label>
+            <div class="col-md-5">
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Purpose" class="col-md-2">Purpose</label>
+            <div class="col-md-8">
+                <input asp-for="Purpose" class="form-control" />
+                <span asp-validation-for="Purpose" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="InformationCollected" class="col-md-2">Information Collected</label>
+            <div class="col-md-8">
+                <span asp-validation-for="InformationCollected" class="text-danger"></span>
+                @for (int i = 0; i < Model.InformationCollected.Length; i++)
+                {
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="infoColl-@i" name="informationCollected[i]">
+                        <div class="input-group-append" id="button-addon-infoColl-@i">
+                            <button class="btn btn-outline-primary" type="button" onClick="add-infoColl-item()">+</button>
+                            <button class="btn btn-outline-danger" type="button" onClick="remove-infoColl-item('infoColl-@i')">-</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="StoredCountry" class="col-md-2">Stored Country</label>
+            <div class="col-md-8">
+                <input asp-for="StoredCountry" class="form-control"/>
+                <span asp-validation-for="StoredCountry" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="SharedWith" class="col-md-2">Shared With</label>
+            <div class="col-md-8">
+                <span asp-validation-for="SharedWith" class="text-danger"></span>
+                @for (int i = 0; i < Model.SharedWith.Length; i++)
+                {
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="sharedWith-@i" name="sharedWith[i]">
+                        <div class="input-group-append" id="button-addon-sharedWith-@i">
+                            <button class="btn btn-outline-primary" type="button">+</button>
+                            <button class="btn btn-outline-danger" type="button">-</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="ConsentRequired" class="col-md-2">Consent Required</label>
+            <div class="col-md-8">
+                <input asp-for="ConsentRequired" class="form-control"/>
+                <span asp-validation-for="ConsentRequired" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function add-infoColl-item() {
+
+        }
+
+        function remove-infoColl-item() {
+
+        }
+
+        $(".custom-file-input").on("change", function () {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+    </script>
+}

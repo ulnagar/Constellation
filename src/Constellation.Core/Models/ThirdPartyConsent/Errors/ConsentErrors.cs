@@ -1,9 +1,18 @@
 ﻿namespace Constellation.Core.Models.ThirdPartyConsent.Errors;
 
 using Shared;
+using System;
+using ApplicationId = Identifiers.ApplicationId;
 
 public static class ConsentErrors
 {
+    public static class Application
+    {
+        public static Func<ApplicationId, Error> NotFound = id => new(
+            "Consent.Application.NotFound",
+            $"Could not find an Application with Id {id.Value}");
+    }
+
     public static class ConsentMethod
     {
         public static Error ValueEmpty = new(
