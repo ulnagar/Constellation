@@ -100,4 +100,11 @@ public sealed class Application : IAuditableEntity
     }
 
     public void Delete() => IsDeleted = true;
+
+    public void Reenable()
+    {
+        IsDeleted = false;
+        DeletedAt = DateTime.MinValue;
+        DeletedBy = null;
+    }
 }
