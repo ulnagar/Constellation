@@ -14,7 +14,7 @@
 
 <hr />
 
-<form>
+<form method="post">
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         @Html.HiddenFor(model => model.Id)
@@ -37,15 +37,18 @@
 
         <div class="form-group row">
             <label asp-for="InformationCollected" class="col-md-2">Information Collected</label>
-            <div class="col-md-8">
+            <div id="infoCollList" class="col-md-8">
                 <span asp-validation-for="InformationCollected" class="text-danger"></span>
-                @for (int i = 0; i < Model.InformationCollected.Length; i++)
+                @for (int i = 0; i < Model.InformationCollected.Count; i++)
                 {
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="infoColl-@i" name="informationCollected[i]">
+                    <div class="input-group" id="infoColl-@i">
+                        <input type="text" class="form-control" name="informationCollected[@i]" id="informationCollected[@i]">
                         <div class="input-group-append" id="button-addon-infoColl-@i">
-                            <button class="btn btn-outline-primary" type="button" onClick="add-infoColl-item()">+</button>
-                            <button class="btn btn-outline-danger" type="button" onClick="remove-infoColl-item('infoColl-@i')">-</button>
+                            <button class="btn btn-outline-danger" type="button" onClick="removeInfoCollItem('@i')">-</button>
+                            @if (i == Model.InformationCollected.Count - 1)
+                            {
+                                <button class="btn btn-outline-success" type="button" onClick="addInfoCollItem('@Model.InformationCollected.Count')">+</button>
+                            }
                         </div>
                     </div>
                 }
@@ -64,7 +67,7 @@
             <label asp-for="SharedWith" class="col-md-2">Shared With</label>
             <div class="col-md-8">
                 <span asp-validation-for="SharedWith" class="text-danger"></span>
-                @for (int i = 0; i < Model.SharedWith.Length; i++)
+                @for (int i = 0; i < Model.SharedWith.Count; i++)
                 {
                     <div class="input-group">
                         <input type="text" class="form-control" id="sharedWith-@i" name="sharedWith[i]">
@@ -97,17 +100,83 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        function add-infoColl-item() {
+        function addInfoCollItem(nextId) {
+            var id = Number(nextId);
 
+            var prevId = id - 1;
+            var currId = id;
+            var incrId = id + 1;
+
+            // Remove the add button from the current input
+            $('#button-addon-infoColl-' + prevId).children().last().remove();
+
+            // Add new input with new index number
+            var input = '<div class="input-group" id="infoColl-' + currId + '">';
+            input += '<input type="text" class="form-control" name="informationCollected[' + currId + ']" >';
+            input += '<div class="input-group-append" id="button-addon-infoColl-' + currId + '">';
+            input += '<button class="btn btn-outline-danger" type="button" onClick="removeInfoCollItem(\'' + currId + '\')">-</button>';
+            input += '<button class="btn btn-outline-success" type="button" onClick="addInfoCollItem(\'' + incrId + '\')">+</button>';
+            input += '</div>';
+            input += '</div>';
+            
+            $('#infoCollList').append(input);
         }
 
-        function remove-infoColl-item() {
+        function removeInfoCollItem(infoCollId) {
+            var id = Number(infoCollId);
+            
+            var prevId = id - 1;
+            var currId = id;
+            var incrId = id + 1;
 
+            var lastItem = $('infoColl-' + incrId).length;
+
+            console.log(lastItem);
+
+            // Remove item at the index selected
+            if (currId == 0 && lastItem) {
+                $('#informationCollected[' + currId + ']').val("");
+            }
+            else {
+                $('#infoColl-' + currId).remove();
+
+                // Check if it is the last item
+                if (lastItem) {
+                    // There is another entry after this, do nothing
+                }
+                else {
+                    var input = '<button class="btn btn-outline-success" type="button" onClick="addInfoCollItem(\'' + currId + '\')">+</button>';
+
+                    $('button-addon-infoColl-' + prevId).append(input);
+                }
+            }
         }
 
-        $(".custom-file-input").on("change", function () {
-            var fileName = $(this).val().split("\\").pop();
-            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-        });
+        function toggleOffering(offeringId) {
+            var selectDiv = $('#offeringSelect-' + offeringId);
+            if (selectDiv.hasClass('btn-info')) {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
+
+                $('#pd-offeringSelect-' + offeringId).remove();
+                $('#i-offeringSelect-' + offeringId).remove();
+            }
+            else {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info')
+
+                var pageDisplayDiv = $('#offeringSelect-' + offeringId).clone().prop('id', 'pd-offeringSelect-' + offeringId);
+                pageDisplayDiv.appendTo('#SelectedOfferingsList');
+
+                var input = $('<input>').attr('id', 'i-offeringSelect-' + offeringId)
+                    .attr('name', 'SelectedOfferingIds')
+                    .attr('type', "hidden");
+                input.val(offeringId);
+                var classInputDiv = $('#SelectedOfferingsList');
+                classInputDiv.append(input);
+            }
+        }
     </script>
 }
