@@ -36,15 +36,15 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     [Required]
     public string Purpose { get; set; } = string.Empty;
-    
-    [BindProperty]
-    public string[] InformationCollected { get; set; }
+
+    [BindProperty] 
+    public List<string> InformationCollected { get; set; } = new() { string.Empty };
     
     [BindProperty]
     public string StoredCountry { get; set; } = string.Empty;
-    
+
     [BindProperty] 
-    public string[] SharedWith { get; set; }
+    public List<string> SharedWith { get; set; } = new() { string.Empty };
     
     [BindProperty]
     public bool ConsentRequired { get; set; }
@@ -71,9 +71,9 @@ public class UpsertModel : BasePageModel
 
             Name = applicationRequest.Value.Name;
             Purpose = applicationRequest.Value.Purpose;
-            InformationCollected = applicationRequest.Value.InformationCollected;
+            InformationCollected = applicationRequest.Value.InformationCollected.ToList();
             StoredCountry = applicationRequest.Value.StoredCountry;
-            SharedWith = applicationRequest.Value.SharedWith;
+            SharedWith = applicationRequest.Value.SharedWith.ToList();
             ConsentRequired = applicationRequest.Value.ConsentRequired;
         }
     }
@@ -81,5 +81,6 @@ public class UpsertModel : BasePageModel
     public async Task<IActionResult> OnPost()
     {
 
+        return Page();
     }
 }
