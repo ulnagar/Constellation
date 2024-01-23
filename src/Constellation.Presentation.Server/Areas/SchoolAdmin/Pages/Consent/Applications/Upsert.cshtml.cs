@@ -10,6 +10,7 @@ using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanEditStudents)]
@@ -82,6 +83,27 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
+        string[] informationCollected = InformationCollected
+            .Where(entry => !string.IsNullOrWhiteSpace(entry))
+            .ToArray();
+
+        if (informationCollected.Length == 0)
+        {
+            ModelState.AddModelError("InformationCollected", "You must include at least one non-blank entry");
+        }
+
+        string[] sharedWith = SharedWith
+            .Where(entry => !string.IsNullOrWhiteSpace(entry))
+            .ToArray();
+
+        if (sharedWith.Length == 0)
+        {
+            ModelState.AddModelError("SharedWith", "You must include at least one non-blank entry");
+        }
+
+        if (!ModelState.IsValid)
+            return Page();
+
         if (Id.HasValue)
         {
             ApplicationId applicationId = ApplicationId.FromValue(Id.Value);
@@ -90,9 +112,9 @@ public class UpsertModel : BasePageModel
                 applicationId,
                 Name,
                 Purpose,
-                InformationCollected.ToArray(),
+                informationCollected,
                 StoredCountry,
-                SharedWith.ToArray(),
+                sharedWith,
                 ConsentRequired);
 
             Result result = await _mediator.Send(command);
@@ -115,9 +137,9 @@ public class UpsertModel : BasePageModel
             CreateApplicationCommand command = new(
                 Name,
                 Purpose,
-                InformationCollected.ToArray(),
+                informationCollected,
                 StoredCountry,
-                SharedWith.ToArray(),
+                sharedWith,
                 ConsentRequired);
 
             Result<ApplicationId> result = await _mediator.Send(command);
