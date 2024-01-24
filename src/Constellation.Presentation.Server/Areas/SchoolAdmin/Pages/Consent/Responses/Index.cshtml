@@ -64,7 +64,7 @@
     <tbody>
     @foreach (var entry in Model.Transactions)
     {
-        @foreach (var app in entry.Applications)
+        @foreach (var app in entry.Applications.OrderBy(app => app.ApplicationName))
         {
             <tr>
                 <td>@entry.Name.DisplayName</td>
