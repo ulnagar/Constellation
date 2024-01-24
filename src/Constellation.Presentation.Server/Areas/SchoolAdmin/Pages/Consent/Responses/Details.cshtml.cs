@@ -1,12 +1,52 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Consent.Responses;
 
-namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Consent.Responses
+using Application.Models.Auth;
+using Application.ThirdPartyConsent.GetTransactionDetails;
+using BaseModels;
+using Core.Models.ThirdPartyConsent.Identifiers;
+using Core.Shared;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+[Authorize(Policy = AuthPolicies.IsStaffMember)]
+public class DetailsModel : BasePageModel
 {
-    public class DetailsModel : PageModel
+    private readonly ISender _mediator;
+    private readonly LinkGenerator _linkGenerator;
+
+    public DetailsModel(
+        ISender mediator,
+        LinkGenerator linkGenerator)
     {
-        public void OnGet()
+        _mediator = mediator;
+        _linkGenerator = linkGenerator;
+    }
+
+    [ViewData] public string ActivePage => ConsentPages.Transactions;
+
+    [BindProperty(SupportsGet = true)]
+    public Guid Id { get; set; }
+
+    public TransactionDetailsResponse Transaction { get; set; }
+
+    public async Task OnGet()
+    {
+        ConsentTransactionId transactionId = ConsentTransactionId.FromValue(Id);
+
+        Result<TransactionDetailsResponse> result = await _mediator.Send(new GetTransactionDetailsQuery(transactionId));
+
+        if (result.IsFailure)
         {
+            Error = new()
+            {
+                Error = result.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Consent/Responses/Index", values: new { area = "SchoolAdmin" })
+            };
+
+            return;
         }
+
+        Transaction = result.Value;
     }
 }

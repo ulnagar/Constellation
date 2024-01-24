@@ -16,6 +16,8 @@ public interface IConsentRepository
     Task<List<Transaction>> GetTransactionsByStudentId(string studentId, CancellationToken cancellationToken = default);
     Task<List<Transaction>> GetAllTransactions(CancellationToken cancellationToken = default);
 
+    Task<bool?> IsMostRecentResponse(ConsentId consentId, CancellationToken cancellationToken = default);
+
     void Insert(Application application);
     void Insert(Transaction transaction);
 }

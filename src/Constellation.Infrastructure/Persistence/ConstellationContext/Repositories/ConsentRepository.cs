@@ -4,7 +4,6 @@ using Core.Models.ThirdPartyConsent;
 using Core.Models.ThirdPartyConsent.Identifiers;
 using Core.Models.ThirdPartyConsent.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ApplicationId = Core.Models.ThirdPartyConsent.Identifiers.ApplicationId;
@@ -16,6 +15,25 @@ internal sealed class ConsentRepository : IConsentRepository
     public ConsentRepository(AppDbContext context)
     {
         _context = context;
+    }
+
+    public async Task<bool?> IsMostRecentResponse(
+        ConsentId consentId,
+        CancellationToken cancellationToken = default)
+    {
+        Consent consent = await _context.Set<Consent>()
+            .FirstOrDefaultAsync(entry => entry.Id == consentId, cancellationToken);
+
+        if (consent is null)
+            return null;
+
+        return !await _context
+            .Set<Consent>()
+            .AnyAsync(entry =>
+                entry.StudentId == consent.StudentId &&
+                entry.ApplicationId == consent.ApplicationId &&
+                entry.ProvidedAt > consent.ProvidedAt,
+                cancellationToken);
     }
 
     public async Task<Application> GetApplicationById(
