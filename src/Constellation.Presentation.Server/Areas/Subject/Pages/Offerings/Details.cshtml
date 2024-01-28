@@ -236,8 +236,8 @@
             @if (canEditTest.Succeeded)
             {
                 <button type="button" data-toggle="modal" data-target="#addSession" class="btn btn-success btn-sm">Assign a new session</button>
-                /* todo */<a asp-page="AddSessions" asp-area="Subject" asp-route-id="@Model.Id" class="btn btn-sm btn-success">Bulk Add Sessions</a>
-                <button data-course-name="@Model.Offering.CourseName" data-offering-name="@Model.Offering.Name" class="btn btn-sm btn-danger btn-show-hover remove-all-sessions-button">Remove All Sessions</button>
+                <a asp-page="AddSessions" asp-area="Subject" asp-route-id="@Model.Id" class="btn btn-sm btn-success">Bulk Add Sessions</a>
+                <button data-course-name="@Model.Offering.CourseName" data-offering-name="@Model.Offering.Name" class="btn btn-sm btn-danger remove-all-sessions-button">Remove All Sessions</button>
             }
 
             <table class="table-striped table-hover data-table">
