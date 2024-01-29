@@ -49,5 +49,32 @@ namespace Constellation.Application.Extensions
         {
             return content.TrimStart(' ').TrimEnd(' ');
         }
+
+        public static (string, string) ExtractLine(this string offeringName)
+        {
+            if (string.IsNullOrWhiteSpace(offeringName))
+                return ("Unknown", "Unknown");
+
+            if (offeringName.Length != 7)
+                return ("Unknown", "Unknown");
+
+            string line = offeringName.Substring(offeringName.Length - 2, 1);
+
+            return line switch
+            {
+                "G" => ("Secondary", "G"),
+                "P" => ("Secondary", "P"),
+                "A" => ("Primary", "A"),
+                "B" => ("Primary", "B"),
+                "C" => ("Primary", "C"),
+                "1" => ("Senior", "1"),
+                "2" => ("Senior", "2"),
+                "3" => ("Senior", "3"),
+                "4" => ("Senior", "4"),
+                "5" => ("Senior", "5"),
+                "6" => ("Senior", "6"),
+                _ => ("Unknown", "Unknown")
+            };
+        }
     }
 }

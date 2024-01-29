@@ -2,6 +2,7 @@
 @model Constellation.Presentation.Server.Areas.Partner.Pages.Students.ClassAuditModel
 
 @using Constellation.Core.Extensions
+@using Constellation.Application.Extensions
 
 <h2>Current Enrolments by Student</h2>
 
@@ -13,40 +14,42 @@
 
 <table class="table-striped table-hover data-table">
     <thead>
-    <tr>
-        <th>SRN</th>
-        <th>Name</th>
-        <th>Grade</th>
-        <th>School</th>
-        <th></th>
-        <th></th>
-    </tr>
+        <tr>
+            <th>SRN</th>
+            <th>Name</th>
+            <th>Grade</th>
+            <th>School</th>
+            <th></th>
+            <th></th>
+        </tr>
     </thead>
     <tbody>
-    @foreach (var item in Model.Students)
-    {
-        <tr>
-            <td>@item.StudentId</td>
-            <td>@item.Name.DisplayName</td>
-            <td>@item.Grade.AsName()</td>
-            <td>@item.SchoolName</td>
-            <td>
-                @foreach (var course in item.Offerings)
-                {
-                    if (course.Current)
+        @foreach (var item in Model.Students)
+        {
+            <tr>
+                <td>@item.StudentId</td>
+                <td>@item.Name.DisplayName</td>
+                <td>@item.Grade.AsName()</td>
+                <td>@item.SchoolName</td>
+                <td>
+                    @foreach (var course in item.Offerings.OrderBy(offering => offering.Name))
                     {
-                        <a asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@course.Id.Value" class="badge badge-success">@course.Name</a>
-                    }
-                    else
-                    {
+                        if (course.Current)
+                        {
+                            (string group, string line) details = course.Name.ExtractLine();
+
+                            <a asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@course.Id.Value" class="badge @details.group-@details.line">@course.Name</a>
+                        }
+                        else
+                        {
                             <a asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@course.Id.Value" class="badge badge-secondary">@course.Name</a>
+                        }
                     }
-                }
-            </td>
-            <td>
-                <a asp-page="/Students/Details" asp-area="Partner" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
-            </td>
-        </tr>
-    }
+                </td>
+                <td>
+                    <a asp-page="/Students/Details" asp-area="Partner" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

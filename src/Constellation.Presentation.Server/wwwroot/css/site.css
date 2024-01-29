@@ -379,3 +379,96 @@ table.hidden-sort-data-table th {
     width: unset !important;
 }
 
+/* Custom badge colouring */
+.Primary-A {
+    background-color: #e83e8c;
+    color: #fff;
+}
+
+.Primary-B {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.Primary-C {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.Secondary-G {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.Secondary-P {
+    background-color: #e83e8c;
+    color: #fff;
+}
+
+.Senior-1 {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.Senior-2 {
+    background-color: #6f42c1;
+    color: #fff;
+}
+
+.Senior-3 {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.Senior-4 {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.Senior-5 {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.Senior-6 {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+a.Primary-A:hover, a.Primary-A:focus,
+a.Primary-B:hover, a.Primary-B:focus,
+a.Primary-C:hover, a.Primary-C:focus,
+a.Secondary-G:hover, a.Secondary-G:focus,
+a.Secondary-P:hover, a.Secondary-P:focus,
+a.Senior-1:hover, a.Senior-1:focus,
+a.Senior-2:hover, a.Senior-2:focus,
+a.Senior-3:hover, a.Senior-3:focus,
+a.Senior-4:hover, a.Senior-4:focus,
+a.Senior-6:hover, a.Senior-6:focus {
+    color: #fff;
+    background-color: #1d2124;
+}
+
+a.Primary-A:focus, a.Primary-A.focus,
+a.Primary-B:focus, a.Primary-B.focus,
+a.Primary-C:focus, a.Primary-C.focus,
+a.Secondary-G:focus, a.Secondary-G.focus,
+a.Secondary-P:focus, a.Secondary-P.focus,
+a.Senior-1:focus, a.Senior-1.focus,
+a.Senior-2:focus, a.Senior-2.focus,
+a.Senior-3:focus, a.Senior-3.focus,
+a.Senior-4:focus, a.Senior-4.focus,
+a.Senior-6:focus, a.Senior-6.focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.5);
+}
+
+a.Senior-5:hover, a.Senior-5:focus {
+    color: #212529;
+    background-color: #dae0e5;
+}
+
+a.Senior-5:focus, a.Senior-5.focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(248, 249, 250, 0.5);
+}
