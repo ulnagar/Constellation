@@ -131,6 +131,7 @@ public static class ServicesRegistration
         services.AddDoEDataServicesGateway(configuration);
         services.AddEmailExternalService(configuration);
         services.AddLinkShortenerExternalService(configuration, environment);
+        services.AddLissServer(configuration, environment);
         services.AddNetworkStatisticsExternalService(configuration);
         services.AddSentralExternalService(configuration);
         services.AddSMSExternalService(configuration, environment);
