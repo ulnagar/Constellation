@@ -53,7 +53,7 @@ public class Gateway : ISentralGateway
 
     private async Task Login(CancellationToken cancellationToken)
     {
-        string uri = $"{_settings.ServerUrl}/check_login";
+        string uri = $"{_settings.ServerUrl}/auth/?manual=true";
 
         HttpRequestMessage request = new();
         request.Headers.CacheControl = new CacheControlHeaderValue
@@ -63,8 +63,9 @@ public class Gateway : ISentralGateway
 
         List<KeyValuePair<string, string>> formData = new()
         {
-            new KeyValuePair<string, string>("sentral-username", _settings.Username),
-            new KeyValuePair<string, string>("sentral-password", _settings.Password)
+            new KeyValuePair<string, string>("username", _settings.Username),
+            new KeyValuePair<string, string>("password", _settings.Password),
+            new KeyValuePair<string, string>("action", "login")
         };
 
         FormUrlEncodedContent formDataEncoded = new(formData);
@@ -408,8 +409,12 @@ public class Gateway : ISentralGateway
 
         // OLD XPATH - CHANGED 2023-02-24
         //var studentTable = page.DocumentNode.SelectSingleNode("/html/body/div[6]/div/div/div[3]/div/div/div/div[2]/table");
-        HtmlNode studentTable = page?.DocumentNode.SelectSingleNode("/html/body/div[7]/div/div/div[3]/div/div/div/div[2]/table");
-
+        
+        // OLD XPATH - CHANGED 2024-02-02
+        //HtmlNode studentTable = page?.DocumentNode.SelectSingleNode("/html/body/div[7]/div/div/div[3]/div/div/div/div[2]/table");
+        
+        HtmlNode studentTable = page?.DocumentNode.SelectSingleNode("/html/body/div[8]/div/div[2]/div[3]/div/div/div/div[2]/table");
+        
         if (studentTable == null) return null;
         
         foreach (HtmlNode row in studentTable.Descendants("tr"))
