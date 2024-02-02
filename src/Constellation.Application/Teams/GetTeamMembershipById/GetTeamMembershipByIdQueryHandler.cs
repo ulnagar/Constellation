@@ -173,12 +173,13 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
                 if (course is not null)
                 {
+                    Staff deputyMiddleSchool, deputySecondarySchool;
+
                     switch (course.Grade)
                     {
                         case Grade.Y05:
                         case Grade.Y06:
-                        case Grade.Y07:
-                            Staff deputyMiddleSchool = await _staffRepository.GetById("1102472", cancellationToken);
+                            deputyMiddleSchool = await _staffRepository.GetById("1102472", cancellationToken);
 
                             if (deputyMiddleSchool is not null)
                             {
@@ -192,12 +193,40 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                             }
 
                             break;
+                        case Grade.Y07:
+                            deputyMiddleSchool = await _staffRepository.GetById("1102472", cancellationToken);
+
+                            if (deputyMiddleSchool is not null)
+                            {
+                                TeamMembershipResponse entry = new(
+                                    team.Id,
+                                    deputyMiddleSchool.EmailAddress,
+                                    TeamsMembershipLevel.Owner.Value);
+
+                                if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
+                                    returnData.Add(entry);
+                            }
+
+                            deputySecondarySchool = await _staffRepository.GetById("1055721", cancellationToken);
+
+                            if (deputySecondarySchool is not null)
+                            {
+                                TeamMembershipResponse entry = new(
+                                    team.Id,
+                                    deputySecondarySchool.EmailAddress,
+                                    TeamsMembershipLevel.Owner.Value);
+
+                                if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
+                                    returnData.Add(entry);
+                            }
+
+                            break;
                         case Grade.Y08:
                         case Grade.Y09:
                         case Grade.Y10:
                         case Grade.Y11:
                         case Grade.Y12:
-                            Staff deputySecondarySchool = await _staffRepository.GetById("1055721", cancellationToken);
+                            deputySecondarySchool = await _staffRepository.GetById("1055721", cancellationToken);
 
                             if (deputySecondarySchool is not null)
                             {
