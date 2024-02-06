@@ -141,31 +141,21 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                     if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
                         returnData.Add(entry);
 
+                    // Cover administrators
+                    IList<AppUser> additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
 
-
-                    TeamMembershipResponse cathyEntry = new(
-                        team.Id,
-                        "catherine.crouch@det.nsw.edu.au",
-                        TeamsMembershipLevel.Owner.Value);
-
-                    if (returnData.All(value => value.EmailAddress != cathyEntry.EmailAddress))
-                        returnData.Add(cathyEntry);
-                }
-
-                // Cover administrators
-                IList<AppUser> additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
-
-                foreach (AppUser teacher in additionalRecipients)
-                {
-                    if (teacher.IsStaffMember)
+                    foreach (AppUser coverAdmin in additionalRecipients)
                     {
-                        TeamMembershipResponse teacherEntry = new(
-                            team.Id,
-                            teacher.Email,
-                            TeamsMembershipLevel.Owner.Value);
+                        if (coverAdmin.IsStaffMember)
+                        {
+                            TeamMembershipResponse teacherEntry = new(
+                                team.Id,
+                                coverAdmin.Email,
+                                TeamsMembershipLevel.Owner.Value);
 
-                        if (returnData.All(value => value.EmailAddress != teacherEntry.EmailAddress))
-                            returnData.Add(teacherEntry);
+                            if (returnData.All(value => value.EmailAddress != teacherEntry.EmailAddress))
+                                returnData.Add(teacherEntry);
+                        }
                     }
                 }
 
