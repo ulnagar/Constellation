@@ -1,7 +1,10 @@
 ﻿namespace Constellation.Application.Teams.GetTeamMembershipById;
 
+using Application.Models.Identity;
 using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.ClassCovers.Events;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
@@ -16,6 +19,9 @@ using Constellation.Core.Shared;
 using Core.Models.Offerings;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.Subjects;
+using Interfaces.Configuration;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Org.BouncyCastle.Cms;
 using Serilog;
 using System;
@@ -23,6 +29,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using static Constellation.Core.Errors.DomainErrors.ClassCovers;
 
 internal sealed class GetTeamMembershipByIdQueryHandler
     : IQueryHandler<GetTeamMembershipByIdQuery, List<TeamMembershipResponse>>
@@ -33,8 +40,10 @@ internal sealed class GetTeamMembershipByIdQueryHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IClassCoverRepository _coverRepository;
+    private readonly AppConfiguration _configuration;
     private readonly IGroupTutorialRepository _groupTutorialRepository;
     private readonly ICourseRepository _courseRepository;
+    private readonly UserManager<AppUser> _userManager;
     private readonly ILogger _logger;
 
     public GetTeamMembershipByIdQueryHandler(
@@ -45,8 +54,10 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         IStaffRepository staffRepository,
         IGroupTutorialRepository groupTutorialRepository,
         ICourseRepository courseRepository,
+        UserManager<AppUser> userManager,
         Serilog.ILogger logger,
-        IClassCoverRepository coverRepository)
+        IClassCoverRepository coverRepository,
+        IOptions<AppConfiguration> configuration)
     {
         _teamRepository = teamRepository;
         _offeringRepository = offeringRepository;
@@ -54,8 +65,10 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         _studentRepository = studentRepository;
         _staffRepository = staffRepository;
         _coverRepository = coverRepository;
+        _configuration = configuration.Value;
         _groupTutorialRepository = groupTutorialRepository;
         _courseRepository = courseRepository;
+        _userManager = userManager;
         _logger = logger.ForContext<GetTeamMembershipByIdQuery>();
     }
 
@@ -128,6 +141,8 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                     if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
                         returnData.Add(entry);
 
+
+
                     TeamMembershipResponse cathyEntry = new(
                         team.Id,
                         "catherine.crouch@det.nsw.edu.au",
@@ -135,14 +150,23 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
                     if (returnData.All(value => value.EmailAddress != cathyEntry.EmailAddress))
                         returnData.Add(cathyEntry);
+                }
 
-                    TeamMembershipResponse karenEntry = new(
-                        team.Id,
-                        "karen.bellamy3@det.nsw.edu.au",
-                        TeamsMembershipLevel.Owner.Value);
+                // Cover administrators
+                IList<AppUser> additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
 
-                    if (returnData.All(value => value.EmailAddress != karenEntry.EmailAddress))
-                        returnData.Add(karenEntry);
+                foreach (AppUser teacher in additionalRecipients)
+                {
+                    if (teacher.IsStaffMember)
+                    {
+                        TeamMembershipResponse teacherEntry = new(
+                            team.Id,
+                            teacher.Email,
+                            TeamsMembershipLevel.Owner.Value);
+
+                        if (returnData.All(value => value.EmailAddress != teacherEntry.EmailAddress))
+                            returnData.Add(teacherEntry);
+                    }
                 }
 
                 // Head Teachers
@@ -241,6 +265,29 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
                             break;
                     }
+
+                    if (_configuration is null) continue;
+
+                    string learningSupport = _configuration.Contacts
+                        .LearningSupportIds
+                        .Where(entry => entry.Key == course.Grade)
+                        .Select(e => e.Value ?? null)
+                        .FirstOrDefault();
+
+                    if (learningSupport is null) continue;
+
+                    Staff learningSupportTeacher =
+                        await _staffRepository.GetById(learningSupport, cancellationToken);
+
+                    if (learningSupportTeacher is null) continue;
+
+                    TeamMembershipResponse lastEntry = new(
+                        team.Id,
+                        learningSupportTeacher.EmailAddress,
+                        TeamsMembershipLevel.Owner.Value);
+
+                    if (returnData.All(value => value.EmailAddress != lastEntry.EmailAddress))
+                        returnData.Add(lastEntry);
                 }
             }
         }
