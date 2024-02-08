@@ -611,11 +611,15 @@ public class ExcelService : IExcelService
                 _ => SiteStatus.Unknown
             };
 
-            var principalCell = worksheet.Cells[i, 18].Value;
-            var principal = (principalCell is not null) ? ((string)principalCell).Trim() : string.Empty;
+            var principalCell = worksheet.Cells[i, 21].Value;
+            var principal = (principalCell is not null && principalCell is not ExcelErrorValue) ? ((string)principalCell).Trim() : string.Empty;
 
-            var principalEmailCell = worksheet.Cells[i, 20].Value;
-            var principalEmail = (principalEmailCell is not null) ? ((string)principalEmailCell).Trim() : string.Empty;
+            var principalEmailCell = worksheet.Cells[i, 22].Value;
+            string principalEmail = string.Empty;
+            if (principalEmailCell is not null &&
+                principalEmailCell is not ExcelErrorValue &&
+                principalEmailCell.GetType() != typeof(double))
+                principalEmail = principalEmailCell.ToString()!.Trim();
 
             schoolsList.Add(new MasterFileSchool(
                 i,
@@ -634,7 +638,7 @@ public class ExcelService : IExcelService
         List<MasterFileStudent> studentList = new();
 
         using ExcelPackage package = new(stream);
-        ExcelWorksheet worksheet = package.Workbook.Worksheets.First(sheet => sheet.Name == "Students_2023");
+        ExcelWorksheet worksheet = package.Workbook.Worksheets.First(sheet => sheet.Name == "Students");
         int rows = worksheet.Dimension.Rows;
 
         for (int i = 2; i <= rows; i++)
@@ -657,7 +661,7 @@ public class ExcelService : IExcelService
 
             var sName = ((string)sNameCell).Trim();
 
-            var gradeCell = worksheet.Cells[i, 6].Value;
+            var gradeCell = worksheet.Cells[i, 7].Value;
             if (gradeCell is null)
                 continue;
 
@@ -667,6 +671,7 @@ public class ExcelService : IExcelService
                 "6" => Grade.Y06,
                 "6*" => Grade.Y06,
                 "7" => Grade.Y07,
+                "7*" => Grade.Y07,
                 "8" => Grade.Y08,
                 "9" => Grade.Y09,
                 "10" => Grade.Y10,
@@ -675,12 +680,12 @@ public class ExcelService : IExcelService
                 _ => Grade.SpecialProgram
             };
 
-            var parent1Cell = worksheet.Cells[i, 42].Value as string;
+            var parent1Cell = worksheet.Cells[i, 39].Value as string;
             string parent1 = string.Empty;
             if (parent1Cell is not null && !string.IsNullOrWhiteSpace(parent1Cell))
                 parent1 = parent1Cell.Trim();
 
-            var parent2Cell = worksheet.Cells[i, 43].Value as string;
+            var parent2Cell = worksheet.Cells[i, 40].Value as string;
             string parent2 = string.Empty;
             if (parent2Cell is not null && !string.IsNullOrWhiteSpace(parent2Cell))
                 parent2 = parent2Cell.Trim();

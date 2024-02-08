@@ -56,7 +56,7 @@ public class MasterFileModel : BasePageModel
                     Error = new ErrorDisplay
                     {
                         Error = outputRequest.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("MasterFile", values: new { area = "Reports" })
+                        RedirectPath = _linkGenerator.GetPathByPage("/MasterFile", values: new { area = "Reports" })
                     };
 
                     return Page();
@@ -69,7 +69,7 @@ public class MasterFileModel : BasePageModel
                 Error = new ErrorDisplay
                 {
                     Error = new Core.Shared.Error("Exception", ex.Message),
-                    RedirectPath = _linkGenerator.GetPathByPage("MasterFile", values: new { area = "Reports" })
+                    RedirectPath = _linkGenerator.GetPathByPage("/MasterFile", values: new { area = "Reports" })
                 };
 
                 return Page();
