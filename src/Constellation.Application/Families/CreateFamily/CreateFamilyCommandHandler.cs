@@ -29,29 +29,40 @@ internal sealed class CreateFamilyCommandHandler
         bool existingFamily = await _familyRepository.DoesFamilyWithEmailExist(request.FamilyEmail, cancellationToken);
 
         if (existingFamily)
-            return Result.Failure<Family>(DomainErrors.Families.Family.EmailAlreadyInUse);
+        {
+            // Check if existing family is deleted, and reactivate
+            Family family = await _familyRepository.GetFamilyByEmail(request.FamilyEmail, cancellationToken);
 
-        Family family = Family.Create(new FamilyId(), request.FamilyTitle);
+            if (!family.IsDeleted) 
+                return Result.Failure<Family>(DomainErrors.Families.Family.EmailAlreadyInUse);
 
-        Result result = family.UpdateFamilyAddress(
+            family.Reinstate();
+            await _unitOfWork.CompleteAsync(cancellationToken);
+            
+            return family;
+        }
+
+        Family newFamily = Family.Create(new FamilyId(), request.FamilyTitle);
+
+        Result result = newFamily.UpdateFamilyAddress(
             request.FamilyTitle,
             request.AddressLine1,
-            (request.AddressLine2 is null ? string.Empty : request.AddressLine2),
+            request.AddressLine2 ?? string.Empty,
             request.AddressTown,
             request.AddressPostCode);
 
         if (result.IsFailure)
             return Result.Failure<Family>(result.Error);
 
-        Result emailResult = family.UpdateFamilyEmail(request.FamilyEmail.Email);
+        Result emailResult = newFamily.UpdateFamilyEmail(request.FamilyEmail.Email);
 
         if (emailResult.IsFailure)
             return Result.Failure<Family>(emailResult.Error);
 
-        _familyRepository.Insert(family);
+        _familyRepository.Insert(newFamily);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 
-        return family;
+        return newFamily;
     }
 }

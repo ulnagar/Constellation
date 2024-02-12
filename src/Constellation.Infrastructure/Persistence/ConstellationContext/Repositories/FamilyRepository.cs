@@ -22,6 +22,13 @@ internal sealed class FamilyRepository : IFamilyRepository
             .Set<Family>()
             .AnyAsync(family => family.FamilyEmail == email.Email, cancellationToken);
 
+    public async Task<Family> GetFamilyByEmail(
+        EmailAddress email,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Family>()
+            .FirstOrDefaultAsync(family => family.FamilyEmail == email.Email, cancellationToken);
+
     public async Task<List<Family>> GetAll(
         CancellationToken cancellationToken = default) =>
         await _context
