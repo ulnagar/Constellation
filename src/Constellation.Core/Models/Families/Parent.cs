@@ -3,6 +3,7 @@ namespace Constellation.Core.Models.Families;
 
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.ValueObjects;
+using Microsoft.VisualBasic.CompilerServices;
 
 public sealed class Parent
 {
@@ -28,12 +29,13 @@ public sealed class Parent
 
     public ParentId Id { get; private set; }
     public FamilyId FamilyId { get; private set; }
-    public string Title { get; private set; } = string.Empty;
-    public string FirstName { get; private set; } = string.Empty;
-    public string LastName { get; private set; } = string.Empty;
-    public string MobileNumber { get; private set; } = string.Empty;
-    public string EmailAddress { get; private set; } = string.Empty;
+    public string Title { get; private set; }
+    public string FirstName { get; private set; }
+    public string LastName { get; private set; }
+    public string MobileNumber { get; private set; }
+    public string EmailAddress { get; private set; }
     public SentralReference SentralLink { get; private set; }
+    public string SentralId { get; private set; } = string.Empty;
 
     public enum SentralReference
     {
@@ -86,4 +88,6 @@ public sealed class Parent
         EmailAddress = emailAddress.Email;
         SentralLink = sentralLink;
     }
+
+    public void SetSentralId(string sentralId) => SentralId = sentralId;
 }

@@ -8,8 +8,10 @@ using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
 using Core.Abstractions.Clock;
 using Core.Shared;
+using ExcelDataReader;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
+using OfficeOpenXml;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -1167,120 +1169,90 @@ public class Gateway : ISentralGateway
             return new List<FamilyDetailsDto>();
         }
 
-        var data = new List<FamilyDetailsDto>();
-
-        var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
-
-        var familiesPage = await GetPageByGet($"{_settings.ServerUrl}/enquiry/export/view_export?name=families&format=csv&headings=1&action=Download", default);
-        var emailPage = await GetPageByGet($"{_settings.ServerUrl}/enquiry/export/view_export?name=email&inputs[only_eldest]=no&inputs[addresses]=all&format=csv&headings=1&action=Download", default);
-        var linkPage = await GetPageByGet($"{_settings.ServerUrl}/enquiry/export/view_export?name=advstudent&inputs%5Bclass%5D=&inputs%5Broll_class%5D=&format=csv&headings=1&action=Download", default);
-
-        if (familiesPage == null || emailPage == null || linkPage == null)
+        List<FamilyDetailsDto> data = new List<FamilyDetailsDto>();
+        
+        Stream completePage = await GetStreamByGet($"{_settings.ServerUrl}/enquiry/export/view_export?name=complete&inputs[class]=&inputs[roll_class]=&inputs[schyear]=&format=xls&headings=1&action=Download", default);
+        Stream emailPage = await GetStreamByGet($"{_settings.ServerUrl}/enquiry/export/view_export?name=email&inputs[only_eldest]=no&inputs[addresses]=all&format=xls&headings=1&action=Download", default);
+        
+        if (completePage == null || emailPage == null)
             return data;
 
-        var list = familiesPage.DocumentNode.InnerHtml.Split('\u000A').ToList();
-
-        // Remove first and last entry
-        list.RemoveAt(0);
-        list.RemoveAt(list.Count - 1);
-
-        for (var i = 0; i < list.Count; i++)
+        using IExcelDataReader completeReader = ExcelReaderFactory.CreateReader(completePage);
+        DataSet completeWorksheet = completeReader.AsDataSet();
+        
+        foreach (DataRow row in completeWorksheet.Tables[0].Rows)
         {
-            var entry = list[i];
-            var split = CSVParser.Split(entry);
-
-            if (split.Length != 41)
-            {
-                split = entry.Split(',');
-
-                if (split.Length != 41)
-                {
-                    continue;
-                }
-            }
-
-            var familyId = split[0].FormatField();
-
-            if (data.Any(detail => detail.FamilyId == familyId))
-            {
+            if (row.ItemArray.First()?.ToString() == "STUDENT_ID") // This is a header row
                 continue;
+
+            string familyId = row[4].ToString().FormatField();
+
+            FamilyDetailsDto existingEntry = data.FirstOrDefault(detail => detail.FamilyId == familyId);
+
+            if (existingEntry is not null)
+            {
+                string studentId = row[0].ToString().FormatField();
+
+                if (existingEntry.StudentIds.All(entry => entry != studentId))
+                    existingEntry.StudentIds.Add(studentId);
             }
             else
             {
-                var detail = new FamilyDetailsDto
+                FamilyDetailsDto detail = new FamilyDetailsDto
                 {
-                    FamilyId = split[0].FormatField(),
-                    FatherTitle = split[9].FormatField(),
-                    FatherFirstName = split[10].FormatField(),
-                    FatherLastName = split[11].FormatField(),
-                    FatherMobile = split[13].FormatField(),
-                    MotherTitle = split[21].FormatField(),
-                    MotherFirstName = split[22].FormatField(),
-                    MotherLastName = split[23].FormatField(),
-                    MotherMobile = split[25].FormatField(),
-                    AddressName = split[1].FormatField(),
-                    AddressLine1 = split[2].FormatField(),
-                    AddressLine2 = split[3].FormatField(),
-                    AddressTown = split[4].FormatField(),
-                    AddressPostCode = split[5].FormatField()
+                    FamilyId = familyId,
+                    AddressName = row[83].ToString().FormatField(),
+                    AddressLine1 = row[85].ToString().FormatField(),
+                    AddressLine2 = row[86].ToString().FormatField(),
+                    AddressTown = row[88].ToString().FormatField(),
+                    AddressPostCode = row[89].ToString().FormatField()
                 };
+
+                if (!string.IsNullOrWhiteSpace(row[50].ToString().FormatField()))
+                {
+                    detail.Contacts.Add(new()
+                    {
+                        SentralId = $"{familyId}.1",
+                        Sequence = 1,
+                        Title = row[49].ToString().FormatField(),
+                        FirstName = row[50].ToString().FormatField(),
+                        LastName = row[51].ToString().FormatField(),
+                        Mobile = row[53].ToString().FormatField()
+                    });
+                }
+
+                if (!string.IsNullOrWhiteSpace(row[62].ToString().FormatField()))
+                {
+                    detail.Contacts.Add(new()
+                    {
+                        SentralId = $"{familyId}.2",
+                        Sequence = 2,
+                        Title = row[61].ToString().FormatField(),
+                        FirstName = row[62].ToString().FormatField(),
+                        LastName = row[63].ToString().FormatField(),
+                        Mobile = row[65].ToString().FormatField()
+                    });
+                }
+
+                detail.StudentIds.Add(row[0].ToString().FormatField());
 
                 data.Add(detail);
             }
         }
 
-        var linkList = linkPage.DocumentNode.InnerHtml.Split('\u000A').ToList();
-        linkList.RemoveAt(0);
-        linkList.RemoveAt(linkList.Count - 1);
+        using IExcelDataReader emailReader = ExcelReaderFactory.CreateReader(emailPage);
+        DataSet emailWorksheet = emailReader.AsDataSet();
 
-        var familyLink = new Dictionary<string, string>();
-
-        foreach (var link in linkList)
+        foreach (DataRow row in emailWorksheet.Tables[0].Rows)
         {
-            var splitLink = CSVParser.Split(link);
-
-            if (splitLink.Length < 4)
+            if (row.ItemArray.First()?.ToString() == "STUDENT_ID") // This is a header row
                 continue;
 
-            if (!familyLink.ContainsKey(splitLink[0]))
-            {
-                familyLink.Add(splitLink[0], splitLink[3]);
-            }
-        }
+            string studentId = row[0].ToString().FormatField();
 
-        list = emailPage.DocumentNode.InnerHtml.Split('\u000A').ToList();
+            FamilyDetailsDto detail = data.FirstOrDefault(item => item.StudentIds.Contains(studentId));
 
-        // Remove first and last entry
-        list.RemoveAt(0);
-        list.RemoveAt(list.Count - 1);
-
-        foreach (var entry in list)
-        {
-            var split = CSVParser.Split(entry);
-
-            if (split.Length != 11)
-            {
-                split = entry.Split(',');
-
-                if (split.Length != 11)
-                    continue;
-            }
-
-            var studentId = split[0].FormatField();
-
-            var familyLinkItem = familyLink.FirstOrDefault(item => item.Key == studentId);
-
-            if (familyLinkItem.Value == null)
-            {
-                // Family was not found. Why?
-                logger.Warning("Student {studentId} is not found in any active family", studentId);
-
-                continue;
-            }
-
-            var dataItem = data.FirstOrDefault(item => item.FamilyId == familyLinkItem.Value);
-
-            if (dataItem == null)
+            if (detail is null)
             {
                 // This student is not part of a family?
                 logger.Warning("Student {studentId} is not found in any active family", studentId);
@@ -1288,28 +1260,26 @@ public class Gateway : ISentralGateway
                 continue;
             }
 
-            dataItem.StudentIds.Add(studentId);
-            dataItem.FamilyEmail = split[8].FormatEmail();
+            detail.FamilyEmail = row[8].ToString().FormatEmail();
 
-            if (dataItem.FatherFirstName != null && dataItem.MotherFirstName == null)
+            string email2 = row[9].ToString().FormatEmail();
+            if (!string.IsNullOrWhiteSpace(email2))
             {
-                // Single parent family, father has custody
-                dataItem.FatherEmail = split[9].FormatEmail();
+                FamilyDetailsDto.Contact parent = detail.Contacts.FirstOrDefault(contact => contact.Sequence == 1);
+
+                if (parent is not null)
+                    parent.Email = email2;
             }
-            else if (dataItem.FatherFirstName == null && dataItem.MotherFirstName != null)
+
+            string email3 = row[10].ToString().FormatEmail();
+            if (!string.IsNullOrWhiteSpace(email3))
             {
-                // Single parent family, mother has custody
-                dataItem.MotherEmail = split[9].FormatEmail();
-            }
-            else
-            {
-                // Dual parent family, mother first, then father
-                dataItem.MotherEmail = split[9].FormatEmail();
-                dataItem.FatherEmail = split[10].FormatEmail();
+                FamilyDetailsDto.Contact parent = detail.Contacts.FirstOrDefault(contact => contact.Sequence == 2);
+
+                if (parent is not null)
+                    parent.Email = email3;
             }
         }
-
-        var noStudents = data.Where(entry => !entry.StudentIds.Any()).ToList();
 
         return data.Where(entry => entry.StudentIds.Any()).ToList();
     }

@@ -74,8 +74,8 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
             _logger
                 .Information("Checking family: {name} ({code})", family.AddressName, family.FamilyId);
 
-            family.MotherMobile = family.MotherMobile.Replace(" ", "");
-            family.FatherMobile = family.FatherMobile.Replace(" ", "");
+            foreach (FamilyDetailsDto.Contact contact in family.Contacts)
+                contact.Mobile = contact.Mobile.Replace(" ", "");
 
             // Check family exists in database
             Family entry = dbFamilies.FirstOrDefault(entry => entry.SentralId == family.FamilyId);
@@ -105,31 +105,18 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     entry.AddStudent(student.StudentId, true);
                 }
 
-                if (!string.IsNullOrWhiteSpace(family.FatherFirstName))
+                foreach (FamilyDetailsDto.Contact contact in family.Contacts)
                 {
-                    ParentContactChangeDto logEntry = CreateNewParent(
-                        family.FatherTitle,
-                        family.FatherFirstName,
-                        family.FatherLastName,
-                        family.FatherMobile,
-                        family.FatherEmail,
-                        Parent.SentralReference.Father,
-                        familyStudents.FirstOrDefault(),
-                        entry);
+                    string contactSentralId = $"{family.FamilyId}.{contact.Sequence}";
 
-                    if (logEntry is not null)
-                        changeLog.Add(logEntry);
-                }
-
-                if (!string.IsNullOrWhiteSpace(family.MotherFirstName))
-                {
                     ParentContactChangeDto logEntry = CreateNewParent(
-                        family.MotherTitle,
-                        family.MotherFirstName,
-                        family.MotherLastName,
-                        family.MotherMobile,
-                        family.MotherEmail,
-                        Parent.SentralReference.Mother,
+                        contact.Title,
+                        contact.FirstName,
+                        contact.LastName,
+                        contact.Mobile,
+                        contact.Email,
+                        Parent.SentralReference.Other,
+                        contactSentralId,
                         familyStudents.FirstOrDefault(),
                         entry);
 
@@ -177,7 +164,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                             (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().FirstName : string.Empty,
                             (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().LastName : string.Empty,
                             (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentGrade.AsName() : string.Empty,
-                            "Family Email Changed"));
+                            "Family Email Added"));
                         }
                     }
                 }
@@ -226,72 +213,56 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     }
                 }
 
-                Parent fatherEntry = entry.Parents.FirstOrDefault(parent => parent.SentralLink == Parent.SentralReference.Father);
-
-                if (fatherEntry is null && !string.IsNullOrWhiteSpace(family.FatherFirstName))
+                foreach (Parent parent in entry.Parents.ToList())
                 {
-                    ParentContactChangeDto logEntry = CreateNewParent(
-                        family.FatherTitle,
-                        family.FatherFirstName,
-                        family.FatherLastName,
-                        family.FatherMobile,
-                        family.FatherEmail,
-                        Parent.SentralReference.Father,
-                        familyStudents.FirstOrDefault(),
-                        entry);
+                    FamilyDetailsDto.Contact contact = family.Contacts.FirstOrDefault(contact => contact.SentralId == parent.SentralId);
 
-                    if (logEntry is not null)
-                        changeLog.Add(logEntry);
-                } 
-                else if (!string.IsNullOrWhiteSpace(family.FatherFirstName))
-                {
-                    ParentContactChangeDto logEntry = UpdateParent(
-                        fatherEntry,
-                        family.FatherTitle,
-                        family.FatherFirstName,
-                        family.FatherLastName,
-                        family.FatherMobile,
-                        family.FatherEmail,
-                        Parent.SentralReference.Father,
-                        familyStudents.FirstOrDefault(),
-                        entry);
-
-                    if (logEntry is not null)
-                        changeLog.Add(logEntry);
+                    if (contact is null)
+                    {
+                        // Parent should be removed as it is not in the latest pull from Sentral
+                        entry.RemoveParent(parent.Id);
+                    }
                 }
 
-                Parent motherEntry = entry.Parents.FirstOrDefault(parent => parent.SentralLink == Parent.SentralReference.Mother);
-
-                if (motherEntry is null && !string.IsNullOrWhiteSpace(family.MotherFirstName))
+                foreach (FamilyDetailsDto.Contact contact in family.Contacts)
                 {
-                    ParentContactChangeDto logEntry = CreateNewParent(
-                        family.MotherTitle,
-                        family.MotherFirstName,
-                        family.MotherLastName,
-                        family.MotherMobile,
-                        family.MotherEmail,
-                        Parent.SentralReference.Mother,
-                        familyStudents.FirstOrDefault(),
-                        entry);
+                    string contactSentralId = $"{family.FamilyId}.{contact.Sequence}";
 
-                    if (logEntry is not null)
-                        changeLog.Add(logEntry);
-                }
-                else if (!string.IsNullOrWhiteSpace(family.MotherFirstName))
-                {
-                    ParentContactChangeDto logEntry = UpdateParent(
-                        motherEntry,
-                        family.MotherTitle,
-                        family.MotherFirstName,
-                        family.MotherLastName,
-                        family.MotherMobile,
-                        family.MotherEmail,
-                        Parent.SentralReference.Mother,
-                        familyStudents.FirstOrDefault(),
-                        entry);
+                    Parent parent = entry.Parents.FirstOrDefault(parent => parent.SentralId == contactSentralId);
 
-                    if (logEntry is not null)
-                        changeLog.Add(logEntry);
+                    if (parent is not null)
+                    {
+                        ParentContactChangeDto logEntry = UpdateParent(
+                            parent,
+                            contact.Title,
+                            contact.FirstName,
+                            contact.LastName,
+                            contact.Mobile,
+                            contact.Email,
+                            Parent.SentralReference.Other,
+                            contactSentralId,
+                            familyStudents.FirstOrDefault(),
+                            entry);
+
+                        if (logEntry is not null)
+                            changeLog.Add(logEntry);
+                    }
+                    else
+                    {
+                        ParentContactChangeDto logEntry = CreateNewParent(
+                            contact.Title,
+                            contact.FirstName,
+                            contact.LastName,
+                            contact.Mobile,
+                            contact.Email,
+                            Parent.SentralReference.Other,
+                            contactSentralId,
+                            familyStudents.FirstOrDefault(),
+                            entry);
+
+                        if (logEntry is not null)
+                            changeLog.Add(logEntry);
+                    }
                 }
 
                 Result<EmailAddress> entryEmail = EmailAddress.Create(entry.FamilyEmail);
@@ -406,6 +377,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
         string mobile,
         string emailAddress,
         Parent.SentralReference parentType,
+        string sentralId,
         Student? firstStudent,
         Family entry)
     {
@@ -442,6 +414,8 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
             return null;
         }
 
+        result.Value.SetSentralId(sentralId);
+
         return new ParentContactChangeDto(
             displayName,
             string.Empty,
@@ -460,6 +434,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
         string mobile,
         string emailAddress,
         Parent.SentralReference parentType,
+        string sentralId,
         Student? firstStudent,
         Family entry)
     {
@@ -543,6 +518,8 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
             
             return null;
         }
+
+        result.Value.SetSentralId(sentralId);
 
         if (emailChanged)
         {
