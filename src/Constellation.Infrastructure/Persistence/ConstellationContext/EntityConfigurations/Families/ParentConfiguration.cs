@@ -19,11 +19,5 @@ internal sealed class ParentConfiguration : IEntityTypeConfiguration<Parent>
             .HasConversion(
                 parentId => parentId.Value,
                 value => ParentId.FromValue(value));
-
-        builder
-            .HasOne<Family>()
-            .WithMany(family => family.Parents)
-            .HasForeignKey(parent => parent.FamilyId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

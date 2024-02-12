@@ -155,13 +155,13 @@ public class Student : AggregateRoot
             return true;
         }
 
-        if (firstStart < secondStart && firstEnd <= secondEnd)
+        if (firstStart < secondStart && firstEnd >= secondStart)
         {
             // Overlaps at the start of the second range
             return true;
         }
 
-        if (firstStart > secondStart && firstStart <= secondEnd)
+        if (firstStart > secondStart && firstEnd <= secondEnd)
         {
             // Second range encompasses first range
             return true;
