@@ -75,8 +75,7 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
 
                             if (incidentPage is not null)
                             {
-                                string xpath = "/html/body/div[7]/div/div/div[3]/div/div/div[1]/div[1]/div/div/div[1]/span";
-                                HtmlNode entry = incidentPage.DocumentNode.SelectSingleNode(xpath);
+                                HtmlNode entry = incidentPage.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "IncidentCreatedDate").Value);
 
                                 string text = entry.InnerText.Trim();
                                 string[] split = text.Split(' ');
