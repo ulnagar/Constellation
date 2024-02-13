@@ -119,6 +119,23 @@ internal sealed class GetLessonRollDetailsQueryHandler
                     emailAddress.Value);
             }
         }
+        else if (!string.IsNullOrWhiteSpace(roll.SubmittedBy))
+        {
+            Result<Name> contactName = Name.CreateMononym(roll.SubmittedBy);
+
+            if (contactName.IsFailure)
+            {
+                _logger
+                    .Warning("Could not create Name from roll submitted by field");
+
+                return Result.Failure<LessonRollDetailsResponse>(contactName.Error);
+            }
+
+            contactDetails = new(
+                0,
+                contactName.Value,
+                EmailAddress.None);
+        }
 
         LessonRollDetailsResponse response = new(
             lesson.Id,

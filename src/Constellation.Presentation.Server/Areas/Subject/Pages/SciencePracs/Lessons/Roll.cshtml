@@ -11,7 +11,7 @@
 <h2>Roll Details</h2>
 
 <div class="page-menu">
-    @if (canManageTest.Succeeded && Model.Roll.Status == Constellation.Core.Enums.LessonStatus.Active)
+    @if (canManageTest.Succeeded && Model.Error == null && Model.Roll.Status == Constellation.Core.Enums.LessonStatus.Active)
     {
         <a asp-page="Submit" asp-area="Subject" asp-route-lessonId="@Model.LessonId" asp-route-rollId="@Model.RollId" class="btn btn-success">Submit Roll</a>
         <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#cancel-roll-modal">Cancel</button>
@@ -26,7 +26,7 @@
         </div>
     }
 
-    @if (canManageTest.Succeeded && Model.Roll.Status == Constellation.Core.Enums.LessonStatus.Cancelled)
+    @if (canManageTest.Succeeded && Model.Error == null && Model.Roll.Status == Constellation.Core.Enums.LessonStatus.Cancelled)
     {
         <a asp-page-handler="Reinstate" asp-area="Subject" asp-route-lessonId="@Model.LessonId" asp-route-rollId="@Model.RollId" class="btn btn-danger">Reinstate</a>
     }
@@ -80,6 +80,23 @@
             </dt>
             <dd class="col-md-10">
                 <span>@Model.Roll.NotificationCount</span>
+            </dd>
+        }
+        
+        @if (Model.Roll.Status != LessonStatus.Active)
+        {
+            <dt class="col-md-2">
+                <label asp-for="Roll.Comment"></label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Roll.Comment</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Roll.ContactDetails">Submitted By</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Roll.ContactDetails?.ContactName</span>
             </dd>
         }
     </dl>
