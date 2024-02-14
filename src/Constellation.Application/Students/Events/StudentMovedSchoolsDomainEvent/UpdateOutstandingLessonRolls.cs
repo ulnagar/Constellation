@@ -80,10 +80,19 @@ internal sealed class UpdateOutstandingLessonRolls
             {
                 _logger.Information("Removing empty roll for lesson {lesson} at school {school}", lesson.Name, roll.SchoolCode);
 
-                lesson.Cancel();
+                // This is the last student in the class from this school
+                // The roll is no longer needed and should be cancelled
+                roll.CancelRoll("Last student has withdrawn. Roll no longer required.");
             }
 
-            roll.RemoveStudent(notification.StudentId);
+            // Remove the student from the roll
+            SciencePracAttendance? attendance = roll.RemoveStudent(notification.StudentId);
+
+            if (attendance is not null)
+            {
+                _lessonRepository.Delete(attendance);
+            }
+
             _logger.Information("Removing student {student} from lesson roll for {lesson} at school {school} due to moving schools", student.DisplayName, lesson.Name, notification.PreviousSchoolCode);
 
             updatedLessonIds.Add(lesson.Id);
