@@ -2,6 +2,9 @@
 
 using Application.StaffMembers.AddStaffToFaculty;
 using Application.StaffMembers.RemoveStaffFromFaculty;
+using Application.Training.Models;
+using Application.Training.Roles.GetTrainingRoleListForStaffMember;
+using Application.Training.Roles.RemoveStaffMemberFromTrainingRole;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -16,6 +19,7 @@ using Core.Models.Faculty;
 using Core.Models.Faculty.Identifiers;
 using Core.Models.Faculty.Repositories;
 using Core.Models.Faculty.ValueObjects;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -236,11 +240,21 @@ public class StaffController : Controller
             return RedirectToPage("/Staff/Index", routeValues: new { area = "Partner" });
         }
 
+        //TODO: Move all this to Domain Events
+
         await _staffService.RemoveStaffMember(staffMember.StaffId);
 
         await _operationsService.RemoveTeacherEmployedMSTeamAccess(staffMember.StaffId);
 
         await _operationsService.DisableCanvasUser(staffMember.StaffId);
+
+        Result<List<TrainingRoleResponse>> roleRequest = await _mediator.Send(new GetTrainingRoleListForStaffMemberQuery(id));
+
+        if (roleRequest.IsSuccess)
+        {
+            foreach (TrainingRoleResponse entry in roleRequest.Value)
+                await _mediator.Send(new RemoveStaffMemberFromTrainingRoleCommand(entry.Id, id));
+        }
 
         // Remove user access
         var newUser = new UserTemplateDto

@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.ClassCovers.Events;
+﻿namespace Constellation.Application.ClassCovers.Events.CoverCreatedDomainEvent;
 
 using Constellation.Application.Abstractions;
 using Constellation.Application.Abstractions.Messaging;
@@ -12,6 +12,12 @@ using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.ValueObjects;
+using Core.Models;
+using Core.Models.Casuals;
+using Core.Models.Covers;
+using Core.Models.Offerings;
+using Core.Models.Students;
+using Core.Shared;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System;
@@ -21,10 +27,9 @@ using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
+internal sealed class SendCoverCreatedEmailHandler
     : IDomainEventHandler<CoverCreatedDomainEvent>
 {
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IClassCoverRepository _classCoverRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
@@ -37,8 +42,7 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
-    public CoverCreatedDomainEvent_SendCoverCreatedEmailHandler(
-        IUnitOfWork unitOfWork,
+    public SendCoverCreatedEmailHandler(
         IClassCoverRepository classCoverRepository,
         IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
@@ -49,9 +53,8 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
         ITimetablePeriodRepository periodRepository,
         IEmailAttachmentService emailAttachmentService,
         IEmailService emailService,
-        Serilog.ILogger logger)
+        ILogger logger)
     {
-        _unitOfWork = unitOfWork;
         _classCoverRepository = classCoverRepository;
         _offeringRepository = offeringRepository;
         _staffRepository = staffRepository;
@@ -69,27 +72,32 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
     public async Task Handle(CoverCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
         // Gather details
-        var cover = await _classCoverRepository.GetById(notification.CoverId, cancellationToken);
+        ClassCover cover = await _classCoverRepository.GetById(notification.CoverId, cancellationToken);
 
-        var offering = await _offeringRepository.GetById(cover.OfferingId, cancellationToken);
+        if (cover is null)
+        {
+            _logger.Error("{action}: Could not find cover with Id {id} in database", nameof(SendCoverCreatedEmailHandler), notification.CoverId);
 
-        var primaryRecipients = new List<EmailRecipient>(); // Casual, Classroom Teacher
-        var secondaryRecipients = new List<EmailRecipient>(); // Head Teacher, Additional Recipients
+            return;
+        }
+
+        Offering offering = await _offeringRepository.GetById(cover.OfferingId, cancellationToken);
+
+        List<EmailRecipient> primaryRecipients = new(); // Casual, Classroom Teacher
+        List<EmailRecipient> secondaryRecipients = new(); // Head Teacher, Additional Recipients
 
         EmailRecipient coveringTeacher = null;
 
         if (cover.TeacherType == CoverTeacherType.Casual)
         {
-            var teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
+            Casual teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
 
             if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
             {
-                var address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
+                Result<EmailRecipient> address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
 
                 if (address.IsFailure)
-                {
-                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(CoverCreatedDomainEvent_SendCoverCreatedEmailHandler), teacher.DisplayName, cover.Id);
-                }
+                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverCreatedEmailHandler), teacher.DisplayName, cover.Id);
                 else
                 {
                     primaryRecipients.Add(address.Value);
@@ -100,16 +108,14 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
 
         if (cover.TeacherType == CoverTeacherType.Staff)
         {
-            var teacher = await _staffRepository.GetById(cover.TeacherId, cancellationToken);
+            Staff teacher = await _staffRepository.GetById(cover.TeacherId, cancellationToken);
 
-            if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
+            if (teacher is not null && primaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
             {
-                var address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
+                Result<EmailRecipient> address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
 
                 if (address.IsFailure)
-                {
-                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(CoverCreatedDomainEvent_SendCoverCreatedEmailHandler), teacher.DisplayName, cover.Id);
-                }
+                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverCreatedEmailHandler), teacher.DisplayName, cover.Id);
                 else
                 {
                     primaryRecipients.Add(address.Value);
@@ -120,22 +126,22 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
 
         if (coveringTeacher is null)
         {
-            _logger.Error("{action}: Could not create valid email address for covering teacher during processing of cover {id}", nameof(CoverCreatedDomainEvent_SendCoverCreatedEmailHandler), cover.Id);
+            _logger.Error("{action}: Could not create valid email address for covering teacher during processing of cover {id}", nameof(SendCoverCreatedEmailHandler), cover.Id);
 
             return;
         }
 
-        var teachers = await _staffRepository.GetCurrentTeachersForOffering(cover.OfferingId, cancellationToken);
+        List<Staff> teachers = await _staffRepository.GetCurrentTeachersForOffering(cover.OfferingId, cancellationToken);
 
-        foreach (var teacher in teachers)
+        foreach (Staff teacher in teachers)
         {
             if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
             {
-                var address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
+                Result<EmailRecipient> address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
 
                 if (address.IsFailure)
                 {
-                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(CoverCreatedDomainEvent_SendCoverCreatedEmailHandler), teacher.DisplayName, cover.Id);
+                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverCreatedEmailHandler), teacher.DisplayName, cover.Id);
 
                     continue;
                 }
@@ -144,17 +150,17 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
             }
         }
 
-        var headTeachers = await _staffRepository.GetFacultyHeadTeachersForOffering(cover.OfferingId, cancellationToken);
+        List<Staff> headTeachers = await _staffRepository.GetFacultyHeadTeachersForOffering(cover.OfferingId, cancellationToken);
 
-        foreach (var teacher in headTeachers)
+        foreach (Staff teacher in headTeachers)
         {
             if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
             {
-                var address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
+                Result<EmailRecipient> address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
 
                 if (address.IsFailure)
                 {
-                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(CoverCreatedDomainEvent_SendCoverCreatedEmailHandler), teacher.DisplayName, cover.Id);
+                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverCreatedEmailHandler), teacher.DisplayName, cover.Id);
                     continue;
                 }
 
@@ -162,17 +168,17 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
             }
         }
 
-        var additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
+        IList<AppUser> additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
 
-        foreach (var teacher in additionalRecipients)
+        foreach (AppUser teacher in additionalRecipients)
         {
             if (primaryRecipients.All(entry => entry.Email != teacher.Email) && secondaryRecipients.All(entry => entry.Email != teacher.Email))
             {
-                var address = EmailRecipient.Create(teacher.DisplayName, teacher.Email);
+                Result<EmailRecipient> address = EmailRecipient.Create(teacher.DisplayName, teacher.Email);
 
                 if (address.IsFailure)
                 {
-                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(CoverCreatedDomainEvent_SendCoverCreatedEmailHandler), teacher.DisplayName, cover.Id);
+                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverCreatedEmailHandler), teacher.DisplayName, cover.Id);
 
                     continue;
                 }
@@ -181,34 +187,34 @@ internal sealed class CoverCreatedDomainEvent_SendCoverCreatedEmailHandler
             }
         }
 
-        var teamLink = await _teamRepository.GetLinkByOffering(offering.Name, offering.EndDate.Year.ToString(), cancellationToken);
+        string teamLink = await _teamRepository.GetLinkByOffering(offering.Name, offering.EndDate.Year.ToString(), cancellationToken);
 
         TimeOnly startTime, endTime;
 
-        var attachments = new List<Attachment>();
+        List<Attachment> attachments = new();
 
         if (cover.TeacherType == CoverTeacherType.Casual)
         {
-            var classStudents = await _studentRepository.GetCurrentEnrolmentsForOfferingWithSchool(offering.Id, cancellationToken);
+            List<Student> classStudents = await _studentRepository.GetCurrentEnrolmentsForOfferingWithSchool(offering.Id, cancellationToken);
 
-            var rollAttachment = await _emailAttachmentService.GenerateClassRollDocument(offering, classStudents, cancellationToken);
+            Attachment rollAttachment = await _emailAttachmentService.GenerateClassRollDocument(offering, classStudents, cancellationToken);
 
             attachments.Add(rollAttachment);
         }
 
         if (cover.StartDate == cover.EndDate)
         {
-            var periods = await _periodRepository.GetByDayAndOfferingId(cover.StartDate.ToDateTime(TimeOnly.MinValue).GetDayNumber(), cover.OfferingId, cancellationToken);
+            List<TimetablePeriod> periods = await _periodRepository.GetByDayAndOfferingId(cover.StartDate.ToDateTime(TimeOnly.MinValue).GetDayNumber(), cover.OfferingId, cancellationToken);
 
             startTime = TimeOnly.FromTimeSpan(periods.Min(period => period.StartTime));
             endTime = TimeOnly.FromTimeSpan(periods.Max(period => period.EndTime));
-        } 
+        }
         else
         {
-            var relevantTimetables = await _offeringRepository.GetTimetableByOfferingId(cover.OfferingId, cancellationToken);
-            var relevantPeriods = await _periodRepository.GetAllFromTimetable(relevantTimetables, cancellationToken);
+            List<string> relevantTimetables = await _offeringRepository.GetTimetableByOfferingId(cover.OfferingId, cancellationToken);
+            List<TimetablePeriod> relevantPeriods = await _periodRepository.GetAllFromTimetable(relevantTimetables, cancellationToken);
 
-            var timetableAttachment = await _emailAttachmentService.GenerateClassTimetableDocument(offering, relevantPeriods, cancellationToken);
+            Attachment timetableAttachment = await _emailAttachmentService.GenerateClassTimetableDocument(offering, relevantPeriods, cancellationToken);
 
             attachments.Add(timetableAttachment);
         }
