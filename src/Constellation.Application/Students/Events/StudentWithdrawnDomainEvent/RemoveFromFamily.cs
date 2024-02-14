@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Students.Events.StudentWithdrawnDomainEvent;
 
 using Abstractions.Messaging;
-using Constellation.Application.Features.Partners.Students.Notifications;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;

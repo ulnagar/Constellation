@@ -29,7 +29,6 @@ public static class ServicesRegistration
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         // Add Logging
-
         services.AddSingleton(Log.Logger);
 
         // Add AutoMapper and AbstractValidator

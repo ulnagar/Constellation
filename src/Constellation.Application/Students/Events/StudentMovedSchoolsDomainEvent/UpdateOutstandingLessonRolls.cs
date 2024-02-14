@@ -1,6 +1,6 @@
-﻿namespace Constellation.Infrastructure.Features.Partners.Students.Notifications.StudentMovedSchools;
+﻿namespace Constellation.Application.Students.Events.StudentMovedSchoolsDomainEvent;
 
-using Constellation.Application.Features.Partners.Students.Notifications;
+using Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
@@ -8,8 +8,9 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Subjects.Identifiers;
-using MediatR;
+using Core.Models.Students.Errors;
+using Core.Models.Students.Events;
+using Core.Shared;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -17,13 +18,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class UpdateOutstandingLessonRolls 
-    : INotificationHandler<StudentMovedSchoolsNotification>
+internal sealed class UpdateOutstandingLessonRolls
+: IDomainEventHandler<StudentMovedSchoolsDomainEvent>
 {
-    private readonly ILogger _logger;
     private readonly IStudentRepository _studentRepository;
     private readonly ILessonRepository _lessonRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger _logger;
 
     public UpdateOutstandingLessonRolls(
         IStudentRepository studentRepository,
@@ -31,17 +32,27 @@ public class UpdateOutstandingLessonRolls
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
-        _logger = logger.ForContext<StudentMovedSchoolsNotification>();
         _studentRepository = studentRepository;
         _lessonRepository = lessonRepository;
         _unitOfWork = unitOfWork;
+        _logger = logger.ForContext<StudentMovedSchoolsDomainEvent>();
     }
 
-    public async Task Handle(StudentMovedSchoolsNotification notification, CancellationToken cancellationToken)
+    public async Task Handle(StudentMovedSchoolsDomainEvent notification, CancellationToken cancellationToken)
     {
-        _logger.Information("Updating lesson rolls for student ({studentId}) move notification from {oldSchool} to {newSchool}", notification.StudentId, notification.OldSchoolCode, notification.NewSchoolCode);
+        _logger.Information("Updating lesson rolls for student ({studentId}) move notification from {oldSchool} to {newSchool}", notification.StudentId, notification.PreviousSchoolCode, notification.CurrentSchoolCode);
 
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken); 
+        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+
+        if (student is null)
+        {
+            _logger
+                .ForContext(nameof(StudentMovedSchoolsDomainEvent), notification, true)
+                .ForContext(nameof(Error), StudentErrors.NotFound(notification.StudentId), true)
+                .Warning("Failed to process Student school change");
+
+            return;
+        }
 
         List<OfferingId> offeringIds = student.Enrolments
             .Where(enrolment => !enrolment.IsDeleted)
@@ -54,12 +65,12 @@ public class UpdateOutstandingLessonRolls
         List<SciencePracRoll> oldRolls = lessons
             .SelectMany(lesson => lesson.Rolls)
             .Where(roll =>
-                roll.SchoolCode == notification.OldSchoolCode &&
+                roll.SchoolCode == notification.PreviousSchoolCode &&
                 roll.Status == LessonStatus.Active &&
                 roll.Attendance.Any(attendance => attendance.StudentId == notification.StudentId))
             .ToList();
 
-        List<SciencePracLessonId> updatedLessonIds = new(); 
+        List<SciencePracLessonId> updatedLessonIds = new();
 
         foreach (SciencePracRoll roll in oldRolls)
         {
@@ -73,7 +84,7 @@ public class UpdateOutstandingLessonRolls
             }
 
             roll.RemoveStudent(notification.StudentId);
-            _logger.Information("Removing student {student} from lesson roll for {lesson} at school {school} due to moving schools", student.DisplayName, lesson.Name, notification.OldSchoolCode);
+            _logger.Information("Removing student {student} from lesson roll for {lesson} at school {school} due to moving schools", student.DisplayName, lesson.Name, notification.PreviousSchoolCode);
 
             updatedLessonIds.Add(lesson.Id);
         }
@@ -81,8 +92,8 @@ public class UpdateOutstandingLessonRolls
         List<SciencePracRoll> existingRollsAtNewSchool = lessons
             .Where(lesson => lesson.Offerings.Any(record => offeringIds.Contains(record.OfferingId)))
             .SelectMany(lesson => lesson.Rolls)
-            .Where(roll => 
-                roll.SchoolCode == notification.NewSchoolCode &&
+            .Where(roll =>
+                roll.SchoolCode == notification.PreviousSchoolCode &&
                 roll.Status == LessonStatus.Active)
             .ToList();
 
@@ -90,7 +101,7 @@ public class UpdateOutstandingLessonRolls
         {
             SciencePracLesson lesson = lessons.First(lesson => lesson.Id == roll.LessonId);
 
-            _logger.Information("Adding student {student} to lesson roll for {lesson} at school {school} due to moving schools", student.DisplayName, lesson.Name, notification.NewSchoolCode);
+            _logger.Information("Adding student {student} to lesson roll for {lesson} at school {school} due to moving schools", student.DisplayName, lesson.Name, notification.CurrentSchoolCode);
 
             roll.AddStudent(notification.StudentId);
 
@@ -101,13 +112,13 @@ public class UpdateOutstandingLessonRolls
         {
             await _unitOfWork.CompleteAsync(cancellationToken);
 
-            _logger.Information("Lesson rolls updated successfully for student ({studentId}) move notification from {oldSchool} to {newSchool}", notification.StudentId, notification.OldSchoolCode, notification.NewSchoolCode);
+            _logger.Information("Lesson rolls updated successfully for student ({studentId}) move notification from {oldSchool} to {newSchool}", notification.StudentId, notification.PreviousSchoolCode, notification.CurrentSchoolCode);
 
             return;
         }
 
         List<SciencePracLesson> newRolls = lessons
-            .Where(lesson => 
+            .Where(lesson =>
                 updatedLessonIds.Contains(lesson.Id) &&
                 lesson.DueDate >= DateOnly.FromDateTime(DateTime.Today))
             .ToList();
@@ -120,11 +131,11 @@ public class UpdateOutstandingLessonRolls
 
             roll.AddStudent(student.StudentId);
 
-            _logger.Information("Creating new roll for lesson {lesson} at school {school} as it did not already exist", lesson.Name, notification.NewSchoolCode);
+            _logger.Information("Creating new roll for lesson {lesson} at school {school} as it did not already exist", lesson.Name, notification.CurrentSchoolCode);
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 
-        _logger.Information("Lesson rolls updated successfully for student ({studentId}) move notification from {oldSchool} to {newSchool}", notification.StudentId, notification.OldSchoolCode, notification.NewSchoolCode);
+        _logger.Information("Lesson rolls updated successfully for student ({studentId}) move notification from {oldSchool} to {newSchool}", notification.StudentId, notification.PreviousSchoolCode, notification.CurrentSchoolCode);
     }
 }

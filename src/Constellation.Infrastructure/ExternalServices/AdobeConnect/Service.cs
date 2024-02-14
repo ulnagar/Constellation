@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.AdobeConnect;
 
+using Application.Students.UpdateStudentAdobeConnectId;
 using Constellation.Application.Casuals.UpdateCasual;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Gateways;
@@ -16,7 +17,6 @@ public class Service : IAdobeConnectService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAdobeConnectGateway _adobeConnect;
     private readonly IAdobeConnectRoomService _roomService;
-    private readonly IStudentService _studentService;
     private readonly IStaffService _staffService;
     private readonly ICasualRepository _casualRepository;
     private readonly IMediator _mediator;
@@ -25,7 +25,6 @@ public class Service : IAdobeConnectService
         IUnitOfWork unitOfWork,
         IAdobeConnectGateway adobeConnectServer,
         IAdobeConnectRoomService roomService,
-        IStudentService studentService,
         IStaffService staffService,
         ICasualRepository casualRepository,
         IMediator mediator)
@@ -34,7 +33,6 @@ public class Service : IAdobeConnectService
 
         _adobeConnect = adobeConnectServer;
         _roomService = roomService;
-        _studentService = studentService;
         _staffService = staffService;
         _casualRepository = casualRepository;
         _mediator = mediator;
@@ -140,9 +138,10 @@ public class Service : IAdobeConnectService
                     AdobeConnectPrincipalId = acPID
                 };
 
-                await _studentService.UpdateStudent(student.StudentId, studentResource);
+                var result = await _mediator.Send(new UpdateStudentAdobeConnectIdCommand(student.StudentId));
 
-                returnList.Add(new AdobeConnectUserDetailDto { ScoId = acPID, UserId = student.StudentId, UserType = "Students", DisplayName = student.DisplayName });
+                if (result.IsSuccess)
+                    returnList.Add(new AdobeConnectUserDetailDto { ScoId = result.Value, UserId = student.StudentId, UserType = "Students", DisplayName = student.DisplayName });
             }
         }
 

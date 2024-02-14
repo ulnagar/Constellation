@@ -26,4 +26,24 @@ public static class StudentErrors
         "Student.NotFoundForGrade",
         $"No current students found linked to grade {grade}");
 
+
+    public static readonly Error FirstNameInvalid = new(
+        "Student.FirstNameInvalid",
+        "The provided First Name is not valid");
+
+    public static readonly Error LastNameInvalid = new(
+        "Student.LastNameInvalid",
+        "The provided Last Name is not valid");
+
+    public static readonly Error PortalUsernameInvalid = new(
+        "Student.PortalUsernameInvalid",
+        "The provided Portal Username is not valid");
+
+    public static readonly Error GenderInvalid = new(
+        "Student.GenderInvalid",
+        "The provided Gender is not valid");
+
+    public static readonly Error SchoolCodeInvalid = new(
+        "Student.SchoolCodeInvalid",
+        "The provided School Code is not valid");
 }

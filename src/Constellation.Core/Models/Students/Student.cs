@@ -13,6 +13,7 @@ using Primitives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Constellation.Core.Errors.DomainErrors.Families;
 
 public class Student : AggregateRoot
 {
@@ -205,5 +206,52 @@ public class Student : AggregateRoot
         DateDeleted = null;
 
         RaiseDomainEvent(new StudentReinstatedDomainEvent(new(), StudentId));
+    }
+
+    public Result UpdateStudent(
+        string firstName,
+        string lastName,
+        string portalUsername,
+        string adobeConnectId,
+        string sentralId,
+        Grade currentGrade,
+        Grade enrolledGrade,
+        string gender,
+        string schoolCode)
+    {
+        if (string.IsNullOrWhiteSpace(firstName))
+            return Result.Failure(StudentErrors.FirstNameInvalid);
+
+        if (string.IsNullOrWhiteSpace(lastName))
+            return Result.Failure(StudentErrors.LastNameInvalid);
+
+        if (string.IsNullOrWhiteSpace(portalUsername))
+            return Result.Failure(StudentErrors.PortalUsernameInvalid);
+
+        if (string.IsNullOrWhiteSpace(gender) ||
+            (gender != "M" && gender != "F"))
+            return Result.Failure(StudentErrors.GenderInvalid);
+
+        if (string.IsNullOrWhiteSpace(schoolCode) || 
+            schoolCode.Length != 4)
+            return Result.Failure(StudentErrors.SchoolCodeInvalid);
+
+        FirstName = firstName;
+        LastName = lastName;
+        PortalUsername = portalUsername;
+        AdobeConnectPrincipalId = adobeConnectId;
+        SentralStudentId = sentralId;
+        CurrentGrade = currentGrade;
+        EnrolledGrade = enrolledGrade;
+        Gender = gender;
+
+        if (SchoolCode != schoolCode)
+        {
+            RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), StudentId, SchoolCode, schoolCode));
+
+            SchoolCode = schoolCode;
+        }
+
+        return Result.Success();
     }
 }

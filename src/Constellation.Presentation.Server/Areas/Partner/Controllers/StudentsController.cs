@@ -2,7 +2,6 @@
 using Constellation.Application.Enrolments.EnrolStudent;
 using Constellation.Application.Enrolments.UnenrolStudent;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings.Identifiers;
@@ -17,27 +16,23 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 {
+    using Application.Students.UpdateStudent;
+
     [Area("Partner")]
     [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class StudentsController : Controller
     {
         private readonly IOfferingRepository _offeringRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IStudentService _studentService;
-        private readonly IOperationService _operationService;
         private readonly IMediator _mediator;
 
         public StudentsController(
             IOfferingRepository offeringRepository,
-            IUnitOfWork unitOfWork, 
-            IStudentService studentService,
-            IOperationService operationService, 
+            IUnitOfWork unitOfWork,
             IMediator mediator)
         {
             _offeringRepository = offeringRepository;
             _unitOfWork = unitOfWork;
-            _studentService = studentService;
-            _operationService = operationService;
             _mediator = mediator;
         }
 
@@ -193,7 +188,17 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
             }
             else
             {
-                await _studentService.UpdateStudent(viewModel.Student.StudentId, viewModel.Student);
+                await _mediator.Send(new UpdateStudentCommand(
+                    viewModel.Student.StudentId,
+                    viewModel.Student.FirstName,
+                    viewModel.Student.LastName,
+                    viewModel.Student.PortalUsername,
+                    viewModel.Student.AdobeConnectPrincipalId,
+                    viewModel.Student.SentralStudentId,
+                    viewModel.Student.CurrentGrade,
+                    viewModel.Student.EnrolledGrade,
+                    viewModel.Student.Gender,
+                    viewModel.Student.SchoolCode));
             }
 
             await _unitOfWork.CompleteAsync();
