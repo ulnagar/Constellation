@@ -6,6 +6,9 @@ public sealed class ProvideParentWholeAbsenceExplanationCommandValidator : Abstr
 {
     public ProvideParentWholeAbsenceExplanationCommandValidator()
     {
-        RuleFor(command => command.Comment).MinimumLength(5).WithMessage("You must include a longer comment");
+        RuleFor(command => command.Comment)
+            .NotEmpty()
+            .MinimumLength(5)
+            .WithMessage("You must include a longer comment");
     }
 }

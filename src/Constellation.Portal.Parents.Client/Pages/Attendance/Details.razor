@@ -175,9 +175,9 @@
 @code {
     [Parameter] public Guid Id { get; set; }
 
-    public bool ShowLoader { get; set; } = false;
+    public bool ShowLoader { get; set; }
 
-    ParentAbsenceDetailsResponse Absence { get; set; }
+    ParentAbsenceDetailsResponse Absence { get; set; } = default;
     public AttendanceDetailsFormModel FormModel { get; set; } = new();
 
     string wholeAbsence = "Whole Absence";
