@@ -18,6 +18,7 @@ using System.Globalization;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Web;
 
 public class Gateway : ISentralGateway
@@ -96,6 +97,33 @@ public class Gateway : ISentralGateway
         }
 
         throw new Exception($"Could not connect to Sentral Server");
+    }
+
+    private async Task<string> GetJsonByGet(string uri, CancellationToken cancellationToken)
+    {
+        for (int i = 1; i < 6; i++)
+        {
+            try
+            {
+                await Login(cancellationToken);
+
+                HttpResponseMessage response = await _client.GetAsync(uri, cancellationToken);
+                string content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                return content;
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning($"Failed to retrieve information from Sentral Server with error: {ex.Message}");
+                if (ex.InnerException != null)
+                    _logger.Warning($"Inner Exception: {ex.InnerException.Message}");
+
+                // Wait and retry
+                await Task.Delay(5000, cancellationToken);
+            }
+        }
+
+        return null;
     }
 
     private async Task<HtmlDocument> GetPageByGet(string uri, CancellationToken cancellationToken)
@@ -193,7 +221,7 @@ public class Gateway : ISentralGateway
                 await Login(cancellationToken);
 
                 HttpResponseMessage response = await _client.GetAsync(uri, cancellationToken);
-
+                
                 return await response.Content.ReadAsByteArrayAsync(cancellationToken);
             }
             catch (Exception ex)
@@ -1346,7 +1374,8 @@ public class Gateway : ISentralGateway
         HtmlDocument previewPage = await GetPageByGet($"{_settings.ServerUrl}/wellbeing/letters/print?letter_type=incident&id={incidentId}&student_id={sentralStudentId}", default);
 
         HtmlNodeCollection inputs = previewPage.DocumentNode.SelectNodes("//input[@name='selected_issues[]']");
-
+        //HtmlNodeCollection inputs = previewPage.DocumentNode.SelectNodes("//*[@id='print_frm']/div[1]/div[2]/div[2]/div[2]/span/input");
+        
         string issue = string.Empty;
 
         foreach (HtmlNode input in inputs)
@@ -1364,7 +1393,7 @@ public class Gateway : ISentralGateway
             new KeyValuePair<string, string>("issue_id", "")
         };
 
-        byte[] response = await GetByteArrayByPost($"{_settings.ServerUrl}/wellbeing/letters/print", formData, default);
+        byte[] response = await GetByteArrayByPost($"{_settings.ServerUrl}/wellbeing/letters/print?format=pdf", formData, default);
 
         if (response is null)
         {
@@ -1374,7 +1403,30 @@ public class Gateway : ISentralGateway
 
         string code = System.Text.Encoding.Default.GetString(response);
 
-        byte[] document = await GetByteArrayByGet($"{_settings.ServerUrl}/jasperreports/createReport?format=pdf&key={code}", default);
+        bool readyToDownload = false;
+        int retryCount = 20;
+
+        while (!readyToDownload)
+        {
+            if (retryCount == 0)
+                return null;
+
+            string progress = await GetJsonByGet($"{_settings.ServerUrl}/_common/lib/jasper_reports?action=pollQueue&user_key={code}", default);
+
+            string status = JsonSerializerExtensions.DeserializeAnonymousType(progress, new { status = "" }).status;
+            
+            if (status != "COMPLETE")
+            {
+                await Task.Delay(1000, default);
+                retryCount--;
+            }
+            else
+            {
+                readyToDownload = true;
+            }
+        }
+
+        byte[] document = await GetByteArrayByGet($"{_settings.ServerUrl}/_common/lib/jasper_reports?format=pdf&key={code}&action=save", default);
 
         if (document is null)
         {
