@@ -8,6 +8,7 @@ using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
+using Core.Enums;
 using Core.Models.Students.Errors;
 using Serilog;
 using System.Collections.Generic;
@@ -67,6 +68,9 @@ internal sealed class AddToLessonRolls
 
         foreach (SciencePracRoll roll in rolls)
         {
+            if (roll.Status == LessonStatus.Cancelled)
+                roll.ReinstateRoll();
+
             if (roll.Attendance.Any(attendance => attendance.StudentId == student.StudentId))
                 continue;
 

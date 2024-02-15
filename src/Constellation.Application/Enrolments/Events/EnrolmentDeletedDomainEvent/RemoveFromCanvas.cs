@@ -3,21 +3,27 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Enums;
 using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Operations;
+using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
+using Core.Models.Enrolments;
 using Core.Models.Operations.Enums;
 using Core.Models.Students.Errors;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using static Constellation.Core.Errors.DomainErrors.SciencePracs;
 
 internal class RemoveFromCanvas
     : IDomainEventHandler<EnrolmentDeletedDomainEvent>
@@ -76,8 +82,22 @@ internal class RemoveFromCanvas
             .Select(resource => resource as CanvasCourseResource)
             .ToList();
 
+        List<Offering> offerings = await _offeringRepository.GetByStudentId(notification.StudentId, cancellationToken);
+        List<string> activeCourseIds = offerings
+            .SelectMany(offering => offering.Resources)
+            .Where(resource => resource.Type == ResourceType.CanvasCourse)
+            .Select(resource => resource as CanvasCourseResource)
+            .Select(resource => resource?.CourseId)
+            .Distinct()
+            .ToList();
+        
         foreach (CanvasCourseResource resource in resources)
         {
+            // Ensure student isn't also enrolled in another current class that is covered by these resources
+            // (e.g. student is marked withdrawn from 07SCIP1 but enrolled in 07SCIP2)
+            if (activeCourseIds.Contains(resource.CourseId))
+                continue;
+
             ModifyEnrolmentCanvasOperation operation = new(
                 student.StudentId,
                 resource.CourseId,
