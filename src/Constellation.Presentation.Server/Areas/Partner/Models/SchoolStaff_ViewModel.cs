@@ -1,4 +1,4 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Core.Models.SchoolContacts;
 using Constellation.Presentation.Server.BaseModels;
 using System.Collections.Generic;
 using System.Linq;

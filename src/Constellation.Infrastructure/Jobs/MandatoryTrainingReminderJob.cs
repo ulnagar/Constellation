@@ -9,6 +9,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
+using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Models.Training.Contexts.Roles;
 using Constellation.Core.Shared;

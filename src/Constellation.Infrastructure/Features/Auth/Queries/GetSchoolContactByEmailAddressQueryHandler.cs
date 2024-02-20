@@ -1,6 +1,6 @@
 ﻿using Constellation.Application.Features.Auth.Queries;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;

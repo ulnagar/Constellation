@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Interfaces.Repositories;
 
+using Core.Models.SchoolContacts.Repositories;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,8 +15,6 @@ public interface IUnitOfWork
     IEnrolmentRepository Enrolments { get; set; }
     IIdentityRepository Identities { get; set; }
     IMSTeamOperationsRepository MSTeamOperations { get; set; }
-    ISchoolContactRepository SchoolContacts { get; set; }
-    ISchoolContactRoleRepository SchoolContactRoles { get; set; }
     ISchoolRepository Schools { get; set; }
     IStaffRepository Staff { get; set; }
     IStudentRepository Students { get; set; }

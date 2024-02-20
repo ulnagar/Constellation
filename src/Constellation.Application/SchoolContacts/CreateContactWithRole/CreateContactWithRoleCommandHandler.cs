@@ -1,14 +1,13 @@
-﻿namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Commands;
+﻿namespace Constellation.Application.SchoolContacts.CreateContactWithRole;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Features.Partners.SchoolContacts.Notifications;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.SchoolContacts.CreateContactWithRole;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
+using Constellation.Core.Models.SchoolContacts.Repositories;
 using Constellation.Core.Shared;
-using MediatR;
+using Core.Errors;
+using Core.Models;
 using Serilog;
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,67 +16,87 @@ internal sealed class CreateContactWithRoleCommandHandler
     : ICommandHandler<CreateContactWithRoleCommand>
 {
     private readonly ISchoolContactRepository _contactRepository;
+    private readonly ISchoolRepository _schoolRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMediator _mediator;
     private readonly ILogger _logger;
 
     public CreateContactWithRoleCommandHandler(
         ISchoolContactRepository contactRepository,
+        ISchoolRepository schoolRepository,
         IUnitOfWork unitOfWork,
-        IMediator mediator,
         ILogger logger)
     {
         _contactRepository = contactRepository;
+        _schoolRepository = schoolRepository;
         _unitOfWork = unitOfWork;
-        _mediator = mediator;
         _logger = logger.ForContext<CreateContactWithRoleCommand>();
     }
 
     public async Task<Result> Handle(CreateContactWithRoleCommand request, CancellationToken cancellationToken)
     {
-        SchoolContact contact = await _contactRepository.GetWithRolesByEmailAddress(request.EmailAddress, cancellationToken);
+        School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
-        if (contact is not null && contact.IsDeleted)
+        if (school is null)
         {
-            contact.IsDeleted = false;
-            contact.DateDeleted = null;
+            _logger
+                .ForContext(nameof(CreateContactWithRoleCommand), request, true)
+                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                .Warning("Failed to create new School Contact");
+
+            return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
         }
-        else if (contact is null)
+
+        SchoolContact existingContact = await _contactRepository.GetWithRolesByEmailAddress(request.EmailAddress, cancellationToken);
+
+        if (existingContact is null)
         {
-            contact = new SchoolContact
+            Result<SchoolContact> contact = SchoolContact.Create(
+                request.FirstName,
+                request.LastName,
+                request.EmailAddress,
+                request.PhoneNumber,
+                request.SelfRegistered);
+
+            if (contact.IsFailure)
             {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                EmailAddress = request.EmailAddress,
-                PhoneNumber = request.PhoneNumber,
-                SelfRegistered = request.SelfRegistered,
-                DateEntered = DateTime.Now
-            };
+                _logger
+                    .ForContext(nameof(CreateContactWithRoleCommand), request, true)
+                    .ForContext(nameof(Error), contact.Error, true)
+                    .Warning("Failed to create new School Contact");
 
-            _contactRepository.Insert(contact);
+                return Result.Failure(contact.Error);
+            }
+
+            contact.Value.AddRole(
+                request.Position,
+                request.SchoolCode,
+                school.Name,
+                request.Note);
+
+            _contactRepository.Insert(contact.Value);
+
+            await _unitOfWork.CompleteAsync(cancellationToken);
+            
+            return Result.Success();
         }
 
-        if (contact.Assignments.Count == 0 || 
-            !contact.Assignments.Any(assignment => 
-                assignment.Role == request.Position && 
-                assignment.SchoolCode == request.SchoolCode &&
-                !assignment.IsDeleted))
-        {
-            SchoolContactRole assignment = new()
-            {
-                SchoolContact = contact,
-                SchoolCode = request.SchoolCode,
-                Role = request.Position,
-                DateEntered = DateTime.Now
-            };
+        if (existingContact.IsDeleted)
+            existingContact.Reinstate();
 
-            contact.Assignments.Add(assignment);
-        }
+        if (existingContact.Assignments.Any(role =>
+                !role.IsDeleted &&
+                role.SchoolCode != request.SchoolCode &&
+                role.Role != request.Position))
+            return Result.Success();
+
+        existingContact.AddRole(
+            request.Position,
+            request.SchoolCode,
+            school.Name,
+            request.Note);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
-
-        await _mediator.Publish(new SchoolContactCreatedNotification { Id = contact.Id }, cancellationToken);
-
+        
         return Result.Success();
     }
 }

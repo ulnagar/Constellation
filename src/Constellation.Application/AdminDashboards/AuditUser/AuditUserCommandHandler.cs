@@ -7,6 +7,9 @@ using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
+using Core.Models;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Repositories;
 using Microsoft.AspNetCore.Identity;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,14 +39,12 @@ internal sealed class AuditUserCommandHandler
 
     public async Task<Result> Handle(AuditUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userManager.FindByIdAsync(request.UserId.ToString());
+        AppUser user = await _userManager.FindByIdAsync(request.UserId.ToString());
 
         if (user is null)
-        {
             return Result.Failure(DomainErrors.Auth.UserNotFound);
-        }
 
-        var staffMember = await _staffRepository.FromEmailForExistCheck(user.Email);
+        Staff staffMember = await _staffRepository.FromEmailForExistCheck(user.Email);
 
         if (staffMember is null)
         {
@@ -56,12 +57,11 @@ internal sealed class AuditUserCommandHandler
             user.StaffId = staffMember.StaffId;
         }
 
-        var contact = await _schoolContactRepository.FromEmailForExistCheck(user.Email);
+        SchoolContact contact = await _schoolContactRepository.GetWithRolesByEmailAddress(user.Email, cancellationToken);
 
         if (contact is null)
         {
             user.IsSchoolContact = false;
-            user.SchoolContactId = 0;
         }
         else
         {
@@ -71,7 +71,7 @@ internal sealed class AuditUserCommandHandler
             await _userManager.AddToRoleAsync(user, AuthRoles.LessonsUser);
         }
 
-        var family = await _studentFamilyRepository.DoesEmailBelongToParentOrFamily(user.Email, cancellationToken);
+        bool family = await _studentFamilyRepository.DoesEmailBelongToParentOrFamily(user.Email, cancellationToken);
 
         user.IsParent = family;
 

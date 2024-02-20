@@ -9,6 +9,7 @@ using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.SchoolContacts.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,41 +86,7 @@ internal sealed class GetLessonRollDetailsQueryHandler
 
         LessonRollDetailsResponse.Contact contactDetails = null;
 
-        if (roll.SchoolContactId.HasValue)
-        {
-            SchoolContact contact = await _contactRepository.GetById(roll.SchoolContactId.Value, cancellationToken);
-
-            if (contact is not null)
-            {
-                Result<Name> contactName = Name.Create(contact.FirstName, string.Empty, contact.LastName);
-
-                if (contactName.IsFailure)
-                {
-                    _logger
-                        .ForContext(nameof(SchoolContact), contact, true)
-                        .Warning("Could not create Name for contact with Id {contactId}", contact.Id);
-
-                    return Result.Failure<LessonRollDetailsResponse>(contactName.Error);
-                }
-
-                Result<EmailAddress> emailAddress = EmailAddress.Create(contact.EmailAddress);
-
-                if (emailAddress.IsFailure)
-                {
-                    _logger
-                        .ForContext(nameof(SchoolContact), contact, true)
-                        .Warning("Could not create EmailAddress for contact with Id {contactId}", contact.Id);
-
-                    return Result.Failure<LessonRollDetailsResponse>(emailAddress.Error);
-                }
-
-                contactDetails = new(
-                    contact.Id,
-                    contactName.Value,
-                    emailAddress.Value);
-            }
-        }
-        else if (!string.IsNullOrWhiteSpace(roll.SubmittedBy))
+        if (!string.IsNullOrWhiteSpace(roll.SubmittedBy))
         {
             Result<Name> contactName = Name.CreateMononym(roll.SubmittedBy);
 

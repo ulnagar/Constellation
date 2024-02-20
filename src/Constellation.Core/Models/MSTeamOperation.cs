@@ -9,6 +9,7 @@ using System;
 namespace Constellation.Core.Models
 {
     using Faculty.Identifiers;
+    using SchoolContacts;
 
     public abstract class MSTeamOperation
     {

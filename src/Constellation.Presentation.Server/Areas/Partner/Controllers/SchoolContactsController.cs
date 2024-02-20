@@ -6,7 +6,7 @@ using Constellation.Application.SchoolContacts.CreateContact;
 using Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
 using Constellation.Application.SchoolContacts.CreateContactWithRole;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using MediatR;

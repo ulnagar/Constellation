@@ -3,6 +3,7 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.SchoolContacts.Repositories;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

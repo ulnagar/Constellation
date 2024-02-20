@@ -3,6 +3,7 @@
 using Constellation.Application.Helpers;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.SchoolContacts;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.Components.TeacherAddFaculty;
 using Core.Models.Faculty.Identifiers;

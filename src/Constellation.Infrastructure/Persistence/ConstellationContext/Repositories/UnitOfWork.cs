@@ -18,8 +18,6 @@ public class UnitOfWork : IUnitOfWork
     public IEnrolmentRepository Enrolments { get; set; }
     public IIdentityRepository Identities { get; set; }
     public IMSTeamOperationsRepository MSTeamOperations { get; set; }
-    public ISchoolContactRepository SchoolContacts { get; set; }
-    public ISchoolContactRoleRepository SchoolContactRoles { get; set; }
     public ISchoolRepository Schools { get; set; }
     public IStaffRepository Staff { get; set; }
     public IStudentRepository Students { get; set; }

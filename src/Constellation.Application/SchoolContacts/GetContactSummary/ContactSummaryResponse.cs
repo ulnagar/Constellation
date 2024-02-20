@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Application.SchoolContacts.GetContactSummary;
 
+using Core.Models.SchoolContacts.Identifiers;
+
 public sealed record ContactSummaryResponse(
-    int ContactId,
+    SchoolContactId ContactId,
     string FirstName,
     string LastName,
     string EmailAddress,

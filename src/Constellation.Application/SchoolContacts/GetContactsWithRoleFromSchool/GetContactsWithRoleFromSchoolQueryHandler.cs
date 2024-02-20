@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.SchoolContacts.GetContactsWithRoleFromSchool;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Core.Models;
+using Constellation.Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
 using Serilog;
 using System.Collections.Generic;

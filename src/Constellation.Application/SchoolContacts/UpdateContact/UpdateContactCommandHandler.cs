@@ -2,10 +2,11 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Errors;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.SchoolContacts.Errors;
+using Core.Models.SchoolContacts.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ internal sealed class UpdateContactCommandHandler
         {
             _logger.Warning("Could not find School Contact with Id {id}", request.ContactId);
 
-            return Result.Failure(DomainErrors.Partners.Contact.NotFound(request.ContactId));
+            return Result.Failure(SchoolContactErrors.NotFound(request.ContactId));
         }
 
         Result<Name> contactName = Name.Create(request.FirstName, string.Empty, request.LastName);
@@ -71,10 +72,11 @@ internal sealed class UpdateContactCommandHandler
             return Result.Failure(contactPhone.Error);
         }
 
-        contact.FirstName = contactName.Value.FirstName;
-        contact.LastName = contactName.Value.LastName;
-        contact.EmailAddress = contactEmail.Value.Email;
-        contact.PhoneNumber = contactPhone.IsSuccess ? contactPhone.Value.ToString(PhoneNumber.Format.None) : string.Empty;
+        contact.Update(
+            contactName.Value.FirstName,
+            contactName.Value.LastName,
+            contactEmail.Value.Email,
+            contactPhone.IsSuccess ? contactPhone.Value.ToString(PhoneNumber.Format.None) : string.Empty);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

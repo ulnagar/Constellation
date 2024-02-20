@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.DTOs;
 
 using Constellation.Application.Models.Identity;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
