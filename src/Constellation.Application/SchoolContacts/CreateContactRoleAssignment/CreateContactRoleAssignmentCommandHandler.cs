@@ -1,15 +1,18 @@
-﻿namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Commands;
+﻿namespace Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Features.Partners.SchoolContacts.Notifications;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
 using Constellation.Core.Errors;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
+using Constellation.Core.Models.SchoolContacts.Repositories;
 using Constellation.Core.Shared;
+using Core.Models;
+using Core.Models.SchoolContacts.Errors;
 using MediatR;
 using Serilog;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,64 +20,62 @@ internal sealed class CreateContactRoleAssignmentCommandHandler
     : ICommandHandler<CreateContactRoleAssignmentCommand>
 {
     private readonly ISchoolContactRepository _contactRepository;
-    private readonly ISchoolContactRoleRepository _roleRepository;
+    private readonly ISchoolRepository _schoolRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMediator _mediator;
     private readonly ILogger _logger;
 
     public CreateContactRoleAssignmentCommandHandler(
         ISchoolContactRepository contactRepository,
-        ISchoolContactRoleRepository roleRepository,
+        ISchoolRepository schoolRepository,
         IUnitOfWork unitOfWork,
-        ILogger logger,
-        IMediator mediator)
+        ILogger logger)
     {
         _contactRepository = contactRepository;
-        _roleRepository = roleRepository;
+        _schoolRepository = schoolRepository;
         _unitOfWork = unitOfWork;
-        _mediator = mediator;
         _logger = logger.ForContext<CreateContactRoleAssignmentCommand>();
     }
 
     public async Task<Result> Handle(CreateContactRoleAssignmentCommand request, CancellationToken cancellationToken)
     {
+        School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+
+        if (school is null)
+        {
+            _logger
+                .ForContext(nameof(CreateContactRoleAssignmentCommand), request, true)
+                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                .Warning("Failed to create School Contact Role");
+
+            return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
+        }
+        
         SchoolContact contact = await _contactRepository.GetById(request.ContactId, cancellationToken);
 
         if (contact is null)
         {
             _logger.Warning("Could not find School Contact with Id {id}", request.ContactId);
 
-            return Result.Failure(DomainErrors.Partners.Contact.NotFound(request.ContactId));
+            return Result.Failure(SchoolContactErrors.NotFound(request.ContactId));
         }
 
         if (contact.IsDeleted)
-        {
-            contact.DateDeleted = null;
-            contact.IsDeleted = false;
-        }
+            contact.Reinstate();
 
-        bool currentRoles = await _roleRepository.Exists(
-            request.ContactId,
-            request.SchoolCode,
-            request.Position,
-            cancellationToken);
-
-        if (currentRoles)
+        if (contact.Assignments.Any(role =>
+                !role.IsDeleted &&
+                role.Role == request.Position &&
+                role.SchoolCode == request.SchoolCode))
             return Result.Success();
 
-        SchoolContactRole assignment = new()
-        {
-            SchoolContactId = request.ContactId,
-            SchoolCode = request.SchoolCode,
-            Role = request.Position,
-            DateEntered = DateTime.Now
-        };
+        contact.AddRole(
+            request.Position,
+            request.SchoolCode,
+            school.Name,
+            request.Note);
 
-        contact.Assignments.Add(assignment);
         await _unitOfWork.CompleteAsync(cancellationToken);
 
-        await _mediator.Publish(new SchoolContactRoleAssignmentCreatedNotification { AssignmentId = assignment.Id }, cancellationToken);
-    
         return Result.Success();
     }
 }

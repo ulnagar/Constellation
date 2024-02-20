@@ -3,6 +3,7 @@
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Faculty;
+using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;

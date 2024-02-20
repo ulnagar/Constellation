@@ -1,4 +1,4 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Core.Models.SchoolContacts;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Models
 {

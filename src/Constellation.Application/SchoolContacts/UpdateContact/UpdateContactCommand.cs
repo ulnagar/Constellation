@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.SchoolContacts.UpdateContact;
 
 using Constellation.Application.Abstractions.Messaging;
+using Core.Models.SchoolContacts.Identifiers;
 
 public sealed record UpdateContactCommand(
-    int ContactId,
+    SchoolContactId ContactId,
     string FirstName,
     string LastName,
     string EmailAddress,

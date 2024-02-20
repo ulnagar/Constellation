@@ -7,6 +7,7 @@ using Constellation.Application.Features.Auth.Queries;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
+using Constellation.Core.Models.SchoolContacts;
 using Core.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
@@ -126,7 +127,7 @@ public class LoginModel : PageModel
                         .Warning(" - Found valid linked school in AD Records for user {user}", Input.Email);
 
                     // Send to registration
-                    await _mediator.Send(new RegisterADUserAsSchoolContactCommand { EmailAddress = Input.Email });
+                    await _mediator.Send(new CreateContactFromActiveDirectoryCommand { EmailAddress = Input.Email });
                     user = await _userManager.FindByEmailAsync(Input.Email);
 
                     _logger

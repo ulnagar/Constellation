@@ -7,7 +7,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.SchoolContacts.CreateContactWithRole;
 using Constellation.Application.Schools.UpsertSchool;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
 
 internal sealed class SchoolRegisterJob : ISchoolRegisterJob
 {

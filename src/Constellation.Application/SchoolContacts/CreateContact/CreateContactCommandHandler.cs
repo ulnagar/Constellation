@@ -1,65 +1,67 @@
-﻿namespace Constellation.Infrastructure.Features.Partners.SchoolContacts.Commands;
+﻿namespace Constellation.Application.SchoolContacts.CreateContact;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Features.Partners.SchoolContacts.Notifications;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.SchoolContacts.CreateContact;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
+using Constellation.Core.Models.SchoolContacts.Identifiers;
+using Constellation.Core.Models.SchoolContacts.Repositories;
 using Constellation.Core.Shared;
-using MediatR;
 using Serilog;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class CreateContactCommandHandler
-    : ICommandHandler<CreateContactCommand, int>
+    : ICommandHandler<CreateContactCommand, SchoolContactId>
 {
     private readonly ISchoolContactRepository _contactRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMediator _mediator;
     private readonly ILogger _logger;
 
     public CreateContactCommandHandler(
         ISchoolContactRepository contactRepository,
         IUnitOfWork unitOfWork,
-        IMediator mediator,
         ILogger logger)
     {
         _contactRepository = contactRepository;
         _unitOfWork = unitOfWork;
-        _mediator = mediator;
         _logger = logger;
     }
 
-    public async Task<Result<int>> Handle(CreateContactCommand request, CancellationToken cancellationToken)
+    public async Task<Result<SchoolContactId>> Handle(CreateContactCommand request, CancellationToken cancellationToken)
     {
-        SchoolContact contact = await _contactRepository.GetWithRolesByEmailAddress(request.EmailAddress, cancellationToken);
+        SchoolContact existingContact = await _contactRepository.GetWithRolesByEmailAddress(request.EmailAddress, cancellationToken);
 
-        if (contact is not null && contact.IsDeleted)
+        if (existingContact is not null)
         {
-            contact.IsDeleted = false;
-            contact.DateDeleted = null;
-        }
-        else if (contact is null)
-        {
-            contact = new SchoolContact
-            {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                EmailAddress = request.EmailAddress,
-                PhoneNumber = request.PhoneNumber,
-                SelfRegistered = request.SelfRegistered,
-                DateEntered = DateTime.Now
-            };
+            if (existingContact.IsDeleted)
+                existingContact.Reinstate();
 
-            _contactRepository.Insert(contact);
+            await _unitOfWork.CompleteAsync(cancellationToken);
+
+            return existingContact.Id;
         }
+
+        Result<SchoolContact> contact = SchoolContact.Create(
+            request.FirstName,
+            request.LastName,
+            request.EmailAddress,
+            request.PhoneNumber,
+            request.SelfRegistered);
+
+        if (contact.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(CreateContactCommand), request, true)
+                .ForContext(nameof(Error), contact.Error, true)
+                .Warning("Failed to create new School Contact");
+
+            return Result.Failure<SchoolContactId>(contact.Error);
+        }
+
+        _contactRepository.Insert(contact.Value);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 
-        await _mediator.Publish(new SchoolContactCreatedNotification { Id = contact.Id }, cancellationToken);
-
-        return contact.Id;
+        return contact.Value.Id;
     }
 }

@@ -1,9 +1,11 @@
 ﻿namespace Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
 
 using Constellation.Application.Abstractions.Messaging;
+using Core.Models.SchoolContacts.Identifiers;
 
 public sealed record CreateContactRoleAssignmentCommand(
-    int ContactId,
+    SchoolContactId ContactId,
     string SchoolCode,
-    string Position)
+    string Position,
+    string Note)
     : ICommand;

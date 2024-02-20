@@ -1,6 +1,7 @@
 ﻿using Constellation.Application.Helpers;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
 using Constellation.Presentation.Server.BaseModels;
 using System.ComponentModel.DataAnnotations;
 

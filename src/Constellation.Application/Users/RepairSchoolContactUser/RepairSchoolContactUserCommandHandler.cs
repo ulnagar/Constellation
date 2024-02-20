@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Application.Users.RepairSchoolContactUser;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.SchoolContacts;
 using Core.Models;
+using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
 using Microsoft.AspNetCore.Identity;

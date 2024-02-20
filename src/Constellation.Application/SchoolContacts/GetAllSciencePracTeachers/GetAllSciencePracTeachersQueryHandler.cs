@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.SchoolContacts.GetAllSciencePracTeachers;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.SchoolContacts.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading;
@@ -80,8 +80,8 @@ internal sealed class GetAllSciencePracTeachersQueryHandler
                     emailRequest.Value,
                     phoneRequest.IsSuccess ? phoneRequest.Value : null,
                     contact.SelfRegistered,
-                    assignment.School.Code,
-                    assignment.School.Name));
+                    assignment.SchoolCode,
+                    assignment.SchoolName));
             }
         }
 

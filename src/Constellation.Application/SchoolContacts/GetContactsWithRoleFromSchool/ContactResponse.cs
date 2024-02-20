@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Application.SchoolContacts.GetContactsWithRoleFromSchool;
 
-using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Identifiers;
 
 public sealed record ContactResponse(
-    int ContactId,
-    int AssignmentId,
+    SchoolContactId ContactId,
+    SchoolContactRoleId AssignmentId,
     string FirstName,
     string LastName,
     string PhoneNumber,

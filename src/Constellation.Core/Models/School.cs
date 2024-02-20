@@ -1,4 +1,5 @@
-﻿using Constellation.Core.Models.Students;
+﻿using Constellation.Core.Models.SchoolContacts;
+using Constellation.Core.Models.Students;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -33,7 +34,7 @@ namespace Constellation.Core.Models
         public string Website { get; set; }
         public bool HasStudents => (Students.Any(students => !students.IsDeleted));
         public bool HasStaff => (Staff.Any(staff => !staff.IsDeleted));
-        public  ICollection<SchoolContactRole> StaffAssignments { get; set; }
+        public ICollection<SchoolContactRole> StaffAssignments { get; set; }
         public virtual ICollection<Student> Students { get; set; }
         public virtual ICollection<Staff> Staff { get; set; }
     }

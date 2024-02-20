@@ -2,7 +2,7 @@
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
 using Constellation.Infrastructure.Templates.Views.Emails.Contacts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

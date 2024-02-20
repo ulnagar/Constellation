@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.SchoolContacts.GetContactSummary;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Errors;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Shared;
+using Core.Models.SchoolContacts.Errors;
+using Core.Models.SchoolContacts.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,7 +31,7 @@ internal sealed class GetContactSummaryQueryHandler
         {
             _logger.Warning("Could not find School Contact with Id {id}", request.ContactId);
 
-            return Result.Failure<ContactSummaryResponse>(DomainErrors.Partners.Contact.NotFound(request.ContactId));
+            return Result.Failure<ContactSummaryResponse>(SchoolContactErrors.NotFound(request.ContactId));
         }
 
         return new ContactSummaryResponse(

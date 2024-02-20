@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Application.SchoolContacts.RemoveContactRole;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Shared;
-using System;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Errors;
+using Core.Models.SchoolContacts.Repositories;
+using Serilog;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,47 +14,60 @@ using System.Threading.Tasks;
 internal sealed class RemoveContactRoleCommandHandler
     : ICommandHandler<RemoveContactRoleCommand>
 {
-    private readonly ISchoolContactRoleRepository _roleRepository;
-    private readonly IAuthService _authService;
-    private readonly IOperationService _operationService;
+    private readonly ISchoolContactRepository _contactRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger _logger;
 
     public RemoveContactRoleCommandHandler(
-        ISchoolContactRoleRepository roleRepository,
-        IAuthService authService,
-        IOperationService operationService,
-        IUnitOfWork unitOfWork)
+        ISchoolContactRepository contactRepository,
+        IUnitOfWork unitOfWork,
+        ILogger logger)
     {
-        _roleRepository = roleRepository;
-        _authService = authService;
-        _operationService = operationService;
+        _contactRepository = contactRepository;
         _unitOfWork = unitOfWork;
+        _logger = logger.ForContext<RemoveContactRoleCommand>();
     }
 
     public async Task<Result> Handle(RemoveContactRoleCommand request, CancellationToken cancellationToken)
     {
-        var role = await _roleRepository.WithDetails(request.RoleId);
+        SchoolContact contact = await _contactRepository.GetById(request.ContactId, cancellationToken);
 
-        if (role.SchoolContact.Assignments.Count(assign => !assign.IsDeleted) == 1)
+        if (contact is null)
         {
-            // This is the last role. User should be updated to remove "IsSchoolContact" flag.
-            var newUser = new UserTemplateDto
-            {
-                FirstName = role.SchoolContact.FirstName,
-                LastName = role.SchoolContact.LastName,
-                Email = role.SchoolContact.EmailAddress,
-                Username = role.SchoolContact.EmailAddress,
-                IsSchoolContact = false
-            };
+            _logger
+                .ForContext(nameof(RemoveContactRoleCommand), request, true)
+                .ForContext(nameof(Error), SchoolContactErrors.NotFound(request.ContactId), true)
+                .Warning("Failed to remove School Contact Role");
 
-            await _authService.UpdateUser(role.SchoolContact.EmailAddress, newUser);
-
-            // Also remove user from the MS Teams
-            await _operationService.RemoveContactAddedMSTeamAccess(role.SchoolContactId);
+            return Result.Failure(SchoolContactErrors.NotFound(request.ContactId));
         }
 
-        role.IsDeleted = true;
-        role.DateDeleted = DateTime.Now;
+        SchoolContactRole role = contact.Assignments.FirstOrDefault(role => role.Id == request.RoleId);
+
+        if (role is null)
+        {
+            _logger
+                .ForContext(nameof(RemoveContactRoleCommand), request, true)
+                .ForContext(nameof(SchoolContact), contact, true)
+                .ForContext(nameof(Error), SchoolContactRoleErrors.NotFound(request.RoleId), true)
+                .Warning("Failed to remove School Contact Role");
+
+            return Result.Failure(SchoolContactRoleErrors.NotFound(request.RoleId));
+        }
+
+        Result attempt = contact.RemoveRole(request.RoleId);
+
+        if (attempt.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(RemoveContactRoleCommand), request, true)
+                .ForContext(nameof(SchoolContact), contact, true)
+                .ForContext(nameof(SchoolContactRole), role, true)
+                .ForContext(nameof(Error), attempt.Error, true)
+                .Warning("Failed to remove School Contact Role");
+
+            return attempt;
+        }
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

@@ -1,5 +1,6 @@
 ﻿@page "{id:int?}"
-@using Constellation.Core.Models;
+@    using Constellation.Core.Models;
+    using Constellation.Core.Models.SchoolContacts;
 @model Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Teachers.UpsertModel
 @{
     string Title = Model.Id.HasValue ? "Edit Contact" : "New Contact";

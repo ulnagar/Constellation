@@ -11,6 +11,7 @@ using Constellation.Core.Models.Faculty.ValueObjects;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;

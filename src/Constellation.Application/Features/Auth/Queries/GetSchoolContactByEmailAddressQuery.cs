@@ -1,4 +1,4 @@
-﻿using Constellation.Core.Models;
+﻿using Constellation.Core.Models.SchoolContacts;
 using MediatR;
 
 namespace Constellation.Application.Features.Auth.Queries

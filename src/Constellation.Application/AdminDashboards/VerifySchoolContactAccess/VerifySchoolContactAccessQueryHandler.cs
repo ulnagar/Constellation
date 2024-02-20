@@ -5,7 +5,7 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Errors;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Threading;

@@ -9,5 +9,6 @@ public sealed record CreateContactWithRoleCommand(
     string PhoneNumber,
     string Position,
     string SchoolCode,
+    string Note,
     bool SelfRegistered)
     : ICommand;

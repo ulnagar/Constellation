@@ -6,7 +6,7 @@ using Constellation.Application.SchoolContacts.GetAllSciencePracTeachers;
 using Constellation.Application.SchoolContacts.GetContactRolesForSelectionList;
 using Constellation.Application.SchoolContacts.RemoveContactRole;
 using Constellation.Application.Schools.GetSchoolsForSelectionList;
-using Constellation.Core.Models;
+using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.AssignRoleModal;

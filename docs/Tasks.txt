@@ -1,7 +1,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
-
+	- Update SchoolContactId field in SciencePracRoll
+		- Remove field
+		- Update SubmittedBy with School Contact name instead
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS

@@ -7,6 +7,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
+using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
 using Core.Models.Attachments.DTOs;
