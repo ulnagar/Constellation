@@ -1,9 +1,8 @@
-﻿using MediatR;
+﻿namespace Constellation.Application.Features.API.Schools.Queries;
+
+using MediatR;
 using System.Collections.Generic;
 
-namespace Constellation.Application.Features.API.Schools.Queries
+public sealed class GetSchoolCodeOfAllPartnerSchoolsQuery : IRequest<ICollection<string>>
 {
-    public class GetSchoolCodeOfAllPartnerSchoolsQuery : IRequest<ICollection<string>>
-    {
-    }
 }

@@ -1,11 +1,10 @@
-﻿using Constellation.Application.DTOs;
+﻿namespace Constellation.Application.Features.API.Schools.Queries;
+
+using Constellation.Application.DTOs;
 using MediatR;
 
-namespace Constellation.Application.Features.API.Schools.Queries
+public sealed class GetGraphDataForSchoolQuery : IRequest<GraphData>
 {
-    public class GetGraphDataForSchoolQuery : IRequest<GraphData>
-    {
-        public string SchoolCode { get; set; }
-        public int Day { get; set; }
-    }
+    public string SchoolCode { get; set; }
+    public int Day { get; set; }
 }

@@ -1,9 +1,12 @@
-﻿namespace Constellation.Infrastructure.Features.API.Operations.Queries;
+﻿namespace Constellation.Application.Features.API.Operations.Queries;
 
-using Constellation.Application.Features.API.Operations.Queries;
 using Constellation.Core.Abstractions.Repositories;
+using MediatR;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-public class GetTeamIdForOfferingQueryHandler : IRequestHandler<GetTeamIdForOfferingQuery, string>
+internal sealed class GetTeamIdForOfferingQueryHandler : IRequestHandler<GetTeamIdForOfferingQuery, string>
 {
     private readonly ITeamRepository _teamRepository;
 

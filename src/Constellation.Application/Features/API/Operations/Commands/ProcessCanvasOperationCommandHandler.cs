@@ -1,18 +1,17 @@
-﻿namespace Constellation.Infrastructure.Features.API.Operations.Commands;
+﻿namespace Constellation.Application.Features.API.Operations.Commands;
 
-using Constellation.Application.DTOs;
-using Constellation.Application.Features.API.Operations.Commands;
-using Constellation.Application.Interfaces.Gateways;
-using Constellation.Core.Models.Operations;
+using Core.Models.Operations;
 using Core.Models.Operations.Enums;
+using DTOs;
+using Interfaces.Gateways;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class ProcessCanvasOperationCommandHandler : IRequestHandler<ProcessCanvasOperationCommand, ServiceOperationResult<CanvasOperation>>
+internal sealed class ProcessCanvasOperationCommandHandler : IRequestHandler<ProcessCanvasOperationCommand, ServiceOperationResult<CanvasOperation>>
 {
     private readonly ICanvasGateway _canvasGateway;
-    
+
     public ProcessCanvasOperationCommandHandler() { }
 
     public ProcessCanvasOperationCommandHandler(ICanvasGateway canvasGateway)
