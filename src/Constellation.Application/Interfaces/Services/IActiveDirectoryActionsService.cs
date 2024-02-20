@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿namespace Constellation.Application.Interfaces.Services;
+
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Constellation.Application.Interfaces.Services
+public interface IActiveDirectoryActionsService
 {
-    public interface IActiveDirectoryActionsService
-    {
-        Task<List<string>> GetLinkedSchoolsFromAD(string emailAddress);
-    }
+    Task<List<string>> GetLinkedSchoolsFromAD(string emailAddress);
+    (string FirstName, string LastName) GetUserDetailsFromAD(string emailAddress);
 }
