@@ -15,6 +15,7 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Abstractions.Clock;
+using Core.Models.SchoolContacts.Repositories;
 using MediatR;
 using Serilog;
 using System.Collections.Generic;
@@ -106,7 +107,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             return;
         }
 
-        if (recipients.Count() == 0)
+        if (!recipients.Any())
         {
             Result<EmailRecipient> result = EmailRecipient.Create(school.Name, school.EmailAddress);
 
@@ -114,7 +115,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
                 recipients.Add(result.Value);
         }
 
-        if (recipients.Count() == 0)
+        if (!recipients.Any())
         {
             _logger.Warning("No recipients could be found or created: {school}", school);
 
