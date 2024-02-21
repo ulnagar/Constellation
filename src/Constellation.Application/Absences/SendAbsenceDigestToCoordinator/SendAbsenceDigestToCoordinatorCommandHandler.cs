@@ -1,21 +1,22 @@
 ﻿namespace Constellation.Application.Absences.SendAbsenceDigestToCoordinator;
 
-using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
+using ConvertAbsenceToAbsenceEntry;
+using Abstractions.Messaging;
+using DTOs;
+using Interfaces.Repositories;
+using Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
+using Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.Students;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Shared;
+using Core.ValueObjects;
 using Core.Abstractions.Clock;
+using Core.Models.SchoolContacts.Repositories;
 using Core.Models.Students.Errors;
 using Serilog;
 using System.Collections.Generic;
@@ -95,7 +96,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
                 return Result.Failure(DomainErrors.Partners.School.NotFound(student.SchoolCode));
             }
 
-            if (recipients.Count() == 0) 
+            if (!recipients.Any()) 
             {
                 Result<EmailRecipient> result = EmailRecipient.Create(school.Name, school.EmailAddress);
 
@@ -103,7 +104,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
                     recipients.Add(result.Value);
             }
 
-            if (recipients.Count() == 0)
+            if (!recipients.Any())
             {
                 _logger.Warning("{jobId}: No recipients could be found or created: {school}", request.JobId, school);
 
@@ -132,13 +133,13 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
 
             if (message == null)
             {
-                _logger.Warning("{jobId}: Email failed to send: {@message}", request.JobId, message);
+                _logger.Warning("{jobId}: Email failed to send", request.JobId);
 
                 return Result.Failure(new("MailSender", "Unknown Error"));
             }
 
             string emails = string.Join(", ", recipients.Select(entry => entry.Email));
-            foreach (var absence in digestAbsences)
+            foreach (Absence absence in digestAbsences)
             {
                 absence.AddNotification(
                     NotificationType.Email,
@@ -150,11 +151,6 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
                 foreach (EmailRecipient recipient in recipients)
                     _logger.Information("{id}: School digest sent to {recipient} for {student}", request.JobId, recipient.Name, student.DisplayName);
             }
-
-            absenceEntries = null;
-            coordinators = null;
-            recipients = null;
-            digestAbsences = null;
         }
 
         return Result.Success();

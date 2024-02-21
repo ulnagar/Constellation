@@ -1,8 +1,7 @@
 ﻿namespace Constellation.Application.SchoolContacts.GetContactRolesForSelectionList;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Shared;
+using Abstractions.Messaging;
+using Core.Shared;
 using Core.Models.SchoolContacts.Repositories;
 using System.Collections.Generic;
 using System.Threading;
@@ -11,18 +10,14 @@ using System.Threading.Tasks;
 internal sealed class GetContactRolesForSelectionListQueryHandler
     : IQueryHandler<GetContactRolesForSelectionListQuery, List<string>>
 {
-    private readonly ISchoolContactRoleRepository _roleRepository;
+    private readonly ISchoolContactRepository _contactRepository;
 
     public GetContactRolesForSelectionListQueryHandler(
-        ISchoolContactRoleRepository roleRepository)
+        ISchoolContactRepository contactRepository)
     {
-        _roleRepository = roleRepository;
+        _contactRepository = contactRepository;
     }
 
-    public async Task<Result<List<string>>> Handle(GetContactRolesForSelectionListQuery request, CancellationToken cancellationToken)
-    {
-        List<string> roles = (List<string>)await _roleRepository.ListOfRolesForSelectionAsync();
-
-        return roles;
-    }
+    public async Task<Result<List<string>>> Handle(GetContactRolesForSelectionListQuery request, CancellationToken cancellationToken) => 
+        await _contactRepository.GetAvailableRoleList(cancellationToken);
 }

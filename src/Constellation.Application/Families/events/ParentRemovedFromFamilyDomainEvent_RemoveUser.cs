@@ -1,10 +1,13 @@
 ﻿namespace Constellation.Application.Families.Events;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
+using Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families.Events;
+using Core.Models;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System.Threading;
@@ -24,7 +27,7 @@ internal sealed class ParentRemovedFromFamilyDomainEvent_RemoveUser
         IStaffRepository staffRepository,
         ISchoolContactRepository contactRepository,
         UserManager<AppUser> userManager,
-        Serilog.ILogger logger)
+        ILogger logger)
     {
         _familyRepository = familyRepository;
         _staffRepository = staffRepository;
@@ -35,7 +38,7 @@ internal sealed class ParentRemovedFromFamilyDomainEvent_RemoveUser
 
     public async Task Handle(ParentRemovedFromFamilyDomainEvent notification, CancellationToken cancellationToken)
     {
-        var existingUser = await _userManager.FindByEmailAsync(notification.EmailAddress);
+        AppUser existingUser = await _userManager.FindByEmailAsync(notification.EmailAddress);
 
         if (existingUser is null)
             return;
@@ -47,7 +50,7 @@ internal sealed class ParentRemovedFromFamilyDomainEvent_RemoveUser
             existingUser.IsParent = false;
         }
 
-        var staffMember = await _staffRepository.GetCurrentByEmailAddress(notification.EmailAddress, cancellationToken);
+        Staff staffMember = await _staffRepository.GetCurrentByEmailAddress(notification.EmailAddress, cancellationToken);
 
         if (staffMember is null)
         {
@@ -55,17 +58,16 @@ internal sealed class ParentRemovedFromFamilyDomainEvent_RemoveUser
             existingUser.StaffId = null;
         }
 
-        var schoolContact = await _contactRepository.GetWithRolesByEmailAddress(notification.EmailAddress, cancellationToken);
+        SchoolContact schoolContact = await _contactRepository.GetWithRolesByEmailAddress(notification.EmailAddress, cancellationToken);
 
         if (schoolContact is null)
         {
             existingUser.IsSchoolContact = false;
-            existingUser.SchoolContactId = 0;
         }
 
         if (!existingUser.IsSchoolContact && !existingUser.IsStaffMember && !existingUser.IsParent)
         {
-            var deleteResult = await _userManager.DeleteAsync(existingUser);
+            IdentityResult deleteResult = await _userManager.DeleteAsync(existingUser);
 
             if (!deleteResult.Succeeded)
             {
@@ -76,7 +78,7 @@ internal sealed class ParentRemovedFromFamilyDomainEvent_RemoveUser
                     notification.EmailAddress,
                     notification.FamilyId.ToString());
 
-                foreach (var error in deleteResult.Errors)
+                foreach (IdentityError error in deleteResult.Errors)
                 {
                     _logger.Warning(
                         "EID {eid}: Failed with error {error}",

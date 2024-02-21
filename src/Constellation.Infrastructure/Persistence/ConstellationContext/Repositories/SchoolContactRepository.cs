@@ -78,4 +78,12 @@ public class SchoolContactRepository : ISchoolContactRepository
                     !role.IsDeleted &&
                     role.Role == selectedRole))
             .ToListAsync(cancellationToken);
+
+    public async Task<List<string>> GetAvailableRoleList(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SchoolContactRole>()
+            .Select(role => role.Role)
+            .Distinct()
+            .ToListAsync(cancellationToken);
 }

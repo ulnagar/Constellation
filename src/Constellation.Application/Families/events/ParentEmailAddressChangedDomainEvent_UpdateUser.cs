@@ -1,11 +1,14 @@
 ﻿namespace Constellation.Application.Families.Events;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
+using Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Families.Events;
+using Core.Models;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System.Linq;
@@ -26,7 +29,7 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
         IStaffRepository staffRepository,
         ISchoolContactRepository contactRepository,
         UserManager<AppUser> userManager,
-        Serilog.ILogger logger)
+        ILogger logger)
     {
         _familyRepository = familyRepository;
         _staffRepository = staffRepository;
@@ -75,7 +78,7 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
                 oldUser.IsParent = false;
             }
 
-            var staffMember = await _staffRepository.GetCurrentByEmailAddress(notification.OldEmail, cancellationToken);
+            Staff staffMember = await _staffRepository.GetCurrentByEmailAddress(notification.OldEmail, cancellationToken);
 
             if (staffMember is null)
             {
@@ -83,17 +86,16 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
                 oldUser.StaffId = null;
             }
 
-            var schoolContact = await _contactRepository.GetWithRolesByEmailAddress(notification.OldEmail, cancellationToken);
+            SchoolContact schoolContact = await _contactRepository.GetWithRolesByEmailAddress(notification.OldEmail, cancellationToken);
 
             if (schoolContact is null)
             {
                 oldUser.IsSchoolContact = false;
-                oldUser.SchoolContactId = 0;
             }
 
             if (!oldUser.IsSchoolContact && !oldUser.IsStaffMember && !oldUser.IsParent)
             {
-                var deleteResult = await _userManager.DeleteAsync(oldUser);
+                IdentityResult deleteResult = await _userManager.DeleteAsync(oldUser);
 
                 if (!deleteResult.Succeeded)
                 {
@@ -104,7 +106,7 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
                         notification.ParentId.ToString(),
                         notification.FamilyId.ToString());
 
-                    foreach (var error in deleteResult.Errors)
+                    foreach (IdentityError error in deleteResult.Errors)
                     {
                         _logger.Warning(
                             "EID {eid}: Failed with error {error}",
@@ -120,17 +122,17 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
         }
 
         // Is there already a registered user with this email address?
-        var existingUser = await _userManager.FindByEmailAsync(notification.NewEmail);
+        AppUser existingUser = await _userManager.FindByEmailAsync(notification.NewEmail);
 
         if (existingUser is not null)
         {
             existingUser.IsParent = true;
-            var updateResult = await _userManager.UpdateAsync(existingUser);
+            IdentityResult updateResult = await _userManager.UpdateAsync(existingUser);
 
             if (updateResult.Succeeded)
                 return;
 
-            foreach (var error in updateResult.Errors)
+            foreach (IdentityError error in updateResult.Errors)
             {
                 _logger.Warning(
                     "EID {eid}: Could not update user for parent {pid} in family {fid} due to error {error}",
@@ -143,7 +145,7 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
             return;
         }
 
-        var user = new AppUser
+        AppUser user = new()
         {
             UserName = parent.EmailAddress,
             Email = parent.EmailAddress,
@@ -152,12 +154,12 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
             IsParent = true
         };
 
-        var result = await _userManager.CreateAsync(user);
+        IdentityResult result = await _userManager.CreateAsync(user);
 
         if (result.Succeeded)
             return;
 
-        foreach (var error in result.Errors)
+        foreach (IdentityError error in result.Errors)
         {
             _logger.Warning(
                 "EID {eid}: Could not create user for parent {pid} in family {fid} due to error {error}",
@@ -166,7 +168,5 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
                 notification.FamilyId.ToString(),
                 error);
         }
-
-        return;
     }
 }

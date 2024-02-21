@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Application.AdminDashboards.VerifySchoolContactAccess;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Errors;
+using Abstractions.Messaging;
+using DTOs;
+using Interfaces.Services;
 using Constellation.Core.Models.SchoolContacts;
-using Constellation.Core.Shared;
+using Core.Shared;
+using Core.Models.SchoolContacts.Errors;
+using Core.Models.SchoolContacts.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,13 +32,11 @@ internal class VerifySchoolContactAccessQueryHandler
     {
         SchoolContact contact = await _contactRepository.GetById(request.ContactId, cancellationToken);
 
-        if (contact is null)
-        {
-            _logger.Warning("Could not find School Contact with Id {id}", request.ContactId);
+        if (contact is not null) 
+            return await _authService.VerifyContactAccess(contact.EmailAddress);
+        
+        _logger.Warning("Could not find School Contact with Id {id}", request.ContactId);
 
-            return Result.Failure<UserAuditDto>(DomainErrors.Partners.Contact.NotFound(request.ContactId));
-        }
-
-        return await _authService.VerifyContactAccess(contact.EmailAddress);
+        return Result.Failure<UserAuditDto>(SchoolContactErrors.NotFound(request.ContactId));
     }
 }

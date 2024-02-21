@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.Contacts.ExportContactList;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Contacts.GetContactList;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
+using Abstractions.Messaging;
+using GetContactList;
+using DTOs;
+using Interfaces.Repositories;
+using Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Faculty.ValueObjects;
@@ -14,12 +14,13 @@ using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Subjects;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Shared;
+using Core.ValueObjects;
 using Core.Models.Faculty;
 using Core.Models.Faculty.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
+using Core.Models.SchoolContacts.Repositories;
 using Helpers;
 using System.Collections.Generic;
 using System.IO;
@@ -84,44 +85,37 @@ internal sealed class ExportContactListCommandHandler
 
         foreach (Student student in students)
         {
-            Result<Name> studentName = Name.Create(student.FirstName, null, student.LastName);
-
-            if (studentName.IsFailure)
-            {
-                // Dunno what to do here!
-            }
+            Name studentName = student.GetName();
 
             Result<EmailAddress> studentEmail = EmailAddress.Create(student.EmailAddress);
 
-            Result<EmailAddress> schoolEmail = EmailAddress.Create(student.School.EmailAddress);
-
-            if (schoolEmail.IsFailure)
-            {
-                // Dunno what to do here either!
-            }
-
             result.Add(new ContactResponse(
                 student.StudentId,
-                studentName.Value,
+                studentName,
                 student.CurrentGrade,
                 student.School.Name,
                 ContactCategory.Student,
-                studentName.Value.DisplayName,
+                studentName.DisplayName,
                 studentEmail.Value,
                 null));
 
             Result<PhoneNumber> schoolPhone = PhoneNumber.Create(student.School.PhoneNumber);
 
-            result.Add(new ContactResponse(
-                student.StudentId,
-                studentName.Value,
-                student.CurrentGrade,
-                student.School.Name,
-                ContactCategory.PartnerSchoolSchool,
-                student.School.Name,
-                schoolEmail.Value,
-                schoolPhone.IsSuccess ? schoolPhone.Value : null));
-
+            Result<EmailAddress> schoolEmail = EmailAddress.Create(student.School.EmailAddress);
+            
+            if (schoolEmail.IsSuccess)
+            {
+                result.Add(new ContactResponse(
+                    student.StudentId,
+                    studentName,
+                    student.CurrentGrade,
+                    student.School.Name,
+                    ContactCategory.PartnerSchoolSchool,
+                    student.School.Name,
+                    schoolEmail.Value,
+                    schoolPhone.IsSuccess ? schoolPhone.Value : null));
+            }
+            
             List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(student.SchoolCode, cancellationToken);
 
             foreach (SchoolContact contact in contacts)
@@ -150,7 +144,7 @@ internal sealed class ExportContactListCommandHandler
 
                     result.Add(new ContactResponse(
                         student.StudentId,
-                        studentName.Value,
+                        studentName,
                         student.CurrentGrade,
                         student.School.Name,
                         category,
@@ -175,7 +169,7 @@ internal sealed class ExportContactListCommandHandler
                 {
                     result.Add(new ContactResponse(
                         student.StudentId,
-                        studentName.Value,
+                        studentName,
                         student.CurrentGrade,
                         student.School.Name,
                         ContactCategory.ResidentialFamily,
@@ -206,7 +200,7 @@ internal sealed class ExportContactListCommandHandler
 
                         result.Add(new ContactResponse(
                             student.StudentId,
-                            studentName.Value,
+                            studentName,
                             student.CurrentGrade,
                             student.School.Name,
                             category,
@@ -219,7 +213,7 @@ internal sealed class ExportContactListCommandHandler
                 {
                     result.Add(new ContactResponse(
                         student.StudentId,
-                        studentName.Value,
+                        studentName,
                         student.CurrentGrade,
                         student.School.Name,
                         ContactCategory.NonResidentialFamily,
@@ -243,7 +237,7 @@ internal sealed class ExportContactListCommandHandler
 
                         result.Add(new ContactResponse(
                             student.StudentId,
-                            studentName.Value,
+                            studentName,
                             student.CurrentGrade,
                             student.School.Name,
                             ContactCategory.NonResidentialParent,
@@ -286,7 +280,7 @@ internal sealed class ExportContactListCommandHandler
 
                     result.Add(new ContactResponse(
                         student.StudentId,
-                        studentName.Value,
+                        studentName,
                         student.CurrentGrade,
                         student.School.Name,
                         ContactCategory.AuroraTeacher,
@@ -331,7 +325,7 @@ internal sealed class ExportContactListCommandHandler
 
                     result.Add(new ContactResponse(
                         student.StudentId,
-                        studentName.Value,
+                        studentName,
                         student.CurrentGrade,
                         student.School.Name,
                         ContactCategory.AuroraHeadTeacher,
@@ -352,7 +346,7 @@ internal sealed class ExportContactListCommandHandler
 
         MemoryStream stream = await _excelService.CreateContactExportFile(result, cancellationToken);
 
-        FileDto file = new FileDto
+        FileDto file = new()
         {
             FileData = stream.ToArray(),
             FileName = "Contacts List.xlsx",
