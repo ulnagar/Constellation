@@ -251,7 +251,11 @@ internal sealed class GetContactListQueryHandler
                 .Select(entry => entry.OfferingId)
                 .ToList();
 
-            List<Offering> studentOfferings = offerings.Where(entry => offeringIds.Contains(entry.Id)).ToList();
+            List<Offering> studentOfferings = offerings
+                .Where(entry => 
+                    offeringIds.Contains(entry.Id) &&
+                    entry.IsCurrent)
+                .ToList();
 
             foreach (Offering offering in studentOfferings)
             {

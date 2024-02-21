@@ -187,7 +187,10 @@ public class OfferingRepository : IOfferingRepository
 
         return await _context
             .Set<Offering>()
-            .Where(offering => offeringIds.Contains(offering.Id))
+            .Where(offering => 
+                offeringIds.Contains(offering.Id) &&
+                offering.StartDate <= _dateTime.Today &&
+                offering.EndDate >= _dateTime.Today)
         .ToListAsync(cancellationToken);
     }
 

@@ -139,7 +139,7 @@ public class StudentRepository : IStudentRepository
         List<string> SchoolCodes,
         CancellationToken cancellationToken = default)
     {
-        var students = _context
+        IQueryable<Student> students = _context
             .Set<Student>()
             .Include(student => student.School)
             .Include(student => student.Enrolments)
@@ -147,10 +147,17 @@ public class StudentRepository : IStudentRepository
 
         if (OfferingIds.Count > 0)
         {
+            List<Offering> offerings = await _context.Set<Offering>()
+                .Where(offering =>
+                    OfferingIds.Contains(offering.Id) &&
+                    offering.StartDate <= _dateTime.Today &&
+                    offering.EndDate >= _dateTime.Today)
+                .ToListAsync(cancellationToken);
+
             students = students
                 .Where(student => student.Enrolments.Any(enrol => 
                     !enrol.IsDeleted && 
-                    OfferingIds.Contains(enrol.OfferingId)));
+                    offerings.Any(offering => offering.Id == enrol.OfferingId)));
         }
 
         if (Grades.Count > 0)
