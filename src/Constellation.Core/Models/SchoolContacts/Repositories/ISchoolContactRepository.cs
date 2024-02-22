@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.SchoolContacts.Repositories;
 
-using Constellation.Core.Models.SchoolContacts;
+using SchoolContacts;
 using Identifiers;
 using System.Collections.Generic;
 using System.Threading;
@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 public interface ISchoolContactRepository
 {
+    Task<List<SchoolContact>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<SchoolContact>> GetPrincipalsForSchool(string schoolCode, CancellationToken cancellationToken = default);
     Task<SchoolContact> GetWithRolesByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
     Task<List<SchoolContact>> GetWithRolesBySchool(string schoolCode, CancellationToken cancellationToken = default);

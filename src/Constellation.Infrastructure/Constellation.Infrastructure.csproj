@@ -7,14 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Features\Partners\SchoolContacts\Commands\**" />
-    <Compile Remove="Features\Partners\SchoolContacts\Queries\**" />
     <Compile Remove="Features\Portal\School\Home\Commands\**" />
-    <EmbeddedResource Remove="Features\Partners\SchoolContacts\Commands\**" />
-    <EmbeddedResource Remove="Features\Partners\SchoolContacts\Queries\**" />
     <EmbeddedResource Remove="Features\Portal\School\Home\Commands\**" />
-    <None Remove="Features\Partners\SchoolContacts\Commands\**" />
-    <None Remove="Features\Partners\SchoolContacts\Queries\**" />
     <None Remove="Features\Portal\School\Home\Commands\**" />
   </ItemGroup>
 
@@ -53,6 +47,10 @@
     <PackageReference Include="Serilog.Sinks.Seq" Version="5.1.1" />
     <PackageReference Include="System.DirectoryServices" Version="6.0.0" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Features\Auth\Commands\" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Rollover;
 
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Rollover.Enums;
+using Enums;
 
 public sealed record RolloverDecision(
     string StudentId,

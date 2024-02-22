@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Rollover.Repositories;
 
-using Constellation.Core.Models.Rollover;
-using Constellation.Core.Shared;
+using Rollover;
+using Shared;
 using System.Collections.Generic;
 
 public interface IRolloverRepository

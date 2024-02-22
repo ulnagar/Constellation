@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Core.Models.Reports;
 
-using Constellation.Core.DomainEvents;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Primitives;
+using DomainEvents;
+using Identifiers;
+using Primitives;
 
 public sealed class AcademicReport : AggregateRoot
 {

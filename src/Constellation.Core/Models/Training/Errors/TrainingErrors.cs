@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Training.Errors;
 
-using Constellation.Core.Models.Training.Identifiers;
-using Constellation.Core.Shared;
+using Identifiers;
+using Shared;
 using System;
 
 public static class TrainingErrors

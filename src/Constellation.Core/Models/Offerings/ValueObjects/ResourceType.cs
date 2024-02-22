@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Offerings.ValueObjects;
 
-using Constellation.Core.Primitives;
+using Primitives;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.GroupTutorials;
 
-using Constellation.Core.Models.Identifiers;
+using Identifiers;
 
 public sealed class TutorialRollStudent
 {

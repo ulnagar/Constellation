@@ -194,19 +194,8 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             _logger.Information("{id}: School: Name {school} - Code {code}: PhoneNumber updated to {newPhone}", JobId, school.Name, school.Code, location.Phone);
         }
 
-        var acc = school.StaffAssignments.FirstOrDefault(s => s.Role == SchoolContactRole.Coordinator)?.SchoolContact;
-        if (acc != null)
-        {
-            location.MainContact = acc.DisplayName;
-            location.Maincontctphone = acc.PhoneNumber;
-
-            _logger.Information("{id}: School: Name {school} - Code {code}: ACC updated to {newACC}", JobId, school.Name, school.Code, acc.DisplayName);
-        }
-        else
-        {
-            location.MainContact = null;
-            location.Maincontctphone = null;
-        }
+        location.MainContact = null;
+        location.Maincontctphone = null;
 
         location.Updated();
     }
@@ -225,15 +214,8 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
 
         _logger.Information("{id}: School: Name {school} - Code {code}: Created new record", JobId, school.Name, school.Code);
 
-
-        var acc = school.StaffAssignments.FirstOrDefault(s => s.Role == SchoolContactRole.Coordinator)?.SchoolContact;
-        if (acc != null)
-        {
-            location.MainContact = acc.DisplayName;
-            location.Maincontctphone = acc.PhoneNumber;
-
-            _logger.Information("{id}: School: Name {school} - Code {code}: ACC updated to {newACC}", JobId, school.Name, school.Code, acc.DisplayName);
-        }
+        location.MainContact = null;
+        location.Maincontctphone = null;
 
         location.Sequence = GetNextLocationSequence();
 

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Offerings.Errors;
 
-using Constellation.Core.Shared;
+using Shared;
 
 public static class OfferingNameErrors 
 {

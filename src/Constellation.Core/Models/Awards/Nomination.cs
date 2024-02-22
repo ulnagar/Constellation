@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Core.Models.Awards;
 
-using Constellation.Core.Models.Identifiers;
+using Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
-using Constellation.Core.Primitives;
-using Constellation.Core.ValueObjects;
+using Primitives;
+using ValueObjects;
 using Enums;
 using Extensions;
 using System;

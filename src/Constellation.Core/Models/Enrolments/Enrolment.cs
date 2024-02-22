@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Core.Models.Enrolments;
 
-using Constellation.Core.Models.Enrolments.Errors;
-using Constellation.Core.Models.Enrolments.Events;
-using Constellation.Core.Models.Enrolments.Identifiers;
+using Errors;
+using Events;
+using Identifiers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
-using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
+using Primitives;
+using Shared;
 using System;
 
 public class Enrolment : AggregateRoot, IAuditableEntity

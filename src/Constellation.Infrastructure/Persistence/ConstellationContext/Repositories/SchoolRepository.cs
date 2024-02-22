@@ -30,8 +30,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         {
             return _context.Schools
                 .Include(s => s.Staff)
-                .Include(s => s.StaffAssignments)
-                    .ThenInclude(assignment => assignment.SchoolContact)
                 .Include(s => s.Students)
                     .ThenInclude(student => student.Enrolments);
         }
@@ -67,94 +65,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Where(school => school.Students.Any(student => !student.IsDeleted))
                 .ToListAsync(cancellationToken);
 
-        public School WithDetails(string id)
-        {
-            return Collection()
-                .SingleOrDefault(d => d.Code == id);
-        }
-
-        public School WithFilter(Expression<Func<School, bool>> predicate)
-        {
-            return Collection()
-                .FirstOrDefault(predicate);
-        }
-
-        public ICollection<School> All()
-        {
-            return Collection()
-                .ToList();
-        }
-
-        public ICollection<School> AllWithFilter(Expression<Func<School, bool>> predicate)
-        {
-            return Collection()
-                .Where(predicate)
-                .ToList();
-        }
-
-        public ICollection<School> AllWithStudents()
-        {
-            return Collection()
-                .Where(s => s.Students.Any(a => !a.IsDeleted))
-                .OrderBy(s => s.Name)
-                .ToList();
-        }
-
-        public async Task<ICollection<School>> AllWithStudentsForAbsenceSettingsAsync()
-        {
-            return await _context.Schools
-                .Where(s => s.Students.Any(a => !a.IsDeleted))
-                .OrderBy(s => s.Name)
-                .ToListAsync();
-        }
-
-        public ICollection<School> AllWithStaff()
-        {
-            return Collection()
-                .Where(s => s.Staff.Any(a => !a.IsDeleted))
-                .OrderBy(s => s.Name)
-                .ToList();
-        }
-
-        public ICollection<School> AllWithBoth()
-        {
-            return Collection()
-                .Where(s => s.Students.Any(a => !a.IsDeleted) && s.Staff.Any(a => !a.IsDeleted))
-                .OrderBy(s => s.Name)
-                .ToList();
-        }
-
-        public ICollection<School> AllWithEither()
-        {
-            return Collection()
-                 .Where(s => s.Students.Any(a => !a.IsDeleted) || s.Staff.Any(a => !a.IsDeleted))
-                 .OrderBy(s => s.Name).ToList();
-        }
-
-        public ICollection<School> AllWithNeither()
-        {
-            return Collection()
-                .Where(s => !s.Students.Any(a => !a.IsDeleted) && !s.Staff.Any(a => !a.IsDeleted))
-                .OrderBy(s => s.Name)
-                .ToList();
-        }
-
-        public async Task<IDictionary<string, string>> AllForLessonsPortal()
-        {
-            var schools = await _context.Schools
-                    .Where(school => school.Students.Any(student => !student.IsDeleted))
-                    .OrderBy(school => school.Name)
-                    .ToListAsync();
-
-            var dict = new Dictionary<string, string>();
-            foreach (var school in schools)
-            {
-                dict.Add(school.Code, school.Name);
-            }
-
-            return dict;
-        }
-
         public async Task<ICollection<School>> ForSelectionAsync()
         {
             return await _context.Schools
@@ -183,8 +93,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
                 .Include(school => school.Staff)
                 .Include(school => school.Staff)
                 .ThenInclude(staff => staff.Faculties)
-                .Include(school => school.StaffAssignments)
-                .ThenInclude(assignment => assignment.SchoolContact)
                 .SingleOrDefaultAsync(school => school.Code == id);
         }
 
@@ -198,21 +106,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
         {
             return await _context.Schools
                 .AnyAsync(school => school.Code == id);
-        }
-
-        public async Task<ICollection<School>> ForTrackItSync()
-        {
-            return await _context.Schools
-                .Where(school => school.Students.Any() || school.Staff.Any())
-                .ToListAsync();
-        }
-
-        public async Task<ICollection<School>> ForBulkUpdate()
-        {
-            return await _context.Schools
-                .Include(school => school.StaffAssignments)
-                .ThenInclude(role => role.SchoolContact)
-                .ToListAsync();
         }
 
         public IList<MapLayer> GetForMapping(IList<string> schoolCodes)

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Absences;
 
-using Constellation.Core.Common;
+using Common;
 using System;
 
 public class AbsenceType : StringEnumeration<AbsenceType>, IEquatable<AbsenceType>
@@ -17,7 +17,7 @@ public class AbsenceType : StringEnumeration<AbsenceType>, IEquatable<AbsenceTyp
     public override bool Equals(object obj)
     {
         if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
+        if (obj.GetType() != GetType()) return false;
         
         AbsenceType other = obj as AbsenceType;
 
@@ -28,7 +28,7 @@ public class AbsenceType : StringEnumeration<AbsenceType>, IEquatable<AbsenceTyp
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        if (other.GetType() != this.GetType()) return false;
+        if (other.GetType() != GetType()) return false;
 
         return Value == other.Value && Name == other.Name;
     }

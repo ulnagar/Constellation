@@ -42,8 +42,6 @@ public class UnitOfWork : IUnitOfWork
         Enrolments = new EnrolmentRepository(context, dateTime);
         Identities = new IdentityRepository(userManager);
         MSTeamOperations = new MSTeamOperationsRepository(context);
-        SchoolContacts = new SchoolContactRepository(context);
-        SchoolContactRoles = new SchoolContactRoleRepository(context);
         Schools = new SchoolRepository(context);
         Staff = new StaffRepository(context);
         Students = new StudentRepository(context, dateTime);

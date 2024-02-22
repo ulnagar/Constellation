@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Offerings.ValueObjects;
 
-using Constellation.Core.Primitives;
+using Primitives;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Core.Models.Offerings.Errors;
 
-using Constellation.Core.Models.Offerings.Identifiers;
+using Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
-using Constellation.Core.Shared;
+using Shared;
 using System;
 
 public static class OfferingErrors

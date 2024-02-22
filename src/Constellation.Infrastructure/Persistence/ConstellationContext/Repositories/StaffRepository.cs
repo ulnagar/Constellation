@@ -251,7 +251,6 @@ public class StaffRepository : IStaffRepository
             .Include(staff => staff.Faculties)
             .Include(staff => staff.School)
             .ThenInclude(school => school.StaffAssignments)
-            .ThenInclude(role => role.SchoolContact)
             .SingleOrDefaultAsync(staff => staff.StaffId == id);
     }
     

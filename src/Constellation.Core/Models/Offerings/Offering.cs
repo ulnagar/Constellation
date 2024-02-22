@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Core.Models.Offerings;
 
-using Constellation.Core.Models.Offerings.Errors;
-using Constellation.Core.Models.Offerings.Events;
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Offerings.ValueObjects;
+using Errors;
+using Events;
+using Identifiers;
+using ValueObjects;
 using Constellation.Core.Models.Subjects.Identifiers;
-using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
+using Primitives;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Core.Models.Absences;
 
-using Constellation.Core.DomainEvents;
-using Constellation.Core.Models.Identifiers;
+using DomainEvents;
+using Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
+using Primitives;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;

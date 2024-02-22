@@ -1,24 +1,26 @@
 ﻿namespace Constellation.Application.Training.Modules.GenerateStaffReport;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
+using Abstractions.Messaging;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.Training.Contexts.Modules;
-using Constellation.Core.Shared;
+using Core.Errors;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Faculty.ValueObjects;
+using Core.Models.SchoolContacts.Repositories;
 using Core.Models.Training.Contexts.Roles;
 using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;
+using Core.Shared;
 using Helpers;
+using Interfaces.Repositories;
+using Interfaces.Services;
 using Models;
+using Serilog;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -37,8 +39,8 @@ internal sealed class GenerateStaffReportCommandHandler
     private readonly ISchoolRepository _schoolRepository;
     private readonly ISchoolContactRepository _schoolContactRepository;
     private readonly IExcelService _excelService;
-    private readonly IAttachmentRepository _attachmentRepository;
     private readonly IAttachmentService _attachmentService;
+    private readonly ILogger _logger;
 
     public GenerateStaffReportCommandHandler(
         ITrainingModuleRepository trainingRepository,
@@ -48,8 +50,8 @@ internal sealed class GenerateStaffReportCommandHandler
         ISchoolRepository schoolRepository,
         ISchoolContactRepository schoolContactRepository,
         IExcelService excelService,
-        IAttachmentRepository attachmentRepository,
-        IAttachmentService attachmentService)
+        IAttachmentService attachmentService,
+        ILogger logger)
     {
         _trainingRepository = trainingRepository;
         _roleRepository = roleRepository;
@@ -58,8 +60,8 @@ internal sealed class GenerateStaffReportCommandHandler
         _schoolRepository = schoolRepository;
         _schoolContactRepository = schoolContactRepository;
         _excelService = excelService;
-        _attachmentRepository = attachmentRepository;
         _attachmentService = attachmentService;
+        _logger = logger.ForContext<GenerateStaffReportCommand>();
     }
 
     public async Task<Result<ReportDto>> Handle(GenerateStaffReportCommand request, CancellationToken cancellationToken)
@@ -68,6 +70,16 @@ internal sealed class GenerateStaffReportCommandHandler
 
         // - Get all staff
         Staff staff = await _staffRepository.GetById(request.StaffId, cancellationToken);
+
+        if (staff is null)
+        {
+            _logger
+                .ForContext(nameof(GenerateStaffReportCommand), request, true)
+                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(request.StaffId))
+                .Warning("Failed to generate Staff Report for Mandatory Training");
+
+            return Result.Failure<ReportDto>(DomainErrors.Partners.Staff.NotFound(request.StaffId));
+        }
 
         List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(request.StaffId, cancellationToken);
 
@@ -157,12 +169,13 @@ internal sealed class GenerateStaffReportCommandHandler
             return reportDto;
         }
 
-        List<AttachmentResponse> fileList = new();
-
-        fileList.Add(new(
-            FileContentTypes.ExcelModernFile,
-            $"Mandatory Training Report - {data.Name}.xlsx",
-            fileData.ToArray()));
+        List<AttachmentResponse> fileList = new()
+        {
+            new(
+                FileContentTypes.ExcelModernFile,
+                $"Mandatory Training Report - {data.Name}.xlsx",
+                fileData.ToArray())
+        };
 
         List<string> recordIds = data.Modules
             .Where(record => record.RecordId is not null)
@@ -182,13 +195,13 @@ internal sealed class GenerateStaffReportCommandHandler
         }
 
         // Create ZIP file
-        using MemoryStream memoryStream = new MemoryStream();
-        using (ZipArchive zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Create))
+        using MemoryStream memoryStream = new();
+        using (ZipArchive zipArchive = new(memoryStream, ZipArchiveMode.Create))
         {
             foreach (AttachmentResponse file in fileList)
             {
                 ZipArchiveEntry zipArchiveEntry = zipArchive.CreateEntry(file.FileName);
-                await using StreamWriter streamWriter = new StreamWriter(zipArchiveEntry.Open());
+                await using StreamWriter streamWriter = new(zipArchiveEntry.Open());
                 await streamWriter.BaseStream.WriteAsync(file.FileData, 0, file.FileData.Length, cancellationToken);
             }
         }

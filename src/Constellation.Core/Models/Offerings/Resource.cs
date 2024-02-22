@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Offerings;
 
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Offerings.ValueObjects;
+using Identifiers;
+using ValueObjects;
 using Constellation.Core.Models.Subjects.Identifiers;
 using System;
 

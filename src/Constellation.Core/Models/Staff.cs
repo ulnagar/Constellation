@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Core.Models;
 
-using Constellation.Core.Models.Faculty;
-using Constellation.Core.Models.Training.Contexts.Modules;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Faculty;
+using Training.Contexts.Modules;
+using Shared;
+using ValueObjects;
 using System;
 using System.Collections.Generic;
 

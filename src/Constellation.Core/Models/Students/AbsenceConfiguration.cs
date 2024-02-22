@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Core.Models.Students;
 
 using Constellation.Core.Errors;
-using Constellation.Core.Models.Absences;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
+using Absences;
+using Identifiers;
+using Primitives;
+using Shared;
 using Errors;
 using System;
 

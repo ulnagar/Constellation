@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Training.Repositories;
 
-using Constellation.Core.Models.Training.Contexts.Roles;
-using Constellation.Core.Models.Training.Identifiers;
+using Contexts.Roles;
+using Identifiers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

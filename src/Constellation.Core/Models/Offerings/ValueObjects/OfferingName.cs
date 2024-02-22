@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Core.Models.Offerings.ValueObjects;
 
-using Constellation.Core.Models.Offerings.Errors;
-using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
+using Errors;
+using Primitives;
+using Shared;
 using System;
 using System.Collections.Generic;
 

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Absences;
 
-using Constellation.Core.Models.Identifiers;
+using Identifiers;
 using System;
 
 public class Response

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Offerings;
 
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Primitives;
+using Identifiers;
+using Primitives;
 using System;
 
 public sealed class Session : IAuditableEntity

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.SciencePracs;
 
-using Constellation.Core.Models.Identifiers;
+using Identifiers;
 
 public sealed class SciencePracAttendance
 {

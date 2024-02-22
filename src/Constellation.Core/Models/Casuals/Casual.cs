@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Core.Models.Casuals;
 
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Primitives;
-using Constellation.Core.ValueObjects;
+using Identifiers;
+using Primitives;
+using ValueObjects;
 using System;
 
 public sealed class Casual : AggregateRoot, IAuditableEntity

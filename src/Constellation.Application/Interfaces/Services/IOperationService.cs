@@ -37,12 +37,6 @@ namespace Constellation.Application.Interfaces.Services
         Task RemoveStudentEnrollmentMSTeamAccess(string studentId);
         Task CreateTeacherEmployedMSTeamAccess(string staffId);
         Task RemoveTeacherEmployedMSTeamAccess(string staffId);
-        Task CreateContactAddedMSTeamAccess(int contactId);
-        Task RemoveContactAddedMSTeamAccess(int contactId);
-
-        //Task AddStaffToAdobeGroupBasedOnFaculty(string staffId, Faculty staffFaculty);
-        //Task AuditStaffAdobeGroupMembershipBasedOnFaculty(string staffId, Faculty originalFaculty, Faculty staffFaculty);
-        //Task RemoveStaffAdobeGroupMembershipBasedOnFaculty(string staffId, Faculty staffFaculty);
 
         Task MarkAdobeConnectOperationCompleteAsync(int id);
 

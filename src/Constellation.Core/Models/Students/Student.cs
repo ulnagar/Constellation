@@ -1,12 +1,12 @@
 namespace Constellation.Core.Models.Students;
 
 using Abstractions.Clock;
-using Constellation.Core.Enums;
-using Constellation.Core.Models.Absences;
-using Constellation.Core.Models.Enrolments;
-using Constellation.Core.Models.Families;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Enums;
+using Absences;
+using Enrolments;
+using Families;
+using Shared;
+using ValueObjects;
 using Errors;
 using Events;
 using Primitives;

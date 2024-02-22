@@ -1,21 +1,22 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Constellation.Application.DTOs;
-using Constellation.Application.DTOs.EmailRequests;
-using Constellation.Application.Interfaces.Configuration;
+using Application.DTOs;
+using Application.DTOs.EmailRequests;
+using Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Enums;
-using Constellation.Core.Models;
-using Constellation.Core.Models.SchoolContacts;
-using Constellation.Core.Models.SciencePracs;
-using Constellation.Core.Models.Subjects;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
-using Constellation.Infrastructure.Services;
+using Core.Abstractions.Repositories;
+using Core.Enums;
+using Core.Models;
+using Core.Models.SchoolContacts;
+using Core.Models.SciencePracs;
+using Core.Models.Subjects;
+using Core.Shared;
+using Core.ValueObjects;
+using Services;
 using Core.Abstractions.Clock;
+using Core.Models.SchoolContacts.Repositories;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -189,7 +190,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
             List<LessonEmail.LessonItem> finalWarning = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount == 3).ToList();
             List<LessonEmail.LessonItem> alert = schoolEmailDto.Lessons.Where(lesson => lesson.NotificationCount >= 4).ToList();
 
-            _logger.Log(LogSeverity.Information, $"");
+            _logger.Log(LogSeverity.Information, string.Empty);
             _logger.Log(LogSeverity.Information, $"Emails for {school.Name} to be delivered to:");
 
             foreach (EmailRecipient contact in sptRecipients)
@@ -203,7 +204,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
             foreach (EmailRecipient contact in principalRecipients)
                 _logger.Log(LogSeverity.Information, $" (PRN) {contact.Name} - {contact.Email}");
 
-            _logger.Log(LogSeverity.Information, $"");
+            _logger.Log(LogSeverity.Information, string.Empty);
 
             if (firstWarning.Any())
             {

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.ThirdPartyConsent.Events;
 
-using Constellation.Core.DomainEvents;
+using DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using Identifiers;
 

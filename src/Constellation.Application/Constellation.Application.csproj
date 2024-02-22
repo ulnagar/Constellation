@@ -52,4 +52,12 @@
 		</AssemblyAttribute>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="SchoolContacts\Events\SchoolContactCreated\" />
+	  <Folder Include="SchoolContacts\Events\SchoolContactRoleDeleted\" />
+	  <Folder Include="SchoolContacts\Events\SchoolContactReinstated\" />
+	  <Folder Include="SchoolContacts\Events\SchoolContactEmailAddressChanged\" />
+	  <Folder Include="SchoolContacts\Events\SchoolContactDeleted\" />
+	</ItemGroup>
+
 </Project>

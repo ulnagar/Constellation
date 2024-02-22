@@ -1,20 +1,21 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
 using Application.Training.Models;
-using Constellation.Application.Helpers;
-using Constellation.Application.Interfaces.Configuration;
+using Application.Helpers;
+using Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models;
-using Constellation.Core.Models.Faculty;
-using Constellation.Core.Models.Faculty.Repositories;
-using Constellation.Core.Models.SchoolContacts;
-using Constellation.Core.Models.Training.Contexts.Modules;
-using Constellation.Core.Models.Training.Contexts.Roles;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Models;
+using Core.Models.Faculty;
+using Core.Models.Faculty.Repositories;
+using Core.Models.SchoolContacts;
+using Core.Models.Training.Contexts.Modules;
+using Core.Models.Training.Contexts.Roles;
+using Core.Shared;
+using Core.ValueObjects;
 using Core.Models.Faculty.ValueObjects;
+using Core.Models.SchoolContacts.Repositories;
 using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;
 using Microsoft.Extensions.Options;
@@ -127,6 +128,7 @@ internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJ
                     }
                 }
 
+                // Removed to prevent emails being sent to Principals for Term 1
                 //School localSchool = await _schoolRepository.GetById("8912", cancellationToken);
 
                 //List<SchoolContact> localPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(localSchool.Code, cancellationToken);
@@ -158,7 +160,7 @@ internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJ
         }
     }
 
-    public async Task SendEmail(List<CompletionRecordExtendedDetailsDto> entries, CancellationToken cancellationToken = default)
+    private async Task SendEmail(List<CompletionRecordExtendedDetailsDto> entries, CancellationToken cancellationToken = default)
     {
         Dictionary<string, string> warning = entries
             .Where(record => 
@@ -221,7 +223,7 @@ internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJ
             .SelectMany(entry => entry.PrincipalContacts)
             .Distinct();
 
-        foreach (EmailRecipient principal in entries.First().PrincipalContacts)
+        foreach (EmailRecipient principal in principals)
         {
             if (expiredRecipients.All(entry => entry != principal))
                 expiredRecipients.Add(principal);

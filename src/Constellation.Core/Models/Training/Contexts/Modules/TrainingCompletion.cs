@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Training.Contexts.Modules;
 
-using Constellation.Core.Primitives;
+using Primitives;
 using Identifiers;
 using System;
 

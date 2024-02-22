@@ -4,8 +4,8 @@ using Constellation;
 
 namespace Constellation.Core.Models.Assignments.Repositories;
 
-using Constellation.Core.Models.Assignments;
-using Constellation.Core.Models.Assignments.Identifiers;
+using Assignments;
+using Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using System.Collections.Generic;
 using System.Threading;

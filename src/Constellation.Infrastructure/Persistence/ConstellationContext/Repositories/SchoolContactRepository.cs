@@ -86,4 +86,13 @@ public class SchoolContactRepository : ISchoolContactRepository
             .Select(role => role.Role)
             .Distinct()
             .ToListAsync(cancellationToken);
+
+    public async Task<List<SchoolContact>> GetAllActive(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SchoolContact>()
+            .Where(contact => 
+                !contact.IsDeleted &&
+                contact.Assignments.Any(role => !role.IsDeleted))
+            .ToListAsync(cancellationToken);
 }

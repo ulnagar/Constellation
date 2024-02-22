@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Core.Models.GroupTutorials;
 
-using Constellation.Core.Enums;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Primitives;
+using Enums;
+using Identifiers;
+using Primitives;
 using System;
 using System.Collections.Generic;
 using System.Linq;

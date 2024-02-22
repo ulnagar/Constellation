@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.ThirdPartyConsent;
 
-using Constellation.Core.Models.ThirdPartyConsent.Enums;
+using Enums;
 using Identifiers;
 using System;
 using ApplicationId = Identifiers.ApplicationId;

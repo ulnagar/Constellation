@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Access;
 
-using Constellation.Core.Primitives;
+using Primitives;
 using System;
 
 public sealed class AccessTicket : AggregateRoot, IAuditableEntity

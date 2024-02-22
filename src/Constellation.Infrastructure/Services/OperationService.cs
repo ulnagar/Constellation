@@ -1,23 +1,22 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
-using Constellation.Application.Enums;
-using Constellation.Application.Interfaces.Repositories;
+using Application.Enums;
+using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Enums;
-using Constellation.Core.Models;
-using Constellation.Core.Models.Offerings;
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Offerings.Repositories;
-using Constellation.Core.Models.Offerings.ValueObjects;
-using Constellation.Core.Models.Operations;
-using Constellation.Core.Models.Students;
-using Constellation.Infrastructure.DependencyInjection;
+using Core.Abstractions.Clock;
+using Core.Enums;
+using Core.Models;
+using Core.Models.Offerings;
+using Core.Models.Offerings.Identifiers;
+using Core.Models.Offerings.Repositories;
+using Core.Models.Offerings.ValueObjects;
+using Core.Models.Operations;
 using Core.Models.Operations.Enums;
+using Core.Models.Students;
 using System;
 using System.Threading.Tasks;
 
-public class OperationService : IOperationService, IScopedService
+public class OperationService : IOperationService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IOfferingRepository _offeringRepository;
@@ -408,87 +407,7 @@ public class OperationService : IOperationService, IScopedService
 
         _unitOfWork.Add(schoolTeamOperation);
     }
-
-    public async Task CreateContactAddedMSTeamAccess(int contactId)
-    {
-        // Validate entries
-        var contact = _unitOfWork.SchoolContacts.GetForExistCheck(contactId);
-
-        if (contact == null)
-            return;
-
-        var primary = await _unitOfWork.SchoolContacts.IsContactAtPrimarySchool(contactId);
-        var secondary = await _unitOfWork.SchoolContacts.IsContactAtSecondarySchool(contactId);
-
-        if (secondary)
-        {
-            var operation = new ContactAddedMSTeamOperation()
-            {
-                ContactId = contactId,
-                DateScheduled = _dateTime.Now,
-                TeamName = MicrosoftTeam.SecondaryPartnerSchools,
-                Action = MSTeamOperationAction.Add,
-                PermissionLevel = MSTeamOperationPermissionLevel.Member
-            };
-
-            _unitOfWork.Add(operation);
-        }
-
-        if (primary)
-        {
-            var operation = new ContactAddedMSTeamOperation()
-            {
-                ContactId = contactId,
-                DateScheduled = _dateTime.Now,
-                TeamName = MicrosoftTeam.PrimaryPartnerSchools,
-                Action = MSTeamOperationAction.Add,
-                PermissionLevel = MSTeamOperationPermissionLevel.Member
-            };
-
-            _unitOfWork.Add(operation);
-        }
-    }
-
-    public async Task RemoveContactAddedMSTeamAccess(int contactId)
-    {
-        // Validate entries
-        var contact = _unitOfWork.SchoolContacts.GetForExistCheck(contactId);
-
-        if (contact == null)
-            return;
-
-        var primary = await _unitOfWork.SchoolContacts.IsContactAtPrimarySchool(contactId);
-        var secondary = await _unitOfWork.SchoolContacts.IsContactAtSecondarySchool(contactId);
-
-        if (secondary)
-        {
-            var operation = new ContactAddedMSTeamOperation()
-            {
-                ContactId = contactId,
-                DateScheduled = _dateTime.Now,
-                TeamName = MicrosoftTeam.SecondaryPartnerSchools,
-                Action = MSTeamOperationAction.Remove,
-                PermissionLevel = MSTeamOperationPermissionLevel.Member
-            };
-
-            _unitOfWork.Add(operation);
-        }
-
-        if (primary)
-        {
-            var operation = new ContactAddedMSTeamOperation()
-            {
-                ContactId = contactId,
-                DateScheduled = _dateTime.Now,
-                TeamName = MicrosoftTeam.PrimaryPartnerSchools,
-                Action = MSTeamOperationAction.Remove,
-                PermissionLevel = MSTeamOperationPermissionLevel.Member
-            };
-
-            _unitOfWork.Add(operation);
-        }
-    }
-
+    
     public async Task RemoveStudentMSTeamAccess(string studentId, OfferingId offeringId, DateTime schedule)
     {
         // Validate entries
@@ -556,156 +475,6 @@ public class OperationService : IOperationService, IScopedService
 
         operation.IsDeleted = true;
     }
-
-    //public async Task AddStaffToAdobeGroupBasedOnFaculty(string staffId, Faculty staffFaculty)
-    //{
-    //    if (staffFaculty.HasFlag(Faculty.Administration))
-    //    {
-    //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Administration, _dateTime.Now);
-    //    }
-
-    //    if (staffFaculty.HasFlag(Faculty.Executive))
-    //    {
-    //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Executive, _dateTime.Now);
-    //    }
-
-    //    if (staffFaculty.HasFlag(Faculty.English))
-    //    {
-    //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.English, _dateTime.Now);
-    //    }
-
-    //    if (staffFaculty.HasFlag(Faculty.Mathematics))
-    //    {
-    //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Mathematics, _dateTime.Now);
-    //    }
-
-    //    if (staffFaculty.HasFlag(Faculty.Science))
-    //    {
-    //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Science, _dateTime.Now);
-    //    }
-
-    //    if (staffFaculty.HasFlag(Faculty.Stage3))
-    //    {
-    //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Stage3, _dateTime.Now);
-    //    }
-
-    //    if (staffFaculty.HasFlag(Faculty.Support))
-    //    {
-    //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Support, _dateTime.Now);
-    //    }
-    //}
-
-    //public async Task AuditStaffAdobeGroupMembershipBasedOnFaculty(string staffId, Faculty originalFaculty, Faculty staffFaculty)
-    //{
-    //    if (!originalFaculty.HasFlag(Faculty.Administration) && staffFaculty.HasFlag(Faculty.Administration))
-    //    {
-    //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Administration, _dateTime.Now);
-    //    }
-
-    //    if (!staffFaculty.HasFlag(Faculty.Administration) && originalFaculty.HasFlag(Faculty.Administration))
-    //    {
-    //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Administration, _dateTime.Now);
-    //    }
-
-    //    if (!originalFaculty.HasFlag(Faculty.Executive) && staffFaculty.HasFlag(Faculty.Executive))
-    //    {
-    //       await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Executive, _dateTime.Now);
-    //    }
-
-    //    if (!staffFaculty.HasFlag(Faculty.Executive) && originalFaculty.HasFlag(Faculty.Executive))
-    //    {
-    //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Executive, _dateTime.Now);
-    //    }
-
-    //    if (!originalFaculty.HasFlag(Faculty.English) && staffFaculty.HasFlag(Faculty.English))
-    //    {
-    //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.English, _dateTime.Now);
-    //    }
-
-    //    if (!staffFaculty.HasFlag(Faculty.English) && originalFaculty.HasFlag(Faculty.English))
-    //    {
-    //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.English, _dateTime.Now);
-    //    }
-
-    //    if (!originalFaculty.HasFlag(Faculty.Mathematics) && staffFaculty.HasFlag(Faculty.Mathematics))
-    //    {
-    //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Mathematics, _dateTime.Now);
-    //    }
-
-    //    if (!staffFaculty.HasFlag(Faculty.Mathematics) && originalFaculty.HasFlag(Faculty.Mathematics))
-    //    {
-    //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Mathematics, _dateTime.Now);
-    //    }
-
-    //    if (!originalFaculty.HasFlag(Faculty.Science) && staffFaculty.HasFlag(Faculty.Science))
-    //    {
-    //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Science, _dateTime.Now);
-    //    }
-
-    //    if (!staffFaculty.HasFlag(Faculty.Science) && originalFaculty.HasFlag(Faculty.Science))
-    //    {
-    //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Science, _dateTime.Now);
-    //    }
-
-    //    if (!originalFaculty.HasFlag(Faculty.Stage3) && staffFaculty.HasFlag(Faculty.Stage3))
-    //    {
-    //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Stage3, _dateTime.Now);
-    //    }
-
-    //    if (!staffFaculty.HasFlag(Faculty.Stage3) && originalFaculty.HasFlag(Faculty.Stage3))
-    //    {
-    //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Stage3, _dateTime.Now);
-    //    }
-
-    //    if (!originalFaculty.HasFlag(Faculty.Support) && staffFaculty.HasFlag(Faculty.Support))
-    //    {
-    //        await CreateTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Support, _dateTime.Now);
-    //    }
-
-    //    if (!staffFaculty.HasFlag(Faculty.Support) && originalFaculty.HasFlag(Faculty.Support))
-    //    {
-    //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Support, _dateTime.Now);
-    //    }
-    //}
-
-    //public async Task RemoveStaffAdobeGroupMembershipBasedOnFaculty(string staffId, Faculty staffFaculty)
-    //{
-    //    if (staffFaculty.HasFlag(Faculty.Administration))
-    //    {
-    //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Administration, _dateTime.Now);
-    //    }
-
-    //    if (staffFaculty.HasFlag(Faculty.Executive))
-    //    {
-    //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Executive, _dateTime.Now);
-    //    }
-
-    //    if (staffFaculty.HasFlag(Faculty.English))
-    //    {
-    //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.English, _dateTime.Now);
-    //    }
-
-    //    if (staffFaculty.HasFlag(Faculty.Mathematics))
-    //    {
-    //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Mathematics, _dateTime.Now);
-    //    }
-
-    //    if (staffFaculty.HasFlag(Faculty.Science))
-    //    {
-    //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Science, _dateTime.Now);
-    //    }
-
-    //    if (staffFaculty.HasFlag(Faculty.Stage3))
-    //    {
-    //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Stage3, _dateTime.Now);
-    //    }
-
-    //    if (staffFaculty.HasFlag(Faculty.Support))
-    //    {
-    //        await RemoveTeacherAdobeConnectGroupMembership(staffId, AdobeConnectGroup.Support, _dateTime.Now);
-    //    }
-    //}
-
     public Task CreateCanvasUserFromStudent(Student student)
     {
         var operation = new CreateUserCanvasOperation()
