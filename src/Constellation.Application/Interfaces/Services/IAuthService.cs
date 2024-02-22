@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
 using Constellation.Application.DTOs;
+using Core.Models.SchoolContacts.Identifiers;
 using Microsoft.AspNetCore.Identity;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ public interface IAuthService
     Task RepairStaffUserAccounts();
     Task AuditSchoolContactUsers();
     Task<UserAuditDto> VerifyContactAccess(string email);
-    Task RepairSchoolContactUser(int schoolContactId);
+    Task RepairSchoolContactUser(SchoolContactId schoolContactId);
     Task AuditParentUsers(CancellationToken cancellationToken = default);
     Task AuditAllUsers(CancellationToken cancellationToken);
 }

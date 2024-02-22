@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Core.Models.SciencePracs;
 
-using Constellation.Core.Enums;
-using Constellation.Core.Errors;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Shared;
+using Enums;
+using Errors;
+using Identifiers;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;

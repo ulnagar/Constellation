@@ -1,14 +1,13 @@
-﻿using Constellation.Core.Enums;
+﻿namespace Constellation.Core.Models;
+
+using Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-namespace Constellation.Core.Models
+public class Device
 {
-    public class Device
+    public Device()
     {
-        public Device()
-        {
             Notes = new List<DeviceNotes>();
             Allocations = new List<DeviceAllocation>();
 
@@ -16,8 +15,8 @@ namespace Constellation.Core.Models
             Status = Status.New;
         }
 
-        public Device(string serialNumber, Status status)
-        {
+    public Device(string serialNumber, Status status)
+    {
             Notes = new List<DeviceNotes>();
             Allocations = new List<DeviceAllocation>();
 
@@ -27,19 +26,19 @@ namespace Constellation.Core.Models
             Status = status;
         }
 
-        public string SerialNumber { get; set; }
-        public string Make { get; set; }
-        public string Model { get; set; }
-        public string Description { get; set; }
-        public Status Status { get; set; }
-        public DateTime? DateWarrantyExpires { get; set; }
-        public DateTime? DateReceived { get; set; }
-        public DateTime? DateDisposed { get; set; }
-        public ICollection<DeviceAllocation> Allocations { get; set; }
-        public ICollection<DeviceNotes> Notes { get; set; }
+    public string SerialNumber { get; set; }
+    public string Make { get; set; }
+    public string Model { get; set; }
+    public string Description { get; set; }
+    public Status Status { get; set; }
+    public DateTime? DateWarrantyExpires { get; set; }
+    public DateTime? DateReceived { get; set; }
+    public DateTime? DateDisposed { get; set; }
+    public ICollection<DeviceAllocation> Allocations { get; set; }
+    public ICollection<DeviceNotes> Notes { get; set; }
 
-        public bool CanAllocate()
-        {
+    public bool CanAllocate()
+    {
             if (IsAllocated())
                 return false;
 
@@ -49,16 +48,16 @@ namespace Constellation.Core.Models
             return false;
         }
 
-        public bool IsAllocated()
-        {
+    public bool IsAllocated()
+    {
             if (Allocations.Any(a => !a.IsDeleted))
                 return true;
 
             return false;
         }
 
-        public bool CanUpdateStatus()
-        {
+    public bool CanUpdateStatus()
+    {
             switch (Status)
             {
                 case Status.Unknown:
@@ -79,5 +78,4 @@ namespace Constellation.Core.Models
                     return false;
             }
         }
-    }
 }

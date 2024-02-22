@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Core.Models;
 
-using Constellation.Core.DomainEvents;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Primitives;
+using DomainEvents;
+using Identifiers;
+using Primitives;
 using System;
 using System.Web;
 

@@ -88,4 +88,8 @@ public interface IEmailService
         
     // Report Emails
     Task SendAcademicReportToNonResidentialParent(List<EmailRecipient> recipients, Name studentName, string ReportingPeriod, string Year, FileDto file, CancellationToken cancellationToken = default);
+
+    // School Contact Emails
+    Task SendWelcomeEmailToCoordinator(List<EmailRecipient> recipients, string schoolName, CancellationToken cancellationToken = default);
+    Task SendWelcomeEmailToSciencePracTeacher(List<EmailRecipient> recipients, string schoolName, CancellationToken cancellationToken = default);
 }

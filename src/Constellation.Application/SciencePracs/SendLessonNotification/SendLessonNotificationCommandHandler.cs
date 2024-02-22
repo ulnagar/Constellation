@@ -1,24 +1,24 @@
 ﻿namespace Constellation.Application.SciencePracs.SendLessonNotification;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
-using Constellation.Application.DTOs.EmailRequests;
-using Constellation.Application.Interfaces.Configuration;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Errors;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Errors;
+using Core.Models.SchoolContacts.Repositories;
+using Core.Shared;
+using Core.ValueObjects;
+using DTOs;
+using DTOs.EmailRequests;
+using Interfaces.Configuration;
+using Interfaces.Repositories;
+using Interfaces.Services;
 using Microsoft.Extensions.Options;
 using Serilog;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -35,9 +35,7 @@ internal sealed class SendLessonNotificationCommandHandler
     private readonly IUnitOfWork _unitOfWork;
     private readonly AppConfiguration _configuration;
     private readonly ILogger _logger;
-
-    private readonly DateOnly Today = DateOnly.FromDateTime(DateTime.Today);
-
+    
     public SendLessonNotificationCommandHandler(
         ILessonRepository lessonRepository,
         ISchoolRepository schoolRepository,
@@ -97,6 +95,13 @@ internal sealed class SendLessonNotificationCommandHandler
 
         School school = await _schoolRepository.GetById(roll.SchoolCode, cancellationToken);
 
+        if (school is null)
+        {
+            _logger.Warning("Could not find School with Code {code}", roll.SchoolCode);
+
+            return Result.Failure(DomainErrors.Partners.School.NotFound(roll.SchoolCode));
+        }
+
         List<LessonEmail.LessonItem> lessonItems = new();
 
         Course course = await _courseRepository.GetByLessonId(lesson.Id, cancellationToken);
@@ -110,7 +115,7 @@ internal sealed class SendLessonNotificationCommandHandler
 
         string description = $"{course.Grade} {lesson.Name}";
 
-        if (course.Grade == Grade.Y11 || course.Grade == Grade.Y12)
+        if (course.Grade is Grade.Y11 or Grade.Y12)
             description = $"{course.Grade} {course.Name} {lesson.Name}";
 
         lessonItems.Add(
@@ -163,26 +168,24 @@ internal sealed class SendLessonNotificationCommandHandler
         LessonMissedNotificationEmail notification = new()
         {
             SchoolName = school.Name,
-            Lessons = lessonItems
-        };
-
-        notification.NotificationType = roll.NotificationCount switch
-        {
-            0 => LessonMissedNotificationEmail.NotificationSequence.First,
-            1 => LessonMissedNotificationEmail.NotificationSequence.Second,
-            2 => LessonMissedNotificationEmail.NotificationSequence.Third,
-            3 => LessonMissedNotificationEmail.NotificationSequence.Final,
-            >= 4 => LessonMissedNotificationEmail.NotificationSequence.Alert,
-            _ => LessonMissedNotificationEmail.NotificationSequence.First
-        };
-
-        notification.Recipients = roll.NotificationCount switch
-        {
-            0 or 1 => sptRecipients.Concat(accRecipients).Distinct().ToList(),
-            2 => sptRecipients.Concat(accRecipients).Concat(new List<EmailRecipient> { schoolResult.Value }).Distinct().ToList(),
-            3 => sptRecipients.Concat(accRecipients).Concat(new List<EmailRecipient> { schoolResult.Value }).Concat(principalRecipients).Distinct().ToList(),
-            >= 4 => facultyContacts,
-            _ => sptRecipients.Concat(accRecipients).Distinct().ToList()
+            Lessons = lessonItems,
+            NotificationType = roll.NotificationCount switch
+            {
+                0 => LessonMissedNotificationEmail.NotificationSequence.First,
+                1 => LessonMissedNotificationEmail.NotificationSequence.Second,
+                2 => LessonMissedNotificationEmail.NotificationSequence.Third,
+                3 => LessonMissedNotificationEmail.NotificationSequence.Final,
+                >= 4 => LessonMissedNotificationEmail.NotificationSequence.Alert,
+                _ => LessonMissedNotificationEmail.NotificationSequence.First
+            },
+            Recipients = roll.NotificationCount switch
+            {
+                0 or 1 => sptRecipients.Concat(accRecipients).Distinct().ToList(),
+                2 => sptRecipients.Concat(accRecipients).Concat(new List<EmailRecipient> { schoolResult.Value }).Distinct().ToList(),
+                3 => sptRecipients.Concat(accRecipients).Concat(new List<EmailRecipient> { schoolResult.Value }).Concat(principalRecipients).Distinct().ToList(),
+                >= 4 => facultyContacts,
+                _ => sptRecipients.Concat(accRecipients).Distinct().ToList()
+            }
         };
 
         await _emailService.SendLessonMissedEmail(notification);

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Enrolments.Events;
 
-using Constellation.Core.DomainEvents;
-using Constellation.Core.Models.Enrolments.Identifiers;
+using DomainEvents;
+using Identifiers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Faculty;
 
-using Constellation.Core.Primitives;
+using Primitives;
 using Errors;
 using Events;
 using Identifiers;

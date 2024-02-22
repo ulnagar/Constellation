@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Core.Models.GroupTutorials;
 
-using Constellation.Core.DomainEvents;
-using Constellation.Core.Errors;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Students;
-using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
+using DomainEvents;
+using Errors;
+using Identifiers;
+using Students;
+using Primitives;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Subjects.Errors;
 
-using Constellation.Core.Models.Subjects.Identifiers;
-using Constellation.Core.Shared;
+using Identifiers;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;

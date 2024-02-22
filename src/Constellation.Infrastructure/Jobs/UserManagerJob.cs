@@ -4,11 +4,14 @@ using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Repositories;
 using Microsoft.AspNetCore.Identity;
 
 internal sealed class UserManagerJob : IUserManagerJob
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly ISchoolContactRepository _contactRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
@@ -16,10 +19,12 @@ internal sealed class UserManagerJob : IUserManagerJob
 
     public UserManagerJob(
         UserManager<AppUser> userManager, 
+        ISchoolContactRepository contactRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _userManager = userManager;
+        _contactRepository = contactRepository;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<IUserManagerJob>();
     }
@@ -38,10 +43,10 @@ internal sealed class UserManagerJob : IUserManagerJob
             await CreateUser(member.EmailAddress, member.FirstName, member.LastName, AuthRoles.StaffMember);
         }
 
-        var contacts = await _unitOfWork.SchoolContacts.AllWithActiveRoleAsync();
+        List<SchoolContact> contacts = await _contactRepository.GetAllActive(token);
         _logger.Information("{id}: Found {count} School Contacts to check...", jobId, contacts.Count);
 
-        foreach (var contact in contacts)
+        foreach (SchoolContact contact in contacts)
         {
             if (token.IsCancellationRequested)
                 return;

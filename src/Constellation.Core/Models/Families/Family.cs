@@ -1,12 +1,12 @@
 ﻿#nullable enable
 namespace Constellation.Core.Models.Families;
 
-using Constellation.Core.DomainEvents;
-using Constellation.Core.Errors;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using DomainEvents;
+using Errors;
+using Identifiers;
+using Primitives;
+using Shared;
+using ValueObjects;
 using Events;
 using System;
 using System.Collections.Generic;

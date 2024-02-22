@@ -1,43 +1,49 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
-using Constellation.Application.DTOs;
+using Application.DTOs;
+using Application.Interfaces.Repositories;
+using Application.Models.Auth;
 using Constellation.Application.Features.Auth.Command;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models;
-using Constellation.Core.Models.Families;
-using Constellation.Core.Models.SchoolContacts;
-using Constellation.Infrastructure.DependencyInjection;
-using Constellation.Infrastructure.Persistence.ConstellationContext;
+using Core.Abstractions.Repositories;
+using Core.Models;
+using Core.Models.Families;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Identifiers;
+using Core.Models.SchoolContacts.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-public class AuthService : IAuthService, IScopedService
+public class AuthService : IAuthService
 {
     private readonly IMediator _mediator;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IFamilyRepository _familyRepository;
-    private readonly AppDbContext _context;
+    private readonly ISchoolContactRepository _contactRepository;
+    private readonly IStaffRepository _staffRepository;
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
     private readonly ILogger _logger;
 
     public AuthService(
         IFamilyRepository familyRepository,
-        AppDbContext context,
+        ISchoolContactRepository contactRepository,
+        IStaffRepository staffRepository,
         IMediator mediator,
+        IUnitOfWork unitOfWork,
         UserManager<AppUser> userManager,
         RoleManager<AppRole> roleManager,
         ILogger logger)
     {
         _familyRepository = familyRepository;
-        _context = context;
+        _contactRepository = contactRepository;
+        _staffRepository = staffRepository;
         _mediator = mediator;
+        _unitOfWork = unitOfWork;
         _userManager = userManager;
         _roleManager = roleManager;
         _logger = logger.ForContext<IAuthService>();
@@ -59,7 +65,7 @@ public class AuthService : IAuthService, IScopedService
             StaffId = userDetails.StaffId
         };
 
-        if (userDetails.IsSchoolContact != null && userDetails.IsSchoolContact.HasValue && userDetails.IsSchoolContact.Value)
+        if (userDetails.IsSchoolContact is not null && userDetails.IsSchoolContact.Value)
         {
             user.IsSchoolContact = userDetails.IsSchoolContact.Value;
             user.SchoolContactId = userDetails.SchoolContactId;
@@ -69,7 +75,7 @@ public class AuthService : IAuthService, IScopedService
             user.IsSchoolContact = false;
         }
 
-        if (userDetails.IsStaffMember != null && userDetails.IsStaffMember.HasValue && userDetails.IsStaffMember.Value)
+        if (userDetails.IsStaffMember is not null && userDetails.IsStaffMember.Value)
         {
             user.IsStaffMember = userDetails.IsStaffMember.Value;
             user.StaffId = userDetails.StaffId;
@@ -119,7 +125,7 @@ public class AuthService : IAuthService, IScopedService
             {
                 // Remove user from School Contacts!
                 user.IsSchoolContact = newUser.IsSchoolContact.Value;
-                user.SchoolContactId = 0;
+                user.SchoolContactId = null;
                 await RemoveUserFromRole(newUser, AuthRoles.LessonsUser);
             }
             else if (!user.IsSchoolContact && newUser.IsSchoolContact.Value)
@@ -214,7 +220,7 @@ public class AuthService : IAuthService, IScopedService
 
     public async Task RepairStaffUserAccounts()
     {
-        var staff = await _context.Staff.Where(staff => !staff.IsDeleted).ToListAsync();
+        var staff = await _staffRepository.GetAllActive();
 
         var users = await _userManager.Users.ToListAsync();
 
@@ -287,21 +293,22 @@ public class AuthService : IAuthService, IScopedService
     {
         if (contact.Assignments.All(assignment => assignment.IsDeleted))
         {
-            contact.IsDeleted = true;
-            contact.DateDeleted = DateTime.Today;
+            contact.Delete();
+
+            await _unitOfWork.CompleteAsync();
             return;
         }
 
-        var users = await _userManager.Users.ToListAsync();
-        var role = await _roleManager.FindByNameAsync(AuthRoles.LessonsUser);
+        List<AppUser> users = await _userManager.Users.ToListAsync();
+        AppRole role = await _roleManager.FindByNameAsync(AuthRoles.LessonsUser);
 
-        var matchingUser = users.FirstOrDefault(user => user.Email == contact.EmailAddress);
+        AppUser matchingUser = users.FirstOrDefault(user => user.Email == contact.EmailAddress);
 
         if (matchingUser == null)
         {
             // Create a new user
 
-            var user = new AppUser
+            AppUser user = new()
             {
                 UserName = contact.EmailAddress,
                 Email = contact.EmailAddress,
@@ -311,9 +318,9 @@ public class AuthService : IAuthService, IScopedService
                 SchoolContactId = contact.Id
             };
 
-            var result = await _userManager.CreateAsync(user);
+            IdentityResult result = await _userManager.CreateAsync(user);
 
-            if (result == IdentityResult.Success)
+            if (result.Succeeded)
             {
                 // Succeeded. Add to Role
                 await _userManager.AddToRoleAsync(user, role.Name);
@@ -333,12 +340,9 @@ public class AuthService : IAuthService, IScopedService
         }
     }
 
-    public async Task RepairSchoolContactUser(int schoolContactId)
+    public async Task RepairSchoolContactUser(SchoolContactId schoolContactId)
     {
-        var contact = await _context.SchoolContacts
-            .Include(contact => contact.Assignments)
-            .Where(contact => !contact.IsDeleted)
-            .SingleOrDefaultAsync(contact => contact.Id == schoolContactId);
+        SchoolContact contact = await _contactRepository.GetById(schoolContactId);
 
         if (contact != null)
             await RepairSchoolContactUser(contact);
@@ -347,13 +351,10 @@ public class AuthService : IAuthService, IScopedService
     public async Task AuditSchoolContactUsers()
     {
         // Get list of SchoolContacts
-        var contacts = await _context.SchoolContacts
-            .Include(contact => contact.Assignments)
-            .Where(contact => !contact.IsDeleted)
-            .ToListAsync();
+        List<SchoolContact> contacts = await _contactRepository.GetAllActive();
 
         // Find each SchoolContact in AppUsers
-        foreach (var contact in contacts)
+        foreach (SchoolContact contact in contacts)
         {
             await RepairSchoolContactUser(contact);
         }
@@ -379,20 +380,16 @@ public class AuthService : IAuthService, IScopedService
 
     public async Task<UserAuditDto> VerifyContactAccess(string email)
     {
-        var result = new UserAuditDto();
+        UserAuditDto result = new UserAuditDto();
 
-        var contacts = await _context.SchoolContacts
-            .Include(innerContact => innerContact.Assignments)
-            .ThenInclude(assignment => assignment.School)
-            .Where(innerContact => innerContact.EmailAddress == email && !innerContact.IsDeleted)
-            .ToListAsync();
+        SchoolContact contact = await _contactRepository.GetWithRolesByEmailAddress(email);
 
-        if (contacts.Any() && contacts.Count == 1)
+        if (contact is not null)
         {
             result.ContactPresent = true;
-            result.Contact = contacts.First();
+            result.Contact = contact;
 
-            var roles = result.Contact.Assignments
+            List<SchoolContactRole> roles = result.Contact.Assignments
                 .Where(assignment => !assignment.IsDeleted)
                 .ToList();
 
@@ -403,7 +400,7 @@ public class AuthService : IAuthService, IScopedService
             }
         }
 
-        var users = await _userManager.Users.Where(account => account.Email == email).ToListAsync();
+        List<AppUser> users = await _userManager.Users.Where(account => account.Email == email).ToListAsync();
 
         if (users.Any() && users.Count == 1)
         {
@@ -415,7 +412,7 @@ public class AuthService : IAuthService, IScopedService
                 result.UserPropertiesPresent = true;
             }
 
-            if (result.User.SchoolContactId != 0 && result.User.SchoolContactId == result.Contact.Id)
+            if (result.User.SchoolContactId is not null && result.User.SchoolContactId == result.Contact.Id)
             {
                 result.UserContactLinkPresent = true;
             }
@@ -439,12 +436,7 @@ public class AuthService : IAuthService, IScopedService
         _logger.Information("Found {count} users currently registered", users.Count);
 
         // Get all family/parent details
-        List<Family> families = await _context
-            .Set<Family>()
-            .Include(family => family.Parents)
-            .Include(family => family.Students)
-            .Where(family => !family.IsDeleted)
-            .ToListAsync(cancellationToken);
+        List<Family> families = await _familyRepository.GetAllCurrent(cancellationToken);
 
         _logger.Information("Found {count} families currently registered", families.Count);
 
@@ -455,20 +447,12 @@ public class AuthService : IAuthService, IScopedService
         _logger.Information("Found {count} parents currently registered", parents.Count);
 
         // Get all staff details
-        List<Staff> staff = await _context
-            .Set<Staff>()
-            .Where(member => !member.IsDeleted)
-            .ToListAsync(cancellationToken);
+        List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
 
         _logger.Information("Found {count} staff members currently registered", staff.Count);
 
         // Get all school contact details
-        List<SchoolContact> contacts = await _context
-            .Set<SchoolContact>()
-            .Include(contact => contact.Assignments.Where(role => !role.IsDeleted))
-            .ThenInclude(role => role.School)
-            .Where(contact => !contact.IsDeleted)
-            .ToListAsync(cancellationToken);
+        List<SchoolContact> contacts = await _contactRepository.GetAllActive(cancellationToken);
 
         _logger.Information("Found {count} school contacts currently registered", contacts.Count);
 
@@ -497,8 +481,7 @@ public class AuthService : IAuthService, IScopedService
             }
 
             Staff matchingStaff = staff
-                .Where(member => member.EmailAddress == user.Email)
-                .FirstOrDefault();
+                .FirstOrDefault(member => member.EmailAddress == user.Email);
 
             if (matchingStaff is not null)
             {
@@ -508,11 +491,7 @@ public class AuthService : IAuthService, IScopedService
                 user.StaffId = matchingStaff.StaffId;
             }
 
-            SchoolContact contact = contacts
-                .Where(contact =>
-                    contact.EmailAddress == user.Email &&
-                    contact.Assignments.Any())
-                .FirstOrDefault();
+            SchoolContact contact = contacts.FirstOrDefault(contact => contact.EmailAddress == user.Email);
 
             if (contact is not null)
             {
@@ -550,7 +529,7 @@ public class AuthService : IAuthService, IScopedService
                 .ForContext(nameof(Parent), parent, true)
                 .Information("Checking parent {name}", $"{parent.FirstName} {parent.LastName}");
 
-            if (!users.Any(user => user.Email == parent.EmailAddress))
+            if (users.All(user => user.Email != parent.EmailAddress))
             {
                 _logger.Information("Found no matching user.");
                 _logger.Information("User will be created");
@@ -583,7 +562,7 @@ public class AuthService : IAuthService, IScopedService
                 .ForContext(nameof(Staff), member, true)
                 .Information("Checking staff member {name}", $"{member.FirstName} {member.LastName}");
 
-            if (!users.Any(user => user.Email == member.EmailAddress))
+            if (users.All(user => user.Email != member.EmailAddress))
             {
                 _logger.Information("Found no matching user.");
                 _logger.Information("User will be created");
@@ -613,7 +592,7 @@ public class AuthService : IAuthService, IScopedService
 
         foreach (SchoolContact contact in contacts)
         {
-            if (!contact.Assignments.Any(role => !role.IsDeleted))
+            if (contact.Assignments.All(role => role.IsDeleted))
             {
                 continue;
             }
@@ -622,7 +601,7 @@ public class AuthService : IAuthService, IScopedService
                 .ForContext(nameof(SchoolContact), contact, true)
                 .Information("Checking school contact {name}", $"{contact.FirstName} {contact.LastName}");
 
-            if (!users.Any(user => user.Email == contact.EmailAddress))
+            if (users.All(user => user.Email != contact.EmailAddress))
             {
                 _logger.Information("Found no matching user.");
                 _logger.Information("User will be created");

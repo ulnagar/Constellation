@@ -2,14 +2,12 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.SchoolContacts;
-using Core.Models;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Models.Identity;
 using Serilog;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -19,20 +17,17 @@ internal sealed class RepairSchoolContactUserCommandHandler
 : ICommandHandler<RepairSchoolContactUserCommand, AppUser>
 {
     private readonly ISchoolContactRepository _contactRepository;
-    private readonly ISchoolContactRoleRepository _roleRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger _logger;
 
     public RepairSchoolContactUserCommandHandler(
         ISchoolContactRepository contactRepository,
-        ISchoolContactRoleRepository roleRepository, 
         IUnitOfWork unitOfWork,
         UserManager<AppUser> userManager,
         ILogger logger)
     {
         _contactRepository = contactRepository;
-        _roleRepository = roleRepository;
         _unitOfWork = unitOfWork;
         _userManager = userManager;
         _logger = logger.ForContext<RepairSchoolContactUserCommand>();
@@ -40,15 +35,16 @@ internal sealed class RepairSchoolContactUserCommandHandler
 
     public async Task<Result<AppUser>> Handle(RepairSchoolContactUserCommand request, CancellationToken cancellationToken)
     {
-        SchoolContact contact = await _contactRepository.GetById(request.SchoolContactId, cancellationToken);
-        List<SchoolContactRole> roles = await _roleRepository.GetForContact(contact.Id, cancellationToken);
+        SchoolContact contact = await _contactRepository.GetById(request.ContactId, cancellationToken);
+        List<SchoolContactRole> roles = contact.Assignments
+            .Where(role => !role.IsDeleted)
+            .ToList();
 
         if (!roles.Any())
         {
             if (!contact.IsDeleted)
             {
-                contact.IsDeleted = true;
-                contact.DateDeleted = DateTime.Today;
+                contact.Delete();
 
                 await _unitOfWork.CompleteAsync(cancellationToken);
             }

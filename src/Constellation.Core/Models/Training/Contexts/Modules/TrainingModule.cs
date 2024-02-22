@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Training.Contexts.Modules;
 
-using Constellation.Core.Enums;
-using Constellation.Core.Primitives;
+using Enums;
+using Primitives;
 using Identifiers;
 using System;
 using System.Collections.Generic;

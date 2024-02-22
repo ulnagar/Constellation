@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Awards;
 
-using Constellation.Core.Enums;
-using Constellation.Core.Models.Identifiers;
+using Enums;
+using Identifiers;
 
 public sealed record NominationPeriodGrade(
     AwardNominationPeriodId PeriodId,

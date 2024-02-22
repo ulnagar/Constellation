@@ -1,5 +1,5 @@
 ﻿namespace Constellation.Core.Models.Training.Contexts.Roles;
-using Training.Identifiers;
+using Identifiers;
 
 public sealed class TrainingRoleMember
 {

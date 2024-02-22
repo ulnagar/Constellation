@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Core.Models.Subjects;
 
-using Constellation.Core.Enums;
-using Constellation.Core.Models.Offerings;
-using Constellation.Core.Models.Subjects.Errors;
-using Constellation.Core.Models.Subjects.Identifiers;
-using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
+using Enums;
+using Offerings;
+using Errors;
+using Identifiers;
+using Primitives;
+using Shared;
 using Extensions;
 using Faculty.Identifiers;
 using System.Collections.Generic;

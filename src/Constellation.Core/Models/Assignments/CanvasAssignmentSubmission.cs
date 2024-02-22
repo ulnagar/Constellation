@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Assignments;
 
-using Constellation.Core.Models.Assignments.Identifiers;
+using Identifiers;
 using System;
 
 public class CanvasAssignmentSubmission

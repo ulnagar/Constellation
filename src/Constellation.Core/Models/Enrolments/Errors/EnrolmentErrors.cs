@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Enrolments.Errors;
 
-using Constellation.Core.Shared;
+using Shared;
 
 public static class EnrolmentErrors
 {

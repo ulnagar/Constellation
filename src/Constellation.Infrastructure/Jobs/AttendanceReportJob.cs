@@ -1,17 +1,18 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Attendance.GenerateAttendanceReportForStudent;
 using Application.DTOs;
-using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
-using Constellation.Application.Extensions;
+using Application.Extensions;
+using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models.Families;
-using Constellation.Core.Models.SchoolContacts;
-using Constellation.Core.Models.Students;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Abstractions.Repositories;
+using Core.Models.Families;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Students;
+using Core.Shared;
+using Core.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -93,7 +94,7 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
             _logger.Information("{id}: Sending reports to school {school}", JobId, school.First().School.Name);
 
             // Email all the files to the school
-            List<System.Net.Mail.Attachment> attachmentList = new();
+            List<Attachment> attachmentList = new();
 
             if (cancellationToken.IsCancellationRequested)
                 return;
@@ -175,14 +176,14 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
 
         if (recipients.Any())
         {
-            MemoryStream stream = new MemoryStream(file.FileData);
+            MemoryStream stream = new(file.FileData);
 
             bool success = await _emailService.SendParentAttendanceReportEmail(
                 student.DisplayName, 
                 dateToReport, 
                 dateToReport.AddDays(12), 
                 recipients, 
-                new List<Attachment> { new(stream, file.FileName) }, 
+                new() { new(stream, file.FileName) }, 
                 cancellationToken);
 
             if (success)

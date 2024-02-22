@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Core.Models.Assignments;
 
-using Constellation.Core.DomainEvents;
+using DomainEvents;
 using Constellation.Core.Errors;
-using Constellation.Core.Models.Assignments.Identifiers;
+using Identifiers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
-using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
+using Primitives;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;

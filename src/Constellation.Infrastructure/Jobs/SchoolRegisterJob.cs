@@ -1,37 +1,43 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
 using Application.DTOs;
-using Constellation.Application.Interfaces.Gateways;
+using Application.SchoolContacts.RemoveContactRole;
+using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
-using Constellation.Application.SchoolContacts.CreateContactWithRole;
-using Constellation.Application.Schools.UpsertSchool;
-using Constellation.Core.Models.SchoolContacts;
+using Application.Interfaces.Repositories;
+using Application.SchoolContacts.CreateContactWithRole;
+using Application.Schools.UpsertSchool;
+using Core.Models.SchoolContacts;
+using Core.Models;
+using Core.Models.SchoolContacts.Repositories;
+using Core.Shared;
 
 internal sealed class SchoolRegisterJob : ISchoolRegisterJob
 {
     private readonly IDoEDataSourcesGateway _doeGateway;
+    private readonly ISchoolContactRepository _contactRepository;
+    private readonly ISchoolRepository _schoolRepository;
     private readonly IMediator _mediator;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ISchoolContactService _schoolContactService;
     private readonly ILogger _logger;
     
     public SchoolRegisterJob(
         IDoEDataSourcesGateway doeGateway,
+        ISchoolContactRepository contactRepository,
+        ISchoolRepository schoolRepository,
         IMediator mediator,
         IUnitOfWork unitOfWork,
-        ISchoolContactService schoolContactService,
         ILogger logger)
     {
         _doeGateway = doeGateway;
+        _contactRepository = contactRepository;
+        _schoolRepository = schoolRepository;
         _mediator = mediator;
         _unitOfWork = unitOfWork;
-        _schoolContactService = schoolContactService;
         _logger = logger.ForContext<ISchoolRegisterJob>();
     }
 
-    public async Task StartJob(Guid jobId, CancellationToken token)
+    public async Task StartJob(Guid jobId, CancellationToken cancellationToken)
     {
         List<DataCollectionsSchoolResponse> csvSchools = await _doeGateway.GetSchoolsFromDataCollections();
         List<CeseSchoolResponse> ceseSchools = await _doeGateway.GetSchoolsFromCESEMasterData();
@@ -39,11 +45,11 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
         List<DataCollectionsSchoolResponse> openSchools = csvSchools.Where(school => school.Status == "Open").ToList();
 
         // Match entries with database
-        ICollection<School> dbSchools = await _unitOfWork.Schools.ForBulkUpdate();
+        ICollection<School> dbSchools = await _schoolRepository.GetAll(cancellationToken);
 
         foreach (DataCollectionsSchoolResponse csvSchool in openSchools)
         {
-            if (token.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
                 return;
 
             _logger.Information("{id}: Processing School {Name} ({SchoolCode})", jobId, csvSchool.Name, csvSchool.SchoolCode);
@@ -55,7 +61,7 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
                 _logger.Information("{id}: School {Name} ({SchoolCode}): Not found - Adding to database", jobId, csvSchool.Name, csvSchool.SchoolCode);
                 // Doesn't exist in database! Create!
 
-                UpsertSchoolCommand command = new UpsertSchoolCommand()
+                UpsertSchoolCommand command = new()
                 {
                     Code = csvSchool.SchoolCode,
                     Name = csvSchool.Name,
@@ -89,7 +95,7 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
                     command.LateOpening = (ceseSchool.LateOpening == "Y");
                 }
 
-                await _mediator.Send(command, token);
+                await _mediator.Send(command, cancellationToken);
             }
             else
             {
@@ -161,16 +167,13 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
                 }
             }
 
-            await _unitOfWork.CompleteAsync(token);
+            await _unitOfWork.CompleteAsync(cancellationToken);
         }
 
         // Do not update Principal data as this might overwrite custom data updates
         // Filter out all closed/proposed schools
         openSchools = openSchools.Where(school => !string.IsNullOrWhiteSpace(school.PrincipalEmail)).ToList();
-
-        // Match entries with database
-        ICollection<SchoolContact> dbContacts = await _unitOfWork.SchoolContacts.ForBulkUpdate();
-
+        
         foreach (DataCollectionsSchoolResponse csvSchool in openSchools)
         {
             _logger.Information("{id}: Processing School {Name} ({SchoolCode})", jobId, csvSchool.Name, csvSchool.SchoolCode);
@@ -179,33 +182,42 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
             if (dbSchool == null)
                 continue;
 
-            SchoolContactRole principal = dbSchool.StaffAssignments.FirstOrDefault(role => role.Role == SchoolContactRole.Principal && !role.IsDeleted);
+            List<SchoolContact> principals = await _contactRepository.GetPrincipalsForSchool(dbSchool.Code, cancellationToken);
 
             if (string.IsNullOrWhiteSpace(csvSchool.PrincipalEmail))
                 continue;
 
             // Compare Principal in database to information in csv by email address
             // If different, mark database entry as old/deleted and create a new entry
-            if (principal != null)
+            if (principals.Any())
             {
-                if (dbSchool.Students.All(student => student.IsDeleted) || dbSchool.Staff.All(staff => staff.IsDeleted))
+                foreach (SchoolContact principal in principals)
                 {
-                    Console.WriteLine($" Removing old Principal: {principal.SchoolContact.DisplayName}");
-                    await _schoolContactService.RemoveRole(principal.Id);
+                    if (!dbSchool.Students.All(student => student.IsDeleted) &&
+                        !dbSchool.Staff.All(staff => staff.IsDeleted) &&
+                        string.Equals(principal.EmailAddress, csvSchool.PrincipalEmail, StringComparison.CurrentCultureIgnoreCase)) 
+                        continue;
+                    
+                    Console.WriteLine($" Removing old Principal: {principal.DisplayName}");
+                    SchoolContactRole role = principal.Assignments.FirstOrDefault(role => 
+                        role.Role == SchoolContactRole.Principal && 
+                        role.SchoolCode == dbSchool.Code && 
+                        !role.IsDeleted);
 
-                    await _unitOfWork.CompleteAsync(token);
-                    continue;
-                }
-                
-                if (!string.Equals(principal.SchoolContact.EmailAddress, csvSchool.PrincipalEmail, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    Console.WriteLine($" Removing old Principal: {principal.SchoolContact.DisplayName}");
-                    await _schoolContactService.RemoveRole(principal.Id);
-                    principal = null;
-                }
-            }
+                    if (role is null) 
+                        continue;
 
-            if (principal == null)
+                    Result request = await _mediator.Send(new RemoveContactRoleCommand(principal.Id, role.Id), cancellationToken);
+
+                    if (request.IsSuccess) 
+                        continue;
+
+                    _logger
+                        .ForContext(nameof(SchoolContact), principal, true)
+                        .Warning("Failed to remove expired role from contact");
+                }
+            } 
+            else 
             {
                 // Does the email address appear in the SchoolContact list?
                 Console.WriteLine($" Adding new Principal: {csvSchool.PrincipalEmail}");
@@ -217,14 +229,10 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
                     string.Empty,
                     SchoolContactRole.Principal,
                     csvSchool.SchoolCode,
+                    "Principal created from CESE Data Source",
                     false),
-                    token);
+                    cancellationToken);
             }
-
-            await _unitOfWork.CompleteAsync(token);
         }
-
-        if (token.IsCancellationRequested)
-            return;
     }
 }

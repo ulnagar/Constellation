@@ -28,11 +28,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
                 .WithOne(s => s.School)
                 .HasForeignKey(s => s.SchoolCode)
                 .OnDelete(DeleteBehavior.NoAction);
-
-            builder.HasMany(s => s.StaffAssignments)
-                .WithOne(a => a.School)
-                .HasForeignKey(a => a.SchoolCode)
-                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

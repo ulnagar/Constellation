@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Offerings.Errors;
 
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Shared;
+using Identifiers;
+using Shared;
 using System;
 
 public static class SessionErrors

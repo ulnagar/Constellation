@@ -1,14 +1,14 @@
-﻿namespace Constellation.Infrastructure.Features.Portal.School.ScienceRolls.Queries;
+﻿namespace Constellation.Application.SciencePracs.GetLessonRollSubmitContextForSchoolsPortal;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.SciencePracs.GetLessonRollSubmitContextForSchoolsPortal;
+using Abstractions.Messaging;
+using Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
+using Core.Errors;
 using Constellation.Core.Models.SchoolContacts;
+using Constellation.Core.Models.SchoolContacts.Repositories;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
-using Constellation.Core.Shared;
+using Core.Shared;
 using Serilog;
 using System;
 using System.Linq;
@@ -61,22 +61,12 @@ internal sealed class GetLessonRollSubmitContextForSchoolsPortalQueryHandler
             LessonId = lesson.Id,
             LessonName = lesson.Name,
             LessonDueDate = lesson.DueDate.ToDateTime(TimeOnly.MinValue),
-            LessonDate = roll.LessonDate.HasValue ? roll.LessonDate.Value.ToDateTime(TimeOnly.MinValue) : DateTime.Today,
+            LessonDate = roll.LessonDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.Today,
             Comment = roll.Comment
         };
 
         if (roll.Status == Core.Enums.LessonStatus.Completed)
         {
-            if (roll.SchoolContactId.HasValue)
-            {
-                SchoolContact contact = await _contactRepository.GetById(roll.SchoolContactId.Value, cancellationToken);
-
-                if (contact is not null)
-                {
-                    response.TeacherName = contact.DisplayName;
-                }
-            }
-
             if (!string.IsNullOrWhiteSpace(roll.SubmittedBy))
             {
                 SchoolContact contact = await _contactRepository.GetWithRolesByEmailAddress(roll.SubmittedBy, cancellationToken);

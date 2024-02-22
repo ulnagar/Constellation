@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Awards;
 
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Primitives;
+using Identifiers;
+using Primitives;
 using Events;
 using System;
 

@@ -31,6 +31,7 @@ using MimeKit;
 using System.Net.Mail;
 using System.Threading;
 using Templates.Views.Emails.Assignments;
+using Templates.Views.Emails.Contacts;
 
 public sealed class Service : IEmailService
 {
@@ -1156,5 +1157,43 @@ public sealed class Service : IEmailService
         await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
 
         return true;
+    }
+
+    public async Task SendWelcomeEmailToCoordinator(
+        List<EmailRecipient> recipients, 
+        string schoolName,
+        CancellationToken cancellationToken = default)
+    {
+        NewACCoordinatorEmailViewModel viewModel = new()
+        {
+            Title = $"Welcome to Aurora College!",
+            SenderName = "Virginia Cluff",
+            SenderTitle = "Instructional Leader",
+            Preheader = "",
+            PartnerSchool = schoolName
+        };
+
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Contacts/NewACCoordinatorEmail.cshtml", viewModel);
+
+        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+    }
+
+    public async Task SendWelcomeEmailToSciencePracTeacher(
+        List<EmailRecipient> recipients, 
+        string schoolName,
+        CancellationToken cancellationToken = default)
+    {
+        NewSciencePracTeacherEmailViewModel viewModel = new()
+        {
+            Title = $"Welcome to Aurora College!",
+            SenderName = "Fiona Boneham",
+            SenderTitle = "Science Practical Coordinator",
+            Preheader = "",
+            PartnerSchool = schoolName
+        };
+
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Contacts/NewSciencePracTeacherEmail.cshtml", viewModel);
+
+        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
     }
 }

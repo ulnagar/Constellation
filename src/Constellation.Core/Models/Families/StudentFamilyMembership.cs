@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace Constellation.Core.Models.Families;
 
-using Constellation.Core.Models.Identifiers;
+using Identifiers;
 using System;
 using Newtonsoft.Json;
 

@@ -1,8 +1,8 @@
 ﻿#nullable enable
 namespace Constellation.Core.Models.Families;
 
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.ValueObjects;
+using Identifiers;
+using ValueObjects;
 using Microsoft.VisualBasic.CompilerServices;
 
 public sealed class Parent

@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Core.Models.Offerings;
 
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Offerings.ValueObjects;
-using Constellation.Core.Primitives;
+using Identifiers;
+using ValueObjects;
+using Primitives;
 using System;
 
 public sealed class TeacherAssignment : IAuditableEntity
