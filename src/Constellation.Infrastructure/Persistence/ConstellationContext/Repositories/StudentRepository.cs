@@ -147,17 +147,18 @@ public class StudentRepository : IStudentRepository
 
         if (OfferingIds.Count > 0)
         {
-            List<Offering> offerings = await _context.Set<Offering>()
+            List<OfferingId> currentOfferingIds = await _context.Set<Offering>()
                 .Where(offering =>
                     OfferingIds.Contains(offering.Id) &&
                     offering.StartDate <= _dateTime.Today &&
                     offering.EndDate >= _dateTime.Today)
+                .Select(offering => offering.Id)
                 .ToListAsync(cancellationToken);
 
             students = students
-                .Where(student => student.Enrolments.Any(enrol => 
-                    !enrol.IsDeleted && 
-                    offerings.Any(offering => offering.Id == enrol.OfferingId)));
+                .Where(student => student.Enrolments.Any(enrol =>
+                    !enrol.IsDeleted &&
+                    currentOfferingIds.Contains(enrol.OfferingId)));
         }
 
         if (Grades.Count > 0)
