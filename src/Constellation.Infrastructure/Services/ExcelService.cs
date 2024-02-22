@@ -7,6 +7,7 @@ using Application.Extensions;
 using Application.Helpers;
 using Application.Rollover.ImportStudents;
 using Application.Training.Models;
+using Constellation.Application.Absences.ExportUnexplainedPartialAbsencesReport;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
 using Constellation.Application.Awards.ExportAwardNominations;
 using Constellation.Application.Contacts.GetContactList;
@@ -125,6 +126,23 @@ public class ExcelService : IExcelService
         workSheet.Cells[2, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
         var memoryStream = new MemoryStream();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateUnexplainedPartialAbsencesReportFile(
+        List<UnexplainedPartialAbsenceResponse> absences,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Sheet 1");
+
+        worksheet.Cells[2, 1].LoadFromCollection(absences, true);
+        worksheet.Cells[2, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
+
+        MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;
 

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
+using Absences.ExportUnexplainedPartialAbsencesReport;
 using Attendance.GetAttendanceDataFromSentral;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
 using Constellation.Application.Attendance.GenerateAttendanceReportForPeriod;
@@ -25,6 +26,7 @@ public interface IExcelService
 {
     Task<MemoryStream> CreatePTOFile(ICollection<InterviewExportDto> exportLines);
     Task<MemoryStream> CreateAbsencesReportFile(List<FilteredAbsenceResponse> exportAbsences, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateUnexplainedPartialAbsencesReportFile(List<UnexplainedPartialAbsenceResponse> absences, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateAwardsCalculationFile(MemoryStream stream);
     Task<MemoryStream> CreateTrainingModuleReportFile(ModuleDetailsDto data);
     Task<MemoryStream> CreateTrainingModuleStaffReportFile(StaffCompletionListDto data);

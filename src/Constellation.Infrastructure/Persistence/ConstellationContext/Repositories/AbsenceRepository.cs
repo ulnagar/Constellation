@@ -79,6 +79,15 @@ public class AbsenceRepository : IAbsenceRepository
                     absence.Type == AbsenceType.Whole)
                 .ToListAsync(cancellationToken);
 
+    public async Task<List<Absence>> GetUnexplainedPartialAbsences(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Absence>()
+            .Where(absence => 
+                absence.Type == AbsenceType.Partial &&
+                !absence.Explained)
+            .ToListAsync(cancellationToken);
+
     public async Task<int> GetCountForStudentDateAndOffering(
         string studentId,
         DateOnly absenceDate,
