@@ -1,10 +1,9 @@
-﻿using Constellation.Core.Models.Stocktake;
+﻿namespace Constellation.Application.Features.Equipment.Stocktake.Queries;
+
+using Constellation.Core.Models.Stocktake;
 using MediatR;
 using System.Collections.Generic;
 
-namespace Constellation.Application.Features.Equipment.Stocktake.Queries
-{
-    public class GetStocktakeEventListQuery : IRequest<ICollection<StocktakeEvent>>
-    {
-    }
-}
+public sealed class GetStocktakeEventListQuery 
+    : IRequest<ICollection<StocktakeEvent>>
+{ }

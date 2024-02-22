@@ -19,6 +19,29 @@ internal sealed class StocktakeRepository : IStocktakeRepository
         _dateTime = dateTime;
     }
 
+    public async Task<List<StocktakeEvent>> GetAll(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<StocktakeEvent>()
+            .ToListAsync(cancellationToken);
+
+    public async Task<StocktakeEvent> GetById(
+        Guid eventId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<StocktakeEvent>()
+            .Where(stocktake => stocktake.Id == eventId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<StocktakeEvent> GetByIdWithSightings(
+        Guid eventId, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<StocktakeEvent>()
+            .Include(stocktake => stocktake.Sightings)
+            .Where(stocktake => stocktake.Id == eventId)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public async Task<List<StocktakeEvent>> GetCurrentEvents(
         CancellationToken cancellationToken = default) => 
         await _context
@@ -48,4 +71,5 @@ internal sealed class StocktakeRepository : IStocktakeRepository
             .FirstOrDefaultAsync(sighting => sighting.Id == sightingId, cancellationToken);
 
     public void Insert(StocktakeSighting sighting) => _context.Set<StocktakeSighting>().Add(sighting);
+    public void Insert(StocktakeEvent stocktake) => _context.Set<StocktakeEvent>().Add(stocktake);
 }
