@@ -1,10 +1,9 @@
-﻿using Constellation.Core.Models.SchoolContacts;
+﻿namespace Constellation.Application.Features.Auth.Queries;
+
+using Constellation.Core.Models.SchoolContacts;
 using MediatR;
 
-namespace Constellation.Application.Features.Auth.Queries
+public sealed class GetSchoolContactByEmailAddressQuery : IRequest<SchoolContact>
 {
-    public class GetSchoolContactByEmailAddressQuery : IRequest<SchoolContact>
-    {
-        public string EmailAddress { get; set; }
-    }
+    public string EmailAddress { get; set; }
 }

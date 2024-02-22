@@ -1,11 +1,15 @@
-﻿namespace Constellation.Infrastructure.Features.Equipment.Stocktake.Queries;
+﻿namespace Constellation.Application.Features.Equipment.Stocktake.Queries;
 
-using Constellation.Application.Features.Equipment.Stocktake.Queries;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.StaffMembers.Models;
-using Core.Models;
+using Constellation.Core.Models;
+using MediatR;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
-public class GetStaffForSelectionQueryHandler 
+internal sealed class GetStaffForSelectionQueryHandler 
     : IRequestHandler<GetStaffForSelectionQuery, ICollection<StaffSelectionListResponse>>
 {
     private readonly IStaffRepository _staffRepository;
@@ -18,17 +22,14 @@ public class GetStaffForSelectionQueryHandler
 
     public async Task<ICollection<StaffSelectionListResponse>> Handle(GetStaffForSelectionQuery request, CancellationToken cancellationToken)
     {
-        List<StaffSelectionListResponse> response = new();
-
         List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
 
-        foreach (Staff member in staff)
-        {
-            response.Add(new(
+        List<StaffSelectionListResponse> response = staff.Select(member =>
+            new StaffSelectionListResponse(
                 member.StaffId,
                 member.FirstName,
-                member.LastName));
-        }
+                member.LastName))
+            .ToList();
 
         return response;
     }

@@ -1,11 +1,15 @@
-﻿namespace Constellation.Infrastructure.Features.Portal.School.Timetables.Queries;
+﻿namespace Constellation.Application.Features.Portal.School.Timetables.Queries;
 
-using Application.DTOs;
-using Constellation.Application.Features.Portal.School.Timetables.Queries;
+using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Services;
+using MediatR;
+using System.IO;
 using System.Net.Mime;
+using System.Threading;
+using System.Threading.Tasks;
 
-public class GetStudentTimetableExportQueryHandler : IRequestHandler<GetStudentTimetableExportQuery, FileDto>
+internal sealed class GetStudentTimetableExportQueryHandler 
+    : IRequestHandler<GetStudentTimetableExportQuery, FileDto>
 {
     private readonly IRazorViewToStringRenderer _renderService;
     private readonly IPDFService _pdfService;

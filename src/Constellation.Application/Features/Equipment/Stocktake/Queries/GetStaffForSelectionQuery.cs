@@ -4,6 +4,6 @@ using MediatR;
 using System.Collections.Generic;
 using StaffMembers.Models;
 
-public class GetStaffForSelectionQuery : IRequest<ICollection<StaffSelectionListResponse>>
-{
-}
+public sealed class GetStaffForSelectionQuery 
+    : IRequest<ICollection<StaffSelectionListResponse>>
+{ }

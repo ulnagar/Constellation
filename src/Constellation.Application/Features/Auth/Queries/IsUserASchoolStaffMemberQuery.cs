@@ -1,9 +1,8 @@
-﻿using MediatR;
+﻿namespace Constellation.Application.Features.Auth.Queries;
 
-namespace Constellation.Application.Features.Auth.Queries
+using MediatR;
+
+public sealed class IsUserASchoolStaffMemberQuery : IRequest<bool>
 {
-    public class IsUserASchoolStaffMemberQuery : IRequest<bool>
-    {
-        public string EmailAddress { get; set; }
-    }
+    public string EmailAddress { get; set; }
 }
