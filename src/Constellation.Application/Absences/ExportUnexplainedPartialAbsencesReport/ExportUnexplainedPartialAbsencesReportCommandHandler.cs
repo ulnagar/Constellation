@@ -1,25 +1,24 @@
 ﻿namespace Constellation.Application.Absences.ExportUnexplainedPartialAbsencesReport;
 
 using Abstractions.Messaging;
-using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
-using Constellation.Application.Helpers;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
+using Helpers;
+using Interfaces.Repositories;
+using Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Core.Models;
 using Core.Models.Absences;
 using Core.Models.Offerings;
+using Core.Models.Students.Errors;
 using Core.Shared;
 using Core.ValueObjects;
 using DTOs;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,19 +30,22 @@ internal sealed class ExportUnexplainedPartialAbsencesReportCommandHandler
     private readonly IOfferingRepository _offeringRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IExcelService _excelService;
+    private readonly ILogger _logger;
 
     public ExportUnexplainedPartialAbsencesReportCommandHandler(
         IAbsenceRepository absenceRepository, 
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
         ISchoolRepository schoolRepository,
-        IExcelService excelService)
+        IExcelService excelService,
+        ILogger logger)
     {
         _absenceRepository = absenceRepository;
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
         _schoolRepository = schoolRepository;
         _excelService = excelService;
+        _logger = logger.ForContext<ExportUnexplainedPartialAbsencesReportCommand>();
     }
 
     public async Task<Result<FileDto>> Handle(ExportUnexplainedPartialAbsencesReportCommand request, CancellationToken cancellationToken)
@@ -62,7 +64,10 @@ internal sealed class ExportUnexplainedPartialAbsencesReportCommandHandler
 
             if (student is null)
             {
-                //_logger;
+                _logger
+                    .ForContext(nameof(ExportUnexplainedPartialAbsencesReportCommand), request, true)
+                    .ForContext(nameof(Absence), absenceGroup.First(), true)
+                    .ForContext(nameof(Error), StudentErrors.NotFound(absenceGroup.Key), true);
 
                 continue;
             }
@@ -93,7 +98,8 @@ internal sealed class ExportUnexplainedPartialAbsencesReportCommandHandler
                     offeringName,
                     absence.AbsenceLength,
                     absence.AbsenceTimeframe,
-                    response is null ? "Pending Response" : "Pending Verification"));
+                    response is null ? "Pending Response" : "Pending Verification",
+                    response is null ? null : DateOnly.FromDateTime(response.ReceivedAt)));
             }
         }
 

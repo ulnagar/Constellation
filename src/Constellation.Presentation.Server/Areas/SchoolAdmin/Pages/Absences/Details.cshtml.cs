@@ -27,6 +27,8 @@ public class DetailsModel : BasePageModel
         _authService = authService;
     }
 
+    [ViewData] public string ActivePage => AbsencePages.List;
+    
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }
 
@@ -34,8 +36,6 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
-        ViewData["ActivePage"] = "Report";
-
         AbsenceId absenceId = AbsenceId.FromValue(Id);
 
         Result<AbsenceDetailsResponse> result = await _mediator.Send(new GetAbsenceDetailsQuery(absenceId), cancellationToken);

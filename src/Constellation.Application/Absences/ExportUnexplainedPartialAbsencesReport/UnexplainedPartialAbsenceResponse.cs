@@ -15,4 +15,5 @@ public sealed record UnexplainedPartialAbsenceResponse(
     string OfferingName,
     int AbsenceLength,
     string AbsenceTimeframe,
-    string AbsenceStatus);
+    string AbsenceStatus,
+    DateOnly? ResponseReceived);

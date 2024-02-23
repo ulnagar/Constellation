@@ -1,4 +1,5 @@
-﻿@{
+﻿@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Absences
+@{
     Layout = "/Pages/Shared/_WebLayout.cshtml";
 
     string activePage = ViewData["ActivePage"].ToString();
@@ -12,13 +13,18 @@
             </h4>
             <ul class="nav flex-column mx-2">
                 <li class="nav-item">
-                    <a class="nav-link @(activePage == "Report" ? "active" : "")" href="/SchoolAdmin/Absences/Report">
-                        Report
+                    <a class="nav-link @(activePage == AbsencePages.List ? "active" : "")" href="/SchoolAdmin/Absences/List">
+                        List
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @(activePage == "Audit" ? "active" : "")" href="/SchoolAdmin/Absences/Audit">
+                    <a class="nav-link @(activePage == AbsencePages.Audit ? "active" : "")" href="/SchoolAdmin/Absences/Audit">
                         Student Settings
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(activePage == AbsencePages.Report ? "active" : "")" href="/SchoolAdmin/Absences/Report">
+                        Reports
                     </a>
                 </li>
             </ul>

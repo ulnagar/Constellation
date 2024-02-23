@@ -85,6 +85,7 @@ public class AbsenceRepository : IAbsenceRepository
             .Set<Absence>()
             .Where(absence => 
                 absence.Type == AbsenceType.Partial &&
+                absence.Date > _dateTime.FirstDayOfYear &&
                 !absence.Explained)
             .ToListAsync(cancellationToken);
 

@@ -22,7 +22,8 @@ public class AuditModel : BasePageModel
         _mediator = mediator;
         _linkGenerator = linkGenerator;
     }
-
+    [ViewData] public string ActivePage => AbsencePages.Audit;
+    
     [BindProperty(SupportsGet = true)]
     public FilterDto Filter { get; set; } = FilterDto.All;
 
@@ -30,8 +31,6 @@ public class AuditModel : BasePageModel
 
     public async Task OnGet()
     {
-        ViewData["ActivePage"] = "Audit";
-
         Result<List<StudentAbsenceSettingsResponse>> studentRequest = await _mediator.Send(new GetStudentsWithAbsenceSettingsQuery());
 
         if (studentRequest.IsFailure)

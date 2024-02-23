@@ -33,6 +33,7 @@ using OfficeOpenXml.Style;
 using Persistence.ConstellationContext.Migrations;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -139,8 +140,35 @@ public class ExcelService : IExcelService
         ExcelPackage excel = new();
         ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Sheet 1");
 
-        worksheet.Cells[2, 1].LoadFromCollection(absences, true);
-        worksheet.Cells[2, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
+        worksheet.Cells[1, 1].LoadFromCollection(absences, opt =>
+        {
+            opt.PrintHeaders = true;
+            opt.TableStyle = OfficeOpenXml.Table.TableStyles.Light9;
+            opt.HeaderParsingType = OfficeOpenXml.LoadFunctions.Params.HeaderParsingTypes.CamelCaseToSpace;
+        });
+
+        for (int i = 1; i <= worksheet.Dimension.Rows; i++)
+        {
+            if (i == 1)
+                continue;
+
+            string absenceDateString = worksheet.Cells[i, 7].Value?.ToString();
+
+            if (absenceDateString is not null)
+                worksheet.Cells[i, 7].Value = DateTime.Parse(absenceDateString);
+
+            string responseDateString = worksheet.Cells[i, 12].Value?.ToString();
+
+            if (responseDateString is not null)
+                worksheet.Cells[i, 12].Value = DateTime.Parse(responseDateString);
+        }
+        
+        worksheet.Columns[7].Style.Numberformat.Format = DateTimeFormatInfo.CurrentInfo.ShortDatePattern;
+        worksheet.Columns[9].Style.Numberformat.Format = "0";
+        worksheet.Columns[12].Style.Numberformat.Format = DateTimeFormatInfo.CurrentInfo.ShortDatePattern;
+
+        worksheet.View.FreezePanes(2, 1);
+        worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
 
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
