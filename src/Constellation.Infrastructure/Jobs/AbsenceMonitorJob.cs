@@ -65,6 +65,12 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 
                 List<Absence> absences = await _absenceProcessor.StartJob(jobId, student, cancellationToken);
 
+                // If the student has absences with new external explanations,
+                // and without any new absences, their details will not be saved
+                // unless we do it here
+                // This must be done early, otherwise the digests will not reflect these changes
+                await _unitOfWork.CompleteAsync(cancellationToken);
+
                 if (absences.Any())
                 {
                     if (cancellationToken.IsCancellationRequested)
@@ -144,9 +150,6 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
                         cancellationToken);
                 }
                 
-                // If the student has absences with new external explanations,
-                // and without any new absences, their details will not be saved
-                // unless we re-save here
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 absences = null;
             }
