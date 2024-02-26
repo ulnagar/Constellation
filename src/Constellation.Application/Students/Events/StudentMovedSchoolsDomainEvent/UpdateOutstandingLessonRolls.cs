@@ -102,7 +102,7 @@ internal sealed class UpdateOutstandingLessonRolls
             .Where(lesson => lesson.Offerings.Any(record => offeringIds.Contains(record.OfferingId)))
             .SelectMany(lesson => lesson.Rolls)
             .Where(roll =>
-                roll.SchoolCode == notification.PreviousSchoolCode &&
+                roll.SchoolCode == notification.CurrentSchoolCode &&
                 roll.Status == LessonStatus.Active)
             .ToList();
 
@@ -139,6 +139,8 @@ internal sealed class UpdateOutstandingLessonRolls
                 student.SchoolCode);
 
             roll.AddStudent(student.StudentId);
+
+            lesson.AddRoll(roll);
 
             _logger.Information("Creating new roll for lesson {lesson} at school {school} as it did not already exist", lesson.Name, notification.CurrentSchoolCode);
         }
