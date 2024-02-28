@@ -10,15 +10,38 @@
     ViewData["SenderTitle"] = Model.SenderTitle;
 }
 
-<p>Dear Coordinator,</p>
-<p>@Model.StudentName is a student shared between @Model.SchoolName and Aurora College, and was marked absent for the entire duration of some of their lessons. We have received no response from the parents when asked to explain these absences.</p>
-<dl>
-    @foreach (var entry in Model.Absences)
-    {
-        <dt>@entry.Date.ToLongDateString()</dt>
-        <dd>@entry.PeriodName (@entry.PeriodTimeframe) - @entry.OfferingName</dd>
-    }
-</dl>
-<p>If you are able to confirm that the student was marked absent for the day on your school rolls, or attending a school event, we will update our records. Any absences you do not confirm will be marked as unjustified in our system.</p>
-<p>A new Coordinator portal has been developed for absences. You can now view all outstanding absences for students at your school by going to the following site: <a href="@CoordinatorAbsenceDigestEmailViewModel.Link" target="_blank">@CoordinatorAbsenceDigestEmailViewModel.Link</a></p>
+<p>@Model.StudentName.DisplayName is a student shared between @Model.SchoolName and Aurora College, and was marked absent from the following lessons.</p>
+
+@if (Model.WholeAbsences.Any())
+{
+    <p>@Model.StudentName.FirstName was marked absent for the entire duration of the lessons below. We have received no response from the parents when asked to explain these absences.</p>
+    <dl>
+        @foreach (var entry in Model.WholeAbsences.OrderBy(entry => entry.Date).ThenBy(entry => entry.PeriodName))
+        {
+            <dt>@entry.Date.ToLongDateString()</dt>
+            <dd>@entry.PeriodName (@entry.PeriodTimeframe) - @entry.OfferingName</dd>
+        }
+    </dl>
+    <p>If you are able to confirm that the student was marked absent for the day on your school rolls, or attending a school event, we will update our records. Any absences you do not confirm will be marked as unjustified in our system.</p>
+    <hr />
+}
+
+@if (Model.PartialAbsences.Any())
+{
+    <p>@Model.StudentName.FirstName was marked absent for a portion of the lessons below. @Model.StudentName.FirstName has supplied an explanation for each, which require verification from a staff member at @Model.SchoolName</p>
+    <dl>
+        @foreach (var entry in Model.PartialAbsences.OrderBy(entry => entry.Date).ThenBy(entry => entry.PeriodName).ThenBy(entry => entry.AbsenceTimeframe))
+        {
+            <dt>@entry.Date.ToLongDateString()</dt>
+            <dd>
+                @entry.PeriodName (@entry.PeriodTimeframe) - @entry.OfferingName<br />
+                @entry.AbsenceTimeframe (@entry.AbsenceLength minutes)<br />
+            </dd>
+        }
+    </dl>
+    <p>Please review the accuracy of their description, and either verify or reject their response.</p>
+    <hr />
+}
+
+<p>You can view all outstanding absences for students at your school by going to the following site: <a href="@CoordinatorAbsenceDigestEmailViewModel.Link" target="_blank">@CoordinatorAbsenceDigestEmailViewModel.Link</a></p>
 <p>If you have any questions or concerns about this absence, please contact our office on 1300 287 629 or at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a></p>

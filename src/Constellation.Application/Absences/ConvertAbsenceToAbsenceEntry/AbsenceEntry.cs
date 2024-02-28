@@ -9,4 +9,5 @@ public sealed record AbsenceEntry(
     string PeriodName,
     string PeriodTimeframe,
     string OfferingName,
-    string AbsenceTimeframe);
+    string AbsenceTimeframe,
+    int AbsenceLength);

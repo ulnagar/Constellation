@@ -147,7 +147,8 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                 absence.PeriodName,
                 absence.PeriodTimeframe,
                 offering.Name,
-                absence.AbsenceTimeframe));
+                absence.AbsenceTimeframe,
+                absence.AbsenceLength));
         }
 
         List<IGrouping<DateOnly, AbsenceEntry>> groupedAbsences = absenceEntries.GroupBy(absence => absence.Date).ToList();
