@@ -20,7 +20,7 @@ public class CurrentUserService : ICurrentUserService
 
     public string UserName => User != null && User.Identity.IsAuthenticated ? User.Identity.Name : string.Empty;
 
-    public string EmailAddress => string.Empty; // Retrieve user email from claims?
+    public string EmailAddress => User?.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value ?? string.Empty;
 
     public bool IsAuthenticated => User != null && User.Identity.IsAuthenticated;
 }
