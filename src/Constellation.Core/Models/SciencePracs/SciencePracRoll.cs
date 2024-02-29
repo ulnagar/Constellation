@@ -27,7 +27,6 @@ public sealed class SciencePracRoll
     public SciencePracRollId Id { get; private set; }
     public SciencePracLessonId LessonId { get; private set; }
     public string SchoolCode { get; private set; }
-    public int? SchoolContactId { get; private set; }
     public string SubmittedBy { get; private set; }
 
     public IReadOnlyCollection<SciencePracAttendance> Attendance => _attendance;
@@ -38,7 +37,6 @@ public sealed class SciencePracRoll
     public int NotificationCount { get; private set; }
 
     internal Result MarkRoll(
-        int? schoolContactId,
         string submittedBy,
         DateOnly lessonDate,
         string comment,
@@ -71,9 +69,6 @@ public sealed class SciencePracRoll
         if (_attendance.Count(entry => entry.Present) == 0 && string.IsNullOrWhiteSpace(comment))
             return Result.Failure(DomainErrors.SciencePracs.Roll.CommentRequiredNonePresent);
 
-        if (schoolContactId is not null)
-            SchoolContactId = schoolContactId;
-        
         SubmittedBy = submittedBy;
         LessonDate = lessonDate;
         Comment = comment;

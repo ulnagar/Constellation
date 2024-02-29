@@ -10,6 +10,8 @@ public sealed class SchoolContactRole : IAuditableEntity
     public const string Coordinator = "Aurora College Coordinator";
     public const string Principal = "Principal";
 
+    private SchoolContactRole() { } // Required for EF Core
+
     internal SchoolContactRole(
         SchoolContactId contactId,
         string role,

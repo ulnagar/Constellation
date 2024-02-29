@@ -64,7 +64,6 @@ public sealed class SciencePracLesson : AggregateRoot
 
     public Result MarkRoll(
         SciencePracRollId rollId,
-        int schoolContactId,
         string submittedBy,
         DateOnly lessonDate,
         string comment,
@@ -79,7 +78,6 @@ public sealed class SciencePracLesson : AggregateRoot
         }
 
         Result attempt = roll.MarkRoll(
-            schoolContactId == 0 ? null : schoolContactId,
             submittedBy,
             lessonDate,
             comment,
