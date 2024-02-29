@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations
 {
     using Core.Models.Faculty.Identifiers;
+    using Core.Models.SchoolContacts.Identifiers;
 
     public class MSTeamOperationConfiguration : IEntityTypeConfiguration<MSTeamOperation>
     {
@@ -130,6 +131,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
                 .WithMany()
                 .HasForeignKey(operation => operation.StudentId)
                 .OnDelete(DeleteBehavior.NoAction);
+        }
+    }
+
+    public class ContactAddedMSTeamOperationConfiguration : IEntityTypeConfiguration<ContactAddedMSTeamOperation>
+    {
+        public void Configure(EntityTypeBuilder<ContactAddedMSTeamOperation> builder)
+        {
+            builder
+                .Property(operation => operation.ContactId)
+                .HasConversion(
+                    id => id.Value,
+                    value => SchoolContactId.FromValue(value));
         }
     }
 }

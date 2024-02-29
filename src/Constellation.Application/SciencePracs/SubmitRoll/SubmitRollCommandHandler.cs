@@ -55,8 +55,7 @@ internal sealed class SubmitRollCommandHandler
 
         Result submitRequest = lesson.MarkRoll(
             roll.Id,
-            0,
-            _currentUserService.UserName,
+            _currentUserService.UserName, //TODO: Confirm that the CurrentUserService has access to email and submit that instead.
             DateOnly.FromDateTime(request.LessonDate),
             request.Comment,
             request.PresentStudents,
