@@ -23,11 +23,31 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "FK_SciencePracs_Rolls_SchoolContact_SchoolContactId",
                 table: "SciencePracs_Rolls");
 
-            migrationBuilder.DropTable(
-                name: "SchoolContactRole");
+            migrationBuilder.DropForeignKey(
+                name: "FK_SchoolContactRole_SchoolContact_SchoolContactId",
+                table: "SchoolContactRole");
+            
+            // Update entries that Fiona marked with her email (377 entries)
+            migrationBuilder.Sql(@"
+                UPDATE SciencePracs_Rolls
+                SET SubmittedBy = 'fiona.boneham@det.nsw.edu.au'
+                WHERE 
+                    LessonDate is not null and
+                    SchoolContactId is null and
+                    SubmittedBy is null");
 
-            migrationBuilder.DropTable(
-                name: "SchoolContact");
+            // Update entries with the SchoolContactId set
+            migrationBuilder.Sql(@"
+                UPDATE SciencePracs_Rolls 
+                SET SubmittedBy = C.EmailAddress
+                FROM SciencePracs_Rolls R 
+                    JOIN SchoolContact C on R.SchoolContactId = C.Id");
+
+            // Update entries with the SubmittedBy set to name
+            migrationBuilder.Sql(@"
+                UPDATE SciencePracs_Rolls
+                SET SubmittedBy = C.EmailAddress
+                FROM SciencePracs_Rolls R join SChoolContact C on R.SubmittedBy = CONCAT(TRIM(C.FirstName), ' ', TRIM(C.LastName))");
 
             migrationBuilder.DropIndex(
                 name: "IX_SciencePracs_Rolls_SchoolContactId",
@@ -37,24 +57,64 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "SchoolContactId",
                 table: "SciencePracs_Rolls");
 
-            migrationBuilder.AlterColumn<Guid>(
+            // Update table for new ID Column
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_SchoolContact",
+                table: "SchoolContact");
+            
+            migrationBuilder.RenameColumn(
+                name: "Id",
+                table: "SchoolContact",
+                newName: "OldId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "Id",
+                table: "SchoolContact",
+                type: "uniqueidentifier",
+                nullable: false,
+                defaultValueSql: "NEWID()");
+
+            // Update PartialAbsenceResponses history table
+            migrationBuilder.RenameColumn(
+                name: "VerifierId",
+                table: "PartialAbsenceResponses",
+                newName: "OldVerifierId");
+            
+            migrationBuilder.AddColumn<Guid>(
                 name: "VerifierId",
                 table: "PartialAbsenceResponses",
                 type: "uniqueidentifier",
-                nullable: true,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldNullable: true);
+                nullable: true);
 
-            migrationBuilder.AlterColumn<Guid>(
+            migrationBuilder.Sql(@"
+                UPDATE PartialAbsenceResponses 
+                SET VerifierId = C.Id
+                FROM PartialAbsenceResponses A 
+                    JOIN SchoolContact C on A.OldVerifierId = C.OldId");
+
+            migrationBuilder.DropColumn(
+                name: "OldVerifierId",
+                table: "PartialAbsenceResponses");
+
+            // Update MSTeamOperations
+            migrationBuilder.RenameColumn(
+                name: "ContactId",
+                table: "MSTeamOperations",
+                newName: "OldContactId");
+
+            migrationBuilder.AddColumn<Guid>(
                 name: "ContactId",
                 table: "MSTeamOperations",
                 type: "uniqueidentifier",
-                nullable: true,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldNullable: true);
+                nullable: true);
 
+            migrationBuilder.Sql(@"
+                UPDATE MSTeamOperations 
+                SET ContactId = C.Id
+                FROM MSTeamOperations O 
+                    JOIN SchoolContact C on O.OldContactId = C.OldId");
+
+            // Update User Tables
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
                 table: "AspNetUserTokens",
@@ -73,21 +133,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 oldClrType: typeof(string),
                 oldType: "nvarchar(450)");
 
-            migrationBuilder.AlterColumn<Guid>(
-                name: "SchoolContactId",
-                table: "AspNetUsers",
-                type: "uniqueidentifier",
-                nullable: true,
-                oldClrType: typeof(int),
-                oldType: "int");
-
-            migrationBuilder.AddColumn<int>(
-                name: "OldSchoolContactId",
-                table: "AspNetUsers",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
-
             migrationBuilder.AlterColumn<string>(
                 name: "ProviderKey",
                 table: "AspNetUserLogins",
@@ -105,6 +150,25 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(450)");
+
+            migrationBuilder.RenameColumn(
+                name: "SchoolContactId",
+                table: "AspNetUsers",
+                newName: "OldSchoolContactId");
+            
+            migrationBuilder.AddColumn<Guid>(
+                name: "SchoolContactId",
+                table: "AspNetUsers",
+                type: "uniqueidentifier",
+                nullable: true);
+
+            migrationBuilder.Sql(@"
+                UPDATE AspNetUsers 
+                SET SchoolContactId = C.Id
+                FROM AspNetUsers U 
+                    JOIN SchoolContact C on U.OldSchoolContactId = C.OldId");
+
+            //TODO: Modify table creation code to instead alter existing table. Perhaps move to top.
 
             migrationBuilder.CreateTable(
                 name: "SchoolContacts_Contacts",
