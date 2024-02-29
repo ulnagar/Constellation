@@ -275,6 +275,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 type: "nvarchar(max)",
                 nullable: true);
 
+            migrationBuilder.Sql(@"
+                UPDATE SchoolContactRole
+                SET SchoolName = S.Name
+                FROM SchoolContactRole R 
+                    JOIN Schools S on R.SchoolCode = S.Code");
+
             migrationBuilder.AddColumn<string>(
                 name: "Note",
                 table: "SchoolContactRole",
