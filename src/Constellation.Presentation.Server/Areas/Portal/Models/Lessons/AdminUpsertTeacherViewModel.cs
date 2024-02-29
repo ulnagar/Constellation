@@ -6,10 +6,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
 {
+    using Core.Models.SchoolContacts.Identifiers;
+
     public class AdminUpsertTeacherViewModel : BaseViewModel
     {
-        public int? Id { get; set; }
-        public int? RoleId { get; set; }
+        public SchoolContactId? Id { get; set; }
+        public SchoolContactRoleId? RoleId { get; set; }
         [Required]
         [Display(Name=DisplayNameDefaults.FirstName)]
         public string FirstName { get; set; }
@@ -27,16 +29,16 @@ namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
 
         public SelectList SchoolList { get; set; }
 
-        public static AdminUpsertTeacherViewModel ConvertFromContactRole(SchoolContactRole role)
+        public static AdminUpsertTeacherViewModel ConvertFromContactRole(SchoolContact contact, SchoolContactRole role)
         {
             var viewModel = new AdminUpsertTeacherViewModel
             {
-                Id = role.SchoolContactId,
+                Id = contact.Id,
                 RoleId = role.Id,
-                FirstName = role.SchoolContact.FirstName,
-                LastName = role.SchoolContact.LastName,
-                PhoneNumber = role.SchoolContact.PhoneNumber,
-                EmailAddress = role.SchoolContact.EmailAddress,
+                FirstName = contact.FirstName,
+                LastName = contact.LastName,
+                PhoneNumber = contact.PhoneNumber,
+                EmailAddress = contact.EmailAddress,
                 SchoolCode = role.SchoolCode
             };
 

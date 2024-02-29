@@ -6,6 +6,7 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Models.SchoolContacts.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,13 +28,15 @@ public class AuditModel : BasePageModel
     [ViewData] public string ActivePage => SubjectPages.Teachers;
 
     [BindProperty(SupportsGet = true)]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     public UserAuditDto Audit { get; set; }
 
     public async Task OnGet()
     {
-        Result<UserAuditDto> auditRequest = await _mediator.Send(new VerifySchoolContactAccessQuery(Id));
+        SchoolContactId contactId = SchoolContactId.FromValue(Id);
+
+        Result<UserAuditDto> auditRequest = await _mediator.Send(new VerifySchoolContactAccessQuery(contactId));
 
         if (auditRequest.IsFailure)
         {
@@ -51,7 +54,9 @@ public class AuditModel : BasePageModel
 
     public async Task<IActionResult> OnGetRepair()
     {
-        await _mediator.Send(new RepairSchoolContactUserCommand(Id));
+        SchoolContactId contactId = SchoolContactId.FromValue(Id);
+
+        await _mediator.Send(new RepairSchoolContactUserCommand(contactId));
 
         return RedirectToPage("/SciencePracs/Teachers/Audit", new { area = "Subject" });
     }

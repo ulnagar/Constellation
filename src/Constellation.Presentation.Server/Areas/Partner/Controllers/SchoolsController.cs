@@ -10,6 +10,12 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using Core.Models;
+using Core.Models.Faculty;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Students;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,15 +25,18 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
 public class SchoolsController : Controller
 {
+    private readonly ISchoolContactRepository _contactRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISchoolService _schoolService;
     private readonly IMediator _mediator;
 
     public SchoolsController(
-        IUnitOfWork unitOfWork, 
+        ISchoolContactRepository contactRepository,
+        IUnitOfWork unitOfWork,
         ISchoolService schoolService,
         IMediator mediator)
     {
+        _contactRepository = contactRepository;
         _unitOfWork = unitOfWork;
         _schoolService = schoolService;
         _mediator = mediator;
@@ -187,27 +196,34 @@ public class SchoolsController : Controller
             return RedirectToAction("Index");
         }
 
-        var school = await _unitOfWork.Schools.ForDetailDisplayAsync(id);
+        School school = await _unitOfWork.Schools.ForDetailDisplayAsync(id);
 
         if (school == null)
         {
             return RedirectToAction("Index");
         }
 
-        var contacts = await _unitOfWork.SchoolContacts.ForSelectionAsync();
-        var roles = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
+        List<SchoolContact> contacts = await _contactRepository.GetAll();
+        List<string> roles = await _contactRepository.GetAvailableRoleList();
 
         // Build the master form viewmodel
-        var viewModel = new School_DetailsViewModel();
+        School_DetailsViewModel viewModel = new School_DetailsViewModel();
         viewModel.School = School_DetailsViewModel.SchoolDto.ConvertFromSchool(school);
-        viewModel.Contacts = school.StaffAssignments.Where(role => !role.IsDeleted).Select(School_DetailsViewModel.ContactDto.ConvertFromAssignment).ToList();
+
+        foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => !role.IsDeleted && role.SchoolCode == school.Code)))
+        {
+            foreach (SchoolContactRole assignment in contact.Assignments.Where(role => !role.IsDeleted && role.SchoolCode == school.Code).ToList())
+            {
+                viewModel.Contacts.Add(School_DetailsViewModel.ContactDto.ConvertFromAssignment(contact, assignment));
+            }
+        }
             
-        foreach (var student in school.Students)
+        foreach (Student student in school.Students)
         {
             if (student.IsDeleted)
                 continue;
 
-            var enrolments = await _mediator.Send(new GetStudentEnrolmentsWithDetailsQuery(student.StudentId));
+            Result<List<StudentEnrolmentResponse>> enrolments = await _mediator.Send(new GetStudentEnrolmentsWithDetailsQuery(student.StudentId));
 
             viewModel.Students.Add(new()
             {
@@ -223,13 +239,13 @@ public class SchoolsController : Controller
             });
         }
             
-        foreach (var member in school.Staff.Where(staff => !staff.IsDeleted))
+        foreach (Staff member in school.Staff.Where(staff => !staff.IsDeleted))
         {
             List<string> faculties = new();
 
-            foreach (var membership in member.Faculties.Where(membership => !membership.IsDeleted))
+            foreach (FacultyMembership membership in member.Faculties.Where(membership => !membership.IsDeleted))
             {
-                var facultyRequest = await _mediator.Send(new GetFacultyQuery(membership.FacultyId));
+                Result<FacultyResponse> facultyRequest = await _mediator.Send(new GetFacultyQuery(membership.FacultyId));
 
                 if (facultyRequest.IsSuccess)
                 {
@@ -237,9 +253,9 @@ public class SchoolsController : Controller
                 }
             }
 
-            var courseList = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(member.StaffId));
+            Result<List<TeacherOfferingResponse>> courseList = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(member.StaffId));
 
-            var entry = new School_DetailsViewModel.StaffDto
+            School_DetailsViewModel.StaffDto entry = new School_DetailsViewModel.StaffDto
             {
                 Id = member.StaffId,
                 Name = member.DisplayName,

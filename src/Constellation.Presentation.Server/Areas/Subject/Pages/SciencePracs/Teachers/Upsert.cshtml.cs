@@ -6,6 +6,7 @@ using Constellation.Application.SchoolContacts.GetContactSummary;
 using Constellation.Application.SchoolContacts.UpdateContact;
 using Constellation.Application.Schools.GetSchoolsForSelectionList;
 using Constellation.Application.Schools.Models;
+using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
@@ -31,7 +32,7 @@ public class UpsertModel : BasePageModel
     [ViewData] public string ActivePage => SubjectPages.Teachers;
 
     [BindProperty(SupportsGet = true)]
-    public int? Id { get; set; }
+    public Guid? Id { get; set; }
 
     [BindProperty]
     [Required]
@@ -62,7 +63,9 @@ public class UpsertModel : BasePageModel
     {
         if (Id.HasValue)
         {
-            Result<ContactSummaryResponse> contactRequest = await _mediator.Send(new GetContactSummaryQuery(Id.Value));
+            SchoolContactId contactId = SchoolContactId.FromValue(Id.Value);
+            
+            Result<ContactSummaryResponse> contactRequest = await _mediator.Send(new GetContactSummaryQuery(contactId));
             
             if (contactRequest.IsFailure)
             {
@@ -102,8 +105,10 @@ public class UpsertModel : BasePageModel
 
         if (Id.HasValue)
         {
+            SchoolContactId contactId = SchoolContactId.FromValue(Id.Value);
+            
             Result updateRequest = await _mediator.Send(new UpdateContactCommand(
-                Id.Value,
+                contactId,
                 FirstName,
                 LastName,
                 EmailAddress,
@@ -130,6 +135,7 @@ public class UpsertModel : BasePageModel
             PhoneNumber,
             Role,
             SchoolCode,
+            string.Empty,
             false);
 
         Result createRequest = await _mediator.Send(command);

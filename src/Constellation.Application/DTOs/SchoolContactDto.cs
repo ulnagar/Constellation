@@ -3,9 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Application.DTOs
 {
+    using System;
+
     public class SchoolContactDto
     {
-        public int? Id { get; set; }
+        public Guid? Id { get; set; }
         [Required]
         [Display(Name=DisplayNameDefaults.FirstName)]
         public string FirstName { get; set; } = string.Empty;
@@ -18,10 +20,5 @@ namespace Constellation.Application.DTOs
         [Display(Name = DisplayNameDefaults.PhoneNumber)]
         public string PhoneNumber { get; set; } = string.Empty;
         public bool SelfRegistered { get; set; }
-
-        public SchoolContactDto()
-        {
-            Id = 0;
-        }
     }
 }

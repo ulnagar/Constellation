@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
 {
+    using Core.Models.SchoolContacts.Identifiers;
+
     public class AdminTeachersViewModel : BaseViewModel
     {
         public AdminTeachersViewModel()
@@ -15,8 +17,8 @@ namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
 
         public class TeacherDto
         {
-            public int Id { get; set; }
-            public int RoleId { get; set; }
+            public SchoolContactId Id { get; set; }
+            public SchoolContactRoleId RoleId { get; set; }
             public string FirstName { get; set; }
             public string LastName { get; set; }
             public string EmailAddress { get; set; }
@@ -25,19 +27,19 @@ namespace Constellation.Presentation.Server.Areas.Portal.Models.Lessons
             public string SchoolCode { get; set; }
             public string SchoolName { get; set; }
 
-            public static TeacherDto ConvertFromContactRole(SchoolContactRole role)
+            public static TeacherDto ConvertFromContactRole(SchoolContact contact, SchoolContactRole role)
             {
                 var viewModel = new TeacherDto
                 {
-                    Id = role.SchoolContactId,
+                    Id = contact.Id,
                     RoleId = role.Id,
-                    FirstName = role.SchoolContact.FirstName,
-                    LastName = role.SchoolContact.LastName,
-                    EmailAddress = role.SchoolContact.EmailAddress,
-                    PhoneNumber = role.SchoolContact.PhoneNumber,
-                    SelfRegistered = role.SchoolContact.SelfRegistered,
+                    FirstName = contact.FirstName,
+                    LastName = contact.LastName,
+                    EmailAddress = contact.EmailAddress,
+                    PhoneNumber = contact.PhoneNumber,
+                    SelfRegistered = contact.SelfRegistered,
                     SchoolCode = role.SchoolCode,
-                    SchoolName = role.School.Name
+                    SchoolName = role.SchoolName
                 };
 
                 return viewModel;

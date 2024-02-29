@@ -102,6 +102,7 @@ else
         AuthenticationState authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
         RequestContactRemovalCommand command = new(
+            Contact.ContactId,
             Contact.AssignmentId,
             comment,
             authState.User.Identity.Name,

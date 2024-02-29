@@ -15,26 +15,31 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 {
+    using Core.Models;
+    using Core.Models.SchoolContacts.Identifiers;
+    using Core.Models.SchoolContacts.Repositories;
+    using Core.Shared;
+
     [Area("Partner")]
     [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
     public class SchoolContactsController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
-        private readonly ISchoolContactService _schoolContactService;
+        private readonly ISchoolContactRepository _contactRepository;
         private readonly IOperationService _operationService;
         private readonly IMediator _mediator;
 
         public SchoolContactsController(
             IUnitOfWork unitOfWork, 
             IAuthService authService,
-            ISchoolContactService schoolContactService, 
+            ISchoolContactRepository contactRepository,
             IOperationService operationService,
             IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;
-            _schoolContactService = schoolContactService;
+            _contactRepository = contactRepository;
             _operationService = operationService;
             _mediator = mediator;
         }
@@ -47,92 +52,82 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
 
         public async Task<IActionResult> All()
         {
-            var withRole = await _unitOfWork.SchoolContacts.AllWithActiveRoleAsync();
-            var withoutRole = await _unitOfWork.SchoolContacts.AllWithoutActiveRoleAsync();
+            var contacts = await _contactRepository.GetAll();
+
+            var withRole = contacts.Where(contact => contact.Assignments.Any(role => !role.IsDeleted));
+            var withoutRole = contacts.Where(contact => contact.Assignments.All(role => role.IsDeleted));
 
             var contactList = withoutRole.Select(SchoolStaff_ViewModel.ContactDto.ConvertFromContact).ToList();
             contactList.AddRange(withRole.SelectMany(SchoolStaff_ViewModel.ContactDto.ConvertFromContactWithRole));
 
             var viewModel = new SchoolStaff_ViewModel();
             viewModel.Contacts = contactList.OrderBy(contact => contact.Name).ToList();
-            viewModel.RoleList = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
+            viewModel.RoleList = await _contactRepository.GetAvailableRoleList();
 
             return View("Index", viewModel);
         }
 
-        public async Task<IActionResult> FromGrade(Grade id)
+        public async Task<IActionResult> FromGrade(Grade grade)
         {
-            var withRole = await _unitOfWork.SchoolContactRoles.AllCurrentFromGrade(id);
+            List<SchoolContact> withRole = await _contactRepository.GetByGrade(grade);
 
-            var contactList = withRole.Select(SchoolStaff_ViewModel.ContactDto.ConvertFromAssignment).ToList();
+            List<SchoolStaff_ViewModel.ContactDto> contactList = withRole.SelectMany(SchoolStaff_ViewModel.ContactDto.ConvertFromContactWithRole).ToList();
 
-            var viewModel = new SchoolStaff_ViewModel();
-            viewModel.Contacts = contactList.OrderBy(contact => contact.Name).ToList();
-            viewModel.RoleList = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
+            SchoolStaff_ViewModel viewModel = new()
+            {
+                Contacts = contactList.OrderBy(contact => contact.Name).ToList(), 
+                RoleList = await _contactRepository.GetAvailableRoleList()
+            };
 
             return View("Index", viewModel);
         }
 
         public async Task<IActionResult> WithRole(string role)
         {
-            var withRole = await _unitOfWork.SchoolContactRoles.AllCurrentWithRole(role);
+            List<SchoolContact> withRole = await _contactRepository.GetAllByRole(role);
 
-            var contactList = withRole.Select(SchoolStaff_ViewModel.ContactDto.ConvertFromAssignment).ToList();
+            List<SchoolStaff_ViewModel.ContactDto> contactList = new();
 
-            var viewModel = new SchoolStaff_ViewModel();
-            viewModel.Contacts = contactList.OrderBy(contact => contact.Name).ToList();
-            viewModel.RoleList = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
-
-            return View("Index", viewModel);
-        }
-
-        public async Task<IActionResult> Search(string[] role, int[] grade)
-        {
-            var filteredContacts = new List<SchoolContactRole>();
-
-            foreach (Grade selectedGrade in grade)
+            foreach (SchoolContact contact in withRole)
             {
-                filteredContacts.AddRange(await _unitOfWork.SchoolContactRoles.AllCurrentFromGrade(selectedGrade));
+                contactList.AddRange(contact.Assignments
+                    .Where(assignment => 
+                        !assignment.IsDeleted && 
+                        assignment.Role == role)
+                    .Select(assignment => 
+                        SchoolStaff_ViewModel.ContactDto.ConvertFromAssignment(contact, assignment)));
             }
 
-            if (role != null && filteredContacts.Any())
+            SchoolStaff_ViewModel viewModel = new()
             {
-                filteredContacts = filteredContacts.Where(r => role.Contains(r.Role)).ToList();
-            }
-            else if (role != null)
-            {
-                foreach (var selectedRole in role)
-                {
-                    filteredContacts.AddRange(await _unitOfWork.SchoolContactRoles.AllCurrentWithRole(selectedRole));
-                }
-            }
-
-            var contactList = filteredContacts.Distinct().Select(SchoolStaff_ViewModel.ContactDto.ConvertFromAssignment).ToList();
-
-            var viewModel = new SchoolStaff_ViewModel();
-            viewModel.Contacts = contactList.OrderBy(contact => contact.Name).ToList();
-            viewModel.RoleList = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
-
-            return View("Index", viewModel);
-        }
-
-        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> AddAssignment(int id)
-        {
-            var contact = await _unitOfWork.SchoolContacts.FromIdForExistCheck(id);
-            var roles = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
-
-            var schools = await _unitOfWork.Schools.ForSelectionAsync();
-
-            var viewModel = new Contacts_AssignmentViewModel();
-            viewModel.SchoolList = new SelectList(schools, "Code", "Name");
-            viewModel.ContactRole = new SchoolContactRoleDto
-            {
-                SchoolContactId = id,
-                SchoolContactName = contact.DisplayName
+                Contacts = contactList.OrderBy(contact => contact.Name).ToList(), 
+                RoleList = await _contactRepository.GetAvailableRoleList()
             };
-            viewModel.RoleList = new SelectList(roles);
-            viewModel.ReturnUrl = Request.GetTypedHeaders().Referer.ToString();
+
+            return View("Index", viewModel);
+        }
+        
+        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
+        public async Task<IActionResult> AddAssignment(Guid id)
+        {
+            SchoolContactId contactId = SchoolContactId.FromValue(id);
+
+            SchoolContact contact = await _contactRepository.GetById(contactId);
+            List<string> roles = await _contactRepository.GetAvailableRoleList();
+
+            ICollection<School> schools = await _unitOfWork.Schools.ForSelectionAsync();
+
+            Contacts_AssignmentViewModel viewModel = new()
+            {
+                SchoolList = new(schools, "Code", "Name"), 
+                ContactRole = new()
+                {
+                    SchoolContactId = id,
+                    SchoolContactName = contact.DisplayName
+                },
+                RoleList = new(roles),
+                ReturnUrl = Request.GetTypedHeaders().Referer?.ToString()
+            };
 
             return View(viewModel);
         }
@@ -142,44 +137,49 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> _AddAssignment(Contacts_AssignmentViewModel viewModel)
         {
+            SchoolContactId contactId = SchoolContactId.FromValue(viewModel.ContactRole.SchoolContactId);
+
             await _mediator.Send(new CreateContactRoleAssignmentCommand(
-                viewModel.ContactRole.SchoolContactId,
+                contactId,
                 viewModel.ContactRole.SchoolCode,
-                viewModel.ContactRole.Role));
+                viewModel.ContactRole.Role,
+                string.Empty));
 
             if (viewModel.ReturnUrl == null)
-                return Redirect(Request.GetTypedHeaders().Referer.ToString());
+                return RedirectToAction("All");
             else 
                 return Redirect(viewModel.ReturnUrl);
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Update(int id)
+        public async Task<IActionResult> Update(Guid id)
         {
-            if (id == 0)
+            if (id == default)
             {
                 RedirectToAction("Index");
             }
 
-            var contact = await _unitOfWork.SchoolContacts.ForEditAsync(id);
+            SchoolContactId contactId = SchoolContactId.FromValue(id);
 
-            if (contact == null)
+            SchoolContact contact = await _contactRepository.GetById(contactId);
+
+            if (contact is null)
             {
                 RedirectToAction("Index");
             }
 
-            var viewModel = new SchoolStaff_UpdateViewModel();
-            viewModel.Contact = new SchoolContactDto
-            {
-                Id = id,
-                FirstName = contact.FirstName.Trim(),
-                LastName = contact.LastName.Trim(),
-                EmailAddress = contact.EmailAddress.Trim(),
-                PhoneNumber = (string.IsNullOrWhiteSpace(contact.PhoneNumber) ? string.Empty : contact.PhoneNumber.Trim()),
-                SelfRegistered = contact.SelfRegistered
+            SchoolStaff_UpdateViewModel viewModel = new() { 
+                Contact = new SchoolContactDto
+                {
+                    Id = id,
+                    FirstName = contact.FirstName.Trim(),
+                    LastName = contact.LastName.Trim(),
+                    EmailAddress = contact.EmailAddress.Trim(),
+                    PhoneNumber = (string.IsNullOrWhiteSpace(contact.PhoneNumber) ? string.Empty : contact.PhoneNumber.Trim()),
+                    SelfRegistered = contact.SelfRegistered
+                },
+                IsNew = false
             };
-
-            viewModel.IsNew = false;
 
             return View(viewModel);
         }
@@ -220,33 +220,28 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                         viewModel.Contact.PhoneNumber,
                         viewModel.ContactRole.Role,
                         viewModel.ContactRole.SchoolCode,
+                        string.Empty,
                         false));
                 }
             }
             else
             {
-                var contact = await _unitOfWork.SchoolContacts.ForEditAsync(viewModel.Contact.Id.Value);
+                SchoolContactId contactId = SchoolContactId.FromValue(viewModel.Contact.Id!.Value);
 
-                var checkEmail = contact.EmailAddress;
+                SchoolContact contact = await _contactRepository.GetById(contactId);
 
-                var result = await _schoolContactService.UpdateContact(viewModel.Contact);
+                string checkEmail = contact.EmailAddress;
 
-                if (!result.Success)
+                Result result = contact.Update(
+                    viewModel.Contact.FirstName,
+                    viewModel.Contact.LastName,
+                    viewModel.Contact.EmailAddress,
+                    viewModel.Contact.PhoneNumber);
+
+                if (result.IsFailure)
                 {
                     return View("Update", viewModel);
                 }
-
-                var newUser = new UserTemplateDto
-                {
-                    FirstName = result.Entity.FirstName,
-                    LastName = result.Entity.LastName,
-                    Email = result.Entity.EmailAddress,
-                    Username = result.Entity.EmailAddress,
-                    IsSchoolContact = true,
-                    SchoolContactId = result.Entity.Id
-                };
-
-                await _authService.UpdateUser(checkEmail, newUser);
             }
 
             await _unitOfWork.CompleteAsync();
@@ -257,7 +252,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
         public async Task<IActionResult> Create()
         {
-            var roles = await _unitOfWork.SchoolContactRoles.ListOfRolesForSelectionAsync();
+            var roles = await _contactRepository.GetAvailableRoleList();
             var schools = await _unitOfWork.Schools.ForSelectionAsync();
 
             var viewModel = new SchoolStaff_UpdateViewModel();
@@ -270,38 +265,25 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> DeleteAssignment(int id)
+        public async Task<IActionResult> DeleteAssignment(Guid contactGuid, Guid roleGuid)
         {
-            var role = await _unitOfWork.SchoolContactRoles.WithDetails(id);
+            SchoolContactId contactId = SchoolContactId.FromValue(contactGuid);
+            SchoolContactRoleId roleId = SchoolContactRoleId.FromValue(roleGuid);
 
-            if (role.SchoolContact.Assignments.Count(assign => !assign.IsDeleted) == 1)
-            {
-                // This is the last role. User should be updated to remove "IsSchoolContact" flag.
-                var newUser = new UserTemplateDto
-                {
-                    FirstName = role.SchoolContact.FirstName,
-                    LastName = role.SchoolContact.LastName,
-                    Email = role.SchoolContact.EmailAddress,
-                    Username = role.SchoolContact.EmailAddress,
-                    IsSchoolContact = false
-                };
+            SchoolContact contact = await _contactRepository.GetById(contactId);
+            contact.RemoveRole(roleId);
 
-                await _authService.UpdateUser(role.SchoolContact.EmailAddress, newUser);
-
-                // Also remove user from the MS Teams
-                await _operationService.RemoveContactAddedMSTeamAccess(role.SchoolContactId);
-            }
-
-            await _schoolContactService.RemoveRole(id);
             await _unitOfWork.CompleteAsync();
 
             return Redirect(Request.GetTypedHeaders().Referer.ToString());
         }
 
         [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> RepairUserAccount(int id)
+        public async Task<IActionResult> RepairUserAccount(Guid id)
         {
-            await _authService.RepairSchoolContactUser(id);
+            SchoolContactId contactId = SchoolContactId.FromValue(id);
+
+            await _authService.RepairSchoolContactUser(contactId);
 
             return RedirectToAction("Index");
         }

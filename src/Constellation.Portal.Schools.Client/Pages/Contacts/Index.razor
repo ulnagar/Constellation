@@ -2,6 +2,7 @@
 
 @using Constellation.Application.SchoolContacts.GetContactsWithRoleFromSchool
 @using Constellation.Application.Schools.GetSchoolContactDetails;
+@using Constellation.Core.Models.SchoolContacts.Identifiers
 
 @attribute [Authorize]
 
@@ -150,7 +151,7 @@
         NavigationManager.NavigateTo($"Contacts/Create");
     }
 
-    async Task RemoveContact(int assignmentId)
+    async Task RemoveContact(SchoolContactRoleId assignmentId)
     {
         var contact = Contacts.First(contact => contact.AssignmentId == assignmentId);
 

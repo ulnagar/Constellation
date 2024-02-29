@@ -7,6 +7,7 @@ using Constellation.Application.SchoolContacts.GetContactRolesForSelectionList;
 using Constellation.Application.SchoolContacts.RemoveContactRole;
 using Constellation.Application.Schools.GetSchoolsForSelectionList;
 using Constellation.Core.Models.SchoolContacts;
+using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.AssignRoleModal;
@@ -86,19 +87,24 @@ public class IndexModel : BasePageModel
         return Partial("AssignRoleModal", viewModel);
     }
 
-    public async Task<IActionResult> OnGetDeleteAssignment(int Id)
+    public async Task<IActionResult> OnGetDeleteAssignment(Guid contactGuid, Guid roleGuid)
     {
-        await _mediator.Send(new RemoveContactRoleCommand(Id));
+        SchoolContactId contactId = SchoolContactId.FromValue(contactGuid);
+        SchoolContactRoleId roleId = SchoolContactRoleId.FromValue(roleGuid);
+
+        await _mediator.Send(new RemoveContactRoleCommand(contactId, roleId));
 
         return RedirectToPage("Index", new { area = "Subject" });
     }
 
     public async Task<IActionResult> OnPostCreateAssignment(
-        string SchoolCode,
-        string RoleName,
-        int ContactId)
+        string schoolCode,
+        string roleName,
+        Guid contactGuid)
     {
-        Result request = await _mediator.Send(new CreateContactRoleAssignmentCommand(ContactId, SchoolCode, RoleName));
+        SchoolContactId contactId = SchoolContactId.FromValue(contactGuid);
+        
+        Result request = await _mediator.Send(new CreateContactRoleAssignmentCommand(contactId, schoolCode, roleName, string.Empty));
 
         if (request.IsFailure)
         {

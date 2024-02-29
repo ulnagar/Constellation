@@ -1,8 +1,8 @@
 ﻿@page "/Contacts/Create"
 
-@    using Blazored.FluentValidation
-@    using Constellation.Core.Models
-@    using Constellation.Application.SchoolContacts.CreateContactWithRole
+@using Constellation.Application.SchoolContacts.CreateContactWithRole
+@using Constellation.Core.Models.SchoolContacts
+@using Blazored.FluentValidation
 
 @attribute [Authorize]
 
@@ -158,6 +158,7 @@
                 PhoneNumber,
                 Position,
                 SchoolCode,
+                string.Empty,
                 true);
         }
     }

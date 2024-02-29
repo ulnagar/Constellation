@@ -1,4 +1,4 @@
-﻿@page "{id:int}"
+﻿@page "{id:guid}"
 @model Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Teachers.AuditModel
 
 <h2>Coordinator Access Audit</h2>
@@ -56,7 +56,7 @@
                     <div class="control-label text-only border-bottom">
                         @role.Id<br />
                         @role.Role<br />
-                        @role.School.Name
+                        @role.SchoolName
                     </div>
                 }
             </td>

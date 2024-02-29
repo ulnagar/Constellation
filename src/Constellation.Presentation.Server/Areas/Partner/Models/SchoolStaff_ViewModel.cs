@@ -5,6 +5,8 @@ using System.Linq;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Models
 {
+    using Core.Models.SchoolContacts.Identifiers;
+
     public class SchoolStaff_ViewModel : BaseViewModel
     {
         public SchoolStaff_ViewModel()
@@ -17,8 +19,8 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
 
         public class ContactDto
         {
-            public int Id { get; set; }
-            public int AssignmentId { get; set; }
+            public SchoolContactId Id { get; set; }
+            public SchoolContactRoleId AssignmentId { get; set; }
             public string Name { get;set; }
             public string EmailAddress { get; set; }
             public string PhoneNumber { get; set; }
@@ -30,7 +32,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
                 var viewModel = new ContactDto
                 {
                     Id = contact.Id,
-                    AssignmentId = 0,
+                    AssignmentId = null,
                     Name = contact.DisplayName,
                     EmailAddress = contact.EmailAddress,
                     PhoneNumber = contact.PhoneNumber,
@@ -53,9 +55,9 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
                         AssignmentId = role.Id,
                         Name = contact.DisplayName,
                         EmailAddress = contact.EmailAddress,
-                        PhoneNumber = string.IsNullOrEmpty(contact.PhoneNumber) ? role.School.PhoneNumber : contact.PhoneNumber,
+                        PhoneNumber = contact.PhoneNumber,
                         Role = role.Role,
-                        SchoolName = role.School.Name
+                        SchoolName = role.SchoolName
                     };
 
                     contactList.Add(viewModel);
@@ -64,17 +66,17 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
                 return contactList;
             }
 
-            public static ContactDto ConvertFromAssignment(SchoolContactRole role)
+            public static ContactDto ConvertFromAssignment(SchoolContact contact, SchoolContactRole role)
             {
                 var viewModel = new ContactDto
                 {
-                    Id = role.SchoolContact.Id,
+                    Id = contact.Id,
                     AssignmentId = role.Id,
-                    Name = role.SchoolContact.DisplayName,
-                    EmailAddress = role.SchoolContact.EmailAddress,
-                    PhoneNumber = string.IsNullOrEmpty(role.SchoolContact.PhoneNumber) ? role.School.PhoneNumber : role.SchoolContact.PhoneNumber,
+                    Name = contact.DisplayName,
+                    EmailAddress = contact.EmailAddress,
+                    PhoneNumber = contact.PhoneNumber,
                     Role = role.Role,
-                    SchoolName = role.School.Name
+                    SchoolName = role.SchoolName
                 };
 
                 return viewModel;
