@@ -19,6 +19,8 @@ using Core.Models.Faculty;
 using Core.Models.Faculty.Identifiers;
 using Core.Models.Faculty.Repositories;
 using Core.Models.Faculty.ValueObjects;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -33,6 +35,7 @@ public class StaffController : Controller
     private readonly IStaffService _staffService;
     private readonly IOperationService _operationsService;
     private readonly IFacultyRepository _facultyRepository;
+    private readonly ISchoolContactRepository _contactRepository;
     private readonly IMediator _mediator;
 
     public StaffController(IUnitOfWork unitOfWork,
@@ -40,6 +43,7 @@ public class StaffController : Controller
         IStaffService staffService, 
         IOperationService operationsService,
         IFacultyRepository facultyRepository,
+        ISchoolContactRepository contactRepository,
         IMediator mediator)
     {
         _unitOfWork = unitOfWork;
@@ -47,6 +51,7 @@ public class StaffController : Controller
         _staffService = staffService;
         _operationsService = operationsService;
         _facultyRepository = facultyRepository;
+        _contactRepository = contactRepository;
         _mediator = mediator;
     }
 
@@ -195,12 +200,21 @@ public class StaffController : Controller
             });
         }
 
+        List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(staff.SchoolCode);
+
         // Build the master form view model
         Staff_DetailsViewModel viewModel = new Staff_DetailsViewModel();
         viewModel.Staff = Staff_DetailsViewModel.StaffDto.ConvertFromStaff(staff);
         viewModel.Offerings = offeringResponse;
         viewModel.Sessions = sessionResponse;
-        viewModel.SchoolStaff = staff.School.StaffAssignments.Where(role => !role.IsDeleted).Select(Staff_DetailsViewModel.ContactDto.ConvertFromRoleAssignment).ToList();
+
+        foreach (SchoolContact contact in contacts)
+        {
+            foreach (SchoolContactRole assignment in contact.Assignments.Where(role => !role.IsDeleted && role.SchoolCode == staff.SchoolCode).ToList())
+            {
+                viewModel.SchoolStaff.Add(Staff_DetailsViewModel.ContactDto.ConvertFromRoleAssignment(contact, assignment));
+            }
+        }
 
         foreach (FacultyMembership membership in staff.Faculties)
         {

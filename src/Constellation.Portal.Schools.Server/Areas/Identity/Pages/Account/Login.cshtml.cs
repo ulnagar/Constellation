@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Portal.Schools.Server.Areas.Identity.Pages.Account;
 
+using Application.SchoolContacts.CreateContactFromActiveDirectory;
 using Application.Users.RepairSchoolContactUser;
 using Constellation.Application.Exceptions;
 using Constellation.Application.Features.Auth.Command;
@@ -127,7 +128,7 @@ public class LoginModel : PageModel
                         .Warning(" - Found valid linked school in AD Records for user {user}", Input.Email);
 
                     // Send to registration
-                    await _mediator.Send(new CreateContactFromActiveDirectoryCommand { EmailAddress = Input.Email });
+                    await _mediator.Send(new CreateContactFromActiveDirectoryCommand(Input.Email));
                     user = await _userManager.FindByEmailAsync(Input.Email);
 
                     _logger

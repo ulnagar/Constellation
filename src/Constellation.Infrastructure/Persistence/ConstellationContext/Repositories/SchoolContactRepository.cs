@@ -1,6 +1,9 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Application.Features.API.Schools.Queries;
+using Constellation.Core.Enums;
 using Constellation.Core.Models.SchoolContacts;
+using Core.Models;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +18,12 @@ public class SchoolContactRepository : ISchoolContactRepository
     }
 
     public void Insert(SchoolContact contact) => _context.Set<SchoolContact>().Add(contact);
+
+    public async Task<List<SchoolContact>> GetAll(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SchoolContact>()
+            .ToListAsync(cancellationToken);
 
     public async Task<SchoolContact?> GetById(
         SchoolContactId contactId, 
@@ -52,6 +61,28 @@ public class SchoolContactRepository : ISchoolContactRepository
             .Include(contact => contact.Assignments.Where(role => !role.IsDeleted))
             .Where(contact => contact.Assignments.Any(role => !role.IsDeleted && role.SchoolCode == schoolCode))
             .ToListAsync(cancellationToken);
+
+    public async Task<List<SchoolContact>> GetByGrade(
+        Grade grade,
+        CancellationToken cancellationToken = default)
+    {
+        List<string> schoolCodes = await _context
+            .Set<School>()
+            .Where(school =>
+                school.Students
+                    .Any(student =>
+                        !student.IsDeleted &&
+                        student.CurrentGrade == grade))
+            .Select(school => school.Code)
+            .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<SchoolContact>()
+            .Where(contact => contact.Assignments.Any(role =>
+                !role.IsDeleted &&
+                schoolCodes.Contains(role.SchoolCode)))
+            .ToListAsync(cancellationToken);
+    }
 
     public async Task<List<SchoolContact>> GetBySchoolAndRole(
         string schoolCode,

@@ -2,10 +2,12 @@
 
 namespace Constellation.Presentation.Server.Areas.Partner.Models
 {
+    using Core.Models.SchoolContacts.Identifiers;
+
     public class SchoolStaff_WithRoleViewModel
     {
-        public int Id { get; set; }
-        public int AssignmentId { get; set; }
+        public SchoolContactId Id { get; set; }
+        public SchoolContactRoleId AssignmentId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Name => FirstName + " " + LastName;
@@ -35,22 +37,19 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
             return viewModel;
         }
 
-        public static SchoolStaff_WithRoleViewModel ConvertFromAssignment(SchoolContactRole assignment)
+        public static SchoolStaff_WithRoleViewModel ConvertFromAssignment(SchoolContact contact, SchoolContactRole assignment)
         {
-            var staffPhone = !string.IsNullOrEmpty(assignment.SchoolContact.PhoneNumber);
-
             var viewModel = new SchoolStaff_WithRoleViewModel
             {
-                Id = assignment.SchoolContact.Id,
+                Id = contact.Id,
                 AssignmentId = assignment.Id,
-                FirstName = assignment.SchoolContact.FirstName,
-                LastName = assignment.SchoolContact.LastName,
-                PhoneNumber = staffPhone ? assignment.SchoolContact.PhoneNumber : assignment.School.PhoneNumber,
-                StaffPhone = staffPhone,
-                EmailAddress = assignment.SchoolContact.EmailAddress,
+                FirstName = contact.FirstName,
+                LastName = contact.LastName,
+                PhoneNumber = contact.PhoneNumber,
+                EmailAddress = contact.EmailAddress,
                 Role = assignment.Role,
-                SchoolCode = assignment.School.Code,
-                SchoolName = assignment.School.Name
+                SchoolCode = assignment.SchoolCode,
+                SchoolName = assignment.SchoolName
             };
 
             return viewModel;

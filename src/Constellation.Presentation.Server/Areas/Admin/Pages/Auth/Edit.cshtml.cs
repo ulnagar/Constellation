@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Models.SchoolContacts.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -39,7 +40,7 @@ public class EditModel : BasePageModel
     public bool IsSchoolContact { get; set; }
 
     [BindProperty]
-    public int SchoolContactId { get; set; }
+    public SchoolContactId SchoolContactId { get; set; }
 
     [BindProperty]
     public bool IsParent { get; set; }

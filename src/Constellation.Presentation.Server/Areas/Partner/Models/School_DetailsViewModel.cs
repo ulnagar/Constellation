@@ -7,6 +7,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Constellation.Presentation.Server.Areas.Partner.Models
 {
+    using Core.Models.SchoolContacts.Identifiers;
+
     public class School_DetailsViewModel : BaseViewModel
     {
         public School_DetailsViewModel()
@@ -82,7 +84,8 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
 
         public class ContactDto
         {
-            public int RoleId { get; set; }
+            public SchoolContactId ContactId { get; set; }
+            public SchoolContactRoleId RoleId { get; set; }
             public string Name { get; set; }
             [Display(Name=DisplayNameDefaults.EmailAddress)]
             public string EmailAddress { get; set; }
@@ -90,14 +93,15 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
             public string PhoneNumber { get; set; }
             public string Role { get; set; }
 
-            public static ContactDto ConvertFromAssignment(SchoolContactRole role)
+            public static ContactDto ConvertFromAssignment(SchoolContact contact, SchoolContactRole role)
             {
                 var viewModel = new ContactDto
                 {
+                    ContactId = contact.Id,
                     RoleId = role.Id,
-                    Name = role.SchoolContact.DisplayName,
-                    EmailAddress = role.SchoolContact.EmailAddress,
-                    PhoneNumber = role.SchoolContact.PhoneNumber,
+                    Name = contact.DisplayName,
+                    EmailAddress = contact.EmailAddress,
+                    PhoneNumber = contact.PhoneNumber,
                     Role = role.Role
                 };
 

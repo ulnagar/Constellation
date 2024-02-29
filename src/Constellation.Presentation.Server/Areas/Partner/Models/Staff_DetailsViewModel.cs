@@ -9,6 +9,7 @@ using Constellation.Presentation.Server.Pages.Shared.Components.TeacherAddFacult
 using Core.Models.Faculty.Identifiers;
 using Core.Models.Faculty.ValueObjects;
 using Core.Models.Offerings.ValueObjects;
+using Core.Models.SchoolContacts.Identifiers;
 using System.ComponentModel.DataAnnotations;
 
 public class Staff_DetailsViewModel : BaseViewModel
@@ -79,7 +80,8 @@ public class Staff_DetailsViewModel : BaseViewModel
 
     public class ContactDto
     {
-        public int Id { get; set; }
+        public SchoolContactId ContactId { get; set; }
+        public SchoolContactRoleId RoleId { get; set; }
         public string Name { get; set; }
         [Display(Name = DisplayNameDefaults.EmailAddress)]
         public string EmailAddress { get; set; }
@@ -87,19 +89,16 @@ public class Staff_DetailsViewModel : BaseViewModel
         public string PhoneNumber { get; set; }
         public string Role { get; set; }
 
-        public static ContactDto ConvertFromRoleAssignment(SchoolContactRole role)
-        {
-            var viewModel = new ContactDto
+        public static ContactDto ConvertFromRoleAssignment(SchoolContact contact, SchoolContactRole role) =>
+            new()
             {
-                Id = role.Id,
-                Name = role.SchoolContact.DisplayName,
-                EmailAddress = role.SchoolContact.EmailAddress,
-                PhoneNumber = string.IsNullOrWhiteSpace(role.SchoolContact.PhoneNumber) ? role.School.PhoneNumber : role.SchoolContact.PhoneNumber,
+                ContactId = contact.Id,
+                RoleId = role.Id,
+                Name = contact.DisplayName,
+                EmailAddress = contact.EmailAddress,
+                PhoneNumber = contact.PhoneNumber,
                 Role = role.Role
             };
-
-            return viewModel;
-        }
     }
 
     public sealed record FacultyDto(

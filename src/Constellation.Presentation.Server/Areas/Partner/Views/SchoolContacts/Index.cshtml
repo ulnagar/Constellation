@@ -1,7 +1,7 @@
-﻿@using Constellation.Application.Helpers
+﻿@model SchoolStaff_ViewModel
+
 @using Constellation.Application.Models.Auth
 @using Constellation.Core.Enums
-@model SchoolStaff_ViewModel
 
 @{
     var authorised = (User.IsInRole(AuthRoles.Editor) || User.IsInRole(AuthRoles.Admin));
@@ -39,14 +39,6 @@
         </div>
     </div>
 
-    <div class="btn-group" role="group">
-        <button type="button" class="btn btn-secondary" id="custom-search-toggle">Custom Search</button>
-    </div>
-
-    <div class="btn-group" role="group">
-        <button type="button" class="btn btn-warning" onclick="getEmailAddresses()">Copy Contact Emails</button>
-    </div>
-
     @if (authorised)
     {
         <div class="btn-group" role="group">
@@ -55,59 +47,9 @@
     }
 </div>
 
-<div class="row" id="custom-search-box">
-    <div class="col-md-10">
-        <div class="row">
-            <div class="col-md-8"><span class="menu-heading">Grade</span></div>
-            <div class="col-md-4"><span class="menu-heading">Role</span></div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                @{
-                    foreach (Grade grade in grades)
-                    {
-                        if ((int)grade <= 8)
-                        {
-                            <input type="checkbox" value="@((int) grade)" name="grade" />
-                            @grade.GetDisplayName()
-                            <br />
-                        }
-                    }
-                }
-            </div>
-            <div class="col-md-4">
-                @{
-                    foreach (Grade grade in grades)
-                    {
-                        if ((int)grade > 8 && (int)grade <= 12)
-                        {
-                            <input type="checkbox" value="@((int) grade)" name="grade" />
-                            @grade.GetDisplayName()
-                            <br />
-                        }
-                    }
-                }
-            </div>
-            <div class="col-md-4">
-                @{
-                    foreach (var role in Model.RoleList)
-                    {
-                        <input type="checkbox" value="@role" name="role" />
-                        @role
-                        <br />
-                    }
-                }
-            </div>
-        </div>
-    </div>
-    <div class="col-md-2">
-        <button type="button" class="btn btn-success" id="custom-search-button">Search!</button>
-    </div>
-</div>
-
 <hr />
 
-<table class="table-striped table-hover interactive-table">
+<table class="table-striped table-hover data-table">
     <thead>
         <tr>
             <th>Name</th>
@@ -133,11 +75,11 @@
                         <div class="btn-group" role="group">
                             <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
                             <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                <a asp-action="Update" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.Id" class="dropdown-item">Edit Contact</a>
-                                <a asp-action="AddAssignment" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.Id" class="dropdown-item">Add Role</a>
+                                <a asp-action="Update" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.Id.Value" class="dropdown-item">Edit Contact</a>
+                                <a asp-action="AddAssignment" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.Id.Value" class="dropdown-item">Add Role</a>
                                 @if (!string.IsNullOrEmpty(item.Role))
                                 {
-                                    <a asp-action="DeleteAssignment" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.AssignmentId" class="dropdown-item">Remove Role</a>
+                                    <a asp-action="DeleteAssignment" asp-controller="SchoolContacts" asp-area="Partner" asp-route-contactGuid="@item.Id.Value" asp-route-roleGuid="@item.AssignmentId.Value" class="dropdown-item">Remove Role</a>
                                 }
                                 <div class="dropdown-divider"></div>
                                 <a asp-action="RepairUserAccount" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.Id" class="dropdown-item">Repair Account</a>
@@ -150,71 +92,3 @@
     </tbody>
 </table>
 
-@section scripts
-{
-    <script>
-        var table;
-
-        $(document)
-            .ready(function() {
-                table = $('.interactive-table').DataTable({
-                    "order": []
-                });
-
-                $('#custom-search-box').hide();
-            });
-
-        function getEmailAddresses() {
-            var email = '';
-
-            table.column(1, { search: 'applied' }).data().each(function (value, index) {
-                email += '; ' + value.replace(/<.*?>/ig, "");
-            });
-
-            var arr = email.split(';');
-            arr = arr.filter((item, index) => arr.indexOf(item) === index);
-            email = arr.join(";");
-
-            if (email.length > 2048) {
-                console.log("This string is too long!");
-
-                var dummy = document.createElement("textarea");
-                document.body.appendChild(dummy);
-                dummy.textContent = email;
-                dummy.select();
-                document.execCommand("copy");
-                document.body.removeChild(dummy);
-
-                var dummyModal = $(makeModal('<p>The email addresses of all contacts in the table displayed below have been copied to your clipboard.</p><p>Please paste (with Ctrl+V) into your email client <strong>BCC field</strong> now.</p>'));
-                dummyModal.modal('show');
-            }
-            else {
-                window.location = 'mailto:?bcc=' + email;
-            }
-        }
-
-        $('#custom-search-toggle').click(function() {
-            $('#custom-search-box').toggle();
-        });
-
-        $('#custom-search-button').click(function() {
-            var searchParam = "?search=custom";
-
-            $('input:checkbox[name="grade"]').each(function() {
-                if ($(this).prop('checked')) {
-                    searchParam += "&grade=" + $(this).attr('value');
-                }
-            });
-
-            $('input:checkbox[name="role"]').each(function() {
-                if ($(this).prop('checked')) {
-                    searchParam += "&role=" + $(this).attr('value');
-                }
-            });
-
-            var searchUrl = "@Url.Action("Search")";
-
-            window.location.href = searchUrl + searchParam;
-        });
-    </script>
-}

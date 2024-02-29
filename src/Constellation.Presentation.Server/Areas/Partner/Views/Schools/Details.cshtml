@@ -196,7 +196,7 @@
                         <td>
                             @if (authorised)
                             {
-                                <a asp-action="DeleteAssignment" asp-controller="SchoolContacts" asp-area="Partner" asp-route-id="@item.RoleId" class="btn btn-sm btn-warning btn-show-hover">Remove</a>
+                                <a asp-action="DeleteAssignment" asp-controller="SchoolContacts" asp-area="Partner" asp-route-contactGuid="@item.ContactId.Value" asp-route-roleGuid="@item.RoleId.Value" class="btn btn-sm btn-warning btn-show-hover">Remove</a>
                             }
                         </td>
                     </tr>
