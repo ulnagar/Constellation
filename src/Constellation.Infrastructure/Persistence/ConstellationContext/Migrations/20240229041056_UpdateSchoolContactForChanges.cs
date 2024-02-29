@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
+    using Microsoft.EntityFrameworkCore.Metadata.Internal;
+
     /// <inheritdoc />
     public partial class UpdateSchoolContactForChanges : Migration
     {
@@ -26,7 +28,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
             migrationBuilder.DropForeignKey(
                 name: "FK_SchoolContactRole_SchoolContact_SchoolContactId",
                 table: "SchoolContactRole");
-            
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_SchoolContactRole_Schools_SchoolCode",
+                table: "SchoolContactRole");
+
             // Update entries that Fiona marked with her email (377 entries)
             migrationBuilder.Sql(@"
                 UPDATE SciencePracs_Rolls
@@ -95,6 +101,28 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
             migrationBuilder.DropColumn(
                 name: "OldVerifierId",
                 table: "PartialAbsenceResponses");
+
+            // Update SchoolContactRole
+            migrationBuilder.RenameColumn(
+                name: "SchoolContactId",
+                table: "SchoolContactRole",
+                newName: "OldSchoolContactId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "SchoolContactId",
+                table: "SchoolContactRole",
+                type: "uniqueidentifier",
+                nullable: true);
+
+            migrationBuilder.Sql(@"
+                UPDATE SchoolContactRole 
+                SET SchoolContactId = C.Id
+                FROM SchoolContactRole R 
+                    JOIN SchoolContact C on R.OldContactId = C.OldId");
+
+            migrationBuilder.DropColumn(
+                name: "OldSchoolContactId",
+                table: "SchoolContactRole");
 
             // Update MSTeamOperations
             migrationBuilder.RenameColumn(
@@ -169,64 +197,161 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     JOIN SchoolContact C on U.OldSchoolContactId = C.OldId");
 
             //TODO: Modify table creation code to instead alter existing table. Perhaps move to top.
+            migrationBuilder.RenameColumn(
+                name: "DateEntered",
+                table: "SchoolContact",
+                newName: "CreatedAt");
 
-            migrationBuilder.CreateTable(
-                name: "SchoolContacts_Contacts",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EmailAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SelfRegistered = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SchoolContacts_Contacts", x => x.Id);
-                });
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "CreatedAt",
+                table: "SchoolContact",
+                nullable: false);
+                //defaultValue: DateTime.MinValue);
 
-            migrationBuilder.CreateTable(
-                name: "SchoolContacts_Roles",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SchoolContactId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SchoolCode = table.Column<string>(type: "nvarchar(4)", nullable: true),
-                    SchoolName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SchoolContacts_Roles", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SchoolContacts_Roles_SchoolContacts_Contacts_SchoolContactId",
-                        column: x => x.SchoolContactId,
-                        principalTable: "SchoolContacts_Contacts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SchoolContacts_Roles_Schools_SchoolCode",
-                        column: x => x.SchoolCode,
-                        principalTable: "Schools",
-                        principalColumn: "Code",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.RenameColumn(
+                name: "DateDeleted",
+                table: "SchoolContact",
+                newName: "DeletedAt");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "DeletedAt",
+                table: "SchoolContact",
+                nullable: false);
+                //defaultValue: DateTime.MinValue);
+
+            migrationBuilder.AddColumn<string>(
+                name: "CreatedBy",
+                table: "SchoolContact",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "ModifiedBy",
+                table: "SchoolContact",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "ModifiedAt",
+                table: "SchoolContact",
+                type: "datetime2",
+                nullable: false);
+                //defaultValue: DateTime.MinValue);
+
+            migrationBuilder.AddColumn<string>(
+                name: "DeletedBy",
+                table: "SchoolContact",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.RenameTable(
+                name: "SchoolContact",
+                newName: "SchoolContacts_Contacts");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_SchoolContacts_Contacts",
+                table: "SchoolContacts_Contacts",
+                column: "Id");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_SchoolContactRole",
+                table: "SchoolContactRole");
+
+            migrationBuilder.RenameColumn(
+                name: "Id",
+                table: "SchoolContactRole",
+                newName: "OldId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "Id",
+                table: "SchoolContactRole",
+                type: "uniqueidentifier",
+                nullable: false,
+                defaultValueSql: "NEWID()");
+
+            migrationBuilder.AddColumn<string>(
+                name: "SchoolName",
+                table: "SchoolContactRole",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "Note",
+                table: "SchoolContactRole",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "CreatedBy",
+                table: "SchoolContactRole",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.RenameColumn(
+                name: "DateEntered",
+                table: "SchoolContactRole",
+                newName: "CreatedAt");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "CreatedAt",
+                table: "SchoolContactRole",
+                type: "datetime2",
+                nullable: false);
+            // defaultValue: DateTime.MinValue);
+
+            migrationBuilder.AddColumn<string>(
+                name: "ModifiedBy",
+                table: "SchoolContactRole",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "ModifiedAt",
+                table: "SchoolContactRole",
+                type: "datetime2",
+                nullable: false);
+
+            migrationBuilder.AddColumn<string>(
+                name: "DeletedBy",
+                table: "SchoolContactRole",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.RenameColumn(
+                name: "DateDeleted",
+                table: "SchoolContactRole",
+                newName: "DeletedAt");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "DeletedAt",
+                table: "SchoolContactRole",
+                type: "datetime2",
+                nullable: false);
+
+            migrationBuilder.RenameTable(
+                name: "SchoolContactRole",
+                newName: "SchoolContacts_Roles");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_SchoolContacts_Roles",
+                table: "SchoolContacts_Roles",
+                column: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_SchoolContacts_Roles_SchoolContacts_Contacts_SchoolContactId",
+                table: "SchoolContacts_Roles",
+                column: "SchoolContactId",
+                principalTable: "SchoolContacts_Contacts",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_SchoolContacts_Roles_Schools_SchoolCode",
+                table: "SchoolContacts_Roles",
+                column: "SchoolCode",
+                principalTable: "Schools",
+                principalColumn: "Code",
+                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.CreateIndex(
                 name: "IX_SchoolContacts_Roles_SchoolCode",
