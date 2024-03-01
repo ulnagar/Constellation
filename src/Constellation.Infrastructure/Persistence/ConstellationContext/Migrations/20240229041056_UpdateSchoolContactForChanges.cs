@@ -13,6 +13,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropIndex(
+                name: "IX_PartialAbsenceResponses_VerifierId",
+                table: "PartialAbsenceResponses");
+
+            migrationBuilder.DropIndex(
+                name: "IX_SchoolContactRole_SchoolContactId",
+                table: "SchoolContactRole");
+
             migrationBuilder.DropForeignKey(
                 name: "FK_MSTeamOperations_SchoolContact_ContactId",
                 table: "MSTeamOperations");
@@ -118,7 +126,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 UPDATE SchoolContactRole 
                 SET SchoolContactId = C.Id
                 FROM SchoolContactRole R 
-                    JOIN SchoolContact C on R.OldContactId = C.OldId");
+                    JOIN SchoolContact C on R.OldSchoolContactId = C.OldId");
 
             migrationBuilder.DropColumn(
                 name: "OldSchoolContactId",
@@ -143,6 +151,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     JOIN SchoolContact C on O.OldContactId = C.OldId");
 
             // Update User Tables
+            migrationBuilder.DropPrimaryKey(
+                "PK_AspNetUserTokens",
+                table: "AspNetUserTokens");
+
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
                 table: "AspNetUserTokens",
@@ -160,6 +172,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(450)");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_AspNetUserTokens",
+                table: "AspNetUserTokens",
+                columns: new String[] { "UserId", "LoginProvider", "Name " });
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_AspNetUserLogins",
+                table: "AspNetUserLogins");
 
             migrationBuilder.AlterColumn<string>(
                 name: "ProviderKey",
@@ -179,6 +200,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 oldClrType: typeof(string),
                 oldType: "nvarchar(450)");
 
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_AspNetUserLogins",
+                table: "AspNetUserLogins",
+                columns: new string[] { "LoginProvider", "ProviderKey" });
+
             migrationBuilder.RenameColumn(
                 name: "SchoolContactId",
                 table: "AspNetUsers",
@@ -196,7 +222,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 FROM AspNetUsers U 
                     JOIN SchoolContact C on U.OldSchoolContactId = C.OldId");
 
-            //TODO: Modify table creation code to instead alter existing table. Perhaps move to top.
+            //Modify SchoolContacts table
+            migrationBuilder.DropColumn(
+                name: "OldId",
+                table: "SchoolContact");
+
             migrationBuilder.RenameColumn(
                 name: "DateEntered",
                 table: "SchoolContact",
@@ -206,7 +236,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "CreatedAt",
                 table: "SchoolContact",
                 nullable: false);
-                //defaultValue: DateTime.MinValue);
+
+            migrationBuilder.Sql(@"
+                UPDATE SchoolContact
+                SET
+                    DateDeleted = CAST('0001-01-01' as datetime2)
+                WHERE DateDeleted is null");
 
             migrationBuilder.RenameColumn(
                 name: "DateDeleted",
@@ -217,7 +252,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "DeletedAt",
                 table: "SchoolContact",
                 nullable: false);
-                //defaultValue: DateTime.MinValue);
 
             migrationBuilder.AddColumn<string>(
                 name: "CreatedBy",
@@ -235,8 +269,19 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "ModifiedAt",
                 table: "SchoolContact",
                 type: "datetime2",
+                nullable: true);
+
+            migrationBuilder.Sql(@"
+                UPDATE SchoolContact
+                SET
+                    ModifiedAt = CAST('0001-01-01' as datetime2)
+                WHERE ModifiedAt is null");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "ModifiedAt",
+                table: "SchoolContact",
+                type: "datetime2",
                 nullable: false);
-                //defaultValue: DateTime.MinValue);
 
             migrationBuilder.AddColumn<string>(
                 name: "DeletedBy",
@@ -303,7 +348,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 table: "SchoolContactRole",
                 type: "datetime2",
                 nullable: false);
-            // defaultValue: DateTime.MinValue);
 
             migrationBuilder.AddColumn<string>(
                 name: "ModifiedBy",
@@ -315,6 +359,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "ModifiedAt",
                 table: "SchoolContactRole",
                 type: "datetime2",
+                nullable: true);
+
+            migrationBuilder.Sql(@"
+                UPDATE SchoolContactRole
+                SET
+                    ModifiedAt = CAST('0001-01-01' as datetime2)
+                WHERE ModifiedAt is null");
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "ModifiedAt",
+                table: "SchoolContactRole",
+                type: "datetime2",
                 nullable: false);
 
             migrationBuilder.AddColumn<string>(
@@ -322,6 +378,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 table: "SchoolContactRole",
                 type: "nvarchar(max)",
                 nullable: true);
+
+            migrationBuilder.Sql(@"
+                UPDATE SchoolContactRole
+                SET
+                    DateDeleted = CAST('0001-01-01' as datetime2)
+                WHERE DateDeleted is null");
 
             migrationBuilder.RenameColumn(
                 name: "DateDeleted",
@@ -333,6 +395,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 table: "SchoolContactRole",
                 type: "datetime2",
                 nullable: false);
+
+            migrationBuilder.DropColumn(
+                name: "OldId",
+                table: "SchoolContactRole");
 
             migrationBuilder.RenameTable(
                 name: "SchoolContactRole",
@@ -368,6 +434,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "IX_SchoolContacts_Roles_SchoolContactId",
                 table: "SchoolContacts_Roles",
                 column: "SchoolContactId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PartialAbsenceResponses_VerifierId",
+                table: "PartialAbsenceResponses",
+                column: "VerifierId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_MSTeamOperations_SchoolContacts_Contacts_ContactId",

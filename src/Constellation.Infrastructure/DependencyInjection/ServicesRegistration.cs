@@ -38,9 +38,11 @@ public static class ServicesRegistration
 
         // Add Mediatr
 
-        services.AddMediatR(new[] {
+        services.AddMediatR(new[]
+        {
             Constellation.Application.AssemblyReference.Assembly,
-            Constellation.Core.AssemblyReference.Assembly });
+            Constellation.Core.AssemblyReference.Assembly
+        });
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(BusinessValidationBehaviour<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));
@@ -64,6 +66,7 @@ public static class ServicesRegistration
                     {
                         b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
                         b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                        b.CommandTimeout(120); // Increased command timeout to allow migrations to complete. May not be necessary after Term 1 2024.
                     });
 
                 options.EnableSensitiveDataLogging(true);
@@ -90,10 +93,10 @@ public static class ServicesRegistration
 
         // Add Hangfire Services
 
-        services.Scan(selector =>
-            selector
-                .FromAssemblies(Constellation.Application.AssemblyReference.Assembly)
-                .RegisterHandlers(typeof(INotificationHandler<>)));
+        //services.Scan(selector =>
+        //    selector
+        //        .FromAssemblies(Constellation.Application.AssemblyReference.Assembly)
+        //        .RegisterHandlers(typeof(INotificationHandler<>)));
 
         services.Decorate(typeof(INotificationHandler<>), typeof(IdempotentDomainEventHandler<>));
 
