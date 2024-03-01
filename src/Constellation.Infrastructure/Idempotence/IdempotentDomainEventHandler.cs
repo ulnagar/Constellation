@@ -14,7 +14,7 @@ public sealed class IdempotentDomainEventHandler<TDomainEvent> : IDomainEventHan
     private readonly ILogger _logger;
     private readonly AppDbContext _dbContext;
 
-    public IdempotentDomainEventHandler(AppDbContext dbContext, INotificationHandler<TDomainEvent> decorated, Serilog.ILogger logger)
+    public IdempotentDomainEventHandler(AppDbContext dbContext, INotificationHandler<TDomainEvent> decorated, ILogger logger)
     {
         _dbContext = dbContext;
         _decorated = decorated;
@@ -25,8 +25,6 @@ public sealed class IdempotentDomainEventHandler<TDomainEvent> : IDomainEventHan
     {
         string consumer = _decorated.GetType().Name;
 
-        _logger.Information("{ID} PROCESSING: {@notification} WITH: {consumer}", notification.Id, notification, consumer);
-
         if (await _dbContext.Set<OutboxMessageConsumer>()
                 .AnyAsync(
                     outboxMessageConsumer =>
@@ -34,17 +32,17 @@ public sealed class IdempotentDomainEventHandler<TDomainEvent> : IDomainEventHan
                         outboxMessageConsumer.Name == consumer,
                     cancellationToken))
         {
-            _logger.Information("{ID} SKIPPED: {@notification} WITH: Already marked completed in database", notification.Id, notification);
+            _logger
+                .ForContext("Notification", notification.GetType().Name)
+                .ForContext("Notification Id", notification.Id, true)
+                .ForContext("Consumer", _decorated.GetType())
+                .Information("SKIPPED: {notification_type} WITH: Already marked completed in database", notification.GetType().Name);
 
             return;
         }
 
-        _logger.Information("{ID} ATTEMPTING: {@notification}", notification.Id, notification);
-
         await _decorated.Handle(notification, cancellationToken);
-
-        _logger.Information("{ID} FINISHED: {@notification}", notification.Id, notification);
-
+        
         _dbContext.Set<OutboxMessageConsumer>()
             .Add(new OutboxMessageConsumer
             {
