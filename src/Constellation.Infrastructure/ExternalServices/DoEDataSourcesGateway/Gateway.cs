@@ -1,4 +1,4 @@
-﻿namespace Constellation.Infrastructure.ExternalServices.CESE;
+﻿namespace Constellation.Infrastructure.ExternalServices.DoEDataSourcesGateway;
 
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Gateways;
@@ -33,12 +33,12 @@ internal class Gateway : IDoEDataSourcesGateway
             return;
         }
 
-        var config = new HttpClientHandler
+        HttpClientHandler config = new HttpClientHandler
         {
             CookieContainer = new CookieContainer()
         };
 
-        var proxy = WebRequest.DefaultWebProxy;
+        IWebProxy proxy = WebRequest.DefaultWebProxy;
         config.UseProxy = true;
         config.Proxy = proxy;
 
@@ -55,18 +55,18 @@ internal class Gateway : IDoEDataSourcesGateway
             return new List<CeseSchoolResponse>();
         }
 
-        var response = await _client.GetAsync(_configuration.CESEDataPath);
+        HttpResponseMessage response = await _client.GetAsync(_configuration.CESEDataPath);
 
-        var json = await response.Content.ReadAsStringAsync();
+        string json = await response.Content.ReadAsStringAsync();
 
         if (string.IsNullOrWhiteSpace(json))
             return new List<CeseSchoolResponse>();
 
         try
         {
-            var results = JsonSerializer.Deserialize<List<CeseSchoolResponse>>(json);
+            List<CeseSchoolResponse> results = JsonSerializer.Deserialize<List<CeseSchoolResponse>>(json);
 
-            var newResults = results.Where(entry =>
+            List<CeseSchoolResponse> newResults = results.Where(entry =>
                     entry.GetType().GetProperties()
                         .Where(pi => pi.PropertyType == typeof(string))
                         .Select(pi => (string)pi.GetValue(entry))
@@ -92,29 +92,29 @@ internal class Gateway : IDoEDataSourcesGateway
             return new List<DataCollectionsSchoolResponse>();
         }
 
-        var response = await _client.GetAsync(_configuration.DataCollectionsDataPath);
+        HttpResponseMessage response = await _client.GetAsync(_configuration.DataCollectionsDataPath);
         response.EnsureSuccessStatusCode();
 
-        var content = await response.Content.ReadAsStringAsync();
-        var entries = content.Split('\u000A').ToList();
+        string content = await response.Content.ReadAsStringAsync();
+        List<string> entries = content.Split('\u000A').ToList();
 
-        var textInfo = new CultureInfo("en-AU", false).TextInfo;
+        TextInfo textInfo = new CultureInfo("en-AU", false).TextInfo;
 
-        var list = new List<DataCollectionsSchoolResponse>();
-        var CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+        List<DataCollectionsSchoolResponse> list = new List<DataCollectionsSchoolResponse>();
+        Regex CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
 
-        foreach (var entry in entries)
+        foreach (string entry in entries)
         {
-            var splitString = CSVParser.Split(entry);
+            string[] splitString = CSVParser.Split(entry);
             if (splitString[0].Length > 4 || splitString.Length == 1)
                 continue;
 
             try
             {
-                var school = new DataCollectionsSchoolResponse
+                DataCollectionsSchoolResponse school = new DataCollectionsSchoolResponse
                 {
                     SchoolCode = splitString[0].Trim(),
-                    Name = splitString[4].Trim('"').Trim(),
+                    Name = splitString[5].Trim('"').Trim(),
                     Address = splitString[6].Trim(),
                     Town = textInfo.ToTitleCase(splitString[7].Trim()),
                     PostCode = splitString[8].Trim(),
@@ -125,7 +125,7 @@ internal class Gateway : IDoEDataSourcesGateway
                     PhoneNumber = Regex.Replace(splitString[34].Trim(), @"[^0-9]", ""),
                     EmailAddress = splitString[36].Trim(),
                     FaxNumber = Regex.Replace(splitString[35].Trim(), @"[^0-9]", ""),
-                    HeatSchool = splitString[39] == "Yes",
+                    HeatSchool = splitString[39] == "Y",
                     PrincipalName = splitString[47].Trim(),
                     PrincipalEmail = splitString[48].Trim()
                 };
@@ -139,7 +139,7 @@ internal class Gateway : IDoEDataSourcesGateway
                 if (school.PrincipalName.IndexOf(',') > 0)
                 {
                     school.PrincipalName = school.PrincipalName.Trim('"').Trim();
-                    var principalName = school.PrincipalName.Split(',');
+                    string[] principalName = school.PrincipalName.Split(',');
                     school.PrincipalName = $"{principalName[1].Trim()} {principalName[0].Trim()}";
                     school.PrincipalFirstName = principalName[1].Trim();
                     school.PrincipalLastName = principalName[0].Trim();
