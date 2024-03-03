@@ -1,4 +1,4 @@
-﻿namespace Constellation.Infrastructure.ExternalServices.CESE;
+﻿namespace Constellation.Infrastructure.ExternalServices.DoEDataSourcesGateway;
 
 public sealed class DoEDataSourcesGatewayConfiguration
 {

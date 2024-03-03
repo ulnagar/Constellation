@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.DTOs;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
@@ -32,29 +33,29 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
 
     public async Task StartJob(Guid jobId, CancellationToken token)
     {
-        var csvSchools = await _doeGateway.GetSchoolsFromDataCollections();
-        var ceseSchools = await _doeGateway.GetSchoolsFromCESEMasterData();
+        List<DataCollectionsSchoolResponse> csvSchools = await _doeGateway.GetSchoolsFromDataCollections();
+        List<CeseSchoolResponse> ceseSchools = await _doeGateway.GetSchoolsFromCESEMasterData();
 
-        var openSchools = csvSchools.Where(school => school.Status == "Open").ToList();
+        List<DataCollectionsSchoolResponse> openSchools = csvSchools.Where(school => school.Status == "Open").ToList();
 
         // Match entries with database
-        var dbSchools = await _unitOfWork.Schools.ForBulkUpdate();
+        ICollection<School> dbSchools = await _unitOfWork.Schools.ForBulkUpdate();
 
-        foreach (var csvSchool in openSchools)
+        foreach (DataCollectionsSchoolResponse csvSchool in openSchools)
         {
             if (token.IsCancellationRequested)
                 return;
 
             _logger.Information("{id}: Processing School {Name} ({SchoolCode})", jobId, csvSchool.Name, csvSchool.SchoolCode);
-            var dbSchool = dbSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
-            var ceseSchool = ceseSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
+            School dbSchool = dbSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
+            CeseSchoolResponse ceseSchool = ceseSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
 
             if (dbSchool == null)
             {
                 _logger.Information("{id}: School {Name} ({SchoolCode}): Not found - Adding to database", jobId, csvSchool.Name, csvSchool.SchoolCode);
                 // Doesn't exist in database! Create!
 
-                var command = new UpsertSchoolCommand()
+                UpsertSchoolCommand command = new UpsertSchoolCommand()
                 {
                     Code = csvSchool.SchoolCode,
                     Name = csvSchool.Name,
@@ -168,17 +169,17 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
         openSchools = openSchools.Where(school => !string.IsNullOrWhiteSpace(school.PrincipalEmail)).ToList();
 
         // Match entries with database
-        var dbContacts = await _unitOfWork.SchoolContacts.ForBulkUpdate();
+        ICollection<SchoolContact> dbContacts = await _unitOfWork.SchoolContacts.ForBulkUpdate();
 
-        foreach (var csvSchool in openSchools)
+        foreach (DataCollectionsSchoolResponse csvSchool in openSchools)
         {
             _logger.Information("{id}: Processing School {Name} ({SchoolCode})", jobId, csvSchool.Name, csvSchool.SchoolCode);
-            var dbSchool = dbSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
+            School dbSchool = dbSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
 
             if (dbSchool == null)
                 continue;
 
-            var principal = dbSchool.StaffAssignments.FirstOrDefault(role => role.Role == SchoolContactRole.Principal && !role.IsDeleted);
+            SchoolContactRole principal = dbSchool.StaffAssignments.FirstOrDefault(role => role.Role == SchoolContactRole.Principal && !role.IsDeleted);
 
             if (string.IsNullOrWhiteSpace(csvSchool.PrincipalEmail))
                 continue;
@@ -187,7 +188,7 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
             // If different, mark database entry as old/deleted and create a new entry
             if (principal != null)
             {
-                if (!dbSchool.Students.Any(student => !student.IsDeleted) || !dbSchool.Staff.Any(staff => !staff.IsDeleted))
+                if (dbSchool.Students.All(student => student.IsDeleted) || dbSchool.Staff.All(staff => staff.IsDeleted))
                 {
                     Console.WriteLine($" Removing old Principal: {principal.SchoolContact.DisplayName}");
                     await _schoolContactService.RemoveRole(principal.Id);
@@ -195,7 +196,8 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
                     await _unitOfWork.CompleteAsync(token);
                     continue;
                 }
-                else if (principal.SchoolContact.EmailAddress.ToLower() != csvSchool.PrincipalEmail.ToLower())
+                
+                if (!string.Equals(principal.SchoolContact.EmailAddress, csvSchool.PrincipalEmail, StringComparison.CurrentCultureIgnoreCase))
                 {
                     Console.WriteLine($" Removing old Principal: {principal.SchoolContact.DisplayName}");
                     await _schoolContactService.RemoveRole(principal.Id);
