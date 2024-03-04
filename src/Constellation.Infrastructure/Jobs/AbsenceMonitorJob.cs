@@ -1,17 +1,18 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Constellation.Application.Absences.SendAbsenceDigestToCoordinator;
-using Constellation.Application.Absences.SendAbsenceDigestToParent;
-using Constellation.Application.Absences.SendAbsenceNotificationToParent;
-using Constellation.Application.Absences.SendAbsenceNotificationToStudent;
-using Constellation.Application.Absences.SendMissedWorkEmailToStudent;
+using Application.Absences.SendAbsenceDigestToStudent;
+using Application.Absences.SendAbsenceDigestToCoordinator;
+using Application.Absences.SendAbsenceDigestToParent;
+using Application.Absences.SendAbsenceNotificationToParent;
+using Application.Absences.SendAbsenceNotificationToStudent;
+using Application.Absences.SendMissedWorkEmailToStudent;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Enums;
-using Constellation.Core.Models.Absences;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Students;
+using Application.Interfaces.Repositories;
+using Core.Abstractions.Repositories;
+using Core.Enums;
+using Core.Models.Absences;
+using Core.Models.Identifiers;
+using Core.Models.Students;
 
 internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 {
@@ -114,16 +115,14 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
                             student.StudentId,
                             wholeAbsenceIds),
                             cancellationToken);
-
-                    partialAbsenceIds = null;
-                    wholeAbsenceIds = null;
                 }
-
+                
                 if (DateTime.Now.DayOfWeek == DayOfWeek.Monday)
                 {
                     if (cancellationToken.IsCancellationRequested)
                         return;
-
+                    
+                    await _mediator.Send(new SendAbsenceDigestToStudentCommand(jobId, student.StudentId), cancellationToken);
                     await _mediator.Send(new SendAbsenceDigestToParentCommand(jobId, student.StudentId), cancellationToken);
                     await _mediator.Send(new SendAbsenceDigestToCoordinatorCommand(jobId, student.StudentId), cancellationToken);
                 }
@@ -151,7 +150,6 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
                 }
                 
                 await _unitOfWork.CompleteAsync(cancellationToken);
-                absences = null;
             }
         }
     }

@@ -10,15 +10,41 @@
     ViewData["SenderTitle"] = Model.SenderTitle;
 }
 
-<p>@Model.StudentFirstName was absent from school on the following dates and no satisfactory explanation has been received.</p>
-<dl>
-    @foreach (var entry in Model.Absences)
-    {
-        <dt>@entry.Date.ToLongDateString()</dt>
-        <dd>@entry.PeriodName (@entry.PeriodTimeframe) - @entry.OfferingName</dd>
-    }
-</dl>
-<p>The <i>Education Act 1990</i> requires you to ensure your child attends school each day that instruction is provided unless they are prevented from doing so by sickness or other acceptable reason and for you to provide an explanation for any absence.</p>
-<p>The Act requires you to explain your child's absences within seven days of their occurrence. Failure to do so will result in an unjustified absence being recorded.</p>
-<p>Please provide an explanation of these absences using our Parent Portal as soon as possible: <a href="@ParentAbsenceDigestEmailViewModel.Link" target="_blank">@ParentAbsenceDigestEmailViewModel.Link</a></p>
-<p>If you have any questions or concerns about this absence, please contact our office on 1300 287 629 or at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a></p>
+<p>Dear @Model.ParentName,</p>
+
+@if (Model.WholeAbsences.Any())
+{
+    <p>@Model.StudentFirstName was absent from class on the following dates and no satisfactory explanation has been received.</p>
+    <dl>
+        @foreach (var entry in Model.WholeAbsences.OrderBy(entry => entry.Date).ThenBy(entry => entry.PeriodName))
+        {
+            <dt>@entry.Date.ToLongDateString()</dt>
+            <dd>Absent: @entry.PeriodName (@entry.PeriodTimeframe) - @entry.OfferingName</dd>
+        }
+    </dl>
+    <p>The <i>Education Act 1990</i> requires parents/carers to ensure their child attends school each day that instruction is provided, unless they are prevented from doing so by sickness or another acceptable reason. Parents/carers must also provide an explanation for any absence within seven days of the absence.</p>
+    <p>Failure to do so will result in an unjustified absence being recorded.</p>
+    <p>Please provide an explanation as soon as possible for the @(Model.WholeAbsences.Count > 1 ? "absences" : "absence") listed using our Parent Portal: <a href="@ParentAbsenceDigestEmailViewModel.Link" target="_blank">@ParentAbsenceDigestEmailViewModel.Link</a></p>
+    <hr />
+}
+
+@if (Model.PartialAbsences.Any())
+{
+    <p>@Model.StudentFirstName was absent from a portion of a class on the following dates.</p>
+    <dl>
+        @foreach (var entry in Model.PartialAbsences.OrderBy(entry => entry.Date).ThenBy(entry => entry.PeriodName).ThenBy(entry => entry.AbsenceTimeframe))
+        {
+            <dt>@entry.Date.ToLongDateString()</dt>
+            <dd>
+                @entry.PeriodName (@entry.PeriodTimeframe) - @entry.OfferingName<br/>
+                Absent: @entry.AbsenceTimeframe (@entry.AbsenceLength minutes)
+            </dd>
+        }
+    </dl>
+    <p>@Model.StudentFirstName is required to provide an explanation for the @(Model.PartialAbsences.Count > 1 ? "absences" : "absence") which will then be verified by the home school.</p>
+    <p>To date, no explanation of these partial absences has been received.</p>
+    <p>Please encourage @Model.StudentFirstName to enter an explanation for this absence using the link sent to them via email.</p>
+    <hr />
+}
+
+<p>If you have any questions or concerns about these absences, please contact our office on 1300 287 629 or at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a></p>

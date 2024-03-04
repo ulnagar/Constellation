@@ -1,32 +1,33 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email;
 
 using Application.Helpers;
-using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
-using Constellation.Application.Absences.ConvertResponseToAbsenceExplanation;
-using Constellation.Application.DTOs;
-using Constellation.Application.DTOs.EmailRequests;
-using Constellation.Application.Interfaces.Configuration;
-using Constellation.Application.Interfaces.Gateways;
+using Application.Absences.ConvertAbsenceToAbsenceEntry;
+using Application.Absences.ConvertResponseToAbsenceExplanation;
+using Application.DTOs;
+using Application.DTOs.EmailRequests;
+using Application.Interfaces.Configuration;
+using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models;
-using Constellation.Core.Models.Assignments;
-using Constellation.Core.Models.Assignments.Identifiers;
-using Constellation.Core.Models.Awards;
-using Constellation.Core.Models.Covers;
-using Constellation.Core.Models.Offerings;
-using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Subjects;
-using Constellation.Core.ValueObjects;
-using Constellation.Infrastructure.Templates.Views.Emails.Absences;
-using Constellation.Infrastructure.Templates.Views.Emails.Auth;
-using Constellation.Infrastructure.Templates.Views.Emails.Awards;
-using Constellation.Infrastructure.Templates.Views.Emails.Covers;
-using Constellation.Infrastructure.Templates.Views.Emails.Lessons;
-using Constellation.Infrastructure.Templates.Views.Emails.MandatoryTraining;
-using Constellation.Infrastructure.Templates.Views.Emails.Reports;
-using Constellation.Infrastructure.Templates.Views.Emails.RollMarking;
+using Core.Models;
+using Core.Models.Assignments;
+using Core.Models.Assignments.Identifiers;
+using Core.Models.Awards;
+using Core.Models.Covers;
+using Core.Models.Offerings;
+using Core.Models.Students;
+using Core.Models.Subjects;
+using Core.ValueObjects;
+using Templates.Views.Emails.Absences;
+using Templates.Views.Emails.Auth;
+using Templates.Views.Emails.Awards;
+using Templates.Views.Emails.Covers;
+using Templates.Views.Emails.Lessons;
+using Templates.Views.Emails.MandatoryTraining;
+using Templates.Views.Emails.Reports;
+using Templates.Views.Emails.RollMarking;
 using Core.Shared;
 using Microsoft.Extensions.Options;
+using MimeKit;
 using System.Net.Mail;
 using System.Threading;
 using Templates.Views.Emails.Assignments;
@@ -53,18 +54,18 @@ public sealed class Service : IEmailService
     public async Task SendAcademicReportToNonResidentialParent(
         List<EmailRecipient> recipients, 
         Name studentName, 
-        string ReportingPeriod, 
-        string Year, 
+        string reportingPeriod, 
+        string year, 
         FileDto file,
         CancellationToken cancellationToken = default)
     {
         List<Attachment> attachments = new();
-        var stream = new MemoryStream(file.FileData);
+        MemoryStream stream = new MemoryStream(file.FileData);
         attachments.Add(new Attachment(stream, file.FileName, file.FileType));
 
-        foreach (var parent in recipients)
+        foreach (EmailRecipient parent in recipients)
         {
-            var viewModel = new AcademicReportEmailViewModel
+            AcademicReportEmailViewModel viewModel = new AcademicReportEmailViewModel
             {
                 Preheader = "",
                 SenderName = "Chris Robertson",
@@ -72,17 +73,13 @@ public sealed class Service : IEmailService
                 Title = $"[Aurora College] Academic Report Published",
                 ParentName = parent.Name,
                 StudentName = studentName,
-                ReportingPeriod = ReportingPeriod,
-                Year = Year
+                ReportingPeriod = reportingPeriod,
+                Year = year
             };
 
-            var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Reports/AcademicReportEmail.cshtml", viewModel);
+            string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Reports/AcademicReportEmail.cshtml", viewModel);
 
-            var toRecipients = new Dictionary<string, string>();
-            if (!toRecipients.Any(recipient => recipient.Value == parent.Email))
-                toRecipients.Add(parent.Name, parent.Email);
-
-            await _emailSender.Send(toRecipients, null, viewModel.Title, body, attachments, cancellationToken);
+            await _emailSender.Send(recipients, null, viewModel.Title, body, attachments, cancellationToken);
         }
     }
 
@@ -94,7 +91,7 @@ public sealed class Service : IEmailService
         List<Attachment> attachments,
         CancellationToken cancellationToken = default)
     {
-        var viewModel = new ParentAttendanceReportEmailViewModel
+        ParentAttendanceReportEmailViewModel viewModel = new ParentAttendanceReportEmailViewModel
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
@@ -105,14 +102,9 @@ public sealed class Service : IEmailService
             EndDate = endDate
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAttendanceReportEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAttendanceReportEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in recipients)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                toRecipients.Add(entry.Name, entry.Email);
-
-        var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, attachments, cancellationToken);
+        MimeMessage message = await _emailSender.Send(recipients, null, null, null, viewModel.Title, body, attachments, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -131,7 +123,7 @@ public sealed class Service : IEmailService
         List<Attachment> attachments,
         CancellationToken cancellationToken = default)
     {
-        var viewModel = new SchoolAttendanceReportEmailViewModel
+        SchoolAttendanceReportEmailViewModel viewModel = new SchoolAttendanceReportEmailViewModel
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
@@ -141,14 +133,9 @@ public sealed class Service : IEmailService
             EndDate = endDate
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/SchoolAttendanceReportEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/SchoolAttendanceReportEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in recipients)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                toRecipients.Add(entry.Name, entry.Email);
-
-        var message = await _emailSender.Send(toRecipients, null, null, null, viewModel.Title, body, attachments, cancellationToken);
+        MimeMessage message = await _emailSender.Send(recipients, null, null, null, viewModel.Title, body, attachments, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -176,14 +163,9 @@ public sealed class Service : IEmailService
             Absences = absences
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAbsenceNotificationEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAbsenceNotificationEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in emailAddresses)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                toRecipients.Add(entry.Name, entry.Email);
-
-        var message = await _emailSender.Send(toRecipients, null, viewModel.Title, body, cancellationToken);
+        MimeMessage message = await _emailSender.Send(emailAddresses, null, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -202,30 +184,29 @@ public sealed class Service : IEmailService
             return null;
     }
 
-    public async Task<EmailDtos.SentEmail> SendParentWholeAbsenceDigest(
-        List<AbsenceEntry> absences, 
+    public async Task<EmailDtos.SentEmail> SendParentAbsenceDigest(
+        string familyName,
+        List<AbsenceEntry> wholeAbsences, 
+        List<AbsenceEntry> partialAbsences,
         Student student,
         List<EmailRecipient> emailAddresses,
         CancellationToken cancellationToken = default)
     {
-        var viewModel = new ParentAbsenceDigestEmailViewModel
+        ParentAbsenceDigestEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
             SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
             Title = $"[Aurora College] Absentee Notice - Compulsory School Attendance",
             StudentFirstName = student.FirstName,
-            Absences = absences
+            WholeAbsences = wholeAbsences,
+            PartialAbsences = partialAbsences,
+            ParentName = familyName
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAbsenceDigestEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAbsenceDigestEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in emailAddresses)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                toRecipients.Add(entry.Name, entry.Email);
-
-        var message = await _emailSender.Send(toRecipients, null, viewModel.Title, body, cancellationToken);
+        MimeMessage message = await _emailSender.Send(emailAddresses, null, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -233,15 +214,15 @@ public sealed class Service : IEmailService
 
         if (message != null)
         {
-            return new EmailDtos.SentEmail
+            return new()
             {
                 message = body,
                 id = message.MessageId,
                 recipients = message.To.ToString()
             };
         }
-        else
-            return null;
+
+        return null;
     }
 
     public async Task<EmailDtos.SentEmail> SendStudentPartialAbsenceExplanationRequest(
@@ -250,7 +231,7 @@ public sealed class Service : IEmailService
         List<EmailRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
-        var viewModel = new StudentAbsenceExplanationRequestEmailViewModel
+        StudentAbsenceExplanationRequestEmailViewModel viewModel = new StudentAbsenceExplanationRequestEmailViewModel
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
@@ -261,9 +242,9 @@ public sealed class Service : IEmailService
             Absences = absences
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/StudentAbsenceExplanationRequestEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/StudentAbsenceExplanationRequestEmail.cshtml", viewModel);
 
-        var message = await _emailSender.Send(recipients, null, viewModel.Title, body, cancellationToken);
+        MimeMessage message = await _emailSender.Send(recipients, null, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -288,7 +269,7 @@ public sealed class Service : IEmailService
         List<EmailRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
-        var viewModel = new CoordinatorAbsenceVerificationRequestEmailViewModel
+        CoordinatorAbsenceVerificationRequestEmailViewModel viewModel = new CoordinatorAbsenceVerificationRequestEmailViewModel
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
@@ -299,14 +280,9 @@ public sealed class Service : IEmailService
             ClassList = absences
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/CoordinatorAbsenceVerificationRequestEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/CoordinatorAbsenceVerificationRequestEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in recipients)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                toRecipients.Add(entry.Name, entry.Email);
-
-        var message = await _emailSender.Send(toRecipients, null, viewModel.Title, body, cancellationToken);
+        MimeMessage message = await _emailSender.Send(recipients, null, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -325,8 +301,9 @@ public sealed class Service : IEmailService
             return null;
     }
 
-    public async Task<EmailDtos.SentEmail> SendCoordinatorWholeAbsenceDigest(
-        List<AbsenceEntry> absences, 
+    public async Task<EmailDtos.SentEmail> SendCoordinatorAbsenceDigest(
+        List<AbsenceEntry> wholeAbsences, 
+        List<AbsenceEntry> partialAbsences, 
         Student student,
         School school,
         List<EmailRecipient> recipients,
@@ -335,25 +312,21 @@ public sealed class Service : IEmailService
         if (recipients is null || recipients.Count == 0)
             return null;
 
-        var viewModel = new CoordinatorAbsenceDigestEmailViewModel
+        CoordinatorAbsenceDigestEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
             SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
             Title = "Absence Explanation Request",
-            StudentName = student.DisplayName,
+            StudentName = student.GetName(),
             SchoolName = school.Name,
-            Absences = absences
+            WholeAbsences = wholeAbsences,
+            PartialAbsences = partialAbsences
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/CoordinatorAbsenceDigestEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/CoordinatorAbsenceDigestEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in recipients)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                toRecipients.Add(entry.Name, entry.Email);
-
-        var message = await _emailSender.Send(toRecipients, null, viewModel.Title, body, cancellationToken);
+        MimeMessage message = await _emailSender.Send(recipients, null, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -361,16 +334,56 @@ public sealed class Service : IEmailService
 
         if (message != null)
         {
-            return new EmailDtos.SentEmail
+            return new()
             {
                 message = body,
                 id = message.MessageId,
                 recipients = message.To.ToString()
             };
         }
-        else
+
+        return null;
+    }
+
+    public async Task<EmailDtos.SentEmail> SendStudentAbsenceDigest(
+        List<AbsenceEntry> absences,
+        Student student,
+        List<EmailRecipient> recipients,
+        CancellationToken cancellationToken = default)
+    {
+        if (recipients is null || recipients.Count == 0)
             return null;
 
+        StudentAbsenceDigestEmailViewModel viewModel = new()
+        {
+            Preheader = "",
+            SenderName = _configuration.Absences.AbsenceCoordinatorName,
+            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
+            Title = "[Aurora College] Partial Absentee Notice - Compulsory School Attendance",
+            StudentName = student.GetName(),
+            StudentId = student.StudentId,
+            PartialAbsences = absences
+        };
+
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/StudentAbsenceDigestEmail.cshtml", viewModel);
+
+        MimeMessage message = await _emailSender.Send(recipients, null, viewModel.Title, body, cancellationToken);
+
+        // Perhaps used for future where message file (.eml) is saved to database
+        //var messageStream = new MemoryStream();
+        //message.WriteTo(messageStream);
+
+        if (message != null)
+        {
+            return new()
+            {
+                message = body,
+                id = message.MessageId,
+                recipients = message.To.ToString()
+            };
+        }
+
+        return null;
     }
 
     public async Task SendMissedWorkEmail(
@@ -381,7 +394,7 @@ public sealed class Service : IEmailService
         List<EmailRecipient> recipients, 
         CancellationToken cancellationToken = default)
     {
-        var viewModel = new MissedWorkEmailViewModel
+        MissedWorkEmailViewModel viewModel = new MissedWorkEmailViewModel
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
@@ -393,7 +406,7 @@ public sealed class Service : IEmailService
             AbsenceDate = absenceDate
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/MissedWorkEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/MissedWorkEmail.cshtml", viewModel);
 
         await _emailSender.Send(recipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, cancellationToken);
     }
@@ -401,11 +414,11 @@ public sealed class Service : IEmailService
 
     public async Task SendAdminAbsenceSentralAlert(string studentName)
     {
-        var viewModel = $"<p>{studentName} cannot be located in the Sentral Users list and does not currently have a Sentral Student Id specified.</p>";
+        string viewModel = $"<p>{studentName} cannot be located in the Sentral Users list and does not currently have a Sentral Student Id specified.</p>";
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new Dictionary<string, string>
         {
             { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
         };
@@ -415,11 +428,11 @@ public sealed class Service : IEmailService
 
     public async Task SendAdminAbsenceContactAlert(string studentName)
     {
-        var viewModel = $"<p>Parent contact details for {studentName} cannot be located in Sentral.";
+        string viewModel = $"<p>Parent contact details for {studentName} cannot be located in Sentral.";
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new Dictionary<string, string>
         {
             { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
         };
@@ -431,17 +444,17 @@ public sealed class Service : IEmailService
         MemoryStream report,
         CancellationToken cancellationToken = default)
     {
-        var viewModel = $"<p>Parent Contact Change Report for {DateTime.Today.ToLongDateString()} is attached.</p>";
+        string viewModel = $"<p>Parent Contact Change Report for {DateTime.Today.ToLongDateString()} is attached.</p>";
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new Dictionary<string, string>
         {
             { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" },
             { "Aurora College", "auroracoll-h.school@det.nsw.edu.au" }
         };
 
-        var attachments = new List<Attachment>
+        List<Attachment> attachments = new List<Attachment>
         {
             new Attachment(report, "Change Report.xlsx", FileContentTypes.ExcelModernFile)
         };
@@ -451,11 +464,11 @@ public sealed class Service : IEmailService
 
     public async Task SendAdminLowCreditAlert(double credit)
     {
-        var viewModel = $"<p>The SMS Global account has a low balance of ${credit:c}.</p><p>Please top up the account immediately!</p>";
+        string viewModel = $"<p>The SMS Global account has a low balance of ${credit:c}.</p><p>Please top up the account immediately!</p>";
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new Dictionary<string, string>
         {
             { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" },
             { "auroracoll-h.school@det.nsw.edu.au", "auroracoll-h.school@det.nsw.edu.au" }
@@ -471,7 +484,7 @@ public sealed class Service : IEmailService
         AssignmentSubmissionId submissionId,
         CancellationToken cancellationToken = default)
     {
-        var viewModel = $@"<p>Failed to upload an assignment submission to Canvas:</p>
+        string viewModel = $@"<p>Failed to upload an assignment submission to Canvas:</p>
             <dl>
                 <dt>Assignment:</dt>
                 <dd>{assignmentName} ({assignmentId.Value})</dd>
@@ -479,9 +492,9 @@ public sealed class Service : IEmailService
                 <dd>From {studentName} ({submissionId.Value})</dd>
             </dl>";
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new Dictionary<string, string>
         {
             { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
         };
@@ -497,7 +510,7 @@ public sealed class Service : IEmailService
 
     public async Task SendAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail)
     {
-        var viewModel = new AbsenceExplanationToSchoolAdminEmailViewModel
+        AbsenceExplanationToSchoolAdminEmailViewModel viewModel = new AbsenceExplanationToSchoolAdminEmailViewModel
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
@@ -506,7 +519,7 @@ public sealed class Service : IEmailService
             StudentName = notificationEmail.StudentName
         };
 
-        foreach (var absence in notificationEmail.WholeAbsences)
+        foreach (EmailDtos.AbsenceResponseEmail.AbsenceDto absence in notificationEmail.WholeAbsences)
         {
             viewModel.Absences.Add(new AbsenceExplanationToSchoolAdminEmailViewModel.AbsenceDto
             {
@@ -520,11 +533,11 @@ public sealed class Service : IEmailService
             });
         }
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/AbsenceExplanationToSchoolAdminEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/AbsenceExplanationToSchoolAdminEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in notificationEmail.Recipients)
-            if (!toRecipients.Any(recipient => recipient.Value == entry))
+        Dictionary<string, string> toRecipients = new Dictionary<string, string>();
+        foreach (string entry in notificationEmail.Recipients)
+            if (toRecipients.All(recipient => recipient.Value != entry))
                 toRecipients.Add(entry, entry);
 
         await _emailSender.Send(toRecipients, null, $"Absence Explanation Received - {viewModel.StudentName}", body);
@@ -578,20 +591,20 @@ public sealed class Service : IEmailService
 
             string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
 
-            await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData, cancellationToken);
         }
         else
         {
             string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverEmail.cshtml", viewModel);
 
-            await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, cancellationToken);
         }
 
     }
 
     public async Task SendNewCoverEmail(EmailDtos.CoverEmail resource)
     {
-        var viewModel = new NewCoverEmailViewModel
+        NewCoverEmailViewModel viewModel = new NewCoverEmailViewModel
         {
             ToName = resource.CoveringTeacherName,
             Title = "Class Cover Information",
@@ -617,7 +630,7 @@ public sealed class Service : IEmailService
             if (toRecipients.All(recipient => recipient.Value != entry.Value))
                 toRecipients.Add(entry.Key, entry.Value);
 
-        foreach (var entry in resource.SecondaryRecipients)
+        foreach (KeyValuePair<string, string> entry in resource.SecondaryRecipients)
             if (ccRecipients.All(recipient => recipient.Value != entry.Value))
                 ccRecipients.Add(entry.Key, entry.Value);
 
@@ -672,13 +685,13 @@ public sealed class Service : IEmailService
 
             string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
 
-            await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData, cancellationToken);
         }
         else
         {
             string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverEmail.cshtml", viewModel);
 
-            await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, cancellationToken);
         }
     }
 
@@ -706,11 +719,11 @@ public sealed class Service : IEmailService
 
         Dictionary<string, string> ccRecipients = new Dictionary<string, string>();
 
-        foreach (var entry in resource.ClassroomTeachers)
+        foreach (KeyValuePair<string, string> entry in resource.ClassroomTeachers)
             if (toRecipients.All(recipient => recipient.Value != entry.Value))
                 toRecipients.Add(entry.Key, entry.Value);
 
-        foreach (var entry in resource.SecondaryRecipients)
+        foreach (KeyValuePair<string, string> entry in resource.SecondaryRecipients)
             if (ccRecipients.All(recipient => recipient.Value != entry.Value))
                 ccRecipients.Add(entry.Key, entry.Value);
 
@@ -761,13 +774,13 @@ public sealed class Service : IEmailService
             DateTime appointmentEnd = cover.EndDate.ToDateTime(endTime);
             string icsData = _calendarService.CancelInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
 
-            await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData, cancellationToken);
         }
         else
         {
             string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverEmail.cshtml", viewModel);
 
-            await _emailSender.Send(primaryRecipients.ToDictionary(k => k.Name, k => k.Email), secondaryRecipients.ToDictionary(k => k.Name, k => k.Email), "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, cancellationToken);
         }
     }
 
@@ -795,11 +808,11 @@ public sealed class Service : IEmailService
 
         Dictionary<string, string> ccRecipients = new();
 
-        foreach (var entry in resource.ClassroomTeachers)
+        foreach (KeyValuePair<string, string> entry in resource.ClassroomTeachers)
             if (toRecipients.All(recipient => recipient.Value != entry.Value))
                 toRecipients.Add(entry.Key, entry.Value);
 
-        foreach (var entry in resource.SecondaryRecipients)
+        foreach (KeyValuePair<string, string> entry in resource.SecondaryRecipients)
             if (ccRecipients.All(recipient => recipient.Value != entry.Value))
                 ccRecipients.Add(entry.Key, entry.Value);
 
@@ -830,7 +843,7 @@ public sealed class Service : IEmailService
 
     private async Task SendFirstLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
-        var viewModel = new FirstWarningEmailViewModel
+        FirstWarningEmailViewModel viewModel = new FirstWarningEmailViewModel
         {
             Preheader = "",
             SenderName = _configuration.Lessons.CoordinatorName,
@@ -841,19 +854,14 @@ public sealed class Service : IEmailService
             Lessons = notification.Lessons
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/FirstWarningEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/FirstWarningEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in notification.Recipients)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                toRecipients.Add(entry.Name, entry.Email);
-
-        await _emailSender.Send(toRecipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(notification.Recipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
     }
 
     private async Task SendSecondLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
-        var viewModel = new SecondWarningEmailViewModel
+        SecondWarningEmailViewModel viewModel = new SecondWarningEmailViewModel
         {
             Preheader = "",
             SenderName = _configuration.Lessons.CoordinatorName,
@@ -864,19 +872,14 @@ public sealed class Service : IEmailService
             Lessons = notification.Lessons
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/SecondWarningEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/SecondWarningEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in notification.Recipients)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                toRecipients.Add(entry.Name, entry.Email);
-
-        await _emailSender.Send(toRecipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(notification.Recipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
     }
 
     private async Task SendThirdLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
-        var viewModel = new SecondWarningEmailViewModel
+        SecondWarningEmailViewModel viewModel = new SecondWarningEmailViewModel
         {
             Preheader = "",
             SenderName = _configuration.Lessons.CoordinatorName,
@@ -887,19 +890,14 @@ public sealed class Service : IEmailService
             Lessons = notification.Lessons
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/SecondWarningEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/SecondWarningEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in notification.Recipients)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                toRecipients.Add(entry.Name, entry.Email);
-
-        await _emailSender.Send(toRecipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(notification.Recipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
     }
 
     private async Task SendFinalLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
-        var viewModel = new FinalWarningEmailViewModel
+        FinalWarningEmailViewModel viewModel = new FinalWarningEmailViewModel
         {
             Preheader = "",
             SenderName = _configuration.Lessons.CoordinatorName,
@@ -910,19 +908,14 @@ public sealed class Service : IEmailService
             Lessons = notification.Lessons
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/FinalWarningEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/FinalWarningEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in notification.Recipients)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                toRecipients.Add(entry.Name, entry.Email);
-
-        await _emailSender.Send(toRecipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(notification.Recipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
     }
 
     private async Task SendLessonAlertEmail(LessonMissedNotificationEmail notification)
     {
-        var viewModel = new CoordinatorNotificationEmailViewModel
+        CoordinatorNotificationEmailViewModel viewModel = new CoordinatorNotificationEmailViewModel
         {
             Preheader = "",
             SenderName = _configuration.Lessons.CoordinatorName,
@@ -932,14 +925,9 @@ public sealed class Service : IEmailService
             Lessons = notification.Lessons
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/CoordinatorNotificationEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/CoordinatorNotificationEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in notification.Recipients)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                toRecipients.Add(entry.Name, entry.Email);
-
-        await _emailSender.Send(toRecipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(notification.Recipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
     }
 
     public async Task SendStudentLessonCompletedEmail(
@@ -948,7 +936,7 @@ public sealed class Service : IEmailService
         string courseName,
         CancellationToken cancellationToken)
     {
-        var viewModel = new StudentMarkedPresentEmailViewModel
+        StudentMarkedPresentEmailViewModel viewModel = new StudentMarkedPresentEmailViewModel
         {
             Title = $"Congratulations on finishing your Science Prac!",
             SenderName = "Silvia Rudmann",
@@ -959,39 +947,39 @@ public sealed class Service : IEmailService
             Subject = courseName
         };
 
-        var toRecipients = new Dictionary<string, string>
-            {
-                { student.DisplayName, student.EmailAddress }
-            };
+        Dictionary<string, string> toRecipients = new Dictionary<string, string>
+        {
+            { student.DisplayName, student.EmailAddress }
+        };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/StudentMarkedPresentEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/StudentMarkedPresentEmail.cshtml", viewModel);
 
         await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
     }
 
     public async Task SendServiceLogEmail(ServiceLogEmail notification)
     {
-        var viewModel = $"The following messages were logged by {notification.Source} when it ran today.<br>";
-        foreach (var line in notification.Log)
+        string viewModel = $"The following messages were logged by {notification.Source} when it ran today.<br>";
+        foreach (string line in notification.Log)
             viewModel += line + "<br>";
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>
+        List<EmailRecipient> recipients = notification.Recipients;
+        if (recipients.All(entry => entry.Email != "auroracollegeitsupport@det.nsw.edu.au"))
         {
-            { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
-        };
+            Result<EmailRecipient> address = EmailRecipient.Create("auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au");
 
-        foreach (var entry in notification.Recipients)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                toRecipients.Add(entry.Name, entry.Email);
-
-        await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", $"[Aurora College] Service Log Output - {notification.Source}", body);
+            if (address.IsSuccess)
+                recipients.Add(address.Value);
+        }
+        
+        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", $"[Aurora College] Service Log Output - {notification.Source}", body);
     }
 
     public async Task SendDailyRollMarkingReport(List<RollMarkingEmailDto> entries, DateOnly reportDate, Dictionary<string, string> recipients)
     {
-        var viewModel = new DailyReportEmailViewModel
+        DailyReportEmailViewModel viewModel = new DailyReportEmailViewModel
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
@@ -1000,14 +988,14 @@ public sealed class Service : IEmailService
             RollEntries = entries
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/RollMarking/DailyReportEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/RollMarking/DailyReportEmail.cshtml", viewModel);
 
         await _emailSender.Send(recipients, null, viewModel.Title, body);
     }
 
     public async Task SendNoRollMarkingReport(DateOnly reportDate, Dictionary<string, string> recipients)
     {
-        var viewModel = new DailyReportEmailViewModel
+        DailyReportEmailViewModel viewModel = new DailyReportEmailViewModel
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
@@ -1015,14 +1003,14 @@ public sealed class Service : IEmailService
             Title = $"[Aurora College] Roll Marking Report - {reportDate.ToLongDateString()}"
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/RollMarking/NoReportEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/RollMarking/NoReportEmail.cshtml", viewModel);
 
         await _emailSender.Send(recipients, null, viewModel.Title, body);
     }
 
     public async Task SendMagicLinkLoginEmail(MagicLinkEmail notification)
     {
-        var viewModel = new MagicLinkLoginEmailViewModel
+        MagicLinkLoginEmailViewModel viewModel = new MagicLinkLoginEmailViewModel
         {
             Preheader = "This is an automated message. Please do not reply.",
             SenderName = "",
@@ -1032,19 +1020,14 @@ public sealed class Service : IEmailService
             Link = notification.Link
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Auth/MagicLinkLoginEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Auth/MagicLinkLoginEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>();
-        foreach (var entry in notification.Recipients)
-            if (!toRecipients.Any(recipient => recipient.Value == entry.Email))
-                toRecipients.Add(entry.Name, entry.Email);
-
-        await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
+        await _emailSender.Send(notification.Recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
     }
 
     public async Task SendTrainingExpiryWarningEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients)
     {
-        var viewModel = new TrainingExpiringSoonWarningEmailViewModel
+        TrainingExpiringSoonWarningEmailViewModel viewModel = new TrainingExpiringSoonWarningEmailViewModel
         {
             Preheader = "This is an automated message. Please do not reply.",
             SenderName = "",
@@ -1053,14 +1036,14 @@ public sealed class Service : IEmailService
             Courses = courses
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MandatoryTraining/TrainingExpiryWarningEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/MandatoryTraining/TrainingExpiryWarningEmail.cshtml", viewModel);
 
         await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
     }
 
     public async Task SendTrainingExpiryAlertEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients)
     {
-        var viewModel = new TrainingExpiringSoonAlertEmailViewModel
+        TrainingExpiringSoonAlertEmailViewModel viewModel = new TrainingExpiringSoonAlertEmailViewModel
         {
             Preheader = "This is an automated message. Please do not reply.",
             SenderName = "",
@@ -1069,14 +1052,14 @@ public sealed class Service : IEmailService
             Courses = courses
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MandatoryTraining/TrainingExpiryWarningEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/MandatoryTraining/TrainingExpiryWarningEmail.cshtml", viewModel);
 
         await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
     }
 
     public async Task SendTrainingExpiredEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients)
     {
-        var viewModel = new TrainingExpiredAlertEmailViewModel
+        TrainingExpiredAlertEmailViewModel viewModel = new TrainingExpiredAlertEmailViewModel
         {
             Preheader = "This is an automated message. Please do not reply.",
             SenderName = "",
@@ -1085,23 +1068,23 @@ public sealed class Service : IEmailService
             Courses = courses
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/MandatoryTraining/TrainingExpiryWarningEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/MandatoryTraining/TrainingExpiryWarningEmail.cshtml", viewModel);
 
         await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
     }
 
     public async Task SendMasterFileConsistencyReportEmail(MemoryStream report, string emailAddress, CancellationToken cancellationToken = default)
     {
-        var viewModel = $"<p>MasterFile Consistency Report generated {DateTime.Today.ToLongDateString()} is attached.</p>";
+        string viewModel = $"<p>MasterFile Consistency Report generated {DateTime.Today.ToLongDateString()} is attached.</p>";
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        var toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new Dictionary<string, string>
         {
             { "", emailAddress }
         };
 
-        var attachments = new List<Attachment>
+        List<Attachment> attachments = new List<Attachment>
         {
             new Attachment(report, "Consistency Report.xlsx", FileContentTypes.ExcelModernFile)
         };
@@ -1117,7 +1100,7 @@ public sealed class Service : IEmailService
         Staff? teacher,
         CancellationToken cancellationToken = default)
     {
-        var viewModel = new NewAwardCertificateEmailViewModel
+        NewAwardCertificateEmailViewModel viewModel = new NewAwardCertificateEmailViewModel
         {
             Preheader = "",
             SenderName = "",
@@ -1130,9 +1113,9 @@ public sealed class Service : IEmailService
             TeacherName = teacher?.DisplayName
         };
 
-        var body = await _razorService.RenderViewToStringAsync("/Views/Emails/Awards/NewAwardCertificateEmail.cshtml", viewModel);
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Awards/NewAwardCertificateEmail.cshtml", viewModel);
         
-        foreach (var recipient in recipients)
+        foreach (EmailRecipient recipient in recipients)
         {
             await _emailSender.Send(new List<EmailRecipient> { recipient }, "noreply@aurora.nsw.edu.au", viewModel.Title, body, new List<Attachment> { certificate }, cancellationToken);
         }

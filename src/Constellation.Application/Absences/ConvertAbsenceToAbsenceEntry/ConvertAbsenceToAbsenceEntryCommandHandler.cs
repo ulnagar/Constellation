@@ -59,6 +59,7 @@ internal sealed class ConvertAbsenceToAbsenceEntryCommandHandler
             absence.PeriodName,
             absence.PeriodTimeframe,
             offering.Name,
-            timeframe);
+            timeframe,
+            absence.AbsenceLength);
     }
 }

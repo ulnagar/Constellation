@@ -14,9 +14,11 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Abstractions.Clock;
+using Core.Errors;
 using Core.Models.Students.Errors;
 using Serilog;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -72,7 +74,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
                 .ForContext(nameof(request.AbsenceIds), request.AbsenceIds)
                 .Warning("{jobId}: Could not find any valid absences from Ids provided", request.JobId);
 
-            return Result.Failure(Error.None);
+            return Result.Failure(DomainErrors.Absences.Absence.NotFound(request.AbsenceIds.First()));
         }
 
         List<EmailRecipient> recipients = new();
@@ -99,10 +101,17 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
                 absence.PeriodName,
                 absence.PeriodTimeframe,
                 offering.Name,
-                absence.AbsenceTimeframe));
+                absence.AbsenceTimeframe,
+                absence.AbsenceLength));
         }
 
         EmailDtos.SentEmail sentEmail = await _emailService.SendStudentPartialAbsenceExplanationRequest(absenceEntries, student, recipients, cancellationToken);
+
+        if (sentEmail is null)
+        {
+            return Result.Failure(new("Gateway.Email", "Failed to send email"));
+        }
+
         foreach (Absence absence in absences)
         {
             absence.AddNotification(NotificationType.Email, sentEmail.message, student.EmailAddress, sentEmail.id, _dateTime.Now);
@@ -110,10 +119,6 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
             foreach (EmailRecipient recipient in recipients)
                 _logger.Information("{id}: Message sent via Email to {student} ({email}) for Partial Absence on {Date}", request.JobId, recipient.Name, recipient.Email, absence.Date.ToShortDateString());
         }
-
-        recipients = null;
-        absences = null;
-        absenceEntries = null;
 
         return Result.Success();
     }

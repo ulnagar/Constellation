@@ -4,7 +4,6 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Core.Abstractions.Clock;
 using Microsoft.EntityFrameworkCore;
@@ -143,6 +142,50 @@ public class AbsenceRepository : IAbsenceRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Absence>> GetUnexplainedPartialAbsencesForStudentWithDelay(
+        string studentId,
+        int ageInWeeks,
+        CancellationToken cancellationToken = default)
+    {
+        DateTime seenAfter = DateTime.Today.AddDays(-(ageInWeeks * 7));
+        DateTime seenBefore = DateTime.Today.AddDays(-(ageInWeeks - 1) * 7 - 1);
+
+        return await _context
+            .Set<Absence>()
+            .Where(absence =>
+                absence.Date > _dateTime.FirstDayOfYear &&
+                absence.StudentId == studentId &&
+                !absence.Explained &&
+                absence.Type == AbsenceType.Partial &&
+                absence.FirstSeen >= seenAfter &&
+                absence.FirstSeen <= seenBefore &&
+                absence.Responses.All(response =>
+                    response.Type != ResponseType.Student))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<Absence>> GetUnverifiedPartialAbsencesForStudentWithDelay(
+        string studentId,
+        int ageInWeeks,
+        CancellationToken cancellationToken = default)
+    {
+        DateTime seenAfter = DateTime.Today.AddDays(-(ageInWeeks * 7));
+        DateTime seenBefore = DateTime.Today.AddDays(-(ageInWeeks - 1) * 7 - 1);
+
+        return await _context
+            .Set<Absence>()
+            .Where(absence =>
+                absence.Date > _dateTime.FirstDayOfYear &&
+                absence.StudentId == studentId &&
+                !absence.Explained &&
+                absence.Type == AbsenceType.Partial &&
+                absence.Responses.Any(response =>
+                    response.Type == ResponseType.Student &&
+                    response.VerificationStatus == ResponseVerificationStatus.Pending &&
+                    response.ReceivedAt >= seenAfter &&
+                    response.ReceivedAt <= seenBefore))
+            .ToListAsync(cancellationToken);
+    }
     public async Task<List<Absence>> GetForStudentFromDateRange(
         string studentId, 
         DateOnly startDate, 
