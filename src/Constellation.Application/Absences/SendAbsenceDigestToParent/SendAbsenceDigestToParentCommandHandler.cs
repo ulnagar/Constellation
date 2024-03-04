@@ -1,18 +1,18 @@
 ﻿namespace Constellation.Application.Absences.SendAbsenceDigestToParent;
 
-using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
+using ConvertAbsenceToAbsenceEntry;
+using Abstractions.Messaging;
+using DTOs;
+using Interfaces.Repositories;
+using Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Shared;
+using Core.ValueObjects;
 using Core.Abstractions.Clock;
 using Core.Models.Students.Errors;
 using Serilog;
@@ -66,31 +66,32 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
         List<Absence> digestWholeAbsences = await _absenceRepository.GetUnexplainedWholeAbsencesForStudentWithDelay(student.StudentId, 1, cancellationToken);
         List<Absence> digestPartialAbsences = await _absenceRepository.GetUnexplainedPartialAbsencesForStudentWithDelay(student.StudentId, 1, cancellationToken);
 
-        if (digestWholeAbsences.Any() || digestPartialAbsences.Any())
+        if (!digestWholeAbsences.Any() && !digestPartialAbsences.Any())
+            return Result.Success();
+
+        List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
+
+        foreach (Family family in families)
         {
-            List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
-            List<Parent> parents = families.SelectMany(family => family.Parents).ToList();
             List<EmailRecipient> recipients = new();
 
-            foreach (Family family in families)
-            {
-                Result<EmailRecipient> result = EmailRecipient.Create(family.FamilyTitle, family.FamilyEmail);
+            Result<EmailRecipient> familyEmail = EmailRecipient.Create(family.FamilyTitle, family.FamilyEmail);
 
-                if (result.IsSuccess)
-                    recipients.Add(result.Value);
-            }
+            if (familyEmail.IsSuccess)
+                recipients.Add(familyEmail.Value);
 
-            foreach (Parent parent in parents)
+            foreach (Parent parent in family.Parents)
             {
                 Result<Name> nameResult = Name.Create(parent.FirstName, string.Empty, parent.LastName);
 
                 if (nameResult.IsFailure)
                     continue;
 
-                Result<EmailRecipient> result = EmailRecipient.Create(nameResult.Value.DisplayName, parent.EmailAddress);
+                Result<EmailRecipient> parentEmail = EmailRecipient.Create(nameResult.Value.DisplayName, parent.EmailAddress);
 
-                if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))
-                    recipients.Add(result.Value);
+                if (parentEmail.IsSuccess && 
+                    recipients.All(recipient => parentEmail.Value.Email != recipient.Email))
+                    recipients.Add(parentEmail.Value);
             }
 
             if (recipients.Any())
@@ -98,10 +99,10 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
                 List<AbsenceEntry> wholeAbsenceEntries = await ProcessAbsences(digestWholeAbsences, cancellationToken);
                 List<AbsenceEntry> partialAbsenceEntries = await ProcessAbsences(digestPartialAbsences, cancellationToken);
 
-                if (!wholeAbsenceEntries.Any() && !partialAbsenceEntries.Any()) 
+                if (!wholeAbsenceEntries.Any() && !partialAbsenceEntries.Any())
                     return Result.Success();
 
-                EmailDtos.SentEmail sentMessage = await _emailService.SendParentAbsenceDigest(wholeAbsenceEntries, partialAbsenceEntries, student, recipients, cancellationToken);
+                EmailDtos.SentEmail sentMessage = await _emailService.SendParentAbsenceDigest(family.FamilyTitle, wholeAbsenceEntries, partialAbsenceEntries, student, recipients, cancellationToken);
 
                 if (sentMessage is null)
                     return Result.Failure(new("Gateway.Email", "Failed to send email"));

@@ -113,6 +113,28 @@ public class Gateway : IEmailGateway
     public Task<MimeMessage> Send(
         List<EmailRecipient> toRecipients,
         List<EmailRecipient> ccRecipients,
+        string fromAddress,
+        string subject,
+        string body,
+        ICollection<Attachment> attachments,
+        string calendarInfo,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAll(
+            toRecipients,
+            ccRecipients,
+            null,
+            fromAddress,
+            subject,
+            body,
+            attachments,
+            calendarInfo,
+            cancellationToken);
+    }
+
+    public Task<MimeMessage> Send(
+        List<EmailRecipient> toRecipients,
+        List<EmailRecipient> ccRecipients,
         List<EmailRecipient> bccRecipients,
         string fromAddress,
         string subject,

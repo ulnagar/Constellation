@@ -91,47 +91,6 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
             return Result.Failure(IntegrationErrors.Absences.Notifications.Parents.NoAbsencesDetected);
         }
 
-        List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
-        List<Parent> parents = families.SelectMany(family => family.Parents).ToList();
-
-        List<string> numbers = parents
-            .Select(parent => parent.MobileNumber)
-            .Distinct()
-            .ToList();
-
-        List<PhoneNumber> phoneNumbers = new();
-
-        foreach (string number in numbers)
-        {
-            Result<PhoneNumber> result = PhoneNumber.Create(number);
-
-            if (result.IsSuccess)
-                phoneNumbers.Add(result.Value);
-        }
-
-        List<EmailRecipient> recipients = new();
-
-        foreach (Family family in families)
-        {
-            Result<EmailRecipient> result = EmailRecipient.Create(family.FamilyTitle, family.FamilyEmail);
-
-            if (result.IsSuccess)
-                recipients.Add(result.Value);
-        }
-
-        foreach (Parent parent in parents)
-        {
-            Result<Name> nameResult = Name.Create(parent.FirstName, string.Empty, parent.LastName);
-
-            if (nameResult.IsFailure)
-                continue;
-
-            Result<EmailRecipient> result = EmailRecipient.Create(nameResult.Value.DisplayName, parent.EmailAddress);
-
-            if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))
-                recipients.Add(result.Value);
-        }
-
         List<AbsenceEntry> absenceEntries = new();
 
         foreach (Absence absence in absences)
@@ -153,75 +112,129 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
 
         List<IGrouping<DateOnly, AbsenceEntry>> groupedAbsences = absenceEntries.GroupBy(absence => absence.Date).ToList();
 
-        foreach (IGrouping<DateOnly, AbsenceEntry> group in groupedAbsences)
+        List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
+
+        foreach (Family family in families)
         {
-            if (phoneNumbers.Any() && group.Key == DateOnly.FromDateTime(DateTime.Today.AddDays(-1)))
+            List<EmailRecipient> recipients = new();
+            List<PhoneNumber> phoneNumbers = new();
+
+            Result<EmailRecipient> familyEmail = EmailRecipient.Create(family.FamilyTitle, family.FamilyEmail);
+
+            if (familyEmail.IsSuccess)
+                recipients.Add(familyEmail.Value);
+
+            List<string> numbers = family.Parents
+                .Select(parent => parent.MobileNumber)
+                .Distinct()
+                .ToList();
+
+            foreach (string number in numbers)
             {
-                SMSMessageCollectionDto sentMessages = await _smsService.SendAbsenceNotification(
-                    group.ToList(),
-                    student,
-                    phoneNumbers,
-                    cancellationToken);
+                Result<PhoneNumber> result = PhoneNumber.Create(number);
 
-                if (sentMessages == null)
+                if (result.IsSuccess)
+                    phoneNumbers.Add(result.Value);
+            }
+
+            foreach (Parent parent in family.Parents)
+            {
+                Result<Name> nameResult = Name.Create(parent.FirstName, string.Empty, parent.LastName);
+
+                if (nameResult.IsFailure)
+                    continue;
+
+                Result<EmailRecipient> result =
+                    EmailRecipient.Create(nameResult.Value.DisplayName, parent.EmailAddress);
+
+                if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))
+                    recipients.Add(result.Value);
+            }
+
+            foreach (IGrouping<DateOnly, AbsenceEntry> group in groupedAbsences)
+            {
+                if (phoneNumbers.Any() && group.Key == DateOnly.FromDateTime(DateTime.Today.AddDays(-1)))
                 {
-                    // SMS Gateway failed. Send via email instead.
-                    _logger.Warning("{id}: SMS Sending Failed! Fallback to Email notifications.", request.JobId);
+                    SMSMessageCollectionDto sentMessages = await _smsService.SendAbsenceNotification(
+                        group.ToList(),
+                        student,
+                        phoneNumbers,
+                        cancellationToken);
 
-                    if (recipients.Any())
+                    if (sentMessages == null)
                     {
-                        EmailDtos.SentEmail message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), student, recipients, cancellationToken);
+                        // SMS Gateway failed. Send via email instead.
+                        _logger.Warning("{id}: SMS Sending Failed! Fallback to Email notifications.", request.JobId);
 
-                        foreach (AbsenceEntry entry in group)
+                        if (recipients.Any())
                         {
-                            string emails = string.Join(", ", recipients.Select(entry => entry.Email));
-                            Absence absence = absences.First(absence => absence.Id == entry.Id);
+                            EmailDtos.SentEmail message =
+                                await _emailService.SendParentWholeAbsenceAlert(group.ToList(), student, recipients,
+                                    cancellationToken);
 
-                            absence.AddNotification(NotificationType.Email, message.message, emails, message.id, _dateTime.Now);
+                            foreach (AbsenceEntry entry in group)
+                            {
+                                string emails = string.Join(", ", recipients.Select(entry => entry.Email));
+                                Absence absence = absences.First(absence => absence.Id == entry.Id);
 
-                            foreach (EmailRecipient recipient in recipients)
-                                _logger.Information("{id}: Message sent via Email to {email} for Whole Absence on {Date}", request.JobId, recipient.Email, group.Key.ToShortDateString());
+                                absence.AddNotification(NotificationType.Email, message.message, emails, message.id,
+                                    _dateTime.Now);
+
+                                foreach (EmailRecipient recipient in recipients)
+                                    _logger.Information(
+                                        "{id}: Message sent via Email to {email} for Whole Absence on {Date}",
+                                        request.JobId, recipient.Email, group.Key.ToShortDateString());
+                            }
+                        }
+                        else
+                        {
+                            _logger.Error("{id}: Email addresses not found! Parents have not been notified!",
+                                request.JobId);
                         }
                     }
-                    else
+
+                    // Once the message has been sent, add it to the database.
+                    if (sentMessages.Messages.Count > 0)
                     {
-                        _logger.Error("{id}: Email addresses not found! Parents have not been notified!", request.JobId);
+                        foreach (AbsenceEntry entry in group)
+                        {
+                            string sentToNumbers = string.Join(", ",
+                                phoneNumbers.Select(entry => entry.ToString(PhoneNumber.Format.Mobile)));
+                            Absence absence = absences.First(absence => absence.Id == entry.Id);
+
+                            absence.AddNotification(NotificationType.SMS, sentMessages.Messages.First().MessageBody,
+                                sentToNumbers, sentMessages.Messages.First().OutgoingId, _dateTime.Now);
+
+                            foreach (PhoneNumber number in phoneNumbers)
+                                _logger.Information(
+                                    "{id}: Message sent via SMS to {number} for Whole Absence on {Date}", request.JobId,
+                                    number.ToString(PhoneNumber.Format.Mobile), group.Key.ToShortDateString());
+                        }
                     }
                 }
-
-                // Once the message has been sent, add it to the database.
-                if (sentMessages.Messages.Count > 0)
+                else if (recipients.Any())
                 {
+                    EmailDtos.SentEmail message =
+                        await _emailService.SendParentWholeAbsenceAlert(group.ToList(), student, recipients,
+                            cancellationToken);
+
                     foreach (AbsenceEntry entry in group)
                     {
-                        string sentToNumbers = string.Join(", ", phoneNumbers.Select(entry => entry.ToString(PhoneNumber.Format.Mobile)));
+                        string emails = string.Join(", ", recipients.Select(entry => entry.Email));
                         Absence absence = absences.First(absence => absence.Id == entry.Id);
 
-                        absence.AddNotification(NotificationType.SMS, sentMessages.Messages.First().MessageBody, sentToNumbers, sentMessages.Messages.First().OutgoingId, _dateTime.Now);
+                        absence.AddNotification(NotificationType.Email, message.message, emails, message.id,
+                            _dateTime.Now);
 
-                        foreach (PhoneNumber number in phoneNumbers)
-                            _logger.Information("{id}: Message sent via SMS to {number} for Whole Absence on {Date}", request.JobId, number.ToString(PhoneNumber.Format.Mobile), group.Key.ToShortDateString());
+                        foreach (EmailRecipient recipient in recipients)
+                            _logger.Information("{id}: Message sent via Email to {email} for Whole Absence on {Date}",
+                                request.JobId, recipient.Email, group.Key.ToShortDateString());
                     }
                 }
-            }
-            else if (recipients.Any())
-            {
-                EmailDtos.SentEmail message = await _emailService.SendParentWholeAbsenceAlert(group.ToList(), student, recipients, cancellationToken);
-
-                foreach (AbsenceEntry entry in group)
+                else
                 {
-                    string emails = string.Join(", ", recipients.Select(entry => entry.Email));
-                    Absence absence = absences.First(absence => absence.Id == entry.Id);
-
-                    absence.AddNotification(NotificationType.Email, message.message, emails, message.id, _dateTime.Now);
-
-                    foreach (EmailRecipient recipient in recipients)
-                        _logger.Information("{id}: Message sent via Email to {email} for Whole Absence on {Date}", request.JobId, recipient.Email, group.Key.ToShortDateString());
+                    await _emailService.SendAdminAbsenceContactAlert(student.DisplayName);
                 }
-            }
-            else
-            {
-                await _emailService.SendAdminAbsenceContactAlert(student.DisplayName);
             }
         }
 

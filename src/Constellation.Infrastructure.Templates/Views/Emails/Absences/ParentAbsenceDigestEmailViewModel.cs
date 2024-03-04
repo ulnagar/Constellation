@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 public class ParentAbsenceDigestEmailViewModel : EmailLayoutBaseViewModel
 {
+    public string ParentName { get; set; }
     public string StudentFirstName { get; set; }
     public static string Link => "https://acos.aurora.nsw.edu.au/parents";
     public List<AbsenceEntry> WholeAbsences { get; set; } = new();

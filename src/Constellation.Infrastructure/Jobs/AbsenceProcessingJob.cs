@@ -817,14 +817,17 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             return null;
         }
 
+        // UPDATED 2024-03-04
+        // If "Shared Enrolment" is not included in the DiscountedWholeReasons collection, but a whole absence is made up
+        // of multiple partial absences, where one or more is "Shared Enrolment" and all the rest are included in the
+        // DiscountedWholeReasons collection, this should still be treated as an explained absence.
+
         // If all the parts of this whole absence have explained statuses, then record the explanation
         if (absencesToProcess.All(absence =>
-                _configuration.Absences.DiscountedWholeReasons.Contains(AbsenceReason.FromValue(absence.Reason))))
+                _configuration.Absences.DiscountedWholeReasons.Contains(AbsenceReason.FromValue(absence.Reason)) ||
+                absence.Reason.Equals(AbsenceReason.SharedEnrolment)))
         {
             // This absence has been externally explained
-            SentralPeriodAbsenceDto absenceDto = absencesToProcess.First(absence => 
-                AbsenceReason.FromValue(absence.Reason) == reason);
-
             absenceRecord.AddResponse(
                 ResponseType.System,
                 attendanceAbsence.ExternalExplanationSource,

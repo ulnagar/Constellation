@@ -14,6 +14,7 @@ public interface IEmailGateway
     Task<MimeMessage> Send(List<EmailRecipient> toRecipients, string fromAddress, string subject, string body, ICollection<Attachment> attachments, CancellationToken cancellationToken = default);
     Task<MimeMessage> Send(List<EmailRecipient> toRecipients, List<EmailRecipient> ccRecipients, string fromAddress, string subject, string body, CancellationToken cancellationToken = default);
     Task<MimeMessage> Send(List<EmailRecipient> toRecipients, List<EmailRecipient> ccRecipients, string fromAddress, string subject, string body, ICollection<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task<MimeMessage> Send(List<EmailRecipient> toRecipients, List<EmailRecipient> ccRecipients, string fromAddress, string subject, string body, ICollection<Attachment> attachments, string calendarInfo, CancellationToken cancellationToken = default);
     Task<MimeMessage> Send(List<EmailRecipient> toRecipients, List<EmailRecipient> ccRecipients, List<EmailRecipient> bccRecipients, string fromAddress, string subject, string body, CancellationToken cancellationToken = default);
     Task<MimeMessage> Send(List<EmailRecipient> toRecipients, List<EmailRecipient> ccRecipients, List<EmailRecipient> bccRecipients, string fromAddress, string subject, string body, ICollection<Attachment> attachments, CancellationToken cancellationToken = default);
 

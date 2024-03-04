@@ -11,15 +11,15 @@
 }
 
 <p>Dear @Model.StudentName.FirstName,</p>
-<p>Regular attendance at school is essential if students are to achieve their educational best, social and psychological potential, and increase their career and life options.</p>
-<p>Our records show you were absent for portions of the following classes last week and no explanation has been provided. To prevent these absences being marked as unjustified, please submit an explanation which we will send to your Aurora College Coordinator for confirmation.</p>
+<p>For every student, a positive experience at school begins with consistent attendance. The evidence is clear that the more time you attend school, the greater your opportunity to learn, make new friends and improve wellbeing.</p>
+<p>Our records show you were absent for portions of the following classes last week and no explanation has been provided. To prevent these absences being marked as unjustified, please submit an explanation which we will then send to your Aurora College Coordinator for confirmation.</p>
 <dl>
     @foreach (var entry in Model.PartialAbsences)
     {
         <dt>@entry.Date.ToLongDateString()</dt>
         <dd>
             @entry.PeriodName (@entry.PeriodTimeframe) - @entry.OfferingName<br/>
-            @entry.AbsenceTimeframe (@entry.AbsenceLength minutes)
+            Absent: @entry.AbsenceTimeframe (@entry.AbsenceLength minutes)
         </dd>
     }
 </dl>

@@ -56,59 +56,53 @@ internal sealed class SendMissedWorkEmailToStudentCommandHandler
         }
 
         List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
-        List<Parent> parents = families.SelectMany(family => family.Parents).ToList();
 
-        List<string> numbers = parents
-            .Select(parent => parent.MobileNumber)
-            .Distinct()
-            .ToList();
-
-        List<EmailRecipient> recipients = new();
-
-        Result<EmailRecipient> studentEmailResult = EmailRecipient.Create(student.GetName()?.DisplayName, student.EmailAddress);
-
-        if (studentEmailResult.IsFailure)
+        foreach (var family in families)
         {
-            _logger
-                .ForContext("Error", studentEmailResult.Error, true)
-                .Warning("{jobId}: Could not create email recipient from student {name}", request.JobId, student.GetName()?.DisplayName);
+            List<EmailRecipient> recipients = new();
 
-            return Result.Failure(studentEmailResult.Error);
+            Result<EmailRecipient> studentEmailResult = EmailRecipient.Create(student.GetName()?.DisplayName, student.EmailAddress);
+
+            if (studentEmailResult.IsFailure)
+            {
+                _logger
+                    .ForContext("Error", studentEmailResult.Error, true)
+                    .Warning("{jobId}: Could not create email recipient from student {name}", request.JobId, student.GetName()?.DisplayName);
+
+                return Result.Failure(studentEmailResult.Error);
+            }
+
+            recipients.Add(studentEmailResult.Value);
+
+            Result<EmailRecipient> familyEmail = EmailRecipient.Create(family.FamilyTitle, family.FamilyEmail);
+
+            if (familyEmail.IsSuccess)
+                recipients.Add(familyEmail.Value);
+
+            foreach (Parent parent in family.Parents)
+            {
+                Result<Name> nameResult = Name.Create(parent.FirstName, string.Empty, parent.LastName);
+
+                if (nameResult.IsFailure)
+                    continue;
+
+                Result<EmailRecipient> result = EmailRecipient.Create(nameResult.Value.DisplayName, parent.EmailAddress);
+
+                if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))
+                    recipients.Add(result.Value);
+            }
+
+            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
+            Course course = offering is not null ? await _courseRepository.GetById(offering.CourseId, cancellationToken) : null;
+
+            await _emailService.SendMissedWorkEmail(
+                student,
+                course is not null ? course.Name : string.Empty,
+                offering is not null ? offering.Name : string.Empty,
+                request.AbsenceDate,
+                recipients,
+                cancellationToken);
         }
-
-        recipients.Add(studentEmailResult.Value);
-
-        foreach (Family family in families)
-        {
-            Result<EmailRecipient> result = EmailRecipient.Create(family.FamilyTitle, family.FamilyEmail);
-
-            if (result.IsSuccess)
-                recipients.Add(result.Value);
-        }
-
-        foreach (Parent parent in parents)
-        {
-            Result<Name> nameResult = Name.Create(parent.FirstName, string.Empty, parent.LastName);
-
-            if (nameResult.IsFailure)
-                continue;
-
-            Result<EmailRecipient> result = EmailRecipient.Create(nameResult.Value.DisplayName, parent.EmailAddress);
-
-            if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))
-                recipients.Add(result.Value);
-        }
-
-        Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
-        Course course = offering is not null ? await _courseRepository.GetById(offering.CourseId, cancellationToken) : null;
-
-        await _emailService.SendMissedWorkEmail(
-            student, 
-            course is not null ? course.Name : string.Empty,
-            offering is not null ? offering.Name : string.Empty,
-            request.AbsenceDate,
-            recipients,
-            cancellationToken);
 
         return Result.Success();
     }
