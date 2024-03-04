@@ -114,17 +114,17 @@ internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJ
                     }
                 }
 
-                if (staffMember.IsShared)
-                {
-                    School sharedSchool = await _schoolRepository.GetById(staffMember.SchoolCode, cancellationToken);
+                //if (staffMember.IsShared)
+                //{
+                //    School sharedSchool = await _schoolRepository.GetById(staffMember.SchoolCode, cancellationToken);
 
-                    List<SchoolContact> sharedSchoolPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(staffMember.SchoolCode, cancellationToken);
+                //    List<SchoolContact> sharedSchoolPrincipals = await _schoolContactRepository.GetPrincipalsForSchool(staffMember.SchoolCode, cancellationToken);
 
-                    foreach (SchoolContact principal in sharedSchoolPrincipals)
-                    {
-                        entry.AddPrincipalDetails(principal, sharedSchool);
-                    }
-                }
+                //    foreach (SchoolContact principal in sharedSchoolPrincipals)
+                //    {
+                //        entry.AddPrincipalDetails(principal, sharedSchool);
+                //    }
+                //}
 
                 //School localSchool = await _schoolRepository.GetById("8912", cancellationToken);
 
