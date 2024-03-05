@@ -1,4 +1,135 @@
 ﻿@page
+@using Constellation.Core.Models.ThirdPartyConsent.Enums
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Consent.Responses.UpsertModel
 @{
+}
+
+<h2>Add Consent Response</h2>
+
+<form method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group row">
+            <label asp-for="StudentId" class="col-md-2">Student</label>
+            <div class="col-md-5">
+                <input asp-for="StudentId" class="form-control" />
+                <span asp-validation-for="StudentId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Submitter" class="col-md-2">Submitter</label>
+            <div class="col-md-8">
+                <input asp-for="Submitter" class="form-control" />
+                <span asp-validation-for="Submitter" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="Method" class="col-md-2">Method</label>
+            <div class="col-md-8">
+                <select asp-for="Method" class="form-control">
+                    <option value="@ConsentMethod.Email.Value">@ConsentMethod.Email.Name</option>
+                    <option value="@ConsentMethod.PhoneCall.Value">@ConsentMethod.PhoneCall.Name</option>
+                </select>
+                <span asp-validation-for="Method" class="text-danger"></span>
+            </div>
+        </div>
+
+
+        <div class="form-group row">
+            <label asp-for="Responses" class="col-md-2">Consent Responses</label>
+            <div class="col-md-8">
+                <button type="button" class="btn btn-success" onclick="addApplicationRow()">Add Application</button>
+                <span asp-validation-for="Responses" class="text-danger"></span>
+                <div id="consent-rows"></div>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Notes" class="col-md-2">Notes</label>
+            <div class="col-md-8">
+                <input asp-for="Notes" class="form-control" />
+                <span asp-validation-for="Notes" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-none">
+        <div class="input-group" id="consent-template">
+            <!-- 
+                TODO: Try to update this to include select2 box with search
+                https://stackoverflow.com/a/56710244 
+            -->
+            <select class="custom-select form-control" name="Responses[999].ApplicationId">
+                <option value="@Guid.Empty"> -- Select Application -- </option>
+                @foreach (var entry in Model.Applications)
+                {
+                    <option value="@entry.Id.Value">@entry.Name</option>
+                }
+            </select>
+            <div class="input-group-append">
+                <input type="hidden" name="Responses[999].Consent"/>
+                <button class="btn btn-outline-success" type="button">
+                    <i class="fal fa-check"></i>
+                </button>
+                <button class="btn btn-outline-danger" type="button">
+                    <i class="fal fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function consentProvided(event) {
+            var index = event.data.index;
+
+            // Update hidden field to have value of true
+            $('#consent-' + index + ' .input-group-append input:hidden').val('true');
+            
+            // Update buttons to have solid check and outline times
+            $('#consent-' + index + ' .input-group-append .btn-outline-success').addClass('btn-success');
+            $('#consent-' + index + ' .input-group-append .btn-outline-success').removeClass('btn-outline-success');
+            $('#consent-' + index + ' .input-group-append .btn-danger').addClass('btn-outline-danger');
+            $('#consent-' + index + ' .input-group-append .btn-danger').removeClass('btn-danger');
+        }
+
+        function consentDenied(event) {
+            var index = event.data.index;
+
+            // Update hidden field to have value of true
+            $('#consent-' + index + ' .input-group-append input:hidden').val('false');
+
+            // Update buttons to have solid check and outline times
+            $('#consent-' + index + ' .input-group-append .btn-success').addClass('btn-outline-success');
+            $('#consent-' + index + ' .input-group-append .btn-success').removeClass('btn-success');
+            $('#consent-' + index + ' .input-group-append .btn-outline-danger').addClass('btn-danger');
+            $('#consent-' + index + ' .input-group-append .btn-outline-danger').removeClass('btn-outline-danger');
+        }
+
+        function addApplicationRow() {
+            var index = $('#consent-rows').children().length;
+
+            // Clone hidden template group
+            var clone = $('#consent-template').clone(true, true);
+            clone.prop('id', 'consent-' + index);
+            //clone.find('#consent-template').prop('id', 'consent-' + index);
+            clone.find('.custom-select').prop('name', 'Responses[' + index + '].ApplicationId');
+            clone.find('input:hidden').prop('name', 'Responses[' + index + '].Consent');
+            clone.find('.btn-outline-success').on('click', { index: index }, consentProvided);
+            clone.find('.btn-outline-danger').on('click', { index: index }, consentDenied);
+            $('#consent-rows').append(clone);
+        }
+    </script>
 }

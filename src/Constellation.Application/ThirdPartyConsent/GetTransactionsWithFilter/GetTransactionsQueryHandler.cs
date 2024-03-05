@@ -1,16 +1,15 @@
-﻿namespace Constellation.Application.ThirdPartyConsent.GetTransactions;
+﻿namespace Constellation.Application.ThirdPartyConsent.GetTransactionsWithFilter;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.ThirdPartyConsent.Models;
+using Constellation.Core.Models.Students;
+using Constellation.Core.Models.ThirdPartyConsent;
 using Constellation.Core.Models.ThirdPartyConsent.Errors;
+using Constellation.Core.Models.ThirdPartyConsent.Identifiers;
 using Constellation.Core.Models.ThirdPartyConsent.Repositories;
-using Core.Models.Students;
-using Core.Models.ThirdPartyConsent;
-using Core.Models.ThirdPartyConsent.Identifiers;
-using Core.Shared;
-using GetTransactionsWithFilter;
-using Newtonsoft.Json.Serialization;
+using Constellation.Core.Shared;
+using GetTransactions;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,7 +67,7 @@ internal sealed class GetTransactionsWithFilterQueryHandler
 
         List<Application> applications = await _consentRepository.GetAllActiveApplications(cancellationToken);
 
-        foreach (Student student in students)
+        foreach (Student student in students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName))
         {
             List<Transaction> transactions =
                 await _consentRepository.GetTransactionsByStudentId(student.StudentId, cancellationToken);
