@@ -170,7 +170,7 @@ public class IndexModel : BasePageModel
             offeringIds,
             Filter.Grades,
             Filter.Schools,
-            Filter.Students));
+            Filter.Students), cancellationToken);
 
         if (result.IsFailure)
         {

@@ -1,13 +1,26 @@
 ﻿@page
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Consent.Responses.IndexModel
+
 @using Constellation.Core.Extensions
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @using Constellation.Core.Enums
-@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Consent.Responses.IndexModel
+
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+}
 
 <h2>Consent Responses</h2>
 
 <div class="page-menu">
     <button type="button" class="btn btn-warning" data-toggle="collapse" data-target="#filterDefinition" aria-expanded="false" aria-controls="filterDefinition">Show Filter</button>
+    
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="/Consent/Responses/Upsert" asp-area="SchoolAdmin" class="btn btn-primary">Create New</a>
+    }
+
 </div>
 
 <div id="filterDefinition" class="collapse">
@@ -74,15 +87,21 @@
                 <td>
                     @if (!app.MostRecentResponse)
                     {
-                        <span class="badge badge-secondary">@app.ApplicationName</span>
+                        <span class="badge badge-secondary">
+                            <i class="fal fa-eye-slash"></i> @app.ApplicationName
+                        </span>
                     }
                     else if (app.ConsentProvided)
                     {
-                        <span class="badge badge-success">@app.ApplicationName</span>
+                        <span class="badge badge-success">
+                            <i class="fal fa-check"></i> @app.ApplicationName
+                        </span>
                     }
                     else
                     {
-                        <span class="badge badge-danger">@app.ApplicationName</span>
+                        <span class="badge badge-danger">
+                            <i class="fal fa-times"></i> @app.ApplicationName
+                        </span>
                     }
                 </td>
                 <td>

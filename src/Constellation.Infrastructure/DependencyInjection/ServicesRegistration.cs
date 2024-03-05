@@ -31,22 +31,6 @@ public static class ServicesRegistration
         // Add Logging
         services.AddSingleton(Log.Logger);
 
-        // Add AutoMapper and AbstractValidator
-
-        services.AddAutoMapper(Constellation.Application.AssemblyReference.Assembly);
-        services.AddValidatorsFromAssembly(Constellation.Application.AssemblyReference.Assembly);
-
-        // Add Mediatr
-
-        services.AddMediatR(new[]
-        {
-            Constellation.Application.AssemblyReference.Assembly,
-            Constellation.Core.AssemblyReference.Assembly
-        });
-
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(BusinessValidationBehaviour<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));
-
         // Add IOptions
         services.AddOptions<AppConfiguration>();
         services.Configure<AppConfiguration>(configuration.GetSection(AppConfiguration.Section));
