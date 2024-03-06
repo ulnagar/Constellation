@@ -472,3 +472,8 @@ a.Senior-5:focus, a.Senior-5.focus {
     outline: 0;
     box-shadow: 0 0 0 0.2rem rgba(248, 249, 250, 0.5);
 }
+
+/* Consent Upsert Dynamic Select2 Style */
+.input-group .select2-container--bootstrap .select2-selection--single {
+    width: 100%;
+}

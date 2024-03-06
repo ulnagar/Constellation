@@ -40,7 +40,6 @@ internal sealed class RequestLoggingPipelineBehaviour<TRequest, TResponse>
         else
             _logger
                 .ForContext(requestName, request, true)
-                .ForContext(typeof(TResponse).Name, result, true)
                 .ForContext(nameof(Error), result.Error, true)
                 .Information("Failed to complete request {request}", requestName);
 
