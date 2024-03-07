@@ -57,7 +57,7 @@
 </div>
 
 <div class="main-content">
-    <div class="alert alert-info alert-dismissible fade show">
+    <div class="alert alert-info alert-dismissible fade show feature-alert d-none" data-version="1.14.4">
         <h4 class="alert-heading">New Features!</h4>
         <p>The latest feature added to Constellation is the Third Party Consent. You can now see whether students have permission to use third party applications by selecting the SchoolAdmin menu above, then the Third Party Consent menu option.</p>
         <p>Please be patient while we collect permission from parents. If you have any questions, please contact the Technology Support Team at <a href="mailto:support@aurora.nsw.edu.au" class="alert-link">support@aurora.nsw.edu.au</a></p>
@@ -88,6 +88,18 @@
                     }
                 }
             });
+
+            var featureAlert = $('.feature-alert');
+            var version = featureAlert.data('version');
+
+            if (localStorage.getItem('feature-alert-' + version) === null) 
+            {
+                featureAlert.removeClass('d-none');
+
+                featureAlert.on('closed.bs.alert', function () {
+                    localStorage.setItem('feature-alert-' + version, 'closed');
+                });
+            }
         });
     </script>
 }
