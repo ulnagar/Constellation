@@ -1,5 +1,5 @@
 ﻿@page
-@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards
+
 @model Constellation.Presentation.Server.Areas.Home.Pages.DashboardModel
 
 <style>
@@ -14,17 +14,24 @@
         float: right;
     }
 
-    .text-center {
+    .page-heading {
         padding-bottom: 0.5rem;
         margin-bottom: 1rem;
         border-bottom: 2px solid orange;
     }
 </style>
 
-<div class="text-center">
-    <h2>Welcome, @Model.UserName</h2>
+<div class="page-heading">
+    <h2 class="text-center m-2">Welcome, @Model.UserName</h2>
+    
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <div class="alert alert-success">
+            <span><span class="font-weight-bold">Daily Affirmation:</span> @Model.Message</span>
+        </div>
+    }
 
-@*    <div class="alert alert-info text-left mt-3" role="alert">
+    @*    <div class="alert alert-info text-left mt-3" role="alert">
         <h4 class="alert-heading">Stocktake</h4>
         <p>Please take the time to register your Aurora College equipment in the current stocktake. Click <a class="alert-link" asp-area="Equipment" asp-controller="Stocktake" asp-action="StaffDashboard" asp-route-id="256d068a-d8cc-4220-ec2b-08da5fb7be30">here</a> to view the stocktake details, or use the stocktake button in the Quick Links section below.</p>
     </div>*@
@@ -50,13 +57,14 @@
 </div>
 
 <div class="main-content">
-    @if (!string.IsNullOrWhiteSpace(Model.Message))
-    {
-        <div class="alert alert-success">
-            <h5 class="alert-heading">Daily Affirmation</h5>
-            <p>@Model.Message</p>
-        </div>
-    }
+    <div class="alert alert-info alert-dismissible fade show">
+        <h4 class="alert-heading">New Features!</h4>
+        <p>The latest feature added to Constellation is the Third Party Consent. You can now see whether students have permission to use third party applications by selecting the SchoolAdmin menu above, then the Third Party Consent menu option.</p>
+        <p>Please be patient while we collect permission from parents. If you have any questions, please contact the Technology Support Team at <a href="mailto:support@aurora.nsw.edu.au" class="alert-link">support@aurora.nsw.edu.au</a></p>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
     
     <div class="row row-cols-1 row-cols-md-3" id="sortable-cards">
         <vc:show-dashboard-widgets user="@Model.User" />
