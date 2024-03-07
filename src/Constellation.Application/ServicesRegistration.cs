@@ -25,7 +25,7 @@ public static class ServicesRegistration
         });
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ExceptionHandlingPipelineBehaviour<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestLoggingPipelineBehaviour<,>));
+        //services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestLoggingPipelineBehaviour<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationPipelineBehaviour<,>));
 
         services.AddScoped<IAttachmentService, AttachmentService>();
