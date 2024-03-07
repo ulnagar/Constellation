@@ -4,7 +4,6 @@ using Constellation.Core.Errors;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 public sealed class EmailRecipient : ValueObject
 {
@@ -16,20 +15,13 @@ public sealed class EmailRecipient : ValueObject
 
     public static Result<EmailRecipient> Create(string name, string email)
     {
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            return Result.Failure<EmailRecipient>(DomainErrors.ValueObjects.EmailAddress.EmailEmpty);
-        }
+        Result<EmailAddress> address = EmailAddress.Create(email);
 
-        if (!(new EmailAddressAttribute().IsValid(email)))
-        {
-            return Result.Failure<EmailRecipient>(DomainErrors.ValueObjects.EmailAddress.EmailInvalid);
-        }
+        if (address.IsFailure)
+            return Result.Failure<EmailRecipient>(address.Error);
 
         if (string.IsNullOrWhiteSpace(name))
-        {
             return Result.Failure<EmailRecipient>(DomainErrors.ValueObjects.EmailRecipient.NameEmpty);
-        }
 
         return new EmailRecipient(name, email);
     }

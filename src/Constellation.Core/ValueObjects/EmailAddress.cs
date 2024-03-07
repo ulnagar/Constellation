@@ -4,11 +4,13 @@ using Constellation.Core.Errors;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 public sealed class EmailAddress : ValueObject
 {
-    public static EmailAddress None = new("");
+    private const string _emailRegex = @"^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$";
+
+    public static readonly EmailAddress None = new("");
 
     private EmailAddress(string email)
     {
@@ -18,14 +20,10 @@ public sealed class EmailAddress : ValueObject
     public static Result<EmailAddress> Create(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
-        {
             return Result.Failure<EmailAddress>(DomainErrors.ValueObjects.EmailAddress.EmailEmpty);
-        }
 
-        if (!(new EmailAddressAttribute().IsValid(email)))
-        {
+        if (!Regex.IsMatch(email, _emailRegex))
             return Result.Failure<EmailAddress>(DomainErrors.ValueObjects.EmailAddress.EmailInvalid);
-        }
 
         return new EmailAddress(email);
     }
@@ -37,8 +35,5 @@ public sealed class EmailAddress : ValueObject
         yield return Email;
     }
 
-    public override string ToString()
-    {
-        return Email;
-    }
+    public override string ToString() => Email;
 }
