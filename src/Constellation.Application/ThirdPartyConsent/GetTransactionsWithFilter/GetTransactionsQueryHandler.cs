@@ -45,7 +45,8 @@ internal sealed class GetTransactionsWithFilterQueryHandler
             !request.Grades.Any() &&
             !request.SchoolCodes.Any())
         {
-            students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+            // students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+            return response;
         }
 
         if (request.StudentIds.Any())
@@ -105,6 +106,9 @@ internal sealed class GetTransactionsWithFilterQueryHandler
 
                         continue;
                     }
+
+                    if (mostRecent is false)
+                        continue;
 
                     applicationEntries.Add(new(
                         application.Name,
