@@ -26,6 +26,10 @@ public static class StudentErrors
         "Student.NotFoundForGrade",
         $"No current students found linked to grade {grade}");
 
+    public static readonly Error NoneFoundFilter = new(
+        "Student.NoneFoundFilter",
+        $"No current students found that match the selected filter");
+
 
     public static readonly Error FirstNameInvalid = new(
         "Student.FirstNameInvalid",
