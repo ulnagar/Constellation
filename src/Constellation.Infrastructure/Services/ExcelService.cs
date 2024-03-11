@@ -1044,51 +1044,52 @@ public class ExcelService : IExcelService
                 continue;
 
             // Index 0: Student Id
-            // Index 1: Date Created
-            // Index 2: Date of Incident
-            // Index 3: Day
-            // Index 4: Incident
-            // Index 5: Student Was
-            // Index 6: Incident Time
-            // Index 7: Period
-            // Index 8: Subject
-            // Index 9: Category
-            // Index 10: Type
-            // Index 11: Sub Type
-            // Index 12: Incident Records Description
-            // Index 13: Incident Record Details
-            // Index 14: Incident Record Detail Options
-            // Index 15: Follow Up Action Comment
-            // Index 16: Follow Up Actions
-            // Index 17: Teacher
-            // Index 18: Student Surname,
-            // Index 19: Student First Name,
-            // Index 20: DOB
-            // Index 21: Years
-            // Index 22: Months
-            // Index 23: School Year
-            // Index 24: House
-            // Index 25: Roll Class
-            // Index 26: Location
+            // Index 1: Confidential
+            // Index 2: Date Created
+            // Index 3: Date of Incident
+            // Index 4: Day
+            // Index 5: Incident
+            // Index 6: Student Was
+            // Index 7: Incident Time
+            // Index 8: Period
+            // Index 9: Subject
+            // Index 10: Category
+            // Index 11: Type
+            // Index 12: Sub Type
+            // Index 13: Incident Records Description
+            // Index 14: Incident Record Details
+            // Index 15: Incident Record Detail Options
+            // Index 16: Follow Up Action Comment
+            // Index 17: Follow Up Actions
+            // Index 18: Teacher
+            // Index 19: Student Surname,
+            // Index 20: Student First Name,
+            // Index 21: DOB
+            // Index 22: Years
+            // Index 23: Months
+            // Index 24: School Year
+            // Index 25: House
+            // Index 26: Roll Class
+            // Index 27: Location
 
             string studentId = row[0].ToString();
 
-            DateOnly.TryParse(row[1].ToString(), out DateOnly dateCreated);
+            DateOnly.TryParse(row[2].ToString(), out DateOnly dateCreated);
 
             int severity = _dateTime.Today.DayNumber - dateCreated.DayNumber;
 
-            int gradeNum = Convert.ToInt32(row[23]);
+            int gradeNum = Convert.ToInt32(row[24]);
             Grade grade = (Grade)gradeNum;
             
             response.Add(new(
                 studentId,
                 dateCreated,
-                row[4].ToString().FormatField(),
-                row[8].ToString().FormatField(),
-                row[10].ToString().FormatField(),
-                row[17].ToString().FormatField(),
-                row[19].ToString().FormatField(),
+                row[5].ToString().FormatField(),
+                row[9].ToString().FormatField(),
+                row[11].ToString().FormatField(),
                 row[18].ToString().FormatField(),
+                row[20].ToString().FormatField(),
+                row[19].ToString().FormatField(),
                 grade,
                 severity));
         }
