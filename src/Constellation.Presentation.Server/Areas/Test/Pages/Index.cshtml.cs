@@ -1,9 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
-using Application.Absences.ExportUnexplainedPartialAbsencesReport;
 using BaseModels;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 
 public class IndexModel : BasePageModel
 {
@@ -14,7 +12,9 @@ public class IndexModel : BasePageModel
     {
         _mediator = mediator;
     }
-    
-    public async Task OnGet() { }
 
+    public async Task OnGet()
+    {
+
+    }
 }

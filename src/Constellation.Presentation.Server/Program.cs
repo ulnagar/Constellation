@@ -5,6 +5,7 @@ using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Presentation.Server.Helpers.HtmlGenerator;
+using Constellation.Presentation.Server.Identity;
 using Constellation.Presentation.Server.Infrastructure;
 using Constellation.Presentation.Server.Services;
 using Hangfire;
@@ -33,18 +34,18 @@ builder.Services.AddIdentity<AppUser, AppRole>()
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
 
-builder.Services.AddTransient<UserClaimsPrincipalFactory<AppUser, AppRole>, StaffUserIdClaimsFactory>();
+//builder.Services.AddTransient<UserClaimsPrincipalFactory<AppUser, AppRole>, StaffUserIdClaimsFactory>();
 
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 6;
-    options.Password.RequiredUniqueChars = 1;
-    options.User.RequireUniqueEmail = true;
-});
+//builder.Services.Configure<IdentityOptions>(options =>
+//{
+//    options.Password.RequireDigit = true;
+//    options.Password.RequireLowercase = true;
+//    options.Password.RequireNonAlphanumeric = false;
+//    options.Password.RequireUppercase = true;
+//    options.Password.RequiredLength = 6;
+//    options.Password.RequiredUniqueChars = 1;
+//    options.User.RequireUniqueEmail = true;
+//});
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -54,7 +55,17 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = new PathString("/Admin/Logout");
 });
 
+builder.Services.AddIdentityServer()
+    .AddDeveloperSigningCredential()
+    .AddInMemoryApiScopes(IdentityConfiguration.ApiScopes)
+    .AddInMemoryClients(IdentityConfiguration.Clients)
+    .AddTestUsers(IdentityConfiguration.Users)
+    //.AddAspNetIdentity<AppUser>();
+    .AddApiAuthorization<AppUser, AppDbContext>();
+
 builder.Services.AddAuthorization(opt => opt.AddApplicationPolicies());
+
+builder.Services.AddAuthentication();
 
 builder.Services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByRoute>();
 builder.Services.AddScoped<IAuthorizationHandler, HasRequiredMandatoryTrainingModulePermissions>();
@@ -141,6 +152,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseIdentityServer();
 app.UseAuthentication();
 app.UseAuthorization();
 
