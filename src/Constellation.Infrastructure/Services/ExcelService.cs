@@ -832,26 +832,29 @@ public class ExcelService : IExcelService
 
             // Index 0: Surname
             // Index 1: Preferred name
-            // Index 2: Rollclass name
-            // Index 3: School year
-            // Index 4: External id
-            // Index 5: Days total
-            // Index 6: Days absent
-            // Index 7: Days attended
-            // Index 8: Percentage attendance
-            // Index 9: Percentage absent
-            // Index 10: Explained absences
-            // Index 11: Unexplained absences
-            // Index 12: Percentage explained
-            // Index 13: Percentage unexplained
+            // Index 2: Gender
+            // Index 3: Rollclass name
+            // Index 4: School year
+            // Index 5: External id
+            // Index 6: Suburb
+            // Index 7: Days total
+            // Index 8: Today's attendance reason
+            // Index 9: Days absent
+            // Index 10: Days attended
+            // Index 11: Percentage attendance
+            // Index 12: Percentage absent
+            // Index 13: Explained absences
+            // Index 14: Unexplained absences
+            // Index 15: Percentage explained
+            // Index 16: Percentage unexplained
 
-            string studentId = line[4].FormatField();
+            string studentId = line[5].FormatField();
 
             StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentId == studentId);
 
             if (entry is not null)
             {
-                entry.DayYTD = Convert.ToDecimal(line[8].FormatField());
+                entry.DayYTD = Convert.ToDecimal(line[11].FormatField());
             }
             else
             {
@@ -859,8 +862,8 @@ public class ExcelService : IExcelService
                 {
                     StudentId = studentId,
                     Name = $"{line[1].FormatField()} {line[0].FormatField()}",
-                    Grade = (Grade)Convert.ToInt32(line[3].FormatField()),
-                    DayYTD = Convert.ToDecimal(line[8].FormatField())
+                    Grade = (Grade)Convert.ToInt32(line[4].FormatField()),
+                    DayYTD = Convert.ToDecimal(line[11].FormatField())
                 };
 
                 data.Add(entry);
@@ -939,26 +942,29 @@ public class ExcelService : IExcelService
 
             // Index 0: Surname
             // Index 1: Preferred name
-            // Index 2: Rollclass name
-            // Index 3: School year
-            // Index 4: External id
-            // Index 5: Days total
-            // Index 6: Days absent
-            // Index 7: Days attended
-            // Index 8: Percentage attendance
-            // Index 9: Percentage absent
-            // Index 10: Explained absences
-            // Index 11: Unexplained absences
-            // Index 12: Percentage explained
-            // Index 13: Percentage unexplained
+            // Index 2: Gender
+            // Index 3: Rollclass name
+            // Index 4: School year
+            // Index 5: External id
+            // Index 6: Suburb
+            // Index 7: Days total
+            // Index 8: Today's attendance reason
+            // Index 9: Days absent
+            // Index 10: Days attended
+            // Index 11: Percentage attendance
+            // Index 12: Percentage absent
+            // Index 13: Explained absences
+            // Index 14: Unexplained absences
+            // Index 15: Percentage explained
+            // Index 16: Percentage unexplained
 
-            string studentId = line[4].FormatField();
+            string studentId = line[5].FormatField();
 
             StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentId == studentId);
 
             if (entry is not null)
             {
-                entry.DayWeek = Convert.ToDecimal(line[8].FormatField());
+                entry.DayWeek = Convert.ToDecimal(line[11].FormatField());
             }
             else
             {
@@ -966,7 +972,7 @@ public class ExcelService : IExcelService
                 {
                     StudentId = studentId,
                     Name = $"{line[1].FormatField()} {line[0].FormatField()}",
-                    DayWeek = Convert.ToDecimal(line[8].FormatField())
+                    DayWeek = Convert.ToDecimal(line[11].FormatField())
                 };
 
                 data.Add(entry);
