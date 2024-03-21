@@ -29,22 +29,34 @@ builder.Services
 
 // Configuration Authentication and Authorization
 builder.Services.AddIdentity<AppUser, AppRole>()
-            .AddClaimsPrincipalFactory<StaffUserIdClaimsFactory>()
-            .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders();
+    .AddClaimsPrincipalFactory<StaffUserIdClaimsFactory>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 
-builder.Services.AddTransient<UserClaimsPrincipalFactory<AppUser, AppRole>, StaffUserIdClaimsFactory>();
+//builder.Services.AddTransient<UserClaimsPrincipalFactory<AppUser, AppRole>, StaffUserIdClaimsFactory>();
 
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 6;
-    options.Password.RequiredUniqueChars = 1;
-    options.User.RequireUniqueEmail = true;
-});
+//builder.Services.Configure<IdentityOptions>(options =>
+//{
+//    options.Password.RequireDigit = true;
+//    options.Password.RequireLowercase = true;
+//    options.Password.RequireNonAlphanumeric = false;
+//    options.Password.RequireUppercase = true;
+//    options.Password.RequiredLength = 6;
+//    options.Password.RequiredUniqueChars = 1;
+//    options.User.RequireUniqueEmail = true;
+//});
+
+builder.Services.AddIdentityServer(opts =>
+    {
+        opts.KeyManagement.KeyPath = "Keys";
+        opts.KeyManagement.RotationInterval = TimeSpan.FromDays(30);
+        opts.KeyManagement.PropagationTime = TimeSpan.FromDays(2);
+        opts.KeyManagement.RetentionDuration = TimeSpan.FromDays(7);
+    })
+    .AddInMemoryClients()
+    .AddAspNetIdentity<AppUser>()
+    .AddProfileService<StaffUserIdProfileService>();
+    
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
