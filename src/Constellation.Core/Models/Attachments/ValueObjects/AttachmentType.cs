@@ -12,6 +12,7 @@ public sealed class AttachmentType : ValueObject, IComparable
     public static readonly AttachmentType StudentReport = new("Student Report");
     public static readonly AttachmentType TrainingCertificate = new("Training Certificate");
     public static readonly AttachmentType AwardCertificate = new("Award Certificate");
+    public static readonly AttachmentType WorkFlowEmailAttachment = new("WorkFlow Email Attachment");
 
     public static AttachmentType FromValue(string value)
     {

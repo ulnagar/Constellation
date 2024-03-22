@@ -99,6 +99,22 @@ public sealed class Attachment
         return attachment;
     }
 
+    public static Attachment CreateWorkFlowEmailAttachment(
+        string name,
+        string fileType,
+        string recordLinkId,
+        DateTime createdAt)
+    {
+        Attachment attachment = new(
+            name,
+            fileType,
+            AttachmentType.WorkFlowEmailAttachment,
+            recordLinkId,
+            createdAt);
+
+        return attachment;
+    }
+
     public Result AttachData(byte[] fileData, bool overwrite = false)
     {
         if (FilePath is not null && overwrite is false)

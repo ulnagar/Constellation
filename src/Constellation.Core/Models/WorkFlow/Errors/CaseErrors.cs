@@ -46,11 +46,37 @@ public static class CaseErrors
                 "Cannot create an ActionNote without a User");
         }
 
+        public static class AddRecipient
+        {
+            public static Error Duplicate = new(
+                "Case.Action.AddRecipient.Duplicate",
+                $"A recipient with that email address already exists in the list");
+        }
+
         public static class UpdateStatus
         {
             public static Error StatusNull = new(
                 "Case.Action.UpdateStatus.StatusNull",
                 "Cannot change Status to blank");
+        }
+
+        public static class Update
+        {
+            public static Error EmptySubjectLine = new(
+                "Case.Action.Update.EmptySubjectLine",
+                "Cannot send email with a blank subject line");
+
+            public static Error EmptyEmailBody = new(
+                "Case.Action.Update.EmptyEmailBody",
+                "Cannot send email with a blank body");
+
+            public static Error IncidentNumberZero = new(
+                "Case.Action.Update.IncidentNumberZero",
+                "Cannot update Action with zero value Incident Number");
+
+            public static Error NotRequiredFalse = new(
+                "Case.Action.Update.NotRequiredFalse",
+                "Cannot update Action with Not Required set to false");
         }
     }
 }
