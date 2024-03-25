@@ -39,6 +39,8 @@ public abstract class Action : IAuditableEntity
     public string DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; } = DateTime.MinValue;
 
+    public abstract override string ToString();
+
     internal Result AssignAction(Staff? assignee, string currentUser)
     {
         if (assignee is null)
@@ -193,16 +195,42 @@ public sealed class SendEmailAction : Action
 
         return Result.Success();
     }
+
+    public override string ToString() =>
+        Status switch
+        {
+            { } value when value.Equals(ActionStatus.Open) => 
+                $"Task assigned to: {AssignedTo}",
+            { } value when value.Equals(ActionStatus.Completed) =>
+                $"Email sent to {Recipients.Count} recipients with subject {Subject} by {AssignedTo}",
+            _ => $"Unknown Status"
+        };
 }
 
 public sealed class PhoneParentAction : Action
 {
     // Option to contact parent via phone to discuss issues
+
+    public override string ToString() =>
+        Status switch
+        {
+            { } value when value.Equals(ActionStatus.Open) =>
+                $"Task assigned to: {AssignedTo}",
+            _ => $"Unknown Status"
+        };
 }
 
 public sealed class ParentInterviewAction : Action
 {
     // Option to schedule and record interview with parent
+
+    public override string ToString() =>
+        Status switch
+        {
+            { } value when value.Equals(ActionStatus.Open) =>
+                $"Task assigned to: {AssignedTo}",
+            _ => $"Unknown Status"
+        };
 }
 
 public sealed class CreateSentralEntryAction : Action
@@ -290,6 +318,18 @@ public sealed class CreateSentralEntryAction : Action
 
         return action;
     }
+
+    public override string ToString() =>
+        Status switch
+        {
+            { } value when value.Equals(ActionStatus.Open) =>
+                $"Task assigned to: {AssignedTo}",
+            { } value when value.Equals(ActionStatus.Completed) && NotRequired =>
+                $"Sentral entry determined Not Required by {AssignedTo}",
+            { } value when value.Equals(ActionStatus.Completed) && !NotRequired =>
+                $"Sentral entry {IncidentNumber} completed by {AssignedTo}",
+            _ => $"Unknown Status"
+        };
 }
 
 public sealed class ConfirmSentralEntryAction : Action
@@ -332,5 +372,17 @@ public sealed class ConfirmSentralEntryAction : Action
 
         return action;
     }
+
+    public override string ToString() =>
+        Status switch
+        {
+            { } value when value.Equals(ActionStatus.Open) =>
+                $"Task assigned to: {AssignedTo}",
+            { } value when value.Equals(ActionStatus.Completed) && Confirmed =>
+                $"Sentral entry confirmed by {AssignedTo}",
+            { } value when value.Equals(ActionStatus.Completed) && !Confirmed =>
+                $"Sentral entry rejected by {AssignedTo}",
+            _ => $"Unknown Status"
+        };
 }
 

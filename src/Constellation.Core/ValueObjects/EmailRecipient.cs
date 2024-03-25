@@ -7,6 +7,8 @@ using System.Collections.Generic;
 
 public sealed class EmailRecipient : ValueObject
 {
+    private EmailRecipient() {} // Required by EF Core
+
     private EmailRecipient(string name, string email)
     {
         Name = name;
