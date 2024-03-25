@@ -2,11 +2,13 @@
 
 using Constellation.Application.DTOs;
 using Constellation.Core.Models;
+using Schools.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+
 public interface ISchoolRepository
 {
     void Insert(School school);
@@ -22,4 +24,5 @@ public interface ISchoolRepository
     Task<bool> IsPartnerSchoolWithStudents(string code);
     Task<bool> AnyWithId(string id);
     IList<MapLayer> GetForMapping(IList<string> schoolCodes);
+    Task<SchoolType> GetSchoolType(string schoolCode, CancellationToken cancellationToken = default);
 }
