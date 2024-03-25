@@ -1,8 +1,11 @@
 ﻿namespace Constellation.Core.Models.WorkFlow;
 
 using Enums;
+using Errors;
+using Events;
 using Identifiers;
 using Primitives;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,5 +38,37 @@ public sealed class Case : AggregateRoot, IAuditableEntity
     public string DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
 
+    public void AddAction(Action action)
+    {
+        _actions.Add(action);
 
+        RaiseDomainEvent(new CaseActionAddedDomainEvent(new(), Id, action.Id));
+    }
+
+    public Result AddActionNote(ActionId actionId, string message, string currentUser)
+    {
+        Action action = _actions.FirstOrDefault(entry => entry.Id == actionId);
+
+        if (action is null)
+            return Result.Failure(CaseErrors.Action.NotFound(actionId));
+
+        Result noteAction = action.AddNote(message, currentUser);
+
+        return noteAction;
+    }
+
+    public Result UpdateActionStatus(
+        ActionId actionId,
+        ActionStatus newStatus,
+        string currentUser)
+    {
+        Action action = _actions.FirstOrDefault(entry => entry.Id == actionId);
+
+        if (action is null)
+            return Result.Failure(CaseErrors.Action.NotFound(actionId));
+
+        Result statusUpdate = action.UpdateStatus(newStatus, currentUser);
+
+        return statusUpdate;
+    }
 }

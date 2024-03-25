@@ -85,7 +85,7 @@ public abstract class Action : IAuditableEntity
         return Result.Success();
     }
 
-    protected Result AddNote(string message, string currentUser)
+    internal Result AddNote(string message, string currentUser)
     {
         if (string.IsNullOrWhiteSpace(message))
             return Result.Failure(CaseErrors.Action.AddNote.MessageBlank);
