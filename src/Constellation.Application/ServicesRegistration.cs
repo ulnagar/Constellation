@@ -5,6 +5,7 @@ using Constellation.Application.Common.Behaviours;
 using Constellation.Application.Rollover.Repositories;
 using Constellation.Core.Models.Attachments.Services;
 using Constellation.Core.Models.Rollover.Repositories;
+using Constellation.Core.Models.WorkFlow.Services;
 using FluentValidation;
 using MediatR;
 
@@ -14,7 +15,6 @@ public static class ServicesRegistration
     {
         // Add AutoMapper and AbstractValidator
 
-        services.AddAutoMapper(Constellation.Application.AssemblyReference.Assembly);
         services.AddValidatorsFromAssembly(Constellation.Application.AssemblyReference.Assembly);
 
         // Add Mediatr
@@ -30,6 +30,7 @@ public static class ServicesRegistration
 
         services.AddScoped<IAttachmentService, AttachmentService>();
         services.AddSingleton<IRolloverRepository, RolloverRepository>();
+        services.AddScoped<ICaseService, CaseService>();
 
         return services;
     }

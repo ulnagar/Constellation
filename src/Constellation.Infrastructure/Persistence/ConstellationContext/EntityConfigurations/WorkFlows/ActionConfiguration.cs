@@ -5,6 +5,7 @@ using Core.Models.Offerings;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Identifiers;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -97,6 +98,14 @@ internal sealed class SendEmailActionConfiguration : IEntityTypeConfiguration<Se
 
                     config
                         .HasKey("Id");
+
+                    config
+                        .Property(recipient => recipient.Email)
+                        .HasColumnName(nameof(EmailRecipient.Email));
+
+                    config
+                        .Property(recipient => recipient.Name)
+                        .HasColumnName(nameof(EmailRecipient.Name));
                 });
     }
 }

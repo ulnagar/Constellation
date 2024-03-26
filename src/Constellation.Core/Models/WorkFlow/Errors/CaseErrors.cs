@@ -6,6 +6,27 @@ using System;
 
 public static class CaseErrors
 {
+    public static class Case
+    {
+        public static class AttachDetails
+        {
+            public static readonly Func<string, string, Error> DetailMismatch = (caseType, expected) => new(
+                "Case.AttachDetails.DetailMismatch",
+                $"Require details of type {expected} for Case Type {caseType}");
+
+            public static readonly Error UnknownDetails = new(
+                "Case.AttachDetails.UnknownDetails",
+                "Unable to determine correct details type to attach");
+        }
+
+        public static class UpdateStatus
+        {
+            public static readonly Error CompletedWithOutstandingActions = new(
+                "Case.UpdateStatus.CompletedWithOutstandingActions",
+                "Cannot mark a Case completed with pending actions");
+        }
+    }
+
     public static class CaseDetail
     {
         public static class Create
