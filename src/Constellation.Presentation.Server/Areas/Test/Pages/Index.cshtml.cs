@@ -1,37 +1,56 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
-using Application.Absences.ExportUnexplainedPartialAbsencesReport;
+using Application.Interfaces.Repositories;
 using BaseModels;
+using Core.Models.Attendance.Identifiers;
 using Core.Models.WorkFlow;
-using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Repositories;
+using Core.Models.WorkFlow.Services;
+using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
-    private readonly ICaseRepository _repository;
+    private readonly ICaseRepository _caseRepository;
+    private readonly ICaseService _caseService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public IndexModel(
         IMediator mediator,
-        ICaseRepository repository)
+        ICaseRepository caseRepository,
+        ICaseService caseService,
+        IUnitOfWork unitOfWork)
     {
         _mediator = mediator;
-        _repository = repository;
+        _caseRepository = caseRepository;
+        _caseService = caseService;
+        _unitOfWork = unitOfWork;
     }
 
-    public List<Case> Cases { get; set; }
+    public List<Case> Cases { get; set; } = new();
 
 
     public async Task OnGet()
     {
-        Cases = await _repository.GetAll();
+        Cases = await _caseRepository.GetAll();
     }
 
     public async Task OnGetCreateCase()
     {
-        var item = new Case();
+        // AttendanceValueId 2F8178D5-FB1B-4982-BF2A-12EC81DDB5E0
+        // StudentId 444998822
+
+        AttendanceValueId valueId = AttendanceValueId.FromValue(Guid.Parse("2F8178D5-FB1B-4982-BF2A-12EC81DDB5E0"));
+
+        Result<Case> caseResult = await _caseService.CreateAttendanceCase("444998822", valueId);
+
+        if (caseResult.IsSuccess)
+            _caseRepository.Insert(caseResult.Value);
+
+        await _unitOfWork.CompleteAsync();
+
+        Cases.Add(caseResult.Value);
     }
 
 }

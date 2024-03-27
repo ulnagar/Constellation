@@ -35,6 +35,10 @@ internal sealed class CaseConfiguration : IEntityTypeConfiguration<Case>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
+            .Navigation(item => item.Detail)
+            .AutoInclude();
+
+        builder
             .Property(item => item.DetailId)
             .HasConversion(
                 id => id.Value,
@@ -49,5 +53,11 @@ internal sealed class CaseConfiguration : IEntityTypeConfiguration<Case>
         builder
             .Navigation(item => item.Actions)
             .AutoInclude();
+
+        builder
+            .Property(item => item.Status)
+            .HasConversion(
+                status => status.Value,
+                value => CaseStatus.FromValue(value));
     }
 }

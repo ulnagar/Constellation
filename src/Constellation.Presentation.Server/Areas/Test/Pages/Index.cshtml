@@ -1,3 +1,27 @@
 ﻿@page
 
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
+
+<h2>WorkFlow Cases</h2>
+
+<div class="page-menu">
+    <a asp-page-handler="CreateCase" class="btn btn-danger">Create Case</a>
+</div>
+
+<hr />
+
+<table class="table-striped data-table">
+    <thead>
+    <tr>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var entry in Model.Cases)
+    {
+        <tr>
+            <td>@entry.ToString()</td>
+        </tr>
+    }
+    </tbody>
+</table>

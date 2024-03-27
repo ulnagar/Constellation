@@ -1,7 +1,5 @@
 ﻿using Constellation.Core.Enums;
-using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.ValueObjects;
 using System;
 
 namespace Constellation.Application.Absences.GetAbsenceDetailsForParent;

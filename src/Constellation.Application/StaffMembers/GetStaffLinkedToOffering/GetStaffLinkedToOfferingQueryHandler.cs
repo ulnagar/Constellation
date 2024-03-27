@@ -1,10 +1,9 @@
 ﻿namespace Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.StaffMembers.Models;
-using Constellation.Core.Errors;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;

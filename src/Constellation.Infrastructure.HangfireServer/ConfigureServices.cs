@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Infrastructure.HangfireServer;
 
-using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Infrastructure.HangfireServer.Services;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
+using Core.Abstractions.Services;
 using Hangfire;
 using Hangfire.SqlServer;
 

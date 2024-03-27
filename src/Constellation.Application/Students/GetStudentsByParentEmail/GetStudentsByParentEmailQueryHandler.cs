@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Students.GetStudentsByParentEmail;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Extensions;
 using Core.Models.Students;
 using Core.Shared;
-using Interfaces.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;

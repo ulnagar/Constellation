@@ -5,7 +5,6 @@ using Constellation.Application.Models.Identity;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Microsoft.AspNetCore.Identity;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 

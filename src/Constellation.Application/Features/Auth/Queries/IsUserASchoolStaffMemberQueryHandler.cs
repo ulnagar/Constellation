@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Features.Auth.Queries;
 
-using Constellation.Application.Interfaces.Repositories;
 using Core.Models;
+using Core.Models.StaffMembers.Repositories;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;

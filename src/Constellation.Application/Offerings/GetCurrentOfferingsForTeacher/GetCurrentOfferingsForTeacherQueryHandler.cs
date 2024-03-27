@@ -1,12 +1,13 @@
 ﻿namespace Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Repositories;
+using Core.Models.Subjects.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;

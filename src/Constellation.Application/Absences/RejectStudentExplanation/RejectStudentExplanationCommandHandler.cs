@@ -1,16 +1,12 @@
 ﻿namespace Constellation.Application.Absences.RejectStudentExplanation;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
-using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
-using Org.BouncyCastle.Crypto;
 using Serilog;
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;

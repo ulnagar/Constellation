@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.StaffMembers.GetStaffForSelectionList;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.StaffMembers.Models;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Repositories;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

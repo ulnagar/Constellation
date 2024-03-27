@@ -9,6 +9,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.ValueObjects;
 using Core.Extensions;
 using Core.Shared;

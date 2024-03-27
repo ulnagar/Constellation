@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.ThirdPartyConsent.GetTransactionsWithFilter;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.ThirdPartyConsent.Models;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.ThirdPartyConsent;
 using Constellation.Core.Models.ThirdPartyConsent.Errors;
 using Constellation.Core.Models.ThirdPartyConsent.Identifiers;

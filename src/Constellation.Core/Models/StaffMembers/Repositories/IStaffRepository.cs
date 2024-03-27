@@ -1,8 +1,8 @@
-﻿namespace Constellation.Application.Interfaces.Repositories;
+﻿namespace Constellation.Core.Models.StaffMembers.Repositories;
 
 using Constellation.Core.Models;
+using Constellation.Core.Models.Faculty.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Core.Models.Faculty.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;

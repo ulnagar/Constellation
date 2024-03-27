@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Students.CountStudentsWithPendingAwards;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Shared;
-using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;

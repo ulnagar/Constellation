@@ -12,6 +12,7 @@ using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Faculty.ValueObjects;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training.Contexts.Roles;
 using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;

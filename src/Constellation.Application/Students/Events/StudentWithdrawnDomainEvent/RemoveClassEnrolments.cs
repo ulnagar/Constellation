@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
+using Core.Models.Enrolments.Repositories;
 using Core.Models.Students.Events;
 using Serilog;
 using System.Collections.Generic;

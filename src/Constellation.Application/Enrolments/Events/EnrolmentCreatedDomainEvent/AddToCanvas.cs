@@ -10,6 +10,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.Operations.Enums;
 using Core.Models.Students.Errors;

@@ -6,6 +6,8 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
+using Core.Models.Enrolments.Repositories;
+using Core.Models.StaffMembers.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;

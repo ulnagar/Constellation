@@ -17,6 +17,7 @@ using Core.ValueObjects;
 using Services;
 using Core.Abstractions.Clock;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Subjects.Repositories;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;

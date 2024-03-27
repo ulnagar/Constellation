@@ -3,10 +3,9 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Errors;
-using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training.Errors;
 using Core.Models.Training.Repositories;
 using System.Collections.Generic;

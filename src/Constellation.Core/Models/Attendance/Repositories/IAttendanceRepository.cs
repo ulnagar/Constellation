@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Attendance.Repositories;
 
 using Enums;
+using Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 public interface IAttendanceRepository
 {
+    Task<AttendanceValue> GetById(AttendanceValueId id, CancellationToken cancellationToken = default);
     Task<List<AttendanceValue>> GetAll(CancellationToken cancellationToken = default);
     Task<List<AttendanceValue>> GetAllRecent(CancellationToken cancellationToken = default);
     Task<List<AttendanceValue>> GetAllForStudent(int year, string studentId, CancellationToken cancellationToken = default);

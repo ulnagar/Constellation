@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Portal.Parents.Server.Services;
 
-using Constellation.Application.Interfaces.Services;
+using Core.Abstractions.Services;
 using System.Security.Claims;
 
 /// <summary>

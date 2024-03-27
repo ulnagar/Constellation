@@ -1,13 +1,14 @@
 ﻿namespace Constellation.Application.SciencePracs.Events;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Subjects;
+using Core.Models.Subjects.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;

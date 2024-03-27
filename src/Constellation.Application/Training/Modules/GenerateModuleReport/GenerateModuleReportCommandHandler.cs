@@ -2,7 +2,6 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Helpers;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Faculty;
@@ -14,6 +13,7 @@ using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Faculty.Identifiers;
+using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training.Contexts.Roles;
 using Core.Models.Training.Repositories;
 using Models;

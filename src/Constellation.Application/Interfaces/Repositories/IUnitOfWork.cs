@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Application.Interfaces.Repositories;
 
-using Core.Models.SchoolContacts.Repositories;
+using Constellation.Core.Models.Students.Repositories;
+using Core.Models.Enrolments.Repositories;
+using Core.Models.StaffMembers.Repositories;
 using System.Threading;
 using System.Threading.Tasks;
 

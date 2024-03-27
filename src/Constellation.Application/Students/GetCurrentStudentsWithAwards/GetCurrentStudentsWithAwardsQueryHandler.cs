@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Students.GetCurrentStudentsWithAwards;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
 using System.Threading;

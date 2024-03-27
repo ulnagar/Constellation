@@ -7,6 +7,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Events;
+using Constellation.Core.Models.Students.Repositories;
 using Serilog;
 using System;
 using System.Threading;

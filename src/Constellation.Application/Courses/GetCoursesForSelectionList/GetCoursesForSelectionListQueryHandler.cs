@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Application.Courses.GetCoursesForSelectionList;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Core.Models.Faculty.Errors;
+using Core.Models.Subjects.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;

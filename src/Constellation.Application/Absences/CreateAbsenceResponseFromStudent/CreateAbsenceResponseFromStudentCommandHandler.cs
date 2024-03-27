@@ -7,7 +7,6 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Shared;
 using Serilog;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 

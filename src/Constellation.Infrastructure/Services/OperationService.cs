@@ -13,6 +13,7 @@ using Core.Models.Offerings.ValueObjects;
 using Core.Models.Operations;
 using Core.Models.Operations.Enums;
 using Core.Models.Students;
+using Core.Models.Subjects.Repositories;
 using System;
 using System.Threading.Tasks;
 

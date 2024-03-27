@@ -1,9 +1,8 @@
-﻿namespace Constellation.Application.Interfaces.Repositories;
+﻿namespace Constellation.Core.Models.Students.Repositories;
 
-using Constellation.Core.Enums;
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Enums;
+using Offerings.Identifiers;
+using Subjects.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -12,8 +11,8 @@ using System.Threading.Tasks;
 
 public interface IStudentRepository
 {
-    Task<Student?> GetById(string studentId, CancellationToken cancellationToken = default);
-    Task<Student?> GetWithSchoolById(string studentId, CancellationToken cancellationToken = default);
+    Task<Student> GetById(string studentId, CancellationToken cancellationToken = default);
+    Task<Student> GetWithSchoolById(string studentId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentStudentsWithSchool(CancellationToken cancellationToken = default);
     Task<List<Student>> GetListFromIds(List<string> studentIds, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentEnrolmentsForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
@@ -31,7 +30,7 @@ public interface IStudentRepository
     /// <param name="emailAddress"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Student?> GetCurrentByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
+    Task<Student> GetCurrentByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get any student with a specified email address. Can return deleted students.
@@ -39,7 +38,7 @@ public interface IStudentRepository
     /// <param name="emailAddress"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Student?> GetAnyByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
+    Task<Student> GetAnyByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
 
     Task<int> GetCountCurrentStudentsWithPartialAbsenceScanDisabled(CancellationToken cancellationToken = default);
     Task<int> GetCountCurrentStudentsWithWholeAbsenceScanDisabled(CancellationToken cancellationToken = default);

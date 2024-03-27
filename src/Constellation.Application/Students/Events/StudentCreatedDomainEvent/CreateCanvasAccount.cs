@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Events;
+using Constellation.Core.Models.Students.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;

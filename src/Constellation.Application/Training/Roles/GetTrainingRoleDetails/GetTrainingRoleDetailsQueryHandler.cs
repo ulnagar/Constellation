@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Core.Errors;
 using Core.Models;
+using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training.Contexts.Modules;
 using Core.Models.Training.Contexts.Roles;
 using Core.Models.Training.Errors;

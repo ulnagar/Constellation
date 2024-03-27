@@ -10,9 +10,7 @@ using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
 using Core.Models.Attachments;
 using Core.Models.Attachments.Services;
-using Core.Models.Attachments.ValueObjects;
 using Serilog;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 

@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Interfaces.Services;
+﻿namespace Constellation.Core.Abstractions.Services;
 
 public interface ICurrentUserService
 {

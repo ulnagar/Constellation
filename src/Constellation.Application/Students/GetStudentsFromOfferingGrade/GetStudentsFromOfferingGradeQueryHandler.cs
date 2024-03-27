@@ -3,10 +3,12 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Errors;
 using Core.Models;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Errors;
+using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using Serilog;
 using System.Collections.Generic;

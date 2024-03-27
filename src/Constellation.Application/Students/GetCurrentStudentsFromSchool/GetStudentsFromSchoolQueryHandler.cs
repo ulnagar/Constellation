@@ -2,14 +2,12 @@
 
 using Abstractions.Messaging;
 using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Students;
 using Core.Shared;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 

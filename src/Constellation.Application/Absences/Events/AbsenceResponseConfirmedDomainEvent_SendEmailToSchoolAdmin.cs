@@ -10,6 +10,8 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
+using Core.Models.StaffMembers.Repositories;
 using Serilog;
 using System.Linq;
 using System.Threading;

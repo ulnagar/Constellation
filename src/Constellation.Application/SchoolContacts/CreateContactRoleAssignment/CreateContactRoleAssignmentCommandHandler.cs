@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Features.Partners.SchoolContacts.Notifications;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.SchoolContacts;
@@ -9,9 +8,7 @@ using Constellation.Core.Models.SchoolContacts.Repositories;
 using Constellation.Core.Shared;
 using Core.Models;
 using Core.Models.SchoolContacts.Errors;
-using MediatR;
 using Serilog;
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;

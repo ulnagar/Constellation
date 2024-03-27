@@ -1,13 +1,10 @@
 ﻿namespace Constellation.Application.Assignments.GetAssignmentById;
 
 using Abstractions.Messaging;
-using Extensions;
-using Interfaces.Repositories;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Models.Subjects.Errors;
 using Core.Extensions;
 using Core.Shared;
-using Core.Models;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
 using Core.Models.Subjects;
@@ -16,6 +13,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
+using Core.Models.Subjects.Repositories;
 
 internal sealed class GetAssignmentByIdQueryHandler
     : IQueryHandler<GetAssignmentByIdQuery, AssignmentResponse>

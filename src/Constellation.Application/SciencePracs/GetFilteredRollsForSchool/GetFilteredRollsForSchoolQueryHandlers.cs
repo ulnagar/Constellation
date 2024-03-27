@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Application.SciencePracs.GetFilteredRollsForSchool;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.SciencePracs.Models;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Subjects;
 using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Models.SciencePracs;
+using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using Serilog;
 using System.Collections.Generic;

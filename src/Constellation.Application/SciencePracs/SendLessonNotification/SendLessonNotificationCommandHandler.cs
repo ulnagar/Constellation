@@ -10,6 +10,7 @@ using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Errors;
 using Core.Errors;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using DTOs;

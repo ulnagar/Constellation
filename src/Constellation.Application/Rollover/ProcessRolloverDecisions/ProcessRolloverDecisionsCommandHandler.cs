@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Enums;
 using Core.Models.Rollover;
 using Core.Models.Rollover.Enums;

@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Contacts.GetContactList;
 
 using Abstractions.Messaging;
-using Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Families;
@@ -22,6 +21,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Constellation.Core.Models.Students.Repositories;
+using Core.Models.StaffMembers.Repositories;
+using Core.Models.Subjects.Repositories;
 
 internal sealed class GetContactListQueryHandler
     : IQueryHandler<GetContactListQuery, List<ContactResponse>>

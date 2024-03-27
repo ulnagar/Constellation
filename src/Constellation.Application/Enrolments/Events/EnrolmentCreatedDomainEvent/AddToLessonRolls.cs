@@ -7,6 +7,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Enums;
 using Core.Models.Students.Errors;

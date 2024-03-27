@@ -1,11 +1,10 @@
 ﻿namespace Constellation.Application.Assignments.GetCurrentAssignmentsListing;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Extensions;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Shared;
 using Core.Extensions;
+using Core.Models.Subjects.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Threading;

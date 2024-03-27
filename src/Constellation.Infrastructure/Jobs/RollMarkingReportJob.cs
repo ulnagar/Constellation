@@ -11,6 +11,8 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Core.Models.StaffMembers.Repositories;
+using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using MediatR;
 using Microsoft.Extensions.Options;

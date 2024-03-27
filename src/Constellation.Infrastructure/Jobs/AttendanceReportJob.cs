@@ -3,9 +3,9 @@
 using Application.Attendance.GenerateAttendanceReportForStudent;
 using Application.DTOs;
 using Application.Extensions;
-using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Models.Families;
 using Core.Models.SchoolContacts;

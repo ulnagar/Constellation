@@ -1,9 +1,15 @@
 ﻿namespace Constellation.Core.Models.Attendance.Errors;
 
+using Identifiers;
 using Shared;
+using System;
 
 public static class AttendanceValueErrors
 {
+    public static Func<AttendanceValueId, Error> NotFound = id => new(
+        "AttendanceValue.NotFound",
+        $"Could not find an Attendance Value with the Id {id}");
+
     public static class Create
     {
         public static Error EmptyValues => new(

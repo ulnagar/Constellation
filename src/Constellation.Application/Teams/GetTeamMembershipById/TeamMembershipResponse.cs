@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Application.Teams.GetTeamMembershipById;
 
-using Constellation.Core.Enums;
 using System;
 
 public sealed record TeamMembershipResponse(

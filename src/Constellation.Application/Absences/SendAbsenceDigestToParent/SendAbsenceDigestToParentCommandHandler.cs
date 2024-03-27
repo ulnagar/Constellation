@@ -3,7 +3,6 @@
 using ConvertAbsenceToAbsenceEntry;
 using Abstractions.Messaging;
 using DTOs;
-using Interfaces.Repositories;
 using Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
@@ -21,6 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Constellation.Core.Models.Students.Repositories;
 
 internal sealed class SendAbsenceDigestToParentCommandHandler
     : ICommandHandler<SendAbsenceDigestToParentCommand>

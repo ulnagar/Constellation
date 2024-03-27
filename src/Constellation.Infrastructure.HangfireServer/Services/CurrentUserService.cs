@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.HangfireServer.Services;
 
-using Constellation.Application.Interfaces.Services;
+using Core.Abstractions.Services;
 
 public class CurrentUserService : ICurrentUserService
 {

@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Application.Offerings.GetOfferingsForBulkEnrol;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
+using Core.Models.Subjects.Repositories;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Models.Attachments;

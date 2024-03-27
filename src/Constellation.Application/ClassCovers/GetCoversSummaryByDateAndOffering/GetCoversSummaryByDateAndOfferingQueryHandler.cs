@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.ClassCovers.GetCoversSummaryByDateAndOffering;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.StaffMembers.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Threading;

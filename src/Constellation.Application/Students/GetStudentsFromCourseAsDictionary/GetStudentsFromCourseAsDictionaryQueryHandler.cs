@@ -1,14 +1,13 @@
 ﻿namespace Constellation.Application.Students.GetStudentsFromCourseAsDictionary;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Extensions;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings.Repositories;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Core.Extensions;
+using Core.Models.Enrolments.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;

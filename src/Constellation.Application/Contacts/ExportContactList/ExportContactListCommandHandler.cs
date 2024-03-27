@@ -3,7 +3,6 @@
 using Abstractions.Messaging;
 using GetContactList;
 using DTOs;
-using Interfaces.Repositories;
 using Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
@@ -27,6 +26,9 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Constellation.Core.Models.Students.Repositories;
+using Core.Models.StaffMembers.Repositories;
+using Core.Models.Subjects.Repositories;
 
 internal sealed class ExportContactListCommandHandler
     : ICommandHandler<ExportContactListCommand, FileDto>

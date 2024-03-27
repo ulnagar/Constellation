@@ -4,7 +4,6 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 

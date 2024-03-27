@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.StaffMembers.GetStaffByEmail;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.StaffMembers.Models;
 using Constellation.Core.Models;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Repositories;
 using System.Threading;
 using System.Threading.Tasks;
 

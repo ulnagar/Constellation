@@ -1,12 +1,10 @@
 ﻿namespace Constellation.Application.Absences.ExportUnexplainedPartialAbsencesReport;
 
 using Abstractions.Messaging;
-using Helpers;
-using Interfaces.Repositories;
-using Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Models;
 using Core.Models.Absences;
 using Core.Models.Offerings;
@@ -14,6 +12,9 @@ using Core.Models.Students.Errors;
 using Core.Shared;
 using Core.ValueObjects;
 using DTOs;
+using Helpers;
+using Interfaces.Repositories;
+using Interfaces.Services;
 using Serilog;
 using System;
 using System.Collections.Generic;

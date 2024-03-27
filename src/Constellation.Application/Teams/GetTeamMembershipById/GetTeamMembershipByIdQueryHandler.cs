@@ -2,8 +2,6 @@
 
 using Application.Models.Identity;
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.ClassCovers.Events;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
@@ -15,21 +13,22 @@ using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.Offerings;
 using Core.Models.Offerings.ValueObjects;
+using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects;
+using Core.Models.Subjects.Repositories;
 using Interfaces.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using Org.BouncyCastle.Cms;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static Constellation.Core.Errors.DomainErrors.ClassCovers;
 
 internal sealed class GetTeamMembershipByIdQueryHandler
     : IQueryHandler<GetTeamMembershipByIdQuery, List<TeamMembershipResponse>>

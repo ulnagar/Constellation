@@ -6,7 +6,9 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Repositories;
 
 internal class GroupTutorialExpiryScanJob : IGroupTutorialExpiryScanJob
 {

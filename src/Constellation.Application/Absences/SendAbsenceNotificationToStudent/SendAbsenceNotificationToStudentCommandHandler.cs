@@ -3,7 +3,6 @@
 using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
@@ -11,6 +10,7 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Abstractions.Clock;

@@ -1,8 +1,5 @@
-﻿using Constellation.Core.Models;
-
-namespace Constellation.Application.DTOs
+﻿namespace Constellation.Application.DTOs
 {
-    using Core.Models.SchoolContacts.Identifiers;
     using System;
 
     public class SchoolContactRoleDto

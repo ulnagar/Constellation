@@ -1,5 +1,5 @@
 #nullable enable
-namespace Constellation.Application.Interfaces.Repositories;
+namespace Constellation.Core.Models.Subjects.Repositories;
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;

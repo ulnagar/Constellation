@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.Students.GetStudents;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Students.Models;
 using Constellation.Core.Models.Students.Errors;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.Students;
 using System.Collections.Generic;

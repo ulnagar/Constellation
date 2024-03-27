@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Attendance;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Models.Absences;
 using Core.Models.Attendance.Repositories;
@@ -9,7 +10,6 @@ using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Students;
 using Core.Shared;
-using Interfaces.Repositories;
 using Interfaces.Services;
 using Serilog;
 using System;

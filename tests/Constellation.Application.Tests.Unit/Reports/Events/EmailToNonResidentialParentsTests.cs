@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Application.Tests.Unit.Reports.Events;
 
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Reports.Events;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Reports;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Errors;
 using Core.Models.Attachments.Services;

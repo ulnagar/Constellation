@@ -7,6 +7,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Repositories;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;

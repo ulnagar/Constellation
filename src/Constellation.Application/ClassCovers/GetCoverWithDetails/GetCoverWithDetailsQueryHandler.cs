@@ -8,6 +8,7 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.StaffMembers.Repositories;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

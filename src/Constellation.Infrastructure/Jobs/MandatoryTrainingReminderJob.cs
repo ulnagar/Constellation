@@ -16,6 +16,7 @@ using Core.Shared;
 using Core.ValueObjects;
 using Core.Models.Faculty.ValueObjects;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;
 using Microsoft.Extensions.Options;

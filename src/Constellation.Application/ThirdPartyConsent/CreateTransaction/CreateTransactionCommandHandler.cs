@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Application.ThirdPartyConsent.CreateTransaction;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Clock;
+using Core.Abstractions.Services;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.ThirdPartyConsent;
@@ -10,7 +12,6 @@ using Core.Models.ThirdPartyConsent.Errors;
 using Core.Models.ThirdPartyConsent.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
-using Interfaces.Services;
 using Serilog;
 using System;
 using System.Collections.Generic;

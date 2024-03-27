@@ -1,12 +1,11 @@
 ﻿namespace Constellation.Application.Families.GetFamilyContacts;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Extensions;
 using Constellation.Application.Families.GetFamilyContactsForStudent;
 using Constellation.Application.Families.Models;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Extensions;

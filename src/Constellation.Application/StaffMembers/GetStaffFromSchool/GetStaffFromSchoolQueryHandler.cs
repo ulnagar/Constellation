@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.StaffMembers.GetStaffFromSchool;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Core.Models;
+using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Models;
 using Serilog;

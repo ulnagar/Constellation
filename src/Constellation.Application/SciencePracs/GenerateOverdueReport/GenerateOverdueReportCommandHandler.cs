@@ -6,6 +6,7 @@ using Core.Enums;
 using Core.Models;
 using Core.Models.SciencePracs;
 using Core.Models.Subjects;
+using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using DTOs;
 using Helpers;

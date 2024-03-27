@@ -3,27 +3,22 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Enums;
 using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
-using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Operations;
-using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
-using Core.Models.Enrolments;
 using Core.Models.Operations.Enums;
 using Core.Models.Students.Errors;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static Constellation.Core.Errors.DomainErrors.SciencePracs;
 
 internal class RemoveFromCanvas
     : IDomainEventHandler<EnrolmentDeletedDomainEvent>

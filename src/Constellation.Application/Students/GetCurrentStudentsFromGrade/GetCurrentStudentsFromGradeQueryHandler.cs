@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Models;
 using Core.Models.Students.Errors;
 using Core.Shared;

@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Attendance.GetAttendanceDataFromSentral;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Attendance;
 using Core.Models.Students;
 using Core.Shared;
 using Interfaces.Gateways;
-using Interfaces.Repositories;
 using Interfaces.Services;
 using Serilog;
 using System;

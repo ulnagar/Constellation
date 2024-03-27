@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Constellation.Core.Models.Students.Repositories;
 
 internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
     : ICommandHandler<SendAbsenceDigestToCoordinatorCommand>

@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Interceptors;
 
-using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Audit;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Primitives;
 using Constellation.Infrastructure.Persistence.ConstellationContext.Audit;
+using Core.Abstractions.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;

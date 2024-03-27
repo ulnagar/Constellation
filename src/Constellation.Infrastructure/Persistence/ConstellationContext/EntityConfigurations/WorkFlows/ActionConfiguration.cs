@@ -56,6 +56,10 @@ internal sealed class ActionConfiguration : IEntityTypeConfiguration<Action>
             .OnDelete(DeleteBehavior.ClientSetNull);
 
         builder
+            .Navigation(action => action.Notes)
+            .AutoInclude();
+
+        builder
             .HasDiscriminator<string>("ActionType")
             .HasValue<SendEmailAction>(nameof(SendEmailAction))
             .HasValue<PhoneParentAction>(nameof(PhoneParentAction))

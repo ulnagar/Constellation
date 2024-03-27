@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Students.UpdateStudentSentralId;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Shared;

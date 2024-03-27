@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Extensions;
 using Core.Models.Students;
 using Core.Shared;

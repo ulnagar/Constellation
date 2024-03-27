@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.ThirdPartyConsent.GetConsentStatusByApplication;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Errors;
 using Core.Models;
 using Core.Models.Students;

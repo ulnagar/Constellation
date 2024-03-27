@@ -2,12 +2,12 @@
 
 using Abstractions.Messaging;
 using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Clock;
 using Core.Models.Offerings;
 using Core.Shared;

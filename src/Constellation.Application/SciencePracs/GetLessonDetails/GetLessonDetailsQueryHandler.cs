@@ -10,6 +10,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
+using Core.Models.Subjects.Repositories;
 using Serilog;
 using System;
 using System.Collections.Generic;

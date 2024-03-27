@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.ThirdPartyConsent.GetTransactions;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.ThirdPartyConsent.Models;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.ThirdPartyConsent.Errors;
 using Constellation.Core.Models.ThirdPartyConsent.Repositories;
 using Core.Models.Students;

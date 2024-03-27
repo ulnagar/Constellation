@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Features.Equipment.Stocktake.Queries;
 
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.StaffMembers.Models;
 using Constellation.Core.Models;
+using Core.Models.StaffMembers.Repositories;
 using MediatR;
 using System.Collections.Generic;
 using System.Linq;

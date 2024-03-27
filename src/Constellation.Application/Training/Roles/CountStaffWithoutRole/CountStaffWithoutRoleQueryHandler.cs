@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.Training.Roles.CountStaffWithoutRole;
 
 using Abstractions.Messaging;
+using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training.Contexts.Roles;
 using Core.Models.Training.Repositories;
 using Core.Shared;
-using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading;

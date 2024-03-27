@@ -11,6 +11,7 @@ using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Models.Faculty.Identifiers;
 using Core.Models.Faculty.ValueObjects;
+using Core.Models.StaffMembers.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

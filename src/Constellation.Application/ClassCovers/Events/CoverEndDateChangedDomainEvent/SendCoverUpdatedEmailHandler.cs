@@ -26,6 +26,8 @@ using System.Linq;
 using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
+using Constellation.Core.Models.Students.Repositories;
+using Core.Models.StaffMembers.Repositories;
 
 internal sealed class SendCoverUpdatedEmailHandler
     : IDomainEventHandler<CoverEndDateChangedDomainEvent>

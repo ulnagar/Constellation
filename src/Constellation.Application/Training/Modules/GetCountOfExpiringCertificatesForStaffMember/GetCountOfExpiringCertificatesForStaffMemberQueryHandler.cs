@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Training.Modules.GetCountOfExpiringCertificatesForStaffMember;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Models.Training.Contexts.Roles;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;
 using Models;

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Constellation.Core.Models.Attendance.Identifiers;
 using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Models.Attendance;
@@ -22,6 +23,13 @@ internal class AttendanceRepository : IAttendanceRepository
         _context = context;
         _dateTime = dateTime;
     }
+
+    public async Task<AttendanceValue> GetById(
+        AttendanceValueId id,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AttendanceValue>()
+            .SingleOrDefaultAsync(value => value.Id == id, cancellationToken);
 
     public async Task<List<AttendanceValue>> GetAll(
         CancellationToken cancellationToken = default) =>

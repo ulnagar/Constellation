@@ -1,8 +1,7 @@
 ﻿namespace Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Extensions;
-using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Extensions;
 using System.Collections.Generic;

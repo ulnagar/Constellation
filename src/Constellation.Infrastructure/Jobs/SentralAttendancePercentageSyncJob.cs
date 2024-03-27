@@ -7,6 +7,7 @@ using Application.Interfaces.Services;
 using Constellation.Application.Attendance.GetAttendanceDataFromSentral;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
 using Core.Models.Attendance.Repositories;

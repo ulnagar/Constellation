@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Students.AuditAwardTallyValues;
 
 using Constellation.Application.Abstractions.Messaging;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Models.Awards;
 using Core.Models.Students;

@@ -8,6 +8,7 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Events;
 using Core.Shared;

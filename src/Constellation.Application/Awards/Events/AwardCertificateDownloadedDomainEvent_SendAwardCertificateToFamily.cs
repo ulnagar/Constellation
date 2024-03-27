@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.Awards.Events;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Awards.Events;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.ValueObjects;
 using Core.Abstractions.Clock;
 using Core.Models;
@@ -13,6 +13,7 @@ using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Awards;
 using Core.Models.Families;
+using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Shared;
 using Serilog;

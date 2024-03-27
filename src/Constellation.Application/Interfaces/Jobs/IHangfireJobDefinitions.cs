@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Application.Interfaces.Jobs;
 
-using Core.Models;
 using Core.Models.Absences;
 using System.Collections.Generic;
 using System;

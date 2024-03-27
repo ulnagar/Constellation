@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Families.Events;
 
 using Abstractions.Messaging;
-using Interfaces.Repositories;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;
@@ -9,6 +8,7 @@ using Constellation.Core.Models.Families.Events;
 using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.StaffMembers.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System.Linq;

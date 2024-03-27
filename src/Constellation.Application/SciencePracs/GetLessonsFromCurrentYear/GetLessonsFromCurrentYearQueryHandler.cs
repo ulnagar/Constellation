@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.SciencePracs.GetLessonsFromCurrentYear;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
+using Core.Models.Subjects.Repositories;
 using Serilog;
 using System;
 using System.Collections.Generic;

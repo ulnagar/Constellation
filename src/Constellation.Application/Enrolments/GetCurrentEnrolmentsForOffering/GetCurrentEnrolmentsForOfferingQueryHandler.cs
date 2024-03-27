@@ -2,8 +2,8 @@
 
 using Abstractions.Messaging;
 using Core.Models.Enrolments;
+using Core.Models.Enrolments.Repositories;
 using Core.Shared;
-using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading;

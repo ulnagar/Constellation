@@ -1,5 +1,4 @@
 ﻿using Constellation.Application.DTOs;
-using System;
 using System.Threading.Tasks;
 
 namespace Constellation.Application.Interfaces.Gateways

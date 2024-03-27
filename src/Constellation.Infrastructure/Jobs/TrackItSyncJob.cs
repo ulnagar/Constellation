@@ -3,12 +3,13 @@
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
-using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Infrastructure.Persistence.TrackItContext;
 using Constellation.Infrastructure.Persistence.TrackItContext.Models;
 using Core.Models.Faculty;
 using Core.Models.Faculty.Repositories;
+using Core.Models.StaffMembers.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class TrackItSyncJob : ITrackItSyncJob

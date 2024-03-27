@@ -7,6 +7,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.SciencePracs;
 using Core.Models.Enrolments;
+using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings.Identifiers;
 using Serilog;
 using System.Collections.Generic;

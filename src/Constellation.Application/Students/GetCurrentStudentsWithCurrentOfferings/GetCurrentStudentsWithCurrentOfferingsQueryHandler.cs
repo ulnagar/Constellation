@@ -1,12 +1,13 @@
 ﻿namespace Constellation.Application.Students.GetCurrentStudentsWithCurrentOfferings;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Enrolments;
+using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Students;
 using Core.Shared;
-using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;

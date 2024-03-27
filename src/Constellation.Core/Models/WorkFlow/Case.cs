@@ -1,14 +1,12 @@
 ﻿#nullable enable
 namespace Constellation.Core.Models.WorkFlow;
 
-using Attendance;
 using Enums;
 using Errors;
 using Events;
 using Identifiers;
 using Primitives;
 using Shared;
-using Students;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +24,7 @@ public sealed class Case : AggregateRoot, IAuditableEntity
     }
 
     public CaseId Id { get; private set; } = new();
-    public CaseType Type { get; private set; }
+    public CaseType? Type { get; private set; }
 
     public CaseDetailId? DetailId { get; private set; }
     public CaseDetail? Detail { get; private set; }
@@ -34,12 +32,12 @@ public sealed class Case : AggregateRoot, IAuditableEntity
     public CaseStatus Status { get; private set; } = CaseStatus.Open;
 
     public IReadOnlyList<Action> Actions => _actions.ToList();
-    public string CreatedBy { get; set; } = string.Empty;
+    public string? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.MinValue;
-    public string ModifiedBy { get; set; } = string.Empty;
+    public string? ModifiedBy { get; set; }
     public DateTime ModifiedAt { get; set; } = DateTime.MinValue;
     public bool IsDeleted { get; private set; }
-    public string DeletedBy { get; set; } = string.Empty;
+    public string? DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; } = DateTime.MinValue;
 
     public void AddAction(Action action)
@@ -102,10 +100,13 @@ public sealed class Case : AggregateRoot, IAuditableEntity
                 return Result.Failure(CaseErrors.Case.AttachDetails.DetailMismatch(Type.Name, nameof(AttendanceCaseDetail)));
             
             Detail = detail;
+            DetailId = detail.Id;
 
             return Result.Success();
         }
 
         return Result.Failure(CaseErrors.Case.AttachDetails.UnknownDetails);
     }
+
+    public override string ToString() => Detail?.ToString() ?? string.Empty;
 }

@@ -7,6 +7,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Attendance.Repositories;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Clock;
 using Core.Shared;
 using Interfaces.Gateways;

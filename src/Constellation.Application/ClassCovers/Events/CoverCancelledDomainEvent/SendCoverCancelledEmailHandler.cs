@@ -15,6 +15,7 @@ using Core.Models;
 using Core.Models.Casuals;
 using Core.Models.Covers;
 using Core.Models.Offerings;
+using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Microsoft.AspNetCore.Identity;
 using Serilog;

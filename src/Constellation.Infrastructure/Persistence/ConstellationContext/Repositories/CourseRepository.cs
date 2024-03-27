@@ -9,6 +9,7 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Models.Subjects.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 public class CourseRepository : ICourseRepository

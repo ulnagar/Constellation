@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Awards.GetStudentAwardStatistics;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Models.Students;

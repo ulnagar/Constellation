@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Features.API.Schools.Queries;
 
+using Constellation.Core.Models.Students.Repositories;
 using Core.Models;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;

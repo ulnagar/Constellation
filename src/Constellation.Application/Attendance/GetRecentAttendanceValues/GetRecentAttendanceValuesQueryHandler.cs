@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Attendance.GetRecentAttendanceValues;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Repositories;
 using Core.Models.Students;
 using Core.Shared;
-using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;

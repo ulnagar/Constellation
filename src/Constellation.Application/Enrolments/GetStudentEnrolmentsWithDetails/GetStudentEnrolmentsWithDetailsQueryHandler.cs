@@ -1,10 +1,12 @@
 ﻿namespace Constellation.Application.Enrolments.GetStudentEnrolmentsWithDetails;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Enrolments.Repositories;
+using Core.Models.StaffMembers.Repositories;
+using Core.Models.Subjects.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,15 +1,15 @@
 ﻿namespace Constellation.Application.GroupTutorials.GetTutorialRollWithDetailsById;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Extensions;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Extensions;
+using Core.Models.StaffMembers.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;

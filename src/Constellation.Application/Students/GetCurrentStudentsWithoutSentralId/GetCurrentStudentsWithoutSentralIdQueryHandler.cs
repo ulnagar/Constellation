@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.Students.GetCurrentStudentsWithoutSentralId;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Students;
 using Core.Shared;
-using Interfaces.Repositories;
 using Models;
 using System.Collections.Generic;
 using System.Threading;

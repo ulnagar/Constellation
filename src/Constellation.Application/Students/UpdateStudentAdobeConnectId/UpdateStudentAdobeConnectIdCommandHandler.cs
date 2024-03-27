@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Shared;
 using Interfaces.Gateways;
 using Serilog;

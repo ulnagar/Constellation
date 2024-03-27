@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.AdminDashboards.AuditUser;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions.Repositories;
@@ -10,6 +9,7 @@ using Constellation.Core.Shared;
 using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.StaffMembers.Repositories;
 using Microsoft.AspNetCore.Identity;
 using System.Threading;
 using System.Threading.Tasks;

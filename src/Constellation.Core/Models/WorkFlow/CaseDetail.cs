@@ -3,7 +3,9 @@
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Attendance.Identifiers;
+using Enums;
 using Errors;
+using Extensions;
 using Identifiers;
 using Shared;
 using Students;
@@ -12,6 +14,8 @@ public abstract class CaseDetail
 {
     public CaseDetailId Id { get; private protected set; } = new();
     public CaseId CaseId { get; private protected set; }
+
+    public abstract string ToString();
 }
 
 public sealed class AttendanceCaseDetail : CaseDetail
@@ -25,6 +29,7 @@ public sealed class AttendanceCaseDetail : CaseDetail
     public string SchoolName { get; private set; }
     public AttendanceValueId AttendanceValueId { get; private set; }
     public string PeriodLabel { get; private set; }
+    public AttendanceSeverity Severity { get; private set; }
     public decimal PerMinuteYearToDatePercentage { get; private set; }
     public decimal PerMinuteWeekPercentage { get; private set; }
     public decimal PerDayYearToDatePercentage { get; private set; }
@@ -46,6 +51,7 @@ public sealed class AttendanceCaseDetail : CaseDetail
         AttendanceCaseDetail detail = new();
         detail.AddFromStudent(student);
         detail.AddFromAttendanceValue(value);
+        detail.Severity = AttendanceSeverity.FromAttendanceValue(value.PerMinuteWeekPercentage);
 
         return detail;
     }
@@ -68,4 +74,6 @@ public sealed class AttendanceCaseDetail : CaseDetail
         SchoolCode = student.SchoolCode;
         SchoolName = student.School.Name;
     }
+
+    public override string ToString() => $"Attendance Case for {Name} ({Grade.AsName()}): {PeriodLabel} - {Severity.Name}";
 }

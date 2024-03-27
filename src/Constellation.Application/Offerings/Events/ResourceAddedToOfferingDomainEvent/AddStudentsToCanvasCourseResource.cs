@@ -11,6 +11,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Shared;
+using Core.Models.Enrolments.Repositories;
 using Core.Models.Operations.Enums;
 using Serilog;
 using System.Collections.Generic;

@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Students.GetStudentById;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Students.Models;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.Students.Errors;
 using System.Threading;

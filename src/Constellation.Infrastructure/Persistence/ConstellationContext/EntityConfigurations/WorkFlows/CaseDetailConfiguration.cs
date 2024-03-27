@@ -2,6 +2,7 @@
 
 using Core.Models.Attendance.Identifiers;
 using Core.Models.WorkFlow;
+using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -42,5 +43,11 @@ internal sealed class AttendanceCaseDetailConfiguration : IEntityTypeConfigurati
             .HasConversion(
                 id => id.Value,
                 value => AttendanceValueId.FromValue(value));
+
+        builder
+            .Property(detail => detail.Severity)
+            .HasConversion(
+                severity => severity.Value,
+                value => AttendanceSeverity.FromValue(value));
     }
 }

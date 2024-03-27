@@ -1,4 +1,4 @@
-namespace Constellation.Application.Interfaces.Repositories;
+namespace Constellation.Core.Models.Enrolments.Repositories;
 
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings.Identifiers;

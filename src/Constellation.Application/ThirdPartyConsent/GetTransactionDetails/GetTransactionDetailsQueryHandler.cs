@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Application.ThirdPartyConsent.GetTransactionDetails;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.ThirdPartyConsent;
 using Core.Models.ThirdPartyConsent.Errors;
 using Core.Models.ThirdPartyConsent.Repositories;
 using Core.Shared;
-using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading;

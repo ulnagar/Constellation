@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.SciencePracs.GetLessonRollSubmitContextForSchoolsPortal;
 
 using Abstractions.Messaging;
-using Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Core.Errors;
 using Constellation.Core.Models.SchoolContacts;
@@ -14,6 +13,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Constellation.Core.Models.Students.Repositories;
 
 internal sealed class GetLessonRollSubmitContextForSchoolsPortalQueryHandler
     : IQueryHandler<GetLessonRollSubmitContextForSchoolsPortalQuery, ScienceLessonRollForSubmit>

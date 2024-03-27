@@ -1,9 +1,7 @@
 ﻿namespace Constellation.Application.Absences.GetAbsencesForFamily;
 
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.ValueObjects;
 using System;
 
 public sealed record AbsenceForFamilyResponse(
