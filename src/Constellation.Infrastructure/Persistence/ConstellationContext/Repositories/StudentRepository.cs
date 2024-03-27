@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Enums;
@@ -11,6 +10,7 @@ using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Models.Absences;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 public class StudentRepository : IStudentRepository
@@ -301,13 +301,16 @@ public class StudentRepository : IStudentRepository
     }
 
     public async Task<List<Student>> ForInterviewsExportAsync(
-        InterviewExportSelectionDto filter,
+        List<int> filterGrades, 
+        List<OfferingId> filterClasses, 
+        bool perFamily, 
+        bool resFamilyOnly,
         CancellationToken cancellationToken = default) =>
         await _context.Students
             .Include(student => student.Enrolments)
             .Include(student => student.FamilyMemberships)
             .Where(student => !student.IsDeleted)
-            .Where(FilterStudent(filter))
+            .Where(FilterStudent(filterGrades, filterClasses, perFamily, resFamilyOnly))
             .ToListAsync(cancellationToken);
 
     public async Task<ICollection<Student>> WithoutAdobeConnectDetailsForUpdate()
@@ -317,18 +320,18 @@ public class StudentRepository : IStudentRepository
             .ToListAsync();
     }
 
-    private static Expression<Func<Student, bool>> FilterStudent(InterviewExportSelectionDto filter)
+    private static Expression<Func<Student, bool>> FilterStudent(List<int> filterGrades, List<OfferingId> filterClasses, bool perFamily, bool resFamilyOnly)
     {
-        var predicate = PredicateBuilder.New<Student>();
+        ExpressionStarter<Student> predicate = PredicateBuilder.New<Student>();
 
-        if (filter.Grades.Any())
+        if (!filterGrades.Any())
         {
-            predicate.And(student => filter.Grades.Contains((int)student.CurrentGrade));
+            predicate.And(student => filterGrades.Contains((int)student.CurrentGrade));
         }
 
-        if (filter.ClassList.Any())
+        if (filterClasses.Any())
         {
-            predicate.And(student => student.Enrolments.Any(enrolment => !enrolment.IsDeleted && filter.ClassList.Contains(enrolment.OfferingId)));
+            predicate.And(student => student.Enrolments.Any(enrolment => !enrolment.IsDeleted && filterClasses.Contains(enrolment.OfferingId)));
         }
 
         return predicate;

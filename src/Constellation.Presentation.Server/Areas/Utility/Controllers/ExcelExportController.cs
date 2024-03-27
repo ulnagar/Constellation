@@ -28,7 +28,7 @@ public class ExcelExportController : Controller
 
     public async Task<IActionResult> ExportInterviews(InterviewExportSelectionDto filter, CancellationToken cancellationToken)
     {
-        List<Student> data = await _unitOfWork.Students.ForInterviewsExportAsync(filter, cancellationToken);
+        List<Student> data = await _unitOfWork.Students.ForInterviewsExportAsync(filter.Grades.ToList(), filter.ClassList.ToList(), filter.PerFamily, filter.ResidentialFamilyOnly, cancellationToken);
 
         List<InterviewExportDto> exportDto = await _exportService.CreatePTOExport(data, filter.PerFamily, filter.ResidentialFamilyOnly, cancellationToken);
 
