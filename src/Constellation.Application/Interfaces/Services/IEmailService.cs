@@ -13,12 +13,14 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.ValueObjects;
 using Core.Models.Assignments;
 using Core.Models.Subjects;
+using Core.Models.WorkFlow;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
+using Action = Core.Models.WorkFlow.Action;
 
 public interface IEmailService
 {
@@ -92,4 +94,7 @@ public interface IEmailService
     // School Contact Emails
     Task SendWelcomeEmailToCoordinator(List<EmailRecipient> recipients, string schoolName, CancellationToken cancellationToken = default);
     Task SendWelcomeEmailToSciencePracTeacher(List<EmailRecipient> recipients, string schoolName, CancellationToken cancellationToken = default);
+
+    // WorkFlow Emails
+    Task SendActionAssignedEmail(List<EmailRecipient> recipients, Case item, Action action, Staff assignee, CancellationToken cancellationToken = default);
 }

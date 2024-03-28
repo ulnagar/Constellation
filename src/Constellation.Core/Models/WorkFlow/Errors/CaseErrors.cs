@@ -8,6 +8,10 @@ public static class CaseErrors
 {
     public static class Case
     {
+        public static readonly Func<CaseId, Error> NotFound = id => new(
+            "Case.NotFound",
+            $"Could not find a Case with the Id {id}");
+
         public static class AttachDetails
         {
             public static readonly Func<string, string, Error> DetailMismatch = (caseType, expected) => new(

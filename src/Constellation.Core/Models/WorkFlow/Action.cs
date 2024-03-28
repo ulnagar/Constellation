@@ -4,6 +4,7 @@ namespace Constellation.Core.Models.WorkFlow;
 using Enums;
 using Errors;
 using Identifiers;
+using Models.Identifiers;
 using Offerings;
 using Offerings.Identifiers;
 using Primitives;
@@ -40,6 +41,7 @@ public abstract class Action : IAuditableEntity
     public DateTime DeletedAt { get; set; } = DateTime.MinValue;
 
     public abstract override string ToString();
+    public abstract string AsStatus();
 
     internal Result AssignAction(Staff? assignee, string currentUser)
     {
@@ -197,6 +199,9 @@ public sealed class SendEmailAction : Action
     }
 
     public override string ToString() =>
+        $"Send email";
+
+    public override string AsStatus() =>
         Status switch
         {
             { } value when value.Equals(ActionStatus.Open) => 
@@ -210,8 +215,63 @@ public sealed class SendEmailAction : Action
 public sealed class PhoneParentAction : Action
 {
     // Option to contact parent via phone to discuss issues
+    public ParentId? ParentId { get; private set; }
+    public string? ParentName { get; private set; }
+    public string? PhoneNumber { get; private set; }
+    public DateTime DateOccurred { get; private set; }
+    public int IncidentNumber { get; private set; }
+
+    public static Result<PhoneParentAction> Create(
+        CaseId caseId,
+        Staff assignee,
+        string currentUser)
+    {
+        PhoneParentAction action = new()
+        {
+            CaseId = caseId
+        };
+
+        Result assignment = action.AssignAction(assignee, currentUser);
+
+        if (assignment.IsFailure)
+            return Result.Failure<PhoneParentAction>(assignment.Error);
+
+        return action;
+    }
+
+    public Result Update(
+        ParentId? parentId,
+        string parentName,
+        string parentNumber,
+        DateTime dateOccurred,
+        int incidentNumber, 
+        string currentUser)
+    {
+        if (incidentNumber == 0)
+            return Result.Failure(CaseErrors.Action.Update.IncidentNumberZero);
+
+        Result noteAttempt = AddNote(
+            $"Details updated: ParentId = {parentId}, ParentName = {parentName}, PhoneNumber = {parentNumber}, DateOccurred = {dateOccurred}, IncidentNumber = {incidentNumber}",
+            currentUser);
+        
+        if (noteAttempt.IsFailure)
+            return noteAttempt;
+
+        if (parentId is not null)
+            ParentId = parentId;
+        
+        ParentName = parentName;
+        PhoneNumber = parentNumber;
+        DateOccurred = dateOccurred;
+        IncidentNumber = incidentNumber;
+
+        return Result.Success();
+    }
 
     public override string ToString() =>
+        $"Contact Parent via phone";
+
+    public override string AsStatus() =>
         Status switch
         {
             { } value when value.Equals(ActionStatus.Open) =>
@@ -223,8 +283,60 @@ public sealed class PhoneParentAction : Action
 public sealed class ParentInterviewAction : Action
 {
     // Option to schedule and record interview with parent
+    public ParentId? ParentId { get; private set; }
+    public string? ParentName { get; private set; }
+    public DateTime DateOccurred { get; private set; }
+    public int IncidentNumber { get; private set; }
+
+    public static Result<ParentInterviewAction> Create(
+        CaseId caseId,
+        Staff assignee,
+        string currentUser)
+    {
+        ParentInterviewAction action = new()
+        {
+            CaseId = caseId
+        };
+
+        Result assignment = action.AssignAction(assignee, currentUser);
+
+        if (assignment.IsFailure)
+            return Result.Failure<ParentInterviewAction>(assignment.Error);
+
+        return action;
+    }
+
+    public Result Update(
+        ParentId? parentId,
+        string parentName,
+        DateTime dateOccurred,
+        int incidentNumber,
+        string currentUser)
+    {
+        if (incidentNumber == 0)
+            return Result.Failure(CaseErrors.Action.Update.IncidentNumberZero);
+
+        Result noteAttempt = AddNote(
+            $"Details updated: ParentId = {parentId}, ParentName = {parentName}, DateOccurred = {dateOccurred}, IncidentNumber = {incidentNumber}",
+            currentUser);
+
+        if (noteAttempt.IsFailure)
+            return noteAttempt;
+
+        if (parentId is not null)
+            ParentId = parentId;
+
+        ParentName = parentName;
+        DateOccurred = dateOccurred;
+        IncidentNumber = incidentNumber;
+
+        return Result.Success();
+    }
 
     public override string ToString() =>
+        $"Arrange interview with Parent";
+
+    public override string AsStatus() =>
         Status switch
         {
             { } value when value.Equals(ActionStatus.Open) =>
@@ -320,6 +432,9 @@ public sealed class CreateSentralEntryAction : Action
     }
 
     public override string ToString() =>
+        $"Create Sentral entry and record Incident Number";
+
+    public override string AsStatus() =>
         Status switch
         {
             { } value when value.Equals(ActionStatus.Open) =>
@@ -374,6 +489,9 @@ public sealed class ConfirmSentralEntryAction : Action
     }
 
     public override string ToString() =>
+        $"Confirm Sentral entry";
+
+    public override string AsStatus() =>
         Status switch
         {
             { } value when value.Equals(ActionStatus.Open) =>

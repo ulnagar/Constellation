@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.WorkFlows;
 
 using Core.Models;
+using Core.Models.Identifiers;
 using Core.Models.Offerings;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
@@ -114,6 +115,64 @@ internal sealed class SendEmailActionConfiguration : IEntityTypeConfiguration<Se
     }
 }
 
+internal sealed class PhoneParentActionConfiguration : IEntityTypeConfiguration<PhoneParentAction>
+{
+    public void Configure(EntityTypeBuilder<PhoneParentAction> builder)
+    {
+        builder
+            .Property(action => action.ParentId)
+            .HasConversion(
+                id => id.Value,
+                value => ParentId.FromValue(value));
+
+        builder
+            .Property(action => action.ParentId)
+            .HasColumnName(nameof(PhoneParentAction.ParentId));
+
+        builder
+            .Property(action => action.ParentName)
+            .HasColumnName(nameof(PhoneParentAction.ParentName));
+
+        builder
+            .Property(action => action.DateOccurred)
+            .HasColumnName(nameof(PhoneParentAction.DateOccurred));
+
+        builder
+            .Property(action => action.IncidentNumber)
+            .HasColumnName(nameof(PhoneParentAction.IncidentNumber));
+    }
+
+}
+
+internal sealed class ParentInterviewActionConfiguration : IEntityTypeConfiguration<ParentInterviewAction>
+{
+    public void Configure(EntityTypeBuilder<ParentInterviewAction> builder)
+    {
+        builder
+            .Property(action => action.ParentId)
+            .HasConversion(
+                id => id.Value,
+                value => ParentId.FromValue(value));
+
+        builder
+            .Property(action => action.ParentId)
+            .HasColumnName(nameof(ParentInterviewAction.ParentId));
+
+        builder
+            .Property(action => action.ParentName)
+            .HasColumnName(nameof(ParentInterviewAction.ParentName));
+
+        builder
+            .Property(action => action.DateOccurred)
+            .HasColumnName(nameof(ParentInterviewAction.DateOccurred));
+
+        builder
+            .Property(action => action.IncidentNumber)
+            .HasColumnName(nameof(ParentInterviewAction.IncidentNumber));
+    }
+
+}
+
 internal sealed class CreateSentralEntryActionConfiguration : IEntityTypeConfiguration<CreateSentralEntryAction>
 {
     public void Configure(EntityTypeBuilder<CreateSentralEntryAction> builder)
@@ -124,5 +183,9 @@ internal sealed class CreateSentralEntryActionConfiguration : IEntityTypeConfigu
             .HasForeignKey(action => action.OfferingId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.ClientSetNull);
+
+        builder
+            .Property(action => action.IncidentNumber)
+            .HasColumnName(nameof(CreateSentralEntryAction.IncidentNumber));
     }
 }

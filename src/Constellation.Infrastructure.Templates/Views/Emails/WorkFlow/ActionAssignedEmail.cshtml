@@ -1,0 +1,16 @@
+@using Constellation.Infrastructure.Templates.Views.Emails.WorkFlow
+@model ActionAssignedEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>@Model.TeacherName,</p>
+<p>You have been assigned a task relating to the @Model.CaseDescription.</p>
+<p>The task is: @Model.ActionDescription</p>
+<p>Please complete this task at <a href="@Model.Link">@Model.Link</a></p>

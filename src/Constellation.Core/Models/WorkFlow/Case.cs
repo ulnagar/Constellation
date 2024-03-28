@@ -21,6 +21,8 @@ public sealed class Case : AggregateRoot, IAuditableEntity
         CaseType type)
     {
         Type = type;
+
+        RaiseDomainEvent(new CaseCreatedDomainEvent(new(), Id));
     }
 
     public CaseId Id { get; private set; } = new();
@@ -94,7 +96,7 @@ public sealed class Case : AggregateRoot, IAuditableEntity
     public Result AttachDetails(
         CaseDetail detail)
     {
-        if (Type.Equals(CaseType.Attendance))
+        if (Type!.Equals(CaseType.Attendance))
         {
             if (detail is not AttendanceCaseDetail)
                 return Result.Failure(CaseErrors.Case.AttachDetails.DetailMismatch(Type.Name, nameof(AttendanceCaseDetail)));

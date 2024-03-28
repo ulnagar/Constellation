@@ -17,6 +17,7 @@ public sealed class AppConfiguration
     public ContactsConfiguration Contacts { get; set; }
     public AttachmentsConfiguration Attachments { get; set; }
     public CoversConfiguration Covers { get; set; }
+    public WorkFlowConfiguration WorkFlow { get; set; }
 
 
     public class AbsencesConfiguration
@@ -71,5 +72,10 @@ public sealed class AppConfiguration
         public string ContactName { get; set; }
         public string ContactTitle { get; set; }
         public string ContactPhone { get; set; }
+    }
+
+    public class WorkFlowConfiguration
+    {
+        public string AttendanceReviewer { get; set; }
     }
 }

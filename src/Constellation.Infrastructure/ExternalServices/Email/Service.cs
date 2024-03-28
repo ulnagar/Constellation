@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email;
 
-using Application.Helpers;
 using Application.Absences.ConvertAbsenceToAbsenceEntry;
 using Application.Absences.ConvertResponseToAbsenceExplanation;
 using Application.DTOs;
 using Application.DTOs.EmailRequests;
+using Application.Helpers;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
@@ -16,22 +16,24 @@ using Core.Models.Covers;
 using Core.Models.Offerings;
 using Core.Models.Students;
 using Core.Models.Subjects;
+using Core.Models.WorkFlow;
+using Core.Shared;
 using Core.ValueObjects;
+using Microsoft.Extensions.Options;
+using MimeKit;
+using System.Net.Mail;
+using System.Threading;
 using Templates.Views.Emails.Absences;
+using Templates.Views.Emails.Assignments;
 using Templates.Views.Emails.Auth;
 using Templates.Views.Emails.Awards;
+using Templates.Views.Emails.Contacts;
 using Templates.Views.Emails.Covers;
 using Templates.Views.Emails.Lessons;
 using Templates.Views.Emails.MandatoryTraining;
 using Templates.Views.Emails.Reports;
 using Templates.Views.Emails.RollMarking;
-using Core.Shared;
-using Microsoft.Extensions.Options;
-using MimeKit;
-using System.Net.Mail;
-using System.Threading;
-using Templates.Views.Emails.Assignments;
-using Templates.Views.Emails.Contacts;
+using Templates.Views.Emails.WorkFlow;
 
 public sealed class Service : IEmailService
 {
@@ -1193,6 +1195,30 @@ public sealed class Service : IEmailService
         };
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Contacts/NewSciencePracTeacherEmail.cshtml", viewModel);
+
+        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+    }
+
+    public async Task SendActionAssignedEmail(
+        List<EmailRecipient> recipients,
+        Case item,
+        Action action,
+        Staff assignee,
+        CancellationToken cancellationToken = default)
+    {
+        ActionAssignedEmailViewModel viewModel = new()
+        {
+            Title = $"[WorkFlow] Action Assigned",
+            SenderName = "Aurora College",
+            SenderTitle = "",
+            Preheader = "",
+            TeacherName = assignee.DisplayName,
+            ActionDescription = action.ToString(),
+            CaseDescription = item.ToString(),
+            Link = "https://acos.aurora.nsw.edu.au/"
+        };
+
+        string body = await _razorService.RenderViewToStringAsync(ActionAssignedEmailViewModel.ViewLocation, viewModel);
 
         await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
     }
