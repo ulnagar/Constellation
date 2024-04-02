@@ -1,3 +1,23 @@
 ﻿@page
 
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
+
+<table class="table-striped data-table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Offering</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var entry in Model.Rolls)
+        {
+            <tr>
+                <td data-sort="@entry.Date.ToString("yyyy-MM-dd")">@entry.Date.ToShortDateString()</td>
+                <td>@entry.OfferingName</td>
+            </tr>
+        }
+    </tbody>
+
+</table>

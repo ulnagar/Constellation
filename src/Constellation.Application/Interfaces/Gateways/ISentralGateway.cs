@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 public interface ISentralGateway
 {
+    Task<bool> GetAttendanceRollSyncStatus(string sentralStudentId, DateOnly date);
     Task<string> GetSentralStudentIdAsync(string studentName);
     Task<List<SentralPeriodAbsenceDto>> GetAbsenceDataAsync(string sentralStudentId);
     Task<List<SentralPeriodAbsenceDto>> GetPartialAbsenceDataAsync(string sentralStudentId);

@@ -6,6 +6,7 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
+using Constellation.Core.Models;
 using Core.Abstractions.Clock;
 using Core.Shared;
 using ExcelDataReader;
@@ -596,6 +597,53 @@ public class Gateway : ISentralGateway
         returnData.AddRange(term4);
 
         return returnData;
+    }
+
+    public async Task<bool> GetAttendanceRollSyncStatus(string sentralStudentId, DateOnly date)
+    {
+        HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/attendance/administration/student/{sentralStudentId}?term=1", default);
+
+        if (page == null)
+            return false;
+
+        HtmlNode absenceTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "PartialAbsenceTable").Value);
+
+        if (absenceTable is null)
+            return false;
+
+        IEnumerable<HtmlNode> rows = absenceTable.Descendants("tr");
+
+        foreach (HtmlNode row in rows)
+        {
+            List<HtmlNode> cellNodes = row.ChildNodes.Where(node => node.Name == "td").ToList();
+
+            if (!cellNodes.Any())
+                continue;
+
+            if (cellNodes.Count() != 10)
+                continue;
+
+            HtmlNode anchorTag = cellNodes.Last().ChildNodes.First();
+            HtmlAttribute onClick = anchorTag.Attributes.AttributesWithName("onclick").FirstOrDefault();
+            if (onClick is null)
+                continue;
+
+            string stringDate = onClick.Value.Split(", '")[1].Split(");")[0].Trim('\'');
+            DateOnly rowDate = DateOnly.Parse(stringDate);
+
+            if (rowDate != date)
+                continue;
+
+            HtmlNode spanTag = cellNodes[8].ChildNodes.FindFirst("span");
+
+            HtmlAttribute spanClass = spanTag?.Attributes.AttributesWithName("class").FirstOrDefault();
+            if (spanClass is null)
+                continue;
+
+            return spanClass.Value.Contains("icon-check");
+        }
+
+        return false;
     }
 
     private async Task<List<SentralPeriodAbsenceDto>> GetPartialAbsenceDataForTerm(string sentralStudentId, int term)
