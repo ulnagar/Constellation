@@ -1,5 +1,8 @@
 ﻿@page
 
+@using Constellation.Application.Attendance.GenerateAttendanceReportForStudent
+@using Constellation.Core.Extensions
+@using Constellation.Core.Models.WorkFlow
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
 
 <h2>WorkFlow Cases</h2>
@@ -10,41 +13,135 @@
 
 <hr />
 
-<table class="table-striped data-table">
-    <thead>
-    <tr>
-        <th>Case</th>
-        <th>User</th>
-        <th></th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var entry in Model.Cases)
-    {
-        <tr>
-            <td>@entry.ToString()</td>
-            <td></td>
-            <td></td>
-        </tr>
-        @foreach (var action in entry.Actions.OrderBy(action => action.CreatedAt))
+@foreach (var entry in Model.Cases)
+{
+    <div class="border border-danger container mb-3 p-4">
+        <div class="row">
+            <div class="col-12"><h3>@entry.ToString()</h3></div>
+            <div class="col-12 mt-1">
+                <a asp-page-handler="NewAction" class="btn btn-sm btn-success">New Action</a>
+                <a asp-page-handler="AddNote" class="btn btn-sm btn-secondary">Add Note</a>
+                <a asp-page-handler="CloseCase" class="btn btn-sm btn-danger">Mark Completed</a>
+            </div>
+            <div class="col-6 mt-3">
+                @if (entry.Detail is AttendanceCaseDetail absenceDetail)
+                {
+                    <dl>
+                        <dt>Case Type</dt>
+                        <dd>Attendance Percentage</dd>
+                        
+                        <dt>Student</dt>
+                        <dd>
+                            @absenceDetail.Name <br/>
+                            @absenceDetail.Grade.AsName() <br />
+                            @absenceDetail.SchoolName
+                        </dd>
+                        
+                        <dt>Attendance Period</dt>
+                        <dd>@absenceDetail.PeriodLabel</dd>
+                        
+                        <dt>Severity Band</dt>
+                        <dd>@absenceDetail.Severity.Name</dd>
+                        
+                        <dt>Attendance Percentage (per minute for week)</dt>
+                        <dd>@absenceDetail.PerMinuteWeekPercentage%</dd>
+                    </dl>
+                }
+            </div>
+            <div class="col-6 mt-3">
+                <dl>
+                    <dt>Created</dt>
+                    <dd>@entry.CreatedAt.ToString("dd/MM/yyyy h:mm tt")</dd>
+                    
+                    <dt>Status</dt>
+                    <dd>@entry.Status.Name</dd>
+                </dl>
+            </div>
+        </div>
+        @foreach (var action in entry.Actions.Where(action => action.ParentActionId is null).OrderBy(action => action.CreatedAt))
         {
-            <tr>
-                <td>@action.ToString()</td>
-                <td>@action.AssignedTo</td>
-                <td>
-                    <a asp-page-handler="ProcessAction" asp-route-caseId="@entry.Id.Value" asp-route-actionId="@action.Id.Value" class="btn btn-sm btn-danger">Update</a>
-                </td>
-            </tr>
+            <div class="border border-success row mt-1 pb-1">
+                <div class="col-12"><strong>Action: @action.ToString()</strong></div>
+                <div class="col-12 mt-1">
+                    <a asp-page-handler="UpdateAction" class="btn btn-sm btn-success">Update Action</a>
+                    <a asp-page-handler="AddNote" class="btn btn-sm btn-secondary">Add Note</a>
+                    <a asp-page-handler="CloseAction" class="btn btn-sm btn-danger">Mark Completed</a>
+                </div>
+                <div class="col-6 mt-3">
+                    @if (action is SendEmailAction emailAction)
+                    {
 
-            @foreach (var note in action.Notes.OrderBy(note => note.SubmittedAt))
+                    }
+                    
+                    @if (action is CreateSentralEntryAction sentralAction)
+                    {
+
+                    }
+                    
+                    @if (action is ConfirmSentralEntryAction confirmAction)
+                    {
+
+                    }
+                    
+                    @if (action is ParentInterviewAction interviewAction)
+                    {
+
+                    }
+                    
+                    @if (action is PhoneParentAction phoneAction)
+                    {
+
+                    }
+                </div>
+                <div class="col-6 mt-3">
+                    <dl>
+                        <dt>Created</dt>
+                        <dd>@action.CreatedAt.ToString("dd/MM/yyyy h:mm tt")</dd>
+
+                        <dt>Assigned To</dt>
+                        <dd>@action.AssignedTo</dd>
+                        
+                        <dt>Assigned</dt>
+                        <dd>@action.AssignedAt.ToString("dd/MM/yyyy h:mm tt")</dd>
+                        
+                        <dt>Status</dt>
+                        <dd>@action.Status.Name</dd>
+                    </dl>
+                </div>
+                <div class="col-12 mt-2">
+                    <strong>Notes:</strong>
+                    @foreach (var note in action.Notes)
+                    {
+                        <div class="col-12 alert alert-info">
+                            <span>@note.SubmittedBy : @note.SubmittedAt.ToString("dd/MM/yyyy h:mm tt")</span>
+                            <p class="mb-0">@note.Note</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @foreach (var subAction in entry.Actions.Where(item => item.ParentActionId == action.Id).OrderBy(item => item.CreatedAt))
             {
-                <tr>
-                    <td>@note.Note</td>
-                    <td>@note.SubmittedBy</td>
-                    <td></td>
-                </tr>
+                <div class="ml-3 mt-1 pb-1 border border-success row">
+                    <div class="col-12"><strong>Action: @subAction.ToString()</strong></div>
+                    <div class="col-12">
+                        Insert action buttons here
+                    </div>
+                    <div class="col-12">
+                        Insert details here
+                    </div>
+                    <div class="col-12 mt-2">
+                        <strong>Notes:</strong>
+                        @foreach (var note in subAction.Notes)
+                        {
+                            <div class="col-12 alert alert-info">
+                                <span>@note.SubmittedBy : @note.SubmittedAt.ToString("dd/MM/yyyy h:mm tt")</span>
+                                <p class="mb-0">@note.Note</p>
+                            </div>
+                        }
+                    </div>
+                </div>
             }
         }
-    }
-    </tbody>
-</table>
+    </div>
+}
