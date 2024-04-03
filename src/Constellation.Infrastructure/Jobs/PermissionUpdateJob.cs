@@ -32,7 +32,7 @@ internal sealed class PermissionUpdateJob : IPermissionUpdateJob
 
         _logger.Information("Searching for operations...");
         ICollection<CanvasOperation> operations = await _unitOfWork.CanvasOperations.AllToProcess();
-        _logger.Information("Found {count} operations to process.", jobId);
+        _logger.Information("Found {count} operations to process.", operations.Count);
         
         foreach (CanvasOperation operation in operations)
         {

@@ -49,7 +49,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
         _logger.ForContext(nameof(jobId), jobId);
 
         _logger
-            .Debug("Starting Sentral Awards Scan.");
+            .Information("Starting Sentral Awards Scan.");
 
         Result<List<AwardDetailResponse>> details = await _mediator.Send(new GetAwardDetailsFromSentralQuery(), cancellationToken);
 
@@ -73,14 +73,14 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
         List<Staff> teachers = await _staffRepository.GetAllActive(cancellationToken);
 
         _logger
-            .Debug("Found {count} students to process.", students.Count);
+            .Information("Found {count} students to process.", students.Count);
 
         foreach (Student student in students)
         {
             Name name = student.GetName();
 
             _logger
-                .Debug("Processing Student {name} ({grade})", name.DisplayName, student.CurrentGrade.AsName());
+                .Information("Processing Student {name} ({grade})", name.DisplayName, student.CurrentGrade.AsName());
 
             List<AwardDetailResponse> reportAwards = details
                 .Value
@@ -91,7 +91,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
             List<StudentAward> existingAwards = await _awardRepository.GetByStudentId(student.StudentId, cancellationToken);
 
             _logger
-                .Debug("Found {count} total awards for student {name} ({grade})", reportAwards.Count, name.DisplayName, student.CurrentGrade.AsName());
+                .Information("Found {count} total awards for student {name} ({grade})", reportAwards.Count, name.DisplayName, student.CurrentGrade.AsName());
 
             Result<List<AwardIncidentResponse>> awardIncidentsRequest = await _mediator.Send(new GetAwardIncidentsFromSentralQuery(student.SentralStudentId, _dateTime.CurrentYear.ToString()), cancellationToken);
 
@@ -105,14 +105,14 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
             }
 
             _logger
-                .Debug("Found {count} award incidents for student {name} ({grade})", awardIncidentsRequest.Value.Count, name.DisplayName, student.CurrentGrade.AsName());
+                .Information("Found {count} award incidents for student {name} ({grade})", awardIncidentsRequest.Value.Count, name.DisplayName, student.CurrentGrade.AsName());
 
             foreach (AwardDetailResponse item in reportAwards)
             {
                 if (!existingAwards.Any(award => award.Type == item.Type && award.AwardedOn.AddSeconds(-award.AwardedOn.Second) == item.AwardCreated))
                 {
                     _logger
-                        .Debug("Found new {type} on {date}", item.Type, item.AwardCreated.ToShortDateString());
+                        .Information("Found new {type} on {date}", item.Type, item.AwardCreated.ToShortDateString());
 
                     StudentAward entry = StudentAward.Create(
                         student.StudentId,
@@ -161,14 +161,14 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
     {
         Staff teacher = teachers.FirstOrDefault(staff =>
         {
-            string[] splitName = award.TeacherName.ToLowerInvariant().Trim().Split(' ');
+            string[] splitName = award.TeacherName.Trim().Split(' ');
 
-            if (staff.FirstName.Contains(splitName[0]) && staff.LastName.Contains(splitName[1]))
+            if (staff.FirstName.Contains(splitName[0], StringComparison.InvariantCultureIgnoreCase) && staff.LastName.Contains(splitName[1], StringComparison.InvariantCultureIgnoreCase))
                 return true;
 
-            string username = award.TeacherName.ToLowerInvariant().Trim().Replace(' ', '.');
+            string username = award.TeacherName.Trim().Replace(' ', '.').Replace("-", string.Empty, StringComparison.InvariantCultureIgnoreCase);
 
-            return staff.PortalUsername.Contains(username);
+            return staff.PortalUsername.Contains(username, StringComparison.InvariantCultureIgnoreCase);
         });
 
         if (teacher is null)
