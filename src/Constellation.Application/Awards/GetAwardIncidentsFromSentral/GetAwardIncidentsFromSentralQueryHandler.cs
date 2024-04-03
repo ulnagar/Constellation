@@ -28,16 +28,19 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
     {
         _gateway = gateway;
         _settings = settings.Value;
-        _logger = logger;
+        _logger = logger.ForContext<GetAwardIncidentsFromSentralQuery>();
     }
 
     public async Task<Result<List<AwardIncidentResponse>>> Handle(GetAwardIncidentsFromSentralQuery request, CancellationToken cancellationToken)
     {
         List<AwardIncidentResponse> response = new();
-
+        
         HtmlDocument page = await _gateway.GetAwardsListing(request.StudentId, request.Year, cancellationToken);
+        
+        if (page is null)
+            _logger.Warning("Page is null");
 
-        HtmlNode awardsList = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "WellbeingStudentAwardsList").Value);
+        HtmlNode awardsList = page?.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "WellbeingStudentAwardsList").Value);
 
         if (awardsList is null) return response;
         
