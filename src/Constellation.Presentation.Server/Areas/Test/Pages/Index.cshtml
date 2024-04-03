@@ -1,6 +1,5 @@
 ﻿@page
 
-@using Constellation.Application.Attendance.GenerateAttendanceReportForStudent
 @using Constellation.Core.Extensions
 @using Constellation.Core.Models.WorkFlow
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
@@ -17,7 +16,7 @@
 {
     <div class="border border-danger container mb-3 p-4">
         <div class="row">
-            <div class="col-12"><h3>@entry.ToString()</h3></div>
+            <div class="col-12 border-bottom border-dark py-2"><h3>@entry.ToString()</h3></div>
             <div class="col-12 mt-1">
                 <a asp-page-handler="NewAction" class="btn btn-sm btn-success">New Action</a>
                 <a asp-page-handler="AddNote" class="btn btn-sm btn-secondary">Add Note</a>
@@ -61,7 +60,7 @@
         @foreach (var action in entry.Actions.Where(action => action.ParentActionId is null).OrderBy(action => action.CreatedAt))
         {
             <div class="border border-success row mt-1 pb-1">
-                <div class="col-12"><strong>Action: @action.ToString()</strong></div>
+                <div class="col-12 border-bottom border-dark py-1"><strong>Action: @action.ToString()</strong></div>
                 <div class="col-12 mt-1">
                     <a asp-page-handler="UpdateAction" class="btn btn-sm btn-success">Update Action</a>
                     <a asp-page-handler="AddNote" class="btn btn-sm btn-secondary">Add Note</a>
