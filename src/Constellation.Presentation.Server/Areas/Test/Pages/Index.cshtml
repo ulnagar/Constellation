@@ -13,6 +13,8 @@
 <table class="table-striped data-table">
     <thead>
     <tr>
+        <th>Case</th>
+        <th>User</th>
         <th></th>
     </tr>
     </thead>
@@ -21,7 +23,28 @@
     {
         <tr>
             <td>@entry.ToString()</td>
+            <td></td>
+            <td></td>
         </tr>
+        @foreach (var action in entry.Actions.OrderBy(action => action.CreatedAt))
+        {
+            <tr>
+                <td>@action.ToString()</td>
+                <td>@action.AssignedTo</td>
+                <td>
+                    <a asp-page-handler="ProcessAction" asp-route-caseId="@entry.Id.Value" asp-route-actionId="@action.Id.Value" class="btn btn-sm btn-danger">Update</a>
+                </td>
+            </tr>
+
+            @foreach (var note in action.Notes.OrderBy(note => note.SubmittedAt))
+            {
+                <tr>
+                    <td>@note.Note</td>
+                    <td>@note.SubmittedBy</td>
+                    <td></td>
+                </tr>
+            }
+        }
     }
     </tbody>
 </table>

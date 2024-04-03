@@ -29,11 +29,11 @@ builder.Services
 
 // Configuration Authentication and Authorization
 builder.Services.AddIdentity<AppUser, AppRole>()
-            .AddClaimsPrincipalFactory<StaffUserIdClaimsFactory>()
-            .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders();
+    .AddClaimsPrincipalFactory<StaffUserIdClaimsFactory>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 
-builder.Services.AddTransient<UserClaimsPrincipalFactory<AppUser, AppRole>, StaffUserIdClaimsFactory>();
+//builder.Services.AddTransient<UserClaimsPrincipalFactory<AppUser, AppRole>, StaffUserIdClaimsFactory>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {

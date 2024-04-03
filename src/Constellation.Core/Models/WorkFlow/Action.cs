@@ -53,14 +53,14 @@ public abstract class Action : IAuditableEntity
 
         if (!string.IsNullOrWhiteSpace(AssignedTo))
         {
-            Result noteAttempt = AddNote($"Assignee changed from {AssignedTo} to {assignee.GetName()!.DisplayName} by {currentUser}", currentUser);
+            Result noteAttempt = AddNote($"Assignee changed from {AssignedTo} to {assignee.GetName()!.DisplayName}", currentUser);
 
             if (noteAttempt.IsFailure)
                 return noteAttempt;
         }
         else
         {
-            Result noteAttempt = AddNote($"Assignee set to {assignee.GetName()!.DisplayName} by {currentUser}", currentUser);
+            Result noteAttempt = AddNote($"Assignee set to {assignee.GetName()!.DisplayName}", currentUser);
 
             if (noteAttempt.IsFailure)
                 return noteAttempt;
@@ -77,7 +77,7 @@ public abstract class Action : IAuditableEntity
         ActionStatus newStatus,
         string currentUser)
     {
-        Result noteAttempt = AddNote($"Status changed from {Status} to {newStatus} by {currentUser}", currentUser);
+        Result noteAttempt = AddNote($"Status changed from {Status} to {newStatus}", currentUser);
 
         if (noteAttempt.IsFailure)
             return noteAttempt;
@@ -166,6 +166,8 @@ public sealed class SendEmailAction : Action
     /// <param name="subject">Subject line of the email</param>
     /// <param name="body">Body of the email as raw HTML string</param>
     /// <param name="hasAttachments">Has the email been sent with any attached files?</param>
+    /// <param name="sentAt">At what DateTime was the email queued for sending?</param>
+    /// <param name="currentUser">Which user initiated this action?</param>
     /// <returns>Result</returns>
     public Result Update(
         List<EmailRecipient> recipients,
@@ -173,7 +175,8 @@ public sealed class SendEmailAction : Action
         string subject,
         string body,
         bool hasAttachments,
-        DateTime sentAt)
+        DateTime sentAt,
+        string currentUser)
     {
         if (string.IsNullOrWhiteSpace(subject))
             return Result.Failure(CaseErrors.Action.Update.EmptySubjectLine);
@@ -195,7 +198,9 @@ public sealed class SendEmailAction : Action
         HasAttachments = hasAttachments;
         SentAt = sentAt;
 
-        return Result.Success();
+        Result status = UpdateStatus(ActionStatus.Completed, currentUser);
+
+        return status;
     }
 
     public override string ToString() =>
@@ -265,7 +270,9 @@ public sealed class PhoneParentAction : Action
         DateOccurred = dateOccurred;
         IncidentNumber = incidentNumber;
 
-        return Result.Success();
+        Result status = UpdateStatus(ActionStatus.Completed, currentUser);
+
+        return status;
     }
 
     public override string ToString() =>
@@ -330,7 +337,9 @@ public sealed class ParentInterviewAction : Action
         DateOccurred = dateOccurred;
         IncidentNumber = incidentNumber;
 
-        return Result.Success();
+        Result status = UpdateStatus(ActionStatus.Completed, currentUser);
+
+        return status;
     }
 
     public override string ToString() =>
@@ -365,14 +374,14 @@ public sealed class CreateSentralEntryAction : Action
 
         if (IncidentNumber != 0)
         {
-            Result noteAttempt = AddNote($"Incident Number changed from {IncidentNumber} to {incidentNumber} by {currentUser}", currentUser);
+            Result noteAttempt = AddNote($"Incident Number changed from {IncidentNumber} to {incidentNumber}", currentUser);
 
             if (noteAttempt.IsFailure)
                 return noteAttempt;
         }
         else
         {
-            Result noteAttempt = AddNote($"Incident Number set to {incidentNumber} by {currentUser}", currentUser);
+            Result noteAttempt = AddNote($"Incident Number set to {incidentNumber}", currentUser);
 
             if (noteAttempt.IsFailure)
                 return noteAttempt;
@@ -380,7 +389,9 @@ public sealed class CreateSentralEntryAction : Action
         
         IncidentNumber = incidentNumber;
 
-        return Result.Success();
+        Result status = UpdateStatus(ActionStatus.Completed, currentUser);
+        
+        return status;
     }
 
     public Result Update(bool notRequired, string currentUser)
@@ -390,7 +401,7 @@ public sealed class CreateSentralEntryAction : Action
 
         if (IncidentNumber != 0)
         {
-            Result noteAttempt = AddNote($"Not Required set to true with previous Incident Number value of {IncidentNumber} by {currentUser}", currentUser);
+            Result noteAttempt = AddNote($"Not Required set to true with previous Incident Number value of {IncidentNumber}", currentUser);
 
             if (noteAttempt.IsFailure)
                 return noteAttempt;
@@ -399,7 +410,7 @@ public sealed class CreateSentralEntryAction : Action
         }
         else
         {
-            Result noteAttempt = AddNote($"Not Required set to true by {currentUser}", currentUser);
+            Result noteAttempt = AddNote($"Not Required set to true", currentUser);
 
             if (noteAttempt.IsFailure)
                 return noteAttempt;
@@ -407,7 +418,9 @@ public sealed class CreateSentralEntryAction : Action
 
         NotRequired = true;
 
-        return Result.Success();
+        Result status = UpdateStatus(ActionStatus.Completed, currentUser);
+        
+        return status;
     }
 
     public static Result<CreateSentralEntryAction> Create(
@@ -458,14 +471,16 @@ public sealed class ConfirmSentralEntryAction : Action
 
     public Result Update(bool confirmed, string currentUser)
     {
-        Result noteAttempt = AddNote($"Confirmed set to {confirmed} by {currentUser}", currentUser);
+        Result noteAttempt = AddNote($"Confirmed set to {confirmed}", currentUser);
 
         if (noteAttempt.IsFailure)
             return noteAttempt;
 
         Confirmed = confirmed;
 
-        return Result.Success();
+        Result status = UpdateStatus(ActionStatus.Completed, currentUser);
+
+        return status;
     }
 
     public static Result<ConfirmSentralEntryAction> Create(

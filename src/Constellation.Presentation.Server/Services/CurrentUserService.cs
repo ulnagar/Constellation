@@ -9,7 +9,7 @@ using System.Security.Claims;
 /// </summary>
 public class CurrentUserService : ICurrentUserService
 {
-    private IHttpContextAccessor _httpContextAccessor;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public CurrentUserService(IHttpContextAccessor httpContextAccessor)
     {
@@ -18,9 +18,18 @@ public class CurrentUserService : ICurrentUserService
 
     private ClaimsPrincipal User => _httpContextAccessor.HttpContext?.User;
 
-    public string UserName => User != null && User.Identity.IsAuthenticated ? User.Identity.Name : string.Empty;
+    public string UserName =>
+        User is null ? string.Empty :
+        User.Identity is null ? string.Empty :
+        User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.GivenName) is null ? User.Identity.Name :
+        User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Surname) is null ? User.Identity.Name :
+        $"{User.Claims.First(claim => claim.Type == ClaimTypes.GivenName).Value} {User.Claims.First(claim => claim.Type == ClaimTypes.Surname).Value}";
 
-    public string EmailAddress => User?.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value ?? string.Empty;
+    public string EmailAddress =>
+        User is null ? string.Empty :
+        User.Identity is null ? string.Empty :
+        User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email) is null ? string.Empty :
+        User.Claims.First(claim => claim.Type == ClaimTypes.Email).Value;
 
-    public bool IsAuthenticated => User != null && User.Identity.IsAuthenticated;
+    public bool IsAuthenticated => User is not null && (User.Identity?.IsAuthenticated ?? false);
 }

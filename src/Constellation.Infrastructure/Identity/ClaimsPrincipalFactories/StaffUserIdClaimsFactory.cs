@@ -17,7 +17,13 @@ public class StaffUserIdClaimsFactory : UserClaimsPrincipalFactory<AppUser, AppR
     protected override async Task<ClaimsIdentity> GenerateClaimsAsync(AppUser user)
     {
         ClaimsIdentity identity = await base.GenerateClaimsAsync(user);
-        
+
+        identity.AddClaims(new []
+        {
+            new Claim(ClaimTypes.GivenName, user.FirstName),
+            new Claim(ClaimTypes.Surname, user.LastName)
+        });
+
         if (user.IsStaffMember)
         {
             identity.AddClaim(new Claim(AuthClaimType.StaffEmployeeId, user.StaffId));
