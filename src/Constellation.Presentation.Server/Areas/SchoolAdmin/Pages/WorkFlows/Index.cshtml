@@ -1,0 +1,39 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Workflows.IndexModel
+
+@{
+}
+
+<h2>WorkFlow Cases</h2>
+
+<div class="page-menu">
+
+</div>
+
+<hr />
+
+<table class="table-striped data-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.Cases)
+        {
+            <tr>
+                <td data-order="@entry.Subject.SortOrder">@entry.Subject.DisplayName</td>
+                <td>@entry.Description</td>
+                <td>@entry.Status</td>
+                <td data-order="@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")">@entry.CreatedAt.ToString("dd/MM/yyyy")</td>
+                <td>
+                    <a asp-page="/WorkFlows/Details" asp-area="SchoolAdmin" asp-route-id="@entry.CaseId.Value" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,39 @@
+﻿@model SendEmailAction
+
+@using Constellation.Core.Models.WorkFlow
+@using Constellation.Core.Models.WorkFlow.Enums
+
+<dl>
+    <dt>Recipients</dt>
+    <dd>
+        @foreach (var recipient in Model.Recipients)
+        {
+            <span class="d-block">@recipient.Name (<span class="user-select-all">@recipient.Email</span>)</span>
+        }
+    </dd>
+
+    <dt>Sender</dt>
+    <dd>
+        @if (Model.Status == ActionStatus.Completed)
+        {
+            <span>@Model.Sender?.Name (<span class="user-select-all">@Model.Sender?.Email</span>)</span>
+        }
+    </dd>
+
+    <dt>Subject</dt>
+    <dd>@Model.Subject</dd>
+
+    <dt>Body</dt>
+    <dd>@Model.Body</dd>
+
+    <dt>Sent</dt>
+    <dd>
+        @if (Model.Status == ActionStatus.Completed)
+        {
+            @Model.SentAt.ToString("dd/MM/yyyy h:mm tt")
+        }
+    </dd>
+
+    <dt>Has Attachments?</dt>
+    <dd>@(Model.HasAttachments ? "Yes" : "No")</dd>
+</dl>

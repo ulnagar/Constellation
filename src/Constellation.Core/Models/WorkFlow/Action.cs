@@ -40,6 +40,8 @@ public abstract class Action : IAuditableEntity
     public string DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; } = DateTime.MinValue;
 
+
+    public abstract string Description { get; }
     public abstract override string ToString();
     public abstract string AsStatus();
 
@@ -115,6 +117,8 @@ public sealed class SendEmailAction : Action
 
     private SendEmailAction()
         : base() { }
+
+    public override string Description => string.Empty;
 
     public IReadOnlyList<EmailRecipient> Recipients => _recipients.AsReadOnly();
 
@@ -198,9 +202,7 @@ public sealed class SendEmailAction : Action
         HasAttachments = hasAttachments;
         SentAt = sentAt;
 
-        Result status = UpdateStatus(ActionStatus.Completed, currentUser);
-
-        return status;
+        return Result.Success();
     }
 
     public override string ToString() =>
@@ -219,6 +221,8 @@ public sealed class SendEmailAction : Action
 
 public sealed class PhoneParentAction : Action
 {
+    public override string Description => $"Record of a phone call with a parent or guardian";
+
     // Option to contact parent via phone to discuss issues
     public ParentId? ParentId { get; private set; }
     public string? ParentName { get; private set; }
@@ -289,6 +293,8 @@ public sealed class PhoneParentAction : Action
 
 public sealed class ParentInterviewAction : Action
 {
+    public override string Description => $"Record of an interview with a parent or guardian";
+
     // Option to schedule and record interview with parent
     public ParentId? ParentId { get; private set; }
     public string? ParentName { get; private set; }
@@ -337,9 +343,7 @@ public sealed class ParentInterviewAction : Action
         DateOccurred = dateOccurred;
         IncidentNumber = incidentNumber;
 
-        Result status = UpdateStatus(ActionStatus.Completed, currentUser);
-
-        return status;
+        return Result.Success();
     }
 
     public override string ToString() =>
@@ -356,6 +360,8 @@ public sealed class ParentInterviewAction : Action
 
 public sealed class CreateSentralEntryAction : Action
 {
+    public override string Description => $"Record of the reference to a Sentral Incident that has been created relating to this case";
+
     // Option to record Sentral Incident creation (Incident Id only)
 
     private CreateSentralEntryAction()
@@ -389,9 +395,7 @@ public sealed class CreateSentralEntryAction : Action
         
         IncidentNumber = incidentNumber;
 
-        Result status = UpdateStatus(ActionStatus.Completed, currentUser);
-        
-        return status;
+        return Result.Success();
     }
 
     public Result Update(bool notRequired, string currentUser)
@@ -418,9 +422,7 @@ public sealed class CreateSentralEntryAction : Action
 
         NotRequired = true;
 
-        Result status = UpdateStatus(ActionStatus.Completed, currentUser);
-        
-        return status;
+        return Result.Success();
     }
 
     public static Result<CreateSentralEntryAction> Create(
@@ -463,6 +465,7 @@ public sealed class CreateSentralEntryAction : Action
 public sealed class ConfirmSentralEntryAction : Action
 {
     // Option to have user confirm Sentral Incident recorded in the CreateSentralEntryAction was actually created
+    public override string Description => $"Record of confirmation that the reference to a Sentral Incident above has been created";
 
     private ConfirmSentralEntryAction() 
         : base() { }
@@ -478,9 +481,7 @@ public sealed class ConfirmSentralEntryAction : Action
 
         Confirmed = confirmed;
 
-        Result status = UpdateStatus(ActionStatus.Completed, currentUser);
-
-        return status;
+        return Result.Success();
     }
 
     public static Result<ConfirmSentralEntryAction> Create(

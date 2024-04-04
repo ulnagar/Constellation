@@ -79,6 +79,9 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanEditStaff, policy =>
             policy.RequireRole(AuthRoles.Editor, AuthRoles.Admin));
 
+        options.AddPolicy(AuthPolicies.CanManageWorkflows, policy =>
+            policy.RequireRole(AuthRoles.ExecStaffMember, AuthRoles.Admin));
+
         return options;
     }
 }

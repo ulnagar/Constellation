@@ -1,0 +1,37 @@
+﻿@page "{Id:guid}"
+@model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Workflows.DetailsModel
+
+@{
+}
+
+<div class="p-4">
+    <div class="row">
+        <div class="col-12 border-bottom border-dark py-2"><h3>@Model.Case.CaseDescription</h3></div>
+        <div class="col-12 mt-1">
+            <a asp-page-handler="NewAction" class="btn btn-sm btn-success">New Action</a>
+            <a asp-page-handler="AddNote" class="btn btn-sm btn-secondary">Add Note</a>
+            <a asp-page-handler="CloseCase" class="btn btn-sm btn-danger">Mark Completed</a>
+        </div>
+        <div class="col-6 mt-3">
+            <vc:display-case-details case-id="@Model.Case.CaseId.Value"></vc:display-case-details>
+        </div>
+        <div class="col-6 mt-3">
+            <dl>
+                <dt>Created</dt>
+                <dd>@Model.Case.CreatedAt.ToString("dd/MM/yyyy h:mm tt")</dd>
+
+                <dt>Status</dt>
+                <dd>@Model.Case.Status.Name</dd>
+            </dl>
+        </div>
+    </div>
+    @foreach (var action in Model.Case.Actions.Where(action => action.ParentActionId is null).OrderBy(action => action.CreatedAt))
+    {
+        <vc:display-case-action case-id="@Model.Case.CaseId.Value" action-id="@action.ActionId.Value"></vc:display-case-action>
+
+        @foreach (var subAction in Model.Case.Actions.Where(item => item.ParentActionId == action.ActionId).OrderBy(item => item.CreatedAt))
+        {
+            <vc:display-case-action case-id="@Model.Case.CaseId.Value" action-id="@subAction.ActionId.Value"></vc:display-case-action>
+        }
+    }
+</div>

@@ -61,7 +61,7 @@ public class IndexModel : BasePageModel
         Cases.Add(caseResult.Value);
     }
 
-    public async Task<IActionResult> OnGetProcessAction(Guid caseId, Guid actionId)
+    public async Task<IActionResult> OnGetUpdateAction(Guid caseId, Guid actionId)
     {
         Case item = await _caseRepository.GetById(CaseId.FromValue(caseId));
 
@@ -98,6 +98,13 @@ public class IndexModel : BasePageModel
             {
                 return RedirectToPage();
             }
+
+            Result complete = item.UpdateActionStatus(emailAction.Id, ActionStatus.Completed, _currentUserService.UserName);
+
+            if (complete.IsFailure)
+            {
+                return RedirectToPage();
+            }
         }
 
         if (action is CreateSentralEntryAction sentralAction)
@@ -108,6 +115,13 @@ public class IndexModel : BasePageModel
             {
                 return RedirectToPage();
             }
+
+            Result complete = item.UpdateActionStatus(sentralAction.Id, ActionStatus.Completed, _currentUserService.UserName);
+
+            if (complete.IsFailure)
+            {
+                return RedirectToPage();
+            }
         }
 
         if (action is ConfirmSentralEntryAction confirmAction)
@@ -115,6 +129,13 @@ public class IndexModel : BasePageModel
             Result update = confirmAction.Update(true, _currentUserService.UserName);
 
             if (update.IsFailure)
+            {
+                return RedirectToPage();
+            }
+
+            Result complete = item.UpdateActionStatus(confirmAction.Id, ActionStatus.Completed, _currentUserService.UserName);
+
+            if (complete.IsFailure)
             {
                 return RedirectToPage();
             }

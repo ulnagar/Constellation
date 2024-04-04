@@ -1,0 +1,24 @@
+﻿@model CreateSentralEntryAction
+
+@using Constellation.Core.Models.WorkFlow
+@using Constellation.Core.Models.WorkFlow.Enums
+
+<dl>
+    <dt>Offering</dt>
+    <dd>@Model.OfferingName</dd>
+
+    <dt>Response</dt>
+    <dd>
+        @if (Model.Status == ActionStatus.Completed)
+        {
+            if (Model.NotRequired)
+            {
+                @:Not Required
+            }
+            else
+            {
+                @:Incident # @Model.IncidentNumber
+            }
+        }
+    </dd>
+</dl>

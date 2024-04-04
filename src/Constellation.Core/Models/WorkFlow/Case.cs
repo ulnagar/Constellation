@@ -73,6 +73,9 @@ public sealed class Case : AggregateRoot, IAuditableEntity
 
         Result statusUpdate = action.UpdateStatus(newStatus, currentUser);
 
+        if (newStatus.Equals(ActionStatus.Completed))
+            RaiseDomainEvent(new CaseActionCompletedDomainEvent(new(), Id, actionId));
+
         return statusUpdate;
     }
 

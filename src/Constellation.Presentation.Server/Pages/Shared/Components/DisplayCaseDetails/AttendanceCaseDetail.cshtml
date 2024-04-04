@@ -1,0 +1,25 @@
+﻿@model AttendanceCaseDetail
+
+@using Constellation.Core.Models.WorkFlow
+@using Constellation.Core.Extensions
+
+<dl>
+    <dt>Case Type</dt>
+    <dd>Attendance Percentage</dd>
+
+    <dt>Student</dt>
+    <dd>
+        @Model.Name <br />
+        @Model.Grade.AsName() <br />
+        @Model.SchoolName
+    </dd>
+
+    <dt>Attendance Period</dt>
+    <dd>@Model.PeriodLabel</dd>
+
+    <dt>Severity Band</dt>
+    <dd>@Model.Severity.Name</dd>
+
+    <dt>Attendance Percentage (per minute for week)</dt>
+    <dd>@Model.PerMinuteWeekPercentage%</dd>
+</dl>

@@ -13,6 +13,7 @@
     <Compile Remove="Features\Portal\School\Home\Commands\**" />
     <Compile Remove="Features\Portal\School\Home\Models\**" />
     <Compile Remove="Features\Portal\School\Timetables\Models\**" />
+    <Compile Remove="WorkFlows\Services\**" />
     <EmbeddedResource Remove="Features\Documents\**" />
     <EmbeddedResource Remove="Features\Partners\SchoolContacts\Commands\**" />
     <EmbeddedResource Remove="Features\Partners\SchoolContacts\Models\**" />
@@ -20,6 +21,7 @@
     <EmbeddedResource Remove="Features\Portal\School\Home\Commands\**" />
     <EmbeddedResource Remove="Features\Portal\School\Home\Models\**" />
     <EmbeddedResource Remove="Features\Portal\School\Timetables\Models\**" />
+    <EmbeddedResource Remove="WorkFlows\Services\**" />
     <None Remove="Features\Documents\**" />
     <None Remove="Features\Partners\SchoolContacts\Commands\**" />
     <None Remove="Features\Partners\SchoolContacts\Models\**" />
@@ -27,6 +29,7 @@
     <None Remove="Features\Portal\School\Home\Commands\**" />
     <None Remove="Features\Portal\School\Home\Models\**" />
     <None Remove="Features\Portal\School\Timetables\Models\**" />
+    <None Remove="WorkFlows\Services\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -57,7 +60,6 @@
 	  <Folder Include="SchoolContacts\Events\SchoolContactReinstated\" />
 	  <Folder Include="SchoolContacts\Events\SchoolContactEmailAddressChanged\" />
 	  <Folder Include="SchoolContacts\Events\SchoolContactDeleted\" />
-	  <Folder Include="WorkFlows\Services\" />
 	</ItemGroup>
 
 </Project>

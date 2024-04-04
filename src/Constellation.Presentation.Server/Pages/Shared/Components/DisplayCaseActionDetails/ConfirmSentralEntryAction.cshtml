@@ -1,0 +1,9 @@
+﻿@model ConfirmSentralEntryAction
+
+@using Constellation.Core.Models.WorkFlow
+@using Constellation.Core.Models.WorkFlow.Enums
+
+<dl>
+    <dt>Response</dt>
+    <dd>@(Model.Status == ActionStatus.Completed && !Model.Confirmed ? "Rejected" : Model.Confirmed ? "Confirmed" : "Unknown")</dd>
+</dl>
