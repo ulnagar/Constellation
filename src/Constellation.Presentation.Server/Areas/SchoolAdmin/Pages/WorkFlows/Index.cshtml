@@ -19,6 +19,7 @@
             <th>Type</th>
             <th>Status</th>
             <th>Created</th>
+            <th>Actions</th>
             <th></th>
         </tr>
     </thead>
@@ -30,6 +31,7 @@
                 <td>@entry.Description</td>
                 <td>@entry.Status</td>
                 <td data-order="@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")">@entry.CreatedAt.ToString("dd/MM/yyyy")</td>
+                <td data-order="@entry.OutstandingActions">@entry.OutstandingActions / @entry.TotalActions</td>
                 <td>
                     <a asp-page="/WorkFlows/Details" asp-area="SchoolAdmin" asp-route-id="@entry.CaseId.Value" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                 </td>

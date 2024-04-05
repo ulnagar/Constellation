@@ -1,37 +1,152 @@
 ﻿@page "{Id:guid}"
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Workflows.DetailsModel
 
+@using Constellation.Presentation.Server.ViewComponents
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+
 @{
 }
 
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
 <div class="p-4">
     <div class="row">
-        <div class="col-12 border-bottom border-dark py-2"><h3>@Model.Case.CaseDescription</h3></div>
+        <div class="col-12 border-bottom border-dark py-2"><h3>@Model.Case?.CaseDescription</h3></div>
         <div class="col-12 mt-1">
             <a asp-page-handler="NewAction" class="btn btn-sm btn-success">New Action</a>
-            <a asp-page-handler="AddNote" class="btn btn-sm btn-secondary">Add Note</a>
-            <a asp-page-handler="CloseCase" class="btn btn-sm btn-danger">Mark Completed</a>
+            <button type="button" class="btn btn-sm btn-danger complete-case-button">Mark Completed</button>
+            <button type="button" class="btn btn-sm btn-danger cancel-case-button">Mark Cancelled</button>
         </div>
         <div class="col-6 mt-3">
-            <vc:display-case-details case-id="@Model.Case.CaseId.Value"></vc:display-case-details>
+            <vc:display-case-details case-id="@Model.Case?.CaseId.Value ?? Guid.Empty"></vc:display-case-details>
         </div>
         <div class="col-6 mt-3">
             <dl>
                 <dt>Created</dt>
-                <dd>@Model.Case.CreatedAt.ToString("dd/MM/yyyy h:mm tt")</dd>
+                <dd>@Model.Case?.CreatedAt.ToString("dd/MM/yyyy h:mm tt")</dd>
 
                 <dt>Status</dt>
-                <dd>@Model.Case.Status.Name</dd>
+                <dd>@Model.Case?.Status.Name</dd>
             </dl>
         </div>
     </div>
-    @foreach (var action in Model.Case.Actions.Where(action => action.ParentActionId is null).OrderBy(action => action.CreatedAt))
+    @foreach (var action in Model.Case?.Actions.Where(action => action.ParentActionId is null).OrderBy(action => action.CreatedAt))
     {
-        <vc:display-case-action case-id="@Model.Case.CaseId.Value" action-id="@action.ActionId.Value"></vc:display-case-action>
+        <vc:display-case-action case-id="@Model.Case?.CaseId.Value ?? Guid.Empty" action-id="@action.ActionId.Value"></vc:display-case-action>
 
-        @foreach (var subAction in Model.Case.Actions.Where(item => item.ParentActionId == action.ActionId).OrderBy(item => item.CreatedAt))
+        @foreach (var subAction in Model.Case?.Actions.Where(item => item.ParentActionId == action.ActionId).OrderBy(item => item.CreatedAt))
         {
-            <vc:display-case-action case-id="@Model.Case.CaseId.Value" action-id="@subAction.ActionId.Value"></vc:display-case-action>
+            <vc:display-case-action case-id="@Model.Case?.CaseId.Value ?? Guid.Empty" action-id="@subAction.ActionId.Value"></vc:display-case-action>
         }
     }
 </div>
+
+@Html.AntiForgeryToken()
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $('.cancel-case-button').click(function (event) {
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxCaseConfirmation",
+                type: "POST",
+                data: {
+                    type: 1,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.complete-case-button').click(function (event) {
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxCaseConfirmation",
+                type: "POST",
+                data: {
+                    type: 0,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.cancel-action-button').click(function (event) {
+            var actionId = $(this).data('actionId');
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            console.log(actionId);
+
+            $.ajax({
+                url: "?handler=AjaxActionConfirmation",
+                type: "POST",
+                data: {
+                    actionId: actionId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.add-action-note-button').click(function (event) {
+            var actionId = $(this).data('actionId');
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            console.log(actionId);
+
+            $.ajax({
+                url: "?handler=AjaxAddActionNote",
+                type: "POST",
+                data: {
+                    actionId: actionId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.reassign-action-button').click(function (event) {
+            var actionId = $(this).data('actionId');
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            console.log(actionId);
+
+            $.ajax({
+                url: "?handler=AjaxReassignAction",
+                type: "POST",
+                data: {
+                    actionId: actionId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+
+                // Activate any comboboxes
+                $("#page-modal .combo").select2({ theme: 'bootstrap' });
+            });
+        });
+    </script>
+}

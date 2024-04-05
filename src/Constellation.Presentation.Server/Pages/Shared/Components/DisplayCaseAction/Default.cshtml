@@ -13,8 +13,12 @@
         @if (Model.Action.Status == ActionStatus.Open && (Model.AssignedToMe || Model.IsAdmin))
         {
             <a asp-page-handler="UpdateAction" asp-route-caseId="@Model.Action.CaseId.Value" asp-route-actionId="@Model.Action.Id.Value" class="btn btn-sm btn-success">Update Action</a>
-            <a asp-page-handler="AddNote" class="btn btn-sm btn-secondary">Add Note</a>
-            <a asp-page-handler="CloseAction" class="btn btn-sm btn-danger">Mark Completed</a>
+            <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-secondary add-action-note-button">Add Note</button>
+        }
+        @if (Model.Action.Status == ActionStatus.Open && Model.IsAdmin)
+        {
+            <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-secondary reassign-action-button">Reassign</button>
+            <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-danger cancel-action-button">Mark Cancelled</button>
         }
     </div>
     <div class="col-12 mt-3">

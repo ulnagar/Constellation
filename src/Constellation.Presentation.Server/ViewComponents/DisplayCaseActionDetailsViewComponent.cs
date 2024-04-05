@@ -9,26 +9,16 @@ public class DisplayCaseActionDetailsViewComponent : ViewComponent
     {
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(Action action)
-    {
-        if (action is null)
-            return Content(string.Empty);
-
-        if (action is SendEmailAction emailAction)
-            return View("SendEmailAction", emailAction);
-
-        if (action is CreateSentralEntryAction sentralAction)
-            return View("CreateSentralEntryAction", sentralAction);
-
-        if (action is ConfirmSentralEntryAction confirmAction)
-            return View("ConfirmSentralEntryAction", confirmAction);
-
-        if (action is PhoneParentAction phoneAction)
-            return View("PhoneParentAction", phoneAction);
-
-        if (action is ParentInterviewAction interviewAction)
-            return View("ParentInterviewAction", interviewAction);
-
-        return Content(string.Empty);
-    }
+    public IViewComponentResult Invoke(Action action) =>
+        action switch
+        {
+            null => Content(string.Empty),
+            SendEmailAction emailAction => View("SendEmailAction", emailAction),
+            CreateSentralEntryAction sentralAction => View("CreateSentralEntryAction", sentralAction),
+            ConfirmSentralEntryAction confirmAction => View("ConfirmSentralEntryAction", confirmAction),
+            PhoneParentAction phoneAction => View("PhoneParentAction", phoneAction),
+            ParentInterviewAction interviewAction => View("ParentInterviewAction", interviewAction),
+            CaseDetailUpdateAction updateAction => View("CaseDetailUpdateAction", updateAction),
+            _ => Content(string.Empty)
+        };
 }

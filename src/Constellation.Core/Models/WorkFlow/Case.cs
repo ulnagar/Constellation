@@ -71,12 +71,38 @@ public sealed class Case : AggregateRoot, IAuditableEntity
         if (action is null)
             return Result.Failure(CaseErrors.Action.NotFound(actionId));
 
+        if (!action.Status.Equals(ActionStatus.Open))
+            return Result.Failure(CaseErrors.Action.UpdateStatus.AlreadyClosed(action.Status));
+
         Result statusUpdate = action.UpdateStatus(newStatus, currentUser);
 
         if (newStatus.Equals(ActionStatus.Completed))
             RaiseDomainEvent(new CaseActionCompletedDomainEvent(new(), Id, actionId));
 
         return statusUpdate;
+    }
+
+    public Result ReassignAction(
+        ActionId actionId,
+        Staff newAssignee,
+        string currentUser)
+    {
+        Action? action = _actions.FirstOrDefault(entry => entry.Id == actionId);
+
+        if (action is null)
+            return Result.Failure(CaseErrors.Action.NotFound(actionId));
+
+        if (action.AssignedToId == newAssignee.StaffId)
+            return Result.Success();
+
+        Result assignmentUpdate = action.AssignAction(newAssignee, currentUser);
+
+        if (assignmentUpdate.IsFailure)
+            return assignmentUpdate;
+
+        RaiseDomainEvent(new CaseActionAssignedDomainEvent(new(), Id, action.Id, newAssignee.StaffId));
+
+        return assignmentUpdate;
     }
 
     public Result UpdateStatus(

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.WorkFlow.Errors;
 
+using Enums;
 using Identifiers;
 using Shared;
 using System;
@@ -86,6 +87,10 @@ public static class CaseErrors
 
         public static class UpdateStatus
         {
+            public static Func<ActionStatus, Error> AlreadyClosed = status => new(
+                "Code.Action.UpdateStatus.Closed",
+                $"Cannot change Status as the Action is already {status}");
+
             public static Error StatusNull = new(
                 "Case.Action.UpdateStatus.StatusNull",
                 "Cannot change Status to blank");

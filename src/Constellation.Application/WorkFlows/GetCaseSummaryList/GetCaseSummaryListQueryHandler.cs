@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.WorkFlows.GetCaseSummaryList;
 
 using Abstractions.Messaging;
+using Awards.GetAwardCountsByTypeByGrade;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Repositories;
@@ -11,6 +12,7 @@ using Core.Shared;
 using Core.ValueObjects;
 using Serilog;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -62,7 +64,9 @@ internal sealed class GetCaseSummaryListQueryHandler
                     name,
                     $"Attendance Case for {details.PeriodLabel} - {details.Severity.Value}",
                     item.Status,
-                    item.CreatedAt));
+                    item.CreatedAt,
+                    item.Actions.Count,
+                    item.Actions.Count(action => action.Status == ActionStatus.Open)));
             }
         }
 

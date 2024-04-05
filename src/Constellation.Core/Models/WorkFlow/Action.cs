@@ -520,3 +520,44 @@ public sealed class ConfirmSentralEntryAction : Action
         };
 }
 
+public sealed class CaseDetailUpdateAction : Action
+{
+    private CaseDetailUpdateAction() { }
+
+    public override string Description => "Record of further information or actions taken in relation to this case";
+
+    public string Details { get; private set; } = string.Empty;
+
+    public static Result<CaseDetailUpdateAction> Create(
+        ActionId? parentId,
+        CaseId caseId,
+        Staff assignee,
+        string details)
+    {
+        CaseDetailUpdateAction action = new()
+        {
+            CaseId = caseId,
+            ParentActionId = parentId,
+            Details = details
+        };
+
+        Result assignment = action.AssignAction(assignee, assignee.DisplayName);
+
+        if (assignment.IsFailure)
+            return Result.Failure<CaseDetailUpdateAction>(assignment.Error);
+
+        Result status = action.UpdateStatus(ActionStatus.Completed, assignee.DisplayName);
+
+        if (status.IsFailure)
+            return Result.Failure<CaseDetailUpdateAction>(status.Error);
+
+        return action;
+    }
+
+    public override string ToString() =>
+        "Case Detail Update entry";
+
+    public override string AsStatus() =>
+        $"Case detail updated by {AssignedTo}";
+}
+

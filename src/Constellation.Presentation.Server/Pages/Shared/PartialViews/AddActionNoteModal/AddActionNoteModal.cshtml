@@ -1,0 +1,22 @@
+﻿@model AddActionNoteModalViewModel
+
+<form asp-page-handler="AddActionNote" method="post">
+    <div class="modal-header">
+        <h5 class="modal-title">Add Note</h5>
+    </div>
+    <div class="modal-body">
+        <div class="form-group row">
+            <label class="col-md-3">Note</label>
+            <div class="col-md-9">
+                @Html.HiddenFor(model => model.ActionId)
+                <textarea asp-for="Note" class="form-control"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Add Note</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>
+
+
