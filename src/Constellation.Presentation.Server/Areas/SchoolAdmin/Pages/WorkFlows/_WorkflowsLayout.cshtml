@@ -30,7 +30,15 @@
         $(document).ready(function () {
             var container = $('#main-container');
             container.removeClass('container');
-            container.addClass('container-fluid')
+            container.addClass('container-fluid');
+            
+            var div = $('#main-container div:first-child');
+            div.removeClass('pb-3');
+
+            $('html, body').css({
+                overflow: 'hidden',
+                height: '100%'
+            });
         });
     </script>
 

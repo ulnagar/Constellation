@@ -41,6 +41,9 @@ internal sealed class GetCaseSummaryListQueryHandler
 
         foreach (Case item in items)
         {
+            if (!request.IsAdmin && item.Actions.All(action => action.AssignedToId != request.CurrentUserId))
+                continue;
+
             if (item.Type!.Equals(CaseType.Attendance))
             {
                 AttendanceCaseDetail details = item.Detail as AttendanceCaseDetail;

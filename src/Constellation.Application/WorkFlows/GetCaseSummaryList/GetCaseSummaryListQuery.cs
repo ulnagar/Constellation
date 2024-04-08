@@ -3,5 +3,7 @@
 using Abstractions.Messaging;
 using System.Collections.Generic;
 
-public sealed record GetCaseSummaryListQuery()
+public sealed record GetCaseSummaryListQuery(
+    bool IsAdmin,
+    string CurrentUserId)
     : IQuery<List<CaseSummaryResponse>>;

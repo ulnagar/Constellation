@@ -2,10 +2,13 @@
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Workflows.DetailsModel
 
 @using Constellation.Presentation.Server.ViewComponents
-@using Microsoft.AspNetCore.Mvc.TagHelpers
+@inject IAuthorizationService authService
 
 @{
+    AuthorizationResult isAdminTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageWorkflows);
 }
+
+<h2>WorkFlow Case</h2>
 
 <div class="page-menu">
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -17,9 +20,12 @@
     <div class="row">
         <div class="col-12 border-bottom border-dark py-2"><h3>@Model.Case?.CaseDescription</h3></div>
         <div class="col-12 mt-1">
-            <a asp-page-handler="NewAction" class="btn btn-sm btn-success">New Action</a>
-            <button type="button" class="btn btn-sm btn-danger complete-case-button">Mark Completed</button>
-            <button type="button" class="btn btn-sm btn-danger cancel-case-button">Mark Cancelled</button>
+            @if (isAdminTest.Succeeded)
+            {
+                <a asp-page-handler="NewAction" class="btn btn-sm btn-success">New Action</a>
+                <button type="button" class="btn btn-sm btn-danger complete-case-button">Mark Completed</button>
+                <button type="button" class="btn btn-sm btn-danger cancel-case-button">Mark Cancelled</button>
+            }
         </div>
         <div class="col-6 mt-3">
             <vc:display-case-details case-id="@Model.Case?.CaseId.Value ?? Guid.Empty"></vc:display-case-details>
