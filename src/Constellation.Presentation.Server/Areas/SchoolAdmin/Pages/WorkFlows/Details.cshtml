@@ -22,7 +22,7 @@
         <div class="col-12 mt-1">
             @if (isAdminTest.Succeeded)
             {
-                <a asp-page-handler="NewAction" class="btn btn-sm btn-success">New Action</a>
+                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#add-action-modal">New Action</button>
                 <button type="button" class="btn btn-sm btn-danger complete-case-button">Mark Completed</button>
                 <button type="button" class="btn btn-sm btn-danger cancel-case-button">Mark Cancelled</button>
             }
@@ -59,6 +59,8 @@
         </div>
     </div>
 </div>
+
+<vc:add-action-modal></vc:add-action-modal>
 
 @section scripts
 {
@@ -152,6 +154,28 @@
 
                 // Activate any comboboxes
                 $("#page-modal .combo").select2({ theme: 'bootstrap' });
+            });
+        });
+
+        $('#addActionButton').click(function (event) {
+            //event.preventDefault();
+            var actionType = $('#newActionType').val();
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $('#add-action-modal').modal('hide');
+
+            $.ajax({
+                url: "?handler=AjaxNewAction",
+                type: "POST",
+                data: {
+                    actionType: actionType,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function(data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+
+                $('#page-modal .combo').select2({ theme: 'bootstrap' });
             });
         });
     </script>

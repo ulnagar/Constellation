@@ -1,7 +1,11 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Workflows;
 
 using Application.Models.Auth;
+using Application.Offerings.GetOfferingsForSelectionList;
+using Application.StaffMembers.GetStaffById;
 using Application.WorkFlows.AddActionNote;
+using Application.WorkFlows.AddCaseDetailUpdateAction;
+using Application.WorkFlows.AddSentralEntryAction;
 using Application.WorkFlows.CancelAction;
 using Application.WorkFlows.CancelCase;
 using Application.WorkFlows.CloseCase;
@@ -9,12 +13,19 @@ using Application.WorkFlows.GetCaseById;
 using Application.WorkFlows.ReassignAction;
 using BaseModels;
 using Constellation.Application.Features.Common.Queries;
+using Core.Abstractions.Services;
+using Core.Errors;
+using Core.Models.Offerings.Identifiers;
+using Core.Models.WorkFlow;
+using Core.Models.WorkFlow.Errors;
 using Core.Models.WorkFlow.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Pages.Shared.PartialViews.AddActionNoteModal;
+using Server.Pages.Shared.PartialViews.AddCaseDetailUpdateAction;
+using Server.Pages.Shared.PartialViews.AddCreateSentralEntryAction;
 using Server.Pages.Shared.PartialViews.ConfirmActionUpdateModal;
 using Server.Pages.Shared.PartialViews.ConfirmCaseUpdateModal;
 using Server.Pages.Shared.PartialViews.ReassignActionToStaffMemberModal;
@@ -206,6 +217,118 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = reassignRequest.Error,
+                RedirectPath = null
+            };
+
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+
+            if (request.IsFailure)
+                return RedirectToPage();
+
+            Case = request.Value;
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAjaxNewAction(string actionType)
+    {
+        Dictionary<string, string> staffResult = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+
+        switch (actionType)
+        {
+            case nameof(SendEmailAction):
+
+                return BadRequest();
+                break;
+            case nameof(CreateSentralEntryAction):
+                Result<List<OfferingSelectionListResponse>> offerings = await _mediator.Send(new GetOfferingsForSelectionListQuery());
+
+                if (offerings.IsFailure) return BadRequest();
+
+                AddCreateSentralEntryActionViewModel sentralViewModel = new()
+                {
+                    StaffMembers = staffResult,
+                    Offerings = offerings.Value.ToDictionary(k => k.Id.Value, k => k.Name)
+                };
+
+                return Partial("AddCreateSentralEntryAction", sentralViewModel);
+                break;
+            case nameof(PhoneParentAction):
+
+                return BadRequest();
+                break;
+            case nameof(ParentInterviewAction):
+
+                return BadRequest();
+                break;
+            case nameof(CaseDetailUpdateAction):
+                AddCaseDetailUpdateActionViewModel detailViewModel = new();
+
+                return Partial("AddCaseDetailUpdateAction", detailViewModel);
+
+                break;
+            default:
+                return BadRequest();
+        }
+    }
+
+    public async Task<IActionResult> OnPostNewSentralAction(AddCreateSentralEntryActionViewModel viewModel)
+    {
+        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+        {
+            Error = new()
+            {
+                Error = CaseErrors.Action.Assign.StaffNull,
+                RedirectPath = null
+            };
+
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+
+            if (request.IsFailure)
+                return RedirectToPage();
+
+            Case = request.Value;
+
+            return Page();
+        }
+
+        Result actionRequest = await _mediator.Send(new AddSentralEntryActionCommand(CaseId.FromValue(Id), OfferingId.FromValue(viewModel.OfferingId), viewModel.StaffId));
+
+        if (actionRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = actionRequest.Error,
+                RedirectPath = null
+            };
+
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+
+            if (request.IsFailure)
+                return RedirectToPage();
+
+            Case = request.Value;
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostNewDetailAction(AddCaseDetailUpdateActionViewModel viewModel)
+    {
+        string staffMemberId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
+        Result actionRequest = await _mediator.Send(new AddCaseDetailUpdateActionCommand(CaseId.FromValue(Id), staffMemberId, viewModel.Details));
+
+        if (actionRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = actionRequest.Error,
                 RedirectPath = null
             };
 

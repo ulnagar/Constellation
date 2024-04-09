@@ -66,7 +66,8 @@ internal sealed class ActionConfiguration : IEntityTypeConfiguration<Action>
             .HasValue<PhoneParentAction>(nameof(PhoneParentAction))
             .HasValue<ParentInterviewAction>(nameof(ParentInterviewAction))
             .HasValue<CreateSentralEntryAction>(nameof(CreateSentralEntryAction))
-            .HasValue<ConfirmSentralEntryAction>(nameof(ConfirmSentralEntryAction));
+            .HasValue<ConfirmSentralEntryAction>(nameof(ConfirmSentralEntryAction))
+            .HasValue<CaseDetailUpdateAction>(nameof(CaseDetailUpdateAction));
     }
 }
 

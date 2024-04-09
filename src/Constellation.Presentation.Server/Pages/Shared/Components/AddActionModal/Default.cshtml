@@ -1,0 +1,30 @@
+﻿@using Constellation.Core.Models.WorkFlow
+
+<div class="modal fade" tabindex="-1" id="add-action-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Action</h5>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row">
+                    <label class="col-md-3">Action Type</label>
+                    <div class="col-md-9">
+                        <select id="newActionType" class="combo">
+                            <option value="">-- Select Action Type</option>
+                            <option value="@nameof(SendEmailAction)">Send Email</option>
+                            <option value="@nameof(CreateSentralEntryAction)">Create Sentral Entry</option>
+                            <option value="@nameof(PhoneParentAction)">Phone Parents</option>
+                            <option value="@nameof(ParentInterviewAction)">Parent Interview</option>
+                            <option value="@nameof(CaseDetailUpdateAction)">Case Detail Update</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <input type="button" id="addActionButton" value="Add Action" class="btn btn-primary" />
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

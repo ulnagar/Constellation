@@ -85,10 +85,17 @@ public static class CaseErrors
                 $"A recipient with that email address already exists in the list");
         }
 
+        public static class Create
+        {
+            public static Func<string, string, Error> CaseTypeMismatch = (expected, provided) => new(
+                "Case.Action.Create.CaseTypeMismatch",
+                $"Action requires {expected} Case Type, but provided {provided}");
+        }
+
         public static class UpdateStatus
         {
             public static Func<ActionStatus, Error> AlreadyClosed = status => new(
-                "Code.Action.UpdateStatus.Closed",
+                "Case.Action.UpdateStatus.Closed",
                 $"Cannot change Status as the Action is already {status}");
 
             public static Error StatusNull = new(
