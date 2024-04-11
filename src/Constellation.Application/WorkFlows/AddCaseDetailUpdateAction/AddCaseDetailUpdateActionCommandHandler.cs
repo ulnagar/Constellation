@@ -42,7 +42,7 @@ internal sealed class AddCaseDetailUpdateActionCommandHandler
             _logger
                 .ForContext(nameof(AddCaseDetailUpdateActionCommand), request, true)
                 .ForContext(nameof(Error), CaseErrors.Case.NotFound(request.CaseId), true)
-                .Warning("Could not create default Action for new Case");
+                .Warning("Could not add Case Detail Update Action to Case");
 
             return Result.Failure(CaseErrors.Case.NotFound(request.CaseId));
         }
@@ -62,7 +62,7 @@ internal sealed class AddCaseDetailUpdateActionCommandHandler
             _logger
                 .ForContext(nameof(AddCaseDetailUpdateActionCommand), request, true)
                 .ForContext(nameof(Error), action.Error, true)
-                .Warning("Could not create default Action for new Case");
+                .Warning("Could not add Case Detail Update Action to Case");
 
             return Result.Failure(action.Error);
         }

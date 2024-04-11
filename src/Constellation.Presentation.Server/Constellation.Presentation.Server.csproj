@@ -42,9 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\Shared\PartialViews\AddSendEmailAction\" />
-    <Folder Include="Pages\Shared\PartialViews\AddPhoneParentAction\" />
-    <Folder Include="Pages\Shared\PartialViews\AddParentInterviewAction\" />
     <Folder Include="wwwroot\private\" />
   </ItemGroup>
 
