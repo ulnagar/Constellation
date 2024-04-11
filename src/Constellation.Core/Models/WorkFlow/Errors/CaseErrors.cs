@@ -105,6 +105,11 @@ public static class CaseErrors
 
         public static class Update
         {
+            public static readonly Func<string, string, Error> TypeMismatch = (expected, provided) => new(
+                "Case.Action.Update.TypeMismatch",
+                $"Expected {expected}, provided {provided}");
+            
+
             public static readonly Error EmptySubjectLine = new(
                 "Case.Action.Update.EmptySubjectLine",
                 "Cannot send email with a blank subject line");

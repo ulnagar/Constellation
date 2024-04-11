@@ -1,0 +1,8 @@
+﻿@model CreateSentralEntryActionViewModel
+
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+
+<form asp-page-handler="UpdateSentralEntryAction" method="post">
+    <input asp-for="NotRequired" />
+    <input asp-for="IncidentNumber" />
+</form>
