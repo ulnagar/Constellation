@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Presentation.Server.Pages.Shared.Components.ActionUpdateForm;
 
-public class CreateSentralEntryActionViewModel
+public sealed class CreateSentralEntryActionViewModel
 {
+    public bool NotRequiredAllowed { get; set; }
     public bool NotRequired { get; set; }
     public int IncidentNumber { get; set; }
 }

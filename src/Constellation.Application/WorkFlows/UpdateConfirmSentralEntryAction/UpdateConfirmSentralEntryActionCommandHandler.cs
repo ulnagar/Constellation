@@ -1,10 +1,10 @@
-﻿namespace Constellation.Application.WorkFlows.UpdateCreateSentralEntryAction;
+﻿namespace Constellation.Application.WorkFlows.UpdateConfirmSentralEntryAction;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.WorkFlow;
+using Constellation.Core.Models.WorkFlow.Enums;
 using Constellation.Core.Models.WorkFlow.Errors;
 using Core.Abstractions.Services;
-using Core.Models.WorkFlow;
-using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -13,15 +13,15 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class UpdateCreateSentralEntryActionCommandHandler
-: ICommandHandler<UpdateCreateSentralEntryActionCommand>
+internal sealed class UpdateConfirmSentralEntryActionCommandHandler
+: ICommandHandler<UpdateConfirmSentralEntryActionCommand>
 {
     private readonly ICaseRepository _caseRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
-    public UpdateCreateSentralEntryActionCommandHandler(
+    public UpdateConfirmSentralEntryActionCommandHandler(
         ICaseRepository caseRepository,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
@@ -30,17 +30,17 @@ internal sealed class UpdateCreateSentralEntryActionCommandHandler
         _caseRepository = caseRepository;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
-        _logger = logger.ForContext<UpdateCreateSentralEntryActionCommand>();
+        _logger = logger.ForContext<UpdateConfirmSentralEntryActionCommand>();
     }
 
-    public async Task<Result> Handle(UpdateCreateSentralEntryActionCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateConfirmSentralEntryActionCommand request, CancellationToken cancellationToken)
     {
         Case item = await _caseRepository.GetById(request.CaseId, cancellationToken);
 
         if (item is null)
         {
             _logger
-                .ForContext(nameof(UpdateCreateSentralEntryActionCommand), request, true)
+                .ForContext(nameof(UpdateConfirmSentralEntryActionCommand), request, true)
                 .ForContext(nameof(Error), CaseErrors.Case.NotFound(request.CaseId), true)
                 .Warning("Failed to update Action");
 
@@ -52,7 +52,7 @@ internal sealed class UpdateCreateSentralEntryActionCommandHandler
         if (action is null)
         {
             _logger
-                .ForContext(nameof(UpdateCreateSentralEntryActionCommand), request, true)
+                .ForContext(nameof(UpdateConfirmSentralEntryActionCommand), request, true)
                 .ForContext(nameof(Case), item, true)
                 .ForContext(nameof(Error), CaseErrors.Action.NotFound(request.ActionId), true)
                 .Warning("Failed to update Action");
@@ -60,18 +60,14 @@ internal sealed class UpdateCreateSentralEntryActionCommandHandler
             return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
         }
 
-        if (action is CreateSentralEntryAction sentralAction)
+        if (action is ConfirmSentralEntryAction confirmAction)
         {
-            Result updateAction = request.NotRequired switch
-            {
-                true => sentralAction.Update(request.NotRequired, _currentUserService.UserName),
-                false => sentralAction.Update(request.IncidentNumber, _currentUserService.UserName)
-            };
+            Result updateAction = confirmAction.Update(request.Confirmed, _currentUserService.UserName);
 
             if (updateAction.IsFailure)
             {
                 _logger
-                    .ForContext(nameof(UpdateCreateSentralEntryActionCommand), request, true)
+                .ForContext(nameof(UpdateConfirmSentralEntryActionCommand), request, true)
                     .ForContext(nameof(Case), item, true)
                     .ForContext(nameof(Error), updateAction.Error, true)
                     .Warning("Failed to update Action");
@@ -84,7 +80,7 @@ internal sealed class UpdateCreateSentralEntryActionCommandHandler
             if (statusUpdate.IsFailure)
             {
                 _logger
-                    .ForContext(nameof(UpdateCreateSentralEntryActionCommand), request, true)
+                    .ForContext(nameof(UpdateConfirmSentralEntryActionCommand), request, true)
                     .ForContext(nameof(Case), item, true)
                     .ForContext(nameof(Error), statusUpdate.Error, true)
                     .Warning("Failed to update Action");
@@ -98,11 +94,11 @@ internal sealed class UpdateCreateSentralEntryActionCommandHandler
         }
 
         _logger
-            .ForContext(nameof(UpdateCreateSentralEntryActionCommand), request, true)
+            .ForContext(nameof(UpdateConfirmSentralEntryActionCommand), request, true)
             .ForContext(nameof(Case), item, true)
-            .ForContext(nameof(Error), CaseErrors.Action.Update.TypeMismatch(nameof(CreateSentralEntryAction), action.GetType().ToString()), true)
+            .ForContext(nameof(Error), CaseErrors.Action.Update.TypeMismatch(nameof(ConfirmSentralEntryAction), action.GetType().ToString()), true)
             .Warning("Failed to update Action");
 
-        return Result.Failure(CaseErrors.Action.Update.TypeMismatch(nameof(CreateSentralEntryAction), action.GetType().ToString()));
+        return Result.Failure(CaseErrors.Action.Update.TypeMismatch(nameof(ConfirmSentralEntryAction), action.GetType().ToString()));
     }
 }

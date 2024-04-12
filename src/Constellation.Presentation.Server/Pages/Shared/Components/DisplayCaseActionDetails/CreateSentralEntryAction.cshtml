@@ -2,6 +2,10 @@
 
 @using Constellation.Core.Models.WorkFlow
 @using Constellation.Core.Models.WorkFlow.Enums
+@using Microsoft.Extensions.Options
+@using Constellation.Application.Interfaces.Configuration
+
+@inject IOptions<SentralGatewayConfiguration> options
 
 <dl>
     <dt>Offering</dt>
@@ -17,7 +21,13 @@
             }
             else
             {
-                @:Incident # @Model.IncidentNumber
+                <span>Incident # @Model.IncidentNumber</span><br />
+                @if (!string.IsNullOrWhiteSpace(options.Value.ServerUrl))
+                {
+                    var url = $"{options.Value.ServerUrl}/wellbeing/incidents/view?id={Model.IncidentNumber}";
+
+                    <a href="@url" target="_blank">@url</a>
+                }
             }
         }
     </dd>

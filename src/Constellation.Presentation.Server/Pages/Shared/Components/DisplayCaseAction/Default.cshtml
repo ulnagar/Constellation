@@ -12,19 +12,22 @@
 
 <div class="border border-success row mt-1 pb-1 @(subAction ? "ml-3" : "")">
     <div class="col-12 border-bottom border-dark py-1"><strong>Action: @Model.Action.ToString()</strong></div>
-    <div class="col-12 mt-1">
-        @if (Model.Action.Status == ActionStatus.Open && (Model.AssignedToMe || Model.IsAdmin))
-        {
-            <a asp-page="/WorkFlows/Actions/Update" asp-route-caseId="@Model.Action.CaseId.Value" asp-route-actionId="@Model.Action.Id.Value" class="btn btn-sm btn-success">Update Action</a>
-            <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-secondary add-action-note-button">Add Note</button>
-        }
-        @if (Model.Action.Status == ActionStatus.Open && Model.IsAdmin)
-        {
-            <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-secondary reassign-action-button">Reassign</button>
-            <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-danger cancel-action-button">Mark Cancelled</button>
-        }
-        <button type="button" data-toggle="collapse" data-target="#@notesDiv" aria-expanded="false" aria-controls="@notesDiv" class="btn btn-sm btn-primary">Show Notes</button>
-    </div>
+    @if (Model.ShowMenu)
+    {
+        <div class="col-12 mt-1">
+            @if (Model.Action.Status == ActionStatus.Open && (Model.AssignedToMe || Model.IsAdmin))
+            {
+                <a asp-page="/WorkFlows/Actions/Update" asp-route-caseGuid="@Model.Action.CaseId.Value" asp-route-actionGuid="@Model.Action.Id.Value" class="btn btn-sm btn-success">Update Action</a>
+                <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-secondary add-action-note-button">Add Note</button>
+            }
+            @if (Model.Action.Status == ActionStatus.Open && Model.IsAdmin)
+            {
+                <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-secondary reassign-action-button">Reassign</button>
+                <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-danger cancel-action-button">Mark Cancelled</button>
+            }
+            <button type="button" data-toggle="collapse" data-target="#@notesDiv" aria-expanded="false" aria-controls="@notesDiv" class="btn btn-sm btn-primary">Show Notes</button>
+        </div>
+    }
     <div class="col-12 mt-3">
         @Model.Action.Description
     </div>

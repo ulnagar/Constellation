@@ -25,7 +25,7 @@ public class DisplayCaseActionViewComponent : ViewComponent
         _caseRepository = caseRepository;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(Guid caseId, Guid actionId)
+    public async Task<IViewComponentResult> InvokeAsync(Guid caseId, Guid actionId, bool showMenu)
     {
         Case item = await _caseRepository.GetById(CaseId.FromValue(caseId));
 
@@ -55,7 +55,8 @@ public class DisplayCaseActionViewComponent : ViewComponent
         {
             Action = action, 
             AssignedToMe = assignedToMe, 
-            IsAdmin = isAdmin.Succeeded
+            IsAdmin = isAdmin.Succeeded,
+            ShowMenu = showMenu
         };
 
         return View(viewModel);
