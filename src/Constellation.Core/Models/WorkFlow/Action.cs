@@ -224,7 +224,6 @@ public sealed class PhoneParentAction : Action
     public override string Description => $"Record of a phone call with a parent or guardian";
 
     // Option to contact parent via phone to discuss issues
-    public ParentId? ParentId { get; private set; }
     public string? ParentName { get; private set; }
     public string? PhoneNumber { get; private set; }
     public DateTime DateOccurred { get; private set; }
@@ -249,7 +248,6 @@ public sealed class PhoneParentAction : Action
     }
 
     public Result Update(
-        ParentId? parentId,
         string parentName,
         string parentNumber,
         DateTime dateOccurred,
@@ -260,23 +258,18 @@ public sealed class PhoneParentAction : Action
             return Result.Failure(CaseErrors.Action.Update.IncidentNumberZero);
 
         Result noteAttempt = AddNote(
-            $"Details updated: ParentId = {parentId}, ParentName = {parentName}, PhoneNumber = {parentNumber}, DateOccurred = {dateOccurred}, IncidentNumber = {incidentNumber}",
+            $"Details updated: ParentName = {parentName}, PhoneNumber = {parentNumber}, DateOccurred = {dateOccurred}, IncidentNumber = {incidentNumber}",
             currentUser);
         
         if (noteAttempt.IsFailure)
             return noteAttempt;
-
-        if (parentId is not null)
-            ParentId = parentId;
-        
+       
         ParentName = parentName;
         PhoneNumber = parentNumber;
         DateOccurred = dateOccurred;
         IncidentNumber = incidentNumber;
-
-        Result status = UpdateStatus(ActionStatus.Completed, currentUser);
-
-        return status;
+        
+        return Result.Success();
     }
 
     public override string ToString() =>
@@ -296,7 +289,7 @@ public sealed class ParentInterviewAction : Action
     public override string Description => $"Record of an interview with a parent or guardian";
 
     // Option to schedule and record interview with parent
-    public ParentId? ParentId { get; private set; }
+    public ParentId ParentId { get; private set; }
     public string? ParentName { get; private set; }
     public DateTime DateOccurred { get; private set; }
     public int IncidentNumber { get; private set; }
@@ -337,7 +330,7 @@ public sealed class ParentInterviewAction : Action
             return noteAttempt;
 
         if (parentId is not null)
-            ParentId = parentId;
+            ParentId = parentId.Value;
 
         ParentName = parentName;
         DateOccurred = dateOccurred;

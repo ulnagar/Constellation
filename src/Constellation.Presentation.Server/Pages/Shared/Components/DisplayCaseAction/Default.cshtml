@@ -17,7 +17,7 @@
         <div class="col-12 mt-1">
             @if (Model.Action.Status == ActionStatus.Open && (Model.AssignedToMe || Model.IsAdmin))
             {
-                <a asp-page="/WorkFlows/Actions/Update" asp-route-caseGuid="@Model.Action.CaseId.Value" asp-route-actionGuid="@Model.Action.Id.Value" class="btn btn-sm btn-success">Update Action</a>
+                <a asp-page="/WorkFlows/Actions/Update" asp-route-caseId="@Model.Action.CaseId" asp-route-actionId="@Model.Action.Id" class="btn btn-sm btn-success">Update Action</a>
                 <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-secondary add-action-note-button">Add Note</button>
             }
             @if (Model.Action.Status == ActionStatus.Open && Model.IsAdmin)

@@ -1,12 +1,12 @@
-﻿@page "{caseGuid:guid}/{actionGuid:guid}"
+﻿@page "{caseId}/{actionId}"
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.WorkFlows.Actions.UpdateModel
 
 @using Constellation.Presentation.Server.ViewComponents
 @using Constellation.Core.Models.WorkFlow.Identifiers
 
 @{
-    bool hasParent = Model.Case.Actions.Any(action => action.ActionId == ActionId.FromValue(Model.ActionGuid));
-    ActionId? parentId = (hasParent) ? Model.Case.Actions.First(action => action.ActionId == ActionId.FromValue(Model.ActionGuid)).ParentActionId : null;
+    bool hasParent = Model.Case.Actions.Any(action => action.ActionId == Model.ActionId);
+    ActionId? parentId = (hasParent) ? Model.Case.Actions.First(action => action.ActionId == Model.ActionId).ParentActionId : null;
 }
 
 <h2>WorkFlow Case</h2>
@@ -21,7 +21,7 @@
     <div class="row">
         <div class="col-12 border-bottom border-dark py-2"><h3>@Model.Case?.CaseDescription</h3></div>
         <div class="col-6 mt-3">
-            <vc:display-case-details case-id="@Model.Case?.CaseId.Value ?? Guid.Empty"></vc:display-case-details>
+            <vc:display-case-details case-id="@Model.CaseId"></vc:display-case-details>
         </div>
         <div class="col-6 mt-3">
             <dl>
@@ -35,8 +35,8 @@
     </div>
     @if (hasParent && parentId is not null)
     {
-        <vc:display-case-action case-id="Model.CaseGuid" action-id="parentId.Value" show-menu="false"></vc:display-case-action>
+        <vc:display-case-action case-id="Model.CaseId.Value" action-id="parentId.Value" show-menu="false"></vc:display-case-action>
     }
-    <vc:display-case-action case-id="Model.CaseGuid" action-id="Model.ActionGuid" show-menu="false"></vc:display-case-action>
-    <vc:action-update-form case-id="@Model.CaseGuid" action-id="@Model.ActionGuid" />
+    <vc:display-case-action case-id="Model.CaseId.Value" action-id="Model.ActionId.Value" show-menu="false"></vc:display-case-action>
+    <vc:action-update-form case-id="@Model.CaseId.Value" action-id="@Model.ActionId.Value" />
 </div>

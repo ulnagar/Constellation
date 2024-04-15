@@ -4,7 +4,6 @@ using Constellation.Application.Families.Models;
 
 public sealed class PhoneParentActionViewModel
 {
-    public Guid ParentId { get; set; }
     public string ParentName { get; set; }
     public string ParentPhoneNumber { get; set; }
     public DateTime DateOccurred { get; set; }

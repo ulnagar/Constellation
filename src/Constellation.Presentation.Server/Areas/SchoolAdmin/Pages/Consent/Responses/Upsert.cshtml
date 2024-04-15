@@ -34,7 +34,7 @@
                         <option value=""> -- Select Parent -- </option>
                         @foreach (var parent in Model.Parents.Where(entry => entry.ParentId != null))
                         {
-                            if (Model.Submitter == parent.ParentId!.Value)
+                            if (Model.Submitter == parent.ParentId?.Value)
                             {
                                 <option value="@parent.ParentId.Value" selected="selected">@parent.Name</option>
                             }

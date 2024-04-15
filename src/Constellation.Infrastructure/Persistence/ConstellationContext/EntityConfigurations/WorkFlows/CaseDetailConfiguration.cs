@@ -22,11 +22,11 @@ internal sealed class CaseDetailConfiguration : IEntityTypeConfiguration<CaseDet
                 id => id.Value,
                 value => CaseDetailId.FromValue(value));
 
-        builder
-            .Property(detail => detail.CaseId)
-            .HasConversion(
-                id => id.Value,
-                value => CaseId.FromValue(value));
+        //builder
+        //    .Property(detail => detail.CaseId)
+        //    .HasConversion(
+        //        id => id.Value,
+        //        value => CaseId.FromValue(value));
 
         builder
             .HasDiscriminator<string>("CaseDetailType")

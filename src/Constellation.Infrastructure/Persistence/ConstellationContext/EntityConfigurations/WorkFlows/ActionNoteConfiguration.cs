@@ -20,10 +20,10 @@ internal sealed class ActionNoteConfiguration : IEntityTypeConfiguration<ActionN
                 id => id.Value,
                 value => ActionNoteId.FromValue(value));
 
-        builder
-            .Property(note => note.ActionId)
-            .HasConversion(
-                id => id.Value,
-                value => ActionId.FromValue(value));
+        //builder
+        //    .Property(note => note.ActionId)
+        //    .HasConversion(
+        //        id => id.Value,
+        //        value => ActionId.FromValue(value));
     }
 }

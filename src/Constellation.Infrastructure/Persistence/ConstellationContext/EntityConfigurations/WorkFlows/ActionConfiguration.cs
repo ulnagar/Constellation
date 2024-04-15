@@ -25,11 +25,11 @@ internal sealed class ActionConfiguration : IEntityTypeConfiguration<Action>
                 id => id.Value,
                 value => ActionId.FromValue(value));
 
-        builder
-            .Property(action => action.CaseId)
-            .HasConversion(
-                id => id.Value,
-                value => CaseId.FromValue(value));
+        //builder
+        //    .Property(action => action.CaseId)
+        //    .HasConversion(
+        //        id => id.Value,
+        //        value => CaseId.FromValue(value));
 
         builder
             .Property(action => action.ParentActionId)
@@ -121,16 +121,6 @@ internal sealed class PhoneParentActionConfiguration : IEntityTypeConfiguration<
     public void Configure(EntityTypeBuilder<PhoneParentAction> builder)
     {
         builder
-            .Property(action => action.ParentId)
-            .HasConversion(
-                id => id.Value,
-                value => ParentId.FromValue(value));
-
-        builder
-            .Property(action => action.ParentId)
-            .HasColumnName(nameof(PhoneParentAction.ParentId));
-
-        builder
             .Property(action => action.ParentName)
             .HasColumnName(nameof(PhoneParentAction.ParentName));
 
@@ -142,7 +132,6 @@ internal sealed class PhoneParentActionConfiguration : IEntityTypeConfiguration<
             .Property(action => action.IncidentNumber)
             .HasColumnName(nameof(PhoneParentAction.IncidentNumber));
     }
-
 }
 
 internal sealed class ParentInterviewActionConfiguration : IEntityTypeConfiguration<ParentInterviewAction>

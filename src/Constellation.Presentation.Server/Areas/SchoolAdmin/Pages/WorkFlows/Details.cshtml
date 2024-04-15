@@ -1,4 +1,4 @@
-﻿@page "{Id:guid}"
+﻿@page "{Id}"
 @model Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Workflows.DetailsModel
 
 @using Constellation.Presentation.Server.ViewComponents
@@ -28,7 +28,7 @@
             }
         </div>
         <div class="col-6 mt-3">
-            <vc:display-case-details case-id="@Model.Case?.CaseId.Value ?? Guid.Empty"></vc:display-case-details>
+            <vc:display-case-details case-id="@Model.Id"></vc:display-case-details>
         </div>
         <div class="col-6 mt-3">
             <dl>
@@ -42,11 +42,11 @@
     </div>
     @foreach (var action in Model.Case?.Actions.Where(action => action.ParentActionId is null).OrderBy(action => action.CreatedAt))
     {
-        <vc:display-case-action case-id="@Model.Case?.CaseId.Value ?? Guid.Empty" action-id="@action.ActionId.Value" show-menu="true"></vc:display-case-action>
+        <vc:display-case-action case-id="@Model.Id.Value" action-id="@action.ActionId.Value" show-menu="true"></vc:display-case-action>
 
         @foreach (var subAction in Model.Case?.Actions.Where(item => item.ParentActionId == action.ActionId).OrderBy(item => item.CreatedAt))
         {
-            <vc:display-case-action case-id="@Model.Case?.CaseId.Value ?? Guid.Empty" action-id="@subAction.ActionId.Value" show-menu="true"></vc:display-case-action>
+            <vc:display-case-action case-id="@Model.Id.Value" action-id="@subAction.ActionId.Value" show-menu="true"></vc:display-case-action>
         }
     }
 </div>

@@ -1,0 +1,108 @@
+﻿namespace Constellation.Application.WorkFlows.UpdatePhoneParentAction;
+
+using Abstractions.Messaging;
+using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions.Services;
+using Constellation.Core.Models.WorkFlow;
+using Constellation.Core.Models.WorkFlow.Enums;
+using Constellation.Core.Models.WorkFlow.Errors;
+using Constellation.Core.Models.WorkFlow.Repositories;
+using Core.Models.StaffMembers.Repositories;
+using Core.Shared;
+using Serilog;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+internal sealed class UpdatePhoneParentActionCommandHandler
+: ICommandHandler<UpdatePhoneParentActionCommand>
+{
+    private readonly ICaseRepository _caseRepository;
+    private readonly IStaffRepository _staffRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger _logger;
+
+    public UpdatePhoneParentActionCommandHandler(
+        ICaseRepository caseRepository,
+        IStaffRepository staffRepository,
+        ICurrentUserService currentUserService,
+        IUnitOfWork unitOfWork,
+        ILogger logger)
+    {
+        _caseRepository = caseRepository;
+        _staffRepository = staffRepository;
+        _currentUserService = currentUserService;
+        _unitOfWork = unitOfWork;
+        _logger = logger.ForContext<UpdatePhoneParentActionCommand>();
+    }
+
+    public async Task<Result> Handle(UpdatePhoneParentActionCommand request, CancellationToken cancellationToken)
+    {
+        Case item = await _caseRepository.GetById(request.CaseId, cancellationToken);
+
+        if (item is null)
+        {
+            _logger
+                .ForContext(nameof(UpdatePhoneParentActionCommand), request, true)
+                .ForContext(nameof(Error), CaseErrors.Case.NotFound(request.CaseId), true)
+                .Warning("Failed to update Action");
+
+            return Result.Failure(CaseErrors.Case.NotFound(request.CaseId));
+        }
+
+        Action action = item.Actions.FirstOrDefault(action => action.Id == request.ActionId);
+
+        if (action is null)
+        {
+            _logger
+                .ForContext(nameof(UpdatePhoneParentActionCommand), request, true)
+                .ForContext(nameof(Case), item, true)
+                .ForContext(nameof(Error), CaseErrors.Action.NotFound(request.ActionId), true)
+                .Warning("Failed to update Action");
+
+            return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+        }
+
+        if (action is PhoneParentAction phoneAction)
+        {
+            Result updateAction = phoneAction.Update(request.ParentName, request.ParentNumber, request.DateOccurred, request.IncidentNumber, _currentUserService.UserName);
+
+            if (updateAction.IsFailure)
+            {
+                _logger
+                .ForContext(nameof(UpdatePhoneParentActionCommand), request, true)
+                    .ForContext(nameof(Case), item, true)
+                    .ForContext(nameof(Error), updateAction.Error, true)
+                    .Warning("Failed to update Action");
+
+                return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+            }
+
+            Result statusUpdate = item.UpdateActionStatus(action.Id, ActionStatus.Completed, _currentUserService.UserName);
+
+            if (statusUpdate.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(UpdatePhoneParentActionCommand), request, true)
+                    .ForContext(nameof(Case), item, true)
+                    .ForContext(nameof(Error), statusUpdate.Error, true)
+                    .Warning("Failed to update Action");
+
+                return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+            }
+
+            await _unitOfWork.CompleteAsync(cancellationToken);
+
+            return Result.Success();
+        }
+
+        _logger
+            .ForContext(nameof(UpdatePhoneParentActionCommand), request, true)
+            .ForContext(nameof(Case), item, true)
+            .ForContext(nameof(Error), CaseErrors.Action.Update.TypeMismatch(nameof(CreateSentralEntryAction), action.GetType().ToString()), true)
+            .Warning("Failed to update Action");
+
+        return Result.Failure(CaseErrors.Action.Update.TypeMismatch(nameof(CreateSentralEntryAction), action.GetType().ToString()));
+    }
+}

@@ -1,7 +1,36 @@
 ﻿@model PhoneParentAction
 
+@using Constellation.Application.Interfaces.Configuration
 @using Constellation.Core.Models.WorkFlow
+@using Microsoft.Extensions.Options
+
+@inject IOptions<SentralGatewayConfiguration> options
 
 <dl>
+    <dt>Parent</dt>
+    <dd>@Model.ParentName</dd>
+    
+    <dt>Phone Number</dt>
+    <dd>@Model.PhoneNumber</dd>
+    
+    <dt>Called At</dt>
+    <dd>@if (Model.DateOccurred != DateTime.MinValue)
+        {
+            Model.DateOccurred.ToString("dd/MM/yyyy h:mm tt");
+        }
+    </dd>
+    
+    <dt>Sentral Incident Number</dt>
+    <dd>
+        @if (Model.IncidentNumber != 0)
+        {
+            <span>Incident # @Model.IncidentNumber</span><br/>
+            @if (!string.IsNullOrWhiteSpace(options.Value.ServerUrl))
+            {
+                var url = $"{options.Value.ServerUrl}/wellbeing/incidents/view?id={Model.IncidentNumber}";
 
+                <a href="@url" target="_blank">@url</a>
+            }
+        }
+    </dd>
 </dl>

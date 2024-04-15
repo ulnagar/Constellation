@@ -3,6 +3,7 @@
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Identifiers;
 using Core.Models.WorkFlow.Repositories;
+using Helpers.ModelBinders;
 using Microsoft.AspNetCore.Mvc;
 
 public class DisplayCaseDetailsViewComponent : ViewComponent
@@ -15,9 +16,9 @@ public class DisplayCaseDetailsViewComponent : ViewComponent
         _caseRepository = caseRepository;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(Guid caseId)
+    public async Task<IViewComponentResult> InvokeAsync([ModelBinder(typeof(StrongIdBinder))] CaseId caseId)
     {
-        Case item = await _caseRepository.GetById(CaseId.FromValue(caseId));
+        Case item = await _caseRepository.GetById(caseId);
 
         if (item is null)
             return Content(string.Empty);

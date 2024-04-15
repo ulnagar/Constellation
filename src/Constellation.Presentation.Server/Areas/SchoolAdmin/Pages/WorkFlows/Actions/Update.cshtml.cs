@@ -3,10 +3,13 @@ namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.WorkFlows.Ac
 using Application.Models.Auth;
 using Application.WorkFlows.UpdateConfirmSentralEntryAction;
 using Application.WorkFlows.UpdateCreateSentralEntryAction;
+using Application.WorkFlows.UpdatePhoneParentAction;
 using BaseModels;
 using Constellation.Application.WorkFlows.GetCaseById;
+using Core.Models.Identifiers;
 using Core.Models.WorkFlow.Identifiers;
 using Core.Shared;
+using Helpers.ModelBinders;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,17 +32,19 @@ public class UpdateModel : BasePageModel
 
     [ViewData] public string ActivePage => WorkFlowPages.Cases;
 
+    [ModelBinder(typeof(StrongIdBinder))]
     [BindProperty(SupportsGet = true)]
-    public Guid CaseGuid { get; set; }
+    public CaseId CaseId { get; set; }
 
+    [ModelBinder(typeof(StrongIdBinder))]
     [BindProperty(SupportsGet = true)]
-    public Guid ActionGuid { get; set; }
+    public ActionId ActionId { get; set; }
 
     public CaseDetailsResponse Case { get; set; }
 
     public async Task OnGet()
     {
-        Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(CaseGuid)));
+        Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId));
 
         if (request.IsFailure)
         {
@@ -57,7 +62,7 @@ public class UpdateModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdateSentralEntryAction(CreateSentralEntryActionViewModel viewModel)
     {
-        Result attempt = await _mediator.Send(new UpdateCreateSentralEntryActionCommand(CaseId.FromValue(CaseGuid), ActionId.FromValue(ActionGuid), viewModel.NotRequired, viewModel.IncidentNumber));
+        Result attempt = await _mediator.Send(new UpdateCreateSentralEntryActionCommand(CaseId, ActionId, viewModel.NotRequired, viewModel.IncidentNumber));
 
         if (attempt.IsFailure)
         {
@@ -70,12 +75,12 @@ public class UpdateModel : BasePageModel
             return Page();
         }
         
-        return RedirectToPage("/WorkFlows/Details", new { area = "SchoolAdmin", Id = CaseGuid });
+        return RedirectToPage("/WorkFlows/Details", new { area = "SchoolAdmin", Id = CaseId.Value });
     }
 
     public async Task<IActionResult> OnPostUpdateConfirmEntryAction(ConfirmSentralEntryActionViewModel viewModel)
     {
-        Result attempt = await _mediator.Send(new UpdateConfirmSentralEntryActionCommand(CaseId.FromValue(CaseGuid), ActionId.FromValue(ActionGuid), viewModel.Confirmed));
+        Result attempt = await _mediator.Send(new UpdateConfirmSentralEntryActionCommand(CaseId, ActionId, viewModel.Confirmed));
 
         if (attempt.IsFailure)
         {
@@ -88,6 +93,24 @@ public class UpdateModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage("/WorkFlows/Details", new { area = "SchoolAdmin", Id = CaseGuid });
+        return RedirectToPage("/WorkFlows/Details", new { area = "SchoolAdmin", Id = CaseId.Value });
+    }
+
+    public async Task<IActionResult> OnPostUpdatePhoneParentAction(PhoneParentActionViewModel viewModel)
+    {
+        Result attempt = await _mediator.Send(new UpdatePhoneParentActionCommand(CaseId, ActionId, viewModel.ParentName, viewModel.ParentPhoneNumber, viewModel.DateOccurred, viewModel.IncidentNumber));
+
+        if (attempt.IsFailure)
+        {
+            Error = new()
+            {
+                Error = attempt.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return RedirectToPage("/WorkFlows/Details", new { area = "SchoolAdmin", Id = CaseId.Value });
     }
 }

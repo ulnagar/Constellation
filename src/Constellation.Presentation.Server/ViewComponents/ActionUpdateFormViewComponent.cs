@@ -3,6 +3,7 @@
 using Application.Families.GetFamilyContactsForStudent;
 using Application.Families.Models;
 using Application.Parents.GetParentWithStudentIds;
+using Core.Abstractions.Clock;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Identifiers;
@@ -16,13 +17,16 @@ public class ActionUpdateFormViewComponent : ViewComponent
 {
     private readonly ISender _mediator;
     private readonly ICaseRepository _caseRepository;
+    private readonly IDateTimeProvider _dateTime;
 
     public ActionUpdateFormViewComponent(
         ISender mediator,
-        ICaseRepository caseRepository)
+        ICaseRepository caseRepository,
+        IDateTimeProvider dateTime)
     {
         _mediator = mediator;
         _caseRepository = caseRepository;
+        _dateTime = dateTime;
     }
 
     public async Task<IViewComponentResult> InvokeAsync(Guid caseId, Guid actionId)
@@ -68,7 +72,16 @@ public class ActionUpdateFormViewComponent : ViewComponent
                 if (parents.IsFailure)
                     return Content(string.Empty);
 
-                PhoneParentActionViewModel phoneViewModel = new() { Parents = parents.Value };
+                // Limit the datetime-local field precision to minutes 
+                DateTime now = _dateTime.Now;
+                now = now.AddSeconds(-(now.Second));
+                now = now.AddMilliseconds(-(now.Millisecond));
+
+                PhoneParentActionViewModel phoneViewModel = new()
+                {
+                    Parents = parents.Value,
+                    DateOccurred = now
+                };
 
                 return View("PhoneParentAction", phoneViewModel);
 

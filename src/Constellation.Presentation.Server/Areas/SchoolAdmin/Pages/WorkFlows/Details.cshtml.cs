@@ -20,6 +20,7 @@ using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Errors;
 using Core.Models.WorkFlow.Identifiers;
 using Core.Shared;
+using Helpers.ModelBinders;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -49,14 +50,15 @@ public class DetailsModel : BasePageModel
 
     [ViewData] public string ActivePage => WorkFlowPages.Cases;
 
+    [ModelBinder(typeof(StrongIdBinder))]
     [BindProperty(SupportsGet = true)]
-    public Guid Id { get; set; }
+    public CaseId Id { get; set; }
 
     public CaseDetailsResponse Case { get; set; }
 
     public async Task OnGet()
     {
-        Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+        Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
         if (request.IsFailure)
         {
@@ -75,7 +77,7 @@ public class DetailsModel : BasePageModel
     public IActionResult OnPostAjaxCaseConfirmation(ConfirmCaseUpdateModalViewModel.UpdateType type)
     {
         ConfirmCaseUpdateModalViewModel viewModel = new(
-            Id,
+            Id.Value,
             type);
 
         return Partial("ConfirmCaseUpdateModal", viewModel);
@@ -83,7 +85,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetCancelCase()
     {
-        Result cancelRequest = await _mediator.Send(new CancelCaseCommand(CaseId.FromValue(Id)));
+        Result cancelRequest = await _mediator.Send(new CancelCaseCommand(Id));
 
         if (cancelRequest.IsFailure)
         {
@@ -93,7 +95,7 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
             if (request.IsFailure)
                 return RedirectToPage();
@@ -108,7 +110,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetCompleteCase()
     {
-        Result cancelRequest = await _mediator.Send(new CloseCaseCommand(CaseId.FromValue(Id)));
+        Result cancelRequest = await _mediator.Send(new CloseCaseCommand(Id));
 
         if (cancelRequest.IsFailure)
         {
@@ -118,7 +120,7 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
             if (request.IsFailure)
                 return RedirectToPage();
@@ -140,7 +142,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetCancelAction(Guid actionId)
     {
-        Result cancelRequest = await _mediator.Send(new CancelActionCommand(CaseId.FromValue(Id), ActionId.FromValue(actionId)));
+        Result cancelRequest = await _mediator.Send(new CancelActionCommand(Id, ActionId.FromValue(actionId)));
 
         if (cancelRequest.IsFailure)
         {
@@ -150,7 +152,7 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
             if (request.IsFailure)
                 return RedirectToPage();
@@ -175,7 +177,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAddActionNote(Guid actionId, string note)
     {
-        Result noteRequest = await _mediator.Send(new AddActionNoteCommand(CaseId.FromValue(Id), ActionId.FromValue(actionId), note));
+        Result noteRequest = await _mediator.Send(new AddActionNoteCommand(Id, ActionId.FromValue(actionId), note));
 
         if (noteRequest.IsFailure)
         {
@@ -185,7 +187,7 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
             if (request.IsFailure)
                 return RedirectToPage();
@@ -213,7 +215,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostReassignAction(Guid actionId, string staffId)
     {
-        Result reassignRequest = await _mediator.Send(new ReassignActionCommand(CaseId.FromValue(Id), ActionId.FromValue(actionId), staffId));
+        Result reassignRequest = await _mediator.Send(new ReassignActionCommand(Id, ActionId.FromValue(actionId), staffId));
 
         if (reassignRequest.IsFailure)
         {
@@ -223,7 +225,7 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
             if (request.IsFailure)
                 return RedirectToPage();
@@ -300,7 +302,7 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
             if (request.IsFailure)
                 return RedirectToPage();
@@ -310,7 +312,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        Result actionRequest = await _mediator.Send(new AddSentralEntryActionCommand(CaseId.FromValue(Id), OfferingId.FromValue(viewModel.OfferingId), viewModel.StaffId));
+        Result actionRequest = await _mediator.Send(new AddSentralEntryActionCommand(Id, OfferingId.FromValue(viewModel.OfferingId), viewModel.StaffId));
 
         if (actionRequest.IsFailure)
         {
@@ -320,7 +322,7 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
             if (request.IsFailure)
                 return RedirectToPage();
@@ -337,7 +339,7 @@ public class DetailsModel : BasePageModel
     {
         string staffMemberId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        Result actionRequest = await _mediator.Send(new AddCaseDetailUpdateActionCommand(CaseId.FromValue(Id), staffMemberId, viewModel.Details));
+        Result actionRequest = await _mediator.Send(new AddCaseDetailUpdateActionCommand(Id, staffMemberId, viewModel.Details));
 
         if (actionRequest.IsFailure)
         {
@@ -347,7 +349,7 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
             if (request.IsFailure)
                 return RedirectToPage();
@@ -370,7 +372,7 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
             if (request.IsFailure)
                 return RedirectToPage();
@@ -380,7 +382,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        Result actionRequest = await _mediator.Send(new AddParentInterviewActionCommand(CaseId.FromValue(Id), viewModel.StaffId));
+        Result actionRequest = await _mediator.Send(new AddParentInterviewActionCommand(Id, viewModel.StaffId));
 
         if (actionRequest.IsFailure)
         {
@@ -390,7 +392,7 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
             if (request.IsFailure)
                 return RedirectToPage();
@@ -413,7 +415,7 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
             if (request.IsFailure)
                 return RedirectToPage();
@@ -423,7 +425,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        Result actionRequest = await _mediator.Send(new AddPhoneParentActionCommand(CaseId.FromValue(Id), viewModel.StaffId));
+        Result actionRequest = await _mediator.Send(new AddPhoneParentActionCommand(Id, viewModel.StaffId));
 
         if (actionRequest.IsFailure)
         {
@@ -433,7 +435,7 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
             if (request.IsFailure)
                 return RedirectToPage();
@@ -456,7 +458,7 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
             if (request.IsFailure)
                 return RedirectToPage();
@@ -466,7 +468,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        Result actionRequest = await _mediator.Send(new AddSendEmailActionCommand(CaseId.FromValue(Id), viewModel.StaffId));
+        Result actionRequest = await _mediator.Send(new AddSendEmailActionCommand(Id, viewModel.StaffId));
 
         if (actionRequest.IsFailure)
         {
@@ -476,7 +478,7 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId.FromValue(Id)));
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
             if (request.IsFailure)
                 return RedirectToPage();

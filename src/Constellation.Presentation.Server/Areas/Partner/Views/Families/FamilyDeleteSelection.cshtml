@@ -37,7 +37,7 @@
                     </ul>
                 </div>
                 <div class="card-footer bg-transparent border-0">
-                    <a asp-page="/Families/Index" asp-area="Partner" asp-page-handler="DeleteParent" asp-route-parent="@Model.ParentId?.Value" asp-route-family="@Model.FamilyId.Value" class="btn btn-block btn-danger">Delete Parent</a>
+                    <a asp-page="/Families/Index" asp-area="Partner" asp-page-handler="DeleteParent" asp-route-parent="@Model.ParentId.Value" asp-route-family="@Model.FamilyId.Value" class="btn btn-block btn-danger">Delete Parent</a>
                 </div>
             </div>
         </div>

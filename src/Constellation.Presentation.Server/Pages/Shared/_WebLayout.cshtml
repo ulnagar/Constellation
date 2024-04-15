@@ -19,6 +19,23 @@
     <link rel="stylesheet" href="~/css/glyphicon.css" />
     <link rel="stylesheet" href="~/private/font-awesome/css/all.min.css" />
     <link rel="stylesheet" href="~/Constellation.Presentation.Server.styles.css" />
+    
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/datatables.net/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables.net-dt/js/dataTables.dataTables.min.js"></script>
+    <script src="~/lib/moment.js/moment.min.js"></script>
+    <script src="~/lib/datatables-plugins/sorting/datetime-moment.min.js"></script>
+    <script src="~/lib/datatables.net-rowgroup/dataTables.rowGroup.min.js"></script>
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <script src="~/lib/Chart.js/chart.min.js"></script>
+    <script src="~/lib/downloadjs/download.min.js"></script>
+    <script src="~/lib/leaflet/leaflet.min.js"></script>
+    <script src="~/lib/leaflet.awesome-markers/leaflet.awesome-markers.min.js"></script>
+    <script src="~/lib/summernote/summernote.min.js"></script>
+    <script src="~/lib/summernote/summernote-bs4.min.js"></script>
+    <script src="~/lib/jquery-sortablejs/jquery-sortable.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 </head>
 <body>
     @await Html.PartialAsync("_NavBar", Model) 
@@ -38,24 +55,7 @@
     <footer class="footer fixed-bottom">
         <vc:page-footer />
     </footer>
-
-    <script src="~/lib/jquery/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="~/lib/datatables.net/jquery.dataTables.min.js"></script>
-    <script src="~/lib/datatables.net-dt/js/dataTables.dataTables.min.js"></script>
-    <script src="~/lib/moment.js/moment.min.js"></script>
-    <script src="~/lib/datatables-plugins/sorting/datetime-moment.min.js"></script>
-    <script src="~/lib/datatables.net-rowgroup/dataTables.rowGroup.min.js"></script>
-    <script src="~/lib/select2/js/select2.min.js"></script>
-    <script src="~/lib/Chart.js/chart.min.js"></script>
-    <script src="~/lib/downloadjs/download.min.js"></script>
-    <script src="~/lib/leaflet/leaflet.min.js"></script>
-    <script src="~/lib/leaflet.awesome-markers/leaflet.awesome-markers.min.js"></script>
-    <script src="~/lib/summernote/summernote.min.js"></script>
-    <script src="~/lib/summernote/summernote-bs4.min.js"></script>
-    <script src="~/lib/jquery-sortablejs/jquery-sortable.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-
+    
     @if (Model.Error is not null)
     {
         <script>
