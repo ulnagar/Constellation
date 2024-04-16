@@ -4,7 +4,6 @@ namespace Constellation.Core.Models.WorkFlow;
 using Enums;
 using Errors;
 using Identifiers;
-using Models.Identifiers;
 using Offerings;
 using Offerings.Identifiers;
 using Primitives;
@@ -286,14 +285,26 @@ public sealed class PhoneParentAction : Action
 
 public sealed class ParentInterviewAction : Action
 {
+    private readonly List<InterviewAttendee> _attendees = new();
+
     public override string Description => $"Record of an interview with a parent or guardian";
 
+    public IReadOnlyList<InterviewAttendee> Attendees => _attendees.AsReadOnly();
+
     // Option to schedule and record interview with parent
-    public ParentId ParentId { get; private set; }
-    public string? ParentName { get; private set; }
     public DateTime DateOccurred { get; private set; }
     public int IncidentNumber { get; private set; }
 
+    private Result AddAttendee(InterviewAttendee attendee)
+    {
+        if (_attendees.Any(entry => entry.Name == attendee.Name))
+            return Result.Failure(CaseErrors.Action.AddAttendee.Duplicate);
+
+        _attendees.Add(attendee);
+
+        return Result.Success();
+    }
+    
     public static Result<ParentInterviewAction> Create(
         CaseId caseId,
         Staff assignee,
@@ -313,8 +324,7 @@ public sealed class ParentInterviewAction : Action
     }
 
     public Result Update(
-        ParentId? parentId,
-        string parentName,
+        List<InterviewAttendee> attendees,
         DateTime dateOccurred,
         int incidentNumber,
         string currentUser)
@@ -322,17 +332,21 @@ public sealed class ParentInterviewAction : Action
         if (incidentNumber == 0)
             return Result.Failure(CaseErrors.Action.Update.IncidentNumberZero);
 
+        foreach (InterviewAttendee attendee in attendees)
+        {
+            Result attendeeAction = AddAttendee(attendee);
+
+            if (attendeeAction.IsFailure)
+                return attendeeAction;
+        }
+
         Result noteAttempt = AddNote(
-            $"Details updated: ParentId = {parentId}, ParentName = {parentName}, DateOccurred = {dateOccurred}, IncidentNumber = {incidentNumber}",
+            $"Details updated: DateOccurred = {dateOccurred}, IncidentNumber = {incidentNumber}",
             currentUser);
 
         if (noteAttempt.IsFailure)
             return noteAttempt;
 
-        if (parentId is not null)
-            ParentId = parentId.Value;
-
-        ParentName = parentName;
         DateOccurred = dateOccurred;
         IncidentNumber = incidentNumber;
 

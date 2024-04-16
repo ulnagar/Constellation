@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.WorkFlows;
 
 using Core.Models;
-using Core.Models.Identifiers;
 using Core.Models.Offerings;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
@@ -139,18 +138,11 @@ internal sealed class ParentInterviewActionConfiguration : IEntityTypeConfigurat
     public void Configure(EntityTypeBuilder<ParentInterviewAction> builder)
     {
         builder
-            .Property(action => action.ParentId)
-            .HasConversion(
-                id => id.Value,
-                value => ParentId.FromValue(value));
-
-        builder
-            .Property(action => action.ParentId)
-            .HasColumnName(nameof(ParentInterviewAction.ParentId));
-
-        builder
-            .Property(action => action.ParentName)
-            .HasColumnName(nameof(ParentInterviewAction.ParentName));
+            .HasMany(action => action.Attendees)
+            .WithOne()
+            .HasForeignKey(attendee => attendee.ActionId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .Property(action => action.DateOccurred)

@@ -2,7 +2,6 @@
 
 using Application.Families.GetFamilyContactsForStudent;
 using Application.Families.Models;
-using Application.Parents.GetParentWithStudentIds;
 using Core.Abstractions.Clock;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
@@ -41,6 +40,15 @@ public class ActionUpdateFormViewComponent : ViewComponent
         if (action is null)
             return Content(string.Empty);
 
+        string studentId = item.Type!.Equals(CaseType.Attendance) ?
+            ((AttendanceCaseDetail)item.Detail)!.StudentId :
+            null;
+
+        // Limit the datetime-local field precision to minutes 
+        DateTime now = _dateTime.Now;
+        now = now.AddSeconds(-(now.Second));
+        now = now.AddMilliseconds(-(now.Millisecond));
+
         switch (action)
         {
             case SendEmailAction emailAction:
@@ -60,33 +68,42 @@ public class ActionUpdateFormViewComponent : ViewComponent
                 return View("ConfirmSentralEntryAction", confirmViewModel);
 
             case PhoneParentAction phoneAction:
-                string studentId = item.Type!.Equals(CaseType.Attendance) ?
-                    ((AttendanceCaseDetail)item.Detail)!.StudentId :
-                    null;
-
                 if (string.IsNullOrWhiteSpace(studentId))
                     return Content(string.Empty);
 
-                Result<List<FamilyContactResponse>> parents = await _mediator.Send(new GetFamilyContactsForStudentQuery(studentId));
+                Result<List<FamilyContactResponse>> phoneParentRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(studentId));
 
-                if (parents.IsFailure)
+                if (phoneParentRequest.IsFailure)
                     return Content(string.Empty);
-
-                // Limit the datetime-local field precision to minutes 
-                DateTime now = _dateTime.Now;
-                now = now.AddSeconds(-(now.Second));
-                now = now.AddMilliseconds(-(now.Millisecond));
 
                 PhoneParentActionViewModel phoneViewModel = new()
                 {
-                    Parents = parents.Value,
+                    Parents = phoneParentRequest.Value,
                     DateOccurred = now
                 };
 
                 return View("PhoneParentAction", phoneViewModel);
 
             case ParentInterviewAction interviewAction:
-                break;
+                if (string.IsNullOrWhiteSpace(studentId))
+                    return Content(string.Empty);
+
+                Result<List<FamilyContactResponse>> interviewParentRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(studentId));
+
+                if (interviewParentRequest.IsFailure)
+                    return Content(string.Empty);
+
+                ParentInterviewActionViewModel interviewViewModel = new()
+                {
+                    ActionId = action.Id,
+                    Parents = interviewParentRequest.Value,
+                    DateOccurred = now
+                };
+
+                interviewViewModel.Attendees.Add(InterviewAttendee.Create(new(), "Brett McDonald", "Parent"));
+                interviewViewModel.Attendees.Add(InterviewAttendee.Create(new(), "Joan McDonald", "Parent"));
+
+                return View("ParentInterviewAction", interviewViewModel);
 
             default:
                 return Content(string.Empty);

@@ -85,6 +85,13 @@ public static class CaseErrors
                 $"A recipient with that email address already exists in the list");
         }
 
+        public static class AddAttendee
+        {
+            public static readonly Error Duplicate = new(
+                "Case.Action.AddAttendee.Duplicate",
+                $"An attendee with that name already exists in the list");
+        }
+
         public static class Create
         {
             public static Func<string, string, Error> CaseTypeMismatch = (expected, provided) => new(

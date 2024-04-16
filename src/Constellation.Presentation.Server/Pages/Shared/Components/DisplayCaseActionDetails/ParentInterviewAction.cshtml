@@ -1,7 +1,42 @@
 ﻿@model ParentInterviewAction
 
+@using Constellation.Application.Interfaces.Configuration
 @using Constellation.Core.Models.WorkFlow
+@using Constellation.Core.Models.WorkFlow.Enums
+@using Microsoft.Extensions.Options
+
+@inject IOptions<SentralGatewayConfiguration> options;
 
 <dl>
+    <dt>Attendees</dt>
+    <dd>
+        @foreach (var attendee in Model.Attendees)
+        {
+            <span class="d-block">@attendee.Name (<span class="user-select-all">@attendee.Notes</span>)</span>
+        }
+    </dd>
 
+    <dt>Held at</dt>
+    <dd>
+        @if (Model.Status == ActionStatus.Completed)
+        {
+            @Model.DateOccurred.ToString("dd/MM/yyyy h:mm tt")
+        }
+    </dd>
+    
+    <dt>Sentral Incident Number</dt>
+    <dd>
+        @if (Model.IncidentNumber != 0)
+        {
+            <span>Incident # @Model.IncidentNumber</span>
+
+            <br />
+            @if (!string.IsNullOrWhiteSpace(options.Value.ServerUrl))
+            {
+                var url = $"{options.Value.ServerUrl}/wellbeing/incidents/view?id={Model.IncidentNumber}";
+
+                <a href="@url" target="_blank">@url</a>
+            }
+        }
+    </dd>
 </dl>

@@ -1,0 +1,229 @@
+﻿@model ParentInterviewActionViewModel
+
+<style>
+    .select-button {
+        margin: 2.5px;
+    }
+</style>
+
+<form asp-page-handler="UpdateParentInterviewAction" method="post">
+    <div class="border border-success row mt-1 pb-1">
+        <div class="col-12 border-bottom border-dark py-1"><strong>Update Action</strong></div>
+        <div class="col-12 mt-1">
+            <button type="submit" class="btn btn-sm btn-success">Save</button>
+            <a href="javascript:history.go(-1)" class="btn btn-sm btn-danger mr-3">Go Back</a>
+        </div>
+        <div class="col-12 mt-3">
+            <div class="form-group row">
+                <label class="col-md-2">Add Attendees</label>
+                <div class="col-md-10">
+                    @foreach (var parent in Model.Parents.Where(parent => parent.ParentId != null))
+                    {
+                        <button type="button" class="btn btn-outline-info select-button parent-toggle-button" data-parent-name="@parent.Name">@parent.Name</button>
+                    }
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label class="col-md-2">Name</label>
+                <div class="col-md-5">
+                    <input id="AttendeeName" class="form-control" />
+                </div>
+                <div class="w-100 mb-1"></div>
+
+                <label class="col-md-2">Notes</label>
+                <div class="col-md-5">
+                    <input id="AttendeeNotes" class="form-control" />
+                </div>
+                <div class="w-100 mb-1"></div>
+
+                <div class="offset-md-2 col-md-5">
+                    <button type="button" class="btn btn-secondary add-attendee-button">Add Attendee</button>
+                    <button type="button" class="btn btn-danger clear-attendee-form-button">Reset</button>
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <div class="offset-md-2 col-md-10 attendee-list">
+                    @foreach (var attendee in Model.Attendees)
+                    {
+                        var index = Model.Attendees.IndexOf(attendee);
+                        
+                        <div id="attendee-@index" class="d-inline">
+                            <input type="hidden" name="Attendees[@index].ActionId" value="@Model.ActionId.Value" />
+                            <input type="hidden" name="Attendees[@index].Name" value="@attendee.Name" />
+                            <input type="hidden" name="Attendees[@index].Notes" value="@attendee.Notes" />
+                            <button type="button" class="btn btn-info select-button remove-attendee-button" data-index="@index">@Model.Attendees[index].Name (@Model.Attendees[index].Notes)</button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label asp-for="DateOccurred" class="col-md-2">Called At</label>
+                <div class="col-md-5">
+                    <input type="datetime-local" step="60" asp-for="DateOccurred" class="form-control" />
+                    <span asp-validation-for="DateOccurred" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label asp-for="IncidentNumber" class="col-md-2">Sentral Incident Number</label>
+                <div class="col-md-5">
+                    <input asp-for="IncidentNumber" class="form-control" />
+                    <span asp-validation-for="IncidentNumber" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="d-none">
+    <div id="attendee-template" class="d-inline">
+        <input type="hidden" name="Attendees[999].Name" value="" />
+        <input type="hidden" name="Attendees[999].Notes" value="" />
+        <button type="button" class="btn btn-info select-button remove-attendee-button"></button>
+    </div>
+</div>
+
+<script>
+    $('.parent-toggle-button').click(function (event) {
+        var parentName = $(this).data('parentName');
+
+        var added = $(this).hasClass('btn-info');
+
+        if (added) {
+            // Remove
+            $('input[value="' + parentName + '"]')
+                .parent()
+                .remove();
+
+            // Re-index remaining items
+            var newIndex = 0;
+            var oldIndex = 0;
+            $('.attendee-list').children().each(function () {
+                oldIndex = $(this).prop('id').match(/\d+/);
+
+                $(this).prop('id', 'attendee-' + newIndex);
+
+                $(this).find('input[name="Attendees[' + oldIndex + '].Name"')
+                    .prop('name', 'Attendees[' + newIndex + '].Name');
+
+                $(this).find('input[name="Attendees[' + oldIndex + '].Notes"')
+                    .prop('name', 'Attendees[' + newIndex + '].Notes');
+
+                newIndex++;
+            });
+
+            $(this)
+                .removeClass('btn-info')
+                .addClass('btn-outline-info');
+        }
+        else {
+            var index = $('.attendee-list').children().length;
+
+            // Clone hidden template group
+            var clone = $('#attendee-template').clone(true, true);
+
+            clone.prop('id', 'attendee-' + index);
+
+            clone.find('input[name="Attendees[999].Name"')
+                .val(parentName);
+
+            clone.find('input[name="Attendees[999].Name"')
+                .prop('name', 'Attendees[' + index + '].Name');
+
+            clone.find('input[name="Attendees[999].Notes"')
+                .val('Parent');
+
+            clone.find('input[name="Attendees[999].Notes"')
+                .prop('name', 'Attendees[' + index + '].Notes');
+
+            clone.find('button')
+                .data('index', index)
+                .text(parentName + ' (Parent)');
+
+            $('.attendee-list').append(clone);
+
+            $(this)
+                .removeClass('btn-outline-info')
+                .addClass('btn-info');
+        }
+    });
+
+    $('.add-attendee-button').click(function (event) {
+        var name = $('#AttendeeName').val();
+        var notes = $('#AttendeeNotes').val();
+
+        var index = $('.attendee-list').children().length;
+
+        // Clone hidden template group
+        var clone = $('#attendee-template').clone(true, true);
+
+        clone.prop('id', 'attendee-' + index);
+
+        clone.find('input[name="Attendees[999].Name"')
+            .val(name);
+
+        clone.find('input[name="Attendees[999].Name"')
+            .prop('name', 'Attendees[' + index + '].Name');
+
+        clone.find('input[name="Attendees[999].Notes"')
+            .val(notes);
+
+        clone.find('input[name="Attendees[999].Notes"')
+            .prop('name', 'Attendees[' + index + '].Notes');
+
+        clone.find('button')
+            .data('index', index)
+            .text(name + ' (' + notes + ')');
+
+        $('.attendee-list').append(clone);
+
+        $('#AttendeeName').val('');
+        $('#AttendeeNotes').val('');
+    });
+
+    $('.clear-attendee-form-button').click(function (event) {
+        $('#AttendeeName').val('');
+        $('#AttendeeNotes').val('');
+    })
+
+    $('.remove-attendee-button').click(function (event) {
+        var existingIndex = $(this).data('index');
+
+        // Remove index
+        var name = $('#attendee-' + existingIndex + ' input[name="Attendees[' + existingIndex + '].Name"]').val();
+        $('.parent-toggle-button[data-parent-name="' + name + '"]')
+            .removeClass('btn-info')
+            .addClass('btn-outline-info');
+
+        $('#attendee-' + existingIndex).remove();
+
+        // Re-index remaining items
+        var newIndex = 0;
+        var oldIndex = 0;
+        $('.attendee-list').children().each(function () {
+            oldIndex = $(this).prop('id').match(/\d+/);
+
+            $(this).prop('id', 'attendee-' + newIndex);
+
+            $(this).find('input[name="Attendees[' + oldIndex + '].Name"')
+                .prop('name', 'Attendees[' + newIndex + '].Name');
+
+            $(this).find('input[name="Attendees[' + oldIndex + '].Notes"')
+                .prop('name', 'Attendees[' + newIndex + '].Notes');
+
+            newIndex++;
+        });
+    });
+
+    function uuidv4() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+            .replace(/[xy]/g, function (c) {
+                const r = Math.random() * 16 | 0,
+                    v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+    }
+</script>
