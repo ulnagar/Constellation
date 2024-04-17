@@ -1,8 +1,14 @@
 ﻿namespace Constellation.Presentation.Server.ViewComponents;
 
+using Application.Contacts.GetContactListForStudent;
+using Application.Contacts.Models;
 using Application.Families.GetFamilyContactsForStudent;
 using Application.Families.Models;
+using Application.StaffMembers.GetStaffByEmail;
+using Application.StaffMembers.GetStaffById;
+using Application.StaffMembers.Models;
 using Core.Abstractions.Clock;
+using Core.Abstractions.Services;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Identifiers;
@@ -16,15 +22,18 @@ public class ActionUpdateFormViewComponent : ViewComponent
 {
     private readonly ISender _mediator;
     private readonly ICaseRepository _caseRepository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IDateTimeProvider _dateTime;
 
     public ActionUpdateFormViewComponent(
         ISender mediator,
         ICaseRepository caseRepository,
+        ICurrentUserService currentUserService,
         IDateTimeProvider dateTime)
     {
         _mediator = mediator;
         _caseRepository = caseRepository;
+        _currentUserService = currentUserService;
         _dateTime = dateTime;
     }
 
@@ -52,7 +61,66 @@ public class ActionUpdateFormViewComponent : ViewComponent
         switch (action)
         {
             case SendEmailAction emailAction:
-                break;
+                SendEmailActionViewModel emailViewModel = new();
+
+                Result<List<ContactResponse>> contacts = await _mediator.Send(new GetContactListForStudentQuery(studentId));
+
+                if (contacts.IsFailure)
+                    return Content(string.Empty);
+
+                foreach (ContactResponse contact in contacts.Value)
+                {
+                    SendEmailActionViewModel.ContactType type = contact.Category switch
+                    {
+                        not null when contact.Category.Equals(ContactCategory.Student) => SendEmailActionViewModel.ContactType.Student,
+                        not null when contact.Category.Equals(ContactCategory.ResidentialFamily) => SendEmailActionViewModel.ContactType.ResidentialFamily,
+                        not null when contact.Category.Equals(ContactCategory.ResidentialFather) => SendEmailActionViewModel.ContactType.ResidentialFamily,
+                        not null when contact.Category.Equals(ContactCategory.ResidentialMother) => SendEmailActionViewModel.ContactType.ResidentialFamily,
+                        not null when contact.Category.Equals(ContactCategory.NonResidentialFamily) => SendEmailActionViewModel.ContactType.NonResidentialFamily,
+                        not null when contact.Category.Equals(ContactCategory.NonResidentialParent) => SendEmailActionViewModel.ContactType.NonResidentialFamily,
+                        not null when contact.Category.Equals(ContactCategory.PartnerSchoolSchool) => SendEmailActionViewModel.ContactType.PartnerSchool,
+                        not null when contact.Category.Equals(ContactCategory.PartnerSchoolACC) => SendEmailActionViewModel.ContactType.PartnerSchool,
+                        not null when contact.Category.Equals(ContactCategory.PartnerSchoolSPT) => SendEmailActionViewModel.ContactType.PartnerSchool,
+                        not null when contact.Category.Equals(ContactCategory.PartnerSchoolPrincipal) => SendEmailActionViewModel.ContactType.PartnerSchool,
+                        not null when contact.Category.Equals(ContactCategory.AuroraTeacher) => SendEmailActionViewModel.ContactType.AuroraCollege,
+                        not null when contact.Category.Equals(ContactCategory.AuroraHeadTeacher) => SendEmailActionViewModel.ContactType.AuroraCollege,
+                        _ => SendEmailActionViewModel.ContactType.AuroraCollege
+                    };
+
+                    emailViewModel.Contacts.Add(
+                        new()
+                        {
+                            Name = contact.Contact,
+                            Email = contact.ContactEmail.Email,
+                            Type = type,
+                            Notes = contact.Category?.Name
+                        });
+                }
+
+                string staffEmail = _currentUserService.EmailAddress;
+
+                Result<StaffSelectionListResponse> staffMember = await _mediator.Send(new GetStaffByEmailQuery(staffEmail));
+
+                if (staffMember.IsFailure)
+                    return Content(string.Empty);
+
+                emailViewModel.Senders.Add(
+                    new()
+                    {
+                        Name = staffMember.Value.DisplayName,
+                        Email = staffEmail
+                    });
+
+                emailViewModel.Senders.Add(
+                    new()
+                    {
+                        Name = "Aurora College",
+                        Email = "auroracoll-h.school@det.nsw.edu.au"
+                    });
+
+                emailViewModel.SentAt = now;
+
+                return View("SendEmailAction", emailViewModel);
 
             case CreateSentralEntryAction sentralAction:
                 CreateSentralEntryActionViewModel sentralViewModel = new();

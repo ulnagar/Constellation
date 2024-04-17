@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Pages.Contacts;
 using Application.DTOs;
 using Constellation.Application.Contacts.ExportContactList;
 using Constellation.Application.Contacts.GetContactList;
+using Constellation.Application.Contacts.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetOfferingsForSelectionList;
 using Constellation.Application.Schools.GetCurrentPartnerSchoolsWithStudentsList;

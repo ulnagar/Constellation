@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Contacts.GetContactList;
+﻿namespace Constellation.Application.Contacts.Models;
 
 using Constellation.Core.Enums;
 using Constellation.Core.ValueObjects;
@@ -11,4 +11,4 @@ public sealed record ContactResponse(
     ContactCategory Category,
     string Contact,
     EmailAddress ContactEmail,
-    PhoneNumber? ContactPhone);
+    PhoneNumber ContactPhone);

@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Contacts.GetContactList;
+﻿namespace Constellation.Application.Contacts.Models;
 
 using Constellation.Core.Common;
 
@@ -22,7 +22,7 @@ public class ContactCategory : StringEnumeration<ContactCategory>
     public static readonly ContactCategory AuroraTeacher = new("Aurora.Staff.Teacher", "Class Teacher");
     public static readonly ContactCategory AuroraHeadTeacher = new("Aurora.Staff.HeadTeacher", "Head Teacher");
 
-    private ContactCategory(string value, string name) 
+    private ContactCategory(string value, string name)
         : base(value, name)
     {
     }

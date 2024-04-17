@@ -6,7 +6,7 @@ using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
 using Constellation.Application.Attendance.GenerateAttendanceReportForPeriod;
 using Constellation.Application.Awards.ExportAwardNominations;
 using Constellation.Application.Compliance.GetWellbeingReportFromSentral;
-using Constellation.Application.Contacts.GetContactList;
+using Constellation.Application.Contacts.Models;
 using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.CSV;
 using Constellation.Application.ExternalDataConsistency;

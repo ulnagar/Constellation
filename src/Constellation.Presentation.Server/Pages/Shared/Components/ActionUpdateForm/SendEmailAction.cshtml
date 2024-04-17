@@ -1,0 +1,289 @@
+﻿@model SendEmailActionViewModel
+
+<style>
+    .select-button {
+        margin: 2.5px;
+    }
+
+    .modal-dialog {
+        max-width: 70vw !important;
+    }
+</style>
+
+<form asp-page-handler="UpdateSendEmailAction" method="post">
+    <div class="border border-success row mt-1 pb-1">
+        <div class="col-12 border-bottom border-dark py-1"><strong>Update Action</strong></div>
+        <div class="col-12 mt-1">
+            <button type="submit" class="btn btn-sm btn-success">Save</button>
+            <a href="javascript:history.go(-1)" class="btn btn-sm btn-danger mr-3">Go Back</a>
+        </div>
+        <div class="col-12 mt-3">
+            <div class="form-group row">
+                <label class="col-md-2">Select Recipients</label>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#ContactListModal">Add Recipient</button>
+                </div>
+                <div class="col-md-8" id="recipient-list">
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label class="col-md-2">Sender</label>
+                <div class="col-md-10">
+                    <input type="hidden" name="SenderName" />
+                    <input type="hidden" name="SenderEmail" />
+                    @foreach (var sender in Model.Senders)
+                    {
+                        <button type="button" class="btn btn-outline-info select-button sender-button" data-name="@sender.Name" data-email="@sender.Email">@sender.Name</button>
+                    }
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label asp-for="Subject" class="col-md-2">Subject</label>
+                <div class="col">
+                    <input asp-for="Subject" class="form-control" />
+                    <span asp-validation-for="Subject" class="text-danger"></span>
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label asp-for="Body" class="col-md-2">Body</label>
+                <div class="col">
+                    <textarea asp-for="Body" class="form-control summernote" rows="20"></textarea>
+                    <span asp-validation-for="Body" class="text-danger"></span>
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label class="col-md-2">Attachments</label>
+                <div class="col-md-5">
+                    <input type="file" multiple asp-for="Attachments" class="form-control" />
+                    <span asp-validation-for="Attachments" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="modal" id="ContactListModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select Recipients</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row mt-2">
+                        <div class="col-md-3">
+                            <h5>Student</h5>
+                        </div>
+                        <div class="col">
+                            @foreach (var contact in Model.Contacts.Where(contact => contact.Type == SendEmailActionViewModel.ContactType.Student))
+                            {
+                                <button type="button" class="btn btn-outline-info select-button add-contact-button" data-contact-index="@Model.Contacts.IndexOf(contact)" data-name="@contact.Name" data-email="@contact.Email">@contact.Name (Student)</button>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-md-3">
+                            <h5>Family</h5>
+                        </div>
+                        <div class="col">
+                            @foreach (var contact in Model.Contacts.Where(contact => contact.Type == SendEmailActionViewModel.ContactType.ResidentialFamily))
+                            {
+                                <button type="button" class="btn btn-outline-info select-button add-contact-button" data-contact-index="@Model.Contacts.IndexOf(contact)" data-name="@contact.Name" data-email="@contact.Email">@contact.Name (@contact.Notes)</button>
+                            }
+                            
+                            @foreach (var contact in Model.Contacts.Where(contact => contact.Type == SendEmailActionViewModel.ContactType.NonResidentialFamily))
+                            {
+                                <button type="button" class="btn btn-outline-info select-button add-contact-button" data-contact-index="@Model.Contacts.IndexOf(contact)" data-name="@contact.Name" data-email="@contact.Email">@contact.Name (@contact.Notes)</button>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-md-3">
+                            <h5>Partner School</h5>
+                        </div>
+                        <div class="col">
+                            @foreach (var contact in Model.Contacts.Where(contact => contact.Type == SendEmailActionViewModel.ContactType.PartnerSchool))
+                            {
+                                <button type="button" class="btn btn-outline-info select-button add-contact-button" data-contact-index="@Model.Contacts.IndexOf(contact)" data-name="@contact.Name" data-email="@contact.Email">@contact.Name (@contact.Notes)</button>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-md-3">
+                            <h5>Aurora College</h5>
+                        </div>
+                        <div class="col">
+                            @foreach (var contact in Model.Contacts.Where(contact => contact.Type == SendEmailActionViewModel.ContactType.AuroraCollege))
+                            {
+                                <button type="button" class="btn btn-outline-info select-button add-contact-button" data-contact-index="@Model.Contacts.IndexOf(contact)" data-name="@contact.Name" data-email="@contact.Email">@contact.Name (@contact.Notes)</button>
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <h5>Add Other</h5>
+                        </div>
+                        <div class="col">
+                            <div class="form-group row">
+                                <label class="col-md-2">Name</label>
+                                <div class="col-md-5">
+                                    <input id="RecipientName" class="form-control" />
+                                </div>
+                                <div class="w-100 mb-1"></div>
+
+                                <label class="col-md-2">Email</label>
+                                <div class="col-md-5">
+                                    <input id="RecipientEmail" class="form-control" />
+                                </div>
+                                <div class="w-100 mb-1"></div>
+
+                                <div class="offset-md-2 col-md-5">
+                                    <button type="button" class="btn btn-secondary add-recipient-button">Add Attendee</button>
+                                    <button type="button" class="btn btn-danger clear-recipient-form-button">Reset</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-none">
+    <div id="recipient-template" class="d-inline">
+        <button type="button" class="btn btn-info select-button add-contact-button"></button>
+        <input type="hidden" name="Recipients[999]" />
+    </div>
+
+    <div id="contact-template" class="d-inline">
+        <button type="button" class="btn btn-info select-button add-contact-button"></button>
+        <input type="hidden" name="Recipients[999]" />
+    </div>
+</div>
+
+<script>
+    $('.sender-button').click(function (event) {
+        var name = $(this).data('name');
+        var email = $(this).data('email');
+
+        if ($(this).hasClass('btn-outline-info')) {
+            $('input[name="SenderName"]').val(name);
+            $('input[name="SenderEmail"]').val(email);
+
+            $('.sender-button.btn-info')
+                .removeClass('btn-info')
+                .addClass('btn-outline-info');
+
+            $(this)
+                .removeClass('btn-outline-info')
+                .addClass('btn-info');
+        }
+        else {
+            $('input[name="SenderName"]').val('');
+            $('input[name="SenderEmail"]').val('');
+
+            $(this)
+                .removeClass('btn-info')
+                .addClass('btn-outline-info');
+        }
+    })
+
+    $('.add-recipient-button').click(function (event) {
+        var name = $('#RecipientName').val();
+        var email = $('#RecipientEmail').val();
+
+        var index = $('#recipient-list').children().length;
+
+        // Clone hidden template group
+        var clone = $('#recipient-template').clone(true, true);
+
+        clone.prop('id', 'recipient-' + index);
+
+        clone.find('input')
+            .val(email)
+            .prop('name', 'Recipients[' + name + ']');
+
+        clone.find('button')
+            .data('index', index)
+            .text(name + ' (' + email + ')');
+
+        $('#recipient-list').append(clone);
+
+        $('#RecipientName').val('');
+        $('#RecipientEmail').val('');
+    });
+
+    $('.clear-recipient-form-button').click(function (event) {
+        $('#RecipientName').val('');
+        $('#RecipientEmail').val('');
+    });
+
+    $('.add-contact-button').click(function (event) {
+        var name = $(this).data('name');
+        var email = $(this).data('email');
+        var contactIndex = $(this).data('contactIndex');
+
+        if ($(this).hasClass('btn-outline-info')) {
+            // Not Selected
+            var index = $('#recipient-list').children().length;
+
+            // Clone hidden template group
+            var clone = $('#contact-template').clone(true, true);
+
+            clone.prop('id', 'recipient-' + index);
+
+            clone.find('input')
+                .val(email)
+                .prop('name', 'Recipients[' + name + ']');
+
+            var buttonText = $(this).text();
+
+            clone.find('button')
+                .data('contactIndex', contactIndex)
+                .data('name', name)
+                .data('email', email)
+                .data('index', index)
+                .text(buttonText);
+
+            $('#recipient-list').append(clone);
+
+            $(this)
+                .data('index', index)
+                .removeClass('btn-outline-info')
+                .addClass('btn-info');
+        }
+        else {
+            // Already Selected
+            var index = $(this).data('index');
+
+            $('#recipient-' + index)
+                .remove();
+
+            $(this)
+                .data('index', '')
+                .removeClass('btn-info')
+                .addClass('btn-outline-info');
+        }
+    });
+
+    $(document).ready(function () {
+        $('.summernote').summernote({
+            height: 300
+        });
+    });
+</script>

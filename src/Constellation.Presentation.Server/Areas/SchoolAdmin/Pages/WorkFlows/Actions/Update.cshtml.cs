@@ -137,4 +137,9 @@ public class UpdateModel : BasePageModel
 
         return RedirectToPage("/WorkFlows/Details", new { area = "SchoolAdmin", Id = CaseId.Value });
     }
+
+    public async Task<IActionResult> OnPostUpdateSendEmailAction(SendEmailActionViewModel viewModel)
+    {
+        return RedirectToPage("/WorkFlows/Details", new { area = "SchoolAdmin", Id = CaseId.Value });
+    }
 }

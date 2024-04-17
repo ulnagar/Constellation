@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects.Repositories;
+using Constellation.Application.Contacts.Models;
 
 internal sealed class GetContactListQueryHandler
     : IQueryHandler<GetContactListQuery, List<ContactResponse>>

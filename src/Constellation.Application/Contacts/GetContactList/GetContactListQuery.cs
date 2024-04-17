@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Contacts.GetContactList;
 
 using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Contacts.Models;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
 using System.Collections.Generic;

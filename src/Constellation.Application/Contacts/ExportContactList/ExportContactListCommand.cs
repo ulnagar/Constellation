@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Contacts.ExportContactList;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Contacts.GetContactList;
+using Constellation.Application.Contacts.Models;
 using Constellation.Application.DTOs;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
