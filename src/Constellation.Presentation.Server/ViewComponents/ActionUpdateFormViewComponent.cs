@@ -100,9 +100,6 @@ public class ActionUpdateFormViewComponent : ViewComponent
                     DateOccurred = now
                 };
 
-                interviewViewModel.Attendees.Add(InterviewAttendee.Create(new(), "Brett McDonald", "Parent"));
-                interviewViewModel.Attendees.Add(InterviewAttendee.Create(new(), "Joan McDonald", "Parent"));
-
                 return View("ParentInterviewAction", interviewViewModel);
 
             default:

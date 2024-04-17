@@ -4,7 +4,7 @@ using Identifiers;
 
 public sealed class InterviewAttendee
 {
-    public InterviewAttendee() { }
+    private InterviewAttendee() { }
 
     public InterviewAttendeeId Id { get; private set; } = new();
     public ActionId ActionId { get; private set; }

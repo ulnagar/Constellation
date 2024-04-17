@@ -145,6 +145,10 @@ internal sealed class ParentInterviewActionConfiguration : IEntityTypeConfigurat
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
+            .Navigation(action => action.Attendees)
+            .AutoInclude();
+
+        builder
             .Property(action => action.DateOccurred)
             .HasColumnName(nameof(ParentInterviewAction.DateOccurred));
 

@@ -3,10 +3,11 @@ namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.WorkFlows.Ac
 using Application.Models.Auth;
 using Application.WorkFlows.UpdateConfirmSentralEntryAction;
 using Application.WorkFlows.UpdateCreateSentralEntryAction;
+using Application.WorkFlows.UpdateParentInterviewAction;
 using Application.WorkFlows.UpdatePhoneParentAction;
 using BaseModels;
 using Constellation.Application.WorkFlows.GetCaseById;
-using Core.Models.Identifiers;
+using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Identifiers;
 using Core.Shared;
 using Helpers.ModelBinders;
@@ -116,7 +117,23 @@ public class UpdateModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdateParentInterviewAction(ParentInterviewActionViewModel viewModel)
     {
+        List<InterviewAttendee> attendees = new();
 
+        foreach (ParentInterviewActionViewModel.Attendee attendee in viewModel.Attendees)
+            attendees.Add(InterviewAttendee.Create(ActionId, attendee.Name, attendee.Notes));
+
+        Result attempt = await _mediator.Send(new UpdateParentInterviewActionCommand(CaseId, ActionId, attendees, viewModel.DateOccurred, viewModel.IncidentNumber));
+
+        if (attempt.IsFailure)
+        {
+            Error = new()
+            {
+                Error = attempt.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
 
         return RedirectToPage("/WorkFlows/Details", new { area = "SchoolAdmin", Id = CaseId.Value });
     }

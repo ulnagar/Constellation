@@ -50,7 +50,6 @@
                         var index = Model.Attendees.IndexOf(attendee);
                         
                         <div id="attendee-@index" class="d-inline">
-                            <input type="hidden" name="Attendees[@index].ActionId" value="@Model.ActionId.Value" />
                             <input type="hidden" name="Attendees[@index].Name" value="@attendee.Name" />
                             <input type="hidden" name="Attendees[@index].Notes" value="@attendee.Notes" />
                             <button type="button" class="btn btn-info select-button remove-attendee-button" data-index="@index">@Model.Attendees[index].Name (@Model.Attendees[index].Notes)</button>
@@ -174,9 +173,11 @@
         clone.find('input[name="Attendees[999].Notes"')
             .prop('name', 'Attendees[' + index + '].Notes');
 
+        var buttonText = !notes.trim() ? name : name + ' (' + notes + ')';
+
         clone.find('button')
             .data('index', index)
-            .text(name + ' (' + notes + ')');
+            .text(buttonText);
 
         $('.attendee-list').append(clone);
 

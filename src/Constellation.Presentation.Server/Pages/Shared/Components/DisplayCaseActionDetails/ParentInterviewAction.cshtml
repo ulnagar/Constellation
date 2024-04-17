@@ -10,10 +10,12 @@
 <dl>
     <dt>Attendees</dt>
     <dd>
-        @foreach (var attendee in Model.Attendees)
-        {
-            <span class="d-block">@attendee.Name (<span class="user-select-all">@attendee.Notes</span>)</span>
-        }
+        <ul>
+            @foreach (var attendee in Model.Attendees)
+            {
+                <li class="user-select-all">@attendee.Name (@attendee.Notes)</li>
+            }
+        </ul>
     </dd>
 
     <dt>Held at</dt>
