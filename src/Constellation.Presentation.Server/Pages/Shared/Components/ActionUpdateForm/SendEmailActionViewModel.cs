@@ -8,7 +8,7 @@ public sealed class SendEmailActionViewModel
     public string SenderEmail { get; set; }
 
     public string Subject { get; set; } = string.Empty;
-    public string Body { get; set; } = string.Empty;
+    public string Body { get; set; } = "<p><br></p><p>Regards,</p><p><br></p>\r\n<p>Aurora College</p>\r\n<p>T: 1300 287 629</p>\r\n<p>W: www.aurora.nsw.edu.au</p>";
 
     public DateTime SentAt { get; set; }
     public List<Contact> Contacts { get; set; } = new();

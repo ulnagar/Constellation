@@ -10,7 +10,7 @@
     }
 </style>
 
-<form asp-page-handler="UpdateSendEmailAction" method="post">
+<form asp-page-handler="UpdateSendEmailAction" method="post" enctype="multipart/form-data">
     <div class="border border-success row mt-1 pb-1">
         <div class="col-12 border-bottom border-dark py-1"><strong>Update Action</strong></div>
         <div class="col-12 mt-1">
@@ -58,8 +58,11 @@
             <div class="form-group row">
                 <label class="col-md-2">Attachments</label>
                 <div class="col-md-5">
-                    <input type="file" multiple asp-for="Attachments" class="form-control" />
-                    <span asp-validation-for="Attachments" class="text-danger"></span>
+                    <div class="custom-file">
+                        <input type="file" id="customFile" multiple asp-for="Attachments" class="form-control custom-file-input"/>
+                        <label class="custom-file-label" for="customFile">Choose file(s)</label>
+                        <span asp-validation-for="Attachments" class="text-danger"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -145,6 +148,7 @@
                                 <label class="col-md-2">Email</label>
                                 <div class="col-md-5">
                                     <input id="RecipientEmail" class="form-control" />
+                                    <span id="RecipientEmailValidation" class="text-danger"></span>
                                 </div>
                                 <div class="w-100 mb-1"></div>
 
@@ -204,8 +208,16 @@
     })
 
     $('.add-recipient-button').click(function (event) {
+        $('#RecipientEmailValidation').text('');
+
         var name = $('#RecipientName').val();
         var email = $('#RecipientEmail').val();
+
+        var regex = /^([a-zA-Z0-9_.+-])+\@@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        if (!regex.test(email)) {
+            $('#RecipientEmailValidation').text('Email Address is invalid!');
+            return;
+        }
 
         var index = $('#recipient-list').children().length;
 
@@ -278,6 +290,19 @@
                 .data('index', '')
                 .removeClass('btn-info')
                 .addClass('btn-outline-info');
+        }
+    });
+
+    $('input[type="file"]').on('change', function (e) {
+        var numFiles = e.target.files.length;
+
+        if (numFiles > 1) {
+            $('.custom-file-label').html('Multiple files selected');
+        } else if (numFiles = 0) {
+            $('.custom-file-label').html('Choose file(s)');
+        } else {
+            var fileName = e.target.files[0].name;
+            $('.custom-file-label').html(fileName);
         }
     });
 

@@ -1222,4 +1222,13 @@ public sealed class Service : IEmailService
 
         await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
     }
+
+    public async Task SendEnteredEmailForAction(
+        List<EmailRecipient> recipients,
+        EmailRecipient sender,
+        string subject,
+        string body,
+        List<Attachment> attachments,
+        CancellationToken cancellationToken = default) =>
+        await _emailSender.Send(recipients, sender.Email, subject, body, attachments, cancellationToken);
 }
