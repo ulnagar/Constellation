@@ -79,7 +79,7 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>
     }
 }
 
-public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TEnum>>
+public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TEnum>>, IComparable
     where TEnum : StringEnumeration<TEnum>
 {
     private static readonly Dictionary<string, TEnum> Enumerations = CreateEnumerations();
@@ -90,8 +90,16 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
         Name = name;
     }
 
+    protected StringEnumeration(string value, string name, int order)
+    {
+        Value = value;
+        Name = name;
+        Order = order;
+    }
+
     public string Value { get; protected init; } = string.Empty;
     public string Name { get; protected init; } = string.Empty;
+    public int Order { get; protected init; } = 0;
 
     public static TEnum? FromValue(string value)
     {
@@ -132,6 +140,19 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
     public override string ToString()
     {
         return Name;
+    }
+
+    public int CompareTo(object? obj)
+    {
+        TEnum? incomingObject = obj as TEnum;
+
+        if (incomingObject is null)
+            return -1;
+
+        if (incomingObject?.Order == 0)
+            return string.Compare(this.Value, incomingObject?.Value, StringComparison.OrdinalIgnoreCase);
+        else
+            return string.CompareOrdinal(this.Order.ToString(), incomingObject?.Order.ToString());
     }
 
     private static Dictionary<string, TEnum> CreateEnumerations()

@@ -10,6 +10,10 @@ public static class AttendanceValueErrors
         "AttendanceValue.NotFound",
         $"Could not find an Attendance Value with the Id {id}");
 
+    public static Func<string, Error> NotFoundForStudent = id => new(
+        "AttendanceValue.NotFoundForStudent",
+        $"Could not find an Attendance Value for the student with Id {id}");
+
     public static class Create
     {
         public static Error EmptyValues => new(

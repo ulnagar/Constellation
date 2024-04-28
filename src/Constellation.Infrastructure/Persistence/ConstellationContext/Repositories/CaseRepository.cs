@@ -36,5 +36,25 @@ internal sealed class CaseRepository : ICaseRepository
             .Where(item => item.Status.Equals(CaseStatus.Open) || item.Status.Equals(CaseStatus.PendingAction))
             .ToListAsync(cancellationToken);
 
+    public async Task<bool> ExistingOpenAttendanceCaseForStudent(
+        string studentId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Case>()
+            .Where(item =>
+                item.Status.Equals(CaseStatus.Open) &&
+                ((AttendanceCaseDetail)item.Detail).StudentId == studentId)
+            .AnyAsync(cancellationToken);
+
+    public async Task<Case?> GetOpenAttendanceCaseForStudent(
+        string studentId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Case>()
+            .Where(item =>
+                item.Status.Equals(CaseStatus.Open) &&
+                ((AttendanceCaseDetail)item.Detail).StudentId == studentId)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public void Insert(Case item) => _context.Set<Case>().Add(item);
 }

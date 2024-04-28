@@ -70,7 +70,16 @@ internal class AttendanceRepository : IAttendanceRepository
                 endOfYear >= entry.EndDate)
             .ToListAsync(cancellationToken);
     }
-    
+
+    public async Task<AttendanceValue> GetLatestForStudent(
+        string studentId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AttendanceValue>()
+            .Where(entry => entry.StudentId == studentId)
+            .OrderByDescending(entry => entry.EndDate)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public async Task<List<AttendanceValue>> GetAllForDate(
         DateOnly selectedDate,
         CancellationToken cancellationToken = default) =>

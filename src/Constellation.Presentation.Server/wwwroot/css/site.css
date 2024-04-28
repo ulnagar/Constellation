@@ -375,7 +375,15 @@ table.hidden-sort-data-table {
     width: 100% !important;
 }
 
+table.grouped-data-table {
+    width: 100% !important;
+}
+
 table.hidden-sort-data-table th {
+    width: unset !important;
+}
+
+table.grouped-data-table th {
     width: unset !important;
 }
 

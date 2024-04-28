@@ -13,6 +13,10 @@ public static class CaseErrors
             "Case.NotFound",
             $"Could not find a Case with the Id {id}");
 
+        public static readonly Func<string, Error> NotFoundForStudent = id => new(
+            "Case.NotFoundForStudent",
+            $"Could not find a Case for Student with Id {id}");
+
         public static class AttachDetails
         {
             public static readonly Func<string, string, Error> DetailMismatch = (caseType, expected) => new(
