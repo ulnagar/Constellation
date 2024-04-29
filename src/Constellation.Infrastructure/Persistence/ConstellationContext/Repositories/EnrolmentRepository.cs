@@ -1,13 +1,11 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Models.Enrolments.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 public class EnrolmentRepository : IEnrolmentRepository
@@ -27,14 +25,12 @@ public class EnrolmentRepository : IEnrolmentRepository
         string studentId,
         CancellationToken cancellationToken = default)
     {
-        var today = DateTime.Today;
-        List<OfferingId> currentOfferings = await _context
+        IQueryable<OfferingId> currentOfferings = _context
             .Set<Offering>()
             .Where(offering =>
                 offering.StartDate <= _dateTime.Today &&
                 offering.EndDate >= _dateTime.Today)
-            .Select(offering => offering.Id)
-            .ToListAsync(cancellationToken);
+            .Select(offering => offering.Id);
 
         return await _context
             .Set<Enrolment>()

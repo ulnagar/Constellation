@@ -77,7 +77,14 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
 
         AttendanceCaseDetail caseDetail = item.Detail as AttendanceCaseDetail;
 
-        if (caseDetail!.Severity.Equals(AttendanceSeverity.BandZero) || caseDetail!.Severity.Equals(AttendanceSeverity.BandOne))
+        List<AttendanceSeverity> severityList = new()
+        {
+            AttendanceSeverity.BandTwo,
+            AttendanceSeverity.BandThree,
+            AttendanceSeverity.BandFour
+        };
+
+        if (!severityList.Contains(caseDetail!.Severity))
             return;
 
         Staff reviewer = await _staffRepository.GetById(_configuration.WorkFlow.AttendanceReviewer, cancellationToken);

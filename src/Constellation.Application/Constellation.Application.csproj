@@ -60,7 +60,6 @@
 	  <Folder Include="SchoolContacts\Events\SchoolContactReinstated\" />
 	  <Folder Include="SchoolContacts\Events\SchoolContactEmailAddressChanged\" />
 	  <Folder Include="SchoolContacts\Events\SchoolContactDeleted\" />
-	  <Folder Include="WorkFlows\Events\CaseActionAssignedDomainEvent\" />
 	</ItemGroup>
 
 </Project>

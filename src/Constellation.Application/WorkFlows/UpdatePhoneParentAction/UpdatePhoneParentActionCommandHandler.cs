@@ -100,9 +100,9 @@ internal sealed class UpdatePhoneParentActionCommandHandler
         _logger
             .ForContext(nameof(UpdatePhoneParentActionCommand), request, true)
             .ForContext(nameof(Case), item, true)
-            .ForContext(nameof(Error), CaseErrors.Action.Update.TypeMismatch(nameof(CreateSentralEntryAction), action.GetType().ToString()), true)
+            .ForContext(nameof(Error), CaseErrors.Action.Update.TypeMismatch(nameof(PhoneParentAction), action.GetType().ToString()), true)
             .Warning("Failed to update Action");
 
-        return Result.Failure(CaseErrors.Action.Update.TypeMismatch(nameof(CreateSentralEntryAction), action.GetType().ToString()));
+        return Result.Failure(CaseErrors.Action.Update.TypeMismatch(nameof(PhoneParentAction), action.GetType().ToString()));
     }
 }

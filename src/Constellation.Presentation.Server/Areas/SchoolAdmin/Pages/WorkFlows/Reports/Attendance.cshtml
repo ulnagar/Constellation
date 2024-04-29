@@ -15,11 +15,12 @@
 <hr />
 
 <form asp-page-handler="CreateWorkFlows" id="pageForm">
+    <div class="d-none" id="formInputs"></div>
+
     <table id="attendanceData" class="table-striped custom-data-table w-100">
         <thead>
         <tr>
             <th>Band</th>
-            <th></th>
             <th>Name</th>
             <th>School</th>
             <th>Value</th>
@@ -28,21 +29,13 @@
         </tr>
         </thead>
         <tbody>
-        
+
         @foreach (var entry in Model.Students)
         {
-            <tr data-student-id="@entry.StudentId">
+            var actionType = entry.ExistingCase ? AttendanceModel.WorkFlowNeeded.ActionType.Update : AttendanceModel.WorkFlowNeeded.ActionType.Create;
+
+            <tr data-student-id="@entry.StudentId" data-action-type="@actionType">
                 <td>@entry.Severity.Name</td>
-                <td>
-                    @if (entry.ExistingCase)
-                    {
-                        <input name="Entries[@entry.StudentId]" type="checkbox" value="@AttendanceModel.ActionType.Update" />
-                    }
-                    else
-                    {
-                        <input name="Entries[@entry.StudentId]" type="checkbox" value="@AttendanceModel.ActionType.Create" />
-                    }
-                </td>
                 <td data-order="@entry.Name.SortOrder">
                     @if (entry.ExistingCase)
                     {
@@ -76,7 +69,6 @@
             <th></th>
             <th></th>
             <th></th>
-            <th></th>
             <th>
                 <button id="submit" type="submit" class="btn btn-success">Create WorkFlows</button>
             </th>
@@ -89,23 +81,74 @@
     var table;
 
     $('#attendanceData tbody tr').on('click', function (e) {
-        if (e.target.matches('input[type=checkbox]')) {
-            return;
-        }
+        var studentId = $(this).data('studentId');
+        var actionType = $(this).data('actionType');
 
         $(this).toggleClass('selected');
 
-        let input = e.target.closest('tr').querySelector('input[type=checkbox]');
-        input.checked = !input.checked;
+        if ($(this).hasClass('selected')) {
+            // newly added, create entries
+
+            var rowIndex = $('tr.selected').length - 1;
+
+            var inputIndex = $('#formInputs input[id^=i-entry]').length;
+
+            var index = Math.max(rowIndex, inputIndex);
+
+            var studentIdInput = $('<input>')
+                .attr({
+                    id: 'i-entry-' + studentId,
+                    type: 'hidden',
+                    name: 'Entries[' + index + '].StudentId',
+                    value: studentId
+                });
+
+            studentIdInput.appendTo('#formInputs');
+
+            var actionTypeInput = $('<input>')
+                .attr({
+                    id: 'a-entry-' + studentId,
+                    type: 'hidden',
+                    name: 'Entries[' + index + '].Type',
+                    value: actionType
+                });
+
+            actionTypeInput.appendTo('#formInputs');
+        }
+        else {
+            // recently removed, delete entries
+
+            $('#i-entry-' + studentId).remove();
+            $('#a-entry-' + studentId).remove();
+
+            var inputs = $('[id^="i-entry-"]');
+
+            var i = 0;
+
+            $.each(inputs, function (index, value) {
+                $(this).attr('name', 'Entries[' + i + '].StudentId');
+
+                var currentStudentId = $(this).attr('id').match(/\d+/);
+                $('#a-entry-' + currentStudentId).attr('name', 'Entries[' + i + '].Type');
+
+                i++;
+            });
+        }
     });
 
     $('#pageForm').on('submit', function (e) {
-        e.preventDefault();
+        var inputs = $('[id^="i-entry-"]');
 
-        var formdata = table.$('input').serialize();
-        var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+        var i = 0;
 
-        $.post('?handler=CreateWorkFlows', formData); // does not work since it doesn't include the xsrf token.
+        $.each(inputs, function (index, value) {
+            $(this).attr('name', 'Entries[' + i + '].StudentId');
+
+            var currentStudentId = $(this).attr('id').match(/\d+/);
+            $('#a-entry-' + currentStudentId).attr('name', 'Entries[' + i + '].Type');
+
+            i++;
+        });
     });
 
     $(document).ready(function () {

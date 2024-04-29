@@ -15,6 +15,7 @@ using Interfaces.Configuration;
 using Interfaces.Repositories;
 using Microsoft.Extensions.Options;
 using Serilog;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -60,7 +61,20 @@ internal sealed class AddSendEmailActionForAttendanceCase
 
         if (!item.Type!.Equals(CaseType.Attendance))
             return;
-        
+
+        AttendanceCaseDetail caseDetail = item.Detail as AttendanceCaseDetail;
+
+        List<AttendanceSeverity> severityList = new()
+        {
+            AttendanceSeverity.BandZero,
+            AttendanceSeverity.BandTwo,
+            AttendanceSeverity.BandThree,
+            AttendanceSeverity.BandFour
+        };
+
+        if (!severityList.Contains(caseDetail!.Severity))
+            return;
+
         Staff reviewer = await _staffRepository.GetById(_configuration.WorkFlow.AttendanceReviewer, cancellationToken);
 
         if (reviewer is null)

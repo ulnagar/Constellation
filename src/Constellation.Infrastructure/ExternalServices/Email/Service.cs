@@ -1215,7 +1215,7 @@ public sealed class Service : IEmailService
             TeacherName = assignee.DisplayName,
             ActionDescription = action.ToString(),
             CaseDescription = item.ToString(),
-            Link = "https://acos.aurora.nsw.edu.au/"
+            Link = $"https://acos.aurora.nsw.edu.au/SchoolAdmin/WorkFlows/Actions/Update/{item.Id.Value}/{action.Id.Value}"
         };
 
         string body = await _razorService.RenderViewToStringAsync(ActionAssignedEmailViewModel.ViewLocation, viewModel);

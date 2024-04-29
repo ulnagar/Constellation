@@ -3,7 +3,6 @@ namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.WorkFlows.Re
 using Application.Attendance.GetAttendanceTrendValues;
 using Application.Models.Auth;
 using Application.WorkFlows.CreateAttendanceCase;
-using Application.WorkFlows.OpenAttendanceCaseExistsForStudent;
 using Application.WorkFlows.UpdateAttendanceCaseDetails;
 using BaseModels;
 using Core.Shared;
@@ -52,16 +51,14 @@ public class AttendanceModel : BasePageModel
             .ToList();
     }
 
-    public async Task<IActionResult> OnPostCreateWorkFlows(Dictionary<string, ActionType> entries)
+    public async Task<IActionResult> OnPostCreateWorkFlows(List<WorkFlowNeeded> entries)
     {
-        return RedirectToPage("/WorkFlows/Reports/Index", new { area = "SchoolAdmin" });
-
-        foreach (KeyValuePair<string, ActionType> entry in entries)
+        foreach (WorkFlowNeeded entry in entries)
         {
-            Result result = entry.Value switch
+            Result result = entry.Type switch
             {
-                ActionType.Create => await _mediator.Send(new CreateAttendanceCaseCommand(entry.Key)),
-                ActionType.Update => await _mediator.Send(new UpdateAttendanceCaseDetailsCommand(entry.Key)),
+                WorkFlowNeeded.ActionType.Create => await _mediator.Send(new CreateAttendanceCaseCommand(entry.StudentId)),
+                WorkFlowNeeded.ActionType.Update => await _mediator.Send(new UpdateAttendanceCaseDetailsCommand(entry.StudentId)),
                 _ => Result.Failure(Core.Shared.Error.NullValue)
             };
 
@@ -80,9 +77,16 @@ public class AttendanceModel : BasePageModel
         return RedirectToPage("/WorkFlows/Reports/Index", new { area = "SchoolAdmin" });
     }
 
-    public enum ActionType
+    public class WorkFlowNeeded
     {
-        Create,
-        Update
+        public string StudentId { get; set; }
+        public ActionType Type { get; set; }
+
+        public enum ActionType
+        {
+            Create,
+            Update
+        }
     }
+    
 }
