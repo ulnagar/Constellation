@@ -57,7 +57,7 @@ public sealed class AppConfiguration
     {
         public List<string> CounsellorIds { get; set; }
         public List<string> CareersAdvisorIds { get; set; }
-        public Dictionary<Grade, string> LearningSupportIds { get; set; }
+        public Dictionary<Grade, List<string>> LearningSupportIds { get; set; }
     }
 
     public class AttachmentsConfiguration

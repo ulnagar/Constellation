@@ -2,7 +2,6 @@
 
 using Application.Models.Identity;
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.ClassCovers.Events;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Repositories;
@@ -22,14 +21,12 @@ using Core.Models.Subjects;
 using Interfaces.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using Org.BouncyCastle.Cms;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static Constellation.Core.Errors.DomainErrors.ClassCovers;
 
 internal sealed class GetTeamMembershipByIdQueryHandler
     : IQueryHandler<GetTeamMembershipByIdQuery, List<TeamMembershipResponse>>
@@ -55,7 +52,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         IGroupTutorialRepository groupTutorialRepository,
         ICourseRepository courseRepository,
         UserManager<AppUser> userManager,
-        Serilog.ILogger logger,
+        ILogger logger,
         IClassCoverRepository coverRepository,
         IOptions<AppConfiguration> configuration)
     {
@@ -74,7 +71,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
     public async Task<Result<List<TeamMembershipResponse>>> Handle(GetTeamMembershipByIdQuery request, CancellationToken cancellationToken)
     {
-        List<TeamMembershipResponse> returnData = new List<TeamMembershipResponse>();
+        List<TeamMembershipResponse> returnData = new();
 
         Team team = await _teamRepository.GetById(request.Id, cancellationToken);
 
@@ -258,26 +255,24 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
                     if (_configuration is null) continue;
 
-                    string learningSupport = _configuration.Contacts
-                        .LearningSupportIds
-                        .Where(entry => entry.Key == course.Grade)
-                        .Select(e => e.Value ?? null)
-                        .FirstOrDefault();
+                    bool learningSupport = _configuration.Contacts.LearningSupportIds.TryGetValue(course.Grade, out List<string> lastStaffIds);
 
-                    if (learningSupport is null) continue;
+                    if (learningSupport is false) continue;
 
-                    Staff learningSupportTeacher =
-                        await _staffRepository.GetById(learningSupport, cancellationToken);
+                    foreach (string staffId in lastStaffIds)
+                    {
+                        Staff learningSupportTeacher = await _staffRepository.GetById(staffId, cancellationToken);
 
-                    if (learningSupportTeacher is null) continue;
+                        if (learningSupportTeacher is null) continue;
 
-                    TeamMembershipResponse lastEntry = new(
-                        team.Id,
-                        learningSupportTeacher.EmailAddress,
-                        TeamsMembershipLevel.Owner.Value);
+                        TeamMembershipResponse lastEntry = new(
+                            team.Id,
+                            learningSupportTeacher.EmailAddress,
+                            TeamsMembershipLevel.Owner.Value);
 
-                    if (returnData.All(value => value.EmailAddress != lastEntry.EmailAddress))
-                        returnData.Add(lastEntry);
+                        if (returnData.All(value => value.EmailAddress != lastEntry.EmailAddress))
+                            returnData.Add(lastEntry);
+                    }
                 }
             }
         }
