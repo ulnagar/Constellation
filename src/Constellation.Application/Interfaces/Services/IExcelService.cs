@@ -21,6 +21,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Training.Models;
+using WorkFlows.ExportOpenCaseReport;
 
 public interface IExcelService
 {
@@ -48,4 +49,6 @@ public interface IExcelService
     Task<MemoryStream> CreateStudentAttendanceReport(string periodLabel, List<AttendanceRecord> records, List<AbsenceRecord> absenceRecords, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateSciencePracOverdueReport(List<OverdueRollResponse> records, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateTrainingModuleOverallReportFile(List<ModuleDetails> moduleDetails, List<StaffStatus> staffStatuses, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateWorkFlowReport(List<CaseReportItem> records, CancellationToken cancellationToken = default);
+
 }

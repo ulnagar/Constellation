@@ -1,6 +1,9 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.WorkFlows.Reports;
 
+using Application.DTOs;
+using Application.WorkFlows.ExportOpenCaseReport;
 using BaseModels;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Workflows;
@@ -17,8 +20,23 @@ public class IndexModel : BasePageModel
 
     [ViewData] public string ActivePage => WorkFlowPages.Reports;
 
-    public async Task<IActionResult> OnGet()
+    public void OnGet() { }
+
+    public async Task<IActionResult> OnGetDownloadReport()
     {
-        return RedirectToPage("Attendance");
+        Result<FileDto> fileRequest = await _mediator.Send(new ExportOpenCaseReportQuery());
+
+        if (fileRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = fileRequest.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
     }
 }

@@ -117,7 +117,7 @@ public sealed class SendEmailAction : Action
     private SendEmailAction()
         : base() { }
 
-    public override string Description => string.Empty;
+    public override string Description => "Send an email";
 
     public IReadOnlyList<EmailRecipient> Recipients => _recipients.AsReadOnly();
 
@@ -454,7 +454,7 @@ public sealed class CreateSentralEntryAction : Action
     }
 
     public override string ToString() =>
-        $"Create Sentral entry and record Incident Number";
+        $"Create Sentral entry and record Incident Number: {OfferingName}";
 
     public override string AsStatus() =>
         Status switch

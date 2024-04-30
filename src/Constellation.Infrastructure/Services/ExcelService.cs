@@ -18,6 +18,7 @@ using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.SciencePracs.GenerateOverdueReport;
 using Constellation.Application.Training.Modules.GenerateOverallReport;
+using Constellation.Application.WorkFlows.ExportOpenCaseReport;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Infrastructure.Jobs;
@@ -1342,6 +1343,64 @@ public class ExcelService : IExcelService
         worksheet.Cells[1, 1, worksheet.Dimension.Rows, 4].AutoFitColumns();
         worksheet.Cells[1, 5, worksheet.Dimension.Rows, worksheet.Dimension.Columns].EntireColumn.Width = 16;
         worksheet.View.FreezePanes(3, 1);
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateWorkFlowReport(
+        List<CaseReportItem> records,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Report");
+
+        worksheet.Cells[1, 1].Value = "Id";
+        worksheet.Cells[1, 2].Value = "Description";
+        worksheet.Cells[1, 3].Value = "Created Date";
+        worksheet.Cells[1, 4].Value = "Completed Date";
+        worksheet.Cells[1, 5].Value = "Assigned To";
+        worksheet.Cells[1, 6].Value = "Open Days";
+        
+        string prevId = string.Empty;
+        bool banded = false;
+
+        for (int row = 0; row < records.Count; row++)
+        {
+            CaseReportItem record = records[row];
+            string currId = record.Id[..8];
+
+            if (currId != prevId)
+                banded = !banded;
+
+            prevId = currId;
+
+            worksheet.Cells[row + 2, 1].Value = record.Id;
+            worksheet.Cells[row + 2, 2].Value = record.Description;
+            worksheet.Cells[row + 2, 3].Value = record.CreatedDate;
+            worksheet.Cells[row + 2, 4].Value = record.CompletedDate;
+            worksheet.Cells[row + 2, 5].Value = record.AssignedTo;
+            worksheet.Cells[row + 2, 6].Value = record.OpenDays;
+
+            if (banded)
+            {
+                worksheet.Cells[row + 2, 1, row + 2, 6].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                worksheet.Cells[row + 2, 1, row + 2, 6].Style.Fill.BackgroundColor.SetColor(Color.LightGray);
+            }
+        }
+        
+        //worksheet.Cells[1, 1].LoadFromCollection(records, opt =>
+        //{
+        //    opt.HeaderParsingType = HeaderParsingTypes.CamelCaseToSpace;
+        //    opt.PrintHeaders = true;
+        //});
+
+        worksheet.Cells[1, 1, 1, worksheet.Dimension.Columns].AutoFilter = true;
+        worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
+        worksheet.View.FreezePanes(2, 1);
 
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
