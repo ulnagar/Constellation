@@ -1,70 +1,72 @@
-﻿namespace Constellation.Application.WorkFlows.CloseCase;
+﻿namespace Constellation.Application.WorkFlows.UpdateCaseStatus;
 
 using Abstractions.Messaging;
+using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.StaffMembers.Repositories;
+using Constellation.Core.Models.WorkFlow.Errors;
+using Constellation.Core.Models.WorkFlow.Repositories;
 using Core.Abstractions.Clock;
-using Core.Abstractions.Services;
 using Core.Models;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
-using Core.Models.WorkFlow.Errors;
-using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
-using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class CloseCaseCommandHandler
-    : ICommandHandler<CloseCaseCommand>
+internal sealed class UpdateCaseStatusCommandHandler
+: ICommandHandler<UpdateCaseStatusCommand>
 {
     private readonly ICaseRepository _caseRepository;
-    private readonly ICurrentUserService _currentUserService;
     private readonly IStaffRepository _staffRepository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
-    public CloseCaseCommandHandler(
+    public UpdateCaseStatusCommandHandler(
         ICaseRepository caseRepository,
-        ICurrentUserService currentUserService,
         IStaffRepository staffRepository,
+        ICurrentUserService currentUserService,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _caseRepository = caseRepository;
-        _currentUserService = currentUserService;
         _staffRepository = staffRepository;
+        _currentUserService = currentUserService;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
-        _logger = logger.ForContext<CloseCaseCommand>();
+        _logger = logger;
     }
 
-    public async Task<Result> Handle(CloseCaseCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateCaseStatusCommand request, CancellationToken cancellationToken)
     {
         Case item = await _caseRepository.GetById(request.CaseId, cancellationToken);
 
         if (item is null)
         {
             _logger
-                .ForContext(nameof(CloseCaseCommand), request, true)
+                .ForContext(nameof(UpdateCaseStatusCommand), request, true)
                 .ForContext(nameof(Error), CaseErrors.Case.NotFound(request.CaseId), true)
-                .Warning("Failed to mark Case as completed");
+                .Warning("Failed to update Case Status");
 
             return Result.Failure(CaseErrors.Case.NotFound(request.CaseId));
         }
 
-        Result update = item.UpdateStatus(CaseStatus.Completed, _currentUserService.UserName);
+        CaseStatus currentStatus = item.Status;
+
+        Result update = item.UpdateStatus(request.Status, _currentUserService.UserName);
 
         if (update.IsFailure)
         {
             _logger
-                .ForContext(nameof(CloseCaseCommand), request, true)
+                .ForContext(nameof(UpdateCaseStatusCommand), request, true)
                 .ForContext(nameof(Case), item, true)
                 .ForContext(nameof(Error), update.Error, true)
-            .Warning("Failed to mark Case as completed");
+                .Warning("Failed to update Case Status");
 
             return Result.Failure(update.Error);
         }
@@ -74,10 +76,10 @@ internal sealed class CloseCaseCommandHandler
         if (currentUser is null)
         {
             _logger
-                .ForContext(nameof(CloseCaseCommand), request, true)
+                .ForContext(nameof(UpdateCaseStatusCommand), request, true)
                 .ForContext(nameof(Case), item, true)
                 .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFoundByEmail(_currentUserService.EmailAddress), true)
-                .Warning("Failed to mark Case as completed");
+                .Warning("Failed to update Case Status");
 
             return Result.Failure(DomainErrors.Partners.Staff.NotFoundByEmail(_currentUserService.EmailAddress));
         }
@@ -86,15 +88,15 @@ internal sealed class CloseCaseCommandHandler
             null,
             item.Id,
             currentUser,
-            $"Case cancelled by {_currentUserService.UserName} at {_dateTime.Now}");
+            $"Case status changed from {currentStatus} to {request.Status} by {_currentUserService.UserName} at {_dateTime.Now}");
 
         if (updateAction.IsFailure)
         {
             _logger
-                .ForContext(nameof(CloseCaseCommand), request, true)
+                .ForContext(nameof(UpdateCaseStatusCommand), request, true)
                 .ForContext(nameof(Case), item, true)
                 .ForContext(nameof(Error), updateAction.Error, true)
-                .Warning("Failed to mark Case as completed");
+                .Warning("Failed to update Case Status");
 
             return Result.Failure(updateAction.Error);
         }

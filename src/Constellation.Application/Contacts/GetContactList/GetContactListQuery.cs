@@ -10,5 +10,5 @@ public sealed record GetContactListQuery(
     List<OfferingId> OfferingCodes,
     List<Grade> Grades,
     List<string> SchoolCodes,
-    List<ContactCategory> ContactCateogries)
+    List<ContactCategory> ContactCategories)
     : IQuery<List<ContactResponse>>;

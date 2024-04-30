@@ -41,10 +41,7 @@ public class IndexModel : BasePageModel
 
     public List<SchoolSelectionListResponse> SchoolsList { get; set; } = new();
 
-    public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
-    {
-        return await PreparePage(cancellationToken);
-    }
+    public async Task<IActionResult> OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
 
     public async Task<IActionResult> OnPostFilter(CancellationToken cancellationToken)
     {
@@ -64,13 +61,13 @@ public class IndexModel : BasePageModel
         foreach (string entry in Filter.Categories)
             filterCategories.Add(ContactCategory.FromValue(entry));
 
-        List<OfferingId> offeringIds = Filter.Offerings.Select(id => OfferingId.FromValue(id)).ToList();
+        List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
 
         Result<FileDto> file = await _mediator.Send(new ExportContactListCommand(
-                offeringIds,
-                Filter.Grades,
-                Filter.Schools,
-                filterCategories),
+            offeringIds,
+            Filter.Grades,
+            Filter.Schools,
+            filterCategories),
             cancellationToken);
 
         if (file.IsFailure)
@@ -89,7 +86,7 @@ public class IndexModel : BasePageModel
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken)
     {
-        var classesResponse = await _mediator.Send(new GetOfferingsForSelectionListQuery(), cancellationToken);
+        Result<List<OfferingSelectionListResponse>> classesResponse = await _mediator.Send(new GetOfferingsForSelectionListQuery(), cancellationToken);
 
         if (classesResponse.IsFailure)
         {
@@ -125,7 +122,7 @@ public class IndexModel : BasePageModel
                 $"Year {course.Name[..2]}"));
         }
 
-        var schoolsRequest = await _mediator.Send(new GetCurrentPartnerSchoolsWithStudentsListQuery(), cancellationToken);
+        Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetCurrentPartnerSchoolsWithStudentsListQuery(), cancellationToken);
 
         if (schoolsRequest.IsFailure)
         {
@@ -142,12 +139,12 @@ public class IndexModel : BasePageModel
 
         List<ContactCategory> filterCategories = new();
 
-        foreach (var entry in Filter.Categories)
+        foreach (string entry in Filter.Categories)
             filterCategories.Add(ContactCategory.FromValue(entry));
 
-        List<OfferingId> offeringIds = Filter.Offerings.Select(id => OfferingId.FromValue(id)).ToList();
+        List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
 
-        var contactRequest = await _mediator.Send(
+        Result<List<ContactResponse>> contactRequest = await _mediator.Send(
             new GetContactListQuery(
                 offeringIds,
                 Filter.Grades,

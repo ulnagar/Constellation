@@ -9,6 +9,7 @@ using Extensions;
 using Identifiers;
 using Shared;
 using Students;
+using System;
 
 public abstract class CaseDetail
 {

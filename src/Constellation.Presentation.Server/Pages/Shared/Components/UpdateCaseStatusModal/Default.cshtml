@@ -1,0 +1,31 @@
+﻿@using Constellation.Core.Models.WorkFlow.Enums
+
+<form asp-page-handler="UpdateStatus" method="post">
+    <div class="modal fade" tabindex="-1" id="update-case-status-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Status</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label class="col-md-3">New Status</label>
+                        <div class="col-md-9">
+                            <select id="newStatus" name="Status" class="combo">
+                                <option value="">-- Select Status --</option>
+                                <option value="@CaseStatus.Open.Value">@CaseStatus.Open.Name</option>
+                                <option value="@CaseStatus.PendingAction.Value">@CaseStatus.PendingAction.Name</option>
+                                <option value="@CaseStatus.Cancelled.Value">@CaseStatus.Cancelled.Name</option>
+                                <option value="@CaseStatus.Completed.Value">@CaseStatus.Completed.Name</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

@@ -68,6 +68,7 @@ internal sealed class GetCaseSummaryListQueryHandler
                     $"Attendance Case for {details.PeriodLabel} - {details.Severity.Value}",
                     item.Status,
                     item.CreatedAt,
+                    item.DueDate,
                     item.Actions.Count,
                     item.Actions.Count(action => action.Status == ActionStatus.Open)));
             }

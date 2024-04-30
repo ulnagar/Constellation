@@ -5,6 +5,7 @@ using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using ValueConverters;
 
 internal sealed class CaseConfiguration : IEntityTypeConfiguration<Case>
 {
@@ -59,5 +60,9 @@ internal sealed class CaseConfiguration : IEntityTypeConfiguration<Case>
             .HasConversion(
                 status => status.Value,
                 value => CaseStatus.FromValue(value));
+
+        builder
+            .Property(item => item.DueDate)
+            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }

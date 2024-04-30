@@ -2,6 +2,7 @@
 
 using Enums;
 using Identifiers;
+using Newtonsoft.Json.Converters;
 using Shared;
 using System;
 
@@ -16,6 +17,10 @@ public static class CaseErrors
         public static readonly Func<string, Error> NotFoundForStudent = id => new(
             "Case.NotFoundForStudent",
             $"Could not find a Case for Student with Id {id}");
+
+        public static readonly Func<DateOnly, Error> DueDateInPast = date => new(
+            "Case.DueDateInPast",
+            $"Could not set the Due Date for the Case to {date} as this has already passed");
 
         public static class AttachDetails
         {

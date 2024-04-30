@@ -11,5 +11,6 @@ public sealed record CaseSummaryResponse(
     string Description,
     CaseStatus Status,
     DateTime CreatedAt,
+    DateOnly DueDate,
     int TotalActions,
     int OutstandingActions);

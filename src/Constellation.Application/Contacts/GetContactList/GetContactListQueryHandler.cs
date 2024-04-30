@@ -335,11 +335,11 @@ internal sealed class GetContactListQueryHandler
             }
         }
 
-        if (request.ContactCateogries.Any())
+        if (request.ContactCategories.Any())
         {
             result = result
                 .Where(entry => 
-                    request.ContactCateogries.Contains(entry.Category))
+                    request.ContactCategories.Contains(entry.Category))
                 .ToList();
         }
 

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.WorkFlow.Services;
 
+using Abstractions.Clock;
 using Abstractions.Services;
 using Attendance;
 using Attendance.Errors;
@@ -22,17 +23,20 @@ public sealed class CaseService : ICaseService
     private readonly IAttendanceRepository _attendanceRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IDateTimeProvider _dateTime;
 
     public CaseService(
         IStudentRepository studentRepository,
         IAttendanceRepository attendanceRepository,
         IStaffRepository staffRepository,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IDateTimeProvider dateTime)
     {
         _studentRepository = studentRepository;
         _attendanceRepository = attendanceRepository;
         _staffRepository = staffRepository;
         _currentUserService = currentUserService;
+        _dateTime = dateTime;
     }
 
     public async Task<Result<Case>> CreateAttendanceCase(
@@ -70,6 +74,11 @@ public sealed class CaseService : ICaseService
 
         if (attach.IsFailure)
             return Result.Failure<Case>(attach.Error);
+
+        Result dueDate = item.SetDueDate(_dateTime);
+
+        if (dueDate.IsFailure)
+            return Result.Failure<Case>(dueDate.Error);
 
         return item;
     }

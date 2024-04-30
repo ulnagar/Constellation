@@ -9,14 +9,14 @@ using Application.WorkFlows.AddPhoneParentAction;
 using Application.WorkFlows.AddSendEmailAction;
 using Application.WorkFlows.AddSentralEntryAction;
 using Application.WorkFlows.CancelAction;
-using Application.WorkFlows.CancelCase;
-using Application.WorkFlows.CloseCase;
 using Application.WorkFlows.GetCaseById;
 using Application.WorkFlows.ReassignAction;
+using Application.WorkFlows.UpdateCaseStatus;
 using BaseModels;
 using Constellation.Application.Features.Common.Queries;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.WorkFlow;
+using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
 using Core.Models.WorkFlow.Identifiers;
 using Core.Shared;
@@ -31,7 +31,6 @@ using Server.Pages.Shared.PartialViews.AddParentInterviewAction;
 using Server.Pages.Shared.PartialViews.AddPhoneParentAction;
 using Server.Pages.Shared.PartialViews.AddSendEmailAction;
 using Server.Pages.Shared.PartialViews.ConfirmActionUpdateModal;
-using Server.Pages.Shared.PartialViews.ConfirmCaseUpdateModal;
 using Server.Pages.Shared.PartialViews.ReassignActionToStaffMemberModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -74,49 +73,17 @@ public class DetailsModel : BasePageModel
         Case = request.Value;
     }
 
-    public IActionResult OnPostAjaxCaseConfirmation(ConfirmCaseUpdateModalViewModel.UpdateType type)
+    public async Task<IActionResult> OnPostUpdateStatus(string status)
     {
-        ConfirmCaseUpdateModalViewModel viewModel = new(
-            Id.Value,
-            type);
+        CaseStatus newStatus = CaseStatus.FromValue(status);
 
-        return Partial("ConfirmCaseUpdateModal", viewModel);
-    }
+        Result action = await _mediator.Send(new UpdateCaseStatusCommand(Id, newStatus));
 
-    public async Task<IActionResult> OnGetCancelCase()
-    {
-        Result cancelRequest = await _mediator.Send(new CancelCaseCommand(Id));
-
-        if (cancelRequest.IsFailure)
+        if (action.IsFailure)
         {
             Error = new()
             {
-                Error = cancelRequest.Error,
-                RedirectPath = null
-            };
-
-            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
-
-            if (request.IsFailure)
-                return RedirectToPage();
-
-            Case = request.Value;
-
-            return Page();
-        }
-
-        return RedirectToPage();
-    }
-
-    public async Task<IActionResult> OnGetCompleteCase()
-    {
-        Result cancelRequest = await _mediator.Send(new CloseCaseCommand(Id));
-
-        if (cancelRequest.IsFailure)
-        {
-            Error = new()
-            {
-                Error = cancelRequest.Error,
+                Error = action.Error,
                 RedirectPath = null
             };
 

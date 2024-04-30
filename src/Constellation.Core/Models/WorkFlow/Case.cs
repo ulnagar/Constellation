@@ -1,6 +1,7 @@
 ﻿#nullable enable
 namespace Constellation.Core.Models.WorkFlow;
 
+using Abstractions.Clock;
 using Enums;
 using Errors;
 using Events;
@@ -41,6 +42,8 @@ public sealed class Case : AggregateRoot, IAuditableEntity
     public bool IsDeleted { get; private set; }
     public string? DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; } = DateTime.MinValue;
+
+    public DateOnly DueDate { get; private set; }
 
     public void AddAction(Action action)
     {
@@ -137,6 +140,23 @@ public sealed class Case : AggregateRoot, IAuditableEntity
         }
 
         return Result.Failure(CaseErrors.Case.AttachDetails.UnknownDetails);
+    }
+
+    public Result SetDueDate(IDateTimeProvider dateTime)
+    {
+        DateOnly expectedDueDate = DateOnly.FromDateTime(CreatedAt.AddDays(7));
+
+        return SetDueDate(dateTime, expectedDueDate);
+    }
+
+    public Result SetDueDate(IDateTimeProvider dateTime, DateOnly dueDate)
+    {
+        if (dueDate < dateTime.Today)
+            return Result.Failure(CaseErrors.Case.DueDateInPast(dueDate));
+
+        DueDate = dueDate;
+
+        return Result.Success();
     }
 
     public override string ToString() => Detail?.ToString() ?? string.Empty;
