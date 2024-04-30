@@ -51,7 +51,7 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
             int cellNumber = 0;
 
             DateTime createdOn = DateTime.MinValue;
-            DateOnly issuedFor;
+            DateOnly issuedFor = DateOnly.MinValue;
             string incidentId = string.Empty;
             string teacherName = string.Empty;
             string issueReason = string.Empty;
@@ -64,7 +64,16 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
                 {
                     case 1:
                         // Date the award was for (i.e. events on this date are the reason for the award)
-                        DateOnly.TryParse(cell.InnerText, out issuedFor);
+                        bool issuedForParse = DateOnly.TryParse(cell.InnerText, out issuedFor);
+
+                        if (!issuedForParse)
+                        {
+                            _logger
+                                .ForContext("Sentral Date Field", cell.InnerText)
+                                .Warning("Failed to extract date from Sentral Date Field");
+
+                            continue;
+                        }
 
                         break;
                     case 2:
@@ -79,6 +88,19 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
                             if (incidentPage is not null)
                             {
                                 HtmlNode entry = incidentPage.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "IncidentCreatedDate").Value);
+
+                                if (entry is null)
+                                {
+                                    _logger
+                                        .ForContext("Page Link", href)
+                                        .Warning("Failed to extract Incident Created Date from page");
+
+                                    continue;
+                                }
+
+                                _logger
+                                    .ForContext("Text Incident Date", entry.InnerText.Trim())
+                                    .Information("Detected incident creation date");
 
                                 string text = entry.InnerText.Trim();
                                 string[] split = text.Split(' ');

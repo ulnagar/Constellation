@@ -64,7 +64,10 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
         
         foreach (AttendanceValue value in values)
         {
-            Student student = students.FirstOrDefault(student => student.StudentId == value.StudentId)!;
+            Student student = students.FirstOrDefault(student => student.StudentId == value.StudentId);
+
+            if (student is null)
+                continue;
 
             List<AttendanceValue> recentHistory = await _attendanceRepository.GetForStudentBetweenDates(student.StudentId, historyBoundary, endDate, cancellationToken);
 
