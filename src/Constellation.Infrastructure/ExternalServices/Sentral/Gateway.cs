@@ -725,37 +725,38 @@ public class Gateway : ISentralGateway
             return new List<DateOnly>();
         }
 
-        var page = await GetPageByGet($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/month", default);
+        HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/month", default);
 
         if (page == null)
             return new List<DateOnly>();
 
-        var calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "CalendarTable").Value);
+        HtmlNode calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "CalendarTable").Value);
 
-        var nonSchoolDays = new List<DateOnly>();
+        List<DateOnly> nonSchoolDays = new();
 
-        if (calendarTable != null)
+        if (calendarTable == null) return nonSchoolDays.OrderBy(a => a).ToList();
+        
+        IEnumerable<HtmlNode> rows = calendarTable.Descendants("tr");
+
+        foreach (HtmlNode row in rows)
         {
-            var rows = calendarTable.Descendants("tr");
+            IEnumerable<HtmlNode> days = row.Descendants("td");
 
-            foreach (var row in rows)
+            foreach (HtmlNode day in days)
             {
-                var days = row.Descendants("td");
+                if (!day.HasClass("school-break") && 
+                    !day.HasClass("holiday") &&
+                    !day.HasClass("holiday-once")) 
+                    continue;
 
-                foreach (var day in days)
-                {
-                    if (day.HasClass("school-break") || day.HasClass("holiday") || day.HasClass("holiday-once"))
-                    {
-                        var action = day.GetAttributeValue("onclick", "");
-                        if (!string.IsNullOrWhiteSpace(action))
-                        {
-                            var detectedDate = action.Split('\'')[1];
-                            var date = DateOnly.Parse(detectedDate);
+                string action = day.GetAttributeValue("onclick", "");
 
-                            nonSchoolDays.Add(date);
-                        }
-                    }
-                }
+                if (string.IsNullOrWhiteSpace(action)) continue;
+                    
+                string detectedDate = action.Split('\'')[1];
+                DateOnly date = DateOnly.Parse(detectedDate);
+
+                nonSchoolDays.Add(date);
             }
         }
 
@@ -1129,33 +1130,31 @@ public class Gateway : ISentralGateway
             return new List<RollMarkReportDto>();
         }
 
-        var sentralDate = date.ToString("yyyy-MM-dd");
+        string sentralDate = date.ToString("yyyy-MM-dd");
 
-        var primaryPage = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id={1}&range=single_day&date={sentralDate}&export=1", default);
-        var secondaryPage = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id={2}&range=single_day&date={sentralDate}&export=1", default);
+        HtmlDocument primaryPage = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id=1&range=single_day&date={sentralDate}&export=1", default);
+        HtmlDocument secondaryPage = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id=2&range=single_day&date={sentralDate}&export=1", default);
 
         if (primaryPage == null || secondaryPage == null)
             return new List<RollMarkReportDto>();
 
-        var primaryList = new List<string>();
+        List<string> primaryList = new();
         if (!primaryPage.DocumentNode.InnerHtml.StartsWith("<"))
-        {
             primaryList = primaryPage.DocumentNode.InnerHtml.Split('\u000A').ToList();
-        }
 
-        var secondaryList = new List<string>();
+        List<string> secondaryList = new();
         if (!secondaryPage.DocumentNode.InnerHtml.StartsWith("<"))
-        {
             secondaryList = secondaryPage.DocumentNode.InnerHtml.Split('\u000A').ToList();
-        }
 
-        var list = new List<RollMarkReportDto>();
+        List<RollMarkReportDto> list = new();
 
-        foreach (var entry in primaryList)
+        foreach (string entry in primaryList)
         {
-            var splitString = Regex.Split(entry, "[,]{1}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+            string[] splitString = Regex.Split(entry, "[,]{1}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+            
             if (splitString[0] == "\"Date\"" || splitString.Length != 7)
                 continue;
+
             list.Add(new RollMarkReportDto
             {
                 Date = DateTime.Parse(splitString[0].TrimStart('"').TrimEnd('"')),
@@ -1168,11 +1167,13 @@ public class Gateway : ISentralGateway
             });
         }
 
-        foreach (var entry in secondaryList)
+        foreach (string entry in secondaryList)
         {
-            var splitString = entry.Split(',');
+            string[] splitString = entry.Split(',');
+
             if (splitString[0] == "\"Date\"" || splitString.Length != 7)
                 continue;
+
             list.Add(new RollMarkReportDto
             {
                 Date = DateTime.Parse(splitString[0].TrimStart('"').TrimEnd('"')),
