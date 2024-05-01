@@ -83,11 +83,13 @@ public class RollModel : BasePageModel
 
         var username = _currentUserService.UserName;
 
+        var studentData = Students.ToDictionary(k => k.StudentId, k => k.Present);
+
         var result = await _mediator.Send(new SubmitRollCommand(
             GroupTutorialId.FromValue(TutorialId),
             TutorialRollId.FromValue(RollId),
             username,
-            Students.ToDictionary(k => k.StudentId, k => k.Present)));
+            studentData));
 
         if (result.IsFailure)
         {
@@ -168,7 +170,7 @@ public class RollModel : BasePageModel
         else
         {
             Roll = rollResult.Value;
-            Students = rollResult.Value.Students.ToList();
+            Students = rollResult.Value.Students.OrderBy(entry => entry.Grade).ThenBy(entry => entry.Name).ToList();
         }
     }
 
