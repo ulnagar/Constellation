@@ -1034,7 +1034,7 @@ public class ExcelService : IExcelService
         return data;
     }
 
-    public async Task<List<SentralIncidentDetails>> ConvertSentralIncidentReport(Stream reportFile, CancellationToken cancellationToken = default)
+    public async Task<List<SentralIncidentDetails>> ConvertSentralIncidentReport(Stream reportFile, List<DateOnly> excludedDates, CancellationToken cancellationToken = default)
     {
         List<SentralIncidentDetails> response = new();
 
@@ -1081,9 +1081,22 @@ public class ExcelService : IExcelService
 
             string studentId = row[0].ToString();
 
-            DateOnly.TryParse(row[2].ToString(), out DateOnly dateCreated);
+            bool dateExtractionSucceeded = DateOnly.TryParse(row[2].ToString(), out DateOnly dateCreated);
+
+            if (!dateExtractionSucceeded)
+                continue;
 
             int severity = _dateTime.Today.DayNumber - dateCreated.DayNumber;
+
+            List<DateOnly> datesBetween = dateCreated.Range(_dateTime.Today);
+            datesBetween = datesBetween
+                .Where(entry => !excludedDates.Contains(entry))
+                .Where(entry => 
+                    entry.DayOfWeek != DayOfWeek.Saturday && 
+                    entry.DayOfWeek != DayOfWeek.Sunday)
+                .ToList();
+
+            severity = datesBetween.Count - 1;
 
             int gradeNum = Convert.ToInt32(row[25]);
             Grade grade = (Grade)gradeNum;
@@ -1190,26 +1203,26 @@ public class ExcelService : IExcelService
         table.AutoFitColumns();
 
         IExcelConditionalFormattingExpression bandFourFormat = worksheet.ConditionalFormatting.AddExpression(data);
-        bandFourFormat.Formula = "=$A2 > 34";
+        bandFourFormat.Formula = "=$A2 > 24";
         bandFourFormat.Style.Fill.PatternType = ExcelFillStyle.Solid;
         bandFourFormat.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(0, 196, 89, 17));
         bandFourFormat.Style.Font.Color.SetColor(Color.White);
         bandFourFormat.StopIfTrue = true;
 
         IExcelConditionalFormattingExpression bandThreeFormat = worksheet.ConditionalFormatting.AddExpression(data);
-        bandThreeFormat.Formula = "=$A2 > 27";
+        bandThreeFormat.Formula = "=$A2 > 19";
         bandThreeFormat.Style.Fill.PatternType = ExcelFillStyle.Solid;
         bandThreeFormat.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(0, 244, 176, 131));
         bandThreeFormat.StopIfTrue = true;
 
         IExcelConditionalFormattingExpression bandTwoFormat = worksheet.ConditionalFormatting.AddExpression(data);
-        bandTwoFormat.Formula = "=$A2 > 20";
+        bandTwoFormat.Formula = "=$A2 > 14";
         bandTwoFormat.Style.Fill.PatternType = ExcelFillStyle.Solid;
         bandTwoFormat.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(0, 241, 202, 172));
         bandTwoFormat.StopIfTrue = true;
 
         IExcelConditionalFormattingExpression bandOneFormat = worksheet.ConditionalFormatting.AddExpression(data);
-        bandOneFormat.Formula = "=$A2 > 13";
+        bandOneFormat.Formula = "=$A2 > 9";
         bandOneFormat.Style.Fill.PatternType = ExcelFillStyle.Solid;
         bandOneFormat.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(0, 251, 228, 213));
         bandOneFormat.StopIfTrue = true;

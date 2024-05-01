@@ -2,8 +2,10 @@
 
 using Abstractions.Messaging;
 using Constellation.Application.Interfaces.Services;
+using Core.Abstractions.Clock;
 using Core.Shared;
 using Interfaces.Gateways;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -14,13 +16,16 @@ internal sealed class GetWellbeingReportFromSentralQueryHandler
 {
     private readonly ISentralGateway _sentralGateway;
     private readonly IExcelService _excelService;
+    private readonly IDateTimeProvider _dateTime;
 
     public GetWellbeingReportFromSentralQueryHandler(
         ISentralGateway sentralGateway,
-        IExcelService excelService)
+        IExcelService excelService,
+        IDateTimeProvider dateTime)
     {
         _sentralGateway = sentralGateway;
         _excelService = excelService;
+        _dateTime = dateTime;
     }
 
 
@@ -30,7 +35,9 @@ internal sealed class GetWellbeingReportFromSentralQueryHandler
 
         if (file.Length > 0)
         {
-            List<SentralIncidentDetails> data = await _excelService.ConvertSentralIncidentReport(file, cancellationToken);
+            List<DateOnly> excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(_dateTime.CurrentYear.ToString());
+
+            List<SentralIncidentDetails> data = await _excelService.ConvertSentralIncidentReport(file, excludedDates, cancellationToken);
 
             return data;
         }
