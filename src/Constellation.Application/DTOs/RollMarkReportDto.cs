@@ -23,6 +23,8 @@ namespace Constellation.Application.DTOs
         public Dictionary<string, string> HeadTeachers { get; set; } = new();
         public string Faculty { get; set; }
         public List<string> Notes { get; set; } = new();
+        public string TeacherName { get; set; } = string.Empty;
+        public string Period { get; set; } = string.Empty;
     }
 
 }

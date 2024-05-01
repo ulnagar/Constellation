@@ -1129,33 +1129,31 @@ public class Gateway : ISentralGateway
             return new List<RollMarkReportDto>();
         }
 
-        var sentralDate = date.ToString("yyyy-MM-dd");
+        string sentralDate = date.ToString("yyyy-MM-dd");
 
-        var primaryPage = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id={1}&range=single_day&date={sentralDate}&export=1", default);
-        var secondaryPage = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id={2}&range=single_day&date={sentralDate}&export=1", default);
+        HtmlDocument primaryPage = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id=1&range=single_day&date={sentralDate}&export=1", default);
+        HtmlDocument secondaryPage = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id=2&range=single_day&date={sentralDate}&export=1", default);
 
         if (primaryPage == null || secondaryPage == null)
             return new List<RollMarkReportDto>();
 
-        var primaryList = new List<string>();
+        List<string> primaryList = new();
         if (!primaryPage.DocumentNode.InnerHtml.StartsWith("<"))
-        {
             primaryList = primaryPage.DocumentNode.InnerHtml.Split('\u000A').ToList();
-        }
 
-        var secondaryList = new List<string>();
+        List<string> secondaryList = new();
         if (!secondaryPage.DocumentNode.InnerHtml.StartsWith("<"))
-        {
             secondaryList = secondaryPage.DocumentNode.InnerHtml.Split('\u000A').ToList();
-        }
 
-        var list = new List<RollMarkReportDto>();
+        List<RollMarkReportDto> list = new();
 
-        foreach (var entry in primaryList)
+        foreach (string entry in primaryList)
         {
-            var splitString = Regex.Split(entry, "[,]{1}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+            string[] splitString = Regex.Split(entry, "[,]{1}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+            
             if (splitString[0] == "\"Date\"" || splitString.Length != 7)
                 continue;
+
             list.Add(new RollMarkReportDto
             {
                 Date = DateTime.Parse(splitString[0].TrimStart('"').TrimEnd('"')),
@@ -1168,11 +1166,13 @@ public class Gateway : ISentralGateway
             });
         }
 
-        foreach (var entry in secondaryList)
+        foreach (string entry in secondaryList)
         {
-            var splitString = entry.Split(',');
+            string[] splitString = entry.Split(',');
+
             if (splitString[0] == "\"Date\"" || splitString.Length != 7)
                 continue;
+
             list.Add(new RollMarkReportDto
             {
                 Date = DateTime.Parse(splitString[0].TrimStart('"').TrimEnd('"')),

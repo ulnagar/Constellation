@@ -30,7 +30,7 @@ internal sealed class GetWellbeingReportFromSentralQueryHandler
 
         if (file.Length > 0)
         {
-            List<SentralIncidentDetails> data = await _excelService.ConvertSentralIncidentReport(file);
+            List<SentralIncidentDetails> data = await _excelService.ConvertSentralIncidentReport(file, cancellationToken);
 
             return data;
         }
