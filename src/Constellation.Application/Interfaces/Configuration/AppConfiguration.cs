@@ -26,19 +26,21 @@ public sealed class AppConfiguration
 
         public List<AbsenceReason> DiscountedPartialReasons { get; set; }
 
-        public DateTime AbsenceScanStartDate { get; set; }
+        //public DateTime AbsenceScanStartDate { get; set; }
 
         public int PartialLengthThreshold { get; set; }
 
-        public List<string> ForwardAbsenceEmailsTo { get; set; }
+        //public List<string> ForwardAbsenceEmailsTo { get; set; }
 
-        public List<string> ForwardTruancyEmailsTo { get; set; }
+        //public List<string> ForwardTruancyEmailsTo { get; set; }
 
         public string AbsenceCoordinatorName { get; set; }
 
         public string AbsenceCoordinatorTitle { get; set; }
 
         public string AbsenceCoordinatorEmail { get; set; }
+
+        public List<string> SendRollMarkingReportTo { get; set; }
     }
 
     public class LessonsConfiguration

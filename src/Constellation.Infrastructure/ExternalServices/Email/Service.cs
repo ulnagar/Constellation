@@ -982,7 +982,7 @@ public sealed class Service : IEmailService
 
     public async Task SendDailyRollMarkingReport(List<RollMarkingEmailDto> entries, DateOnly reportDate, Dictionary<string, string> recipients)
     {
-        DailyReportEmailViewModel viewModel = new DailyReportEmailViewModel
+        DailyReportEmailViewModel viewModel = new()
         {
             Preheader = "This is an automated email. No action is required outside of school hours.",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,

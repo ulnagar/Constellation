@@ -25,7 +25,6 @@ $(document).ready(function () {
             "pageLength": 25
         });
 
-
     $('.grouped-data-table')
         .DataTable({
             "order": [],

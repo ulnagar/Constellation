@@ -11,9 +11,10 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
-using Core.Models.StaffMembers.Repositories;
-using Core.Models.Subjects.Repositories;
+using Core.Models.Offerings;
+using Core.Models.Subjects;
 using Core.Shared;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.Extensions.Options;
 using System;
@@ -55,43 +56,39 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
 
     public async Task StartJob(Guid jobId, CancellationToken token)
     {
-        var date = DateOnly.FromDateTime(DateTime.Today);
+        DateOnly date = DateOnly.FromDateTime(DateTime.Today);
 
-        if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
+        if (date.DayOfWeek is DayOfWeek.Sunday or DayOfWeek.Saturday)
             return;
 
         _logger.Information("{id}: Checking Date: {date}", jobId, date.ToShortDateString());
-        var entries = await _sentralService.GetRollMarkingReportAsync(date);
+        ICollection<RollMarkReportDto> entries = await _sentralService.GetRollMarkingReportAsync(date);
 
-        var unsubmitted = entries.Where(entry => !entry.Submitted).ToList();
-        var absenceSettings = _configuration.Absences;
-        var recipients = new Dictionary<string, string>();
+        List<RollMarkReportDto> unsubmitted = entries.Where(entry => !entry.Submitted).ToList();
+        AppConfiguration.AbsencesConfiguration absenceSettings = _configuration.Absences;
+        Dictionary<string, string> recipients;
 
-        if (!unsubmitted.Any())
+        if (unsubmitted.Count == 0)
         {
-            var infoString = $"{date.ToShortDateString()} - No Unsubmitted Rolls found!";
+            string infoString = $"{date.ToShortDateString()} - No Unsubmitted Rolls found!";
 
             _logger.Information("{id}: {infoString}", jobId, infoString);
 
-
             recipients = new();
-            foreach (var entry in absenceSettings.ForwardAbsenceEmailsTo)
+            foreach (string entry in absenceSettings.SendRollMarkingReportTo)
             {
-                if (!recipients.Any(recipient => recipient.Value == entry))
-                    recipients.Add(absenceSettings.AbsenceCoordinatorName, entry);
+                if (recipients.All(recipient => recipient.Value != entry))
+                    recipients.Add(entry, entry);
             }
-
-            if (!recipients.Any(recipient => recipient.Value == "scott.new@det.nsw.edu.au"))
-                recipients.Add("Scott New", "scott.new@det.nsw.edu.au");
-
+            
             await _emailService.SendNoRollMarkingReport(date, recipients);
 
             return;
         }
 
-        var emailList = new List<RollMarkingEmailDto>();
+        List<RollMarkingEmailDto> emailList = new();
 
-        foreach (var entry in unsubmitted)
+        foreach (RollMarkReportDto entry in unsubmitted)
         {
             if (token.IsCancellationRequested)
                 return;
@@ -99,26 +96,29 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
             if (entry.Teacher.Contains(','))
                 entry.Teacher = null;
 
-            var emailDto = new RollMarkingEmailDto();
+            RollMarkingEmailDto emailDto = new() { Period = entry.Period };
 
-            var offeringName = entry.ClassName.StartsWith("5") || entry.ClassName.StartsWith("6") ? entry.ClassName.PadLeft(7, '0') : entry.ClassName.PadLeft(6, '0');
-            offeringName = offeringName.StartsWith("5") || offeringName.StartsWith("6") ? offeringName.PadLeft(8, '0') : offeringName;
-            entry.ClassName = offeringName;
+            entry.ClassName = entry.ClassName.PadLeft(7, '0');
 
-            var offering = await _offeringRepository.GetFromYearAndName(date.Year, offeringName);
+            Offering offering = await _offeringRepository.GetFromYearAndName(date.Year, entry.ClassName, token);
 
             Staff teacher = null;
 
-            if (string.IsNullOrWhiteSpace(entry.Teacher) && offering is not null)
+            if (!string.IsNullOrWhiteSpace(entry.Teacher))
             {
-                var assignments = offering
+                teacher = await _staffRepository.GetFromName(entry.Teacher);
+            }
+
+            if (offering is not null && teacher is null)
+            {
+                List<TeacherAssignment> assignments = offering
                     .Teachers
                     .Where(assignment =>
                         !assignment.IsDeleted &&
                         assignment.Type == AssignmentType.ClassroomTeacher)
                     .ToList();
 
-                foreach (var assignment in assignments)
+                foreach (TeacherAssignment assignment in assignments)
                 {
                     teacher = await _staffRepository.GetById(assignment.StaffId, token);
 
@@ -126,15 +126,10 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
                         entry.Teacher = teacher.DisplayName;
                 }
             }
-            else if (!string.IsNullOrWhiteSpace(entry.Teacher))
-            {
-                teacher = await _staffRepository.GetFromName(entry.Teacher);
-            }
 
-            var infoString = string.Empty;
-            var Covered = false;
-            var CoveredBy = string.Empty;
-            var CoverType = string.Empty;
+            bool covered = false;
+            string coveredBy = string.Empty;
+            string coverType = string.Empty;
 
             if (offering is null && teacher is null)
             {
@@ -145,12 +140,21 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
 
             if (teacher is not null)
             {
-                emailDto.Teachers.Add(teacher.EmailAddress, teacher.DisplayName);
+                Name teacherName = teacher.GetName();
+
+                if (teacherName is null)
+                    continue;
+
+                emailDto.Teachers.Add(teacher.EmailAddress, teacherName.DisplayName);
+                emailDto.TeacherName = teacherName.SortOrder;
             }
 
             if (offering is not null)
             {
-                var course = await _courseRepository.GetById(offering.CourseId, token);
+                Course course = await _courseRepository.GetById(offering.CourseId, token);
+
+                if (course is null)
+                    continue;
 
                 Result<List<Staff>> headTeachersRequest = await _mediator.Send(new GetFacultyManagersQuery(course.FacultyId), token);
                 if (headTeachersRequest.IsFailure)
@@ -165,25 +169,25 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
                         .ToDictionary(member => member.EmailAddress, member => member.DisplayName);
                 }
 
-                var coversRequest = await _mediator.Send(new GetCoversSummaryByDateAndOfferingQuery(date, offering.Id), token);
+                Result<List<CoverSummaryByDateAndOfferingResponse>> coversRequest = await _mediator.Send(new GetCoversSummaryByDateAndOfferingQuery(date, offering.Id), token);
 
                 if (coversRequest.IsSuccess && coversRequest.Value.Count > 0)
                 {
-                    var cover = coversRequest.Value.OrderBy(cover => cover.CreatedAt).Last();
+                    CoverSummaryByDateAndOfferingResponse cover = coversRequest.Value.OrderBy(cover => cover.CreatedAt).Last();
 
-                    Covered = true;
-                    CoveredBy = cover.TeacherName;
-                    CoverType = cover.CoverType;
+                    covered = true;
+                    coveredBy = cover.TeacherName;
+                    coverType = cover.CoverType;
                 }
             }
 
-            infoString = $"{entry.Date.ToShortDateString()} - Unsubmitted Roll for {entry.ClassName}";
+            string infoString = $"{entry.Date.ToShortDateString()} - Unsubmitted Roll for {entry.ClassName}";
             if (!string.IsNullOrWhiteSpace(entry.Teacher))
                 infoString += $" by {entry.Teacher}";
             infoString += $" in Period {entry.Period}";
-            if (Covered)
+            if (covered)
             {
-                infoString += $" covered by {CoveredBy} ({CoverType})";
+                infoString += $" covered by {coveredBy} ({coverType})";
             }
 
             _logger.Information("{id}: {infoString}", jobId, infoString);
@@ -193,13 +197,13 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
 
         // Send emails to teachers
         // get flattened list of teachers
-        var teachers = emailList.SelectMany(list => list.Teachers).Distinct().ToList();
+        List<KeyValuePair<string, string>> teachers = emailList.SelectMany(list => list.Teachers).Distinct().ToList();
 
-        foreach (var teacher in teachers)
+        foreach (KeyValuePair<string, string> teacher in teachers)
         {
             recipients = new();
 
-            var emails = emailList.Where(item => item.Teachers.ContainsKey(teacher.Key)).ToList();
+            List<RollMarkingEmailDto> emails = emailList.Where(item => item.Teachers.ContainsKey(teacher.Key)).ToList();
 
             if (token.IsCancellationRequested)
                 return;
@@ -207,18 +211,19 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
             recipients.Add(teacher.Value, teacher.Key);
 
             // Email the relevant person (as outlined in the EmailSentTo field
-            await _emailService.SendDailyRollMarkingReport(emails, date, recipients);
+            if (recipients.Count > 0)
+                await _emailService.SendDailyRollMarkingReport(emails, date, recipients);
         }
 
         // Send emails to head teachers
         recipients = new();
         teachers = emailList.SelectMany(list => list.HeadTeachers).Distinct().ToList();
 
-        foreach (var teacher in teachers)
+        foreach (KeyValuePair<string, string> teacher in teachers)
         {
             recipients = new();
 
-            var emails = emailList.Where(item => item.HeadTeachers.ContainsKey(teacher.Key)).ToList();
+            List<RollMarkingEmailDto> emails = emailList.Where(item => item.HeadTeachers.ContainsKey(teacher.Key)).ToList();
 
             if (token.IsCancellationRequested)
                 return;
@@ -226,7 +231,8 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
             recipients.Add(teacher.Value, teacher.Key);
 
             // Email the relevant person (as outlined in the EmailSentTo field
-            await _emailService.SendDailyRollMarkingReport(emails, date, recipients);
+            if (recipients.Count > 0)
+                await _emailService.SendDailyRollMarkingReport(emails, date, recipients);
         }
 
         // Send emails to absence administrator
@@ -234,15 +240,13 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
             return;
         
         recipients = new();
-        foreach (var entry in absenceSettings.ForwardAbsenceEmailsTo)
+        foreach (string entry in absenceSettings.SendRollMarkingReportTo)
         {
-            if (!recipients.Any(recipient => recipient.Value == entry))
-                recipients.Add(absenceSettings.AbsenceCoordinatorName, entry);
+            if (recipients.All(recipient => recipient.Value != entry))
+                recipients.Add(entry, entry);
         }
 
-        if (!recipients.Any(recipient => recipient.Value == "scott.new@det.nsw.edu.au"))
-            recipients.Add("Scott New", "scott.new@det.nsw.edu.au");
-
-        await _emailService.SendDailyRollMarkingReport(emailList, date, recipients);
+        if (recipients.Count > 0)
+            await _emailService.SendDailyRollMarkingReport(emailList, date, recipients);
     }
 }
