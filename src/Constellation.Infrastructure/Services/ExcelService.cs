@@ -1067,16 +1067,17 @@ public class ExcelService : IExcelService
             // Index 15: Incident Record Detail Options
             // Index 16: Follow Up Action Comment
             // Index 17: Follow Up Actions
-            // Index 18: Teacher
-            // Index 19: Student Surname,
-            // Index 20: Student First Name,
-            // Index 21: DOB
-            // Index 22: Years
-            // Index 23: Months
-            // Index 24: School Year
-            // Index 25: House
-            // Index 26: Roll Class
-            // Index 27: Location
+            // Index 18: Follow Up Action Status
+            // Index 19: Teacher
+            // Index 20: Student Surname,
+            // Index 21: Student First Name,
+            // Index 22: DOB
+            // Index 23: Years
+            // Index 24: Months
+            // Index 25: School Year
+            // Index 26: House
+            // Index 27: Roll Class
+            // Index 28: Location
 
             string studentId = row[0].ToString();
 
@@ -1084,7 +1085,7 @@ public class ExcelService : IExcelService
 
             int severity = _dateTime.Today.DayNumber - dateCreated.DayNumber;
 
-            int gradeNum = Convert.ToInt32(row[24]);
+            int gradeNum = Convert.ToInt32(row[25]);
             Grade grade = (Grade)gradeNum;
             
             response.Add(new(
@@ -1093,9 +1094,9 @@ public class ExcelService : IExcelService
                 row[5].ToString().FormatField(),
                 row[9].ToString().FormatField(),
                 row[11].ToString().FormatField(),
-                row[18].ToString().FormatField(),
-                row[20].ToString().FormatField(),
                 row[19].ToString().FormatField(),
+                row[21].ToString().FormatField(),
+                row[20].ToString().FormatField(),
                 grade,
                 severity));
         }
