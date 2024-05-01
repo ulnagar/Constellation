@@ -984,7 +984,7 @@ public sealed class Service : IEmailService
     {
         DailyReportEmailViewModel viewModel = new DailyReportEmailViewModel
         {
-            Preheader = "",
+            Preheader = "This is an automated email. No action is required outside of school hours.",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
             SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
             Title = $"[Aurora College] Roll Marking Report - {reportDate.ToLongDateString()}",

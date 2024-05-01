@@ -10,6 +10,7 @@ using Core.Models.SchoolContacts.Errors;
 using Core.Shared;
 using Enums;
 using Interfaces.Repositories;
+using Schools.Enums;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -60,18 +61,25 @@ internal sealed class AddToPartnerSchoolTeam
             .Distinct()
             .ToList();
 
-        List<School> schools = await _schoolRepository.GetListFromIds(schoolCodes, cancellationToken);
+        bool isPrimary = false;
+        bool isSecondary = false;
 
-        bool isPrimary = schools
-            .SelectMany(school => 
-                school.Students
-                    .Where(student => !student.IsDeleted))
-            .Any(student => student.CurrentGrade <= Grade.Y06);
+        foreach (string schoolCode in schoolCodes)
+        {
+            SchoolType type = await _schoolRepository.GetSchoolType(schoolCode, cancellationToken);
 
-        bool isSecondary = schools
-            .SelectMany(school => 
-                school.Students.Where(student => !student.IsDeleted))
-            .Any(student => student.CurrentGrade >= Grade.Y07);
+            if (type.Equals(SchoolType.Primary))
+                isPrimary = true;
+
+            if (type.Equals(SchoolType.Secondary))
+                isSecondary = true;
+
+            if (type.Equals(SchoolType.Central))
+            {
+                isPrimary = true;
+                isSecondary = true;
+            }
+        }
 
         if (isPrimary)
         {

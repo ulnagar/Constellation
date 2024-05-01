@@ -134,22 +134,25 @@ internal sealed class GetContactListForParentPortalQueryHandler
             }
         }
 
-        bool success = _configuration.Contacts.LearningSupportIds.TryGetValue(student.CurrentGrade, out string lastStaffId);
+        bool success = _configuration.Contacts.LearningSupportIds.TryGetValue(student.CurrentGrade, out List<string> lastStaffIds);
 
         if (success)
         {
-            Staff member = await _staffRepository.GetById(lastStaffId, cancellationToken);
-
-            if (member is not null)
+            foreach (string staffId in lastStaffIds)
             {
-                response.Add(new(
-                    member.FirstName,
-                    member.LastName,
-                    member.DisplayName,
-                    member.EmailAddress,
-                    string.Empty,
-                    "Support",
-                    "Learning Support"));
+                Staff member = await _staffRepository.GetById(staffId, cancellationToken);
+
+                if (member is not null)
+                {
+                    response.Add(new(
+                        member.FirstName,
+                        member.LastName,
+                        member.DisplayName,
+                        member.EmailAddress,
+                        string.Empty,
+                        "Support",
+                        "Learning Support"));
+                }
             }
         }
 
