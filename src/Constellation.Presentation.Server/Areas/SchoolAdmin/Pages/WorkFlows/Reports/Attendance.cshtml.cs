@@ -5,24 +5,28 @@ using Application.Models.Auth;
 using Application.WorkFlows.CreateAttendanceCase;
 using Application.WorkFlows.UpdateAttendanceCaseDetails;
 using BaseModels;
+using Core.Errors;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Workflows;
 
-[Authorize(Policy = AuthPolicies.CanManageWorkflows)]
+[Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class AttendanceModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly IAuthorizationService _authService;
 
     public AttendanceModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        IAuthorizationService authService)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _authService = authService;
     }
 
     [ViewData] public string ActivePage => WorkFlowPages.Reports;
@@ -53,6 +57,19 @@ public class AttendanceModel : BasePageModel
 
     public async Task<IActionResult> OnPostCreateWorkFlows(List<WorkFlowNeeded> entries)
     {
+        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPolicies.CanManageWorkflows);
+
+        if (!authorised.Succeeded)
+        {
+            Error = new()
+            {
+                Error = DomainErrors.Auth.NotAuthorised,
+                RedirectPath = _linkGenerator.GetPathByPage("/WorkFlows/Reports/Index", values: new { area = "SchoolAdmin" })
+            };
+
+            return Page();
+        }
+
         foreach (WorkFlowNeeded entry in entries)
         {
             Result result = entry.Type switch

@@ -61,6 +61,9 @@ builder.Services.AddScoped<IAuthorizationHandler, HasRequiredMandatoryTrainingMo
 builder.Services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByResource>();
 builder.Services.AddScoped<IAuthorizationHandler, IsCurrentTeacherAddedToTutorial>();
 builder.Services.AddScoped<IAuthorizationHandler, HasRequiredGroupTutorialModulePermissions>();
+builder.Services.AddScoped<IAuthorizationHandler, IsAssignedToActionByResource>();
+builder.Services.AddScoped<IAuthorizationHandler, IsInGroupAllowedToEditWorkFlows>();
+builder.Services.AddScoped<IAuthorizationHandler, IsAssignedToActionByRoute>();
 
 // Register Current User Service
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

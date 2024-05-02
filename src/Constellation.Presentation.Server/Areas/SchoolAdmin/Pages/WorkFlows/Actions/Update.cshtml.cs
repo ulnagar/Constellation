@@ -8,10 +8,7 @@ using Application.WorkFlows.UpdatePhoneParentAction;
 using Application.WorkFlows.UpdateSendEmailAction;
 using BaseModels;
 using Constellation.Application.DTOs;
-using Constellation.Application.Features.Common.Queries;
-using Constellation.Application.Training.Modules.GetTrainingModuleEditContext;
 using Constellation.Application.WorkFlows.GetCaseById;
-using Constellation.Core.Models.Training.Identifiers;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Identifiers;
 using Core.Shared;
@@ -20,11 +17,10 @@ using Helpers.ModelBinders;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Org.BouncyCastle.Cms;
 using Server.Pages.Shared.Components.ActionUpdateForm;
 using Workflows;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[Authorize(Policy = AuthPolicies.CanEditWorkFlowAction)]
 public class UpdateModel : BasePageModel
 {
     private readonly ISender _mediator;
