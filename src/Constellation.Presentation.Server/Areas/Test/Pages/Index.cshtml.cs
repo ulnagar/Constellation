@@ -1,149 +1,115 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
-using Application.Interfaces.Repositories;
+using Application.DTOs.Canvas;
+using Application.Interfaces.Gateways;
+using Application.Interfaces.Jobs;
+using Application.Offerings.GetOfferingsWithCanvasUserRecords;
 using BaseModels;
-using Core.Abstractions.Services;
-using Core.Models.Attendance.Identifiers;
-using Core.Models.WorkFlow;
-using Core.Models.WorkFlow.Enums;
-using Core.Models.WorkFlow.Identifiers;
-using Core.Models.WorkFlow.Repositories;
-using Core.Models.WorkFlow.Services;
+using Core.Abstractions.Clock;
 using Core.Shared;
-using Core.ValueObjects;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
-    private readonly ICaseRepository _caseRepository;
-    private readonly ICaseService _caseService;
-    private readonly ICurrentUserService _currentUserService;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly ICanvasGateway _gateway;
+    private readonly IDateTimeProvider _dateTime;
+    private readonly ILogger _logger;
 
     public IndexModel(
         IMediator mediator,
-        ICaseRepository caseRepository,
-        ICaseService caseService,
-        ICurrentUserService currentUserService,
-        IUnitOfWork unitOfWork)
+        ICanvasGateway gateway,
+        IDateTimeProvider dateTime,
+        ILogger logger)
     {
         _mediator = mediator;
-        _caseRepository = caseRepository;
-        _caseService = caseService;
-        _currentUserService = currentUserService;
-        _unitOfWork = unitOfWork;
+        _gateway = gateway;
+        _dateTime = dateTime;
+        _logger = logger.ForContext<IPermissionUpdateJob>();
     }
 
-    public List<Case> Cases { get; set; } = new();
+    public void OnGet() { }
 
-
-    public async Task OnGet()
+    public async Task OnGetRunCode()
     {
-        Cases = await _caseRepository.GetAll();
-    }
+        bool useGroups = false;
 
-    public async Task OnGetCreateCase()
-    {
-        // AttendanceValueId 2F8178D5-FB1B-4982-BF2A-12EC81DDB5E0
-        // StudentId 444998822
+        List<CourseListEntry> coursesInCanvas = await _gateway.GetAllCourses(_dateTime.CurrentYear.ToString());
+        
+        Result<List<OfferingSummaryWithUsers>> offeringRequest = await _mediator.Send(new GetOfferingsWithCanvasUserRecordsQuery());
 
-        AttendanceValueId valueId = AttendanceValueId.FromValue(Guid.Parse("2F8178D5-FB1B-4982-BF2A-12EC81DDB5E0"));
+        if (offeringRequest.IsFailure)
+            return;
 
-        Result<Case> caseResult = await _caseService.CreateAttendanceCase("444998822", valueId);
-
-        if (caseResult.IsSuccess)
-            _caseRepository.Insert(caseResult.Value);
-
-        await _unitOfWork.CompleteAsync();
-
-        Cases.Add(caseResult.Value);
-    }
-
-    public async Task<IActionResult> OnGetUpdateAction(Guid caseId, Guid actionId)
-    {
-        Case item = await _caseRepository.GetById(CaseId.FromValue(caseId));
-
-        if (item is null)
-            return RedirectToPage();
-
-        Action action = item.Actions.FirstOrDefault(action => action.Id == ActionId.FromValue(actionId));
-
-        if (action is null) 
-            return RedirectToPage();
-
-        if (action is SendEmailAction emailAction)
+        List<OfferingSummaryWithUsers> offerings = offeringRequest.Value;
+        
+        foreach (CourseListEntry canvasCourse in coursesInCanvas)
         {
-            List<EmailRecipient> recipients = new();
+            List<CourseEnrolmentEntry> canvasEnrolments = await _gateway.GetEnrolmentsForCourse(canvasCourse.CourseCode);
 
-            Result<EmailRecipient> recipient1 = EmailRecipient.Create("John Smith", "john.smith@mybusiness.com.au");
-            Result<EmailRecipient> recipient2 = EmailRecipient.Create("Emily Smith", "esmith11@gmail.com");
+            List<OfferingSummaryWithUsers> offeringList = offerings
+                .Where(entry => entry.CanvasResourceIds.Contains(canvasCourse.CourseCode))
+                .ToList();
 
-            recipients.Add(recipient1.Value);
-            recipients.Add(recipient2.Value);
+            List<OfferingSummaryWithUsers.User> offeringUsers = offeringList.SelectMany(entry => entry.Users).ToList();
 
-            Result<EmailRecipient> sender = EmailRecipient.Create("Ben Hillsley", "benjamin.hillsley@det.nsw.edu.au");
+            List<OfferingSummaryWithUsers.User> missingCanvasEnrolments = offeringUsers
+                .Where(entry => 
+                    canvasEnrolments.All(user => user.UserId != entry.Id))
+                .ToList();
 
-            Result update = emailAction.Update(
-                recipients,
-                sender.Value,
-                "An update on your childs attendance",
-                "He didn't attend",
-                false,
-                DateTime.Now,
-                _currentUserService.UserName);
-
-            if (update.IsFailure)
+            foreach (OfferingSummaryWithUsers.User missingEnrolment in missingCanvasEnrolments)
             {
-                return RedirectToPage();
+                _logger.Information("Adding {user} to {course}", missingEnrolment.Id, canvasCourse.CourseCode);
+
+                bool enrolAttempt = await _gateway.EnrolUser(missingEnrolment.Id, canvasCourse.CourseCode, missingEnrolment.AccessLevel.ToString());
+
+                if (!useGroups)
+                    continue;
+
+                string year = canvasCourse.CourseCode.Split('-')[1];
+                string canvasGroupCode = $"{year}-{offeringList.First(entry => entry.Users.Contains(missingEnrolment)).Name}";
+
+                bool addToGroupAttempt = await _gateway.AddUserToGroup(missingEnrolment.Id, canvasGroupCode);
             }
 
-            Result complete = item.UpdateActionStatus(emailAction.Id, ActionStatus.Completed, _currentUserService.UserName);
+            List<CourseEnrolmentEntry> extraCanvasEnrolments = canvasEnrolments
+                .Where(entry => 
+                    offeringUsers.All(user => user.Id != entry.UserId))
+                .ToList();
 
-            if (complete.IsFailure)
+            foreach (CourseEnrolmentEntry canvasEnrolment in extraCanvasEnrolments)
             {
-                return RedirectToPage();
+                _logger.Information("Removing {user} from {course}", canvasEnrolment.UserId, canvasCourse.CourseCode);
+                
+                bool unenrolAttempt = await _gateway.UnenrolUser(canvasEnrolment.UserId, canvasEnrolment.CourseCode);
+            }
+
+            if (!useGroups)
+                continue;
+
+            foreach (OfferingSummaryWithUsers offering in offeringList)
+            {
+                string year = canvasCourse.CourseCode.Split('-')[1];
+                string canvasGroupCode = $"{year}-{offering.Name}";
+
+                List<string> usersInGroup = await _gateway.GetGroupMembers(canvasGroupCode);
+
+                List<OfferingSummaryWithUsers.User> missingGroupMembers = offering.Users.Where(entry => !usersInGroup.Contains(entry.Id)).ToList();
+
+                foreach (OfferingSummaryWithUsers.User missingGroupMember in missingGroupMembers)
+                {
+                    bool addToGroupAttempt = await _gateway.AddUserToGroup(missingGroupMember.Id, canvasGroupCode);
+                }
+
+                List<string> extraGroupMembers = usersInGroup.Where(entry => offering.Users.All(user => user.Id != entry)).ToList();
+
+                foreach (string extraGroupMember in extraGroupMembers)
+                {
+                    bool removeFromGroupAttempt = await _gateway.RemoveUserFromGroup(extraGroupMember, canvasGroupCode);
+                }
             }
         }
-
-        if (action is CreateSentralEntryAction sentralAction)
-        {
-            Result update = sentralAction.Update(true, _currentUserService.UserName);
-
-            if (update.IsFailure)
-            {
-                return RedirectToPage();
-            }
-
-            Result complete = item.UpdateActionStatus(sentralAction.Id, ActionStatus.Completed, _currentUserService.UserName);
-
-            if (complete.IsFailure)
-            {
-                return RedirectToPage();
-            }
-        }
-
-        if (action is ConfirmSentralEntryAction confirmAction)
-        {
-            Result update = confirmAction.Update(true, _currentUserService.UserName);
-
-            if (update.IsFailure)
-            {
-                return RedirectToPage();
-            }
-
-            Result complete = item.UpdateActionStatus(confirmAction.Id, ActionStatus.Completed, _currentUserService.UserName);
-
-            if (complete.IsFailure)
-            {
-                return RedirectToPage();
-            }
-        }
-
-        await _unitOfWork.CompleteAsync();
-
-        return RedirectToPage();
     }
-
 }

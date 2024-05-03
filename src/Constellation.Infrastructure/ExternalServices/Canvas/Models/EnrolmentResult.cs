@@ -27,4 +27,7 @@ internal class EnrolmentResult
 
     [JsonProperty("sis_user_id")]
     public string SISId { get; set; }
+
+    [JsonProperty("user")]
+    public EnrolmentListEntry.EnrolmentResultUser User { get; set; }
 }
