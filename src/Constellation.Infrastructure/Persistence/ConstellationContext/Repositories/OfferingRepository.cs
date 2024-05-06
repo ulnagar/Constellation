@@ -2,6 +2,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Canvas.Models;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
@@ -203,6 +204,17 @@ public class OfferingRepository : IOfferingRepository
                 offering.Resources.Any(resource =>
                         resource.Type == ResourceType.MicrosoftTeam &&
                         resource.ResourceId == teamName))
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Offering>> GetWithLinkedCanvasResource(
+        CanvasCourseCode courseCode, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Offering>()
+            .Where(offering =>
+                offering.Resources.Any(resource =>
+                    resource.Type == ResourceType.CanvasCourse &&
+                    resource.ResourceId == courseCode.ToString()))
             .ToListAsync(cancellationToken);
 
     public async Task<Offering> GetFromYearAndName(

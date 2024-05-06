@@ -65,6 +65,7 @@ public sealed class CanvasCourseResource : Resource
     internal CanvasCourseResource(
         OfferingId offeringId,
         string canvasCourseId,
+        string canvasSectionId,
         string name,
         string url)
     {
@@ -74,11 +75,9 @@ public sealed class CanvasCourseResource : Resource
         ResourceId = canvasCourseId;
         Name = name;
 
-        if (string.IsNullOrEmpty(url))
-            Url = $"https://aurora.instructure.com/courses/sis_course_id:{ResourceId}";
-        else
-            Url = url;
+        Url = string.IsNullOrEmpty(url) ? $"https://aurora.instructure.com/courses/sis_course_id:{ResourceId}" : url;
     }
 
     public string CourseId => ResourceId;
+    public string SectionId { get; private set; }
 }

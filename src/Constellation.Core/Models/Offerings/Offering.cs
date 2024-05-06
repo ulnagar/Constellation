@@ -151,7 +151,8 @@ public sealed class Offering : AggregateRoot
         ResourceType type,
         string resourceId,
         string name,
-        string url)
+        string url,
+        string additional = "")
     {
         if (_resources.Any(resource => resource.Type == type && resource.ResourceId == resourceId))
             return Result.Success();
@@ -160,7 +161,7 @@ public sealed class Offering : AggregateRoot
         {
             var _ when type == ResourceType.AdobeConnectRoom => new AdobeConnectRoomResource(Id, resourceId, name, url),
             var _ when type == ResourceType.MicrosoftTeam => new MicrosoftTeamResource(Id, resourceId, name, url),
-            var _ when type == ResourceType.CanvasCourse => new CanvasCourseResource(Id, resourceId, name, url),
+            var _ when type == ResourceType.CanvasCourse => new CanvasCourseResource(Id, resourceId, additional, name, url),
             _ => null
         };
 

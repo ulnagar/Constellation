@@ -41,7 +41,7 @@ public class ModifyEnrolmentCanvasOperation : CanvasOperation
             {
                 ScheduledFor = scheduledFor.Value;
             }
-        }
+    }
 
     public CanvasUserType UserType { get; private set; }
     public string CourseId { get; private set; }

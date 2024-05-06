@@ -13,6 +13,9 @@ internal sealed class EnrolmentListEntry
     [JsonProperty("sis_user_id")]
     public string SISId { get; set; }
 
+    [JsonProperty("sis_section_id")]
+    public string SectionId { get; set; }
+
     [JsonProperty("user")]
     public EnrolmentResultUser User { get; set; }
 

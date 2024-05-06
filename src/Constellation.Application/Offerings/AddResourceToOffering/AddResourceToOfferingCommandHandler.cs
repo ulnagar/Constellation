@@ -6,6 +6,7 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Offerings.ValueObjects;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,7 +39,22 @@ internal sealed class AddResourceToOfferingCommandHandler
             return Result.Failure(OfferingErrors.NotFound(request.OfferingId));
         }
 
-        Result attempt = offering.AddResource(request.ResourceType, request.ResourceId, request.Name, request.Url);
+        Result attempt;
+
+        if (request.ResourceType.Equals(ResourceType.CanvasCourse))
+        {
+            string year = offering.EndDate.Year.ToString();
+            string code = offering.Name;
+
+            if (request.ResourceId.Equals($"{year}-{code[..^2]}"))
+                attempt = offering.AddResource(request.ResourceType, request.ResourceId, request.Name, request.Url, $"{year}-{code}");
+            else
+                attempt = offering.AddResource(request.ResourceType, request.ResourceId, request.Name, request.Url);
+        }
+        else
+        {
+            attempt = offering.AddResource(request.ResourceType, request.ResourceId, request.Name, request.Url);
+        }
 
         if (attempt.IsFailure)
             return attempt;

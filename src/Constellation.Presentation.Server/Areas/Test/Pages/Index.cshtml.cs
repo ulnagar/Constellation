@@ -1,11 +1,12 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
+using Application.Canvas.GetCourseMembershipByCourseCode;
 using Application.DTOs.Canvas;
 using Application.Interfaces.Gateways;
 using Application.Interfaces.Jobs;
-using Application.Offerings.GetOfferingsWithCanvasUserRecords;
 using BaseModels;
 using Core.Abstractions.Clock;
+using Core.Models.Canvas.Models;
 using Core.Shared;
 using MediatR;
 using Serilog;
@@ -33,50 +34,74 @@ public class IndexModel : BasePageModel
 
     public async Task OnGetRunCode()
     {
-        bool useGroups = false;
+        bool useGroups = true;
+        bool useSections = true;
 
         List<CourseListEntry> coursesInCanvas = await _gateway.GetAllCourses(_dateTime.CurrentYear.ToString());
-        
-        Result<List<OfferingSummaryWithUsers>> offeringRequest = await _mediator.Send(new GetOfferingsWithCanvasUserRecordsQuery());
-
-        if (offeringRequest.IsFailure)
-            return;
-
-        List<OfferingSummaryWithUsers> offerings = offeringRequest.Value;
         
         foreach (CourseListEntry canvasCourse in coursesInCanvas)
         {
             List<CourseEnrolmentEntry> canvasEnrolments = await _gateway.GetEnrolmentsForCourse(canvasCourse.CourseCode);
 
-            List<OfferingSummaryWithUsers> offeringList = offerings
-                .Where(entry => entry.CanvasResourceIds.Contains(canvasCourse.CourseCode))
-                .ToList();
+            CanvasCourseCode courseCode = new(canvasCourse.CourseCode);
 
-            List<OfferingSummaryWithUsers.User> offeringUsers = offeringList.SelectMany(entry => entry.Users).ToList();
+            Result<List<CanvasCourseMembership>> calculatedMembers = await _mediator.Send(new GetCourseMembershipByCourseCodeQuery(courseCode));
 
-            List<OfferingSummaryWithUsers.User> missingCanvasEnrolments = offeringUsers
-                .Where(entry => 
-                    canvasEnrolments.All(user => user.UserId != entry.Id))
-                .ToList();
-
-            foreach (OfferingSummaryWithUsers.User missingEnrolment in missingCanvasEnrolments)
+            if (calculatedMembers.IsFailure)
             {
-                _logger.Information("Adding {user} to {course}", missingEnrolment.Id, canvasCourse.CourseCode);
+                _logger
+                    .ForContext(nameof(CanvasCourseCode), courseCode.Value)
+                    .Warning("Error getting expected members of Canvas Course");
 
-                bool enrolAttempt = await _gateway.EnrolUser(missingEnrolment.Id, canvasCourse.CourseCode, missingEnrolment.AccessLevel.ToString());
+                continue;
+            }
 
-                if (!useGroups)
+            List<CanvasCourseMembership> missingCanvasEnrolments = calculatedMembers.Value
+                .Where(entry => 
+                    canvasEnrolments.All(user => user.UserId != entry.UserId))
+                .ToList();
+
+            foreach (CanvasCourseMembership missingEnrolment in missingCanvasEnrolments)
+            {
+                _logger.Information("Adding {user} to {course}", missingEnrolment.UserId, canvasCourse.CourseCode);
+
+                bool enrolAttempt = useSections switch
+                {
+                    true when missingEnrolment.PermissionLevel == CanvasPermissionLevel.Student =>
+                        await _gateway.EnrolToSection(missingEnrolment.UserId, missingEnrolment.SectionId, missingEnrolment.PermissionLevel.ToString()),
+                    true =>
+                        await _gateway.EnrolToCourse(missingEnrolment.UserId, canvasCourse.CourseCode, missingEnrolment.PermissionLevel.ToString()),
+                    false =>
+                        await _gateway.EnrolToCourse(missingEnrolment.UserId, canvasCourse.CourseCode, missingEnrolment.PermissionLevel.ToString()),
+                };
+
+                if (!enrolAttempt)
+                {
+                    _logger
+                        .ForContext(nameof(CanvasCourseCode), courseCode.Value)
+                        .ForContext(nameof(CanvasCourseMembership), missingEnrolment, true)
+                        .Warning("Failed to enrol missing member into Canvas Course");
+
                     continue;
+                }
 
-                string year = canvasCourse.CourseCode.Split('-')[1];
-                string canvasGroupCode = $"{year}-{offeringList.First(entry => entry.Users.Contains(missingEnrolment)).Name}";
+                if (!useGroups || missingEnrolment.PermissionLevel != CanvasPermissionLevel.Student) continue;
 
-                bool addToGroupAttempt = await _gateway.AddUserToGroup(missingEnrolment.Id, canvasGroupCode);
+                bool addToGroupAttempt = await _gateway.AddUserToGroup(missingEnrolment.UserId, missingEnrolment.SectionId);
+
+                if (!addToGroupAttempt)
+                {
+                    _logger
+                        .ForContext(nameof(CanvasCourseCode), courseCode.Value)
+                        .ForContext(nameof(CanvasCourseMembership), missingEnrolment, true)
+                        .ForContext("GroupCode", missingEnrolment.SectionId)
+                        .Warning("Failed to add missing member to Course Group");
+                }
             }
 
             List<CourseEnrolmentEntry> extraCanvasEnrolments = canvasEnrolments
                 .Where(entry => 
-                    offeringUsers.All(user => user.Id != entry.UserId))
+                    calculatedMembers.Value.All(user => user.UserId != entry.UserId))
                 .ToList();
 
             foreach (CourseEnrolmentEntry canvasEnrolment in extraCanvasEnrolments)
@@ -84,30 +109,73 @@ public class IndexModel : BasePageModel
                 _logger.Information("Removing {user} from {course}", canvasEnrolment.UserId, canvasCourse.CourseCode);
                 
                 bool unenrolAttempt = await _gateway.UnenrolUser(canvasEnrolment.UserId, canvasEnrolment.CourseCode);
+
+                if (!unenrolAttempt)
+                {
+                    _logger
+                        .ForContext(nameof(CanvasCourseCode), courseCode.Value)
+                        .ForContext(nameof(CourseEnrolmentEntry), canvasEnrolment, true)
+                        .Warning("Failed to remove extra member from Canvas Course");
+                }
+            }
+            
+            if (useGroups)
+            {
+                foreach (var group in calculatedMembers.Value.GroupBy(entry => entry.SectionId))
+                {
+                    if (string.IsNullOrWhiteSpace(group.Key))
+                        continue;
+
+                    List<string> usersInGroup = await _gateway.GetGroupMembers(group.Key);
+
+                    List<CanvasCourseMembership> missingGroupMembers = group.Where(entry => !usersInGroup.Contains(entry.UserId)).ToList();
+
+                    foreach (CanvasCourseMembership missingGroupMember in missingGroupMembers)
+                    {
+                        bool addToGroupAttempt = await _gateway.AddUserToGroup(missingGroupMember.UserId, group.Key);
+
+                        if (!addToGroupAttempt)
+                            _logger
+                                .ForContext(nameof(CanvasCourseCode), courseCode.Value)
+                                .ForContext(nameof(CanvasCourseMembership), missingGroupMember, true)
+                                .ForContext("GroupCode", group.Key)
+                                .Warning("Failed to add missing member to Course Group");
+                    }
+
+                    List<string> extraGroupMembers = usersInGroup.Where(entry => group.All(user => user.UserId != entry)).ToList();
+
+                    foreach (string extraGroupMember in extraGroupMembers)
+                    {
+                        bool removeFromGroupAttempt = await _gateway.RemoveUserFromGroup(extraGroupMember, group.Key);
+
+                        if (!removeFromGroupAttempt)
+                            _logger
+                                .ForContext(nameof(CanvasCourseCode), courseCode.Value)
+                                .ForContext(nameof(extraGroupMember), extraGroupMember)
+                                .ForContext("GroupCode", group.Key)
+                                .Warning("Failed to remove extra member from Course Group");
+                    }
+                }
             }
 
-            if (!useGroups)
-                continue;
-
-            foreach (OfferingSummaryWithUsers offering in offeringList)
+            if (useSections)
             {
-                string year = canvasCourse.CourseCode.Split('-')[1];
-                string canvasGroupCode = $"{year}-{offering.Name}";
-
-                List<string> usersInGroup = await _gateway.GetGroupMembers(canvasGroupCode);
-
-                List<OfferingSummaryWithUsers.User> missingGroupMembers = offering.Users.Where(entry => !usersInGroup.Contains(entry.Id)).ToList();
-
-                foreach (OfferingSummaryWithUsers.User missingGroupMember in missingGroupMembers)
+                foreach (CanvasCourseMembership calculatedMember in calculatedMembers.Value)
                 {
-                    bool addToGroupAttempt = await _gateway.AddUserToGroup(missingGroupMember.Id, canvasGroupCode);
-                }
+                    CourseEnrolmentEntry matchingCanvasEnrolment = canvasEnrolments.FirstOrDefault(entry => entry.UserId == calculatedMember.UserId);
 
-                List<string> extraGroupMembers = usersInGroup.Where(entry => offering.Users.All(user => user.Id != entry)).ToList();
+                    if (matchingCanvasEnrolment is null)
+                        continue;
 
-                foreach (string extraGroupMember in extraGroupMembers)
-                {
-                    bool removeFromGroupAttempt = await _gateway.RemoveUserFromGroup(extraGroupMember, canvasGroupCode);
+                    if (calculatedMember.SectionId != matchingCanvasEnrolment.SectionCode)
+                    {
+                        await _gateway.UnenrolUser(calculatedMember.UserId, )
+
+
+                        await _gateway.EnrolToSection(calculatedMember.UserId, calculatedMember.SectionId,
+                            calculatedMember.PermissionLevel.ToString());
+                    }
+
                 }
             }
         }

@@ -8,6 +8,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
     {
         public void Configure(EntityTypeBuilder<StocktakeEvent> builder)
         {
+            builder.ToTable("StocktakeEvents");
+
             builder.HasKey(stocktake => stocktake.Id);
 
             builder.HasMany(stocktake => stocktake.Sightings).WithOne(sighting => sighting.StocktakeEvent).OnDelete(DeleteBehavior.Cascade);

@@ -8,6 +8,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
     {
         public void Configure(EntityTypeBuilder<StocktakeSighting> builder)
         {
+            builder.ToTable("StocktakeSightings");
+
             builder.HasKey(sighting => sighting.Id);
         }
     }

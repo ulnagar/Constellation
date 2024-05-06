@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.DTOs.Canvas;
 public sealed record CourseEnrolmentEntry(
     string CourseCode,
+    string SectionCode,
     string UserId,
     CourseEnrolmentEntry.UserType Type,
     CourseEnrolmentEntry.EnrolmentRole Role)

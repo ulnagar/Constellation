@@ -1,5 +1,6 @@
 namespace Constellation.Core.Models.Offerings.Repositories;
 
+using Canvas.Models;
 using Enums;
 using Offerings;
 using Identifiers;
@@ -38,4 +39,5 @@ public interface IOfferingRepository
 
     Task<List<string>> GetTimetableByOfferingId(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetWithLinkedTeamResource(string teamName, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetWithLinkedCanvasResource(CanvasCourseCode courseCode, CancellationToken cancellationToken = default);
 }

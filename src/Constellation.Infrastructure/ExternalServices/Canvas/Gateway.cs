@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Canvas;
 
 using Application.DTOs.Canvas;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Gateways;
-using Constellation.Infrastructure.ExternalServices.Canvas.Models;
+using Application.DTOs;
+using Application.Interfaces.Gateways;
+using Models;
 using Core.Models.Attachments.DTOs;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -18,9 +18,9 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using static Constellation.Core.Errors.DomainErrors;
+using System.Text.RegularExpressions;
 
-internal class Gateway : ICanvasGateway
+internal sealed class Gateway : ICanvasGateway
 {
     private readonly HttpClient _client;
 
@@ -40,7 +40,7 @@ internal class Gateway : ICanvasGateway
 
         if (_logOnly)
         {
-            _logger.Information("Gateway initalised in log only mode");
+            _logger.Information("Gateway initialised in log only mode");
 
             return;
         }
@@ -88,95 +88,112 @@ internal class Gateway : ICanvasGateway
         return response;
     }
 
-    private async Task<int?> SearchForUserLogin(string UserId)
+    private async Task<int?> SearchForUserLogin(
+        string userId, 
+        CancellationToken cancellationToken = default)
     {
-        var path = $"users/sis_user_id:{UserId}/logins";
+        string path = $"users/sis_user_id:{userId}/logins";
 
         if (_logOnly)
         {
-            _logger.Information("SearchForUserLogin: UserId={userId}, path={path}", UserId, path);
+            _logger.Information("SearchForUserLogin: UserId={userId}, path={path}", userId, path);
 
             return 1;
         }
 
-        var response = await RequestAsync(path, HttpVerb.Get);
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
         if (!response.IsSuccessStatusCode)
             return null;
 
-        var responseText = await response.Content.ReadAsStringAsync();
+        string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        var logins = JsonConvert.DeserializeObject<List<UserLoginResult>>(responseText);
+        List<UserLoginResult> logins = JsonConvert.DeserializeObject<List<UserLoginResult>>(responseText);
 
-        return logins.FirstOrDefault(login => login.SISId == UserId)?.Id;
+        return logins.FirstOrDefault(login => login.SISId == userId)?.Id;
     }
 
-    private async Task<int?> SearchForUser(string UserId)
+    private async Task<int?> SearchForUser(
+        string userId,
+        CancellationToken cancellationToken = default)
     {
-        var path = $"accounts/1/users?search_term={UserId}";
+        string path = $"accounts/1/users?search_term={userId}";
 
         if (_logOnly)
         {
-            _logger.Information("SearchForUser: UserId={userId}, path={path}", UserId, path);
+            _logger.Information("SearchForUser: UserId={userId}, path={path}", userId, path);
 
             return 1;
         }
 
-        var response = await RequestAsync(path, HttpVerb.Get);
-        var responseText = await response.Content.ReadAsStringAsync();
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
+        if (!response.IsSuccessStatusCode)
+            return null;
 
-        var users = JsonConvert.DeserializeObject<List<UserResult>>(responseText);
+        string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        return users.FirstOrDefault(login => login.SISId == UserId)?.Id;
+        List<UserResult> users = JsonConvert.DeserializeObject<List<UserResult>>(responseText);
+
+        return users.FirstOrDefault(login => login.SISId == userId)?.Id;
     }
 
-    private async Task<int?> SearchForCourseEnrolment(string UserId, string CourseId)
+    private async Task<int?> SearchForCourseEnrolment(
+        string userId,
+        string courseId,
+        CancellationToken cancellationToken = default)
     {
-        var path = $"courses/sis_course_id:{CourseId}/enrollments?sis_user_id={UserId}";
+        string path = $"courses/sis_course_id:{courseId}/enrollments?sis_user_id={userId}";
 
         if (_logOnly)
         {
-            _logger.Information("SearchForCourseEnrolment: UserId={userId}, CourseId={courseId}, path={path}", UserId, CourseId, path);
+            _logger.Information("SearchForCourseEnrolment: UserId={userId}, CourseId={courseId}, path={path}", userId, courseId, path);
 
             return 1;
         }
 
-        var response = await RequestAsync(path, HttpVerb.Get);
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
         if (!response.IsSuccessStatusCode)
             return null;
 
-        var responseText = await response.Content.ReadAsStringAsync();
+        string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        var enrolments = JsonConvert.DeserializeObject<List<EnrolmentResult>>(responseText);
+        List<EnrolmentResult> enrolments = JsonConvert.DeserializeObject<List<EnrolmentResult>>(responseText);
 
-        return enrolments.FirstOrDefault(enrol => enrol.SISId == UserId)?.Id;
+        return enrolments.FirstOrDefault(enrol => enrol.SISId == userId)?.Id;
     }
 
-    private async Task<List<AssignmentResult>> SearchForCourseAssignment(string UserId, string CourseId)
+    private async Task<List<AssignmentResult>> SearchForCourseAssignment(
+        string userId,
+        string courseId,
+        CancellationToken cancellationToken = default)
     {
-        var path = $"users/sis_user_id:{UserId}/courses/sis_course_id:{CourseId}/assignments";
+        string path = $"users/sis_user_id:{userId}/courses/sis_course_id:{courseId}/assignments";
 
         if (_logOnly)
         {
-            _logger.Information("SearchForCourseAssignment: UserId={userId}, CourseId={courseId}, path={path}", UserId, CourseId, path);
+            _logger.Information("SearchForCourseAssignment: UserId={userId}, CourseId={courseId}, path={path}", userId, courseId, path);
 
-            return new List<AssignmentResult>();
+            return new();
         }
-
-
-        var response = await RequestAsync(path, HttpVerb.Get);
+        
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
         if (!response.IsSuccessStatusCode)
             return null;
 
-        var responseText = await response.Content.ReadAsStringAsync();
+        string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        var assignments = JsonConvert.DeserializeObject<List<AssignmentResult>>(responseText);
+        List<AssignmentResult> assignments = JsonConvert.DeserializeObject<List<AssignmentResult>>(responseText);
 
         return assignments;
     }
 
-    public async Task<bool> UploadAssignmentSubmission(string CourseId, int CanvasAssignmentId, string StudentId, AttachmentResponse file)
+    public async Task<bool> UploadAssignmentSubmission(
+        string courseId, 
+        int canvasAssignmentId, 
+        string studentId, 
+        AttachmentResponse file, 
+        CancellationToken cancellationToken = default)
     {
-        var stepOnePath = $"courses/sis_course_id:{CourseId}/assignments/{CanvasAssignmentId}/submissions/sis_user_id:{StudentId}/files";
+        string stepOnePath = $"courses/sis_course_id:{courseId}/assignments/{canvasAssignmentId}/submissions/sis_user_id:{studentId}/files";
 
         var stepOnePayload = new
         {
@@ -188,37 +205,37 @@ internal class Gateway : ICanvasGateway
 
         if (_logOnly)
         {
-            _logger.Information("UploadAssignmentSubmission: CourseId={courseId}, CanvasAssignmentId={canvasAssignmentId}, StudentId={studentId}, Attachment={@file}, stepOnePath={stepOnePath}, stepOnePayload={@stepOnePayload}", CourseId, CanvasAssignmentId, StudentId, file, stepOnePath, stepOnePayload);
+            _logger.Information("UploadAssignmentSubmission: CourseId={courseId}, CanvasAssignmentId={canvasAssignmentId}, StudentId={studentId}, Attachment={@file}, stepOnePath={stepOnePath}, stepOnePayload={@stepOnePayload}", courseId, canvasAssignmentId, studentId, file, stepOnePath, stepOnePayload);
 
             return true;
         }
 
-        var stepOneResponse = await RequestAsync(stepOnePath, HttpVerb.Post, stepOnePayload);
+        HttpResponseMessage stepOneResponse = await RequestAsync(stepOnePath, HttpVerb.Post, stepOnePayload, cancellationToken: cancellationToken);
         if (!stepOneResponse.IsSuccessStatusCode)
         {
             _logger.Error("CanvasGateway.UploadAssignmentSubmission: Failed on step one with response {@response}", stepOneResponse);
             return false;
         }
 
-        var stepOneResponseText = await stepOneResponse.Content.ReadAsStringAsync();
-        var fileUploadLocation = JsonConvert.DeserializeObject<FileUploadLocationResult>(stepOneResponseText);
+        string stepOneResponseText = await stepOneResponse.Content.ReadAsStringAsync(cancellationToken);
+        FileUploadLocationResult fileUploadLocation = JsonConvert.DeserializeObject<FileUploadLocationResult>(stepOneResponseText);
 
         _logger.Information("CanvasGateway.UploadAssignmentSubmission: Succeeded on step one with response {@response}", fileUploadLocation);
 
-        int fileId = 0;
+        int fileId;
 
         // MultipartFormDataContent code taken from https://makolyte.com/csharp-how-to-send-a-file-with-httpclient/
-        using (var stepTwoContent = new MultipartFormDataContent())
+        using (MultipartFormDataContent stepTwoContent = new())
         {
             stepTwoContent.Add(new StringContent(file.FileName), name: "filename");
             stepTwoContent.Add(new StringContent(file.FileType), name: "content_type");
 
-            var fileStream = new MemoryStream(file.FileData);
-            var fileStreamContent = new StreamContent(fileStream);
-            fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(file.FileType);
+            MemoryStream fileStream = new(file.FileData);
+            StreamContent fileStreamContent = new(fileStream);
+            fileStreamContent.Headers.ContentType = new(file.FileType);
             stepTwoContent.Add(fileStreamContent, name: "file", fileName: file.FileName);
 
-            var stepTwoResponse = await _client.PostAsync(fileUploadLocation.UploadUrl, stepTwoContent);
+            HttpResponseMessage stepTwoResponse = await _client.PostAsync(fileUploadLocation.UploadUrl, stepTwoContent, cancellationToken: cancellationToken);
             if (!stepTwoResponse.IsSuccessStatusCode)
             {
                 _logger.Error("CanvasGateway.UploadAssignmentSubmission: Failed on step two with response {@response}", stepTwoResponse);
@@ -226,16 +243,16 @@ internal class Gateway : ICanvasGateway
                 return false;
             }
 
-            var stepTwoResponseText = await stepTwoResponse.Content.ReadAsStringAsync();
-            var fileUploadConfirmation = JsonConvert.DeserializeObject<FileUploadConfirmationResult>(stepTwoResponseText);
+            string stepTwoResponseText = await stepTwoResponse.Content.ReadAsStringAsync(cancellationToken);
+            FileUploadConfirmationResult fileUploadConfirmation = JsonConvert.DeserializeObject<FileUploadConfirmationResult>(stepTwoResponseText);
             fileId = fileUploadConfirmation.Id;
 
             _logger.Information("CanvasGateway.UploadAssignmentSubmission: Succeeded on step two with response {@response}", fileUploadConfirmation);
         }
 
-        var canvasUserId = await SearchForUser(StudentId);
+        int? canvasUserId = await SearchForUser(studentId, cancellationToken);
 
-        var stepThreePath = $"/courses/sis_course_id:{CourseId}/assignments/{CanvasAssignmentId}/submissions";
+        string stepThreePath = $"/courses/sis_course_id:{courseId}/assignments/{canvasAssignmentId}/submissions";
         var stepThreePayload = new
         {
             submission = new
@@ -246,7 +263,7 @@ internal class Gateway : ICanvasGateway
             }
         };
 
-        var stepThreeResponse = await RequestAsync(stepThreePath, HttpVerb.Post, stepThreePayload);
+        HttpResponseMessage stepThreeResponse = await RequestAsync(stepThreePath, HttpVerb.Post, stepThreePayload, cancellationToken);
         if (!stepThreeResponse.IsSuccessStatusCode)
         {
             _logger.Error("CanvasGateway.UploadAssignmentSubmission: Failed on step three with response {@response}", stepThreeResponse);
@@ -259,30 +276,37 @@ internal class Gateway : ICanvasGateway
         return true;
     }
 
-    public async Task<List<CanvasAssignmentDto>> GetAllCourseAssignments(string CourseId)
+    public async Task<List<CanvasAssignmentDto>> GetAllCourseAssignments(
+        string courseId,
+        CancellationToken cancellationToken = default)
     {
-        var path = $"courses/sis_course_id:{CourseId}/assignments";
+        string path = $"courses/sis_course_id:{courseId}/assignments";
 
         if (_logOnly)
         {
-            _logger.Information("GetAllCourseAssignments: CourseId={courseId}, path={path}", CourseId, path);
+            _logger.Information("GetAllCourseAssignments: CourseId={courseId}, path={path}", courseId, path);
 
             return new List<CanvasAssignmentDto>();
         }
 
-        var response = await RequestAsync(path, HttpVerb.Get);
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
         if (!response.IsSuccessStatusCode)
             return null;
 
-        var responseText = await response.Content.ReadAsStringAsync();
+        string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        var assignments = JsonConvert.DeserializeObject<List<AssignmentResult>>(responseText);
+        List<AssignmentResult> assignments = JsonConvert.DeserializeObject<List<AssignmentResult>>(responseText);
 
-        var returnData = new List<CanvasAssignmentDto>();
+        List<CanvasAssignmentDto> returnData = new();
 
-        foreach (var assignment in assignments.Where(a => a.IsPublished && a.SubmissionTypes.Contains("online_upload")))
+        assignments = assignments.Where(assignment =>
+                assignment.IsPublished &&
+                assignment.SubmissionTypes.Contains("online_upload"))
+            .ToList();
+
+        foreach (AssignmentResult assignment in assignments)
         {
-            returnData.Add(new CanvasAssignmentDto
+            returnData.Add(new()
             {
                 CanvasId = assignment.Id,
                 Name = assignment.Name,
@@ -296,126 +320,182 @@ internal class Gateway : ICanvasGateway
         return returnData;
     }
 
-    public async Task<bool> CreateUser(string UserId, string FirstName, string LastName, string LoginEmail, string UserEmail)
+    public async Task<bool> CreateUser(
+        string userId, 
+        string firstName, 
+        string lastName,
+        string loginEmail, 
+        string userEmail,
+        CancellationToken cancellationToken = default)
     {
-        var CanvasUserId = await SearchForUser(UserId);
+        int? canvasUserId = await SearchForUser(userId, cancellationToken);
 
         if (_logOnly)
         {
             // The SearchForUser function will always return 1,
-            // but we here want to return null instead to cover the create code.
-            CanvasUserId = null;
+            // but we here want to return null instead to cover the whole method code.
+            canvasUserId = null;
         }
 
-        if (CanvasUserId != null)
-            return await ReactivateUser(UserId);
+        if (canvasUserId != null)
+            return await ReactivateUser(userId, cancellationToken);
 
         // If not, create a new user
-        var path = "accounts/1/users";
+        string path = "accounts/1/users";
 
         var payload = new
         {
             user = new
             {
-                name = $"{FirstName} {LastName}",
-                short_name = $"{FirstName} {LastName}"
+                name = $"{firstName} {lastName}",
+                short_name = $"{firstName} {lastName}"
             },
             pseudonym = new
             {
-                unique_id = LoginEmail,
+                unique_id = loginEmail,
                 authentication_provider_id = "google",
-                sis_user_id = UserId
+                sis_user_id = userId
             },
             communications_channel = new
             {
                 type = "email",
-                address = UserEmail,
+                address = userEmail,
                 skip_confirmation = true
             }
         };
 
         if (_logOnly)
         {
-            _logger.Information("CreateUser: args={@args}, payload={@payload}, path={path}", new { UserId, FirstName, LastName, LoginEmail, UserEmail }, payload, path);
+            _logger.Information("CreateUser: args={@args}, payload={@payload}, path={path}", new { UserId = userId, FirstName = firstName, LastName = lastName, LoginEmail = loginEmail,
+                UserEmail = userEmail }, payload, path);
 
             return true;
         }
 
-        var response = await RequestAsync(path, HttpVerb.Post, payload);
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Post, payload, cancellationToken);
 
-        if (response.IsSuccessStatusCode)
-            return true;
-
-        return false;
+        return response.IsSuccessStatusCode;
     }
 
-    public async Task<bool> EnrolUser(string UserId, string CourseId, string PermissionLevel)
+    public async Task<bool> EnrolToCourse(
+        string userId,
+        string courseId,
+        string permissionLevel,
+        CancellationToken cancellationToken = default)
     {
-        var CanvasUserId = await SearchForUser(UserId);
+        int? canvasUserId = await SearchForUser(userId, cancellationToken);
 
-        if (CanvasUserId == null)
+        if (canvasUserId == null)
             return false;
 
-        var path = $"courses/sis_course_id:{CourseId}/enrollments";
+        if (!string.IsNullOrWhiteSpace(courseId))
+        {
+
+        }
+
+        string path = $"courses/sis_course_id:{courseId}/enrollments";
 
         var payload = new
         {
             enrollment = new
             {
-                user_id = CanvasUserId,
-                type = $"{PermissionLevel}Enrollment",
+                user_id = canvasUserId,
+                type = $"{permissionLevel}Enrollment",
                 enrollment_state = "active"
             }
         };
 
         if (_logOnly)
         {
-            _logger.Information("EnrolUser: UserId={userId}, CourseId={courseId}, PermissionLevel={permissionLevel}, path={path}, payload={@payload}", UserId, CourseId, PermissionLevel, path, payload);
+            _logger.Information("EnrolUser: UserId={userId}, CourseId={courseId}, PermissionLevel={permissionLevel}, path={path}, payload={@payload}", userId, courseId, permissionLevel, path, payload);
 
             return true;
         }
 
-        var response = await RequestAsync(path, HttpVerb.Post, payload);
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Post, payload, cancellationToken);
 
-        if (response.IsSuccessStatusCode)
-            return true;
-
-        return false;
+        return response.IsSuccessStatusCode;
     }
 
-    public async Task<bool> UnenrolUser(string UserId, string CourseId)
+    public async Task<bool> EnrolToSection(
+        string userId,
+        string sectionId,
+        string permissionLevel,
+        CancellationToken cancellationToken = default)
     {
-        var CanvasEnrolmentId = await SearchForCourseEnrolment(UserId, CourseId);
+        int? canvasUserId = await SearchForUser(userId, cancellationToken);
 
-        if (CanvasEnrolmentId == null)
+        if (canvasUserId == null)
             return false;
 
-        var path = $"courses/sis_course_id:{CourseId}/enrollments/{CanvasEnrolmentId}?task=deactivate";
+        bool sectionExists = await CheckSectionExists(sectionId, cancellationToken);
+
+        if (!sectionExists)
+        {
+            bool sectionCreated = await CreateSection(sectionId, cancellationToken);
+
+            if (!sectionCreated)
+                return false;
+        }
+
+        string path = $"sections/sis_section_id:{sectionId}/enrollments";
+
+        var payload = new
+        {
+            enrollment = new
+            {
+                user_id = canvasUserId,
+                type = $"{permissionLevel}Enrollment",
+                enrollment_state = "active"
+            }
+        };
 
         if (_logOnly)
         {
-            _logger.Information("UnenrolUser: UserId={userId}, CourseId={courseId}, path={path}", UserId, CourseId, path);
+            _logger.Information("EnrolUser: UserId={userId}, SectionId={sectionId}, PermissionLevel={permissionLevel}, path={path}, payload={@payload}", userId, sectionId, permissionLevel, path, payload);
 
             return true;
         }
 
-        var response = await RequestAsync(path, HttpVerb.Delete);
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Post, payload, cancellationToken);
 
-        if (response.IsSuccessStatusCode)
-            return true;
-
-        return false;
+        return response.IsSuccessStatusCode;
     }
 
-
-    public async Task<bool> ReactivateUser(string UserId)
+    public async Task<bool> UnenrolUser(
+        string userId,
+        string courseId,
+        CancellationToken cancellationToken = default)
     {
-        var CanvasLoginId = await SearchForUserLogin(UserId);
+        int? canvasEnrolmentId = await SearchForCourseEnrolment(userId, courseId, cancellationToken);
 
-        if (CanvasLoginId == null)
+        if (canvasEnrolmentId == null)
             return false;
 
-        var path = $"accounts/1/logins/{CanvasLoginId}";
+        string path = $"courses/sis_course_id:{courseId}/enrollments/{canvasEnrolmentId}?task=deactivate";
+
+        if (_logOnly)
+        {
+            _logger.Information("UnenrolUser: UserId={userId}, CourseId={courseId}, path={path}", userId, courseId, path);
+
+            return true;
+        }
+
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Delete, cancellationToken: cancellationToken);
+
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> ReactivateUser(
+        string userId,
+        CancellationToken cancellationToken = default)
+    {
+        int? canvasLoginId = await SearchForUserLogin(userId, cancellationToken);
+
+        if (canvasLoginId == null)
+            return false;
+
+        string path = $"accounts/1/logins/{canvasLoginId}";
 
         var payload = new
         {
@@ -427,27 +507,26 @@ internal class Gateway : ICanvasGateway
 
         if (_logOnly)
         {
-            _logger.Information("ReactivateUser: UserId={userId}, path={path}, payload={@payload}", UserId, path, payload);
+            _logger.Information("ReactivateUser: UserId={userId}, path={path}, payload={@payload}", userId, path, payload);
 
             return true;
         }
 
-        var response = await RequestAsync(path, HttpVerb.Put, payload);
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Put, payload, cancellationToken);
 
-        if (response.IsSuccessStatusCode)
-            return true;
-
-        return false;
+        return response.IsSuccessStatusCode;
     }
 
-    public async Task<bool> DeactivateUser(string UserId)
+    public async Task<bool> DeactivateUser(
+        string userId,
+        CancellationToken cancellationToken = default)
     {
-        var CanvasLoginId = await SearchForUserLogin(UserId);
+        int? canvasLoginId = await SearchForUserLogin(userId, cancellationToken);
 
-        if (CanvasLoginId == null)
+        if (canvasLoginId == null)
             return false;
 
-        var path = $"accounts/1/logins/{CanvasLoginId}";
+        string path = $"accounts/1/logins/{canvasLoginId}";
 
         var payload = new
         {
@@ -459,39 +538,38 @@ internal class Gateway : ICanvasGateway
 
         if (_logOnly)
         {
-            _logger.Information("DeactivateUser: UserId={userId}, path={path}, payload={@payload}", UserId, path, payload);
+            _logger.Information("DeactivateUser: UserId={userId}, path={path}, payload={@payload}", userId, path, payload);
 
             return true;
         }
 
-        var response = await RequestAsync(path, HttpVerb.Put, payload);
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Put, payload, cancellationToken);
 
-        if (response.IsSuccessStatusCode)
-            return true;
-
-        return false;
+        return response.IsSuccessStatusCode;
     }
 
-    public async Task<bool> DeleteUser(string UserId)
+    public async Task<bool> DeleteUser(
+        string userId,
+        CancellationToken cancellationToken = default)
     {
-        var CanvasLoginId = await SearchForUserLogin(UserId);
+        int? canvasLoginId = await SearchForUserLogin(userId, cancellationToken);
 
-        if (CanvasLoginId == null)
+        if (canvasLoginId == null)
             return false;
 
-        var CanvasUserId = await SearchForUser(UserId);
+        int? canvasUserId = await SearchForUser(userId, cancellationToken);
 
-        if (CanvasUserId == null)
+        if (canvasUserId == null)
             return false;
 
         // Change the users SIS_USER_ID to prepend the deletion year (making it unique)
-        var path = $"accounts/1/logins/{CanvasLoginId}";
+        string path = $"accounts/1/logins/{canvasLoginId}";
 
         var payload = new
         {
             login = new
             {
-                sis_user_id = $"{DateTime.Now.Year}-{UserId}"
+                sis_user_id = $"{DateTime.Now.Year}-{userId}"
             }
         };
 
@@ -499,38 +577,35 @@ internal class Gateway : ICanvasGateway
 
         if (_logOnly)
         {
-            _logger.Information("DeleteUser: UserId={userId}, path={path}, payload={@payload}", UserId, path, payload);
+            _logger.Information("DeleteUser: UserId={userId}, path={path}, payload={@payload}", userId, path, payload);
 
-            response = new HttpResponseMessage(HttpStatusCode.NoContent);
+            response = new(HttpStatusCode.NoContent);
         }
         else
         {
-            response = await RequestAsync(path, HttpVerb.Put, payload);
+            response = await RequestAsync(path, HttpVerb.Put, payload, cancellationToken);
         }
 
         if (!response.IsSuccessStatusCode)
-        {
             return false;
-        }
 
-        path = $"accounts/1/users/{CanvasUserId}";
+        path = $"accounts/1/users/{canvasUserId}";
 
         if (_logOnly)
         {
-            _logger.Information("DeleteUser: UserId={userId}, path={path}", UserId, path);
+            _logger.Information("DeleteUser: UserId={userId}, path={path}", userId, path);
 
             return true;
         }
 
-        response = await RequestAsync(path, HttpVerb.Delete);
+        response = await RequestAsync(path, HttpVerb.Delete, cancellationToken: cancellationToken);
 
-        if (response.IsSuccessStatusCode)
-            return true;
-
-        return false;
+        return response.IsSuccessStatusCode;
     }
 
-    public async Task<List<CourseListEntry>> GetAllCourses(string year, CancellationToken cancellationToken = default)
+    public async Task<List<CourseListEntry>> GetAllCourses(
+        string year, 
+        CancellationToken cancellationToken = default)
     {
         List<CourseListEntry> returnData = new();
 
@@ -542,7 +617,7 @@ internal class Gateway : ICanvasGateway
 
         while (nextPageExists)
         {
-            HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get);
+            HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
 
             if (!response.IsSuccessStatusCode)
                 return returnData;
@@ -575,7 +650,9 @@ internal class Gateway : ICanvasGateway
         return returnData;
     }
 
-    public async Task<List<CourseEnrolmentEntry>> GetEnrolmentsForCourse(string courseId, CancellationToken cancellationToken = default)
+    public async Task<List<CourseEnrolmentEntry>> GetEnrolmentsForCourse(
+        string courseId, 
+        CancellationToken cancellationToken = default)
     {
         List<CourseEnrolmentEntry> returnData = new();
 
@@ -587,7 +664,7 @@ internal class Gateway : ICanvasGateway
 
         while (nextPageExists)
         {
-            HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get);
+            HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
 
             if (!response.IsSuccessStatusCode)
                 return null;
@@ -618,18 +695,21 @@ internal class Gateway : ICanvasGateway
         foreach (EnrolmentListEntry enrolment in enrolments.Where(entry => entry.EnrollmentState == "active" && entry.EnrollmentType != "StudentViewEnrollment"))
         {
             CourseEnrolmentEntry.UserType userType =
-                string.IsNullOrWhiteSpace(enrolment.SISId) ? CourseEnrolmentEntry.UserType.Unknown
-                : enrolment.SISId.Length == 9 && enrolment.SISId.StartsWith("4") ? CourseEnrolmentEntry.UserType.Student
+                enrolment.SISId.Length == 9 && enrolment.SISId.StartsWith("4") ? CourseEnrolmentEntry.UserType.Student
                 : !string.IsNullOrWhiteSpace(enrolment.SISId) ? CourseEnrolmentEntry.UserType.Teacher
                 : CourseEnrolmentEntry.UserType.Unknown;
 
             CourseEnrolmentEntry.EnrolmentRole role =
-                enrolment.EnrollmentType == "StudentEnrollment" ? CourseEnrolmentEntry.EnrolmentRole.Student
-                : enrolment.EnrollmentType == "TeacherEnrollment" ? CourseEnrolmentEntry.EnrolmentRole.Teacher
-                : CourseEnrolmentEntry.EnrolmentRole.Unknown;
+                enrolment.EnrollmentType switch
+                {
+                    "StudentEnrollment" => CourseEnrolmentEntry.EnrolmentRole.Student,
+                    "TeacherEnrollment" => CourseEnrolmentEntry.EnrolmentRole.Teacher,
+                    _ => CourseEnrolmentEntry.EnrolmentRole.Unknown
+                };
 
             returnData.Add(new(
                 courseId,
+                enrolment.SectionId,
                 enrolment.SISId,
                 userType,
                 role));
@@ -638,9 +718,12 @@ internal class Gateway : ICanvasGateway
         return returnData;
     }
 
-    public async Task<bool> AddUserToGroup(string userId, string groupId, CancellationToken cancellationToken = default)
+    public async Task<bool> AddUserToGroup(
+        string userId, 
+        string groupId, 
+        CancellationToken cancellationToken = default)
     {
-        int? canvasUserId = await SearchForUser(userId);
+        int? canvasUserId = await SearchForUser(userId, cancellationToken);
 
         if (canvasUserId == null)
             return false;
@@ -675,7 +758,12 @@ internal class Gateway : ICanvasGateway
 
         if (_logOnly)
         {
-            _logger.Information("EnrolUser: UserId={userId}, CourseId={courseId}, PermissionLevel={permissionLevel}, path={path}, payload={@payload}", userId, groupId, path, payload);
+            _logger
+                .ForContext(nameof(payload), payload, true)
+                .ForContext(nameof(userId), userId)
+                .ForContext(nameof(groupId), groupId)
+                .ForContext(nameof(path), path)
+                .Information("AddUserToGroup");
 
             return true;
         }
@@ -685,7 +773,37 @@ internal class Gateway : ICanvasGateway
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<bool> CheckGroupExists(string groupId, CancellationToken cancellationToken = default)
+    private async Task<bool> CheckSectionExists(
+        string sectionId,
+        CancellationToken cancellationToken = default)
+    {
+        string path = $"sections/sis_section_id:{sectionId}";
+
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
+
+        return response.IsSuccessStatusCode;
+    }
+
+    private async Task<bool> CreateSection(
+        string sectionId,
+        CancellationToken cancellationToken = default)
+    {
+        string path = $"courses/sis_course_id:{sectionId[..^2]}/sections";
+
+        var payload = new
+        {
+            name = sectionId[5..],
+            sis_section_id = sectionId
+        };
+
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Post, payload, cancellationToken);
+
+        return response.IsSuccessStatusCode;
+    }
+
+    private async Task<bool> CheckGroupExists(
+        string groupId, 
+        CancellationToken cancellationToken = default)
     {
         string path = $"groups/sis_group_id:{groupId}";
 
@@ -694,16 +812,20 @@ internal class Gateway : ICanvasGateway
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<bool> CheckGroupCategoryExists(string categoryId, CancellationToken cancellationToken = default)
+    private async Task<bool> CheckGroupCategoryExists(
+        string categoryId, 
+        CancellationToken cancellationToken = default)
     {
-        string path = $"group_categories/sis_group_cateogry_id:{categoryId}";
+        string path = $"group_categories/sis_group_category_id:{categoryId}";
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
 
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<bool> CreateGroupCategory(string categoryId, CancellationToken cancellationToken = default)
+    private async Task<bool> CreateGroupCategory(
+        string categoryId, 
+        CancellationToken cancellationToken = default)
     {
         string path = $"courses/sis_course_id:{categoryId}/group_categories";
         
@@ -718,7 +840,9 @@ internal class Gateway : ICanvasGateway
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<bool> CreateGroup(string groupId, CancellationToken cancellationToken = default)
+    private async Task<bool> CreateGroup(
+        string groupId, 
+        CancellationToken cancellationToken = default)
     {
         string path = $"group_categories/sis_group_category_id:{groupId[..^2]}/groups";
 
@@ -734,7 +858,9 @@ internal class Gateway : ICanvasGateway
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<List<string>> GetGroupMembers(string groupId, CancellationToken cancellationToken = default)
+    public async Task<List<string>> GetGroupMembers(
+        string groupId, 
+        CancellationToken cancellationToken = default)
     {
         List<string> returnData = new();
 
@@ -762,7 +888,9 @@ internal class Gateway : ICanvasGateway
         return returnData;
     }
 
-    public async Task<string> GetUserData(int canvasUserId, CancellationToken cancellationToken = default)
+    private async Task<string> GetUserData(
+        int canvasUserId, 
+        CancellationToken cancellationToken = default)
     {
         string path = $"users/{canvasUserId}";
 
@@ -778,7 +906,10 @@ internal class Gateway : ICanvasGateway
         return userDetails is not null ? userDetails.UserId : string.Empty;
     }
 
-    public async Task<bool> RemoveUserFromGroup(string userId, string groupId, CancellationToken cancellationToken = default)
+    public async Task<bool> RemoveUserFromGroup(
+        string userId, 
+        string groupId, 
+        CancellationToken cancellationToken = default)
     {
         string path = $"groups/sis_group_id:{groupId}/users/sis_user_id:{userId}";
         
