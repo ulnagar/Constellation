@@ -249,10 +249,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Offering.Sessions)
+                    @foreach (var item in Model.Offering.Sessions.OrderBy(entry => entry.PeriodSortName))
                     {
                         <tr>
-                            <td>@item.PeriodName</td>
+                            <td data-order="@item.PeriodSortName">@item.PeriodName</td>
                             <td>@item.Duration</td>
                             <td>
                                 @if (canEditTest.Succeeded)
