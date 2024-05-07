@@ -27,12 +27,13 @@ internal sealed class TeamRepository : ITeamRepository
             .Set<Team>()
             .FirstOrDefaultAsync(team => team.Id == teamId, cancellationToken);
 
-    public async Task<Team?> GetByName(
-        string Name, 
+    public async Task<List<Team>> GetByName(
+        string name, 
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<Team>()
-            .FirstOrDefaultAsync(team => team.Name.Contains(Name), cancellationToken);
+            .Where(team => team.Name.Contains(name))
+            .ToListAsync(cancellationToken);
 
     public async Task<Guid?> GetIdByOffering(
         string offeringName, 

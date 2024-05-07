@@ -1,10 +1,13 @@
 ﻿namespace Constellation.Application.Teams.GetTeamByName;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Teams.Models;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
-using Constellation.Core.Shared;
+using Core.Errors;
+using Core.Models;
+using Core.Shared;
+using Models;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,18 +24,23 @@ internal sealed class GetTeamByNameQueryHandler
 
     public async Task<Result<TeamResource>> Handle(GetTeamByNameQuery request, CancellationToken cancellationToken)
     {
-        var team = await _teamRepository.GetByName(request.Name, cancellationToken);
+        List<Team> teams = await _teamRepository.GetByName(request.Name, cancellationToken);
 
-        if (team is null)
-        {
+        if (teams.Count == 0)
             return Result.Failure<TeamResource>(DomainErrors.LinkedSystems.Teams.TeamNotFoundInDatabase);
+
+        Team exactMatch = teams.FirstOrDefault(team => team.Name == request.Name);
+
+        if (exactMatch is not null)
+        {
+            return new TeamResource(
+                exactMatch.Id,
+                exactMatch.Name,
+                exactMatch.Description,
+                exactMatch.Link,
+                exactMatch.IsArchived);
         }
 
-        return new TeamResource(
-            team.Id,
-            team.Name,
-            team.Description,
-            team.Link,
-            team.IsArchived);
+        return Result.Failure<TeamResource>(DomainErrors.LinkedSystems.Teams.MoreThanOneMatchFound);
     }
 }

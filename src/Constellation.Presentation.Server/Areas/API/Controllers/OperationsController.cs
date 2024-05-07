@@ -1,455 +1,381 @@
-﻿using Constellation.Application.DTOs;
-using Constellation.Application.Features.API.Operations.Commands;
+﻿namespace Constellation.Presentation.Server.Areas.API.Controllers;
+
+using Application.DTOs;
+using Application.Interfaces.Repositories;
+using Application.StaffMembers.GetStaffById;
+using Application.Students.GetStudentById;
+using Application.Students.Models;
+using Application.Teams.GetTeamByName;
 using Constellation.Application.Features.API.Operations.Queries;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.StaffMembers.GetStaffById;
-using Constellation.Application.Students.GetStudentById;
-using Constellation.Application.Teams.GetTeamByName;
 using Constellation.Application.Teams.Models;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Server.Areas.API.Models;
+using Core.Abstractions.Repositories;
+using Core.Enums;
+using Core.Models;
+using Core.Models.Casuals;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Models;
 
-namespace Constellation.Presentation.Server.Areas.API.Controllers
+[Route("api/v1/Operations")]
+[ApiController]
+public class OperationsController : ControllerBase
 {
-    [Route("api/v1/Operations")]
-    [ApiController]
-    public class OperationsController : ControllerBase
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMediator _mediator;
+    private readonly ICasualRepository _casualRepository;
+
+    public OperationsController(
+        IUnitOfWork unitOfWork, 
+        IMediator mediator, 
+        ICasualRepository casualRepository)
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMediator _mediator;
-        private readonly ICasualRepository _casualRepository;
+        _unitOfWork = unitOfWork;
+        _mediator = mediator;
+        _casualRepository = casualRepository;
+    }
 
-        public OperationsController(IUnitOfWork unitOfWork, IMediator mediator, ICasualRepository casualRepository)
+    // GET api/Operations/Due
+    [Route("Due")]
+    public async Task<IEnumerable<TeamsOperation>> GetDue()
+    {
+        MSTeamOperationsList operations = await _unitOfWork.MSTeamOperations.ToProcess();
+
+        return await BuildOperations(operations);
+    }
+
+
+    // GET api/Operations/Overdue
+    [Route("Overdue")]
+    public async Task<IEnumerable<TeamsOperation>> GetOverdue()
+    {
+        MSTeamOperationsList operations = await _unitOfWork.MSTeamOperations.OverdueToProcess();
+
+        return await BuildOperations(operations);
+    }
+
+    private async Task<ICollection<TeamsOperation>> BuildOperations(MSTeamOperationsList operations)
+    {
+        List<TeamsOperation> returnData = new();
+
+        foreach (TeacherAssignmentMSTeamOperation operation in operations.AssignmentOperations)
         {
-            _unitOfWork = unitOfWork;
-            _mediator = mediator;
-            _casualRepository = casualRepository;
+            Result<StaffResponse> staffMember = await _mediator.Send(new GetStaffByIdQuery(operation.StaffId));
+
+            if (staffMember.IsFailure)
+            {
+                continue;
+            }
+
+            TeamsOperation teamOperation = new()
+            {
+                Id = operation.Id,
+                TeamName = operation.TeamName,
+                UserEmail = staffMember.Value.EmailAddress.Email
+            };
+
+            teamOperation.Action = operation.Action switch
+            {
+                MSTeamOperationAction.Add => "Add",
+                MSTeamOperationAction.Remove => "Remove",
+                MSTeamOperationAction.Promote => "Promote",
+                MSTeamOperationAction.Demote => "Demote",
+                _ => teamOperation.Action
+            };
+
+            teamOperation.Role = operation.PermissionLevel switch
+            {
+                MSTeamOperationPermissionLevel.Member => "Member",
+                MSTeamOperationPermissionLevel.Owner => "Owner",
+                _ => teamOperation.Role
+            };
+
+            Result<TeamResource> request = await _mediator.Send(new GetTeamByNameQuery(operation.TeamName));
+
+            if (request.IsFailure)
+                continue;
+
+            teamOperation.TeamId = request.Value.Id.ToString();
+
+            returnData.Add(teamOperation);
         }
 
-        // GET api/Operations/Due
-        [Route("Due")]
-        public async Task<IEnumerable<TeamsOperation>> GetDue()
+        foreach (StudentOfferingMSTeamOperation operation in operations.StudentOfferingOperations)
         {
-            var operations = await _unitOfWork.MSTeamOperations.ToProcess();
+            Result<StudentResponse> student = await _mediator.Send(new GetStudentByIdQuery(operation.StudentId));
 
-            return await BuildOperations(operations);
+            if (student.IsFailure)
+                continue;
+
+            TeamsOperation teamOperation = new()
+            {
+                Id = operation.Id,
+                TeamName = operation.TeamName,
+                UserEmail = student.Value.EmailAddress
+            };
+
+            teamOperation.Action = operation.Action switch
+            {
+                MSTeamOperationAction.Add => "Add",
+                MSTeamOperationAction.Remove => "Remove",
+                MSTeamOperationAction.Promote => "Promote",
+                MSTeamOperationAction.Demote => "Demote",
+                _ => teamOperation.Action
+            };
+
+            teamOperation.Role = operation.PermissionLevel switch
+            {
+                MSTeamOperationPermissionLevel.Member => "Member",
+                MSTeamOperationPermissionLevel.Owner => "Owner",
+                _ => teamOperation.Role
+            };
+
+            Result<TeamResource> request = await _mediator.Send(new GetTeamByNameQuery(operation.TeamName));
+
+            if (request.IsFailure)
+                continue;
+
+            teamOperation.TeamId = request.Value.Id.ToString();
+
+            returnData.Add(teamOperation);
         }
 
-
-        // GET api/Operations/Overdue
-        [Route("Overdue")]
-        public async Task<IEnumerable<TeamsOperation>> GetOverdue()
+        foreach (StudentMSTeamOperation operation in operations.StudentOperations)
         {
-            var operations = await _unitOfWork.MSTeamOperations.OverdueToProcess();
+            TeamsOperation teamOperation = new()
+            {
+                Id = operation.Id,
+                TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
+                UserEmail = operation.Student.EmailAddress
+            };
 
-            return await BuildOperations(operations);
+            teamOperation.Action = operation.Action switch
+            {
+                MSTeamOperationAction.Add => "Add",
+                MSTeamOperationAction.Remove => "Remove",
+                MSTeamOperationAction.Promote => "Promote",
+                MSTeamOperationAction.Demote => "Demote",
+                _ => teamOperation.Action
+            };
+
+            teamOperation.Role = operation.PermissionLevel switch
+            {
+                MSTeamOperationPermissionLevel.Member => "Member",
+                MSTeamOperationPermissionLevel.Owner => "Owner",
+                _ => teamOperation.Role
+            };
+
+            teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
+
+            returnData.Add(teamOperation);
         }
 
-        private async Task<ICollection<TeamsOperation>> BuildOperations(MSTeamOperationsList operations)
+        foreach (TeacherMSTeamOperation operation in operations.TeacherOperations)
         {
-            var returnData = new List<TeamsOperation>();
-
-            foreach (var operation in operations.AssignmentOperations)
+            TeamsOperation teamOperation = new()
             {
-                var staffMember = await _mediator.Send(new GetStaffByIdQuery(operation.StaffId));
+                Id = operation.Id,
+                TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
+                UserEmail = operation.Staff.EmailAddress
+            };
 
-                if (staffMember.IsFailure)
-                {
-                    continue;
-                }
-
-                var teamOperation = new TeamsOperation
-                {
-                    Id = operation.Id,
-                    TeamName = operation.TeamName,
-                    UserEmail = staffMember.Value.EmailAddress.Email
-                };
-
-                switch (operation.Action)
-                {
-                    case MSTeamOperationAction.Add:
-                        teamOperation.Action = "Add";
-                        break;
-                    case MSTeamOperationAction.Remove:
-                        teamOperation.Action = "Remove";
-                        break;
-                    case MSTeamOperationAction.Promote:
-                        teamOperation.Action = "Promote";
-                        break;
-                    case MSTeamOperationAction.Demote:
-                        teamOperation.Action = "Demote";
-                        break;
-                }
-
-                switch (operation.PermissionLevel)
-                {
-                    case MSTeamOperationPermissionLevel.Member:
-                        teamOperation.Role = "Member";
-                        break;
-                    case MSTeamOperationPermissionLevel.Owner:
-                        teamOperation.Role = "Owner";
-                        break;
-                }
-
-                Result<TeamResource> request = await _mediator.Send(new GetTeamByNameQuery(operation.TeamName));
-
-                if (request.IsFailure)
-                {
-                    continue;
-                }
-
-                teamOperation.TeamId = request.Value.Id.ToString();
-
-                returnData.Add(teamOperation);
-            }
-
-            foreach (var operation in operations.StudentOfferingOperations)
+            teamOperation.Action = operation.Action switch
             {
-                var student = await _mediator.Send(new GetStudentByIdQuery(operation.StudentId));
+                MSTeamOperationAction.Add => "Add",
+                MSTeamOperationAction.Remove => "Remove",
+                MSTeamOperationAction.Promote => "Promote",
+                MSTeamOperationAction.Demote => "Demote",
+                _ => teamOperation.Action
+            };
 
-                if (student.IsFailure)
-                {
-                    continue;
-                }
-
-                var teamOperation = new TeamsOperation
-                {
-                    Id = operation.Id,
-                    TeamName = operation.TeamName,
-                    UserEmail = student.Value.EmailAddress
-                };
-
-                switch (operation.Action)
-                {
-                    case MSTeamOperationAction.Add:
-                        teamOperation.Action = "Add";
-                        break;
-                    case MSTeamOperationAction.Remove:
-                        teamOperation.Action = "Remove";
-                        break;
-                    case MSTeamOperationAction.Promote:
-                        teamOperation.Action = "Promote";
-                        break;
-                    case MSTeamOperationAction.Demote:
-                        teamOperation.Action = "Demote";
-                        break;
-                }
-
-                switch (operation.PermissionLevel)
-                {
-                    case MSTeamOperationPermissionLevel.Member:
-                        teamOperation.Role = "Member";
-                        break;
-                    case MSTeamOperationPermissionLevel.Owner:
-                        teamOperation.Role = "Owner";
-                        break;
-                }
-
-                Result<TeamResource> request = await _mediator.Send(new GetTeamByNameQuery(operation.TeamName));
-
-                if (request.IsFailure)
-                {
-                    continue;
-                }
-
-                teamOperation.TeamId = request.Value.Id.ToString();
-
-                returnData.Add(teamOperation);
-            }
-
-            foreach (var operation in operations.StudentOperations)
+            teamOperation.Role = operation.PermissionLevel switch
             {
-                var teamOperation = new TeamsOperation
-                {
-                    Id = operation.Id,
-                    TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
-                    UserEmail = operation.Student.EmailAddress
-                };
+                MSTeamOperationPermissionLevel.Member => "Member",
+                MSTeamOperationPermissionLevel.Owner => "Owner",
+                _ => teamOperation.Role
+            };
 
-                switch (operation.Action)
-                {
-                    case MSTeamOperationAction.Add:
-                        teamOperation.Action = "Add";
-                        break;
-                    case MSTeamOperationAction.Remove:
-                        teamOperation.Action = "Remove";
-                        break;
-                    case MSTeamOperationAction.Promote:
-                        teamOperation.Action = "Promote";
-                        break;
-                    case MSTeamOperationAction.Demote:
-                        teamOperation.Action = "Demote";
-                        break;
-                }
+            teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
 
-                switch (operation.PermissionLevel)
-                {
-                    case MSTeamOperationPermissionLevel.Member:
-                        teamOperation.Role = "Member";
-                        break;
-                    case MSTeamOperationPermissionLevel.Owner:
-                        teamOperation.Role = "Owner";
-                        break;
-                }
-
-                teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
-
-                returnData.Add(teamOperation);
-            }
-
-            foreach (var operation in operations.TeacherOperations)
-            {
-                var teamOperation = new TeamsOperation
-                {
-                    Id = operation.Id,
-                    TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
-                    UserEmail = operation.Staff.EmailAddress
-                };
-
-                switch (operation.Action)
-                {
-                    case MSTeamOperationAction.Add:
-                        teamOperation.Action = "Add";
-                        break;
-                    case MSTeamOperationAction.Remove:
-                        teamOperation.Action = "Remove";
-                        break;
-                    case MSTeamOperationAction.Promote:
-                        teamOperation.Action = "Promote";
-                        break;
-                    case MSTeamOperationAction.Demote:
-                        teamOperation.Action = "Demote";
-                        break;
-                }
-
-                switch (operation.PermissionLevel)
-                {
-                    case MSTeamOperationPermissionLevel.Member:
-                        teamOperation.Role = "Member";
-                        break;
-                    case MSTeamOperationPermissionLevel.Owner:
-                        teamOperation.Role = "Owner";
-                        break;
-                }
-
-                teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
-
-                returnData.Add(teamOperation);
-            }
-
-            foreach (var operation in operations.CasualOperations)
-            {
-                var casual = await _casualRepository.GetById(CasualId.FromValue(operation.CasualId));
-
-                var teamOperation = new TeamsOperation
-                {
-                    Id = operation.Id,
-                    TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
-                    UserEmail = casual.EmailAddress
-                };
-
-                switch (operation.Action)
-                {
-                    case MSTeamOperationAction.Add:
-                        teamOperation.Action = "Add";
-                        break;
-                    case MSTeamOperationAction.Remove:
-                        teamOperation.Action = "Remove";
-                        break;
-                    case MSTeamOperationAction.Promote:
-                        teamOperation.Action = "Promote";
-                        break;
-                    case MSTeamOperationAction.Demote:
-                        teamOperation.Action = "Demote";
-                        break;
-                }
-
-                switch (operation.PermissionLevel)
-                {
-                    case MSTeamOperationPermissionLevel.Member:
-                        teamOperation.Role = "Member";
-                        break;
-                    case MSTeamOperationPermissionLevel.Owner:
-                        teamOperation.Role = "Owner";
-                        break;
-                }
-
-                teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
-
-                returnData.Add(teamOperation);
-            }
-
-            foreach (var operation in operations.GroupOperations)
-            {
-                var teamOperation = new TeamsOperation
-                {
-                    Id = operation.Id,
-                    TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
-                    Action = "Group",
-                    Faculty = operation.Faculty.ToString()
-                };
-
-                teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
-
-                returnData.Add(teamOperation);
-            }
-
-            foreach (var operation in operations.TutorialOperations)
-            {
-                var teamOperation = new TeamsOperation
-                {
-                    Id = operation.Id,
-                    TeamName = $"AC - {operation.GroupTutorial.EndDate:yyyy} - {operation.GroupTutorial.Name}",
-                    Action = "Group"
-                };
-
-                returnData.Add(teamOperation);
-            }
-
-            foreach (var operation in operations.EnrolmentOperations)
-            {
-                var teamOperation = new TeamsOperation
-                {
-                    Id = operation.Id,
-                    TeamName = operation.TeamName,
-                    UserEmail = operation.Student.EmailAddress,
-                    AdditionalInformation = operation.Student.CurrentGrade.ToString()
-                };
-
-                switch (operation.Action)
-                {
-                    case MSTeamOperationAction.Add:
-                        teamOperation.Action = "Add";
-                        break;
-                    case MSTeamOperationAction.Remove:
-                        teamOperation.Action = "Remove";
-                        break;
-                    case MSTeamOperationAction.Promote:
-                        teamOperation.Action = "Promote";
-                        break;
-                    case MSTeamOperationAction.Demote:
-                        teamOperation.Action = "Demote";
-                        break;
-                }
-
-                switch (operation.PermissionLevel)
-                {
-                    case MSTeamOperationPermissionLevel.Member:
-                        teamOperation.Role = "Member";
-                        break;
-                    case MSTeamOperationPermissionLevel.Owner:
-                        teamOperation.Role = "Owner";
-                        break;
-                }
-
-                teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.TeamName, Year = operation.TeamName });
-
-                returnData.Add(teamOperation);
-            }
-
-            foreach (var operation in operations.EmploymentOperations)
-            {
-                var teamOperation = new TeamsOperation
-                {
-                    Id = operation.Id,
-                    TeamName = operation.TeamName,
-                    UserEmail = operation.Staff.EmailAddress,
-                    AdditionalInformation = "All"
-                };
-
-                switch (operation.Action)
-                {
-                    case MSTeamOperationAction.Add:
-                        teamOperation.Action = "Add";
-                        break;
-                    case MSTeamOperationAction.Remove:
-                        teamOperation.Action = "Remove";
-                        break;
-                    case MSTeamOperationAction.Promote:
-                        teamOperation.Action = "Promote";
-                        break;
-                    case MSTeamOperationAction.Demote:
-                        teamOperation.Action = "Demote";
-                        break;
-                }
-
-                switch (operation.PermissionLevel)
-                {
-                    case MSTeamOperationPermissionLevel.Member:
-                        teamOperation.Role = "Member";
-                        break;
-                    case MSTeamOperationPermissionLevel.Owner:
-                        teamOperation.Role = "Owner";
-                        break;
-                }
-
-                teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.TeamName, Year = operation.TeamName });
-
-                returnData.Add(teamOperation);
-            }
-
-            foreach (var operation in operations.ContactOperations)
-            {
-                var teamOperation = new TeamsOperation
-                {
-                    Id = operation.Id,
-                    TeamName = operation.TeamName,
-                    UserEmail = operation.Contact.EmailAddress
-                };
-
-                switch (operation.Action)
-                {
-                    case MSTeamOperationAction.Add:
-                        teamOperation.Action = "Add";
-                        break;
-                    case MSTeamOperationAction.Remove:
-                        teamOperation.Action = "Remove";
-                        break;
-                    case MSTeamOperationAction.Promote:
-                        teamOperation.Action = "Promote";
-                        break;
-                    case MSTeamOperationAction.Demote:
-                        teamOperation.Action = "Demote";
-                        break;
-                }
-
-                switch (operation.PermissionLevel)
-                {
-                    case MSTeamOperationPermissionLevel.Member:
-                        teamOperation.Role = "Member";
-                        break;
-                    case MSTeamOperationPermissionLevel.Owner:
-                        teamOperation.Role = "Owner";
-                        break;
-                }
-
-                teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.TeamName, Year = operation.TeamName });
-
-                returnData.Add(teamOperation);
-            }
-
-            return returnData;
+            returnData.Add(teamOperation);
         }
 
-        // POST api/Operations/Complete
-        [Route("Complete/{id}")]
-        [HttpPost]
-        public async Task Complete(int id)
+        foreach (CasualMSTeamOperation operation in operations.CasualOperations)
         {
-            var operation = await _unitOfWork.MSTeamOperations.ForMarkingCompleteOrCancelled(id);
+            Casual casual = await _casualRepository.GetById(CasualId.FromValue(operation.CasualId));
 
-            if (operation != null)
+            TeamsOperation teamOperation = new()
             {
-                operation.Complete();
-                await _unitOfWork.CompleteAsync();
-            }
+                Id = operation.Id,
+                TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
+                UserEmail = casual.EmailAddress
+            };
+
+            teamOperation.Action = operation.Action switch
+            {
+                MSTeamOperationAction.Add => "Add",
+                MSTeamOperationAction.Remove => "Remove",
+                MSTeamOperationAction.Promote => "Promote",
+                MSTeamOperationAction.Demote => "Demote",
+                _ => teamOperation.Action
+            };
+
+            teamOperation.Role = operation.PermissionLevel switch
+            {
+                MSTeamOperationPermissionLevel.Member => "Member",
+                MSTeamOperationPermissionLevel.Owner => "Owner",
+                _ => teamOperation.Role
+            };
+
+            teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
+
+            returnData.Add(teamOperation);
+        }
+
+        foreach (GroupMSTeamOperation operation in operations.GroupOperations)
+        {
+            TeamsOperation teamOperation = new()
+            {
+                Id = operation.Id,
+                TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
+                Action = "Group",
+                Faculty = operation.Faculty.ToString()
+            };
+
+            teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
+
+            returnData.Add(teamOperation);
+        }
+
+        foreach (GroupTutorialCreatedMSTeamOperation operation in operations.TutorialOperations)
+        {
+            TeamsOperation teamOperation = new()
+            {
+                Id = operation.Id,
+                TeamName = $"AC - {operation.GroupTutorial.EndDate:yyyy} - {operation.GroupTutorial.Name}",
+                Action = "Group"
+            };
+
+            returnData.Add(teamOperation);
+        }
+
+        foreach (StudentEnrolledMSTeamOperation operation in operations.EnrolmentOperations)
+        {
+            TeamsOperation teamOperation = new()
+            {
+                Id = operation.Id,
+                TeamName = operation.TeamName,
+                UserEmail = operation.Student.EmailAddress,
+                AdditionalInformation = operation.Student.CurrentGrade.ToString()
+            };
+
+            teamOperation.Action = operation.Action switch
+            {
+                MSTeamOperationAction.Add => "Add",
+                MSTeamOperationAction.Remove => "Remove",
+                MSTeamOperationAction.Promote => "Promote",
+                MSTeamOperationAction.Demote => "Demote",
+                _ => teamOperation.Action
+            };
+
+            teamOperation.Role = operation.PermissionLevel switch
+            {
+                MSTeamOperationPermissionLevel.Member => "Member",
+                MSTeamOperationPermissionLevel.Owner => "Owner",
+                _ => teamOperation.Role
+            };
+
+            teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.TeamName, Year = operation.TeamName });
+
+            returnData.Add(teamOperation);
+        }
+
+        foreach (TeacherEmployedMSTeamOperation operation in operations.EmploymentOperations)
+        {
+            TeamsOperation teamOperation = new()
+            {
+                Id = operation.Id,
+                TeamName = operation.TeamName,
+                UserEmail = operation.Staff.EmailAddress,
+                AdditionalInformation = "All"
+            };
+
+            teamOperation.Action = operation.Action switch
+            {
+                MSTeamOperationAction.Add => "Add",
+                MSTeamOperationAction.Remove => "Remove",
+                MSTeamOperationAction.Promote => "Promote",
+                MSTeamOperationAction.Demote => "Demote",
+                _ => teamOperation.Action
+            };
+
+            teamOperation.Role = operation.PermissionLevel switch
+            {
+                MSTeamOperationPermissionLevel.Member => "Member",
+                MSTeamOperationPermissionLevel.Owner => "Owner",
+                _ => teamOperation.Role
+            };
+
+            Result<TeamResource> team = await _mediator.Send(new GetTeamByNameQuery(operation.TeamName));
+
+            if (team.IsFailure)
+                continue;
+
+            teamOperation.TeamId = team.Value.Id.ToString();
+
+            returnData.Add(teamOperation);
+        }
+
+        foreach (ContactAddedMSTeamOperation operation in operations.ContactOperations)
+        {
+            TeamsOperation teamOperation = new()
+            {
+                Id = operation.Id,
+                TeamName = operation.TeamName,
+                UserEmail = operation.Contact.EmailAddress
+            };
+
+            teamOperation.Action = operation.Action switch
+            {
+                MSTeamOperationAction.Add => "Add",
+                MSTeamOperationAction.Remove => "Remove",
+                MSTeamOperationAction.Promote => "Promote",
+                MSTeamOperationAction.Demote => "Demote",
+                _ => teamOperation.Action
+            };
+
+            teamOperation.Role = operation.PermissionLevel switch
+            {
+                MSTeamOperationPermissionLevel.Member => "Member",
+                MSTeamOperationPermissionLevel.Owner => "Owner",
+                _ => teamOperation.Role
+            };
+
+            Result<TeamResource> team = await _mediator.Send(new GetTeamByNameQuery(operation.TeamName));
+
+            if (team.IsFailure)
+                continue;
+
+            teamOperation.TeamId = team.Value.Id.ToString();
+
+            returnData.Add(teamOperation);
+        }
+
+        return returnData;
+    }
+
+    // POST api/Operations/Complete
+    [Route("Complete/{id}")]
+    [HttpPost]
+    public async Task Complete(int id)
+    {
+        MSTeamOperation operation = await _unitOfWork.MSTeamOperations.ForMarkingCompleteOrCancelled(id);
+
+        if (operation != null)
+        {
+            operation.Complete();
+            await _unitOfWork.CompleteAsync();
         }
     }
 }

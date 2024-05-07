@@ -292,6 +292,10 @@ public static class DomainErrors
                 "LinkedSystems.Teams.TeamNotFoundInDatabase",
                 "The Team could not be found in the database");
 
+            public static readonly Error MoreThanOneMatchFound = new(
+                "LinkedSystems.Teams.MoreThanOneMatchFound",
+                "Found more than one Team that matched the criteria in the database");
+
             public static readonly Func<Guid, Error> AlreadyExists = id => new Error(
                 "LinkedSystems.Teams.AlreadyExists",
                 $"The Team with Id {id} could not be created because it already exists in the database");
