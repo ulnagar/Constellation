@@ -59,7 +59,7 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
 
         List<CourseListEntry> coursesInCanvas = await _gateway.GetAllCourses(_dateTime.CurrentYear.ToString(), cancellationToken);
 
-        foreach (CourseListEntry canvasCourse in coursesInCanvas)
+        foreach (CourseListEntry canvasCourse in coursesInCanvas.OrderBy(entry => entry.CourseCode))
         {
             _logger.Information("Processing course {canvasCourse}", canvasCourse.Name);
 
@@ -192,10 +192,10 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
 
             if (!_configuration.UseSections) continue;
 
-            foreach (CanvasCourseMembership calculatedMember in calculatedMembers.Value)
+            foreach (var calculatedMember in calculatedMembers.Value.GroupBy(entry => entry.UserId))
             {
                 List<CourseEnrolmentEntry> matchingCanvasEnrolments = canvasEnrolments
-                    .Where(entry => entry.UserId == calculatedMember.UserId)
+                    .Where(entry => entry.UserId == calculatedMember.First().UserId)
                     .ToList();
 
                 if (matchingCanvasEnrolments.Count == 0)
@@ -203,9 +203,9 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
 
                 foreach (CourseEnrolmentEntry matchingCanvasEnrolment in matchingCanvasEnrolments)
                 {
-                    if (calculatedMember.SectionId == matchingCanvasEnrolment.SectionCode) continue;
+                    if (calculatedMember.Any(entry => entry.SectionId == matchingCanvasEnrolment.SectionCode)) continue;
 
-                    _logger.Information("Removing {user} from section {section} in course {course}", calculatedMember.UserId, matchingCanvasEnrolment.SectionCode, matchingCanvasEnrolment.CourseCode);
+                    _logger.Information("Removing {user} from section {section} in course {course}", calculatedMember.First().UserId, matchingCanvasEnrolment.SectionCode, matchingCanvasEnrolment.CourseCode);
                     
                     bool removedFromSection = await _gateway.UnenrolUser(
                         matchingCanvasEnrolment.EnrollmentId,
@@ -221,22 +221,25 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
                     }
                 }
 
-                if (matchingCanvasEnrolments.Any(entry => entry.SectionCode == calculatedMember.SectionId)) continue;
-
-                _logger.Information("Adding {user} to section {section} in course {course}", calculatedMember.UserId, calculatedMember.SectionId, calculatedMember.CanvasCourseCode);
-                
-                bool addedToSection = await _gateway.EnrolToSection(
-                    calculatedMember.UserId,
-                    calculatedMember.SectionId,
-                    calculatedMember.PermissionLevel,
-                    cancellationToken);
-
-                if (!addedToSection)
+                foreach (CanvasCourseMembership calculatedMemberRecord in calculatedMember)
                 {
-                    _logger
-                        .ForContext(nameof(CanvasSectionCode), calculatedMember.SectionId)
-                        .ForContext(nameof(CanvasCourseMembership), calculatedMember, true)
-                        .Warning("Failed to add user to Course Section");
+                    if (matchingCanvasEnrolments.Any(entry => entry.SectionCode == calculatedMemberRecord.SectionId)) continue;
+
+                    _logger.Information("Adding {user} to section {section} in course {course}", calculatedMemberRecord.UserId, calculatedMemberRecord.SectionId, calculatedMemberRecord.CanvasCourseCode);
+
+                    bool addedToSection = await _gateway.EnrolToSection(
+                        calculatedMemberRecord.UserId,
+                        calculatedMemberRecord.SectionId,
+                        calculatedMemberRecord.PermissionLevel,
+                        cancellationToken);
+
+                    if (!addedToSection)
+                    {
+                        _logger
+                            .ForContext(nameof(CanvasSectionCode), calculatedMemberRecord.SectionId)
+                            .ForContext(nameof(CanvasCourseMembership), calculatedMember, true)
+                            .Warning("Failed to add user to Course Section");
+                    }
                 }
             }
         }

@@ -24,7 +24,7 @@ public class HangfireDashboardModel : BasePageModel
         _jobManager = jobManager;
         _serviceScopeFactory = serviceScopeFactory;
 
-        JobDefinitions.Add(new (typeof(ICanvasAccessAuditJob), nameof(ICanvasAccessAuditJob), "*/5 7-15 * * 1-5"));
+        JobDefinitions.Add(new (typeof(ICanvasAccessAuditJob), nameof(ICanvasAccessAuditJob), "*/10 7-15 * * 1-5"));
         JobDefinitions.Add(new (typeof(IClassMonitorJob), nameof(IClassMonitorJob), "* 7-15 * * 1-5"));
         JobDefinitions.Add(new (typeof(ISchoolRegisterJob), nameof(ISchoolRegisterJob), "15 18 1 * *"));
         JobDefinitions.Add(new (typeof(IUserManagerJob), nameof(IUserManagerJob), "0 6 1 * *"));
