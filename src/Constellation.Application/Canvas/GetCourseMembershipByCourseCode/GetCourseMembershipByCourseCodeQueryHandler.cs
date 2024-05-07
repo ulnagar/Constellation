@@ -66,7 +66,7 @@ internal sealed class GetCourseMembershipByCourseCodeQueryHandler
                 response.Add(new(
                     request.CourseCode,
                     teacher.StaffId,
-                    string.Empty,
+                    CanvasSectionCode.Empty, 
                     CanvasPermissionLevel.Teacher));
             }
 
@@ -78,7 +78,7 @@ internal sealed class GetCourseMembershipByCourseCodeQueryHandler
                 response.Add(new(
                     request.CourseCode,
                     headTeacher.StaffId,
-                    string.Empty,
+                    CanvasSectionCode.Empty, 
                     CanvasPermissionLevel.Teacher));
             }
         }

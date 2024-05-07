@@ -6,19 +6,38 @@ using System;
 public abstract class CanvasOperation
 {
     public int Id { get; set; }
-    public string UserId { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-    public DateTime ScheduledFor { get; set; } = DateTime.Now;
-    public bool IsCompleted { get; set; }
-    public bool IsDeleted { get; set; }
+    public string UserId { get; protected set; }
+    public DateTime CreatedAt { get; private set; } = DateTime.Now;
+    public DateTime ScheduledFor { get; protected set; } = DateTime.Now;
+    public bool IsCompleted { get; private set; }
+    public bool IsDeleted { get; private set; }
+
+    public void Complete() => IsCompleted = true;
+    public void Delete() => IsDeleted = true;
 }
 
 public class CreateUserCanvasOperation : CanvasOperation
 {
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string PortalUsername { get; set; }
-    public string EmailAddress { get; set; }
+    private CreateUserCanvasOperation() { }
+
+    public CreateUserCanvasOperation(
+        string userId,
+        string firstName,
+        string lastName,
+        string portalUsername,
+        string emailAddress)
+    {
+        UserId = userId;
+        FirstName = firstName;
+        LastName = lastName;
+        PortalUsername = portalUsername;
+        EmailAddress = emailAddress;
+    }
+
+    public string FirstName { get; private set; }
+    public string LastName { get; private set; }
+    public string PortalUsername { get; private set; }
+    public string EmailAddress { get; private set; }
 }
 
 public class ModifyEnrolmentCanvasOperation : CanvasOperation
@@ -50,4 +69,7 @@ public class ModifyEnrolmentCanvasOperation : CanvasOperation
 
 public class DeleteUserCanvasOperation : CanvasOperation
 {
+    private  DeleteUserCanvasOperation() { }
+
+    public DeleteUserCanvasOperation(string userId) => UserId = userId;
 }

@@ -1,17 +1,15 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
 using Constellation.Application.Interfaces.Services;
-using Constellation.Infrastructure.DependencyInjection;
 using System.Collections.Generic;
 
-public partial class LogHandler<T> : ILogHandler<T>, IScopedService where T : class
+internal sealed class LogHandler<T> : ILogHandler<T> where T : class
 {
-    private ICollection<string> _logHistory;
+    private readonly List<string> _logHistory = new();
     private readonly ILogger _logger;
 
     public LogHandler(ILogger logger)
     {
-        _logHistory = new List<string>();
         _logger = logger.ForContext<T>();
     }
 
@@ -39,8 +37,5 @@ public partial class LogHandler<T> : ILogHandler<T>, IScopedService where T : cl
         }
     }
 
-    public ICollection<string> GetLogHistory()
-    {
-        return _logHistory;
-    }
+    public List<string> GetLogHistory() => _logHistory;
 }

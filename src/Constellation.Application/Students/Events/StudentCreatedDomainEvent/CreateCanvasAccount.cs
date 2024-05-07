@@ -42,14 +42,12 @@ internal sealed class CreateCanvasAccount
             return;
         }
 
-        CreateUserCanvasOperation operation = new()
-        {
-            UserId = student.StudentId,
-            FirstName = student.FirstName,
-            LastName = student.LastName,
-            PortalUsername = student.PortalUsername,
-            EmailAddress = student.EmailAddress
-        };
+        CreateUserCanvasOperation operation = new(
+            student.StudentId,
+            student.FirstName,
+            student.LastName,
+            student.PortalUsername,
+            student.EmailAddress);
 
         _operationsRepository.Insert(operation);
         await _unitOfWork.CompleteAsync(cancellationToken);

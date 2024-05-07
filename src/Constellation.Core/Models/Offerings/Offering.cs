@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Offerings;
 
+using Canvas.Models;
 using Errors;
 using Events;
 using Identifiers;
@@ -161,7 +162,7 @@ public sealed class Offering : AggregateRoot
         {
             var _ when type == ResourceType.AdobeConnectRoom => new AdobeConnectRoomResource(Id, resourceId, name, url),
             var _ when type == ResourceType.MicrosoftTeam => new MicrosoftTeamResource(Id, resourceId, name, url),
-            var _ when type == ResourceType.CanvasCourse => new CanvasCourseResource(Id, resourceId, additional, name, url),
+            var _ when type == ResourceType.CanvasCourse => new CanvasCourseResource(Id, CanvasCourseCode.FromValue(resourceId), CanvasSectionCode.FromValue(additional), name, url),
             _ => null
         };
 

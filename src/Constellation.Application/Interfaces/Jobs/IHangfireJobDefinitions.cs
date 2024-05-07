@@ -28,7 +28,7 @@ public interface ILessonNotificationsJob : IHangfireJob { }
 
 public interface IMandatoryTrainingReminderJob : IHangfireJob { }
 
-public interface IPermissionUpdateJob : IHangfireJob { }
+public interface ICanvasAccessAuditJob : IHangfireJob { }
 
 public interface IProcessOutboxMessagesJob : IHangfireJob { }
 

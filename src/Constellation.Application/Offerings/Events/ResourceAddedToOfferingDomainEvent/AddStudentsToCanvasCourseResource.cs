@@ -80,7 +80,7 @@ internal sealed class AddStudentsToCanvasCourseResource
         {
             ModifyEnrolmentCanvasOperation operation = new(
                 enrolment.StudentId,
-                resource.CourseId,
+                resource.CourseId.ToString(),
                 CanvasAction.Add,
                 CanvasUserType.Student,
                 _dateTime.Now);

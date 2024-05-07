@@ -13,6 +13,7 @@ using Core.Models.Offerings.ValueObjects;
 using Core.Models.Operations;
 using Core.Models.Operations.Enums;
 using Core.Models.Students;
+using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
 using System;
 using System.Threading.Tasks;
@@ -39,13 +40,13 @@ public class OperationService : IOperationService
     public async Task CreateStudentAdobeConnectAccess(string studentId, string roomId, DateTime schedule)
     {
         // Verify entries
-        var checkStudent = await _unitOfWork.Students.GetForExistCheck(studentId);
-        var checkRoom = await _unitOfWork.AdobeConnectRooms.GetForExistCheck(roomId);
+        Student checkStudent = await _unitOfWork.Students.GetForExistCheck(studentId);
+        AdobeConnectRoom checkRoom = await _unitOfWork.AdobeConnectRooms.GetForExistCheck(roomId);
 
         if (checkStudent == null || checkRoom == null)
             return;
 
-        var operation = new StudentAdobeConnectOperation
+        StudentAdobeConnectOperation operation = new()
         {
             ScoId = roomId,
             StudentId = studentId,
@@ -60,13 +61,13 @@ public class OperationService : IOperationService
     public async Task CreateTeacherAdobeConnectAccess(string staffId, string roomId, DateTime scheduled, Guid coverId)
     {
         // Verify entries
-        var checkStaff = await _unitOfWork.Staff.GetForExistCheck(staffId);
-        var checkRoom = await _unitOfWork.AdobeConnectRooms.GetForExistCheck(roomId);
+        Staff checkStaff = await _unitOfWork.Staff.GetForExistCheck(staffId);
+        AdobeConnectRoom checkRoom = await _unitOfWork.AdobeConnectRooms.GetForExistCheck(roomId);
 
         if (checkStaff == null || checkRoom == null)
             return;
 
-        var operation = new TeacherAdobeConnectOperation
+        TeacherAdobeConnectOperation operation = new()
         {
             ScoId = roomId,
             StaffId = staffId,
@@ -81,13 +82,13 @@ public class OperationService : IOperationService
     public async Task RemoveStudentAdobeConnectAccess(string studentId, string roomId, DateTime schedule)
     {
         // Verify entries
-        var checkStudent = await _unitOfWork.Students.GetForExistCheck(studentId);
-        var checkRoom = await _unitOfWork.AdobeConnectRooms.GetForExistCheck(roomId);
+        Student checkStudent = await _unitOfWork.Students.GetForExistCheck(studentId);
+        AdobeConnectRoom checkRoom = await _unitOfWork.AdobeConnectRooms.GetForExistCheck(roomId);
 
         if (checkStudent == null || checkRoom == null)
             return;
 
-        var operation = new StudentAdobeConnectOperation
+        StudentAdobeConnectOperation operation = new()
         {
             ScoId = roomId,
             StudentId = studentId,
@@ -101,13 +102,13 @@ public class OperationService : IOperationService
     public async Task RemoveTeacherAdobeConnectAccess(string staffId, string roomId, DateTime scheduled, Guid coverId)
     {
         // Verify entries
-        var checkStaff = await _unitOfWork.Staff.GetForExistCheck(staffId);
-        var checkRoom = await _unitOfWork.AdobeConnectRooms.GetForExistCheck(roomId);
+        Staff checkStaff = await _unitOfWork.Staff.GetForExistCheck(staffId);
+        AdobeConnectRoom checkRoom = await _unitOfWork.AdobeConnectRooms.GetForExistCheck(roomId);
 
         if (checkStaff == null || checkRoom == null)
             return;
 
-        var operation = new TeacherAdobeConnectOperation
+        TeacherAdobeConnectOperation operation = new()
         {
             ScoId = roomId,
             StaffId = staffId,
@@ -122,12 +123,12 @@ public class OperationService : IOperationService
     public async Task CreateTeacherAdobeConnectGroupMembership(string staffId, AdobeConnectGroup groupName, DateTime scheduled)
     {
         // Verify entries
-        var checkStaff = await _unitOfWork.Staff.GetForExistCheck(staffId);
+        Staff checkStaff = await _unitOfWork.Staff.GetForExistCheck(staffId);
 
         if (checkStaff == null)
             return;
 
-        var operation = new TeacherAdobeConnectGroupOperation
+        TeacherAdobeConnectGroupOperation operation = new()
         {
             GroupSco = ((int)groupName).ToString(),
             GroupName = groupName.ToString(),
@@ -142,12 +143,12 @@ public class OperationService : IOperationService
     public async Task RemoveTeacherAdobeConnectGroupMembership(string staffId, AdobeConnectGroup groupName, DateTime scheduled)
     {
         // Verify entries
-        var checkStaff = await _unitOfWork.Staff.GetForExistCheck(staffId);
+        Staff checkStaff = await _unitOfWork.Staff.GetForExistCheck(staffId);
 
         if (checkStaff == null)
             return;
 
-        var operation = new TeacherAdobeConnectGroupOperation
+        TeacherAdobeConnectGroupOperation operation = new()
         {
             GroupSco = ((int)groupName).ToString(),
             GroupName = groupName.ToString(),
@@ -162,7 +163,7 @@ public class OperationService : IOperationService
     public async Task MarkAdobeConnectOperationComplete(int id)
     {
         // Validate entries
-        var operation = await _unitOfWork.AdobeConnectOperations.ForProcessingAsync(id);
+        AdobeConnectOperation operation = await _unitOfWork.AdobeConnectOperations.ForProcessingAsync(id);
 
         if (operation == null)
             return;
@@ -176,7 +177,7 @@ public class OperationService : IOperationService
     public async Task MarkAdobeConnectOperationCompleteAsync(int id)
     {
         // Validate entries
-        var operation = await _unitOfWork.AdobeConnectOperations.ForProcessingAsync(id);
+        AdobeConnectOperation operation = await _unitOfWork.AdobeConnectOperations.ForProcessingAsync(id);
 
         if (operation == null)
             return;
@@ -190,7 +191,7 @@ public class OperationService : IOperationService
     public async Task CancelAdobeConnectOperation(int id)
     {
         // Validate entries
-        var operation = await _unitOfWork.AdobeConnectOperations.ForProcessingAsync(id);
+        AdobeConnectOperation operation = await _unitOfWork.AdobeConnectOperations.ForProcessingAsync(id);
 
         if (operation == null)
             return;
@@ -200,7 +201,7 @@ public class OperationService : IOperationService
 
     public void CancelAdobeConnectOperation(AdobeConnectOperation operation)
     {
-        if (operation.IsCompleted || operation.IsDeleted)
+        if (operation is null || operation.IsCompleted || operation.IsDeleted)
             return;
 
         operation.IsDeleted = true;
@@ -209,13 +210,13 @@ public class OperationService : IOperationService
     public async Task CreateStudentMSTeamMemberAccess(string studentId, OfferingId offeringId, DateTime schedule)
     {
         // Validate entries
-        var student = await _unitOfWork.Students.GetForExistCheck(studentId);
-        var offering = await _offeringRepository.GetById(offeringId);
+        Student student = await _unitOfWork.Students.GetForExistCheck(studentId);
+        Offering offering = await _offeringRepository.GetById(offeringId);
 
         if (student == null || offering == null)
             return;
 
-        var operation = new StudentMSTeamOperation()
+        StudentMSTeamOperation operation = new()
         {
             StudentId = studentId,
             OfferingId = offeringId,
@@ -231,14 +232,14 @@ public class OperationService : IOperationService
     public async Task CreateTeacherMSTeamMemberAccess(string staffId, OfferingId offeringId, DateTime scheduled, Guid? coverId)
     {
         // Validate entries
-        var staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
-        var offering = await _offeringRepository.GetById(offeringId);
+        Staff staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
+        Offering offering = await _offeringRepository.GetById(offeringId);
 
         if (staffMember == null || offering == null)
             return;
 
         // Create Operation
-        var operation = new TeacherMSTeamOperation
+        TeacherMSTeamOperation operation = new()
         {
             OfferingId = offering.Id,
             StaffId = staffMember.StaffId,
@@ -256,14 +257,14 @@ public class OperationService : IOperationService
     public async Task CreateTeacherMSTeamOwnerAccess(string staffId, OfferingId offeringId, DateTime scheduled, Guid? coverId)
     {
         // Validate entries
-        var staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
-        var offering = await _offeringRepository.GetById(offeringId);
+        Staff staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
+        Offering offering = await _offeringRepository.GetById(offeringId);
 
         if (staffMember == null || offering == null)
             return;
 
         // Create Operation
-        var operation = new TeacherMSTeamOperation
+        TeacherMSTeamOperation operation = new()
         {
             OfferingId = offering.Id,
             StaffId = staffMember.StaffId,
@@ -281,18 +282,18 @@ public class OperationService : IOperationService
     public async Task CreateClassroomMSTeam(OfferingId offeringId, DateTime scheduled)
     {
         // Validate entries
-        var offering = await _offeringRepository.GetById(offeringId);
+        Offering offering = await _offeringRepository.GetById(offeringId);
 
         if (offering is null)
             return;
 
-        var course = await _courseRepository.GetById(offering.CourseId);
+        Course course = await _courseRepository.GetById(offering.CourseId);
 
         if (course is null)
             return;
 
         // Create Operation
-        var operation = new GroupMSTeamOperation
+        GroupMSTeamOperation operation = new()
         {
             FacultyId = course.FacultyId,
             OfferingId = offering.Id,
@@ -308,12 +309,12 @@ public class OperationService : IOperationService
     public async Task CreateStudentEnrolmentMSTeamAccess(string studentId)
     {
         // Validate entries
-        var student = await _unitOfWork.Students.GetForExistCheck(studentId);
+        Student student = await _unitOfWork.Students.GetForExistCheck(studentId);
 
         if (student == null)
             return;
 
-        var operation = new StudentEnrolledMSTeamOperation()
+        StudentEnrolledMSTeamOperation operation = new()
         {
             StudentId = studentId,
             TeamName = MicrosoftTeam.Students,
@@ -328,12 +329,12 @@ public class OperationService : IOperationService
     public async Task RemoveStudentEnrollmentMSTeamAccess(string studentId)
     {
         // Validate entries
-        var student = await _unitOfWork.Students.GetForExistCheck(studentId);
+        Student student = await _unitOfWork.Students.GetForExistCheck(studentId);
 
         if (student == null)
             return;
 
-        var operation = new StudentEnrolledMSTeamOperation()
+        StudentEnrolledMSTeamOperation operation = new()
         {
             StudentId = studentId,
             TeamName = MicrosoftTeam.Students,
@@ -348,13 +349,13 @@ public class OperationService : IOperationService
     public async Task CreateTeacherEmployedMSTeamAccess(string staffId)
     {
         // Validate entries
-        var staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
+        Staff staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
 
         if (staffMember == null)
             return;
 
         // Create Operation
-        var studentTeamOperation = new TeacherEmployedMSTeamOperation()
+        TeacherEmployedMSTeamOperation studentTeamOperation = new()
         {
             StaffId = staffId,
             TeamName = MicrosoftTeam.Students,
@@ -365,7 +366,7 @@ public class OperationService : IOperationService
 
         _unitOfWork.Add(studentTeamOperation);
 
-        var schoolTeamOperation = new TeacherEmployedMSTeamOperation()
+        TeacherEmployedMSTeamOperation schoolTeamOperation = new()
         {
             StaffId = staffId,
             TeamName = MicrosoftTeam.Staff,
@@ -380,13 +381,13 @@ public class OperationService : IOperationService
     public async Task RemoveTeacherEmployedMSTeamAccess(string staffId)
     {
         // Validate entries
-        var staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
+        Staff staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
 
         if (staffMember == null)
             return;
 
         // Create Operation
-        var studentTeamOperation = new TeacherEmployedMSTeamOperation()
+        TeacherEmployedMSTeamOperation studentTeamOperation = new()
         {
             StaffId = staffId,
             TeamName = MicrosoftTeam.Students,
@@ -397,7 +398,7 @@ public class OperationService : IOperationService
 
         _unitOfWork.Add(studentTeamOperation);
 
-        var schoolTeamOperation = new TeacherEmployedMSTeamOperation()
+        TeacherEmployedMSTeamOperation schoolTeamOperation = new()
         {
             StaffId = staffId,
             TeamName = MicrosoftTeam.Staff,
@@ -412,13 +413,13 @@ public class OperationService : IOperationService
     public async Task RemoveStudentMSTeamAccess(string studentId, OfferingId offeringId, DateTime schedule)
     {
         // Validate entries
-        var student = await _unitOfWork.Students.GetForExistCheck(studentId);
-        var offering = await _offeringRepository.GetById(offeringId);
+        Student student = await _unitOfWork.Students.GetForExistCheck(studentId);
+        Offering offering = await _offeringRepository.GetById(offeringId);
 
         if (student == null || offering == null)
             return;
 
-        var operation = new StudentMSTeamOperation()
+        StudentMSTeamOperation operation = new()
         {
             StudentId = studentId,
             OfferingId = offeringId,
@@ -433,14 +434,14 @@ public class OperationService : IOperationService
     public async Task RemoveTeacherMSTeamAccess(string staffId, OfferingId offeringId, DateTime scheduled, Guid? coverId)
     {
         // Validate entries
-        var staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
-        var offering = await _offeringRepository.GetById(offeringId);
+        Staff staffMember = await _unitOfWork.Staff.GetForExistCheck(staffId);
+        Offering offering = await _offeringRepository.GetById(offeringId);
 
         if (staffMember == null || offering == null)
             return;
 
         // Create Operation
-        var operation = new TeacherMSTeamOperation
+        TeacherMSTeamOperation operation = new()
         {
             OfferingId = offering.Id,
             StaffId = staffMember.StaffId,
@@ -458,7 +459,7 @@ public class OperationService : IOperationService
     public async Task MarkMSTeamOperationComplete(int id)
     {
         // Validate entries
-        var operation = await _unitOfWork.MSTeamOperations.ForMarkingCompleteOrCancelled(id);
+        MSTeamOperation operation = await _unitOfWork.MSTeamOperations.ForMarkingCompleteOrCancelled(id);
 
         if (operation == null)
             return;
@@ -469,23 +470,25 @@ public class OperationService : IOperationService
     public async Task CancelMSTeamOperation(int id)
     {
         // Validate entries
-        var operation = await _unitOfWork.MSTeamOperations.ForMarkingCompleteOrCancelled(id);
+        MSTeamOperation operation = await _unitOfWork.MSTeamOperations.ForMarkingCompleteOrCancelled(id);
 
         if (operation == null)
             return;
 
         operation.IsDeleted = true;
     }
+
     public Task CreateCanvasUserFromStudent(Student student)
     {
-        var operation = new CreateUserCanvasOperation()
-        {
-            UserId = student.StudentId,
-            FirstName = student.FirstName,
-            LastName = student.LastName,
-            PortalUsername = student.PortalUsername,
-            EmailAddress = student.EmailAddress
-        };
+        if (student is null)
+            return Task.CompletedTask;
+
+        CreateUserCanvasOperation operation = new(
+            student.StudentId,
+            student.FirstName,
+            student.LastName,
+            student.PortalUsername,
+            student.EmailAddress);
 
         _unitOfWork.Add(operation);
 
@@ -494,14 +497,15 @@ public class OperationService : IOperationService
 
     public Task CreateCanvasUserFromStaff(Staff staff)
     {
-        var operation = new CreateUserCanvasOperation()
-        {
-            UserId = staff.StaffId,
-            FirstName = staff.FirstName,
-            LastName = staff.LastName,
-            PortalUsername = staff.PortalUsername,
-            EmailAddress = staff.EmailAddress
-        };
+        if (staff is null)
+            return Task.CompletedTask;
+
+        CreateUserCanvasOperation operation = new(
+            staff.StaffId,
+            staff.FirstName,
+            staff.LastName,
+            staff.PortalUsername,
+            staff.EmailAddress);
 
         _unitOfWork.Add(operation);
 
@@ -510,6 +514,9 @@ public class OperationService : IOperationService
 
     public async Task EnrolStudentInCanvasCourse(Student student, Offering offering, DateTime? scheduledFor = null)
     {
+        if (student is null || offering is null)
+            return;
+
         List<CanvasCourseResource> resources = offering
             .Resources
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
@@ -520,7 +527,7 @@ public class OperationService : IOperationService
         {
             ModifyEnrolmentCanvasOperation operation = new(
                 student.StudentId,
-                resource.CourseId,
+                resource.CourseId.ToString(),
                 CanvasAction.Add,
                 CanvasUserType.Student,
                 scheduledFor);
@@ -533,6 +540,9 @@ public class OperationService : IOperationService
 
     public Task EnrolStaffInCanvasCourse(Staff staff, Offering offering, DateTime? scheduledFor = null)
     {
+        if (staff is null || offering is null)
+            return Task.CompletedTask;
+
         List<CanvasCourseResource> resources = offering
             .Resources
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
@@ -543,7 +553,7 @@ public class OperationService : IOperationService
         {
             ModifyEnrolmentCanvasOperation operation = new(
                 staff.StaffId,
-                resource.CourseId,
+                resource.CourseId.ToString(),
                 CanvasAction.Add,
                 CanvasUserType.Teacher,
                 scheduledFor);
@@ -556,6 +566,9 @@ public class OperationService : IOperationService
 
     public Task UnenrolStudentFromCanvasCourse(Student student, Offering offering, DateTime? scheduledFor = null)
     {
+        if (student is null || offering is null)
+            return Task.CompletedTask;
+
         List<CanvasCourseResource> resources = offering
             .Resources
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
@@ -566,7 +579,7 @@ public class OperationService : IOperationService
         {
             ModifyEnrolmentCanvasOperation operation = new(
                 student.StudentId,
-                resource.CourseId,
+                resource.CourseId.ToString(),
                 CanvasAction.Remove,
                 CanvasUserType.Student,
                 scheduledFor);
@@ -579,6 +592,9 @@ public class OperationService : IOperationService
 
     public Task UnenrolStaffFromCanvasCourse(Staff staff, Offering offering, DateTime? scheduledFor = null)
     {
+        if (staff is null || offering is null)
+            return Task.CompletedTask;
+
         List<CanvasCourseResource> resources = offering
             .Resources
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
@@ -589,25 +605,23 @@ public class OperationService : IOperationService
         {
             ModifyEnrolmentCanvasOperation operation = new(
                 staff.StaffId,
-                resource.CourseId,
+                resource.CourseId.ToString(),
                 CanvasAction.Remove,
                 CanvasUserType.Teacher,
                 scheduledFor);
 
             _unitOfWork.Add(operation);
         }
+
         return Task.CompletedTask;
     }
 
-    public Task DisableCanvasUser(string UserId)
+    public Task DisableCanvasUser(string userId)
     {
-        if (string.IsNullOrEmpty(UserId))
+        if (string.IsNullOrEmpty(userId))
             return Task.CompletedTask;
 
-        var operation = new DeleteUserCanvasOperation()
-        {
-            UserId = UserId
-        };
+        DeleteUserCanvasOperation operation = new(userId);
 
         _unitOfWork.Add(operation);
 

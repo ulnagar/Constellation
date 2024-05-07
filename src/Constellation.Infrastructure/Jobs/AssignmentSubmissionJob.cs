@@ -10,6 +10,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Core.Models.Assignments.Services;
+using Core.Models.Canvas.Models;
 using Core.Models.Offerings.ValueObjects;
 using System;
 using System.Threading.Tasks;
@@ -57,7 +58,7 @@ internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
                 return;
             }
 
-            List<string> resources = offerings
+            List<CanvasCourseCode> resources = offerings
                 .SelectMany(offering => offering.Resources)
                 .Where(resource => resource.Type == ResourceType.CanvasCourse)
                 .Select(resource => ((CanvasCourseResource)resource).CourseId)
@@ -73,7 +74,7 @@ internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
                 return;
             }
 
-            string canvasCourseId = resources.First();
+            CanvasCourseCode canvasCourseId = resources.First();
 
             List<CanvasAssignmentSubmission> validSubmissions = assignment
                 .Submissions

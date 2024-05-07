@@ -95,7 +95,7 @@ public static class ServicesRegistration
         services.AddScoped<IGroupTutorialExpiryScanJob, GroupTutorialExpiryScanJob>();
         services.AddScoped<ILessonNotificationsJob, LessonNotificationsJob>();
         services.AddScoped<IMandatoryTrainingReminderJob, MandatoryTrainingReminderJob>();
-        services.AddScoped<IPermissionUpdateJob, PermissionUpdateJob>();
+        services.AddScoped<ICanvasAccessAuditJob, CanvasAccessAuditJob>();
         services.AddScoped<IProcessOutboxMessagesJob, ProcessOutboxMessagesJob>();
         services.AddScoped<IRollMarkingReportJob, RollMarkingReportJob>();
         services.AddScoped<ISchoolRegisterJob, SchoolRegisterJob>();

@@ -3,6 +3,7 @@
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Core.Models.Canvas.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -38,5 +39,17 @@ internal sealed class ResourceConfiguration : IEntityTypeConfiguration<Resource>
             .HasValue<AdobeConnectRoomResource>(ResourceType.AdobeConnectRoom)
             .HasValue<MicrosoftTeamResource>(ResourceType.MicrosoftTeam)
             .HasValue<CanvasCourseResource>(ResourceType.CanvasCourse);
+    }
+}
+
+internal sealed class CanvasCourseResourceConfiguration : IEntityTypeConfiguration<CanvasCourseResource>
+{
+    public void Configure(EntityTypeBuilder<CanvasCourseResource> builder)
+    {
+        builder
+            .Property(resource => resource.SectionId)
+            .HasConversion(
+                item => item.ToString(),
+                value => CanvasSectionCode.FromValue(value));
     }
 }

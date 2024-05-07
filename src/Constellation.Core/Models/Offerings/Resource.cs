@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Offerings;
 
+using Canvas.Models;
 using Identifiers;
 using ValueObjects;
 using Constellation.Core.Models.Subjects.Identifiers;
@@ -64,20 +65,21 @@ public sealed class CanvasCourseResource : Resource
 
     internal CanvasCourseResource(
         OfferingId offeringId,
-        string canvasCourseId,
-        string canvasSectionId,
+        CanvasCourseCode canvasCourseId,
+        CanvasSectionCode canvasSectionId,
         string name,
         string url)
     {
         Id = new();
         Type = ResourceType.CanvasCourse;
         OfferingId = offeringId;
-        ResourceId = canvasCourseId;
+        ResourceId = canvasCourseId.ToString();
+        SectionId = canvasSectionId;
         Name = name;
 
         Url = string.IsNullOrEmpty(url) ? $"https://aurora.instructure.com/courses/sis_course_id:{ResourceId}" : url;
     }
 
-    public string CourseId => ResourceId;
-    public string SectionId { get; private set; }
+    public CanvasCourseCode CourseId => CanvasCourseCode.FromValue(ResourceId);
+    public CanvasSectionCode SectionId { get; private set; }
 }

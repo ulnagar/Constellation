@@ -1,33 +1,30 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
-using Constellation.Application.Interfaces.Gateways;
+using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models.Attachments.Repository;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
 using Core.Models.Assignments.Services;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
+using Core.Models.Canvas.Models;
 using Core.Shared;
 using System.Threading.Tasks;
 
 internal class AssignmentService : IAssignmentService
 {
-    private readonly IAttachmentRepository _attachmentRepository;
     private readonly IAttachmentService _attachmentService;
     private readonly ICanvasGateway _canvasGateway;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
     public AssignmentService(
-        IAttachmentRepository attachmentRepository,
         IAttachmentService attachmentService,
         ICanvasGateway canvasGateway,
         IEmailService emailService,
         ILogger logger)
     {
-        _attachmentRepository = attachmentRepository;
         _attachmentService = attachmentService;
         _canvasGateway = canvasGateway;
         _emailService = emailService;
@@ -37,7 +34,7 @@ internal class AssignmentService : IAssignmentService
     public async Task<Result> UploadSubmissionToCanvas(
         CanvasAssignment assignment,
         CanvasAssignmentSubmission submission,
-        string canvasCourseId,
+        CanvasCourseCode canvasCourseId,
         CancellationToken cancellationToken = default)
     {
         Result<AttachmentResponse> fileRequest = await _attachmentService.GetAttachmentFile(
@@ -56,7 +53,7 @@ internal class AssignmentService : IAssignmentService
 
         // Upload file to Canvas
         // Include error checking/retry on failure
-        bool result = await _canvasGateway.UploadAssignmentSubmission(canvasCourseId, assignment.CanvasId, submission.StudentId, fileRequest.Value);
+        bool result = await _canvasGateway.UploadAssignmentSubmission(canvasCourseId, assignment.CanvasId, submission.StudentId, fileRequest.Value, cancellationToken);
 
         if (!result)
         {

@@ -10,6 +10,7 @@ using Constellation.Core.Shared;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
 using Core.Models.Assignments.Services;
+using Core.Models.Canvas.Models;
 using Core.Models.Offerings;
 using Core.Models.Offerings.ValueObjects;
 using Serilog;
@@ -67,7 +68,7 @@ internal sealed class ResendAssignmentSubmissionToCanvasCommandHandler
             return Result.Failure(CourseErrors.NotFound(assignment.CourseId));
         }
 
-        List<string> resources = offerings
+        List<CanvasCourseCode> resources = offerings
             .SelectMany(offering => offering.Resources)
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
             .Select(resource => ((CanvasCourseResource)resource).CourseId)
@@ -84,7 +85,7 @@ internal sealed class ResendAssignmentSubmissionToCanvasCommandHandler
             return Result.Failure(ResourceErrors.NoneOfTypeFound(ResourceType.CanvasCourse));
         }
 
-        string canvasCourseId = resources.First();
+        CanvasCourseCode canvasCourseId = resources.First();
 
         CanvasAssignmentSubmission submission = assignment.Submissions.FirstOrDefault(submission => submission.Id == request.SubmissionId);
 

@@ -10,6 +10,7 @@ using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
+using Core.Models.Canvas.Models;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,7 +53,7 @@ internal sealed class GetAssignmentsFromCourseQueryHandler
             return Result.Failure<List<AssignmentFromCourseResponse>>(OfferingErrors.NotFoundInCourse(request.CourseId));
         }
 
-        List<string> canvasCourseIds = offerings
+        List<CanvasCourseCode> canvasCourseIds = offerings
             .SelectMany(offering => offering.Resources)
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
             .Select(resource => resource as CanvasCourseResource)
@@ -60,9 +61,9 @@ internal sealed class GetAssignmentsFromCourseQueryHandler
             .Distinct()
             .ToList();
 
-        foreach (string courseId in canvasCourseIds)
+        foreach (CanvasCourseCode courseId in canvasCourseIds)
         {
-            List<CanvasAssignmentDto> assignments = await _canvasGateway.GetAllCourseAssignments(courseId);
+            List<CanvasAssignmentDto> assignments = await _canvasGateway.GetAllCourseAssignments(courseId, cancellationToken);
 
             foreach (CanvasAssignmentDto assignment in assignments)
             {

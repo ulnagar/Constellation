@@ -12,6 +12,7 @@ using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Canvas.Models;
 using Core.Models.Operations.Enums;
 using Core.Models.Students.Errors;
 using Serilog;
@@ -78,7 +79,7 @@ internal class RemoveFromCanvas
             .ToList();
 
         List<Offering> offerings = await _offeringRepository.GetByStudentId(notification.StudentId, cancellationToken);
-        List<string> activeCourseIds = offerings
+        List<CanvasCourseCode?> activeCourseIds = offerings
             .SelectMany(offering => offering.Resources)
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
             .Select(resource => resource as CanvasCourseResource)
@@ -95,7 +96,7 @@ internal class RemoveFromCanvas
 
             ModifyEnrolmentCanvasOperation operation = new(
                 student.StudentId,
-                resource.CourseId,
+                resource.CourseId.ToString(),
                 CanvasAction.Remove,
                 CanvasUserType.Student,
                 _dateTime.Now);

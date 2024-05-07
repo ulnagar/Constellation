@@ -13,42 +13,49 @@ public class CanvasOperationsRepository : ICanvasOperationsRepository
 {
     private readonly AppDbContext _context;
 
-    public CanvasOperationsRepository(AppDbContext context)
+    public CanvasOperationsRepository(
+        AppDbContext context)
     {
         _context = context;
     }
 
-    public async Task<ICollection<CanvasOperation>> All()
-    {
-        return await _context.CanvasOperations
-            .ToListAsync();
-    }
+    public async Task<List<CanvasOperation>> All(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<CanvasOperation>()
+            .ToListAsync(cancellationToken);
 
-    public async Task<ICollection<CanvasOperation>> AllToProcess()
-    {
-        return await _context.CanvasOperations
-            .Where(operation => !operation.IsCompleted && !operation.IsDeleted && operation.ScheduledFor <= DateTime.Now)
-            .ToListAsync();
-    }
+    public async Task<List<CanvasOperation>> AllToProcess(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<CanvasOperation>()
+            .Where(operation => 
+                !operation.IsCompleted && 
+                !operation.IsDeleted && 
+                operation.ScheduledFor <= DateTime.Now)
+            .ToListAsync(cancellationToken);
 
-    public async Task<ICollection<CanvasOperation>> AllWithFilter(Expression<Func<CanvasOperation, bool>> predicate)
-    {
-        return await _context.CanvasOperations
+    public async Task<List<CanvasOperation>> AllWithFilter(
+        Expression<Func<CanvasOperation, bool>> predicate,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<CanvasOperation>()
             .Where(predicate)
-            .ToListAsync();
-    }
+            .ToListAsync(cancellationToken);
 
-    public async Task<CanvasOperation> WithDetails(int id)
-    {
-        return await _context.CanvasOperations
-            .FirstAsync(operation => operation.Id == id);
-    }
+    public async Task<CanvasOperation> WithDetails(
+        int id,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<CanvasOperation>()
+            .SingleOrDefaultAsync(operation => operation.Id == id, cancellationToken);
 
-    public async Task<CanvasOperation> WithFilter(Expression<Func<CanvasOperation, bool>> predicate)
-    {
-        return await _context.CanvasOperations
-            .FirstOrDefaultAsync(predicate);
-    }
+    public async Task<CanvasOperation> WithFilter(
+        Expression<Func<CanvasOperation, bool>> predicate,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<CanvasOperation>()
+            .SingleOrDefaultAsync(predicate, cancellationToken);
 
     public void Insert(CanvasOperation operation) =>
         _context.Set<CanvasOperation>().Add(operation);

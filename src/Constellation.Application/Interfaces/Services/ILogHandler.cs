@@ -1,11 +1,10 @@
-﻿using Constellation.Infrastructure.Services;
+﻿namespace Constellation.Application.Interfaces.Services;
+
+using Constellation.Infrastructure.Services;
 using System.Collections.Generic;
 
-namespace Constellation.Application.Interfaces.Services
+public interface ILogHandler<T>
 {
-    public interface ILogHandler<T>
-    {
-        void Log(LogSeverity severity, string message);
-        ICollection<string> GetLogHistory();
-    }
+    void Log(LogSeverity severity, string message);
+    List<string> GetLogHistory();
 }

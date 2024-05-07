@@ -10,6 +10,7 @@ using Core.Abstractions.Clock;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
 using Core.Models.Assignments.Services;
+using Core.Models.Canvas.Models;
 using Core.Models.Offerings.Errors;
 using Core.Models.Subjects.Errors;
 using Core.Shared;
@@ -103,7 +104,7 @@ internal sealed class UploadSubmissionToCanvas
             return;
         }
 
-        List<string> resources = offerings
+        List<CanvasCourseCode> resources = offerings
             .SelectMany(offering => offering.Resources)
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
             .Select(resource => ((CanvasCourseResource)resource).CourseId)
@@ -120,7 +121,7 @@ internal sealed class UploadSubmissionToCanvas
             return;
         }
 
-        string canvasCourseId = resources.First();
+        CanvasCourseCode canvasCourseId = resources.First();
 
         Result uploadAttempt = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, canvasCourseId, cancellationToken);
 

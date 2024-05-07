@@ -4,6 +4,9 @@ using Newtonsoft.Json;
 
 internal sealed class EnrolmentListEntry
 {
+    [JsonProperty("id")]
+    public int EnrollmentId { get; set; }
+
     [JsonProperty("type")]
     public string EnrollmentType { get; set; }
 

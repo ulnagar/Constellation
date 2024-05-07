@@ -1,10 +1,7 @@
 ﻿namespace Constellation.Application.Features.API.Operations.Commands;
 
-using Constellation.Application.DTOs;
-using Constellation.Core.Models.Operations;
-using MediatR;
+using Abstractions.Messaging;
 
-public sealed class ProcessCanvasOperationCommand : IRequest<ServiceOperationResult<CanvasOperation>>
-{
-    public CanvasOperation Operation { get; set; }
-}
+public sealed record ProcessCanvasOperationCommand(
+    int OperationId)
+    : ICommand;
