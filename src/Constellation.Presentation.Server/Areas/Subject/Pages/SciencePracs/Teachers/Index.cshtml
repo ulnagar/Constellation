@@ -1,9 +1,7 @@
 ﻿@page
-
-@using Constellation.Core.Models;
-@using Constellation.Core.Models.SchoolContacts;
-
 @model Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Teachers.IndexModel
+
+@using Constellation.Core.Models.SchoolContacts;
 
 @inject IAuthorizationService authService
 
@@ -29,6 +27,7 @@
             <th>Name</th>
             <th>School</th>
             <th>Email</th>
+            <th>Notes</th>
             <th></th>
         </tr>
     </thead>
@@ -36,7 +35,7 @@
         @foreach (var item in Model.Contacts)
         {
             <tr>
-                <td>
+                <td data-order="@(item.SelfRegistered ? 1 : 2)">
                     @if (item.SelfRegistered)
                     {
                         <i class="fal fa-flag"></i>
@@ -45,6 +44,7 @@
                 <td>@item.ContactName.DisplayName</td>
                 <td>@item.SchoolName</td>
                 <td>@item.ContactEmail.Email</td>
+                <td>@item.Note</td>
                 <td>
                     @if (canEditTest.Succeeded)
                     {
@@ -53,7 +53,7 @@
                             <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                                 <a asp-page="Upsert" asp-area="Subject" asp-route-id="@item.Id" class="dropdown-item">Edit Contact</a>
                                 <button data-contact-id="@item.Id" data-name="@item.ContactName.DisplayName" class="dropdown-item create-assignment-button">Add Role</button>
-                                <button data-role-id="@item.RoleId" data-name="@item.ContactName.DisplayName" data-role="@SchoolContactRole.SciencePrac" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
+                                <button data-contact-id="@item.Id.Value" data-role-id="@item.RoleId.Value" data-name="@item.ContactName.DisplayName" data-role="@SchoolContactRole.SciencePrac" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
                                 <div class="dropdown-divider"></div>
                                 <a asp-page="Audit" asp-area="Subject" asp-route-id="@item.Id" class="dropdown-item">Audit Account</a>
                             </div>
@@ -78,6 +78,7 @@
 @section scripts {
     <script>
         $('.delete-role-button').click(function (event) {
+            var contactId = $(this).data("contactId");
             var roleId = $(this).data("roleId");
             var name = $(this).data("name");
             var role = $(this).data("role");
@@ -88,6 +89,7 @@
                 url: "?handler=AjaxDelete",
                 type: "POST",
                 data: { 
+                    contactId: contactId,
                     roleId: roleId,
                     name: name,
                     role: role,

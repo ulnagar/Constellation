@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Schools.Models;
 using Constellation.Core.Shared;
+using Core.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -22,8 +23,8 @@ internal sealed class GetCurrentPartnerSchoolsWithStudentsListQueryHandler
 
     public async Task<Result<List<SchoolSelectionListResponse>>> Handle(GetCurrentPartnerSchoolsWithStudentsListQuery request, CancellationToken cancellationToken)
     {
-        var schools = await _schoolRepository.GetWithCurrentStudents(cancellationToken);
+        List<School> schools = await _schoolRepository.GetWithCurrentStudents(cancellationToken);
 
-        return schools.Select(school => new SchoolSelectionListResponse(school.Code, school.Name)).ToList();
+        return schools.OrderBy(school => school.Name).Select(school => new SchoolSelectionListResponse(school.Code, school.Name)).ToList();
     }
 }

@@ -11,4 +11,5 @@ public sealed record ContactResponse(
     ContactCategory Category,
     string Contact,
     EmailAddress ContactEmail,
-    PhoneNumber ContactPhone);
+    PhoneNumber ContactPhone,
+    string AdditionalNotes);

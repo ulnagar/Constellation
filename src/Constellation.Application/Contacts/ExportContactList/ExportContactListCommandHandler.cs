@@ -100,6 +100,7 @@ internal sealed class ExportContactListCommandHandler
                 ContactCategory.Student,
                 studentName.DisplayName,
                 studentEmail.Value,
+                null,
                 null));
 
             Result<PhoneNumber> schoolPhone = PhoneNumber.Create(student.School.PhoneNumber);
@@ -116,7 +117,8 @@ internal sealed class ExportContactListCommandHandler
                     ContactCategory.PartnerSchoolSchool,
                     student.School.Name,
                     schoolEmail.Value,
-                    schoolPhone.IsSuccess ? schoolPhone.Value : null));
+                    schoolPhone.IsSuccess ? schoolPhone.Value : null,
+                    null));
             }
             
             List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(student.SchoolCode, cancellationToken);
@@ -153,7 +155,8 @@ internal sealed class ExportContactListCommandHandler
                         category,
                         contactName.Value.DisplayName,
                         contactEmail.Value,
-                        contactPhone.IsSuccess ? contactPhone.Value : schoolPhone.Value));
+                        contactPhone.IsSuccess ? contactPhone.Value : schoolPhone.Value,
+                        role.Note));
                 }
             }
 
@@ -178,6 +181,7 @@ internal sealed class ExportContactListCommandHandler
                         ContactCategory.ResidentialFamily,
                         family.FamilyTitle,
                         familyEmail.Value,
+                        null,
                         null));
 
                     foreach (Parent parent in family.Parents)
@@ -209,7 +213,8 @@ internal sealed class ExportContactListCommandHandler
                             category,
                             parentName.Value.DisplayName,
                             parentEmail.Value,
-                            parentPhone.IsSuccess ? parentPhone.Value : null));
+                            parentPhone.IsSuccess ? parentPhone.Value : null,
+                            null));
                     }
                 }
                 else
@@ -222,6 +227,7 @@ internal sealed class ExportContactListCommandHandler
                         ContactCategory.NonResidentialFamily,
                         family.FamilyTitle,
                         familyEmail.Value,
+                        null,
                         null));
 
                     foreach (Parent parent in family.Parents)
@@ -246,7 +252,8 @@ internal sealed class ExportContactListCommandHandler
                             ContactCategory.NonResidentialParent,
                             parentName.Value.DisplayName,
                             parentEmail.Value,
-                            parentPhone.IsSuccess ? parentPhone.Value : null));
+                            parentPhone.IsSuccess ? parentPhone.Value : null,
+                            null));
                     }
                 }
             }
@@ -257,7 +264,11 @@ internal sealed class ExportContactListCommandHandler
                 .Select(entry => entry.OfferingId)
                 .ToList();
 
-            List<Offering> studentOfferings = offerings.Where(entry => offeringIds.Contains(entry.Id)).ToList();
+            List<Offering> studentOfferings = offerings
+                .Where(entry =>
+                    offeringIds.Contains(entry.Id) &&
+                    entry.IsCurrent)
+                .ToList();
 
             foreach (Offering offering in studentOfferings)
             {
@@ -289,6 +300,7 @@ internal sealed class ExportContactListCommandHandler
                         ContactCategory.AuroraTeacher,
                         teacherName,
                         teacherEmail.Value,
+                        null,
                         null));
                 }
 
@@ -334,6 +346,7 @@ internal sealed class ExportContactListCommandHandler
                         ContactCategory.AuroraHeadTeacher,
                         teacherName,
                         teacherEmail.Value,
+                        null,
                         null));
                 }
             }

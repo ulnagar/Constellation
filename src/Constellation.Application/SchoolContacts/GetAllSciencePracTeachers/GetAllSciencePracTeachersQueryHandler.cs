@@ -81,7 +81,8 @@ internal sealed class GetAllSciencePracTeachersQueryHandler
                     phoneRequest.IsSuccess ? phoneRequest.Value : null,
                     contact.SelfRegistered,
                     assignment.SchoolCode,
-                    assignment.SchoolName));
+                    assignment.SchoolName,
+                    assignment.Note));
             }
         }
 

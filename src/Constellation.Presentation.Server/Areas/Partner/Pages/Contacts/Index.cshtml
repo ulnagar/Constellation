@@ -70,107 +70,119 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var contact in Model.Contacts)
+        @if (Model.Contacts.Any())
         {
-            <tr>
-                <td>@contact.Student.DisplayName (@contact.StudentGrade.AsName())</td>
-                <td>@{
-                        if (contact.Category.Value.Contains("PartnerSchool"))
-                        {
-                            <i class="fal fa-school" title="Partner School"></i>
-                        }
+            foreach (var contact in Model.Contacts)
+            {
+                <tr>
+                    <td>@contact.Student.DisplayName (@contact.StudentGrade.AsName())</td>
+                    <td>
+                        @{
+                            if (contact.Category.Value.Contains("PartnerSchool"))
+                            {
+                                <i class="fal fa-school" title="Partner School"></i>
+                            }
 
-                        if (contact.Category.Value.Contains("NonResidential"))
-                        {
-                            <i class="fal fa-house-damage" title="Non-Residential Family"></i>
-                        }
+                            if (contact.Category.Value.Contains("NonResidential"))
+                            {
+                                <i class="fal fa-house-damage" title="Non-Residential Family"></i>
+                            }
 
-                        if (contact.Category.Value.Contains(".Residential"))
-                        {
-                            <i class="fal fa-house" title="Residential Family"></i>
-                        }
+                            if (contact.Category.Value.Contains(".Residential"))
+                            {
+                                <i class="fal fa-house" title="Residential Family"></i>
+                            }
 
-                        if (contact.Category.Value.Contains("Student"))
-                        {
-                            <i class="fal fa-child" title="Student"></i>
-                        }
+                            if (contact.Category.Value.Contains("Student"))
+                            {
+                                <i class="fal fa-child" title="Student"></i>
+                            }
 
-                        if (contact.Category.Value.Contains("Aurora."))
-                        {
-                            <i class="fal fa-chalkboard-teacher" title="Aurora College"></i>
+                            if (contact.Category.Value.Contains("Aurora."))
+                            {
+                                <i class="fal fa-chalkboard-teacher" title="Aurora College"></i>
+                            }
                         }
-                    }
-                </td>
-                <td>@{
-                        if (contact.Category.Value.Contains(".Family"))
-                        {
-                            //<i class="fal fa-house-leave" title="Family Contact"></i>
-                            @:Family
-                        }
+                    </td>
+                    <td>
+                        @{
+                            if (contact.Category.Value.Contains(".Family"))
+                            {
+                                //<i class="fal fa-house-leave" title="Family Contact"></i>
+                                @:Family
+                            }
 
-                        if (contact.Category.Value.Contains(".Mother"))
-                        {
-                            //<i class="fal fa-female" title="Mother"></i>
-                            @:Mother
-                        }
+                            if (contact.Category.Value.Contains(".Mother"))
+                            {
+                                //<i class="fal fa-female" title="Mother"></i>
+                                @:Mother
+                            }
 
-                        if (contact.Category.Value.Contains(".Father"))
-                        {
-                            //<i class="fal fa-male" title="Father"></i>
-                            @:Father
-                        }
+                            if (contact.Category.Value.Contains(".Father"))
+                            {
+                                //<i class="fal fa-male" title="Father"></i>
+                                @:Father
+                            }
 
-                        if (contact.Category.Value.Contains(".Parent"))
-                        {
-                            //<i class="fal fa-restroom" title="Parent"></i>
-                            @:Parent
-                        }
+                            if (contact.Category.Value.Contains(".Parent"))
+                            {
+                                //<i class="fal fa-restroom" title="Parent"></i>
+                                @:Parent
+                            }
 
-                        if (contact.Category.Value.Contains(".School"))
-                        {
-                            //<i class="fal fa-chalkboard-teacher" title="School"></i>
-                            @:School
-                        }
+                            if (contact.Category.Value.Contains(".School"))
+                            {
+                                //<i class="fal fa-chalkboard-teacher" title="School"></i>
+                                @:School
+                            }
 
-                        if (contact.Category.Value.Contains(".Principal"))
-                        {
-                            //<i class="fal fa-restroom" title="Principal"></i>
-                            @:Principal
-                        }
+                            if (contact.Category.Value.Contains(".Principal"))
+                            {
+                                //<i class="fal fa-restroom" title="Principal"></i>
+                                @:Principal
+                            }
 
-                        if (contact.Category.Value.Contains(".AuroraCollegeCoordinator"))
-                        {
-                            //<i class="fal fa-restroom" title="ACC"></i>
-                            @:ACC
-                        }
+                            if (contact.Category.Value.Contains(".AuroraCollegeCoordinator"))
+                            {
+                                //<i class="fal fa-restroom" title="ACC"></i>
+                                @:ACC
+                            }
 
-                        if (contact.Category.Value.Contains(".SciencePracticalTeacher"))
-                        {
-                            //<i class="fal fa-restroom" title="SPT"></i>
-                            @:SPT
-                        }
+                            if (contact.Category.Value.Contains(".SciencePracticalTeacher"))
+                            {
+                                //<i class="fal fa-restroom" title="SPT"></i>
+                                @:SPT
+                            }
 
-                        if (contact.Category.Value.Contains(".OtherStaff"))
-                        {
-                            //<i class="fal fa-restroom" title="Other Staff"></i>
-                            @:Other Staff
-                        }
+                            if (contact.Category.Value.Contains(".OtherStaff"))
+                            {
+                                //<i class="fal fa-restroom" title="Other Staff"></i>
+                                @:Other Staff
+                            }
 
-                        if (contact.Category.Value.Contains(".Teacher"))
-                        {
-                            @:Teacher
-                        }
+                            if (contact.Category.Value.Contains(".Teacher"))
+                            {
+                                @:Teacher
+                            }
 
-                        if (contact.Category.Value.Contains(".HeadTeacher"))
-                        {
-                            @:Head Teacher
+                            if (contact.Category.Value.Contains(".HeadTeacher"))
+                            {
+                                @:Head Teacher
+                            }
                         }
-                    }
-                </td>
-                <td>@contact.Contact</td>
-                <td>@contact.ContactEmail.Email</td>
-                <td>@contact.ContactPhone?.ToString()</td>
-            </tr>
+                    </td>
+                    <td>
+                        @contact.Contact
+                        @if (!string.IsNullOrWhiteSpace(contact.AdditionalNotes))
+                        {
+                            <br/>
+                            <span class="font-italic text-muted">@contact.AdditionalNotes</span>
+                        }
+                    </td>
+                    <td>@contact.ContactEmail.Email</td>
+                    <td>@contact.ContactPhone?.ToString()</td>
+                </tr>
+            }
         }
     </tbody>
 </table>

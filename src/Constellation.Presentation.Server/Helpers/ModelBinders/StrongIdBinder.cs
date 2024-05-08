@@ -35,7 +35,7 @@ public sealed class StrongIdBinder : IModelBinder
             : null;
 
     private object? FromString(Type idType, string? rawValue) =>
-        rawValue is string && GetContainedType(idType) is Type containedType
+        rawValue is string && !string.IsNullOrWhiteSpace(rawValue) && GetContainedType(idType) is Type containedType
             ? TypeDescriptor.GetConverter(containedType).ConvertFromString(rawValue)
             : null;
 

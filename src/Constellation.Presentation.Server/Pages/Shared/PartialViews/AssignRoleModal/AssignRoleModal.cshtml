@@ -1,6 +1,6 @@
 ﻿@model AssignRoleModalViewModel
 
-<form asp-page-handler="CreateAssignment" asp-page="/SciencePracs/Teachers/Index" asp-area="Subject" method="post">
+<form asp-page-handler="CreateAssignment" method="post">
     <div class="modal-header">
         <h5 class="modal-title">Assign Role</h5>
     </div>
@@ -8,7 +8,7 @@
         <div class="form-group row">
             <label class="col-md-3">Contact</label>
             <div class="col-md-9">
-                @Html.HiddenFor(model => model.ContactId)
+                @Html.HiddenFor(model => model.ContactGuid)
                 @Model.ContactName
             </div>
         </div>
@@ -28,7 +28,7 @@
                 @if (string.IsNullOrWhiteSpace(Model.RoleName))
                 {
                     <select asp-for="RoleName" asp-items="@Model.Roles" class="combo-with-tag" style="width:100%">
-                        <option value="-- Select or Enter --"></option>
+                        <option value="">-- Select or Enter --</option>
                     </select>
                 }
                 else
@@ -36,6 +36,14 @@
                     @Html.HiddenFor(model => model.RoleName)
                     @Model.RoleName
                 }
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="Note" class="col-md-3">Note</label>
+            <div class="col-md-9">
+                <input asp-for="Note" class="form-control" />
+                <span asp-validation-for="Note" class="text-danger"></span>
             </div>
         </div>
     </div>

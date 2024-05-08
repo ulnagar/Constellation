@@ -28,4 +28,5 @@ public class AuthPolicies
     public const string CanEditStaff = "CanEditStaff";
     public const string CanManageWorkflows = "CanManageWorkflows";
     public const string CanEditWorkFlowAction = "CanEditWorkFlowAction";
+    public const string CanManageSchoolContacts = "CanManageSchoolContacts";
 }

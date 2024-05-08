@@ -1,6 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Teachers;
 
-using Constellation.Application.AdminDashboards.RepairSchoolContactUser;
+using Application.Users.RepairSchoolContactUser;
 using Constellation.Application.AdminDashboards.VerifySchoolContactAccess;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;

@@ -85,6 +85,9 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanEditWorkFlowAction, policy =>
             policy.Requirements.Add(new CanEditWorkFlowActionRequirement()));
 
+        options.AddPolicy(AuthPolicies.CanManageSchoolContacts, policy =>
+            policy.RequireRole(AuthRoles.Editor, AuthRoles.Admin));
+
         return options;
     }
 }

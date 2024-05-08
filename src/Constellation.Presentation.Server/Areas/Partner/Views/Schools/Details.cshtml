@@ -170,11 +170,6 @@
         <div id="schoolStaff" class="tab-pane active">
             <h3>School Contacts</h3>
             
-            @if (authorised)
-            {
-                <button type="button" data-toggle="modal" data-target="#addAssignment" class="btn btn-info btn-sm">Set new school contact</button>
-            }
-            
             <table class="table-striped table-hover data-table">
                 <thead>
                 <tr>
@@ -182,21 +177,21 @@
                     <th>Email</th>
                     <th>Phone Number</th>
                     <th>Role</th>
-                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
                 @foreach (var item in Model.Contacts)
                 {
                     <tr>
-                        <td>@Html.DisplayFor(model => item.Name)</td>
+                        <td>@item.Name</td>
                         <td>@Html.DisplayFor(model => item.EmailAddress, "EmailAddress")</td>
                         <td>@Html.DisplayFor(model => item.PhoneNumber, "PhoneNumber")</td>
-                        <td>@Html.DisplayFor(model => item.Role)</td>
                         <td>
-                            @if (authorised)
+                            @item.Role
+                            @if (!string.IsNullOrWhiteSpace(item.Note))
                             {
-                                <a asp-action="DeleteAssignment" asp-controller="SchoolContacts" asp-area="Partner" asp-route-contactGuid="@item.ContactId.Value" asp-route-roleGuid="@item.RoleId.Value" class="btn btn-sm btn-warning btn-show-hover">Remove</a>
+                                <br/>
+                                <span class="font-italic text-muted">@item.Note</span>
                             }
                         </td>
                     </tr>
@@ -276,8 +271,6 @@
         </div>
     </div>
 </div>
-
-@await Html.PartialAsync("_AddAssignment", Model.RoleAssignmentDto)
 
 @section scripts
 {

@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 public interface ISchoolContactRepository
 {
     Task<List<SchoolContact>> GetAll(CancellationToken cancellationToken = default);
+    Task<List<SchoolContact>> GetAllWithRole(CancellationToken cancellationToken = default);
+    Task<List<SchoolContact>> GetAllWithoutRole(CancellationToken cancellationToken = default);
     Task<List<SchoolContact>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<SchoolContact>> GetPrincipalsForSchool(string schoolCode, CancellationToken cancellationToken = default);
     Task<SchoolContact> GetWithRolesByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);

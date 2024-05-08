@@ -52,7 +52,7 @@ internal sealed class SendNotificationToSchoolAdminOfSelfRegisteredContact
             return;
         }
 
-        if (!contact.SelfRegistered || contact.CreatedAt.Subtract(_dateTime.Now).TotalDays > 5)
+        if (!contact.SelfRegistered || _dateTime.Now.Subtract(contact.CreatedAt).TotalDays > 5)
             return;
 
         SchoolContactRole role = contact.Assignments.FirstOrDefault(role => role.Id == notification.RoleId);

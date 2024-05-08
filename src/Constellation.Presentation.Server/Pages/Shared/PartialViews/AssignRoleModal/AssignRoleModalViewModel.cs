@@ -6,7 +6,8 @@ public class AssignRoleModalViewModel
 {
     public string SchoolCode { get; set; }
     public string RoleName { get; set; }
-    public int ContactId { get; set; }
+    public Guid ContactGuid { get; set; }
+    public string Note { get; set; }
 
     public SelectList Roles { get; set; }
     public SelectList Schools { get; set; }

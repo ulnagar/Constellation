@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Server.Pages.Shared.PartialViews.DeleteRoleModal;
-
-internal sealed record DeleteRoleModalViewModel(
-    int RoleId,
+public sealed record DeleteRoleModalViewModel(
+    Guid ContactId,
+    Guid RoleId,
     string ContactName,
     string ContactRole,
     string SchoolName);

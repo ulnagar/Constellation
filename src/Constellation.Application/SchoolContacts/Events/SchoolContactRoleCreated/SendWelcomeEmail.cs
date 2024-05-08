@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Interfaces.Services;
 using Constellation.Core.Models.SchoolContacts;
+using Core.Abstractions.Clock;
 using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Events;
 using Core.Models.SchoolContacts.Repositories;
@@ -13,21 +14,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System;
 
 internal sealed class SendWelcomeEmail 
     : IDomainEventHandler<SchoolContactRoleCreatedDomainEvent>
 {
     private readonly ISchoolContactRepository _contactRepository;
     private readonly IEmailService _emailService;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public SendWelcomeEmail(
         ISchoolContactRepository contactRepository,
         IEmailService emailService,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _contactRepository = contactRepository;
         _emailService = emailService;
+        _dateTime = dateTime;
         _logger = logger.ForContext<SchoolContactRoleCreatedDomainEvent>();
     }
 
@@ -57,6 +62,9 @@ internal sealed class SendWelcomeEmail
 
             return;
         }
+
+        if (_dateTime.Now.Subtract(contact.CreatedAt).TotalDays < 5)
+            return;
 
         switch (role.Role)
         {

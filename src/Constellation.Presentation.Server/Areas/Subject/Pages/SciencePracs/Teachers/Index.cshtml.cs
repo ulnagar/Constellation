@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Teachers;
 
+using Application.Schools.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
 using Constellation.Application.SchoolContacts.GetAllSciencePracTeachers;
@@ -55,12 +56,14 @@ public class IndexModel : BasePageModel
     }
 
     public IActionResult OnPostAjaxDelete(
-        int roleId,
+        Guid contactId,
+        Guid roleId,
         string name,
         string role,
         string school)
     {
         DeleteRoleModalViewModel viewModel = new(
+            contactId,
             roleId,
             name,
             role,
@@ -70,18 +73,18 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAjaxAssign(
-        int contactId,
+        Guid contactId,
         string name)
     {
         AssignRoleModalViewModel viewModel = new();
 
-        var rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
-        var schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery());
+        Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
+        Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
 
-        viewModel.Schools = new SelectList(schoolsRequest.Value, "Code", "Name");
+        viewModel.Schools = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
         viewModel.Roles = new SelectList(rolesRequest.Value, SchoolContactRole.SciencePrac);
         viewModel.RoleName = SchoolContactRole.SciencePrac;
-        viewModel.ContactId = contactId;
+        viewModel.ContactGuid = contactId;
         viewModel.ContactName = name;
 
         return Partial("AssignRoleModal", viewModel);
@@ -100,11 +103,12 @@ public class IndexModel : BasePageModel
     public async Task<IActionResult> OnPostCreateAssignment(
         string schoolCode,
         string roleName,
+        string note,
         Guid contactGuid)
     {
         SchoolContactId contactId = SchoolContactId.FromValue(contactGuid);
         
-        Result request = await _mediator.Send(new CreateContactRoleAssignmentCommand(contactId, schoolCode, roleName, string.Empty));
+        Result request = await _mediator.Send(new CreateContactRoleAssignmentCommand(contactId, schoolCode, roleName, note));
 
         if (request.IsFailure)
         {

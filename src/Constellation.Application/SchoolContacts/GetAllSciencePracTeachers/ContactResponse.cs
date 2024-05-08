@@ -11,4 +11,5 @@ public sealed record ContactResponse(
     PhoneNumber? PhoneNumber,
     bool SelfRegistered,
     string SchoolCode,
-    string SchoolName);
+    string SchoolName,
+    string Note);

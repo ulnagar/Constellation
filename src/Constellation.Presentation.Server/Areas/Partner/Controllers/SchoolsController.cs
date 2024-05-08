@@ -203,19 +203,25 @@ public class SchoolsController : Controller
             return RedirectToAction("Index");
         }
 
-        List<SchoolContact> contacts = await _contactRepository.GetAll();
+        List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(id);
         List<string> roles = await _contactRepository.GetAvailableRoleList();
 
         // Build the master form viewmodel
-        School_DetailsViewModel viewModel = new School_DetailsViewModel();
-        viewModel.School = School_DetailsViewModel.SchoolDto.ConvertFromSchool(school);
-
-        foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => !role.IsDeleted && role.SchoolCode == school.Code)))
+        School_DetailsViewModel viewModel = new()
         {
-            foreach (SchoolContactRole assignment in contact.Assignments.Where(role => !role.IsDeleted && role.SchoolCode == school.Code).ToList())
-            {
+            School = School_DetailsViewModel.SchoolDto.ConvertFromSchool(school)
+        };
+
+        foreach (SchoolContact contact in contacts)
+        {
+            List<SchoolContactRole> assignments = contact.Assignments
+                .Where(role => 
+                    !role.IsDeleted && 
+                    role.SchoolCode == school.Code)
+                .ToList();
+
+            foreach (SchoolContactRole assignment in assignments)
                 viewModel.Contacts.Add(School_DetailsViewModel.ContactDto.ConvertFromAssignment(contact, assignment));
-            }
         }
             
         foreach (Student student in school.Students)

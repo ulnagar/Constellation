@@ -2,10 +2,29 @@
 
 @if (!string.IsNullOrEmpty(Model) && Model.Length == 10)
 {
-    <span>@string.Format("({0}) {1} {2}",
-              Model.Substring(0, 2),
-              Model.Substring(2, 4),
-              Model.Substring(6, 4))</span>
+    var format = string.Empty;
+
+    var prefix = Model[..2];
+
+    format = prefix switch
+    {
+        "04" or "13" => "mobile",
+        "02" or "03" or "07" or "08" => "landline",
+        _ => format
+    };
+
+    switch (format)
+    {
+        case "mobile":
+            <span>@Model[..4] @Model[4..7] @Model[7..10]</span>
+            break;
+        case "landline":
+            <span>(@Model[..2]) @Model[2..6] @Model[6..10]</span>
+            break;
+        case "":
+            <span>@Model</span>
+            break;
+    }
 }
 else
 {

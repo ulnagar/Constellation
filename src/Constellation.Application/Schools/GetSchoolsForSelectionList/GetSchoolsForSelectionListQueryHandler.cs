@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.Schools.GetSchoolsForSelectionList;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Schools.Models;
-using Constellation.Core.Shared;
+using Abstractions.Messaging;
+using Core.Models;
+using Core.Shared;
+using Interfaces.Repositories;
+using Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -23,12 +24,16 @@ internal sealed class GetSchoolsForSelectionListQueryHandler
     {
         List<SchoolSelectionListResponse> returnData = new();
 
-        var schools = await _schoolRepository.GetAll(cancellationToken);
+        List<School> schools = request.Filter switch
+        {
+            GetSchoolsForSelectionListQuery.SchoolsFilter.All => await _schoolRepository.GetAll(cancellationToken),
+            GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools => await _schoolRepository.GetAllActive(cancellationToken),
+            GetSchoolsForSelectionListQuery.SchoolsFilter.WithStudents => await _schoolRepository.GetWithCurrentStudents(cancellationToken),
+            _ => await _schoolRepository.GetAll(cancellationToken)
+        };
 
         if (schools.Count == 0)
-        {
             return returnData;
-        }
 
         returnData.AddRange(schools
             .Select(school => 

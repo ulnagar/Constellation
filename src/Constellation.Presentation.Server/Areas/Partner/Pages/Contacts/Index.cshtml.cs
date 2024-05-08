@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.Partner.Pages.Contacts;
 
 using Application.DTOs;
+using Application.StaffMembers.Models;
 using Constellation.Application.Contacts.ExportContactList;
 using Constellation.Application.Contacts.GetContactList;
 using Constellation.Application.Contacts.Models;
@@ -99,9 +100,9 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
-        foreach (var course in classesResponse.Value)
+        foreach (OfferingSelectionListResponse course in classesResponse.Value)
         {
-            var teachers = await _mediator.Send(new GetStaffLinkedToOfferingQuery(course.Id), cancellationToken);
+            Result<List<StaffSelectionListResponse>> teachers = await _mediator.Send(new GetStaffLinkedToOfferingQuery(course.Id), cancellationToken);
 
             if (teachers.Value.Count == 0)
                 continue;
@@ -113,7 +114,7 @@ public class IndexModel : BasePageModel
                 .OrderByDescending(x => x.Count)
                 .First();
 
-            var primaryTeacher = teachers.Value.First(teacher => teacher.StaffId == frequency.StaffId);
+            StaffSelectionListResponse primaryTeacher = teachers.Value.First(teacher => teacher.StaffId == frequency.StaffId);
 
             ClassSelectionList.Add(new ClassRecord(
                 course.Id,
@@ -144,32 +145,38 @@ public class IndexModel : BasePageModel
 
         List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
 
-        Result<List<ContactResponse>> contactRequest = await _mediator.Send(
-            new GetContactListQuery(
-                offeringIds,
-                Filter.Grades,
-                Filter.Schools,
-                filterCategories),
-            cancellationToken);
-
-        if (contactRequest.IsFailure)
+        if (offeringIds.Any() ||
+            filterCategories.Any() ||
+            Filter.Grades.Any() ||
+            Filter.Schools.Any())
         {
-            Error = new ErrorDisplay
+            Result<List<ContactResponse>> contactRequest = await _mediator.Send(
+                new GetContactListQuery(
+                    offeringIds,
+                    Filter.Grades,
+                    Filter.Schools,
+                    filterCategories),
+                cancellationToken);
+
+            if (contactRequest.IsFailure)
             {
-                Error = contactRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" })
-            };
+                Error = new ErrorDisplay
+                {
+                    Error = contactRequest.Error,
+                    RedirectPath = _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" })
+                };
 
-            return Page();
+                return Page();
+            }
+
+            Contacts = contactRequest.Value;
+
+            Contacts = Contacts
+                .OrderBy(contact => contact.StudentGrade)
+                .ThenBy(contact => contact.Student.LastName)
+                .ThenBy(contact => contact.Student.FirstName)
+                .ToList();
         }
-
-        Contacts = contactRequest.Value;
-
-        Contacts = Contacts
-            .OrderBy(contact => contact.StudentGrade)
-            .ThenBy(contact => contact.Student.LastName)
-            .ThenBy(contact => contact.Student.FirstName)
-            .ToList();
 
         return Page();
     }

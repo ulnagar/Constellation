@@ -87,6 +87,7 @@ internal sealed class GetContactListForStudentQueryHandler
             ContactCategory.Student,
             studentName.DisplayName,
             studentEmail.Value,
+            null,
             null));
 
         Result<PhoneNumber> schoolPhone = PhoneNumber.Create(student.School.PhoneNumber);
@@ -103,7 +104,8 @@ internal sealed class GetContactListForStudentQueryHandler
                 ContactCategory.PartnerSchoolSchool,
                 student.School.Name,
                 schoolEmail.Value,
-                schoolPhone.IsSuccess ? schoolPhone.Value : null));
+                schoolPhone.IsSuccess ? schoolPhone.Value : null,
+                null));
         }
 
         List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(student.SchoolCode, cancellationToken);
@@ -139,7 +141,8 @@ internal sealed class GetContactListForStudentQueryHandler
                     category,
                     contactName.Value.DisplayName,
                     contactEmail.Value,
-                    contactPhone.IsSuccess ? contactPhone.Value : schoolPhone.Value));
+                    contactPhone.IsSuccess ? contactPhone.Value : schoolPhone.Value,
+                    role.Note));
             }
         }
 
@@ -164,6 +167,7 @@ internal sealed class GetContactListForStudentQueryHandler
                     ContactCategory.ResidentialFamily,
                     family.FamilyTitle,
                     familyEmail.Value,
+                    null,
                     null));
 
                 foreach (Parent parent in family.Parents)
@@ -194,8 +198,9 @@ internal sealed class GetContactListForStudentQueryHandler
                         student.School.Name,
                         category,
                         parentName.Value.DisplayName,
-                    parentEmail.Value,
-                        parentPhone.IsSuccess ? parentPhone.Value : null));
+                        parentEmail.Value,
+                        parentPhone.IsSuccess ? parentPhone.Value : null,
+                        null));
                 }
             }
             else
@@ -208,6 +213,7 @@ internal sealed class GetContactListForStudentQueryHandler
                     ContactCategory.NonResidentialFamily,
                     family.FamilyTitle,
                     familyEmail.Value,
+                    null,
                     null));
 
                 foreach (Parent parent in family.Parents)
@@ -232,7 +238,8 @@ internal sealed class GetContactListForStudentQueryHandler
                         ContactCategory.NonResidentialParent,
                         parentName.Value.DisplayName,
                         parentEmail.Value,
-                        parentPhone.IsSuccess ? parentPhone.Value : null));
+                        parentPhone.IsSuccess ? parentPhone.Value : null,
+                        null));
                 }
             }
         }
@@ -269,6 +276,7 @@ internal sealed class GetContactListForStudentQueryHandler
                     ContactCategory.AuroraTeacher,
                     teacherName,
                     teacherEmail.Value,
+                    null,
                     null));
             }
 
@@ -314,6 +322,7 @@ internal sealed class GetContactListForStudentQueryHandler
                     ContactCategory.AuroraHeadTeacher,
                     teacherName,
                     teacherEmail.Value,
+                    null,
                     null));
             }
         }

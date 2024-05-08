@@ -92,7 +92,7 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
             [Display(Name=DisplayNameDefaults.PhoneNumber)]
             public string PhoneNumber { get; set; }
             public string Role { get; set; }
-
+            public string Note { get; set; }
             public static ContactDto ConvertFromAssignment(SchoolContact contact, SchoolContactRole role)
             {
                 var viewModel = new ContactDto
@@ -102,7 +102,8 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
                     Name = contact.DisplayName,
                     EmailAddress = contact.EmailAddress,
                     PhoneNumber = contact.PhoneNumber,
-                    Role = role.Role
+                    Role = role.Role,
+                    Note = role.Note
                 };
 
                 return viewModel;

@@ -1,9 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Application.Features.API.Schools.Queries;
-using Constellation.Core.Enums;
-using Constellation.Core.Models.SchoolContacts;
+using Core.Enums;
 using Core.Models;
+using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +24,23 @@ public class SchoolContactRepository : ISchoolContactRepository
             .Set<SchoolContact>()
             .ToListAsync(cancellationToken);
 
+    public async Task<List<SchoolContact>> GetAllWithRole(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SchoolContact>()
+            .Where(contact => contact.Assignments.Any(assignment =>
+                !assignment.IsDeleted))
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<SchoolContact>> GetAllWithoutRole(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SchoolContact>()
+            .Where(contact => 
+                contact.Assignments.Count == 0 ||
+                contact.Assignments.All(assignment => assignment.IsDeleted))
+            .ToListAsync(cancellationToken);
+    
     public async Task<SchoolContact?> GetById(
         SchoolContactId contactId, 
         CancellationToken cancellationToken = default) =>
