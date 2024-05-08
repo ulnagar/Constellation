@@ -169,12 +169,14 @@ internal sealed class GetAffirmationQueryHandler
         "I am deserving of recognition and advancement, and I confidently seize opportunities for growth."
     };
 
+#pragma warning disable CA5394
     public async Task<Result<string>> Handle(GetAffirmationQuery request, CancellationToken cancellationToken)
     {
         int dateTicks = (int)DateTime.Today.Ticks;
         bool success = int.TryParse(request.UserId, out int userId);
 
         Random random = !success ? new(dateTicks) : new(userId + dateTicks);
+
         bool multipart = random.NextDouble() <= 0.125;
         
         if (multipart)
@@ -197,4 +199,5 @@ internal sealed class GetAffirmationQueryHandler
             return _completeAffirmations[index];
         }
     }
+#pragma warning restore CA5394
 }
