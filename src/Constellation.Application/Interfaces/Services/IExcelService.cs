@@ -15,6 +15,7 @@ using Constellation.Application.Rollover.ImportStudents;
 using Constellation.Application.Training.Modules.GenerateOverallReport;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Infrastructure.Jobs;
+using SchoolContacts.GetContactsBySchool;
 using SciencePracs.GenerateOverdueReport;
 using System;
 using System.Collections.Generic;
@@ -51,5 +52,5 @@ public interface IExcelService
     Task<MemoryStream> CreateSciencePracOverdueReport(List<OverdueRollResponse> records, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateTrainingModuleOverallReportFile(List<ModuleDetails> moduleDetails, List<StaffStatus> staffStatuses, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateWorkFlowReport(List<CaseReportItem> records, CancellationToken cancellationToken = default);
-
+    Task<MemoryStream> CreateSchoolContactExport(List<SchoolWithContactsResponse> records, CancellationToken cancellationToken = default);
 }

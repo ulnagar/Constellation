@@ -3,4 +3,5 @@
 internal sealed class SchoolContactsPages
 {
     public const string Contacts = "Contacts";
+    public const string Reports = "Reports";
 }

@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 
 public sealed class PhoneNumber : ValueObject
 {
+    public static readonly PhoneNumber Empty = new("0200000000");
+
     private const string _regExFormat = @"^(?:\+?(61))? ?(?:\((?=.*\)))?(0?[2-57-8])\)? ?(\d\d(?:[- ](?=\d{3})|(?!\d\d[- ]?\d[- ]))\d\d[- ]?\d[- ]?\d{3})$";
 
     private PhoneNumber(string number)
@@ -44,35 +46,34 @@ public sealed class PhoneNumber : ValueObject
 
     public override string ToString()
     {
-        var prefix = Number[..2];
+        if (this == Empty)
+            return string.Empty;
 
-        if (prefix == "04" ||
-            prefix == "13")
-            return ToString(Format.Mobile);
+        string prefix = Number[..2];
 
-        if (prefix == "02" || 
-            prefix == "03" ||
-            prefix == "07" ||
-            prefix == "08")
-            return ToString(Format.LandLine);
-
-        return ToString(Format.None);
+        switch (prefix)
+        {
+            case "04":
+            case "13":
+                return ToString(Format.Mobile);
+            case "02":
+            case "03":
+            case "07":
+            case "08":
+                return ToString(Format.LandLine);
+            default:
+                return ToString(Format.None);
+        }
     }
 
-    public string ToString(Format format)
-    {
-        if (format == Format.Mobile)
+    public string ToString(Format format) =>
+        format switch
         {
-            return $"{Number[..4]} {Number[4..7]} {Number[7..10]}";
-        }
-
-        if (format == Format.LandLine)
-        {
-            return $"({Number[..2]}) {Number[2..6]} {Number[6..10]}";
-        }
-
-        return Number;
-    }
+            Format.Mobile => $"{Number[..4]} {Number[4..7]} {Number[7..10]}",
+            Format.LandLine => $"({Number[..2]}) {Number[2..6]} {Number[6..10]}",
+            Format.None => Number,
+            _ => Number
+        };
 
     private string Number { get; }
 

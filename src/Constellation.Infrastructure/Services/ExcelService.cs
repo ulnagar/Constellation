@@ -16,6 +16,7 @@ using Constellation.Application.DTOs.CSV;
 using Constellation.Application.ExternalDataConsistency;
 using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.SchoolContacts.GetContactsBySchool;
 using Constellation.Application.SciencePracs.GenerateOverdueReport;
 using Constellation.Application.Training.Modules.GenerateOverallReport;
 using Constellation.Application.WorkFlows.ExportOpenCaseReport;
@@ -32,6 +33,7 @@ using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.LoadFunctions.Params;
 using OfficeOpenXml.Style;
 using OfficeOpenXml.Style.XmlAccess;
+using OfficeOpenXml.Table.PivotTable;
 using Persistence.ConstellationContext.Migrations;
 using System.Data;
 using System.Drawing;
@@ -1406,6 +1408,81 @@ public class ExcelService : IExcelService
         worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
         worksheet.View.FreezePanes(2, 1);
         
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateSchoolContactExport(
+        List<SchoolWithContactsResponse> records,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Contacts");
+
+        worksheet.Cells[1, 1].Value = "School Code";
+        worksheet.Cells[1, 2].Value = "School Type";
+        worksheet.Cells[1, 3].Value = "School";
+        worksheet.Cells[1, 4].Value = "Contact Name";
+        worksheet.Cells[1, 5].Value = "Contact Email";
+        worksheet.Cells[1, 6].Value = "Contact Phone";
+        worksheet.Cells[1, 7].Value = "Contact Role";
+        worksheet.Cells[1, 8].Value = "Notes";
+
+        int row = 2;
+
+        foreach (SchoolWithContactsResponse school in records)
+        {
+            if (school.Contacts.Count == 0)
+            {
+                worksheet.Cells[row, 1].Value = school.SchoolCode;
+                worksheet.Cells[row, 2].Value = school.SchoolType.Name;
+                worksheet.Cells[row, 3].Value = school.SchoolName;
+
+                row++;
+            }
+
+            foreach (SchoolWithContactsResponse.ContactDetails contact in school.Contacts)
+            {
+                worksheet.Cells[row, 1].Value = school.SchoolCode;
+                worksheet.Cells[row, 2].Value = school.SchoolType.Name;
+                worksheet.Cells[row, 3].Value = school.SchoolName;
+                worksheet.Cells[row, 4].Value = contact.Contact.DisplayName;
+                worksheet.Cells[row, 5].Value = contact.EmailAddress.Email;
+                worksheet.Cells[row, 6].Value = contact.PhoneNumber.ToString();
+                worksheet.Cells[row, 7].Value = contact.Role;
+                worksheet.Cells[row, 8].Value = contact.Note;
+
+                row++;
+            }
+        }
+
+        worksheet.Cells[1, 1, 1, worksheet.Dimension.Columns].AutoFilter = true;
+        worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
+        worksheet.View.FreezePanes(2, 1);
+
+        ExcelWorksheet pivotSheet = excel.Workbook.Worksheets.Add("Pivot Table");
+        ExcelPivotTable pivotTable = pivotSheet.PivotTables.Add(
+            pivotSheet.Cells[1, 1],
+            worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns],
+            "Number of Contacts per School by Role");
+
+        pivotTable.ColumnHeaderCaption = "Role";
+        pivotTable.RowHeaderCaption = "School";
+
+        pivotTable.RowFields.Add(pivotTable.Fields["School Type"]);
+        
+        ExcelPivotTableField schoolRowField = pivotTable.RowFields.Add(pivotTable.Fields["School"]);
+        schoolRowField.Sort = eSortType.Ascending;
+        
+        pivotTable.ColumnFields.Add(pivotTable.Fields["Contact Role"]);
+        
+        ExcelPivotTableDataField countDataField = pivotTable.DataFields.Add(pivotTable.Fields["Contact Name"]);
+        countDataField.Function = DataFieldFunctions.Count;
+        countDataField.Name = "Number of Contacts per School by Role";
+
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;
