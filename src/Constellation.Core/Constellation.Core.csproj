@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Models\Assets\Events\" />
     <Folder Include="Models\Assignments\Services\" />
     <Folder Include="Models\Training\Events\" />
   </ItemGroup>
