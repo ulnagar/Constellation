@@ -40,7 +40,7 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
         if (page is null)
             _logger.Warning("Page is null");
 
-        HtmlNode awardsList = page?.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "WellbeingStudentAwardsList").Value);
+        HtmlNode awardsList = page?.DocumentNode.SelectSingleNode(_settings.XPaths.WellbeingStudentAwardsList);
 
         if (awardsList is null) return response;
         
@@ -87,7 +87,7 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
 
                             if (incidentPage is not null)
                             {
-                                HtmlNode entry = incidentPage.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "IncidentCreatedDate").Value);
+                                HtmlNode entry = incidentPage.DocumentNode.SelectSingleNode(_settings.XPaths.IncidentCreatedDate);
 
                                 if (entry is null)
                                 {

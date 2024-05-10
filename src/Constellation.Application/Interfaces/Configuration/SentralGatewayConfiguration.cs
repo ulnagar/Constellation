@@ -10,7 +10,7 @@ public class SentralGatewayConfiguration
     public string Password { get; set; }
     public string ServerUrl { get; set; }
     public ContactPreferenceOptions ContactPreference { get; set; }
-    public Dictionary<string, string> XPaths { get; set; }
+    public SentralXPathLocations XPaths { get; set; }
 
     public bool IsConfigured()
     {
@@ -24,6 +24,26 @@ public class SentralGatewayConfiguration
             return false;
 
         return true;
+    }
+
+    public class SentralXPathLocations
+    {
+        public string MothersHomePhone { get; set; }
+        public string MothersWorkPhone { get; set; }
+        public string MothersMobilePhone { get; set; }
+        public string MothersEmail { get; set; }
+        public string FathersHomePhone { get; set; }
+        public string FathersWorkPhone { get; set; }
+        public string FathersMobilePhone { get; set; }
+        public string FathersEmail { get; set; }
+        public string FamilyName { get; set; }
+        public string AbsenceTable { get; set; }
+        public string StudentTable { get; set; }
+        public string PartialAbsenceTable { get; set; }
+        public string CalendarTable { get; set; }
+        public string TermCalendarTable { get; set; }
+        public string WellbeingStudentAwardsList { get; set; }
+        public string IncidentCreatedDate { get; set; }
     }
 
     public enum ContactPreferenceOptions

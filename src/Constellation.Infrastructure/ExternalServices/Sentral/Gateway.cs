@@ -1,17 +1,16 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Sentral;
 
 using Application.Attendance.GetAttendanceDataFromSentral;
-using Constellation.Application.Attendance.GetValidAttendanceReportDates;
-using Constellation.Application.DTOs;
-using Constellation.Application.Extensions;
-using Constellation.Application.Interfaces.Configuration;
-using Constellation.Application.Interfaces.Gateways;
+using Application.Attendance.GetValidAttendanceReportDates;
+using Application.DTOs;
+using Application.Extensions;
+using Application.Interfaces.Configuration;
+using Application.Interfaces.Gateways;
 using Core.Abstractions.Clock;
 using Core.Shared;
 using ExcelDataReader;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
-using OfficeOpenXml;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -279,22 +278,22 @@ public class Gateway : ISentralGateway
         if (_studentListPage == null)
             return null;
 
-        var page = _studentListPage;
+        HtmlDocument page = _studentListPage;
 
-        var studentTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "StudentTable").Value);
+        HtmlNode studentTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.StudentTable);
 
         if (studentTable != null)
         {
-            foreach (var row in studentTable.Descendants("tr"))
+            foreach (HtmlNode row in studentTable.Descendants("tr"))
             {
-                var cell = row.ChildNodes.FindFirst("td");
-                var sentralName = cell.InnerText.Trim();
-                var sentralFirst = sentralName.Split(',')[1].Trim().ToLower();
-                var sentralLast = sentralName.Split(',')[0].Trim().ToLower();
+                HtmlNode cell = row.ChildNodes.FindFirst("td");
+                string sentralName = cell.InnerText.Trim();
+                string sentralFirst = sentralName.Split(',')[1].Trim().ToLower();
+                string sentralLast = sentralName.Split(',')[0].Trim().ToLower();
 
                 if (studentName.ToLower() == $"{sentralFirst} {sentralLast}")
                 {
-                    var href = cell.ChildNodes.FindFirst("a").GetAttributeValue("href", "");
+                    string href = cell.ChildNodes.FindFirst("a").GetAttributeValue("href", "");
                     if (string.IsNullOrWhiteSpace(href))
                     {
                         // Something went wrong? What now?
@@ -321,25 +320,25 @@ public class Gateway : ISentralGateway
         }
 
         HtmlNode reportTable = null;
-        var page = await GetPageByGet($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history", default);
+        HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history", default);
 
-        var dataList = new List<SentralReportDto>();
+        List<SentralReportDto> dataList = new();
 
         if (page == null)
             return dataList;
 
-        var menuItems = page.DocumentNode.SelectNodes("//*[@id='reporting_period']/option");
+        HtmlNodeCollection menuItems = page.DocumentNode.SelectNodes("//*[@id='reporting_period']/option");
 
         if (menuItems == null || menuItems.Count == 0)
             return dataList;
 
-        foreach (var menuItem in menuItems)
+        foreach (HtmlNode menuItem in menuItems)
         {
-            var linkRef = menuItem.GetAttributeValue("value", "");
+            string linkRef = menuItem.GetAttributeValue("value", "");
             if (string.IsNullOrWhiteSpace(linkRef))
                 continue;
 
-            var reportPage = await GetPageByGet($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history?type=sreport&page=printed_report&reporting_period={linkRef}", default);
+            HtmlDocument reportPage = await GetPageByGet($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history?type=sreport&page=printed_report&reporting_period={linkRef}", default);
             reportTable = reportPage.DocumentNode.SelectSingleNode("//*[@id='layout-2col-content']/div/div/div[2]/table/tbody");
 
             if (reportTable != null)
@@ -348,14 +347,14 @@ public class Gateway : ISentralGateway
 
         if (reportTable != null)
         {
-            foreach (var row in reportTable.Descendants("tr"))
+            foreach (HtmlNode row in reportTable.Descendants("tr"))
             {
-                var cellNumber = 0;
+                int cellNumber = 0;
 
-                var entry = new SentralReportDto();
+                SentralReportDto entry = new();
 
                 // Process Row!
-                foreach (var cell in row.Descendants("td"))
+                foreach (HtmlNode cell in row.Descendants("td"))
                 {
                     cellNumber++;
 
@@ -377,7 +376,7 @@ public class Gateway : ISentralGateway
                             break;
                         case 5:
                             // Report Download link
-                            var link = cell.FirstChild.GetAttributeValue("onclick", "downloadFile(0)");
+                            string link = cell.FirstChild.GetAttributeValue("onclick", "downloadFile(0)");
                             entry.PublishId = link.Split('(')[1].Split(')')[0];
                             break;
                         default:
@@ -476,24 +475,24 @@ public class Gateway : ISentralGateway
             return new List<SentralPeriodAbsenceDto>();
         }
 
-        var page = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/administration/student?id={sentralStudentId}", default);
+        HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/administration/student?id={sentralStudentId}", default);
 
         if (page == null)
             return new List<SentralPeriodAbsenceDto>();
 
-        var absenceTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "AbsenceTable").Value);
+        HtmlNode absenceTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.AbsenceTable);
 
-        var absences = new List<SentralPeriodAbsenceDto>();
+        List<SentralPeriodAbsenceDto> absences = new();
 
         if (absenceTable != null)
         {
-            var rows = absenceTable.Descendants("tr");
-            var previousDate = new DateOnly();
+            IEnumerable<HtmlNode> rows = absenceTable.Descendants("tr");
+            DateOnly previousDate = new();
 
-            foreach (var row in rows)
+            foreach (HtmlNode row in rows)
             {
-                var dateCell = row.ChildNodes.FindFirst("td");
-                var stringDate = dateCell.InnerText.Trim();
+                HtmlNode dateCell = row.ChildNodes.FindFirst("td");
+                string stringDate = dateCell.InnerText.Trim();
                 DateOnly date;
 
                 if (stringDate == "No period absences have been recorded for this student.")
@@ -515,14 +514,14 @@ public class Gateway : ISentralGateway
                     previousDate = date;
                 }
 
-                var periodAbsence = new SentralPeriodAbsenceDto
+                SentralPeriodAbsenceDto periodAbsence = new()
                 {
                     Date = date
                 };
 
-                var cellNumber = 0;
+                int cellNumber = 0;
                 // Process Row!
-                foreach (var cell in row.Descendants("td"))
+                foreach (HtmlNode cell in row.Descendants("td"))
                 {
                     cellNumber++;
 
@@ -533,12 +532,12 @@ public class Gateway : ISentralGateway
                         case 7:
                             break;
                         case 2:
-                            var periodsText = cell.InnerText.Trim().Split(' ');
+                            string[] periodsText = cell.InnerText.Trim().Split(' ');
                             periodAbsence.Period = periodsText[0].Trim();
                             periodAbsence.ClassName = periodsText[2].Trim();
                             break;
                         case 3:
-                            var absenceTypeText = cell.InnerText.Trim();
+                            string absenceTypeText = cell.InnerText.Trim();
                             switch (absenceTypeText[..4])
                             {
                                 case "Abse":
@@ -553,7 +552,7 @@ public class Gateway : ISentralGateway
                                     {
                                         // Partial absence, but for how long?
                                         periodAbsence.Type = SentralPeriodAbsenceDto.Partial;
-                                        var stringMinutes = absenceTypeText.Split('(')[1].Split(')')[0];
+                                        string stringMinutes = absenceTypeText.Split('(')[1].Split(')')[0];
                                         periodAbsence.MinutesAbsent = int.Parse(stringMinutes);
                                         periodAbsence.PartialType = absenceTypeText.Split('(')[0].Trim();
                                     }
@@ -584,12 +583,12 @@ public class Gateway : ISentralGateway
 
     public async Task<List<SentralPeriodAbsenceDto>> GetPartialAbsenceDataAsync(string sentralStudentId)
     {
-        var term1 = await GetPartialAbsenceDataForTerm(sentralStudentId, 1);
-        var term2 = await GetPartialAbsenceDataForTerm(sentralStudentId, 2);
-        var term3 = await GetPartialAbsenceDataForTerm(sentralStudentId, 3);
-        var term4 = await GetPartialAbsenceDataForTerm(sentralStudentId, 4);
+        List<SentralPeriodAbsenceDto> term1 = await GetPartialAbsenceDataForTerm(sentralStudentId, 1);
+        List<SentralPeriodAbsenceDto> term2 = await GetPartialAbsenceDataForTerm(sentralStudentId, 2);
+        List<SentralPeriodAbsenceDto> term3 = await GetPartialAbsenceDataForTerm(sentralStudentId, 3);
+        List<SentralPeriodAbsenceDto> term4 = await GetPartialAbsenceDataForTerm(sentralStudentId, 4);
 
-        var returnData = new List<SentralPeriodAbsenceDto>();
+        List<SentralPeriodAbsenceDto> returnData = new();
         returnData.AddRange(term1);
         returnData.AddRange(term2);
         returnData.AddRange(term3);
@@ -607,42 +606,42 @@ public class Gateway : ISentralGateway
             return new List<SentralPeriodAbsenceDto>();
         }
 
-        var page = await GetPageByGet($"{_settings.ServerUrl}/attendance/administration/student/{sentralStudentId}?term={term}", default);
+        HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/attendance/administration/student/{sentralStudentId}?term={term}", default);
 
         if (page == null)
             return new List<SentralPeriodAbsenceDto>();
 
-        var absenceTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "PartialAbsenceTable").Value);
+        HtmlNode absenceTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.PartialAbsenceTable);
 
-        var detectedAbsences = new List<SentralPeriodAbsenceDto>();
+        List<SentralPeriodAbsenceDto> detectedAbsences = new();
 
         if (absenceTable != null)
         {
-            var rows = absenceTable.Descendants("tr");
+            IEnumerable<HtmlNode> rows = absenceTable.Descendants("tr");
 
-            foreach (var row in rows)
+            foreach (HtmlNode row in rows)
             {
-                var absence = new SentralPeriodAbsenceDto();
-                var firstTD = row.ChildNodes.FindFirst("td");
+                SentralPeriodAbsenceDto absence = new();
+                HtmlNode firstTD = row.ChildNodes.FindFirst("td");
 
                 // The weekly heading rows are TH with no TD tags, so we should just skip these.
                 if (firstTD == null)
                     continue;
 
-                var input = firstTD.ChildNodes.FindFirst("input");
-                var value = input.Attributes.AttributesWithName("value");
-                var rowData = value.FirstOrDefault()?.Value;
+                HtmlNode input = firstTD.ChildNodes.FindFirst("input");
+                IEnumerable<HtmlAttribute> value = input.Attributes.AttributesWithName("value");
+                string rowData = value.FirstOrDefault()?.Value;
 
                 // If this row has no absence data, the value is a numerical id, not a date.
                 if (rowData == null || !rowData.Contains('-'))
                     continue;
 
-                var stringDate = rowData[..rowData.IndexOf('_')];
-                var rowDate = DateOnly.Parse(stringDate);
+                string stringDate = rowData[..rowData.IndexOf('_')];
+                DateOnly rowDate = DateOnly.Parse(stringDate);
                 absence.Date = rowDate;
 
-                var cellNumber = 0;
-                foreach (var cell in row.Descendants("td"))
+                int cellNumber = 0;
+                foreach (HtmlNode cell in row.Descendants("td"))
                 {
                     cellNumber++;
 
@@ -658,7 +657,7 @@ public class Gateway : ISentralGateway
 
                             if (absence.Timeframe.Contains('-'))
                             {
-                                var startTimeSuccess = TimeOnly.TryParseExact(absence.Timeframe.Split(' ')[0], "h:mmtt", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly startTime);
+                                bool startTimeSuccess = TimeOnly.TryParseExact(absence.Timeframe.Split(' ')[0], "h:mmtt", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly startTime);
                                 if (startTimeSuccess)
                                     absence.StartTime = startTime;
                                 else
@@ -668,7 +667,7 @@ public class Gateway : ISentralGateway
                                         .ForContext("SentralStudentId", sentralStudentId)
                                         .Information("Error parsing absence start time to TimeOnly object");
 
-                                var endTimeSuccess = TimeOnly.TryParseExact(absence.Timeframe.Split(' ')[2], "h:mmtt", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly endTime);
+                                bool endTimeSuccess = TimeOnly.TryParseExact(absence.Timeframe.Split(' ')[2], "h:mmtt", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly endTime);
                                 if (endTimeSuccess)
                                     absence.EndTime = endTime;
                                 else
@@ -692,7 +691,7 @@ public class Gateway : ISentralGateway
                                 continue;
                             }
 
-                            var spans = cell.SelectNodes("span");
+                            HtmlNodeCollection spans = cell.SelectNodes("span");
 
                             if (spans.Count > 1)
                             {
@@ -730,7 +729,7 @@ public class Gateway : ISentralGateway
         if (page == null)
             return new List<DateOnly>();
 
-        HtmlNode calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "CalendarTable").Value);
+        HtmlNode calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.CalendarTable);
 
         List<DateOnly> nonSchoolDays = new();
 
@@ -780,7 +779,7 @@ public class Gateway : ISentralGateway
         if (page == null)
             return Result.Failure<(string, string)>(new("SentralGateway.GetPage.Failure", "Could not retrieve page from Sentral Server"));
 
-        HtmlNode calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "TermCalendarTable").Value);
+        HtmlNode calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.TermCalendarTable);
 
         if (calendarTable != null)
         {
@@ -848,7 +847,7 @@ public class Gateway : ISentralGateway
         if (page == null)
             return Result.Failure<(DateOnly, DateOnly)>(new("SentralGateway.GetPage.Failure", "Could not retrieve page from Sentral Server"));
 
-        HtmlNode calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "TermCalendarTable").Value);
+        HtmlNode calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.TermCalendarTable);
 
         if (calendarTable != null)
         {
@@ -884,7 +883,7 @@ public class Gateway : ISentralGateway
 
                 if (correctTerm == true)
                 {
-                    var weekName = row.Descendants("th").FirstOrDefault();
+                    HtmlNode weekName = row.Descendants("th").FirstOrDefault();
 
                     if (weekName?.InnerText == week)
                     {
@@ -929,31 +928,31 @@ public class Gateway : ISentralGateway
             return new List<ValidAttendenceReportDate>();
         }
 
-        var validDates = new List<ValidAttendenceReportDate>();
+        List<ValidAttendenceReportDate> validDates = new();
 
-        var page = await GetPageByGet($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term", default);
+        HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term", default);
 
         if (page == null)
             return validDates;
 
-        var calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "TermCalendarTable").Value);
+        HtmlNode calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.TermCalendarTable);
 
         if (calendarTable != null)
         {
-            var TermName = "";
-            var WeekName = "";
+            string TermName = "";
+            string WeekName = "";
 
-            var rows = calendarTable.Descendants("tr").ToList();
+            List<HtmlNode> rows = calendarTable.Descendants("tr").ToList();
 
             for (int row = 0; row < rows.Count - 1; row++)
             {
-                var firstChildNode = rows[row].ChildNodes.Where(node => node.Name != "#text").First();
+                HtmlNode firstChildNode = rows[row].ChildNodes.Where(node => node.Name != "#text").First();
 
                 if (firstChildNode.Name == "td" && firstChildNode.GetAttributeValue("colspan", 0) > 1)
                 {
                     // This is a header row with the term name
-                    var nodes = firstChildNode.Descendants("b");
-                    foreach (var node in nodes)
+                    IEnumerable<HtmlNode> nodes = firstChildNode.Descendants("b");
+                    foreach (HtmlNode node in nodes)
                     {
                         if (node.InnerText.Contains("Term"))
                         {
@@ -972,20 +971,20 @@ public class Gateway : ISentralGateway
                         DateOnly startDate = new();
                         DateOnly endDate = new();
 
-                        var startDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[1].GetAttributeValue("onclick", "");
+                        string startDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[1].GetAttributeValue("onclick", "");
                         if (!string.IsNullOrWhiteSpace(startDateAction))
                         {
-                            var detectedDate = startDateAction.Split('\'')[1];
-                            var date = DateOnly.Parse(detectedDate);
+                            string detectedDate = startDateAction.Split('\'')[1];
+                            DateOnly date = DateOnly.Parse(detectedDate);
 
                             startDate = date;
                         }
 
-                        var endDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[5].GetAttributeValue("onclick", "");
+                        string endDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[5].GetAttributeValue("onclick", "");
                         if (!string.IsNullOrWhiteSpace(endDateAction))
                         {
-                            var detectedDate = endDateAction.Split('\'')[1];
-                            var date = DateOnly.Parse(detectedDate);
+                            string detectedDate = endDateAction.Split('\'')[1];
+                            DateOnly date = DateOnly.Parse(detectedDate);
 
                             endDate = date;
                         }
@@ -1004,20 +1003,20 @@ public class Gateway : ISentralGateway
                         DateOnly startDate = new();
                         DateOnly endDate = new();
 
-                        var startDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[1].GetAttributeValue("onclick", "");
+                        string startDateAction = rows[row].ChildNodes.Where(node => node.Name != "#text").ToArray()[1].GetAttributeValue("onclick", "");
                         if (!string.IsNullOrWhiteSpace(startDateAction))
                         {
-                            var detectedDate = startDateAction.Split('\'')[1];
-                            var date = DateOnly.Parse(detectedDate);
+                            string detectedDate = startDateAction.Split('\'')[1];
+                            DateOnly date = DateOnly.Parse(detectedDate);
 
                             startDate = date;
                         }
 
-                        var endDateAction = rows[row + 1].ChildNodes.Where(node => node.Name != "#text").ToArray()[5].GetAttributeValue("onclick", "");
+                        string endDateAction = rows[row + 1].ChildNodes.Where(node => node.Name != "#text").ToArray()[5].GetAttributeValue("onclick", "");
                         if (!string.IsNullOrWhiteSpace(endDateAction))
                         {
-                            var detectedDate = endDateAction.Split('\'')[1];
-                            var date = DateOnly.Parse(detectedDate);
+                            string detectedDate = endDateAction.Split('\'')[1];
+                            DateOnly date = DateOnly.Parse(detectedDate);
 
                             endDate = date;
                         }
@@ -1046,24 +1045,24 @@ public class Gateway : ISentralGateway
             return new Dictionary<string, IDictionary<string, string>>();
         }
 
-        var result = new Dictionary<string, IDictionary<string, string>>();
+        Dictionary<string, IDictionary<string, string>> result = new();
 
         if (string.IsNullOrWhiteSpace(sentralStudentId))
             return result;
 
-        var page = await GetPageByGet($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/family", default);
+        HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/family", default);
 
         if (page == null)
             return result;
 
-        var familyName = HttpUtility.HtmlDecode(page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "FamilyName").Value).InnerHtml.Trim().Split('<')[0]);
-        var lastName = familyName.Split(' ').Last();
-        var firstName = familyName[..^lastName.Length].Trim();
+        string familyName = HttpUtility.HtmlDecode(page.DocumentNode.SelectSingleNode(_settings.XPaths.FamilyName).InnerHtml.Trim().Split('<')[0]);
+        string lastName = familyName.Split(' ').Last();
+        string firstName = familyName[..^lastName.Length].Trim();
 
-        var emailAddresses = new List<string>();
+        List<string> emailAddresses = new();
 
-        var mothersEmail = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "MothersEmail").Value).InnerText.Trim();
-        var fathersEmail = page.DocumentNode.SelectSingleNode(_settings.XPaths.First(a => a.Key == "FathersEmail").Value).InnerText.Trim();
+        string mothersEmail = page.DocumentNode.SelectSingleNode(_settings.XPaths.MothersEmail).InnerText.Trim();
+        string fathersEmail = page.DocumentNode.SelectSingleNode(_settings.XPaths.FathersEmail).InnerText.Trim();
 
 
         switch (_settings.ContactPreference)
@@ -1106,9 +1105,9 @@ public class Gateway : ISentralGateway
 
         emailAddresses = emailAddresses.Distinct().ToList();
 
-        foreach (var email in emailAddresses)
+        foreach (string email in emailAddresses)
         {
-            var entry = new Dictionary<string, string>
+            Dictionary<string, string> entry = new()
             {
                 { "FirstName", firstName },
                 { "LastName", lastName },
@@ -1198,7 +1197,7 @@ public class Gateway : ISentralGateway
             return new List<FamilyDetailsDto>();
         }
 
-        List<FamilyDetailsDto> data = new List<FamilyDetailsDto>();
+        List<FamilyDetailsDto> data = new();
         
         Stream completePage = await GetStreamByGet($"{_settings.ServerUrl}/enquiry/export/view_export?name=complete&inputs[class]=&inputs[roll_class]=&inputs[schyear]=&format=xls&headings=1&action=Download", default);
         Stream emailPage = await GetStreamByGet($"{_settings.ServerUrl}/enquiry/export/view_export?name=email&inputs[only_eldest]=no&inputs[addresses]=all&format=xls&headings=1&action=Download", default);
@@ -1227,7 +1226,7 @@ public class Gateway : ISentralGateway
             }
             else
             {
-                FamilyDetailsDto detail = new FamilyDetailsDto
+                FamilyDetailsDto detail = new()
                 {
                     FamilyId = familyId,
                     AddressName = row[83].ToString().FormatField(),
