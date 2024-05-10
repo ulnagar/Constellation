@@ -6,11 +6,17 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     /// <inheritdoc />
-    public partial class AddWorkFlowsStageOne : Migration
+    public partial class ImplementWorkFlows : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<string>(
+                name: "SectionId",
+                table: "Offerings_Resources",
+                type: "nvarchar(max)",
+                nullable: true);
+
             migrationBuilder.CreateTable(
                 name: "WorkFlows_Cases",
                 columns: table => new
@@ -18,13 +24,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DetailId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -50,11 +58,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ActionType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Details = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Confirmed = table.Column<bool>(type: "bit", nullable: true),
                     OfferingId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     OfferingName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NotRequired = table.Column<bool>(type: "bit", nullable: true),
                     IncidentNumber = table.Column<int>(type: "int", nullable: true),
+                    DateOccurred = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ParentName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SenderName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SenderEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Subject = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -97,6 +109,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     SchoolName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AttendanceValueId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     PeriodLabel = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Severity = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PerMinuteYearToDatePercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     PerMinuteWeekPercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     PerDayYearToDatePercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
@@ -128,6 +141,26 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     table.PrimaryKey("PK_WorkFlows_ActionNotes", x => x.Id);
                     table.ForeignKey(
                         name: "FK_WorkFlows_ActionNotes_WorkFlows_Actions_ActionId",
+                        column: x => x.ActionId,
+                        principalTable: "WorkFlows_Actions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WorkFlows_Actions_InterviewAttendees",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ActionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WorkFlows_Actions_InterviewAttendees", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_WorkFlows_Actions_InterviewAttendees_WorkFlows_Actions_ActionId",
                         column: x => x.ActionId,
                         principalTable: "WorkFlows_Actions",
                         principalColumn: "Id",
@@ -176,6 +209,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 column: "OfferingId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_WorkFlows_Actions_InterviewAttendees_ActionId",
+                table: "WorkFlows_Actions_InterviewAttendees",
+                column: "ActionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_WorkFlows_Actions_Recipients_OwnerId",
                 table: "WorkFlows_Actions_Recipients",
                 column: "OwnerId");
@@ -194,6 +232,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "WorkFlows_ActionNotes");
 
             migrationBuilder.DropTable(
+                name: "WorkFlows_Actions_InterviewAttendees");
+
+            migrationBuilder.DropTable(
                 name: "WorkFlows_Actions_Recipients");
 
             migrationBuilder.DropTable(
@@ -204,6 +245,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             migrationBuilder.DropTable(
                 name: "WorkFlows_Cases");
+
+            migrationBuilder.DropColumn(
+                name: "SectionId",
+                table: "Offerings_Resources");
         }
     }
 }

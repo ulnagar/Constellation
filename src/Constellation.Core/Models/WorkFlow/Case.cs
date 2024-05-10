@@ -144,7 +144,9 @@ public sealed class Case : AggregateRoot, IAuditableEntity
 
     public Result SetDueDate(IDateTimeProvider dateTime)
     {
-        DateOnly expectedDueDate = DateOnly.FromDateTime(CreatedAt.AddDays(7));
+        DateOnly expectedDueDate = CreatedAt == DateTime.MinValue 
+            ? DateOnly.FromDateTime(dateTime.Now.AddDays(7)) 
+            : DateOnly.FromDateTime(CreatedAt.AddDays(7));
 
         return SetDueDate(dateTime, expectedDueDate);
     }

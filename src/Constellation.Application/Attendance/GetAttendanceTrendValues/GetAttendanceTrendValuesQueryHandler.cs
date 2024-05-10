@@ -71,12 +71,12 @@ internal sealed class GetAttendanceTrendValuesQueryHandler
                 school.Name,
                 period,
                 existingCase,
-                studentEntries.First().PerMinuteWeekPercentage,
-                studentEntries.Skip(1).First().PerMinuteWeekPercentage,
-                studentEntries.Skip(2).First().PerMinuteWeekPercentage,
-                studentEntries.Skip(3).First().PerMinuteWeekPercentage,
-                studentEntries.Last().PerMinuteWeekPercentage,
-                AttendanceSeverity.FromAttendanceValue(studentEntries.First().PerMinuteWeekPercentage)));
+                studentEntries.FirstOrDefault()?.PerMinuteWeekPercentage ?? 100,
+                studentEntries.Skip(1).FirstOrDefault()?.PerMinuteWeekPercentage ?? 100,
+                studentEntries.Skip(2).FirstOrDefault()?.PerMinuteWeekPercentage ?? 100,
+                studentEntries.Skip(3).FirstOrDefault()?.PerMinuteWeekPercentage ?? 100,
+                studentEntries.LastOrDefault()?.PerMinuteWeekPercentage ?? 100,
+                AttendanceSeverity.FromAttendanceValue(studentEntries.FirstOrDefault()?.PerMinuteWeekPercentage ?? 100)));
         }
 
         return response;

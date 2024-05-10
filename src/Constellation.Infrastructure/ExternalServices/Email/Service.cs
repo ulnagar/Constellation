@@ -1230,5 +1230,5 @@ public sealed class Service : IEmailService
         string body,
         List<Attachment> attachments,
         CancellationToken cancellationToken = default) =>
-        await _emailSender.Send(recipients, sender.Email, subject, body, attachments, cancellationToken);
+        await _emailSender.Send(null, null, recipients, sender.Email, subject, body, attachments, cancellationToken);
 }

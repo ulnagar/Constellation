@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240416030915_ConvertParentInterviewToAttendeeList")]
-    partial class ConvertParentInterviewToAttendeeList
+    [Migration("20240510031411_ImplementWorkFlows")]
+    partial class ImplementWorkFlows
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2002,7 +2002,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("StocktakeEvents");
+                    b.ToTable("StocktakeEvents", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Stocktake.StocktakeSighting", b =>
@@ -2066,7 +2066,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StocktakeEventId");
 
-                    b.ToTable("StocktakeSightings");
+                    b.ToTable("StocktakeSightings", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.StudentPartialAbsence", b =>
@@ -2802,6 +2802,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.Property<Guid?>("DetailId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -3540,6 +3543,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
             modelBuilder.Entity("Constellation.Core.Models.Offerings.CanvasCourseResource", b =>
                 {
                     b.HasBaseType("Constellation.Core.Models.Offerings.Resource");
+
+                    b.Property<string>("SectionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasDiscriminator().HasValue("Canvas Course");
                 });

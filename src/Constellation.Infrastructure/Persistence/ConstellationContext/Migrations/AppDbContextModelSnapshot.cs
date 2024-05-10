@@ -3542,6 +3542,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Offerings.Resource");
 
                     b.Property<string>("SectionId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasDiscriminator().HasValue("Canvas Course");
