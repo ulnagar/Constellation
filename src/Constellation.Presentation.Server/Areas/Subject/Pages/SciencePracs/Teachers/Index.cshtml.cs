@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.SciencePracs.Teachers;
 
+using Application.SchoolContacts.UpdateRoleNote;
 using Application.Schools.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
@@ -13,10 +14,12 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.AssignRoleModal;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.DeleteRoleModal;
+using Helpers.ModelBinders;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Server.Pages.Shared.PartialViews.UpdateRoleNoteModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
@@ -122,5 +125,41 @@ public class IndexModel : BasePageModel
         }
 
         return RedirectToPage("Index", new { area = "Subject" });
+    }
+
+    public async Task<IActionResult> OnPostAjaxUpdateNote(
+        Guid contactId,
+        Guid roleId,
+        string note)
+    {
+        UpdateRoleNoteModalViewModel viewModel = new()
+        {
+            ContactId = SchoolContactId.FromValue(contactId),
+            RoleId = SchoolContactRoleId.FromValue(roleId),
+            Note = note
+        };
+
+        return Partial("UpdateRoleNoteModal", viewModel);
+    }
+
+    public async Task<IActionResult> OnPostUpdateNote(
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactRoleId roleId,
+        string note)
+    {
+        Result request = await _mediator.Send(new UpdateRoleNoteCommand(contactId, roleId, note));
+
+        if (request.IsFailure)
+        {
+            Error = new()
+            {
+                Error = request.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/SchoolContacts/Index", values: new { area = "Partner" })
+            };
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 }

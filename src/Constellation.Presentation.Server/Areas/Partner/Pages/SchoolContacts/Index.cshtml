@@ -101,6 +101,7 @@
                             <button class="dropdown-item create-assignment-button" data-contact-id="@item.Id.Value" data-name="@item.Name">Add Role</button>
                             @if (!string.IsNullOrEmpty(item.Role))
                             {
+                                <button data-contact-id="@item.Id.Value" data-role-id="@item.AssignmentId.Value" data-note="@item.Note" class="dropdown-item update-note-button">Update Note</button>
                                 <button data-contact-id="@item.Id.Value" data-role-id="@item.AssignmentId.Value" data-name="@item.Name" data-role="@item.Role" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
                             }
                             <div class="dropdown-divider"></div>
@@ -142,6 +143,27 @@
                     name: name,
                     role: role,
                     school: school,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.update-note-button').click(function (event) {
+            var contactId = $(this).data("contactId");
+            var roleId = $(this).data("roleId");
+            var note = $(this).data("note");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxUpdateNote",
+                type: "POST",
+                data: {
+                    contactId: contactId,
+                    roleId: roleId,
+                    note: note,
                     __RequestVerificationToken: xsrfHeader
                 }
             }).done(function (data) {

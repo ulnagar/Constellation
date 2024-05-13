@@ -4,6 +4,7 @@ using Application.Models.Auth;
 using Application.SchoolContacts.CreateContactRoleAssignment;
 using Application.SchoolContacts.GetAllContacts;
 using Application.SchoolContacts.GetContactRolesForSelectionList;
+using Application.SchoolContacts.UpdateRoleNote;
 using Application.Schools.GetSchoolsForSelectionList;
 using Application.Schools.Models;
 using Application.Users.RepairSchoolContactUser;
@@ -12,12 +13,14 @@ using Constellation.Application.SchoolContacts.RemoveContactRole;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Shared;
+using Helpers.ModelBinders;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Server.Pages.Shared.PartialViews.AssignRoleModal;
 using Server.Pages.Shared.PartialViews.DeleteRoleModal;
+using Server.Pages.Shared.PartialViews.UpdateRoleNoteModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
@@ -62,6 +65,42 @@ public class IndexModel : BasePageModel
             GetAllContactsQuery.SchoolContactFilter.WithoutRole => contacts.Value.Where(entry => entry.AssignmentId is null).OrderBy(entry => entry.Name).ToList(),
             _ => contacts.Value.OrderBy(entry => entry.SchoolName).ToList()
         };
+    }
+
+    public async Task<IActionResult> OnPostAjaxUpdateNote(
+        Guid contactId,
+        Guid roleId,
+        string note)
+    {
+        UpdateRoleNoteModalViewModel viewModel = new()
+        {
+            ContactId = SchoolContactId.FromValue(contactId),
+            RoleId = SchoolContactRoleId.FromValue(roleId),
+            Note = note
+        };
+
+        return Partial("UpdateRoleNoteModal", viewModel);
+    }
+
+    public async Task<IActionResult> OnPostUpdateNote(
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactRoleId roleId,
+        string note)
+    {
+        Result request = await _mediator.Send(new UpdateRoleNoteCommand(contactId, roleId, note));
+
+        if (request.IsFailure)
+        {
+            Error = new()
+            {
+                Error = request.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/SchoolContacts/Index", values: new { area = "Partner" })
+            };
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostAjaxAssign(

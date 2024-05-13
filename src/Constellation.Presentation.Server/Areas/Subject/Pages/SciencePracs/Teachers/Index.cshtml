@@ -53,6 +53,7 @@
                             <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                                 <a asp-page="Upsert" asp-area="Subject" asp-route-id="@item.Id" class="dropdown-item">Edit Contact</a>
                                 <button data-contact-id="@item.Id" data-name="@item.ContactName.DisplayName" class="dropdown-item create-assignment-button">Add Role</button>
+                                <button data-contact-id="@item.Id.Value" data-role-id="@item.RoleId.Value" data-note="@item.Note" class="dropdown-item update-note-button">Update Note</button>
                                 <button data-contact-id="@item.Id.Value" data-role-id="@item.RoleId.Value" data-name="@item.ContactName.DisplayName" data-role="@SchoolContactRole.SciencePrac" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
                                 <div class="dropdown-divider"></div>
                                 <a asp-page="Audit" asp-area="Subject" asp-route-id="@item.Id" class="dropdown-item">Audit Account</a>
@@ -94,6 +95,27 @@
                     name: name,
                     role: role,
                     school: school,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.update-note-button').click(function (event) {
+            var contactId = $(this).data("contactId");
+            var roleId = $(this).data("roleId");
+            var note = $(this).data("note");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxUpdateNote",
+                type: "POST",
+                data: {
+                    contactId: contactId,
+                    roleId: roleId,
+                    note: note,
                     __RequestVerificationToken: xsrfHeader
                 }
             }).done(function (data) {
