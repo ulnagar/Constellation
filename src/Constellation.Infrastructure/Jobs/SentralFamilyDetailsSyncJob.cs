@@ -59,10 +59,41 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
 
         // Get the CSV file from Sentral
         // Convert to temporary objects
-        ICollection<FamilyDetailsDto> families = await _gateway.GetFamilyDetailsReport(_logger);
+        //ICollection<FamilyDetailsDto> families = await _gateway.GetFamilyDetailsReport(_logger);
+        List<FamilyDetailsDto> families = new();
+
+        Dictionary<string, List<string>> familyGroups = await _gateway.GetFamilyGroupings();
+
+        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(token);
+
+        foreach (KeyValuePair<string, List<string>> family in familyGroups)
+        {
+            Student firstStudent = students.FirstOrDefault(student => student.StudentId == family.Value.First());
+
+            if (firstStudent is null)
+                continue;
+
+            FamilyDetailsDto entry = await _gateway.GetParentContactEntry(firstStudent.SentralStudentId);
+
+            entry.StudentIds = family.Value;
+            entry.FamilyId = family.Key;
+
+            foreach (FamilyDetailsDto.Contact contact in entry.Contacts)
+            {
+                string name = contact.FirstName.Contains(' ')
+                    ? contact.FirstName.Split(' ')[0]
+                    : contact.FirstName;
+
+                name = name.Length > 8 ? name[..8] : name;
+
+                contact.SentralId = $"{entry.FamilyId}-{contact.SentralReference}-{name.ToLowerInvariant()}";
+            }
+
+            families.Add(entry);
+        }
 
         _logger
-            .Information("Found {count} families", families.Count);
+            .Information("Found {count} families", familyGroups.Count);
 
         List<Family> dbFamilies = await _familyRepository.GetAll(token);
 
@@ -96,7 +127,8 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     family.AddressTown,
                     family.AddressPostCode);
 
-                List<Student> familyStudents = await _studentRepository.GetListFromIds(family.StudentIds, token);
+                //TODO: R1.14.4: Is this operation worth the cost?
+                List<Student> familyStudents = students.Where(student => family.StudentIds.Contains(student.StudentId)).ToList();
 
                 foreach (Student student in familyStudents)
                 {
@@ -108,16 +140,14 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
 
                 foreach (FamilyDetailsDto.Contact contact in family.Contacts)
                 {
-                    string contactSentralId = $"{family.FamilyId}.{contact.Sequence}";
-
                     ParentContactChangeDto logEntry = CreateNewParent(
                         contact.Title,
                         contact.FirstName,
                         contact.LastName,
                         contact.Mobile,
                         contact.Email,
-                        Parent.SentralReference.Other,
-                        contactSentralId,
+                        contact.SentralReference,
+                        contact.SentralId,
                         familyStudents.FirstOrDefault(),
                         entry);
 
@@ -187,7 +217,8 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     family.AddressTown,
                     family.AddressPostCode);
 
-                List<Student> familyStudents = await _studentRepository.GetListFromIds(family.StudentIds, token);
+                //TODO: R1.14.4: Is this operation worth the cost?
+                List<Student> familyStudents = students.Where(student => family.StudentIds.Contains(student.StudentId)).ToList();
 
                 foreach (Student student in familyStudents)
                 {
@@ -227,9 +258,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
 
                 foreach (FamilyDetailsDto.Contact contact in family.Contacts)
                 {
-                    string contactSentralId = $"{family.FamilyId}.{contact.Sequence}";
-
-                    Parent parent = entry.Parents.FirstOrDefault(parent => parent.SentralId == contactSentralId);
+                    Parent parent = entry.Parents.FirstOrDefault(parent => parent.SentralId == contact.SentralId);
 
                     if (parent is not null)
                     {
@@ -240,8 +269,8 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                             contact.LastName,
                             contact.Mobile,
                             contact.Email,
-                            Parent.SentralReference.Other,
-                            contactSentralId,
+                            contact.SentralReference,
+                            contact.SentralId,
                             familyStudents.FirstOrDefault(),
                             entry);
 
@@ -256,8 +285,8 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                             contact.LastName,
                             contact.Mobile,
                             contact.Email,
-                            Parent.SentralReference.Other,
-                            contactSentralId,
+                            contact.SentralReference,
+                            contact.SentralId,
                             familyStudents.FirstOrDefault(),
                             entry);
 

@@ -6,19 +6,25 @@ using Application.DTOs;
 using Application.Extensions;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
+using Application.Offerings.RemoveAllSessions;
 using Core.Abstractions.Clock;
+using Core.Models.Families;
 using Core.Shared;
 using ExcelDataReader;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.IO;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
+using static Constellation.Core.Errors.ValidationErrors;
+using ILogger = Serilog.ILogger;
 
 public class Gateway : ISentralGateway
 {
@@ -1036,85 +1042,212 @@ public class Gateway : ISentralGateway
         return validDates.OrderBy(date => date.StartDate).ToList();
     }
 
-    public async Task<IDictionary<string, IDictionary<string, string>>> GetParentContactEntry(string sentralStudentId)
+    public async Task<Dictionary<string, List<string>>> GetFamilyGroupings()
+    {
+        if (_logOnly)
+        {
+            _logger.Information("GetFamilyGroupings");
+
+            return null;
+        }
+
+        Dictionary<string, List<string>> data = new();
+
+        Stream completePage =
+            await GetStreamByGet(
+                $"{_settings.ServerUrl}/enquiry/export/view_export?name=complete&inputs[class]=&inputs[roll_class]=&inputs[schyear]=&format=xls&headings=1&action=Download",
+                default);
+
+        if (completePage is null)
+            return data;
+
+        using IExcelDataReader completeReader = ExcelReaderFactory.CreateReader(completePage);
+        DataSet completeWorksheet = completeReader.AsDataSet();
+
+        foreach (DataRow row in completeWorksheet.Tables[0].Rows)
+        {
+            if (row.ItemArray.First()?.ToString() == "STUDENT_ID") // This is a header row
+                continue;
+
+            string familyId = row[4].ToString().FormatField();
+            string studentId = row[0].ToString().FormatField();
+
+            if (data.ContainsKey(familyId))
+            {
+                data[familyId].Add(studentId);
+            }
+            else
+            {
+                data.Add(familyId, new List<string>() { studentId });
+            }
+        }
+
+        return data;
+    }
+
+    public async Task<FamilyDetailsDto> GetParentContactEntry(string sentralStudentId)
     {
         if (_logOnly)
         {
             _logger.Information("GetParentContactEntry: sentralStudentId={sentralStudentId}", sentralStudentId);
 
-            return new Dictionary<string, IDictionary<string, string>>();
+            return null;
         }
 
-        Dictionary<string, IDictionary<string, string>> result = new();
+        FamilyDetailsDto result = new();
 
         if (string.IsNullOrWhiteSpace(sentralStudentId))
-            return result;
+            return null;
 
         HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/family", default);
 
         if (page == null)
-            return result;
+            return null;
 
-        string familyName = HttpUtility.HtmlDecode(page.DocumentNode.SelectSingleNode(_settings.XPaths.FamilyName).InnerHtml.Trim().Split('<')[0]);
-        string lastName = familyName.Split(' ').Last();
-        string firstName = familyName[..^lastName.Length].Trim();
+        string familyEmailXPath = @"//*[@id=""expander-content-1""]/table/tr/td[1]/table/tr[4]/td";
+        string familyEmail = page.DocumentNode.SelectSingleNode(familyEmailXPath).InnerText.Trim().ToLowerInvariant();
+        
+        string familyAddressBlock = HttpUtility.HtmlDecode(page.DocumentNode.SelectSingleNode(_settings.XPaths.FamilyName).InnerHtml.Trim());
+        string familyName = familyAddressBlock.Split('<')[0].Trim();
+        string addressLine1 = familyAddressBlock.Split('>')[1].Split('<')[0].Trim();
+        string addressLine2 = familyAddressBlock.Split('>').Last().Trim();
 
-        List<string> emailAddresses = new();
+        string postCode = addressLine2.Split(' ').Last().Trim();
+        int postCodePosition = addressLine2.IndexOf(postCode);
+        addressLine2 = postCodePosition < 0
+            ? addressLine2
+            : addressLine2.Remove(postCodePosition).Trim();
 
-        string mothersEmail = page.DocumentNode.SelectSingleNode(_settings.XPaths.MothersEmail).InnerText.Trim();
-        string fathersEmail = page.DocumentNode.SelectSingleNode(_settings.XPaths.FathersEmail).InnerText.Trim();
+        string state = addressLine2.Split(' ').Last().Trim();
+        int statePosition = addressLine2.IndexOf(state);
+        addressLine2 = statePosition < 0
+            ? addressLine2
+            : addressLine2.Remove(statePosition).Trim();
 
+        string town = addressLine2.Trim();
 
-        switch (_settings.ContactPreference)
+        result.FamilyEmail = familyEmail;
+        result.AddressName = familyName;
+        result.AddressLine1 = addressLine1;
+
+        if (addressLine1.Contains('"'))
         {
-            case SentralGatewayConfiguration.ContactPreferenceOptions.MotherThenFather:
-                if (!string.IsNullOrWhiteSpace(mothersEmail))
-                {
-                    emailAddresses.Add(mothersEmail);
-                }
-                else if (!string.IsNullOrWhiteSpace(fathersEmail))
-                {
-                    emailAddresses.Add(fathersEmail);
-                }
+            string line1 = addressLine1.Split('"')[1].Trim();
+            string line2 = addressLine1.Split('"').Last().Trim();
 
-                break;
-            case SentralGatewayConfiguration.ContactPreferenceOptions.FatherThenMother:
-                if (!string.IsNullOrWhiteSpace(fathersEmail))
-                {
-                    emailAddresses.Add(fathersEmail);
-                }
-                else if (!string.IsNullOrWhiteSpace(mothersEmail))
-                {
-                    emailAddresses.Add(mothersEmail);
-                }
+            result.AddressLine1 = line1;
+            result.AddressLine2 = string.IsNullOrWhiteSpace(line2) ? string.Empty : line2;
+        }
+        else
+        {
+            result.AddressLine2 = string.Empty;
+        }
+        result.AddressTown = town;
+        result.AddressState = state;
+        result.AddressPostCode = postCode;
 
-                break;
-            case SentralGatewayConfiguration.ContactPreferenceOptions.Both:
-                if (!string.IsNullOrWhiteSpace(mothersEmail))
-                {
-                    emailAddresses.Add(mothersEmail);
-                }
+        // Get mothers details
+        string parent1NameXPath = @"//*[@id=""expander-content-2""]/table/tr/td[1]/table[1]/tr/td[2]";
+        string parent1NameBlock = HttpUtility.HtmlDecode(page.DocumentNode.SelectSingleNode(parent1NameXPath).InnerHtml.Trim());
+        string parent1Type = parent1NameBlock.Split('>')[1].Trim().Split('<')[0].Trim().Split(' ').Last().Trim(':', ' ');
+        string parent1Name = parent1NameBlock.Split('>').Last().Trim();
 
-                if (!string.IsNullOrWhiteSpace(fathersEmail))
-                {
-                    emailAddresses.Add(fathersEmail);
-                }
+        string parent2NameXPath = @"//*[@id=""expander-content-2""]/table/tr/td[2]/table[1]/tr/td[2]";
+        string parent2NameBlock = HttpUtility.HtmlDecode(page.DocumentNode.SelectSingleNode(parent2NameXPath).InnerHtml.Trim());
+        string parent2Type = parent2NameBlock.Split('>')[1].Trim().Split('<')[0].Trim().Split(' ').Last().Trim(':', ' ');
+        string parent2Name = parent2NameBlock.Split('>').Last().Trim();
+        
+        string parent1Email = page.DocumentNode.SelectSingleNode(_settings.XPaths.MothersEmail).InnerText.Trim().ToLowerInvariant();
+        string parent2Email = page.DocumentNode.SelectSingleNode(_settings.XPaths.FathersEmail).InnerText.Trim().ToLowerInvariant();
 
-                break;
+        string parent1MobileXPath = @"//*[@id=""expander-content-2""]/table/tr/td[1]/table[2]/tr[3]/td";
+        string parent1Mobile = page.DocumentNode.SelectSingleNode(parent1MobileXPath).InnerText.Trim();
+
+        string parent2MobileXPath = @"//*[@id=""expander-content-2""]/table/tr/td[2]/table[2]/tr[3]/td";
+        string parent2Mobile = page.DocumentNode.SelectSingleNode(parent2MobileXPath).InnerText.Trim();
+
+        if (!string.IsNullOrWhiteSpace(parent1Name))
+        {
+            bool referenceSuccess = Enum.TryParse(parent1Type, out Parent.SentralReference sentralReference);
+
+            string title = parent1Name.Split(' ')[0].Trim();
+            int titlePosition = parent1Name.IndexOf(title);
+            parent1Name = titlePosition < 0
+                ? parent1Name
+                : parent1Name.Remove(titlePosition, title.Length).Trim();
+
+            string lastName = parent1Name.Split(' ').Last().Trim();
+            int lastNamePosition = parent1Name.IndexOf(lastName);
+            parent1Name = lastNamePosition < 0
+                ? parent1Name
+                : parent1Name.Remove(lastNamePosition).Trim();
+
+            if (referenceSuccess)
+            {
+                result.Contacts.Add(new()
+                {
+                    Title = title,
+                    LastName = lastName,
+                    FirstName = parent1Name,
+                    SentralReference = sentralReference,
+                    Mobile = parent1Mobile,
+                    Email = parent1Email
+                });
+            }
+            else
+            {
+                result.Contacts.Add(new()
+                {
+                    Title = title,
+                    LastName = lastName,
+                    FirstName = parent1Name,
+                    SentralReference = Parent.SentralReference.Other,
+                    Mobile = parent1Mobile,
+                    Email = parent1Email
+                });
+            }
         }
 
-        emailAddresses = emailAddresses.Distinct().ToList();
-
-        foreach (string email in emailAddresses)
+        if (!string.IsNullOrWhiteSpace(parent2Name))
         {
-            Dictionary<string, string> entry = new()
-            {
-                { "FirstName", firstName },
-                { "LastName", lastName },
-                { "EmailAddress", email }
-            };
+            bool referenceSuccess = Enum.TryParse(parent2Type, out Parent.SentralReference sentralReference);
 
-            result.Add(email, entry);
+            string title = parent2Name.Split(' ')[0].Trim();
+            int titlePosition = parent2Name.IndexOf(title);
+            parent2Name = titlePosition < 0
+                ? parent2Name
+                : parent2Name.Remove(titlePosition, title.Length).Trim();
+
+            string lastName = parent2Name.Split(' ').Last().Trim();
+            int lastNamePosition = parent2Name.IndexOf(lastName);
+            parent2Name = lastNamePosition < 0
+                ? parent2Name
+                : parent2Name.Remove(lastNamePosition).Trim();
+
+            if (referenceSuccess)
+            {
+                result.Contacts.Add(new()
+                {
+                    Title = title,
+                    LastName = lastName,
+                    FirstName = parent2Name,
+                    SentralReference = sentralReference,
+                    Mobile = parent2Mobile,
+                    Email = parent2Email
+                });
+            }
+            else
+            {
+                result.Contacts.Add(new()
+                {
+                    Title = title,
+                    LastName = lastName,
+                    FirstName = parent2Name,
+                    SentralReference = Parent.SentralReference.Other,
+                    Mobile = parent2Mobile,
+                    Email = parent2Email
+                });
+            }
         }
 
         return result;

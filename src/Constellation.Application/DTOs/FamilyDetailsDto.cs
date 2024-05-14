@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.DTOs;
 
+using Core.Models.Families;
 using System.Collections.Generic;
 
 public class FamilyDetailsDto
@@ -12,12 +13,14 @@ public class FamilyDetailsDto
     public string AddressLine1 { get; set; }
     public string AddressLine2 { get; set; }
     public string AddressTown { get; set; }
+    public string AddressState { get; set; }
     public string AddressPostCode { get; set; }
 
     public class Contact
     {
         public string SentralId { get; set; }
         public int Sequence { get; set; }
+        public Parent.SentralReference SentralReference { get; set; }
         public string Title { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
