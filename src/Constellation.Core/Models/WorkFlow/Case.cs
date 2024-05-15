@@ -67,7 +67,8 @@ public sealed class Case : AggregateRoot, IAuditableEntity
     public Result UpdateActionStatus(
         ActionId actionId,
         ActionStatus newStatus,
-        string currentUser)
+        string currentUser,
+        bool sendEmail = true)
     {
         Action? action = _actions.FirstOrDefault(entry => entry.Id == actionId);
 
@@ -79,8 +80,11 @@ public sealed class Case : AggregateRoot, IAuditableEntity
 
         Result statusUpdate = action.UpdateStatus(newStatus, currentUser);
 
-        if (newStatus.Equals(ActionStatus.Completed))
+        if (newStatus.Equals(ActionStatus.Completed) && sendEmail)
             RaiseDomainEvent(new CaseActionCompletedDomainEvent(new(), Id, actionId));
+
+        if (newStatus.Equals(ActionStatus.Cancelled) && sendEmail)
+            RaiseDomainEvent(new CaseActionCancelledDomainEvent(new(), Id, actionId));
 
         return statusUpdate;
     }

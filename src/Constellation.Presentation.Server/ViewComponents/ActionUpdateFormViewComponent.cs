@@ -48,6 +48,12 @@ public class ActionUpdateFormViewComponent : ViewComponent
         if (action is null)
             return Content(string.Empty);
 
+        if (action.Status.Equals(ActionStatus.Completed))
+            return View("ActionCompleted", string.Empty);
+        
+        if (action.Status.Equals(ActionStatus.Cancelled))
+            return View("ActionCancelled", string.Empty);
+
         string studentId = item.Type!.Equals(CaseType.Attendance) ?
             ((AttendanceCaseDetail)item.Detail)!.StudentId :
             null;

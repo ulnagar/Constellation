@@ -1,0 +1,16 @@
+@using Constellation.Infrastructure.Templates.Views.Emails.WorkFlow
+@model ActionCancelledEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>@Model.TeacherName,</p>
+<p>A task you were assigned has been cancelled.</p>
+<p>The task related to the @Model.CaseDescription.</p>
+<p>The task was: @Model.ActionDescription</p>

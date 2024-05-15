@@ -61,7 +61,10 @@ internal sealed class CancelActionCommandHandler
             return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
         }
 
-        Result update = item.UpdateActionStatus(action.Id, ActionStatus.Cancelled, _currentUserService.UserName);
+        Result update = action.AssignedTo == _currentUserService.UserName
+            ? item.UpdateActionStatus(action.Id, ActionStatus.Cancelled, _currentUserService.UserName)
+            : item.UpdateActionStatus(action.Id, ActionStatus.Cancelled, _currentUserService.UserName, false);
+
 
         if (update.IsFailure)
         {
@@ -82,8 +85,10 @@ internal sealed class CancelActionCommandHandler
 
         foreach (Action entry in subActions)
         {
-            Result subActionUpdate = item.UpdateActionStatus(entry.Id, ActionStatus.Cancelled, _currentUserService.UserName);
-
+            Result subActionUpdate = entry.AssignedTo == _currentUserService.UserName
+                ? item.UpdateActionStatus(entry.Id, ActionStatus.Cancelled, _currentUserService.UserName)
+                : item.UpdateActionStatus(entry.Id, ActionStatus.Cancelled, _currentUserService.UserName, false);
+            
             if (subActionUpdate.IsFailure)
             {
                 _logger

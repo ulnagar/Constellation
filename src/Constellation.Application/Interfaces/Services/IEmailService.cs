@@ -97,5 +97,6 @@ public interface IEmailService
 
     // WorkFlow Emails
     Task SendActionAssignedEmail(List<EmailRecipient> recipients, Case item, Action action, Staff assignee, CancellationToken cancellationToken = default);
+    Task SendActionCancelledEmail(List<EmailRecipient> recipients, Case item, Action action, Staff assignee, CancellationToken cancellationToken = default);
     Task SendEnteredEmailForAction(List<EmailRecipient> recipients, EmailRecipient sender, string subject, string body, List<Attachment> attachments, CancellationToken cancellationToken = default);
 }

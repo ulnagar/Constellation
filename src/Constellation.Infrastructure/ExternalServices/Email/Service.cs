@@ -1223,6 +1223,30 @@ public sealed class Service : IEmailService
         await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
     }
 
+    public async Task SendActionCancelledEmail(
+        List<EmailRecipient> recipients,
+        Case item,
+        Action action,
+        Staff assignee,
+        CancellationToken cancellationToken = default)
+    {
+        ActionAssignedEmailViewModel viewModel = new()
+        {
+            Title = $"[WorkFlow] Action Cancelled",
+            SenderName = "Aurora College",
+            SenderTitle = "",
+            Preheader = "",
+            TeacherName = assignee.DisplayName,
+            ActionDescription = action.ToString(),
+            CaseDescription = item.ToString(),
+            Link = $"https://acos.aurora.nsw.edu.au/SchoolAdmin/WorkFlows/Actions/Update/{item.Id.Value}/{action.Id.Value}"
+        };
+
+        string body = await _razorService.RenderViewToStringAsync(ActionCancelledEmailViewModel.ViewLocation, viewModel);
+
+        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+    }
+
     public async Task SendEnteredEmailForAction(
         List<EmailRecipient> recipients,
         EmailRecipient sender,
@@ -1230,5 +1254,5 @@ public sealed class Service : IEmailService
         string body,
         List<Attachment> attachments,
         CancellationToken cancellationToken = default) =>
-        await _emailSender.Send(null, null, recipients, sender.Email, subject, body, attachments, cancellationToken);
+        await _emailSender.Send(new(), new(), recipients, sender.Email, subject, body, attachments, cancellationToken);
 }
