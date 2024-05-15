@@ -56,5 +56,16 @@ internal sealed class CaseRepository : ICaseRepository
                 ((AttendanceCaseDetail)item.Detail).StudentId == studentId)
             .FirstOrDefaultAsync(cancellationToken);
 
+    public async Task<int> CountActiveActionsForUser(
+        string staffId, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Case>()
+            .Where(item => item.Status.Equals(CaseStatus.Open))
+            .SelectMany(item => item.Actions.Where(action =>
+                action.Status == ActionStatus.Open &&
+                action.AssignedToId == staffId))
+            .CountAsync(cancellationToken);
+
     public void Insert(Case item) => _context.Set<Case>().Add(item);
 }

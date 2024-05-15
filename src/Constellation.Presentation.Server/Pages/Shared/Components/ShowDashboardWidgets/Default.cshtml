@@ -1,6 +1,18 @@
-﻿@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards
+﻿@model Constellation.Presentation.Server.Pages.Shared.Components.ShowDashboardWidgets.ShowDashboardWidgetsViewComponentModel
+
+@using Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Awards
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@model Constellation.Presentation.Server.Pages.Shared.Components.ShowDashboardWidgets.ShowDashboardWidgetsViewComponentModel
+
+<div class="col mb-4 sortable">
+    <div class="card h-100 @(Model.ActiveWorkFlowActions > 0 ? "text-white bg-danger" : "text-white bg-success")">
+        <div class="card-header">WorkFlow Actions</div>
+        <div class="card-body">
+            <h3 class="card-title card-title-large">@Model.ActiveWorkFlowActions</h3>
+            <p class="card-text">active assigned WorkFlow Actions</p>
+            <a asp-page="/WorkFlows/Index" asp-area="SchoolAdmin" class="stretched-link"></a>
+        </div>
+    </div>
+</div>
 
 @if (Model.ShowSentralIdWidgets)
 {

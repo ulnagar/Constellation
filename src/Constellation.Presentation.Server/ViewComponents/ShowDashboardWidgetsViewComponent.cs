@@ -6,6 +6,7 @@ using Application.Students.CountStudentsWithAwardOverages;
 using Application.Students.CountStudentsWithoutSentralId;
 using Application.Students.CountStudentsWithPendingAwards;
 using Application.Training.Roles.CountStaffWithoutRole;
+using Application.WorkFlows.CountActiveActionsForUser;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +31,16 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
         bool isAbsencesManager = User.IsInRole(AuthRoles.AbsencesEditor);
         bool isAwardsManager = User.IsInRole(AuthRoles.AwardsManager);
 
+        string staffId = user.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
+
         ShowDashboardWidgetsViewComponentModel viewModel = new();
+
+        if (!string.IsNullOrWhiteSpace(staffId))
+        {
+            Result<int> countOfActiveActions = await _mediator.Send(new CountActiveActionsForUserQuery(staffId), cancellationToken);
+            if (countOfActiveActions.IsSuccess)
+                viewModel.ActiveWorkFlowActions = countOfActiveActions.Value;
+        }
 
         if (isTrainingManager || isAdmin)
         {
