@@ -1,53 +1,60 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
+using Application.Absences.ExportUnexplainedPartialAbsencesReport;
+using Application.Absences.GetAbsencesWithFilterForReport;
 using Application.Attendance.GenerateAttendanceReportForPeriod;
 using Application.Attendance.GetAttendanceDataFromSentral;
+using Application.Awards.ExportAwardNominations;
 using Application.Compliance.GetWellbeingReportFromSentral;
+using Application.Contacts.Models;
+using Application.DTOs;
+using Application.DTOs.CSV;
 using Application.Extensions;
+using Application.ExternalDataConsistency;
+using Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Application.Helpers;
 using Application.Rollover.ImportStudents;
+using Application.SchoolContacts.GetContactsBySchool;
+using Application.SciencePracs.GenerateOverdueReport;
 using Application.Training.Models;
-using Constellation.Application.Absences.ExportUnexplainedPartialAbsencesReport;
-using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
-using Constellation.Application.Awards.ExportAwardNominations;
-using Constellation.Application.Contacts.Models;
-using Constellation.Application.DTOs;
-using Constellation.Application.DTOs.CSV;
-using Constellation.Application.ExternalDataConsistency;
-using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
+using Application.Training.Modules.GenerateOverallReport;
+using Application.WorkFlows.ExportOpenCaseReport;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.SchoolContacts.GetContactsBySchool;
-using Constellation.Application.SciencePracs.GenerateOverdueReport;
-using Constellation.Application.Training.Modules.GenerateOverallReport;
-using Constellation.Application.WorkFlows.ExportOpenCaseReport;
-using Constellation.Core.Enums;
-using Constellation.Core.Models.Training.Contexts.Modules;
-using Constellation.Infrastructure.Jobs;
 using Core.Abstractions.Clock;
+using Core.Enums;
 using Core.Extensions;
+using Core.Models.Training.Contexts.Modules;
 using ExcelDataReader;
+using Jobs;
 using OfficeOpenXml;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
-using OfficeOpenXml.LoadFunctions.Params;
 using OfficeOpenXml.Style;
-using OfficeOpenXml.Style.XmlAccess;
 using OfficeOpenXml.Table.PivotTable;
-using Persistence.ConstellationContext.Migrations;
 using System.Data;
 using System.Drawing;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
-using static Constellation.Core.Errors.ValidationErrors;
-using String = System.String;
 
 public class ExcelService : IExcelService
 {
     private readonly IDateTimeProvider _dateTime;
     private static readonly Regex _csvParser = new(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+    private static readonly List<string[]> _ptoHeadings = new()
+    {
+        new[]
+        {
+            "SCD", "SFN", "SSN", "PCD1", "PTI1", "PFN1", "PSN1", "PEM1", "PCD2", "PTI2", "PFN2", "PSN2", "PEM2",
+            "CCD", "CGN", "CLS", "TCD", "TTI", "TFN", "TSN", "TEM"
+        }
+    };
+    private static readonly List<string[]> _awardsHeadings = new()
+    {
+        new[] { "Student Id", "Student Name", "Grade", "Stellars", "Galaxies", "Universal Achievers" }
+    };
 
     public ExcelService(
         IDateTimeProvider dateTime)
@@ -55,30 +62,29 @@ public class ExcelService : IExcelService
         _dateTime = dateTime;
     }
 
-    public async Task<MemoryStream> CreatePTOFile(ICollection<InterviewExportDto> exportLines)
+    public async Task<MemoryStream> CreatePTOFile(
+        List<InterviewExportDto> exportLines, 
+        CancellationToken cancellationToken = default)
     {
-        var excel = new ExcelPackage();
-        var worksheet = excel.Workbook.Worksheets.Add("PTO");
-        var headerRow = new List<string[]>()
+        ExcelPackage excel = new();
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("PTO");
+        
+        worksheet.Cells[1, 1, 1, _ptoHeadings[0].Length].LoadFromArrays(_ptoHeadings);
+
+        List<string[]> rowData = new();
+
+        exportLines ??= new();
+
+        foreach (InterviewExportDto line in exportLines)
         {
-            new string[] { "SCD", "SFN", "SSN", "PCD1", "PTI1", "PFN1", "PSN1", "PEM1", "PCD2", "PTI2", "PFN2", "PSN2", "PEM2", "CCD", "CGN", "CLS", "TCD", "TTI", "TFN", "TSN", "TEM"}
-        };
+            List<string> row = new()
+            {
+                line.StudentId, 
+                line.StudentFirstName, 
+                line.StudentLastName
+            };
 
-        //var headerRange = "A1:" + char.ConvertFromUtf32(headerRow[0].Length + 64) + "1";
-
-        worksheet.Cells[1, 1, 1, headerRow[0].Length].LoadFromArrays(headerRow);
-
-        var rowData = new List<string[]>();
-
-        foreach (var line in exportLines)
-        {
-            var row = new List<string>();
-
-            row.Add(line.StudentId);
-            row.Add(line.StudentFirstName);
-            row.Add(line.StudentLastName);
-
-            foreach (var parent in line.Parents)
+            foreach (InterviewExportDto.Parent parent in line.Parents)
             {
                 row.Add(parent.ParentCode);
                 row.Add(parent.ParentTitle);
@@ -111,10 +117,11 @@ public class ExcelService : IExcelService
 
         worksheet.Cells[2, 1].LoadFromArrays(rowData);
 
-        var stream = new MemoryStream();
-        await excel.SaveAsAsync(stream);
+        MemoryStream stream = new();
+        await excel.SaveAsAsync(stream, cancellationToken);
         stream.Position = 0;
 
+        excel.Dispose();
         return stream;
     }
 
@@ -122,20 +129,18 @@ public class ExcelService : IExcelService
         List<FilteredAbsenceResponse> exportAbsences, 
         CancellationToken cancellationToken = default)
     {
-        var excel = new ExcelPackage();
-        var workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
-        //var pageTitle = workSheet.Cells[1, 1].RichText.Add();
-        //pageTitle.Bold = true;
-        //pageTitle.Size = 16;
-
+        ExcelPackage excel = new();
+        ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
+        
         workSheet.Cells[2, 1].LoadFromCollection(exportAbsences, true);
         workSheet.Cells[2, 6, workSheet.Dimension.Rows, 6].Style.Numberformat.Format = "dd/MM/yyyy";
         workSheet.Cells[2, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
-        var memoryStream = new MemoryStream();
+        MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;
 
+        excel.Dispose();
         return memoryStream;
     }
 
@@ -161,12 +166,12 @@ public class ExcelService : IExcelService
             string absenceDateString = worksheet.Cells[i, 7].Value?.ToString();
 
             if (absenceDateString is not null)
-                worksheet.Cells[i, 7].Value = DateTime.Parse(absenceDateString);
+                worksheet.Cells[i, 7].Value = DateTime.Parse(absenceDateString, null);
 
             string responseDateString = worksheet.Cells[i, 12].Value?.ToString();
 
             if (responseDateString is not null)
-                worksheet.Cells[i, 12].Value = DateTime.Parse(responseDateString);
+                worksheet.Cells[i, 12].Value = DateTime.Parse(responseDateString, null);
         }
         
         worksheet.Columns[7].Style.Numberformat.Format = DateTimeFormatInfo.CurrentInfo.ShortDatePattern;
@@ -180,21 +185,24 @@ public class ExcelService : IExcelService
         await excel.SaveAsAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;
 
+        excel.Dispose();
         return memoryStream;
     }
 
     public async Task<MemoryStream> CreateAwardsCalculationFile(MemoryStream stream)
     {
-        var awards = new List<AwardRow>();
+        List<AwardRow> awards = new();
 
-        using (var p = new ExcelPackage(stream))
+        using (ExcelPackage p = new(stream))
         {
-            var ws = p.Workbook.Worksheets[0];
-            var dataTable = ws.Cells[ws.Dimension.Address].ToDataTable();
+            ExcelWorksheet ws = p.Workbook.Worksheets[0];
+            DataTable dataTable = ws.Cells[ws.Dimension.Address].ToDataTable();
 
             foreach (DataRow row in dataTable.Rows)
             {
-                var date = DateTime.Parse(row["Date"].ToString());
+                string dateColValue = row["Date"].ToString() ?? string.Empty;
+
+                DateTime date = DateTime.Parse(dateColValue, null);
 
                 awards.Add(new AwardRow
                 {
@@ -206,67 +214,58 @@ public class ExcelService : IExcelService
                     DateAwarded = date,
                     Category = row["Category"].ToString(),
                     Award = row["Award"].ToString(),
-                    Level = Convert.ToInt32(row["Level"].ToString()),
-                    Value = Convert.ToInt32(row["Value"].ToString()),
-                    Total = Convert.ToInt32(row["Total at Time"].ToString())
+                    Level = Convert.ToInt32(row["Level"].ToString(), null),
+                    Value = Convert.ToInt32(row["Value"].ToString(), null),
+                    Total = Convert.ToInt32(row["Total at Time"].ToString(), null)
                 });
             }
         }
 
-        var exportStudents = new List<StudentRecord>();
+        List<StudentRecord> exportStudents = new();
 
-        foreach (var student in awards.GroupBy(award => award.StudentId))
+        foreach (IGrouping<string, AwardRow> student in awards.GroupBy(award => award.StudentId))
         {
-            decimal stellarsEarned = 0;
-            decimal galaxiesEarned = 0;
-            decimal universalsEarned = 0;
-
             decimal totalIssued = student.Sum(award => award.Value);
             decimal weekStart = student.Max(award => award.Total) - totalIssued;
 
-            stellarsEarned = Math.Floor(totalIssued / 5);
+            decimal stellarsEarned = Math.Floor(totalIssued / 5);
             stellarsEarned += Math.Floor(((weekStart % 5) + (totalIssued % 5)) / 5);
 
-            galaxiesEarned = Math.Floor(totalIssued / 25);
+            decimal galaxiesEarned = Math.Floor(totalIssued / 25);
             galaxiesEarned += Math.Floor(((weekStart % 25) + (totalIssued % 25)) / 25);
 
-            universalsEarned = Math.Floor(totalIssued / 125);
+            decimal universalsEarned = Math.Floor(totalIssued / 125);
             universalsEarned += Math.Floor(((weekStart % 125) + (totalIssued % 125)) / 125);
 
             if (stellarsEarned > 0)
             {
-                exportStudents.Add(new StudentRecord
-                {
-                    StudentId = student.First().StudentId,
-                    StudentName = $"{student.First().FirstName} {student.First().Surname}",
-                    Grade = student.First().Year,
-                    StellarsEarned = stellarsEarned,
-                    GalaxiesEarned = galaxiesEarned,
-                    UniveralsEarned = universalsEarned
-                });
+                exportStudents.Add(new StudentRecord(
+                    student.First().StudentId,
+                    $"{student.First().FirstName} {student.First().Surname}",
+                    student.First().Year,
+                    stellarsEarned,
+                    galaxiesEarned,
+                    universalsEarned));
             }
         }
 
-        var excel = new ExcelPackage();
-        var worksheet = excel.Workbook.Worksheets.Add("Awards");
-        var headerRow = new List<string[]>()
-        {
-            new string[] { "Student Id", "Student Name", "Grade", "Stellars", "Galaxies", "Universal Achievers" }
-        };
+        ExcelPackage excel = new();
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Awards");
+        
+        string headerRange = "A1:" + char.ConvertFromUtf32(_awardsHeadings[0].Length + 64) + "1";
 
-        var headerRange = "A1:" + char.ConvertFromUtf32(headerRow[0].Length + 64) + "1";
-
-        worksheet.Cells[headerRange].LoadFromArrays(headerRow);
+        worksheet.Cells[headerRange].LoadFromArrays(_awardsHeadings);
 
         if (exportStudents.Count > 0)
         {
             worksheet.Cells[2, 1].LoadFromCollection(exportStudents);
         }
 
-        var resultStream = new MemoryStream();
+        MemoryStream resultStream = new();
         await excel.SaveAsAsync(resultStream);
         resultStream.Position = 0;
 
+        excel.Dispose();
         return resultStream;
     }
 
@@ -276,6 +275,8 @@ public class ExcelService : IExcelService
 
         ExcelPackage excel = new();
         ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
+
+        data ??= new();
 
         ExcelRichText nameDetail = workSheet.Cells[1, 1].RichText.Add(data.Name);
         nameDetail.Bold = true;
@@ -304,7 +305,7 @@ public class ExcelService : IExcelService
         workSheet.Cells[7, 7, workSheet.Dimension.Rows, 7].Style.Numberformat.Format = "dd/MM/yyyy";
 
         // Highlight overdue entries
-        ExcelAddress dataRange = new ExcelAddress(8, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
+        ExcelAddress dataRange = new(8, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
 
         IExcelConditionalFormattingExpression formatNotRequired = workSheet.ConditionalFormatting.AddExpression(dataRange);
         formatNotRequired.Formula = "=$E8 = TRUE";
@@ -353,10 +354,11 @@ public class ExcelService : IExcelService
         workSheet.View.FreezePanes(8, 1);
         workSheet.Cells[5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
-        MemoryStream memoryStream = new MemoryStream();
+        MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream);
         memoryStream.Position = 0;
 
+        excel.Dispose();
         return memoryStream;
     }
 
@@ -364,8 +366,10 @@ public class ExcelService : IExcelService
     {
         Type completion = typeof(CompletionRecordExtendedDetailsDto);
 
-        ExcelPackage excel = new ExcelPackage();
+        ExcelPackage excel = new();
         ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
+
+        data ??= new();
 
         ExcelRichText nameDetail = workSheet.Cells[1, 1].RichText.Add(data.Name);
         nameDetail.Bold = true;
@@ -404,7 +408,7 @@ public class ExcelService : IExcelService
         workSheet.Cells[7, 5, workSheet.Dimension.Rows, 6].Style.Numberformat.Format = "dd/MM/yyyy";
 
         // Highlight overdue entries
-        ExcelAddress dataRange = new ExcelAddress(8, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
+        ExcelAddress dataRange = new(8, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
 
         IExcelConditionalFormattingExpression formatNeverCompleted = workSheet.ConditionalFormatting.AddExpression(dataRange);
         formatNeverCompleted.Formula = "=$D8 = -9999";
@@ -444,21 +448,22 @@ public class ExcelService : IExcelService
         workSheet.View.FreezePanes(8, 1);
         workSheet.Cells[5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
-        MemoryStream memoryStream = new MemoryStream();
+        MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream);
         memoryStream.Position = 0;
 
+        excel.Dispose();
         return memoryStream;
     }
 
     public List<TrainingModule> ImportMandatoryTrainingDataFromFile(MemoryStream excelFile)
     {
-        ExcelPackage excel = new ExcelPackage(excelFile);
+        ExcelPackage excel = new(excelFile);
         ExcelWorksheet workSheet = excel.Workbook.Worksheets[0];
 
         int numModules = workSheet.Dimension.Rows;
 
-        List<TrainingModule> modules = new List<TrainingModule>();
+        List<TrainingModule> modules = new();
 
         for (int row = 2; row <= numModules; row++)
         {
@@ -496,13 +501,27 @@ public class ExcelService : IExcelService
             }
         }
 
+        excel.Dispose();
+
         return modules;
     }
 
     public async Task<MemoryStream> CreateGroupTutorialAttendanceFile(TutorialDetailsDto data)
     {
-        ExcelPackage excel = new ExcelPackage();
+        ExcelPackage excel = new();
         ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
+
+        if (data is null)
+        {
+            //TODO: R1.14.4: Update to return Result error
+
+            MemoryStream earlyExitStream = new();
+            await excel.SaveAsAsync(earlyExitStream);
+            earlyExitStream.Position = 0;
+
+            excel.Dispose();
+            return earlyExitStream;
+        }
 
         ExcelRichText nameDetail = workSheet.Cells[1, 1].RichText.Add(data.Name);
         nameDetail.Bold = true;
@@ -514,17 +533,17 @@ public class ExcelService : IExcelService
 
         workSheet.Cells[4, 1].RichText.Add("Not Enrolled");
         workSheet.Cells[4, 2].RichText.Add("-");
-        workSheet.Cells[4, 2].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+        workSheet.Cells[4, 2].Style.Fill.PatternType = ExcelFillStyle.Solid;
         workSheet.Cells[4, 2].Style.Fill.BackgroundColor.SetColor(Color.LightGray);
 
         workSheet.Cells[5, 1].RichText.Add("Enrolled, Not Present");
         workSheet.Cells[5, 2].RichText.Add("N");
-        workSheet.Cells[5, 2].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+        workSheet.Cells[5, 2].Style.Fill.PatternType = ExcelFillStyle.Solid;
         workSheet.Cells[5, 2].Style.Fill.BackgroundColor.SetColor(Color.LightGreen);
 
         workSheet.Cells[6, 1].RichText.Add("Enrolled, Present");
         workSheet.Cells[6, 2].RichText.Add("Y");
-        workSheet.Cells[6, 2].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+        workSheet.Cells[6, 2].Style.Fill.PatternType = ExcelFillStyle.Solid;
         workSheet.Cells[6, 2].Style.Fill.BackgroundColor.SetColor(Color.LightGreen);
 
         List<IGrouping<string, TutorialRollStudentDetailsDto>> students = data.Rolls
@@ -559,10 +578,10 @@ public class ExcelService : IExcelService
 
             for(int j = 0; j < rolls.Count; j++)
             {
-                string text = string.Empty;
+                string text;
                 bool enrolled = false;
 
-                TutorialRollStudentDetailsDto entry = rolls[j].Students.FirstOrDefault(student => student.StudentId == students[i].Key);
+                TutorialRollStudentDetailsDto entry = rolls[j].Students.FirstOrDefault(innerStudent => innerStudent.StudentId == students[i].Key);
 
                 if (entry is null)
                 {
@@ -580,12 +599,12 @@ public class ExcelService : IExcelService
 
                 if (enrolled)
                 {
-                    workSheet.Cells[startRow + i, startColumn + 2 + j].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    workSheet.Cells[startRow + i, startColumn + 2 + j].Style.Fill.PatternType = ExcelFillStyle.Solid;
                     workSheet.Cells[startRow + i, startColumn + 2 + j].Style.Fill.BackgroundColor.SetColor(Color.LightGreen);
                 } 
                 else
                 {
-                    workSheet.Cells[startRow + i, startColumn + 2 + j].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    workSheet.Cells[startRow + i, startColumn + 2 + j].Style.Fill.PatternType = ExcelFillStyle.Solid;
                     workSheet.Cells[startRow + i, startColumn + 2 + j].Style.Fill.BackgroundColor.SetColor(Color.LightGray);
                 }
             }
@@ -594,23 +613,26 @@ public class ExcelService : IExcelService
         workSheet.View.FreezePanes(10, 3);
         workSheet.Cells[4, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
-        MemoryStream memoryStream = new MemoryStream();
+        MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream);
         memoryStream.Position = 0;
 
+        excel.Dispose();
         return memoryStream;
     }
 
-    public async Task<MemoryStream> CreateFamilyContactDetailsChangeReport(List<ParentContactChangeDto> changes, CancellationToken cancellationToken = default)
+    public async Task<MemoryStream> CreateFamilyContactDetailsChangeReport(
+        List<ParentContactChangeDto> changes, 
+        CancellationToken cancellationToken = default)
     {
-        var excel = new ExcelPackage();
-        var workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
+        ExcelPackage excel = new();
+        ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
 
-        var nameDetail = workSheet.Cells[1, 1].RichText.Add("Parent Contact Details Changed");
+        ExcelRichText nameDetail = workSheet.Cells[1, 1].RichText.Add("Parent Contact Details Changed");
         nameDetail.Bold = true;
         nameDetail.Size = 16;
 
-        var dateDetail = workSheet.Cells[2, 1].RichText.Add($"Report generated on {DateTime.Today.ToLongDateString()}");
+        ExcelRichText dateDetail = workSheet.Cells[2, 1].RichText.Add($"Report generated on {DateTime.Today.ToLongDateString()}");
         dateDetail.Bold = true;
         dateDetail.Size = 16;
 
@@ -620,15 +642,15 @@ public class ExcelService : IExcelService
         workSheet.Cells[4, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFilter = true;
         workSheet.Cells[5, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
-        var memoryStream = new MemoryStream();
+        MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
-        
         memoryStream.Position = 0;
 
+        excel.Dispose();
         return memoryStream;
     }
 
-    public async Task<List<MasterFileSchool>> GetSchoolsFromMasterFile(MemoryStream stream)
+    public Task<List<MasterFileSchool>> GetSchoolsFromMasterFile(MemoryStream stream)
     {
         List<MasterFileSchool> schoolsList = new();
 
@@ -638,19 +660,19 @@ public class ExcelService : IExcelService
 
         for (int i = 2; i <= rows; i++)
         {
-            var codeCell = worksheet.Cells[i, 9].Value;
+            object codeCell = worksheet.Cells[i, 9].Value;
             if (codeCell is null)
                 continue;
 
-            var code = codeCell.ToString().Trim();
+            string code = codeCell.ToString()?.Trim() ?? string.Empty;
 
-            var nameCell = worksheet.Cells[i, 1].Value;
+            object nameCell = worksheet.Cells[i, 1].Value;
             if (nameCell is null)
                 continue;
 
-            var name = ((string)nameCell).Trim();
+            string name = ((string)nameCell).Trim();
 
-            var statusCell = worksheet.Cells[i, 2].Value;
+            object statusCell = worksheet.Cells[i, 2].Value;
             if (statusCell is null)
                 continue;
 
@@ -663,15 +685,18 @@ public class ExcelService : IExcelService
                 _ => SiteStatus.Unknown
             };
 
-            var principalCell = worksheet.Cells[i, 21].Value;
-            var principal = (principalCell is not null && principalCell is not ExcelErrorValue) ? ((string)principalCell).Trim() : string.Empty;
+            object principalCell = worksheet.Cells[i, 21].Value;
+            string principal = (principalCell is not null && principalCell is not ExcelErrorValue) ? ((string)principalCell).Trim() : string.Empty;
 
-            var principalEmailCell = worksheet.Cells[i, 22].Value;
+            object principalEmailCell = worksheet.Cells[i, 22].Value;
             string principalEmail = string.Empty;
+            
             if (principalEmailCell is not null &&
                 principalEmailCell is not ExcelErrorValue &&
                 principalEmailCell.GetType() != typeof(double))
+            {
                 principalEmail = principalEmailCell.ToString()!.Trim();
+            }
 
             schoolsList.Add(new MasterFileSchool(
                 i,
@@ -682,10 +707,10 @@ public class ExcelService : IExcelService
                 principalEmail));
         }
 
-        return schoolsList;
+        return Task.FromResult(schoolsList);
     }
 
-    public async Task<List<MasterFileStudent>> GetStudentsFromMasterFile(MemoryStream stream)
+    public Task<List<MasterFileStudent>> GetStudentsFromMasterFile(MemoryStream stream)
     {
         List<MasterFileStudent> studentList = new();
 
@@ -695,29 +720,29 @@ public class ExcelService : IExcelService
 
         for (int i = 2; i <= rows; i++)
         {
-            var srnCell = worksheet.Cells[i, 1].Value;
+            object srnCell = worksheet.Cells[i, 1].Value;
             if (srnCell is null)
                 continue;
 
-            var srn = srnCell.ToString().Trim();
+            string srn = srnCell.ToString()?.Trim() ?? string.Empty;
 
-            var fNameCell = worksheet.Cells[i, 3].Value;
+            object fNameCell = worksheet.Cells[i, 3].Value;
             if (fNameCell is null)
                 continue;
 
-            var fName = ((string)fNameCell).Trim();
+            string fName = ((string)fNameCell).Trim();
 
-            var sNameCell = worksheet.Cells[i, 4].Value;
+            object sNameCell = worksheet.Cells[i, 4].Value;
             if (sNameCell is null)
                 continue;
 
-            var sName = ((string)sNameCell).Trim();
+            string sName = ((string)sNameCell).Trim();
 
-            var gradeCell = worksheet.Cells[i, 7].Value;
+            object gradeCell = worksheet.Cells[i, 7].Value;
             if (gradeCell is null)
                 continue;
 
-            Grade grade = gradeCell.ToString().Trim() switch
+            Grade grade = gradeCell.ToString()?.Trim() switch
             {
                 "5" => Grade.Y05,
                 "6" => Grade.Y06,
@@ -732,12 +757,12 @@ public class ExcelService : IExcelService
                 _ => Grade.SpecialProgram
             };
 
-            var parent1Cell = worksheet.Cells[i, 39].Value as string;
+            string parent1Cell = worksheet.Cells[i, 39].Value as string;
             string parent1 = string.Empty;
             if (parent1Cell is not null && !string.IsNullOrWhiteSpace(parent1Cell))
                 parent1 = parent1Cell.Trim();
 
-            var parent2Cell = worksheet.Cells[i, 40].Value as string;
+            string parent2Cell = worksheet.Cells[i, 40].Value as string;
             string parent2 = string.Empty;
             if (parent2Cell is not null && !string.IsNullOrWhiteSpace(parent2Cell))
                 parent2 = parent2Cell.Trim();
@@ -752,15 +777,17 @@ public class ExcelService : IExcelService
                 parent2));
         }
 
-        return studentList;
+        return Task.FromResult(studentList);
     }
 
-    public async Task<MemoryStream> CreateMasterFileConsistencyReport(List<UpdateItem> updateItems, CancellationToken cancellationToken = default)
+    public async Task<MemoryStream> CreateMasterFileConsistencyReport(
+        List<UpdateItem> updateItems, 
+        CancellationToken cancellationToken = default)
     {
-        var excel = new ExcelPackage();
-        var workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
+        ExcelPackage excel = new();
+        ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
 
-        var nameDetail = workSheet.Cells[1, 1].RichText.Add("MasterFile Consistency Report");
+        ExcelRichText nameDetail = workSheet.Cells[1, 1].RichText.Add("MasterFile Consistency Report");
         nameDetail.Bold = true;
         nameDetail.Size = 16;
 
@@ -770,15 +797,17 @@ public class ExcelService : IExcelService
         workSheet.Cells[3, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFilter = true;
         workSheet.Cells[4, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
-        var memoryStream = new MemoryStream();
+        MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
-
         memoryStream.Position = 0;
 
+        excel.Dispose();
         return memoryStream;
     }
 
-    public async Task<MemoryStream> CreateContactExportFile(List<ContactResponse> contacts, CancellationToken cancellationToken = default)
+    public async Task<MemoryStream> CreateContactExportFile(
+        List<ContactResponse> contacts, 
+        CancellationToken cancellationToken = default)
     {
         ExcelPackage excel = new();
         ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Contacts");
@@ -795,16 +824,18 @@ public class ExcelService : IExcelService
 
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
-
         memoryStream.Position = 0;
 
+        excel.Dispose();
         return memoryStream;
     }
 
-    public async Task<MemoryStream> CreateAwardNominationsExportFile(List<AwardNominationExportDto> nominations, CancellationToken cancellationToken = default)
+    public async Task<MemoryStream> CreateAwardNominationsExportFile(
+        List<AwardNominationExportDto> nominations, 
+        CancellationToken cancellationToken = default)
     {
-        var excel = new ExcelPackage();
-        var workSheet = excel.Workbook.Worksheets.Add("Nominations");
+        ExcelPackage excel = new();
+        ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Nominations");
 
         workSheet.Cells[1, 1].LoadFromCollection(nominations, true);
 
@@ -812,19 +843,22 @@ public class ExcelService : IExcelService
         workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFilter = true;
         workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
 
-        var memoryStream = new MemoryStream();
+        MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
-
         memoryStream.Position = 0;
 
+        excel.Dispose();
         return memoryStream;
     }
 
-
-    public List<StudentAttendanceData> ExtractPerDayYearToDateAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
+    public List<StudentAttendanceData> ExtractPerDayYearToDateAttendanceData(
+        SystemAttendanceData systemData, 
+        List<StudentAttendanceData> data)
     {
-        if (systemData.YearToDateDayCalculationDocument is null)
+        if (systemData?.YearToDateDayCalculationDocument is null)
             return data;
+
+        data ??= new();
 
         List<string> ytdDayData = systemData.YearToDateDayCalculationDocument.DocumentNode.InnerHtml.Split('\u000A').ToList();
 
@@ -839,7 +873,7 @@ public class ExcelService : IExcelService
             // Index 0: Surname
             // Index 1: Preferred name
             // Index 2: Gender
-            // Index 3: Rollclass name
+            // Index 3: Roll class name
             // Index 4: School year
             // Index 5: External id
             // Index 6: Suburb
@@ -860,7 +894,7 @@ public class ExcelService : IExcelService
 
             if (entry is not null)
             {
-                entry.DayYTD = Convert.ToDecimal(line[11].FormatField());
+                entry.DayYTD = Convert.ToDecimal(line[11].FormatField(), null);
             }
             else
             {
@@ -868,8 +902,8 @@ public class ExcelService : IExcelService
                 {
                     StudentId = studentId,
                     Name = $"{line[1].FormatField()} {line[0].FormatField()}",
-                    Grade = (Grade)Convert.ToInt32(line[4].FormatField()),
-                    DayYTD = Convert.ToDecimal(line[11].FormatField())
+                    Grade = (Grade)Convert.ToInt32(line[4].FormatField(), null),
+                    DayYTD = Convert.ToDecimal(line[11].FormatField(), null)
                 };
 
                 data.Add(entry);
@@ -879,10 +913,14 @@ public class ExcelService : IExcelService
         return data;
     }
 
-    public List<StudentAttendanceData> ExtractPerMinuteYearToDateAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
+    public List<StudentAttendanceData> ExtractPerMinuteYearToDateAttendanceData(
+        SystemAttendanceData systemData, 
+        List<StudentAttendanceData> data)
     {
-        if (systemData.YearToDateMinuteCalculationDocument is null)
+        if (systemData?.YearToDateMinuteCalculationDocument is null)
             return data;
+
+        data ??= new();
 
         using IExcelDataReader reader = ExcelReaderFactory.CreateReader(systemData.YearToDateMinuteCalculationDocument);
         DataSet result = reader.AsDataSet();
@@ -904,7 +942,7 @@ public class ExcelService : IExcelService
             // Index 6: Class
             // Index 7: Class Time
             // Index 8: Absence Time
-            // Index 9: Untallied Time
+            // Index 9: Un-tallied Time
             // Index 10: Percentage
 
             string studentId = row[0].ToString();
@@ -913,7 +951,7 @@ public class ExcelService : IExcelService
 
             if (entry is not null)
             {
-                entry.MinuteYTD = Convert.ToDecimal(row[10]);
+                entry.MinuteYTD = Convert.ToDecimal(row[10], null);
             }
             else
             {
@@ -921,7 +959,7 @@ public class ExcelService : IExcelService
                 {
                     StudentId = studentId,
                     Name = $"{row[1].ToString().FormatField()} {row[2].ToString().FormatField()}",
-                    MinuteYTD = Convert.ToDecimal(row[10])
+                    MinuteYTD = Convert.ToDecimal(row[10], null)
                 };
 
                 data.Add(entry);
@@ -931,10 +969,14 @@ public class ExcelService : IExcelService
         return data;
     }
 
-    public List<StudentAttendanceData> ExtractPerDayWeekAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
+    public List<StudentAttendanceData> ExtractPerDayWeekAttendanceData(
+        SystemAttendanceData systemData, 
+        List<StudentAttendanceData> data)
     {
-        if (systemData.WeekDayCalculationDocument is null)
+        if (systemData?.WeekDayCalculationDocument is null)
             return data;
+
+        data ??= new();
 
         List<string> fnDayData = systemData.WeekDayCalculationDocument.DocumentNode.InnerHtml.Split('\u000A').ToList();
 
@@ -949,7 +991,7 @@ public class ExcelService : IExcelService
             // Index 0: Surname
             // Index 1: Preferred name
             // Index 2: Gender
-            // Index 3: Rollclass name
+            // Index 3: Roll class name
             // Index 4: School year
             // Index 5: External id
             // Index 6: Suburb
@@ -970,7 +1012,7 @@ public class ExcelService : IExcelService
 
             if (entry is not null)
             {
-                entry.DayWeek = Convert.ToDecimal(line[11].FormatField());
+                entry.DayWeek = Convert.ToDecimal(line[11].FormatField(), null);
             }
             else
             {
@@ -978,7 +1020,7 @@ public class ExcelService : IExcelService
                 {
                     StudentId = studentId,
                     Name = $"{line[1].FormatField()} {line[0].FormatField()}",
-                    DayWeek = Convert.ToDecimal(line[11].FormatField())
+                    DayWeek = Convert.ToDecimal(line[11].FormatField(), null)
                 };
 
                 data.Add(entry);
@@ -988,10 +1030,14 @@ public class ExcelService : IExcelService
         return data;
     }
 
-    public List<StudentAttendanceData> ExtractPerMinuteWeekAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data)
+    public List<StudentAttendanceData> ExtractPerMinuteWeekAttendanceData(
+        SystemAttendanceData systemData, 
+        List<StudentAttendanceData> data)
     {
-        if (systemData.WeekMinuteCalculationDocument is null)
+        if (systemData?.WeekMinuteCalculationDocument is null)
             return data;
+
+        data ??= new();
 
         using IExcelDataReader reader = ExcelReaderFactory.CreateReader(systemData.WeekMinuteCalculationDocument);
         DataSet result = reader.AsDataSet();
@@ -1013,7 +1059,7 @@ public class ExcelService : IExcelService
             // Index 6: Class
             // Index 7: Class Time
             // Index 8: Absence Time
-            // Index 9: Untallied Time
+            // Index 9: Un-tallied Time
             // Index 10: Percentage
 
             string studentId = row[0].ToString();
@@ -1022,7 +1068,7 @@ public class ExcelService : IExcelService
 
             if (entry is not null)
             {
-                entry.MinuteWeek = Convert.ToDecimal(row[10]);
+                entry.MinuteWeek = Convert.ToDecimal(row[10], null);
             }
             else
             {
@@ -1030,7 +1076,7 @@ public class ExcelService : IExcelService
                 {
                     StudentId = studentId,
                     Name = $"{row[1].ToString().FormatField()} {row[2].ToString().FormatField()}",
-                    MinuteWeek = Convert.ToDecimal(row[10])
+                    MinuteWeek = Convert.ToDecimal(row[10], null)
                 };
 
                 data.Add(entry);
@@ -1040,12 +1086,15 @@ public class ExcelService : IExcelService
         return data;
     }
 
-    public async Task<List<SentralIncidentDetails>> ConvertSentralIncidentReport(Stream reportFile, List<DateOnly> excludedDates, CancellationToken cancellationToken = default)
+    public Task<List<SentralIncidentDetails>> ConvertSentralIncidentReport(
+        Stream reportFile, 
+        List<DateOnly> excludedDates, 
+        CancellationToken cancellationToken = default)
     {
         List<SentralIncidentDetails> response = new();
 
         if (reportFile is null)
-            return response;
+            return Task.FromResult(response);
 
         using IExcelDataReader reader = ExcelReaderFactory.CreateReader(reportFile);
         DataSet result = reader.AsDataSet(new ExcelDataSetConfiguration { UseColumnDataType = true });
@@ -1091,9 +1140,7 @@ public class ExcelService : IExcelService
 
             if (!dateExtractionSucceeded)
                 continue;
-
-            int severity = _dateTime.Today.DayNumber - dateCreated.DayNumber;
-
+            
             List<DateOnly> datesBetween = dateCreated.Range(_dateTime.Today);
             datesBetween = datesBetween
                 .Where(entry => !excludedDates.Contains(entry))
@@ -1102,9 +1149,9 @@ public class ExcelService : IExcelService
                     entry.DayOfWeek != DayOfWeek.Sunday)
                 .ToList();
 
-            severity = datesBetween.Count - 1;
+            int severity = datesBetween.Count - 1;
 
-            int gradeNum = Convert.ToInt32(row[25]);
+            int gradeNum = Convert.ToInt32(row[25], null);
             Grade grade = (Grade)gradeNum;
             
             response.Add(new(
@@ -1120,10 +1167,12 @@ public class ExcelService : IExcelService
                 severity));
         }
 
-        return response;
+        return Task.FromResult(response);
     }
 
-    public async Task<List<StudentImportRecord>> ConvertStudentImportFile(MemoryStream importFile, CancellationToken cancellationToken = default)
+    public Task<List<StudentImportRecord>> ConvertStudentImportFile(
+        MemoryStream importFile, 
+        CancellationToken cancellationToken = default)
     {
         List<StudentImportRecord> results = new();
 
@@ -1136,13 +1185,13 @@ public class ExcelService : IExcelService
             if (row[0].ToString() == "StudentId")
                 continue;
 
-            string studentId = row[0]?.ToString() ?? string.Empty;
-            string firstName = row[1]?.ToString() ?? string.Empty;
-            string lastName = row[2]?.ToString() ?? string.Empty;
-            string userName = row[3]?.ToString() ?? string.Empty;
-            string grade = row[4]?.ToString() ?? string.Empty;
-            string schoolCode = row[5]?.ToString() ?? string.Empty;
-            string gender = row[6]?.ToString() ?? string.Empty;
+            string studentId = row[0].ToString() ?? string.Empty;
+            string firstName = row[1].ToString() ?? string.Empty;
+            string lastName = row[2].ToString() ?? string.Empty;
+            string userName = row[3].ToString() ?? string.Empty;
+            string grade = row[4].ToString() ?? string.Empty;
+            string schoolCode = row[5].ToString() ?? string.Empty;
+            string gender = row[6].ToString() ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(studentId) ||
                 string.IsNullOrWhiteSpace(firstName) ||
@@ -1172,7 +1221,7 @@ public class ExcelService : IExcelService
                 gender));
         }
 
-        return results;
+        return Task.FromResult(results);
     }
 
     public async Task<MemoryStream> CreateWellbeingExportFile(
@@ -1235,9 +1284,9 @@ public class ExcelService : IExcelService
 
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
-
         memoryStream.Position = 0;
 
+        excel.Dispose();
         return memoryStream;
     }
 
@@ -1262,6 +1311,8 @@ public class ExcelService : IExcelService
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;
+
+        excel.Dispose();
         return memoryStream;
     }
 
@@ -1286,6 +1337,9 @@ public class ExcelService : IExcelService
         worksheet.Cells[2, 4].Value = "Faculties";
         worksheet.Cells[2, 4].Style.Font.Bold = true;
         worksheet.Cells[2, 4].Style.Font.Size = 14;
+
+        staffStatuses ??= new();
+        moduleDetails ??= new();
 
         for (int row = 3; row < staffStatuses.Count + 3; row++)
         {
@@ -1372,6 +1426,8 @@ public class ExcelService : IExcelService
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;
+
+        excel.Dispose();
         return memoryStream;
     }
 
@@ -1384,24 +1440,30 @@ public class ExcelService : IExcelService
         ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Report");
 
         worksheet.Cells[1, 1].Value = "Id";
-        worksheet.Cells[1, 2].Value = "Description";
-        worksheet.Cells[1, 3].Value = "Created Date";
-        worksheet.Cells[1, 4].Value = "Completed Date";
-        worksheet.Cells[1, 5].Value = "Assigned To";
-        worksheet.Cells[1, 6].Value = "Open Days";
-        
+        worksheet.Cells[1, 2].Value = "Student";
+        worksheet.Cells[1, 3].Value = "Grade";
+        worksheet.Cells[1, 4].Value = "Description";
+        worksheet.Cells[1, 5].Value = "Created Date";
+        worksheet.Cells[1, 6].Value = "Completed Date";
+        worksheet.Cells[1, 7].Value = "Assigned To";
+        worksheet.Cells[1, 8].Value = "Open Days";
+
+        records ??= new();
+
         for (int row = 0; row < records.Count; row++)
         {
             CaseReportItem record = records[row];
 
             worksheet.Cells[row + 2, 1].Value = record.Id;
-            worksheet.Cells[row + 2, 2].Value = record.Description;
-            worksheet.Cells[row + 2, 3].Style.Numberformat.Format = "dd/MM/yyyy";
-            worksheet.Cells[row + 2, 3].Value = record.CreatedDate.ToDateTime(TimeOnly.MinValue);
+            worksheet.Cells[row + 2, 2].Value = record.Student.DisplayName;
+            worksheet.Cells[row + 2, 3].Value = record.Grade.AsName();
+            worksheet.Cells[row + 2, 4].Value = record.Description;
             worksheet.Cells[row + 2, 4].Style.Numberformat.Format = "dd/MM/yyyy";
-            worksheet.Cells[row + 2, 4].Value = record.CompletedDate?.ToDateTime(TimeOnly.MinValue);
-            worksheet.Cells[row + 2, 5].Value = record.AssignedTo;
-            worksheet.Cells[row + 2, 6].Value = record.OpenDays;
+            worksheet.Cells[row + 2, 5].Value = record.CreatedDate.ToDateTime(TimeOnly.MinValue);
+            worksheet.Cells[row + 2, 5].Style.Numberformat.Format = "dd/MM/yyyy";
+            worksheet.Cells[row + 2, 6].Value = record.CompletedDate?.ToDateTime(TimeOnly.MinValue);
+            worksheet.Cells[row + 2, 7].Value = record.AssignedTo;
+            worksheet.Cells[row + 2, 8].Value = record.OpenDays;
         }
 
         worksheet.Cells[1, 1, 1, worksheet.Dimension.Columns].AutoFilter = true;
@@ -1411,6 +1473,8 @@ public class ExcelService : IExcelService
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;
+
+        excel.Dispose();
         return memoryStream;
     }
 
@@ -1430,6 +1494,8 @@ public class ExcelService : IExcelService
         worksheet.Cells[1, 6].Value = "Contact Phone";
         worksheet.Cells[1, 7].Value = "Contact Role";
         worksheet.Cells[1, 8].Value = "Notes";
+
+        records ??= new();
 
         int row = 2;
 
@@ -1486,12 +1552,14 @@ public class ExcelService : IExcelService
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;
+
+        excel.Dispose();
         return memoryStream;
     }
 
     public async Task<MemoryStream> CreateStudentAttendanceReport(
-    string periodLabel,
-    List<AttendanceRecord> records,
+        string periodLabel,
+        List<AttendanceRecord> records,
         List<AbsenceRecord> absenceRecords,
         CancellationToken cancellationToken = default)
     {
@@ -1503,7 +1571,7 @@ public class ExcelService : IExcelService
                 .Where(entry => entry.Grade == grade)
                 .ToList();
 
-            if (filteredRecords.Any())
+            if (filteredRecords.Count > 0)
             {
                 BuildDataTableAndPivot(excel, periodLabel, grade, filteredRecords, absenceRecords);
             }
@@ -1511,16 +1579,16 @@ public class ExcelService : IExcelService
 
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
-
         memoryStream.Position = 0;
 
+        excel.Dispose();
         return memoryStream;
     }
 
-    private void BuildDataTableAndPivot(ExcelPackage package, string periodLabel, Grade grade, List<AttendanceRecord> records, List<AbsenceRecord> absences)
+    private static void BuildDataTableAndPivot(ExcelPackage package, string periodLabel, Grade grade, List<AttendanceRecord> records, List<AbsenceRecord> absences)
     {
         ExcelWorksheet pivotWorksheet = package.Workbook.Worksheets.Add($"{grade.AsName()} Data");
-        ExcelRangeBase table = pivotWorksheet.Cells[1, 1].LoadFromCollection(records, true);
+        pivotWorksheet.Cells[1, 1].LoadFromCollection(records, true);
 
         pivotWorksheet.Cells[2, 9].Value = "90% - 100% Attendance";
         pivotWorksheet.Cells[2, 10].Formula = "=countif(E:E, I2)";
@@ -1534,7 +1602,6 @@ public class ExcelService : IExcelService
         pivotWorksheet.Cells[5, 9].Value = "Below 50% Attendance";
         pivotWorksheet.Cells[5, 10].Formula = "=countif(E:E, I5)";
 
-        ExcelRangeBase chartRange = pivotWorksheet.Cells[2, 9, 5, 10];
         ExcelWorksheet chartWorksheet = package.Workbook.Worksheets.Add($"{grade.AsName()} Report");
 
         ExcelRangeBase chartTitle = chartWorksheet.Cells[1, 1, 1, 9];
@@ -1663,7 +1730,7 @@ public class ExcelService : IExcelService
 
             foreach (var group in groups)
             {
-                string dateDisplay = BuildDateGroupLabel(group.Select(entry => entry.AbsenceDate));
+                string dateDisplay = BuildDateGroupLabel(group.Select(entry => entry.AbsenceDate).ToList());
 
                 chartWorksheet.Cells[rowNumber, 7].Value = group.Key.AbsenceReason;
                 chartWorksheet.Cells[rowNumber, 8].Value = dateDisplay;
@@ -1738,7 +1805,7 @@ public class ExcelService : IExcelService
 
             foreach (var group in groups)
             {
-                string dateDisplay = BuildDateGroupLabel(group.Select(entry => entry.AbsenceDate));
+                string dateDisplay = BuildDateGroupLabel(group.Select(entry => entry.AbsenceDate).ToList());
 
                 chartWorksheet.Cells[rowNumber, 7].Value = group.Key.AbsenceReason;
                 chartWorksheet.Cells[rowNumber, 8].Value = dateDisplay;
@@ -1895,7 +1962,7 @@ public class ExcelService : IExcelService
 
         (bottom, rowNumber) = (rowNumber, bottom); // Swap the bottom and rowNumber variables
 
-        // Follow up actions
+        // Follow-up actions
         ExcelRangeBase followUpTitle = chartWorksheet.Cells[rowNumber, 6, rowNumber, 9];
         followUpTitle.Merge = true;
         followUpTitle.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
@@ -1962,7 +2029,7 @@ public class ExcelService : IExcelService
         pivotWorksheet.Hidden = eWorkSheetHidden.Hidden;
     }
 
-    private string BuildDateGroupLabel(IEnumerable<DateOnly> group)
+    private static string BuildDateGroupLabel(List<DateOnly> group)
     {
         // Group the absence dates as well
         List<List<DateOnly>> dates = new();
@@ -1970,7 +2037,7 @@ public class ExcelService : IExcelService
         dates.Add(date);
 
         DateOnly lastDate = group.First();
-        for (int i = 1; i < group.Count(); i++)
+        for (int i = 1; i < group.Count; i++)
         {
             DateOnly currentDate = group.ElementAt(i);
             int diff = currentDate.DayNumber - lastDate.DayNumber;
@@ -1987,7 +2054,7 @@ public class ExcelService : IExcelService
 
         foreach (List<DateOnly> dateList in dates)
         {
-            if (dateDisplay != string.Empty)
+            if (!string.IsNullOrEmpty(dateDisplay))
                 dateDisplay += ", ";
 
             if (dateList.Count == 1)
@@ -2014,29 +2081,27 @@ public class ExcelService : IExcelService
         return dateDisplay;
     }
 
-    private class StudentRecord
-    {
-        public string StudentId { get; set; }
-        public string StudentName { get; set; }
-        public string Grade { get; set; }
-        public decimal StellarsEarned { get; set; }
-        public decimal GalaxiesEarned { get; set; }
-        public decimal UniveralsEarned { get; set; }
-    }
+    private sealed record StudentRecord(
+        string StudentId,
+        string StudentName,
+        string Grade,
+        decimal StellarsEarned,
+        decimal GalaxiesEarned,
+        decimal UniversalsEarned);
 
     private class AwardRow
     {
-        public string StudentId { get; set; }
-        public string Surname { get; set; }
-        public string FirstName { get; set; }
+        public string StudentId { get; init; }
+        public string Surname { get; init; }
+        public string FirstName { get; init; }
         public string RollClass { get; set; }
-        public string Year { get; set; }
+        public string Year { get; init; }
         public DateTime DateAwarded { get; set; }
         public string Category { get; set; }
         public string Award { get; set; }
         public int Level { get; set; }
-        public int Value { get; set; }
-        public int Total { get; set; }
+        public int Value { get; init; }
+        public int Total { get; init; }
     }
 
     private class IncidentRow

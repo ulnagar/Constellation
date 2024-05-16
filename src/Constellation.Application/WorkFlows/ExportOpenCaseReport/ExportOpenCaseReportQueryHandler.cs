@@ -2,14 +2,20 @@
 
 using Abstractions.Messaging;
 using Constellation.Application.Helpers;
+using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Errors;
+using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Clock;
+using Core.Enums;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using DTOs;
 using Extensions;
 using Interfaces.Services;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,18 +29,24 @@ internal sealed class ExportOpenCaseReportQueryHandler
 {
     private readonly ICaseRepository _caseRepository;
     private readonly IExcelService _excelService;
+    private readonly IStudentRepository _studentRepository;
     private readonly IDateTimeProvider _dateTime;
+    private readonly ILogger _logger;
 
     private int Index { get; set; }
 
     public ExportOpenCaseReportQueryHandler(
         ICaseRepository caseRepository,
         IExcelService excelService,
-        IDateTimeProvider dateTime)
+        IStudentRepository studentRepository,
+        IDateTimeProvider dateTime,
+        ILogger logger)
     {
         _caseRepository = caseRepository;
         _excelService = excelService;
+        _studentRepository = studentRepository;
         _dateTime = dateTime;
+        _logger = logger.ForContext<ExportOpenCaseReportQuery>();
     }
 
     public async Task<Result<FileDto>> Handle(ExportOpenCaseReportQuery request, CancellationToken cancellationToken)
@@ -47,23 +59,45 @@ internal sealed class ExportOpenCaseReportQueryHandler
         {
             string shortCaseId = item.Id.Value.ToShortString();
 
-            reportItems.Add(new(
-                $"{shortCaseId}.00",
-                item.ToString(),
-                DateOnly.FromDateTime(item.CreatedAt),
-                null,
-                null,
-                _dateTime.Today.DayOfYear - item.CreatedAt.DayOfYear));
+            if (item.Type!.Equals(CaseType.Attendance))
+            {
+                AttendanceCaseDetail details = item.Detail as AttendanceCaseDetail;
 
-            List<Action> parentActions = item.Actions
-                .Where(entry => entry.ParentActionId is null)
-                .OrderBy(entry => entry.CreatedAt)
-                .ToList();
+                Student student = await _studentRepository.GetById(details!.StudentId, cancellationToken);
 
-            Index = 0;
+                if (student is null)
+                {
+                    _logger
+                        .ForContext(nameof(Case), item, true)
+                        .ForContext(nameof(Error), StudentErrors.NotFound(details.StudentId), true)
+                        .Warning("Could not export open Cases");
 
-            foreach (Action action in parentActions)
-                CreateFromAction(reportItems, item.Actions.ToList(), shortCaseId, action);
+                    return Result.Failure<FileDto>(StudentErrors.NotFound(details.StudentId));
+                }
+
+                Name name = student.GetName();
+
+                reportItems.Add(new(
+                    $"{shortCaseId}.00",
+                    student.GetName(),
+                    student.CurrentGrade,
+                    item.ToString(),
+                    DateOnly.FromDateTime(item.CreatedAt),
+                    null,
+                    null,
+                    _dateTime.Today.DayOfYear - item.CreatedAt.DayOfYear));
+
+
+                List<Action> parentActions = item.Actions
+                    .Where(entry => entry.ParentActionId is null)
+                    .OrderBy(entry => entry.CreatedAt)
+                    .ToList();
+
+                Index = 0;
+
+                foreach (Action action in parentActions)
+                    CreateFromAction(reportItems, item.Actions.ToList(), shortCaseId, action, student.GetName(), student.CurrentGrade);
+            }
         }
 
         MemoryStream stream = await _excelService.CreateWorkFlowReport(reportItems, cancellationToken);
@@ -80,7 +114,7 @@ internal sealed class ExportOpenCaseReportQueryHandler
         return reportDto;
     }
 
-    private void CreateFromAction(List<CaseReportItem> reportItems, List<Action> actions, string shortCaseId, Action action)
+    private void CreateFromAction(List<CaseReportItem> reportItems, List<Action> actions, string shortCaseId, Action action, Name student, Grade grade)
     {
         Index++;
 
@@ -96,6 +130,8 @@ internal sealed class ExportOpenCaseReportQueryHandler
 
         reportItems.Add(new(
             $"{shortCaseId}.{actionIndex}",
+            student,
+            grade,
             action.ToString(),
             DateOnly.FromDateTime(action.CreatedAt),
             completedDate,
@@ -103,6 +139,6 @@ internal sealed class ExportOpenCaseReportQueryHandler
             _dateTime.Today.DayOfYear - action.CreatedAt.DayOfYear));
 
         foreach (Action childAction in actions.Where(entry => entry.ParentActionId == action.Id))
-            CreateFromAction(reportItems, actions, shortCaseId, childAction);
+            CreateFromAction(reportItems, actions, shortCaseId, childAction, student, grade);
     }
 }

@@ -27,7 +27,7 @@ using WorkFlows.ExportOpenCaseReport;
 
 public interface IExcelService
 {
-    Task<MemoryStream> CreatePTOFile(ICollection<InterviewExportDto> exportLines);
+    Task<MemoryStream> CreatePTOFile(List<InterviewExportDto> exportLines, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateAbsencesReportFile(List<FilteredAbsenceResponse> exportAbsences, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateUnexplainedPartialAbsencesReportFile(List<UnexplainedPartialAbsenceResponse> absences, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateAwardsCalculationFile(MemoryStream stream);
