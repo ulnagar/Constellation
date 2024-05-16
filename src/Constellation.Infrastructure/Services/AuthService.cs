@@ -524,6 +524,39 @@ public class AuthService : IAuthService
 
         _logger.Information("{count} registered users remaining", users.Count);
 
+        foreach (Family family in families)
+        {
+            _logger
+                .ForContext(nameof(Family), family, true)
+                .Information("Checking Family {name}", family.FamilyTitle);
+
+            if (users.All(user => user.Email != family.FamilyEmail))
+            {
+                _logger.Information("Found no matching user.");
+                _logger.Information("User will be created");
+
+                AppUser user = new()
+                {
+                    UserName = family.FamilyEmail,
+                    Email = family.FamilyEmail,
+                    FirstName = string.Empty,
+                    LastName = family.FamilyEmail,
+                    IsParent = true
+                };
+
+                IdentityResult result = await _userManager.CreateAsync(user);
+
+                if (!result.Succeeded)
+                    _logger
+                        .ForContext("Request", user, true)
+                        .Warning("Failed to create user due to error {@error}", result.Errors);
+            }
+            else
+            {
+                _logger.Information("User found.");
+            }
+        }
+
         foreach (Parent parent in parents)
         {
             _logger

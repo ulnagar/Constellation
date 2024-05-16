@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Families.Events;
+﻿namespace Constellation.Application.Families.Events.FamilyDeletedDomainEvent;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
@@ -12,14 +12,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class FamilyDeletedDomainEvent_RemoveParentsAndStudents
+internal sealed class RemoveParentsAndStudents
     : IDomainEventHandler<FamilyDeletedDomainEvent>
 {
     private readonly IFamilyRepository _familyRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
-    public FamilyDeletedDomainEvent_RemoveParentsAndStudents(
+    public RemoveParentsAndStudents(
         IFamilyRepository familyRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
