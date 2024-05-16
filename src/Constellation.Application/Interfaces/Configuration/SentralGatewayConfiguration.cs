@@ -28,14 +28,13 @@ public class SentralGatewayConfiguration
 
     public class SentralXPathLocations
     {
-        public string MothersHomePhone { get; set; }
-        public string MothersWorkPhone { get; set; }
-        public string MothersMobilePhone { get; set; }
-        public string MothersEmail { get; set; }
-        public string FathersHomePhone { get; set; }
-        public string FathersWorkPhone { get; set; }
-        public string FathersMobilePhone { get; set; }
-        public string FathersEmail { get; set; }
+        public string FamilyEmail { get; set; }
+        public string Parent1Name { get; set; }
+        public string Parent1Mobile { get; set; }
+        public string Parent1Email { get; set; }
+        public string Parent2Name { get; set; }
+        public string Parent2Mobile { get; set; }
+        public string Parent2Email { get; set; }
         public string FamilyName { get; set; }
         public string AbsenceTable { get; set; }
         public string StudentTable { get; set; }

@@ -1104,8 +1104,7 @@ public class Gateway : ISentralGateway
         if (page == null)
             return null;
 
-        string familyEmailXPath = @"//*[@id=""expander-content-1""]/table/tr/td[1]/table/tr[4]/td";
-        string familyEmail = page.DocumentNode.SelectSingleNode(familyEmailXPath).InnerText.Trim().ToLowerInvariant();
+        string familyEmail = page.DocumentNode.SelectSingleNode(_settings.XPaths.FamilyEmail).InnerText.Trim().ToLowerInvariant();
         
         string familyAddressBlock = HttpUtility.HtmlDecode(page.DocumentNode.SelectSingleNode(_settings.XPaths.FamilyName).InnerHtml.Trim());
         string familyName = familyAddressBlock.Split('<')[0].Trim();
@@ -1146,25 +1145,17 @@ public class Gateway : ISentralGateway
         result.AddressState = state;
         result.AddressPostCode = postCode;
 
-        // Get mothers details
-        string parent1NameXPath = @"//*[@id=""expander-content-2""]/table/tr/td[1]/table[1]/tr/td[2]";
-        string parent1NameBlock = HttpUtility.HtmlDecode(page.DocumentNode.SelectSingleNode(parent1NameXPath).InnerHtml.Trim());
+        string parent1NameBlock = HttpUtility.HtmlDecode(page.DocumentNode.SelectSingleNode(_settings.XPaths.Parent1Name).InnerHtml.Trim());
         string parent1Type = parent1NameBlock.Split('>')[1].Trim().Split('<')[0].Trim().Split(' ').Last().Trim(':', ' ');
         string parent1Name = parent1NameBlock.Split('>').Last().Trim();
+        string parent1Email = page.DocumentNode.SelectSingleNode(_settings.XPaths.Parent1Email).InnerText.Trim().ToLowerInvariant();
+        string parent1Mobile = page.DocumentNode.SelectSingleNode(_settings.XPaths.Parent1Mobile).InnerText.Trim();
 
-        string parent2NameXPath = @"//*[@id=""expander-content-2""]/table/tr/td[2]/table[1]/tr/td[2]";
-        string parent2NameBlock = HttpUtility.HtmlDecode(page.DocumentNode.SelectSingleNode(parent2NameXPath).InnerHtml.Trim());
+        string parent2NameBlock = HttpUtility.HtmlDecode(page.DocumentNode.SelectSingleNode(_settings.XPaths.Parent2Name).InnerHtml.Trim());
         string parent2Type = parent2NameBlock.Split('>')[1].Trim().Split('<')[0].Trim().Split(' ').Last().Trim(':', ' ');
         string parent2Name = parent2NameBlock.Split('>').Last().Trim();
-        
-        string parent1Email = page.DocumentNode.SelectSingleNode(_settings.XPaths.MothersEmail).InnerText.Trim().ToLowerInvariant();
-        string parent2Email = page.DocumentNode.SelectSingleNode(_settings.XPaths.FathersEmail).InnerText.Trim().ToLowerInvariant();
-
-        string parent1MobileXPath = @"//*[@id=""expander-content-2""]/table/tr/td[1]/table[2]/tr[3]/td";
-        string parent1Mobile = page.DocumentNode.SelectSingleNode(parent1MobileXPath).InnerText.Trim();
-
-        string parent2MobileXPath = @"//*[@id=""expander-content-2""]/table/tr/td[2]/table[2]/tr[3]/td";
-        string parent2Mobile = page.DocumentNode.SelectSingleNode(parent2MobileXPath).InnerText.Trim();
+        string parent2Email = page.DocumentNode.SelectSingleNode(_settings.XPaths.Parent2Email).InnerText.Trim().ToLowerInvariant();
+        string parent2Mobile = page.DocumentNode.SelectSingleNode(_settings.XPaths.Parent2Mobile).InnerText.Trim();
 
         if (!string.IsNullOrWhiteSpace(parent1Name))
         {
