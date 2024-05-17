@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Constellation.Core.Models.WorkFlow;
+﻿namespace Constellation.Core.Models.WorkFlow;
 
 using Abstractions.Clock;
 using Enums;
@@ -35,12 +34,12 @@ public sealed class Case : AggregateRoot, IAuditableEntity
     public CaseStatus Status { get; private set; } = CaseStatus.Open;
 
     public IReadOnlyList<Action> Actions => _actions.ToList();
-    public string? CreatedBy { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.MinValue;
-    public string? ModifiedBy { get; set; }
+    public string ModifiedBy { get; set; } = string.Empty;
     public DateTime ModifiedAt { get; set; } = DateTime.MinValue;
     public bool IsDeleted { get; private set; }
-    public string? DeletedBy { get; set; }
+    public string DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; } = DateTime.MinValue;
 
     public DateOnly DueDate { get; private set; }

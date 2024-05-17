@@ -2,8 +2,10 @@
 
 using System;
 
-public sealed record AttendanceValueId(Guid Value)
+public readonly record struct AttendanceValueId(Guid Value)
 {
+    public static readonly AttendanceValueId Empty = new (Guid.Empty);
+
     public static AttendanceValueId FromValue(Guid value) =>
         new(value);
 

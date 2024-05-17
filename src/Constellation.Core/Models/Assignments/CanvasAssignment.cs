@@ -29,7 +29,6 @@ public class CanvasAssignment : AggregateRoot
         DateOnly forwardingDate,
         int allowedAttempts)
     {
-        Id = new();
         CourseId = courseId;
         Name = name;
         CanvasId = canvasId;
@@ -41,9 +40,9 @@ public class CanvasAssignment : AggregateRoot
         AllowedAttempts = allowedAttempts;
     }
 
-    public AssignmentId Id { get; }
-    public CourseId CourseId { get; private set; }
-    public string Name { get; private set; }
+    public AssignmentId Id { get; } = new();
+    public CourseId CourseId { get; private set; } = CourseId.Empty;
+    public string Name { get; private set; } = string.Empty;
     public int CanvasId { get; private set; }
     public DateTime DueDate { get; private set; }
     public DateTime? LockDate { get; private set; }
@@ -104,12 +103,10 @@ public class CanvasAssignment : AggregateRoot
         return entry;
     }
 
-    public void MarkSubmissionUploaded(
-        AssignmentSubmissionId submissionId)
+    public void MarkSubmissionUploaded(AssignmentSubmissionId submissionId)
     {
-        CanvasAssignmentSubmission submission = Submissions.FirstOrDefault(entry => entry.Id == submissionId);
+        CanvasAssignmentSubmission? submission = Submissions.FirstOrDefault(entry => entry.Id == submissionId);
 
-        if (submission is not null)
-            submission.MarkUploaded();
+        submission?.MarkUploaded();
     }
 }

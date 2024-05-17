@@ -8,13 +8,14 @@ using System.Reflection;
 
 public sealed class AttachmentType : ValueObject, IComparable
 {
+    public static readonly AttachmentType Unset = new("Unset");
     public static readonly AttachmentType CanvasAssignmentSubmission = new("Canvas Assignment Submission");
     public static readonly AttachmentType StudentReport = new("Student Report");
     public static readonly AttachmentType TrainingCertificate = new("Training Certificate");
     public static readonly AttachmentType AwardCertificate = new("Award Certificate");
     public static readonly AttachmentType WorkFlowEmailAttachment = new("WorkFlow Email Attachment");
 
-    public static AttachmentType FromValue(string value)
+    public static AttachmentType? FromValue(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
@@ -36,7 +37,7 @@ public sealed class AttachmentType : ValueObject, IComparable
 
     public override string ToString() => Value;
 
-    public int CompareTo(object obj)
+    public int CompareTo(object? obj)
     {
         if (obj is AttachmentType other)
         {
@@ -46,14 +47,14 @@ public sealed class AttachmentType : ValueObject, IComparable
         return -1;
     }
 
-    public static implicit operator string(AttachmentType assignmentType) =>
+    public static implicit operator string(AttachmentType? assignmentType) =>
         assignmentType is null ? string.Empty : assignmentType.ToString();
 
     public static IEnumerable<object> Enumerations()
     {
-        var enumerationType = typeof(AttachmentType);
+        Type enumerationType = typeof(AttachmentType);
 
-        var fieldsForType = enumerationType
+        IEnumerable<AttachmentType> fieldsForType = enumerationType
             .GetFields(
                 BindingFlags.Public |
                 BindingFlags.Static |
@@ -63,7 +64,7 @@ public sealed class AttachmentType : ValueObject, IComparable
             .Select(fieldInfo =>
                 (AttachmentType)fieldInfo.GetValue(default)!);
 
-        foreach (var field in fieldsForType)
+        foreach (AttachmentType field in fieldsForType)
             yield return field;
     }
 }

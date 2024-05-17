@@ -53,7 +53,7 @@ public sealed class AssignmentType : ValueObject
             .Select(fieldInfo =>
                 (AssignmentType)fieldInfo.GetValue(default)!);
 
-        foreach (var field in fieldsForType)
+        foreach (AssignmentType? field in fieldsForType)
             yield return field;
     }
 }

@@ -35,12 +35,12 @@ public sealed class AttendanceValue : AggregateRoot
         PerDayWeekPercentage = dayWeek;
     }
 
-    public AttendanceValueId Id { get; private set; }
-    public string StudentId { get; private set; }
+    public AttendanceValueId Id { get; private set; } = new();
+    public string StudentId { get; private set; } = string.Empty;
     public Grade Grade { get; private set; }
     public DateOnly StartDate { get; private set; }
     public DateOnly EndDate { get; private set; }
-    public string PeriodLabel { get; private set; }
+    public string PeriodLabel { get; private set; } = string.Empty;
 
     public decimal PerMinuteYearToDatePercentage { get; private set; }
     public decimal PerMinuteWeekPercentage { get; private set; }
@@ -59,13 +59,13 @@ public sealed class AttendanceValue : AggregateRoot
         decimal dayWeek)
     {
         if (minYtd == 0 && minWeek == 0 && dayYtd == 0 && dayWeek == 0)
-            return Result.Failure<AttendanceValue>(AttendanceValueErrors.Create.EmptyValues);
+            return Result.Failure<AttendanceValue>(AttendanceValueErrors.CreateEmptyValues);
 
         if (startDate == DateOnly.MinValue || endDate == DateOnly.MaxValue)
-            return Result.Failure<AttendanceValue>(AttendanceValueErrors.Create.MinimumDates);
+            return Result.Failure<AttendanceValue>(AttendanceValueErrors.CreateMinimumDates);
 
         if (startDate > endDate)
-            return Result.Failure<AttendanceValue>(AttendanceValueErrors.Create.DateRangeInvalid);
+            return Result.Failure<AttendanceValue>(AttendanceValueErrors.CreateDateRangeInvalid);
 
         AttendanceValue value = new(
             studentId,

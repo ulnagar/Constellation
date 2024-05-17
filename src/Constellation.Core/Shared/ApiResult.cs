@@ -13,15 +13,13 @@ public class ApiResult
 
     public static ApiResult FromResult(Result result)
     {
-        if (result.GetType() == typeof(ValidationResult))
+        if (result is ValidationResult validationResult)
         {
-            ValidationResult validationResult = (result as ValidationResult)!;
-
             IEnumerable<string> errors = validationResult.Errors.Select(error => error.Message);
 
             string errorText = string.Join(", ", errors);
 
-            Shared.Error validationError = new(result.Error.Code, errorText);
+            Shared.Error validationError = new(validationResult.Error.Code, errorText);
 
             return new() { IsSuccess = validationResult.IsSuccess, Error = validationError };
         }
@@ -34,17 +32,15 @@ public class ApiResult
 
     public static ApiResult<TValue> FromResult<TValue>(Result<TValue> result)
     {
-        if (result.GetType() == typeof(ValidationResult<TValue>))
+        if (result is ValidationResult<TValue> validationResult)
         {
-            ValidationResult<TValue> validationResult = (result as ValidationResult<TValue>)!;
-
             IEnumerable<string> errors = validationResult.Errors.Select(error => error.Message);
 
             string errorText = string.Join(", ", errors);
 
-            Shared.Error validationError = new(result.Error.Code, errorText);
+            Shared.Error validationError = new(validationResult.Error.Code, errorText);
 
-            return new() { IsSuccess = validationResult.IsSuccess, Error = validationError, Value = result.Value };
+            return new() { IsSuccess = validationResult.IsSuccess, Error = validationError, Value = validationResult.Value };
         }
 
         if (result.IsSuccess)

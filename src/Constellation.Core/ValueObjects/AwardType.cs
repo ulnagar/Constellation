@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.ValueObjects;
 
-using Constellation.Core.Primitives;
+using Primitives;
 using System.Collections.Generic;
 
 public sealed class AwardType : ValueObject
@@ -16,7 +16,7 @@ public sealed class AwardType : ValueObject
     public static readonly AwardType GalaxyMedal = new("Galaxy Medal");
     public static readonly AwardType UniversalAchiever = new("Universal Achiever");
 
-    public static AwardType FromValue(string value)
+    public static AwardType? FromValue(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
