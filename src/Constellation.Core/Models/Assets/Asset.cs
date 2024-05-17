@@ -10,11 +10,14 @@ using Primitives;
 using Shared;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ValueObjects;
 
 public sealed class Asset : AggregateRoot, IAuditableEntity
 {
     private readonly List<Allocation> _allocations = new();
+    private readonly List<Location> _locations = new();
+    private readonly List<Sighting> _sightings = new();
 
     private Asset(
         AssetNumber assetNumber,
@@ -33,7 +36,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     public AssetId Id { get; private set; } = new();
     public AssetNumber AssetNumber { get; private set; }
     public string SerialNumber { get; private set; }
-    public string SAPEquipmentNumber { get; private set; }
+    public string SapEquipmentNumber { get; private set; }
     public string ModelNumber { get; private set; }
     public string ModelDescription { get; private set; }
     public AssetStatus Status { get; private set; }
@@ -45,6 +48,22 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     public DateOnly LastSightedAt { get; private set; }
     public string LastSightedBy { get; private set; }
     public IReadOnlyList<Allocation> Allocations => _allocations.AsReadOnly();
+    public IReadOnlyList<Location> Locations => _locations.AsReadOnly();
+    public IReadOnlyList<Sighting> Sightings => _sightings.AsReadOnly();
+
+    public Allocation? CurrentAllocation => 
+        _allocations
+            .Where(allocation => allocation.ReturnDate == DateOnly.MinValue)
+            .MaxBy(allocation => allocation.AllocationDate);
+
+    public Location? CurrentLocation =>
+        _locations
+            .Where(location => location.DepartureDate == DateOnly.MinValue)
+            .MaxBy(location => location.ArrivalDate);
+
+    public Sighting? LastSighting =>
+        _sightings
+            .MaxBy(sighting => sighting.SightedAt);
 
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -81,13 +100,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
         return asset;
     }
 
-    public Result AddAllocation(Allocation allocation)
-    {
-        // Mark all other allocations as not current
-        _allocations.ForEach(entry => entry.UpdateCurrentFlag(false));
-
-        _allocations.Add(allocation);
-
-        return Result.Success();
-    }
+    public void AddAllocation(Allocation allocation) => _allocations.Add(allocation);
+    public void AddLocation(Location location) => _locations.Add(location);
+    public void AddSighting(Sighting sighting) => _sightings.Add(sighting);
 }

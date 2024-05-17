@@ -19,13 +19,11 @@ public class Allocation : IAuditableEntity
 
     public AllocationId Id { get; private set; } = new();
     public AssetId AssetId { get; private set; }
-    public LocationCategory Category { get; private set; }
-    public string Site { get; private set; }
-    public string SchoolCode { get; private set; }
-    public string Room { get; private set; }
     public string UserId { get; private set; }
     public string ResponsibleOfficer { get; private set; }
-    public bool CurrentLocation { get; private set; }
+
+    public DateOnly AllocationDate { get; private set; }
+    public DateOnly ReturnDate { get; private set; }
 
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -46,15 +44,9 @@ public class Allocation : IAuditableEntity
 
         Allocation allocation = new(assetId);
 
-        allocation.Category = category;
-        allocation.Site = site;
-        allocation.SchoolCode = student.SchoolCode;
-        allocation.Room = string.Empty;
         allocation.UserId = student.StudentId;
         allocation.ResponsibleOfficer = student.GetName().DisplayName;
-
-        allocation.CurrentLocation = true;
-
+        
         return allocation;
     }
 
@@ -71,14 +63,8 @@ public class Allocation : IAuditableEntity
 
         Allocation allocation = new(assetId);
 
-        allocation.Category = category;
-        allocation.Site = site;
-        allocation.SchoolCode = schoolCode;
-        allocation.Room = room;
         allocation.UserId = staffMember.StaffId;
         allocation.ResponsibleOfficer = staffMember.GetName().DisplayName;
-
-        allocation.CurrentLocation = true;
 
         return allocation;
     }
@@ -94,14 +80,8 @@ public class Allocation : IAuditableEntity
 
         Allocation allocation = new(assetId);
 
-        allocation.Category = category;
-        allocation.Site = school.Name;
-        allocation.SchoolCode = school.Code;
-        allocation.Room = room;
         allocation.UserId = school.Code;
         allocation.ResponsibleOfficer = school.Name;
-
-        allocation.CurrentLocation = true;
 
         return allocation;
     }
@@ -118,37 +98,9 @@ public class Allocation : IAuditableEntity
 
         Allocation allocation = new(assetId);
 
-        allocation.Category = category;
-        allocation.Site = site;
-        allocation.SchoolCode = string.Empty;
-        allocation.Room = room;
         allocation.UserId = recipient.Email;
         allocation.ResponsibleOfficer = recipient.Name;
-
-        allocation.CurrentLocation = true;
-
+        
         return allocation;
-    }
-
-    public Result UpdateCurrentFlag(bool current)
-    {
-        if (current is true && CurrentLocation is false)
-            return Result.Failure(AssetErrors.Allocation.CurrentLocation.ReactivationBlocked);
-
-        CurrentLocation = current;
-
-        return Result.Success();
-    }
-
-    public void UpdateLocation(
-        LocationCategory category,
-        string site,
-        string schoolCode,
-        string room)
-    {
-        Category = category;
-        Site = site;
-        SchoolCode = schoolCode;
-        Room = room;
     }
 }
