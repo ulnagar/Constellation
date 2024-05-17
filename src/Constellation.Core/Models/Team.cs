@@ -18,14 +18,14 @@ public class Team : AggregateRoot
     }
 
     public Guid Id { get; private set; }
-    public string Name { get; private set; }
-    public string Description { get; private set; }
-    public string Link { get; private set; }
+    public string Name { get; private set; } = string.Empty;
+    public string Description { get; private set; } = string.Empty;
+    public string Link { get; private set; } = string.Empty;
     public bool IsArchived { get; private set; }
 
     public static Team Create(Guid id, string name, string description, string generalChannelId)
     {
-        var team = new Team(id, name, description);
+        Team team = new(id, name, description);
 
         team.CreateLinkFromPart(generalChannelId);
 

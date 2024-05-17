@@ -14,7 +14,7 @@ public sealed class AssignmentType : ValueObject
     public static readonly AssignmentType PracTeacher = new("Prac Teacher");
     public static readonly AssignmentType TutorialTeacher = new("Tutorial Teacher");
 
-    public static AssignmentType FromValue(string value)
+    public static AssignmentType? FromValue(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
@@ -36,14 +36,14 @@ public sealed class AssignmentType : ValueObject
 
     public override string ToString() => Value;
 
-    public static implicit operator string(AssignmentType assignmentType) =>
+    public static implicit operator string(AssignmentType? assignmentType) =>
         assignmentType is null ? string.Empty : assignmentType.ToString();
 
     public static IEnumerable<object> Enumerations()
     {
-        var enumerationType = typeof(AssignmentType);
+        Type enumerationType = typeof(AssignmentType);
 
-        var fieldsForType = enumerationType
+        IEnumerable<AssignmentType> fieldsForType = enumerationType
             .GetFields(
                 BindingFlags.Public |
                 BindingFlags.Static |

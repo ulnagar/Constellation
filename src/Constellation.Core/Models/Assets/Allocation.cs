@@ -1,8 +1,6 @@
 ﻿namespace Constellation.Core.Models.Assets;
 
 using Core.ValueObjects;
-using Enums;
-using Errors;
 using Identifiers;
 using Primitives;
 using Shared;
@@ -12,9 +10,13 @@ using System;
 public class Allocation : IAuditableEntity
 {
     private Allocation(
-        AssetId assetId)
+        AssetId assetId,
+        string userId,
+        string officer)
     {
         AssetId = assetId;
+        UserId = userId;
+        ResponsibleOfficer = officer;
     }
 
     public AllocationId Id { get; private set; } = new();
@@ -25,82 +27,59 @@ public class Allocation : IAuditableEntity
     public DateOnly AllocationDate { get; private set; }
     public DateOnly ReturnDate { get; private set; }
 
-    public string CreatedBy { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; }
+    public string ModifiedBy { get; set; } = string.Empty;
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; private set; }
-    public string DeletedBy { get; set; }
+    public string DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; }
 
     public static Result<Allocation> Create(
         AssetId assetId,
-        LocationCategory category,
-        string site,
         Student student)
     {
-        if (student is null)
-            return Result.Failure<Allocation>(AssetErrors.Allocation.StudentEmpty);
+        Allocation allocation = new(
+            assetId,
+            student.StudentId, 
+            student.GetName().DisplayName);
 
-        Allocation allocation = new(assetId);
-
-        allocation.UserId = student.StudentId;
-        allocation.ResponsibleOfficer = student.GetName().DisplayName;
-        
         return allocation;
     }
 
     public static Result<Allocation> Create(
         AssetId assetId,
-        LocationCategory category,
-        string site,
-        string schoolCode,
-        string room,
         Staff staffMember)
     {
-        if (staffMember is null)
-            return Result.Failure<Allocation>(AssetErrors.Allocation.StaffEmpty);
-
-        Allocation allocation = new(assetId);
-
-        allocation.UserId = staffMember.StaffId;
-        allocation.ResponsibleOfficer = staffMember.GetName().DisplayName;
+        Allocation allocation = new(
+            assetId,
+            staffMember.StaffId, 
+            staffMember.GetName()?.DisplayName ?? staffMember.StaffId);
 
         return allocation;
     }
 
     public static Result<Allocation> Create(
         AssetId assetId,
-        LocationCategory category,
-        string room,
         School school)
     {
-        if (school is null)
-            return Result.Failure<Allocation>(AssetErrors.Allocation.SchoolEmpty);
-
-        Allocation allocation = new(assetId);
-
-        allocation.UserId = school.Code;
-        allocation.ResponsibleOfficer = school.Name;
+        Allocation allocation = new(
+            assetId,
+            school.Code,
+            school.Name);
 
         return allocation;
     }
 
     public static Result<Allocation> Create(
         AssetId assetId,
-        LocationCategory category,
-        string site,
-        string room,
         EmailRecipient recipient)
     {
-        if (recipient is null)
-            return Result.Failure<Allocation>(AssetErrors.Allocation.RecipientEmpty);
+        Allocation allocation = new(
+            assetId,
+            recipient.Email,
+            recipient.Name);
 
-        Allocation allocation = new(assetId);
-
-        allocation.UserId = recipient.Email;
-        allocation.ResponsibleOfficer = recipient.Name;
-        
         return allocation;
     }
 }

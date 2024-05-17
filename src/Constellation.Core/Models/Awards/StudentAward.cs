@@ -18,21 +18,20 @@ public class StudentAward : AggregateRoot
         string type,
         DateTime awardedOn)
     {
-        Id = new();
         StudentId = studentId;
         Category = category;
         Type = type;
         AwardedOn = awardedOn;
     }
 
-    public StudentAwardId Id { get; private set; }
+    public StudentAwardId Id { get; private set; } = new();
     public string StudentId { get; private set; }
-    public string TeacherId { get; private set; }
+    public string TeacherId { get; private set; } = string.Empty;
     public DateTime AwardedOn { get; private set; }
     public string Category { get; private set; }
     public string Type { get; private set; }
-    public string IncidentId { get; private set; }
-    public string Reason { get; private set; }
+    public string IncidentId { get; private set; } = string.Empty;
+    public string Reason { get; private set; } = string.Empty;
 
     public static StudentAward Create(
         string studentId,

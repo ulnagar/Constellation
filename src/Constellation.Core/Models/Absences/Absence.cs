@@ -75,7 +75,7 @@ public class Absence : AggregateRoot
         TimeOnly startTime,
         TimeOnly endTime)
     {
-        Absence absence = new Absence(
+        Absence absence = new(
             new AbsenceId(),
             type,
             studentId,
@@ -85,10 +85,11 @@ public class Absence : AggregateRoot
             periodTimeframe,
             absenceReason,
             startTime,
-            endTime);
-
-        absence.FirstSeen = DateTime.Now;
-        absence.LastSeen = DateTime.Now;
+            endTime)
+        {
+            FirstSeen = DateTime.Now,
+            LastSeen = DateTime.Now
+        };
 
         return absence;
     }
@@ -151,35 +152,32 @@ public class Absence : AggregateRoot
         if (!Explained)
             return null;
 
-        Response explainedResponse = _responses
+        Response? explainedResponse = _responses
             .FirstOrDefault(response => 
-                response.VerificationStatus == ResponseVerificationStatus.NotRequired);
+                response.VerificationStatus.Equals(ResponseVerificationStatus.NotRequired));
 
         if (explainedResponse is not null)
             return explainedResponse;
 
-        Response verifiedResponse = _responses
+        Response? verifiedResponse = _responses
             .FirstOrDefault(response =>
-                response.VerificationStatus == ResponseVerificationStatus.Verified);
+                response.VerificationStatus.Equals(ResponseVerificationStatus.Verified));
 
         if (verifiedResponse is not null)
             return verifiedResponse;
 
-        Response rejectedResponse = _responses
+        Response? rejectedResponse = _responses
             .FirstOrDefault(response =>
-                response.VerificationStatus == ResponseVerificationStatus.Rejected);
+                response.VerificationStatus.Equals(ResponseVerificationStatus.Rejected));
 
         if (rejectedResponse is not null)
             return rejectedResponse;
 
-        Response pendingResponse = _responses
+        Response? pendingResponse = _responses
             .FirstOrDefault(response =>
-                response.VerificationStatus == ResponseVerificationStatus.Pending);
+                response.VerificationStatus.Equals(ResponseVerificationStatus.Pending));
 
-        if (pendingResponse is not null)
-            return pendingResponse;
-
-        return _responses.First();
+        return pendingResponse ?? _responses.First();
     }
 
     public void ResponseConfirmed(AbsenceResponseId responseId)
@@ -212,7 +210,7 @@ public class Absence : AggregateRoot
         LastSeen = DateTime.Now;
     }
 
-    public static AbsenceReason FindWorstAbsenceReason(List<AbsenceReason> reasons)
+    public static AbsenceReason FindWorstAbsenceReason(IReadOnlyList<AbsenceReason> reasons)
     {
         if (reasons.Any(reason => reason == AbsenceReason.Unjustified))
             return AbsenceReason.Unjustified;
@@ -241,6 +239,6 @@ public class Absence : AggregateRoot
         if (reasons.Any(reason => reason == AbsenceReason.SharedEnrolment))
             return AbsenceReason.SharedEnrolment;
 
-        return null;
+        return AbsenceReason.Unjustified;
     }
 }

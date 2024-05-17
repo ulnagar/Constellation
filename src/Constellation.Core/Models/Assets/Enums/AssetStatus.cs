@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Assets.Enums;
 
-using Constellation.Core.Common;
+using Common;
 
 public sealed class AssetStatus : StringEnumeration<AssetStatus>
 {

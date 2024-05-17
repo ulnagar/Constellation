@@ -67,7 +67,7 @@ public sealed class StocktakeSighting
     {
         if (string.IsNullOrWhiteSpace(serialNumber) && string.IsNullOrWhiteSpace(assetNumber))
         {
-            return Result.Failure<StocktakeSighting>(StocktakeErrors.Sighting.InvalidSerialOrAsset);
+            return Result.Failure<StocktakeSighting>(StocktakeErrors.SightingInvalidSerialOrAsset);
         }
 
         StocktakeSighting sighting = new()
@@ -95,7 +95,7 @@ public sealed class StocktakeSighting
         string cancelledBy)
     {
         if (IsCancelled)
-            return Result.Failure(StocktakeErrors.Sighting.AlreadyCancelled);
+            return Result.Failure(StocktakeErrors.SightingAlreadyCancelled);
 
         IsCancelled = true;
         CancellationComment = comment;

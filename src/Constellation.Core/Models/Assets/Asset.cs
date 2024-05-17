@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Core.Models.Assets;
 
 using Abstractions.Clock;
-using Abstractions.Services;
 using Enums;
 using Errors;
 using Events;
@@ -36,17 +35,15 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     public AssetId Id { get; private set; } = new();
     public AssetNumber AssetNumber { get; private set; }
     public string SerialNumber { get; private set; }
-    public string SapEquipmentNumber { get; private set; }
-    public string ModelNumber { get; private set; }
+    public string SapEquipmentNumber { get; private set; } = string.Empty;
+    public string ModelNumber { get; private set; } = string.Empty;
     public string ModelDescription { get; private set; }
     public AssetStatus Status { get; private set; }
     public AssetCategory Category { get; private set; }
     public DateOnly PurchaseDate { get; private set; }
-    public string PurchaseDocument { get; private set; }
+    public string PurchaseDocument { get; private set; } = string.Empty;
     public decimal PurchaseCost { get; private set; }
     public DateOnly WarrantyEndDate { get; private set; }
-    public DateOnly LastSightedAt { get; private set; }
-    public string LastSightedBy { get; private set; }
     public IReadOnlyList<Allocation> Allocations => _allocations.AsReadOnly();
     public IReadOnlyList<Location> Locations => _locations.AsReadOnly();
     public IReadOnlyList<Sighting> Sightings => _sightings.AsReadOnly();
@@ -65,12 +62,12 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
         _sightings
             .MaxBy(sighting => sighting.SightedAt);
 
-    public string CreatedBy { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; }
+    public string ModifiedBy { get; set; } = string.Empty;
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; private set; }
-    public string DeletedBy { get; set; }
+    public string DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; }
 
     public static Result<Asset> Create(
@@ -78,11 +75,12 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
         string serialNumber,
         string description,
         AssetCategory category,
-        IDateTimeProvider dateTime,
-        ICurrentUserService currentUserService)
+        IDateTimeProvider dateTime)
     {
+        ArgumentNullException.ThrowIfNull(dateTime);
+
         if (string.IsNullOrWhiteSpace(serialNumber))
-            return Result.Failure<Asset>(AssetErrors.Asset.SerialNumberEmpty);
+            return Result.Failure<Asset>(AssetErrors.SerialNumberEmpty);
 
         Asset asset = new(
             assetNumber,
@@ -90,9 +88,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
             description,
             category)
         {
-            PurchaseDate = dateTime.Today, 
-            LastSightedAt = dateTime.Today, 
-            LastSightedBy = currentUserService.UserName
+            PurchaseDate = dateTime.Today
         };
 
         asset.RaiseDomainEvent(new AssetRegisteredDomainEvent(new(), asset.Id, asset.AssetNumber));

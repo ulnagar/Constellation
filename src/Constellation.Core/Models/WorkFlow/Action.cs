@@ -38,8 +38,7 @@ public abstract class Action : IAuditableEntity
     public bool IsDeleted { get; internal set; }
     public string DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; } = DateTime.MinValue;
-
-
+    
     public abstract string Description { get; }
     public abstract override string ToString();
     public abstract string AsStatus();
@@ -170,16 +169,14 @@ public sealed class SendEmailAction : Action
     /// <param name="body">Body of the email as raw HTML string</param>
     /// <param name="hasAttachments">Has the email been sent with any attached files?</param>
     /// <param name="sentAt">At what DateTime was the email queued for sending?</param>
-    /// <param name="currentUser">Which user initiated this action?</param>
     /// <returns>Result</returns>
     public Result Update(
-        List<EmailRecipient> recipients,
+        IReadOnlyList<EmailRecipient> recipients,
         EmailRecipient sender,
         string subject,
         string body,
         bool hasAttachments,
-        DateTime sentAt,
-        string currentUser)
+        DateTime sentAt)
     {
         if (string.IsNullOrWhiteSpace(subject))
             return Result.Failure(CaseErrors.Action.Update.EmptySubjectLine);
@@ -324,7 +321,7 @@ public sealed class ParentInterviewAction : Action
     }
 
     public Result Update(
-        List<InterviewAttendee> attendees,
+        IReadOnlyList<InterviewAttendee> attendees,
         DateTime dateOccurred,
         int incidentNumber,
         string currentUser)

@@ -8,12 +8,12 @@ public abstract class ValueObject : IEquatable<ValueObject>
 {
     public abstract IEnumerable<object> GetAtomicValues();
 
-    public bool Equals(ValueObject other)
+    public bool Equals(ValueObject? other)
     {
         return other is not null && ValuesAreEqual(other);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is ValueObject other && ValuesAreEqual(other);
     }
@@ -32,9 +32,15 @@ public abstract class ValueObject : IEquatable<ValueObject>
             .SequenceEqual(other.GetAtomicValues());
     }
 
-    protected static bool EqualOperator(ValueObject left, ValueObject right)
+    protected static bool EqualOperator(ValueObject? left, ValueObject? right)
     {
-        if (ReferenceEquals(left, null) ^ ReferenceEquals(right, null)) 
+        if (left is null ^ right is null) 
+            return false;
+
+        if (left is null & right is null)
+            return true;
+        
+        if (left is null || right is null) 
             return false;
 
         return left.ValuesAreEqual(right);
