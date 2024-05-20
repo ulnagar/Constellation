@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Core.Models.WorkFlow.Repositories;
 
-using Constellation.Core.Models.WorkFlow.Identifiers;
+using Identifiers;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
 public interface ICaseRepository
 {
-    Task<Case> GetById(CaseId caseId, CancellationToken cancellationToken = default);
+    Task<Case?> GetById(CaseId caseId, CancellationToken cancellationToken = default);
     Task<List<Case>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Case>> GetAllCurrent(CancellationToken cancellationToken = default);
     Task<bool> ExistingOpenAttendanceCaseForStudent(string studentId, CancellationToken cancellationToken = default);

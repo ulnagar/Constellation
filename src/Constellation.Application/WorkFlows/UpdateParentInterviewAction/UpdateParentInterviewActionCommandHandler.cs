@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Application.WorkFlows.UpdateParentInterviewAction;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Enums;
 using Constellation.Core.Models.WorkFlow.Errors;
 using Constellation.Core.Models.WorkFlow.Repositories;
 using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -41,10 +41,10 @@ internal sealed class UpdateParentInterviewActionCommandHandler
         {
             _logger
                 .ForContext(nameof(UpdateParentInterviewActionCommand), request, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(request.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(request.CaseId), true)
                 .Warning("Failed to update Action");
 
-            return Result.Failure(CaseErrors.Case.NotFound(request.CaseId));
+            return Result.Failure(CaseErrors.NotFound(request.CaseId));
         }
 
         Action action = item.Actions.FirstOrDefault(action => action.Id == request.ActionId);
@@ -54,10 +54,10 @@ internal sealed class UpdateParentInterviewActionCommandHandler
             _logger
                 .ForContext(nameof(UpdateParentInterviewActionCommand), request, true)
             .ForContext(nameof(Case), item, true)
-            .ForContext(nameof(Error), CaseErrors.Action.NotFound(request.ActionId), true)
+            .ForContext(nameof(Error), ActionErrors.NotFound(request.ActionId), true)
                 .Warning("Failed to update Action");
 
-            return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+            return Result.Failure(ActionErrors.NotFound(request.ActionId));
         }
 
         if (action is ParentInterviewAction interviewAction)
@@ -72,7 +72,7 @@ internal sealed class UpdateParentInterviewActionCommandHandler
                     .ForContext(nameof(Error), updateAction.Error, true)
                     .Warning("Failed to update Action");
 
-                return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+                return Result.Failure(updateAction.Error);
             }
 
             Result statusUpdate = item.UpdateActionStatus(action.Id, ActionStatus.Completed, _currentUserService.UserName);
@@ -85,7 +85,7 @@ internal sealed class UpdateParentInterviewActionCommandHandler
                     .ForContext(nameof(Error), statusUpdate.Error, true)
                     .Warning("Failed to update Action");
 
-                return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+                return Result.Failure(statusUpdate.Error);
             }
 
             await _unitOfWork.CompleteAsync(cancellationToken);
@@ -96,9 +96,9 @@ internal sealed class UpdateParentInterviewActionCommandHandler
         _logger
             .ForContext(nameof(UpdateParentInterviewActionCommand), request, true)
             .ForContext(nameof(Case), item, true)
-            .ForContext(nameof(Error), CaseErrors.Action.Update.TypeMismatch(nameof(ParentInterviewAction), action.GetType().ToString()), true)
+            .ForContext(nameof(Error), ActionErrors.UpdateTypeMismatch(nameof(ParentInterviewAction), action.GetType().ToString()), true)
             .Warning("Failed to update Action");
 
-        return Result.Failure(CaseErrors.Action.Update.TypeMismatch(nameof(ParentInterviewAction), action.GetType().ToString()));
+        return Result.Failure(ActionErrors.UpdateTypeMismatch(nameof(ParentInterviewAction), action.GetType().ToString()));
     }
 }

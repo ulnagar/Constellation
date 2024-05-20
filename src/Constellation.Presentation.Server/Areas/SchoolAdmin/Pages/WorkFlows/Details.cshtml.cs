@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.SchoolAdmin.Pages.Workflows;
 
+using Application.Features.Common.Queries;
 using Application.Models.Auth;
 using Application.Offerings.GetOfferingsForSelectionList;
 using Application.WorkFlows.AddActionNote;
@@ -13,7 +14,6 @@ using Application.WorkFlows.GetCaseById;
 using Application.WorkFlows.ReassignAction;
 using Application.WorkFlows.UpdateCaseStatus;
 using BaseModels;
-using Constellation.Application.Features.Common.Queries;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
@@ -265,7 +265,7 @@ public class DetailsModel : BasePageModel
         {
             Error = new()
             {
-                Error = CaseErrors.Action.Assign.StaffNull,
+                Error = ActionErrors.AssignStaffNull,
                 RedirectPath = null
             };
 
@@ -335,7 +335,7 @@ public class DetailsModel : BasePageModel
         {
             Error = new()
             {
-                Error = CaseErrors.Action.Assign.StaffNull,
+                Error = ActionErrors.AssignStaffNull,
                 RedirectPath = null
             };
 
@@ -378,7 +378,7 @@ public class DetailsModel : BasePageModel
         {
             Error = new()
             {
-                Error = CaseErrors.Action.Assign.StaffNull,
+                Error = ActionErrors.AssignStaffNull,
                 RedirectPath = null
             };
 
@@ -421,7 +421,7 @@ public class DetailsModel : BasePageModel
         {
             Error = new()
             {
-                Error = CaseErrors.Action.Assign.StaffNull,
+                Error = ActionErrors.AssignStaffNull,
                 RedirectPath = null
             };
 

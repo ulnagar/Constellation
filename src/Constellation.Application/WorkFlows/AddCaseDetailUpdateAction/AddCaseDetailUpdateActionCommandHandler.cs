@@ -1,15 +1,15 @@
 ﻿namespace Constellation.Application.WorkFlows.AddCaseDetailUpdateAction;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Errors;
+using Abstractions.Messaging;
 using Constellation.Core.Models;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Enums;
 using Constellation.Core.Models.WorkFlow.Errors;
 using Constellation.Core.Models.WorkFlow.Repositories;
-using Constellation.Core.Shared;
+using Core.Errors;
+using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,14 +41,14 @@ internal sealed class AddCaseDetailUpdateActionCommandHandler
         {
             _logger
                 .ForContext(nameof(AddCaseDetailUpdateActionCommand), request, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(request.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(request.CaseId), true)
                 .Warning("Could not add Case Detail Update Action to Case");
 
-            return Result.Failure(CaseErrors.Case.NotFound(request.CaseId));
+            return Result.Failure(CaseErrors.NotFound(request.CaseId));
         }
 
         if (!item.Type!.Equals(CaseType.Attendance))
-            return Result.Failure(CaseErrors.Action.Create.CaseTypeMismatch(CaseType.Attendance.Value, item.Type.Value));
+            return Result.Failure(ActionErrors.CreateCaseTypeMismatch(CaseType.Attendance.Value, item.Type.Value));
 
         Staff teacher = await _staffRepository.GetById(request.StaffId, cancellationToken);
 

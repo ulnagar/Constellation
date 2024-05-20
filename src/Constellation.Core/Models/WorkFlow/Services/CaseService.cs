@@ -44,17 +44,17 @@ public sealed class CaseService : ICaseService
         AttendanceValueId attendanceValueId,
         CancellationToken cancellationToken = default)
     {
-        Staff currentUser = await _staffRepository.GetCurrentByEmailAddress(_currentUserService.EmailAddress, cancellationToken);
+        Staff? currentUser = await _staffRepository.GetCurrentByEmailAddress(_currentUserService.EmailAddress, cancellationToken);
 
         if (currentUser is null)
             return Result.Failure<Case>(DomainErrors.Partners.Staff.NotFoundByEmail(_currentUserService.EmailAddress));
 
-        AttendanceValue value = await _attendanceRepository.GetById(attendanceValueId, cancellationToken);
+        AttendanceValue? value = await _attendanceRepository.GetById(attendanceValueId, cancellationToken);
 
         if (value is null)
             return Result.Failure<Case>(AttendanceValueErrors.NotFound(attendanceValueId));
 
-        Student student = await _studentRepository.GetWithSchoolById(value.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetWithSchoolById(value.StudentId, cancellationToken);
 
         if (student is null)
             return Result.Failure<Case>(StudentErrors.NotFound(value.StudentId));

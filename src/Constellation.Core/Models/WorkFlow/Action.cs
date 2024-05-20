@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace Constellation.Core.Models.WorkFlow;
+﻿namespace Constellation.Core.Models.WorkFlow;
 
 using Enums;
 using Errors;
@@ -46,10 +45,10 @@ public abstract class Action : IAuditableEntity
     internal Result AssignAction(Staff? assignee, string currentUser)
     {
         if (assignee is null)
-            return Result.Failure(CaseErrors.Action.Assign.StaffNull);
+            return Result.Failure(ActionErrors.AssignStaffNull);
 
         if (assignee.IsDeleted)
-            return Result.Failure(CaseErrors.Action.Assign.StaffDeleted);
+            return Result.Failure(ActionErrors.AssignStaffDeleted);
 
         if (!string.IsNullOrWhiteSpace(AssignedTo))
         {
@@ -90,10 +89,10 @@ public abstract class Action : IAuditableEntity
     internal Result AddNote(string message, string currentUser)
     {
         if (string.IsNullOrWhiteSpace(message))
-            return Result.Failure(CaseErrors.Action.AddNote.MessageBlank);
+            return Result.Failure(ActionErrors.AddNoteMessageBlank);
 
         if (string.IsNullOrWhiteSpace(currentUser))
-            return Result.Failure(CaseErrors.Action.AddNote.UserNull);
+            return Result.Failure(ActionErrors.AddNoteUserNull);
         
         ActionNote note = ActionNote.Create(
             message,
@@ -135,7 +134,7 @@ public sealed class SendEmailAction : Action
     private Result AddRecipient(EmailRecipient recipient)
     {
         if (_recipients.Any(entry => entry.Email == recipient.Email))
-            return Result.Failure(CaseErrors.Action.AddRecipient.Duplicate);
+            return Result.Failure(ActionErrors.AddRecipientDuplicate);
 
         _recipients.Add(recipient);
 
@@ -179,10 +178,10 @@ public sealed class SendEmailAction : Action
         DateTime sentAt)
     {
         if (string.IsNullOrWhiteSpace(subject))
-            return Result.Failure(CaseErrors.Action.Update.EmptySubjectLine);
+            return Result.Failure(ActionErrors.UpdateEmptySubjectLine);
 
         if (string.IsNullOrWhiteSpace(body))
-            return Result.Failure(CaseErrors.Action.Update.EmptyEmailBody);
+            return Result.Failure(ActionErrors.UpdateEmptyEmailBody);
 
         foreach (EmailRecipient recipient in recipients)
         {
@@ -251,7 +250,7 @@ public sealed class PhoneParentAction : Action
         string currentUser)
     {
         if (incidentNumber == 0)
-            return Result.Failure(CaseErrors.Action.Update.IncidentNumberZero);
+            return Result.Failure(ActionErrors.UpdateIncidentNumberZero);
 
         Result noteAttempt = AddNote(
             $"Details updated: ParentName = {parentName}, PhoneNumber = {parentNumber}, DateOccurred = {dateOccurred}, IncidentNumber = {incidentNumber}",
@@ -295,7 +294,7 @@ public sealed class ParentInterviewAction : Action
     private Result AddAttendee(InterviewAttendee attendee)
     {
         if (_attendees.Any(entry => entry.Name == attendee.Name))
-            return Result.Failure(CaseErrors.Action.AddAttendee.Duplicate);
+            return Result.Failure(ActionErrors.AddAttendeeDuplicate);
 
         _attendees.Add(attendee);
 
@@ -327,7 +326,7 @@ public sealed class ParentInterviewAction : Action
         string currentUser)
     {
         if (incidentNumber == 0)
-            return Result.Failure(CaseErrors.Action.Update.IncidentNumberZero);
+            return Result.Failure(ActionErrors.UpdateIncidentNumberZero);
 
         foreach (InterviewAttendee attendee in attendees)
         {
@@ -380,7 +379,7 @@ public sealed class CreateSentralEntryAction : Action
     public Result Update(int incidentNumber, string currentUser)
     {
         if (incidentNumber == 0)
-            return Result.Failure(CaseErrors.Action.Update.IncidentNumberZero);
+            return Result.Failure(ActionErrors.UpdateIncidentNumberZero);
 
         if (IncidentNumber != 0)
         {
@@ -405,7 +404,7 @@ public sealed class CreateSentralEntryAction : Action
     public Result Update(bool notRequired, string currentUser)
     {
         if (notRequired == false)
-            return Result.Failure(CaseErrors.Action.Update.NotRequiredFalse);
+            return Result.Failure(ActionErrors.UpdateNotRequiredFalse);
 
         if (IncidentNumber != 0)
         {

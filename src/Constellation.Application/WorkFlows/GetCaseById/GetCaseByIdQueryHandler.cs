@@ -32,10 +32,10 @@ internal sealed class GetCaseByIdQueryHandler
         {
             _logger
                 .ForContext(nameof(GetCaseByIdQuery), request, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(request.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(request.CaseId), true)
                 .Warning("Could not retrieve Case for details view");
 
-            return Result.Failure<CaseDetailsResponse>(CaseErrors.Case.NotFound(request.CaseId));
+            return Result.Failure<CaseDetailsResponse>(CaseErrors.NotFound(request.CaseId));
         }
 
         CaseDetailsResponse response = new(

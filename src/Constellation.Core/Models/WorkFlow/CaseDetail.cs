@@ -40,13 +40,13 @@ public sealed class AttendanceCaseDetail : CaseDetail
         AttendanceValue? value)
     {
         if (student is null)
-            return Result.Failure<CaseDetail>(CaseErrors.CaseDetail.Create.StudentNull);
+            return Result.Failure<CaseDetail>(CaseDetailErrors.CreateStudentNull);
 
         if (value is null)
-            return Result.Failure<CaseDetail>(CaseErrors.CaseDetail.Create.AttendanceValueNull);
+            return Result.Failure<CaseDetail>(CaseDetailErrors.CreateAttendanceValueNull);
 
         if (student.StudentId != value.StudentId)
-            return Result.Failure<CaseDetail>(CaseErrors.CaseDetail.Create.StudentMismatch);
+            return Result.Failure<CaseDetail>(CaseDetailErrors.CreateStudentMismatch);
 
         AttendanceCaseDetail detail = new();
         detail.AddFromStudent(student);

@@ -1,16 +1,16 @@
 ﻿namespace Constellation.Application.WorkFlows.Events.CaseActionCancelledDomainEvent;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Models.WorkFlow.Errors;
 using Constellation.Core.Models.WorkFlow.Repositories;
-using Constellation.Core.Shared;
+using Core.Errors;
 using Core.Models;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Events;
+using Core.Shared;
 using Core.ValueObjects;
+using Interfaces.Services;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +45,7 @@ internal sealed class SendUpdateEmailToAssignee
         {
             _logger
                 .ForContext(nameof(CaseActionCancelledDomainEvent), notification, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(notification.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(notification.CaseId), true)
                 .Warning("Could not send cancellation notification to Assignee for Action");
 
             return;
@@ -57,7 +57,7 @@ internal sealed class SendUpdateEmailToAssignee
         {
             _logger
                 .ForContext(nameof(CaseActionCancelledDomainEvent), notification, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(notification.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(notification.CaseId), true)
                 .Warning("Could not send cancellation notification to Assignee for Action");
 
             return;

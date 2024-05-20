@@ -6,25 +6,20 @@ using Application.DTOs;
 using Application.Extensions;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
-using Application.Offerings.RemoveAllSessions;
 using Core.Abstractions.Clock;
 using Core.Models.Families;
 using Core.Shared;
 using ExcelDataReader;
 using HtmlAgilityPack;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.IO;
-using System.Net;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
-using static Constellation.Core.Errors.ValidationErrors;
-using ILogger = Serilog.ILogger;
 
 public class Gateway : ISentralGateway
 {

@@ -41,10 +41,10 @@ internal sealed class UpdateCreateSentralEntryActionCommandHandler
         {
             _logger
                 .ForContext(nameof(UpdateCreateSentralEntryActionCommand), request, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(request.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(request.CaseId), true)
                 .Warning("Failed to update Action");
 
-            return Result.Failure(CaseErrors.Case.NotFound(request.CaseId));
+            return Result.Failure(CaseErrors.NotFound(request.CaseId));
         }
 
         Action action = item.Actions.FirstOrDefault(action => action.Id == request.ActionId);
@@ -54,10 +54,10 @@ internal sealed class UpdateCreateSentralEntryActionCommandHandler
             _logger
                 .ForContext(nameof(UpdateCreateSentralEntryActionCommand), request, true)
                 .ForContext(nameof(Case), item, true)
-                .ForContext(nameof(Error), CaseErrors.Action.NotFound(request.ActionId), true)
+                .ForContext(nameof(Error), ActionErrors.NotFound(request.ActionId), true)
                 .Warning("Failed to update Action");
 
-            return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+            return Result.Failure(ActionErrors.NotFound(request.ActionId));
         }
 
         if (action is CreateSentralEntryAction sentralAction)
@@ -76,7 +76,7 @@ internal sealed class UpdateCreateSentralEntryActionCommandHandler
                     .ForContext(nameof(Error), updateAction.Error, true)
                     .Warning("Failed to update Action");
 
-                return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+                return Result.Failure(updateAction.Error);
             }
 
             Result statusUpdate = item.UpdateActionStatus(action.Id, ActionStatus.Completed, _currentUserService.UserName);
@@ -89,7 +89,7 @@ internal sealed class UpdateCreateSentralEntryActionCommandHandler
                     .ForContext(nameof(Error), statusUpdate.Error, true)
                     .Warning("Failed to update Action");
 
-                return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+                return Result.Failure(statusUpdate.Error);
             }
 
             await _unitOfWork.CompleteAsync(cancellationToken);
@@ -100,9 +100,9 @@ internal sealed class UpdateCreateSentralEntryActionCommandHandler
         _logger
             .ForContext(nameof(UpdateCreateSentralEntryActionCommand), request, true)
             .ForContext(nameof(Case), item, true)
-            .ForContext(nameof(Error), CaseErrors.Action.Update.TypeMismatch(nameof(CreateSentralEntryAction), action.GetType().ToString()), true)
+            .ForContext(nameof(Error), ActionErrors.UpdateTypeMismatch(nameof(CreateSentralEntryAction), action.GetType().ToString()), true)
             .Warning("Failed to update Action");
 
-        return Result.Failure(CaseErrors.Action.Update.TypeMismatch(nameof(CreateSentralEntryAction), action.GetType().ToString()));
+        return Result.Failure(ActionErrors.UpdateTypeMismatch(nameof(CreateSentralEntryAction), action.GetType().ToString()));
     }
 }

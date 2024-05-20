@@ -1,9 +1,7 @@
 ﻿namespace Constellation.Application.WorkFlows.Events.CaseCreatedDomainEvent;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Enrolments.Repositories;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
@@ -13,12 +11,14 @@ using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Enums;
 using Constellation.Core.Models.WorkFlow.Errors;
 using Constellation.Core.Models.WorkFlow.Repositories;
-using Constellation.Core.Shared;
+using Core.Errors;
 using Core.Models;
 using Core.Models.Enrolments;
 using Core.Models.Offerings;
 using Core.Models.WorkFlow.Events;
+using Core.Shared;
 using Interfaces.Configuration;
+using Interfaces.Repositories;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Collections.Generic;
@@ -66,7 +66,7 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
         {
             _logger
                 .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(notification.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(notification.CaseId), true)
                 .Warning("Could not create default Action for new Case");
 
             return;
