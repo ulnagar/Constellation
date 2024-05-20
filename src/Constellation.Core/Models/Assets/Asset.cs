@@ -73,6 +73,43 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     public static Result<Asset> Create(
         AssetNumber assetNumber,
         string serialNumber,
+        string sapEquipmentNumber,
+        string modelNumber,
+        string description,
+        AssetCategory category,
+        string purchaseDocument,
+        decimal purchaseCost,
+        DateOnly warrantyEndDate,
+        IDateTimeProvider dateTime)
+    {
+        ArgumentNullException.ThrowIfNull(dateTime);
+
+        if (string.IsNullOrWhiteSpace(serialNumber))
+            return Result.Failure<Asset>(AssetErrors.SerialNumberEmpty);
+
+        Asset asset = new(
+            assetNumber,
+            serialNumber,
+            description,
+            category)
+        {
+            SapEquipmentNumber = sapEquipmentNumber,
+            ModelNumber = modelNumber,
+            PurchaseDocument = purchaseDocument,
+            PurchaseCost = purchaseCost,
+            WarrantyEndDate = warrantyEndDate,
+            PurchaseDate = dateTime.Today,
+            Status = AssetStatus.Active
+        };
+
+        asset.RaiseDomainEvent(new AssetRegisteredDomainEvent(new(), asset.Id, asset.AssetNumber));
+
+        return asset;
+    }
+
+    public static Result<Asset> Create(
+        AssetNumber assetNumber,
+        string serialNumber,
         string description,
         AssetCategory category,
         IDateTimeProvider dateTime)
@@ -88,7 +125,8 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
             description,
             category)
         {
-            PurchaseDate = dateTime.Today
+            PurchaseDate = dateTime.Today,
+            Status = AssetStatus.Active
         };
 
         asset.RaiseDomainEvent(new AssetRegisteredDomainEvent(new(), asset.Id, asset.AssetNumber));
@@ -96,7 +134,92 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
         return asset;
     }
 
+    public Result Update(
+        string modelNumber,
+        string description,
+        string sapEquipmentNumber,
+        string purchaseDocument,
+        decimal purchaseCost,
+        DateOnly warrantyEndDate)
+    {
+        bool updatedProperty = false;
+
+        if (!string.IsNullOrWhiteSpace(modelNumber))
+        {
+            ModelNumber = modelNumber;
+
+            updatedProperty = true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            ModelDescription = description;
+
+            updatedProperty = true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(sapEquipmentNumber))
+        {
+            SapEquipmentNumber = sapEquipmentNumber;
+
+            updatedProperty = true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(purchaseDocument))
+        {
+            PurchaseDocument = purchaseDocument;
+
+            updatedProperty = true;
+        }
+
+        if (purchaseCost > 0m)
+        {
+            PurchaseCost = purchaseCost;
+
+            updatedProperty = true;
+        }
+
+        if (warrantyEndDate > DateOnly.MinValue)
+        {
+            WarrantyEndDate = warrantyEndDate;
+
+            updatedProperty = true;
+        }
+
+        if (!updatedProperty)
+        {
+            return Result.Failure(AssetErrors.UpdateNoChangeDetected);
+        }
+
+        return Result.Success();
+    }
+
+    public Result UpdateCategory(AssetCategory category)
+    {
+        if (Category.Equals(category))
+            return Result.Failure(AssetErrors.UpdateCategoryNoChange);
+
+        Category = category;
+
+        return Result.Success();
+    }
+
+    public Result UpdateStatus(AssetStatus status)
+    {
+        if (Status.Equals(status))
+            return Result.Failure(AssetErrors.UpdateStatusNoChange);
+
+        if (Status.Equals(AssetStatus.Disposed) && !status.Equals(AssetStatus.Disposed))
+            return Result.Failure(AssetErrors.UpdateStatusReactivateDisposedAsset);
+
+        Status = status;
+
+        return Result.Success();
+    }
+
     public void AddAllocation(Allocation allocation) => _allocations.Add(allocation);
     public void AddLocation(Location location) => _locations.Add(location);
     public void AddSighting(Sighting sighting) => _sightings.Add(sighting);
+
+    public void Delete() => IsDeleted = true;
 }

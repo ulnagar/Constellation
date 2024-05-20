@@ -21,9 +21,9 @@ public sealed record Sighting
 
     public SightingId Id { get; set; } = new();
     public AssetId AssetId { get; private set; }
-    public string SightedBy { get; private set; }
+    public string SightedBy { get; private set; } = string.Empty;
     public DateTime SightedAt { get; private set; }
-    public string Note { get; private set; }
+    public string Note { get; private set; } = string.Empty;
 
     public static Sighting Create(
         AssetId assetId,

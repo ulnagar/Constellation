@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 public sealed class AssetNumber : ValueObject, IComparable
 {
-    public string Number { get; }
+    private string Number { get; }
 
     private AssetNumber(string number) => Number = number;
 
@@ -29,6 +29,10 @@ public sealed class AssetNumber : ValueObject, IComparable
 
         return assetNumber;
     }
+
+    public override string ToString() => Number;
+
+    public static implicit operator string(AssetNumber number) => number.ToString();
 
     public override IEnumerable<object> GetAtomicValues()
     {
