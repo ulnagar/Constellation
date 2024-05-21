@@ -1,4 +1,7 @@
-﻿namespace Constellation.Core.Models.Assets.Errors;
+﻿using Constellation.Core.Models.Assets.ValueObjects;
+using System;
+
+namespace Constellation.Core.Models.Assets.Errors;
 
 using Shared;
 
@@ -23,4 +26,8 @@ public static class AssetErrors
     public static readonly Error UpdateStatusReactivateDisposedAsset = new(
         "Assets.Asset.UpdateStatus.ReactivateDisposedAsset",
         "Cannot reactivate an asset that has already been disposed");
+
+    public static readonly Func<AssetNumber, Error> CreateAssetNumberTaken = id => new(
+        "Assets.Asset.Create.AssetNumberTaken",
+        $"The Asset Number {id} has already been registered");
 }

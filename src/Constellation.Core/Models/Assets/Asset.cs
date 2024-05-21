@@ -1,4 +1,6 @@
 ﻿#nullable enable
+using Constellation.Core.Models.Assets.Repositories;
+
 namespace Constellation.Core.Models.Assets;
 
 using Abstractions.Clock;
@@ -11,6 +13,7 @@ using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using ValueObjects;
 
 public sealed class Asset : AggregateRoot, IAuditableEntity
@@ -76,7 +79,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     public string DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; }
 
-    public static Result<Asset> Create(
+    public static async Task<Result<Asset>> Create(
         AssetNumber assetNumber,
         string serialNumber,
         string sapEquipmentNumber,
@@ -86,12 +89,18 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
         string purchaseDocument,
         decimal purchaseCost,
         DateOnly warrantyEndDate,
-        IDateTimeProvider dateTime)
+        IDateTimeProvider dateTime,
+        IAssetRepository repository)
     {
         ArgumentNullException.ThrowIfNull(dateTime);
 
         if (string.IsNullOrWhiteSpace(serialNumber))
             return Result.Failure<Asset>(AssetErrors.SerialNumberEmpty);
+
+        bool assetNumberTaken = await repository.IsAssetNumberTaken(assetNumber);
+
+        if (assetNumberTaken)
+            return Result.Failure<Asset>(AssetErrors.CreateAssetNumberTaken(assetNumber));
 
         Asset asset = new(
             assetNumber,
@@ -113,17 +122,23 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
         return asset;
     }
 
-    public static Result<Asset> Create(
+    public static async Task<Result<Asset>> Create(
         AssetNumber assetNumber,
         string serialNumber,
         string description,
         AssetCategory category,
-        IDateTimeProvider dateTime)
+        IDateTimeProvider dateTime,
+        IAssetRepository repository)
     {
         ArgumentNullException.ThrowIfNull(dateTime);
 
         if (string.IsNullOrWhiteSpace(serialNumber))
             return Result.Failure<Asset>(AssetErrors.SerialNumberEmpty);
+
+        bool assetNumberTaken = await repository.IsAssetNumberTaken(assetNumber);
+
+        if (assetNumberTaken)
+            return Result.Failure<Asset>(AssetErrors.CreateAssetNumberTaken(assetNumber));
 
         Asset asset = new(
             assetNumber,

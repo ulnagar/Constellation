@@ -5,6 +5,7 @@ using Core.Models.Assets;
 using Core.Models.Assets.Enums;
 using Core.Models.Assets.Identifiers;
 using Core.Models.Assets.Repositories;
+using Core.Models.Assets.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -21,19 +22,26 @@ internal sealed class AssetRepository : IAssetRepository
 
     public async Task<Asset?> GetById(
         AssetId assetId,
-        CancellationToken cancellationToken) =>
+        CancellationToken cancellationToken = default) =>
         await _context
             .Set<Asset>()
             .SingleOrDefaultAsync(asset => asset.Id == assetId, cancellationToken);
 
+    public async Task<Asset?> GetByAssetNumber(
+        AssetNumber assetNumber,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Asset>()
+            .SingleOrDefaultAsync(asset => asset.AssetNumber == assetNumber, cancellationToken);
+
     public async Task<List<Asset>> GetAll(
-        CancellationToken cancellationToken) =>
+        CancellationToken cancellationToken = default) =>
         await _context
             .Set<Asset>()
             .ToListAsync(cancellationToken);
 
     public async Task<List<Asset>> GetAllActive(
-        CancellationToken cancellationToken) => 
+        CancellationToken cancellationToken = default) => 
         await _context
             .Set<Asset>()
             .Where(asset => asset.Status.Equals(AssetStatus.Active))
@@ -41,11 +49,18 @@ internal sealed class AssetRepository : IAssetRepository
 
     public async Task<List<Asset>> GetAllByStatus(
         AssetStatus status,
-        CancellationToken cancellationToken) =>
+        CancellationToken cancellationToken = default) =>
         await _context
             .Set<Asset>()
             .Where(asset => asset.Status.Equals(status))
             .ToListAsync(cancellationToken);
+
+    public async Task<bool> IsAssetNumberTaken(
+        AssetNumber assetNumber,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Asset>()
+            .AnyAsync(asset => asset.AssetNumber == assetNumber, cancellationToken);
 
     public void Insert(Asset asset) => _context.Set<Asset>().Add(asset);
 

@@ -1,17 +1,21 @@
-﻿namespace Constellation.Core.Models.Assets.Repositories;
+﻿#nullable enable
+namespace Constellation.Core.Models.Assets.Repositories;
 
 using Enums;
 using Identifiers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using ValueObjects;
 
 public interface IAssetRepository
 {
-    Task<Asset?> GetById(AssetId assetId, CancellationToken cancellationToken);
-    Task<List<Asset>> GetAll(CancellationToken cancellationToken);
-    Task<List<Asset>> GetAllActive(CancellationToken cancellationToken);
-    Task<List<Asset>> GetAllByStatus(AssetStatus status, CancellationToken cancellationToken);
+    Task<Asset?> GetById(AssetId assetId, CancellationToken cancellationToken = default);
+    Task<Asset?> GetByAssetNumber(AssetNumber assetNumber, CancellationToken cancellationToken = default);
+    Task<List<Asset>> GetAll(CancellationToken cancellationToken = default);
+    Task<List<Asset>> GetAllActive(CancellationToken cancellationToken = default);
+    Task<List<Asset>> GetAllByStatus(AssetStatus status, CancellationToken cancellationToken = default);
+    Task<bool> IsAssetNumberTaken(AssetNumber assetNumber, CancellationToken cancellationToken = default);
 
     void Insert(Asset asset);
     void Insert(Allocation allocation);

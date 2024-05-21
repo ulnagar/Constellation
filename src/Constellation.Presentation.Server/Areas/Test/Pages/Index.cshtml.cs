@@ -1,51 +1,120 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
-using Application.DTOs;
-using Application.Interfaces.Gateways;
+using Application.Interfaces.Repositories;
 using BaseModels;
+using Core.Abstractions.Clock;
+using Core.Models;
+using Core.Models.Assets;
+using Core.Models.Assets.Enums;
+using Core.Models.Assets.Repositories;
+using Core.Models.Assets.ValueObjects;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
+using Core.Shared;
 using MediatR;
 
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
-    private readonly ISentralGateway _gateway;
+    private readonly IAssetRepository _assetRepository;
     private readonly IStudentRepository _studentRepository;
+    private readonly ISchoolRepository _schoolRepository;
+    private readonly IDateTimeProvider _dateTime;
+    private readonly IUnitOfWork _unitOfWork;
 
     public IndexModel(
         IMediator mediator,
-        ISentralGateway gateway,
-        IStudentRepository studentRepository)
+        IAssetRepository assetRepository,
+        IStudentRepository studentRepository,
+        ISchoolRepository schoolRepository,
+        IDateTimeProvider dateTime,
+        IUnitOfWork unitOfWork)
     {
         _mediator = mediator;
-        _gateway = gateway;
+        _assetRepository = assetRepository;
         _studentRepository = studentRepository;
+        _schoolRepository = schoolRepository;
+        _dateTime = dateTime;
+        _unitOfWork = unitOfWork;
     }
 
-    public List<FamilyDetailsDto> Families { get; set; } = new();
+    public string Message { get; set; } = string.Empty;
 
     public void OnGet() { }
 
     public async Task OnGetRunCode()
     {
-        Dictionary<string, List<string>> families = await _gateway.GetFamilyGroupings();
+        Student student = await _studentRepository.GetById("445087432");
 
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool();
+        if (student is null)
+            return;
 
-        foreach (KeyValuePair<string, List<string>> family in families)
+        School school = await _schoolRepository.GetById(student.SchoolCode);
+
+        if (school is null)
+            return;
+
+        Result<AssetNumber> assetNumber = AssetNumber.Create("AC00001407");
+
+        if (assetNumber.IsFailure)
         {
-            Student firstStudent = students.FirstOrDefault(student => student.StudentId == family.Value.First());
+            Message = assetNumber.Error.Message;
 
-            if (firstStudent is null)
-                continue;
-
-            FamilyDetailsDto entry = await _gateway.GetParentContactEntry(firstStudent.SentralStudentId);
-
-            entry.StudentIds = family.Value;
-            entry.FamilyId = family.Key;
-
-            Families.Add(entry);
+            return;
         }
+
+        Result<Asset> asset = await Asset.Create(
+            assetNumber.Value,
+            "LR0E0HAW",
+            "901584297",
+            "20SE-S00300",
+            "Lenovo Yoga 11e 6th Gen",
+            AssetCategory.Student,
+            "",
+            1267m,
+            DateOnly.Parse("2020-09-24"),
+            _dateTime,
+            _assetRepository);
+
+        if (asset.IsFailure)
+        {
+            Message = asset.Error.Message;
+
+            return;
+        }
+
+        Location location = Location.CreatePublicSchoolLocationRecord(
+            asset.Value.Id,
+            school.Name,
+            school.Code,
+            true,
+            DateOnly.Parse("2021-03-01"));
+
+        asset.Value.AddLocation(location);
+
+        Result<Allocation> allocation = Allocation.Create(
+            asset.Value.Id,
+            student,
+            DateOnly.Parse("2021-03-01"));
+
+        if (allocation.IsFailure)
+        {
+            Message = asset.Error.Message;
+
+            return;
+        }
+
+        asset.Value.AddAllocation(allocation.Value);
+
+        Sighting sighting = Sighting.Create(
+            asset.Value.Id,
+            "Toni Stanton",
+            DateTime.Parse("2022-07-20 10:31"),
+            "Good condition");
+
+        asset.Value.AddSighting(sighting);
+
+        _assetRepository.Insert(asset.Value);
+        await _unitOfWork.CompleteAsync();
     }
 }

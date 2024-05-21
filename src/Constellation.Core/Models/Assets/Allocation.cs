@@ -41,49 +41,63 @@ public class Allocation : IAuditableEntity
 
     public static Result<Allocation> Create(
         AssetId assetId,
-        Student student)
+        Student student,
+        DateOnly allocatedOn)
     {
         Allocation allocation = new(
             assetId,
             student.StudentId, 
             student.GetName().DisplayName);
 
+        allocation.SetAllocationDate(allocatedOn);
+
         return allocation;
     }
 
     public static Result<Allocation> Create(
         AssetId assetId,
-        Staff staffMember)
+        Staff staffMember,
+        DateOnly allocatedOn)
     {
         Allocation allocation = new(
             assetId,
             staffMember.StaffId, 
             staffMember.GetName()?.DisplayName ?? staffMember.StaffId);
 
+        allocation.SetAllocationDate(allocatedOn);
+
         return allocation;
     }
 
     public static Result<Allocation> Create(
         AssetId assetId,
-        School school)
+        School school,
+        DateOnly allocatedOn)
     {
         Allocation allocation = new(
             assetId,
             school.Code,
             school.Name);
 
+        allocation.SetAllocationDate(allocatedOn);
+
         return allocation;
     }
 
     public static Result<Allocation> Create(
         AssetId assetId,
-        EmailRecipient recipient)
+        EmailRecipient recipient,
+        DateOnly allocatedOn)
     {
         Allocation allocation = new(
             assetId,
             recipient.Email,
             recipient.Name);
 
+        allocation.SetAllocationDate(allocatedOn);
+
         return allocation;
     }
+
+    private void SetAllocationDate(DateOnly allocatedOn) => AllocationDate = allocatedOn;
 }

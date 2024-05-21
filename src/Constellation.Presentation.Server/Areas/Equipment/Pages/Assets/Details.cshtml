@@ -1,0 +1,194 @@
+﻿@page "{assetNumber}"
+@model Constellation.Presentation.Server.Areas.Equipment.Pages.Assets.DetailsModel
+
+<h2>Asset Details</h2>
+
+<div class="page-menu">
+
+</div>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <h3>Asset Details</h3>
+        <dl>
+            <dt>Asset Number</dt>
+            <dd>@Model.Asset.AssetNumber</dd>
+
+            <dt>Model</dt>
+            <dd>@Model.Asset.ModelDescription (@Model.Asset.ModelNumber)</dd>
+
+            <dt>Serial</dt>
+            <dd>@Model.Asset.SerialNumber</dd>
+
+            <dt>Status</dt>
+            <dd>@Model.Asset.Status.Name</dd>
+
+            <dt>Category</dt>
+            <dd>@Model.Asset.Category.Name</dd>
+
+        </dl>
+    </div>
+    
+    <div class="col-md-4">
+        <h3>Current Allocation Details</h3>
+        <dl>
+            <dt>Allocated To</dt>
+            <dd>@Model.Asset.AllocatedTo</dd>
+            
+            <dt>Allocated On</dt>
+            <dd>@Model.Asset.AllocatedOn</dd>
+        </dl>
+        
+        <h3 class="mt-2">Current Location Details</h3>
+        <dl>
+            <dt>Location Category</dt>
+            <dd>@Model.Asset.LocationCategory</dd>
+            
+            <dt>Site</dt>
+            <dd>@Model.Asset.Site</dd>
+            
+            <dt>Room</dt>
+            <dd>@Model.Asset.Room</dd>
+            
+            <dt>Arrival Date</dt>
+            <dd>@Model.Asset.ArrivalDate</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-md-4">
+        <h3>Purchase Details</h3>
+        <dl>
+            <dt>Purchase Date</dt>
+            <dd>@Model.Asset.PurchaseDate</dd>
+    
+            <dt>Purchase Document</dt>
+            <dd>@Model.Asset.PurchaseDocument</dd>
+    
+            <dt>Purchase Cost</dt>
+            <dd>@Model.Asset.PurchaseCost.ToString("C")</dd>
+        </dl>
+    </div>
+    
+    <div class="col-md-4">
+        <h3>Last Sighting Details</h3>
+        <dl>
+            <dt>Sighted By</dt>
+            <dd>@Model.Asset.SightedBy</dd>
+            
+            <dt>Sighted At</dt>
+            <dd>@Model.Asset.SightedAt</dd>
+            
+            <dt>Notes</dt>
+            <dd>@Model.Asset.SightingNotes</dd>
+        </dl>
+    </div>
+</div>
+
+<hr />
+
+<div>
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            <a class="nav-link active" href="#allocations" data-toggle="tab" role="tab">
+                Allocation History
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#locations" data-toggle="tab" role="tab">
+                Location History
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#sightings" data-toggle="tab" role="tab" id="sessions-tab-button">
+                Sighting History
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#notes" data-toggle="tab" role="tab">
+                Notes
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="allocations" class="tab-pane active">
+            <h3>Allocation History</h3>
+            
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>From</th>
+                        <th>To</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.Asset.Allocations.OrderByDescending(item => item.AllocationDate))
+                    {
+                        <tr>
+                            <td>@entry.UserName</td>
+                            <td>@entry.AllocationDate</td>
+                            <td>
+                                @if (entry.ReturnDate != DateOnly.MinValue)
+                                {
+                                    <span>@entry.ReturnDate</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="locations" class="tab-pane">
+            <h3>Location History</h3>
+            
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Detail</th>
+                        <th>From</th>
+                        <th>To</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.Asset.Locations.OrderByDescending(item => item.ArrivalDate))
+                    {
+                        <tr>
+                            <td>@entry.Category</td>
+                            <td>@entry.Site @entry.Room</td>
+                            <td>@entry.ArrivalDate</td>
+                            <td>
+                                @if (entry.DepartureDate != DateOnly.MinValue)
+                                {
+                                    <span>@entry.DepartureDate</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="sightings" class="tab-pane">
+            <h3>Sighting History</h3>
+            
+            <table>
+
+            </table>
+        </div>
+        
+        <div id="notes" class="tab-pane">
+            <h3>Notes</h3>
+            
+            <table>
+
+            </table>
+        </div>
+    </div>
+</div>
