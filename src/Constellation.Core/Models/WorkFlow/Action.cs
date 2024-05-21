@@ -1,4 +1,5 @@
-﻿namespace Constellation.Core.Models.WorkFlow;
+﻿#nullable enable
+namespace Constellation.Core.Models.WorkFlow;
 
 using Enums;
 using Errors;

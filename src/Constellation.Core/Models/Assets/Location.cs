@@ -1,4 +1,5 @@
-﻿namespace Constellation.Core.Models.Assets;
+﻿#nullable enable
+namespace Constellation.Core.Models.Assets;
 
 using Enums;
 using Identifiers;
@@ -7,6 +8,7 @@ using System;
 
 public sealed record Location : IAuditableEntity
 {
+    // Required by EF Core
     private Location() { }
 
     private Location(

@@ -1,4 +1,5 @@
-﻿namespace Constellation.Core.Models.Assets;
+﻿#nullable enable
+namespace Constellation.Core.Models.Assets;
 
 using Core.ValueObjects;
 using Identifiers;
@@ -9,6 +10,9 @@ using System;
 
 public class Allocation : IAuditableEntity
 {
+    // Required by EF Core
+    private Allocation() { }
+
     private Allocation(
         AssetId assetId,
         string userId,
@@ -21,8 +25,8 @@ public class Allocation : IAuditableEntity
 
     public AllocationId Id { get; private set; } = new();
     public AssetId AssetId { get; private set; }
-    public string UserId { get; private set; }
-    public string ResponsibleOfficer { get; private set; }
+    public string UserId { get; private set; } = string.Empty;
+    public string ResponsibleOfficer { get; private set; } = string.Empty;
 
     public DateOnly AllocationDate { get; private set; }
     public DateOnly ReturnDate { get; private set; }

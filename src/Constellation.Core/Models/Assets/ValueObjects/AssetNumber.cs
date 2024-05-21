@@ -8,9 +8,29 @@ using System.Collections.Generic;
 
 public sealed class AssetNumber : ValueObject, IComparable
 {
+    public static readonly AssetNumber Empty = new(string.Empty);
+
     private string Number { get; }
 
     private AssetNumber(string number) => Number = number;
+
+    public static AssetNumber? FromValue(string number)
+    {
+        if (string.IsNullOrWhiteSpace(number))
+            return null;
+
+        number = number.TrimStart(' ', 'A', 'C', '0');
+
+        if (number.Length > 8)
+            return null;
+
+        if (!int.TryParse(number, out _))
+            return null;
+
+        AssetNumber assetNumber = new($"AC{number.PadLeft(8, '0')}");
+
+        return assetNumber;
+    }
 
     public static Result<AssetNumber> Create(string number)
     {

@@ -1,4 +1,5 @@
-﻿namespace Constellation.Core.Models.Assets;
+﻿#nullable enable
+namespace Constellation.Core.Models.Assets;
 
 using Abstractions.Clock;
 using Enums;
@@ -17,6 +18,10 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     private readonly List<Allocation> _allocations = new();
     private readonly List<Location> _locations = new();
     private readonly List<Sighting> _sightings = new();
+    private readonly List<Note> _notes = new();
+
+    // Required by EF Core
+    private Asset() { }
 
     private Asset(
         AssetNumber assetNumber,
@@ -33,13 +38,13 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     }
 
     public AssetId Id { get; private set; } = new();
-    public AssetNumber AssetNumber { get; private set; }
-    public string SerialNumber { get; private set; }
+    public AssetNumber AssetNumber { get; private set; } = AssetNumber.Empty;
+    public string SerialNumber { get; private set; } = string.Empty;
     public string SapEquipmentNumber { get; private set; } = string.Empty;
     public string ModelNumber { get; private set; } = string.Empty;
-    public string ModelDescription { get; private set; }
-    public AssetStatus Status { get; private set; }
-    public AssetCategory Category { get; private set; }
+    public string ModelDescription { get; private set; } = string.Empty;
+    public AssetStatus Status { get; private set; } = AssetStatus.Active;
+    public AssetCategory Category { get; private set; } = AssetCategory.Student;
     public DateOnly PurchaseDate { get; private set; }
     public string PurchaseDocument { get; private set; } = string.Empty;
     public decimal PurchaseCost { get; private set; }
@@ -47,6 +52,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     public IReadOnlyList<Allocation> Allocations => _allocations.AsReadOnly();
     public IReadOnlyList<Location> Locations => _locations.AsReadOnly();
     public IReadOnlyList<Sighting> Sightings => _sightings.AsReadOnly();
+    public IReadOnlyList<Note> Notes => _notes.AsReadOnly();
 
     public Allocation? CurrentAllocation => 
         _allocations
@@ -144,8 +150,12 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     {
         bool updatedProperty = false;
 
+        List<string> messages = new();
+
         if (!string.IsNullOrWhiteSpace(modelNumber))
         {
+            messages.Add($"{nameof(ModelNumber)} changed from {ModelNumber} to {modelNumber}");
+
             ModelNumber = modelNumber;
 
             updatedProperty = true;
@@ -153,6 +163,8 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
 
         if (!string.IsNullOrWhiteSpace(description))
         {
+            messages.Add($"{nameof(ModelDescription)} changed from {ModelDescription} to {description}");
+
             ModelDescription = description;
 
             updatedProperty = true;
@@ -160,6 +172,8 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
 
         if (!string.IsNullOrWhiteSpace(sapEquipmentNumber))
         {
+            messages.Add($"{nameof(SapEquipmentNumber)} changed from {SapEquipmentNumber} to {sapEquipmentNumber}");
+
             SapEquipmentNumber = sapEquipmentNumber;
 
             updatedProperty = true;
@@ -167,6 +181,8 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
 
         if (!string.IsNullOrWhiteSpace(purchaseDocument))
         {
+            messages.Add($"{nameof(purchaseDocument)} changed from {PurchaseDocument} to {purchaseDocument}");
+            
             PurchaseDocument = purchaseDocument;
 
             updatedProperty = true;
@@ -174,6 +190,8 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
 
         if (purchaseCost > 0m)
         {
+            messages.Add($"{nameof(PurchaseCost)} changed from {PurchaseCost} to {purchaseCost}");
+
             PurchaseCost = purchaseCost;
 
             updatedProperty = true;
@@ -181,6 +199,8 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
 
         if (warrantyEndDate > DateOnly.MinValue)
         {
+            messages.Add($"{nameof(WarrantyEndDate)} changed from {WarrantyEndDate} to {warrantyEndDate}");
+
             WarrantyEndDate = warrantyEndDate;
 
             updatedProperty = true;
@@ -191,6 +211,13 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
             return Result.Failure(AssetErrors.UpdateNoChangeDetected);
         }
 
+        Result<Note> note = Note.Create(Id, string.Join(Environment.NewLine, messages));
+
+        if (note.IsFailure)
+            return Result.Failure(note.Error);
+
+        _notes.Add(note.Value);
+
         return Result.Success();
     }
 
@@ -198,6 +225,11 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     {
         if (Category.Equals(category))
             return Result.Failure(AssetErrors.UpdateCategoryNoChange);
+
+        Result<Note> note = Note.Create(Id, $"{nameof(Category)} changed from {Category} to {category}");
+
+        if (note.IsFailure)
+            return Result.Failure(note.Error);
 
         Category = category;
 
@@ -212,6 +244,11 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
         if (Status.Equals(AssetStatus.Disposed) && !status.Equals(AssetStatus.Disposed))
             return Result.Failure(AssetErrors.UpdateStatusReactivateDisposedAsset);
 
+        Result<Note> note = Note.Create(Id, $"{nameof(Status)} changed from {Status} to {status}");
+
+        if (note.IsFailure)
+            return Result.Failure(note.Error);
+
         Status = status;
 
         return Result.Success();
@@ -220,6 +257,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     public void AddAllocation(Allocation allocation) => _allocations.Add(allocation);
     public void AddLocation(Location location) => _locations.Add(location);
     public void AddSighting(Sighting sighting) => _sightings.Add(sighting);
+    public void AddNote(Note note) => _notes.Add(note);
 
     public void Delete() => IsDeleted = true;
 }

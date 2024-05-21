@@ -13,7 +13,6 @@ using Primitives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Constellation.Core.Errors.DomainErrors.Families;
 
 public class Student : AggregateRoot
 {
@@ -51,8 +50,6 @@ public class Student : AggregateRoot
         MSTeamOperations = new List<StudentMSTeamOperation>();
 
         Absences = new List<Absence>();
-        PartialAbsences = new List<StudentPartialAbsence>();
-        WholeAbsences = new List<StudentWholeAbsence>();
     }
 
     public string StudentId { get; set; }
@@ -82,8 +79,6 @@ public class Student : AggregateRoot
     public ICollection<StudentAdobeConnectOperation> AdobeConnectOperations { get; set; }
     public ICollection<StudentMSTeamOperation> MSTeamOperations { get; set; }
     public ICollection<Absence> Absences { get; set; }
-    public ICollection<StudentPartialAbsence> PartialAbsences { get; set; }
-    public ICollection<StudentWholeAbsence> WholeAbsences { get; set; }
     public IReadOnlyCollection<AbsenceConfiguration> AbsenceConfigurations => _absenceConfigurations;
 
     public static Student Create(
@@ -95,7 +90,7 @@ public class Student : AggregateRoot
         string schoolCode,
         string gender)
     {
-        Student entry = new Student(
+        Student entry = new(
             studentId,
             firstName,
             lastName,

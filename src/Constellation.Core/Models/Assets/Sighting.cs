@@ -1,10 +1,12 @@
-﻿namespace Constellation.Core.Models.Assets;
+﻿#nullable enable
+namespace Constellation.Core.Models.Assets;
 
 using Identifiers;
 using System;
 
 public sealed record Sighting
 {
+    // Required by EF Core
     private Sighting() { }
 
     private Sighting(
@@ -19,7 +21,7 @@ public sealed record Sighting
         Note = note;
     }
 
-    public SightingId Id { get; set; } = new();
+    public SightingId Id { get; private set; } = new();
     public AssetId AssetId { get; private set; }
     public string SightedBy { get; private set; } = string.Empty;
     public DateTime SightedAt { get; private set; }
