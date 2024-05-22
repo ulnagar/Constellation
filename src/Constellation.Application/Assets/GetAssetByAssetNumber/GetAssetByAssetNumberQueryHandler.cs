@@ -82,7 +82,8 @@ internal sealed class GetAssetByAssetNumberQueryHandler
             notes.Add(new(
                 note.Id,
                 note.Message,
-                note.CreatedBy));
+                note.CreatedBy,
+                note.CreatedAt));
         }
 
 

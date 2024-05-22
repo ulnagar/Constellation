@@ -1,7 +1,10 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
+using Application.Assets.ImportAssetsFromFile;
 using Application.Interfaces.Repositories;
 using BaseModels;
+using Constellation.Application.Training.Modules.ProcessTrainingImportFile;
+using Constellation.Presentation.Server.Helpers.Validation;
 using Core.Abstractions.Clock;
 using Core.Models;
 using Core.Models.Assets;
@@ -12,6 +15,8 @@ using Core.Models.Students;
 using Core.Models.Students.Repositories;
 using Core.Shared;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 public class IndexModel : BasePageModel
 {
@@ -37,6 +42,10 @@ public class IndexModel : BasePageModel
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
     }
+
+    [BindProperty]
+    [AllowExtensions(FileExtensions: "xlsx", ErrorMessage = "You can only upload XLSX files")]
+    public IFormFile UploadFile { get; set; }
 
     public string Message { get; set; } = string.Empty;
 
@@ -116,5 +125,36 @@ public class IndexModel : BasePageModel
 
         _assetRepository.Insert(asset.Value);
         await _unitOfWork.CompleteAsync();
+    }
+
+    public async Task OnPostImportFile()
+    {
+        if (UploadFile is not null)
+        {
+            try
+            {
+                await using MemoryStream target = new();
+                await UploadFile.CopyToAsync(target);
+
+                Result request = await _mediator.Send(new ImportAssetsFromFileCommand(target));
+
+                if (request.IsFailure)
+                {
+                    Error = new ErrorDisplay
+                    {
+                        Error = request.Error,
+                        RedirectPath = null
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Error = new ErrorDisplay
+                {
+                    Error = new(ex.Source, ex.Message),
+                    RedirectPath = null
+                };
+            }
+        }
     }
 }

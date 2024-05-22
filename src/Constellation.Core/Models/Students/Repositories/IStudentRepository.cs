@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 public interface IStudentRepository
 {
+    Task<List<Student>> GetAll(CancellationToken cancellationToken = default);
     Task<Student?> GetById(string studentId, CancellationToken cancellationToken = default);
     Task<Student?> GetWithSchoolById(string studentId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentStudentsWithSchool(CancellationToken cancellationToken = default);

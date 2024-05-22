@@ -1,4 +1,60 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Equipment.Pages.Assets.IndexModel
-@{
-}
+@using Constellation.Presentation.Server.Areas.Equipment.Pages.Assets
+
+<h2>Assets</h2>
+
+<div class="page-menu">
+    @{
+        var all_style = "btn-outline-secondary";
+        var active_style = all_style;
+        var disposed_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case IndexModel.FilterEnum.All:
+                all_style = "btn-primary";
+                break;
+            case IndexModel.FilterEnum.Active:
+                active_style = "btn-primary";
+                break;
+            case IndexModel.FilterEnum.Disposed:
+                disposed_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-route-filter="@IndexModel.FilterEnum.All" class="btn @all_style">All</a>
+        <a asp-route-filter="@IndexModel.FilterEnum.Active" class="btn @active_style">Active</a>
+        <a asp-route-filter="@IndexModel.FilterEnum.Disposed" class="btn @disposed_style">Disposed</a>
+    </div>
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th>Asset Number</th>
+            <th>Serial Number</th>
+            <th>Model</th>
+            <th>Status</th>
+            <th>User</th>
+            <th>Location</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Assets.OrderBy(item => item.AssetNumber))
+        {
+            <tr>
+                <td>@item.AssetNumber</td>
+                <td>@item.SerialNumber</td>
+                <td>@item.ModelDescription</td>
+                <td>@item.Status</td>
+                <td>@item.AllocatedTo</td>
+                <td>@item.Location</td>
+            </tr>
+        }
+    </tbody>
+</table>

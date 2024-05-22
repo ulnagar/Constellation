@@ -43,7 +43,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     public AssetId Id { get; private set; } = new();
     public AssetNumber AssetNumber { get; private set; } = AssetNumber.Empty;
     public string SerialNumber { get; private set; } = string.Empty;
-    public string SapEquipmentNumber { get; private set; } = string.Empty;
+    public string? SapEquipmentNumber { get; private set; }
     public string ModelNumber { get; private set; } = string.Empty;
     public string ModelDescription { get; private set; } = string.Empty;
     public AssetStatus Status { get; private set; } = AssetStatus.Active;
@@ -82,7 +82,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     public static async Task<Result<Asset>> Create(
         AssetNumber assetNumber,
         string serialNumber,
-        string sapEquipmentNumber,
+        string? sapEquipmentNumber,
         string modelNumber,
         string description,
         AssetCategory category,
@@ -108,7 +108,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
             description,
             category)
         {
-            SapEquipmentNumber = sapEquipmentNumber,
+            SapEquipmentNumber = string.IsNullOrWhiteSpace(sapEquipmentNumber) ? null : sapEquipmentNumber,
             ModelNumber = modelNumber,
             PurchaseDocument = purchaseDocument,
             PurchaseCost = purchaseCost,

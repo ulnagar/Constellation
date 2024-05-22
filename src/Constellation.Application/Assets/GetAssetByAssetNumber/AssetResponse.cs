@@ -64,5 +64,6 @@ public sealed record AssetResponse(
     public sealed record NoteDetails(
         NoteId NoteId,
         string Message,
-        string CreatedBy);
+        string CreatedBy,
+        DateTime CreatedAt);
 }

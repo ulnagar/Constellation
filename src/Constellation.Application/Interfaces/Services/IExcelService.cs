@@ -3,6 +3,7 @@
 using Absences.ExportUnexplainedPartialAbsencesReport;
 using Attendance.GetAttendanceDataFromSentral;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
+using Constellation.Application.Assets.ImportAssetsFromFile;
 using Constellation.Application.Attendance.GenerateAttendanceReportForPeriod;
 using Constellation.Application.Awards.ExportAwardNominations;
 using Constellation.Application.Compliance.GetWellbeingReportFromSentral;
@@ -53,4 +54,5 @@ public interface IExcelService
     Task<MemoryStream> CreateTrainingModuleOverallReportFile(List<ModuleDetails> moduleDetails, List<StaffStatus> staffStatuses, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateWorkFlowReport(List<CaseReportItem> records, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateSchoolContactExport(List<SchoolWithContactsResponse> records, CancellationToken cancellationToken = default);
+    Task<List<ImportAssetDto>> ImportAssetsFromFile(MemoryStream stream, CancellationToken cancellationToken = default);
 }

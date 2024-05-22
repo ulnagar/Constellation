@@ -129,15 +129,18 @@
                 <tbody>
                     @foreach (var entry in Model.Asset.Allocations.OrderByDescending(item => item.AllocationDate))
                     {
+                        var returnDateSort = entry.ReturnDate != DateOnly.MinValue
+                            ? entry.ReturnDate.ToString("yyyy-MM-dd")
+                            : "9999-99-99";
+
+                        var returnDateDisplay = entry.ReturnDate != DateOnly.MinValue
+                            ? entry.ReturnDate.ToShortDateString()
+                            : string.Empty;
+
                         <tr>
                             <td>@entry.UserName</td>
                             <td>@entry.AllocationDate</td>
-                            <td>
-                                @if (entry.ReturnDate != DateOnly.MinValue)
-                                {
-                                    <span>@entry.ReturnDate</span>
-                                }
-                            </td>
+                            <td data-order="@returnDateSort">@returnDateDisplay</td>
                         </tr>
                     }
                 </tbody>
@@ -159,16 +162,19 @@
                 <tbody>
                     @foreach (var entry in Model.Asset.Locations.OrderByDescending(item => item.ArrivalDate))
                     {
+                        var departureDateSort = entry.DepartureDate != DateOnly.MinValue
+                            ? entry.DepartureDate.ToString("yyyy-MM-dd")
+                            : "9999-99-99";
+
+                        var departureDateDisplay = entry.DepartureDate != DateOnly.MinValue
+                            ? entry.DepartureDate.ToShortDateString()
+                            : string.Empty;
+
                         <tr>
                             <td>@entry.Category</td>
                             <td>@entry.Site @entry.Room</td>
-                            <td>@entry.ArrivalDate</td>
-                            <td>
-                                @if (entry.DepartureDate != DateOnly.MinValue)
-                                {
-                                    <span>@entry.DepartureDate</span>
-                                }
-                            </td>
+                            <td data-order="@entry.ArrivalDate.ToString("yyyy-MM-dd")">@entry.ArrivalDate</td>
+                            <td data-order="@departureDateSort">@departureDateDisplay</td>
                         </tr>
                     }
                 </tbody>
@@ -178,16 +184,48 @@
         <div id="sightings" class="tab-pane">
             <h3>Sighting History</h3>
             
-            <table>
-
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>By</th>
+                        <th>On</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.Asset.Sightings.OrderByDescending(item => item.SightedAt))
+                    {
+                        <tr>
+                            <td>@entry.SightedBy</td>
+                            <td data-order="@entry.SightedAt.ToString("yyyy-MM-dd HH:mm")">@entry.SightedAt</td>
+                            <td>@entry.Note</td>
+                        </tr>
+                    }
+                </tbody>
             </table>
         </div>
         
         <div id="notes" class="tab-pane">
             <h3>Notes</h3>
             
-            <table>
-
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Note</th>
+                        <th>By</th>
+                        <th>On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.Asset.Notes.OrderByDescending(item => item.CreatedAt))
+                    {
+                        <tr>
+                            <td>@entry.Message</td>
+                            <td>@entry.CreatedBy</td>
+                            <td data-order="@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")">@entry.CreatedAt</td>
+                        </tr>
+                    }
+                </tbody>
             </table>
         </div>
     </div>

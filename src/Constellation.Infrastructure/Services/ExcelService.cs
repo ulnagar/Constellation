@@ -2,6 +2,7 @@
 
 using Application.Absences.ExportUnexplainedPartialAbsencesReport;
 using Application.Absences.GetAbsencesWithFilterForReport;
+using Application.Assets.ImportAssetsFromFile;
 using Application.Attendance.GenerateAttendanceReportForPeriod;
 using Application.Attendance.GetAttendanceDataFromSentral;
 using Application.Awards.ExportAwardNominations;
@@ -60,6 +61,44 @@ public class ExcelService : IExcelService
         IDateTimeProvider dateTime)
     {
         _dateTime = dateTime;
+    }
+
+    public Task<List<ImportAssetDto>> ImportAssetsFromFile(
+        MemoryStream stream,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new(stream);
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets[0];
+
+        int numRows = worksheet.Dimension.Rows;
+
+        List<ImportAssetDto> assets = new();
+
+        for (int row = 2; row <= numRows; row++)
+        {
+            ImportAssetDto entry = new(
+                row,
+                worksheet.Cells[row, 1].GetCellValue<string>(),
+                worksheet.Cells[row, 2].GetCellValue<string>(),
+                worksheet.Cells[row, 3].GetCellValue<string>(),
+                worksheet.Cells[row, 4].GetCellValue<string>(),
+                worksheet.Cells[row, 5].GetCellValue<string>(),
+                worksheet.Cells[row, 6].GetCellValue<string>(),
+                worksheet.Cells[row, 7].GetCellValue<string>(),
+                DateOnly.FromDateTime(worksheet.Cells[row, 8].GetCellValue<DateTime>()),
+                worksheet.Cells[row, 9].GetCellValue<decimal>(),
+                DateOnly.FromDateTime(worksheet.Cells[row, 10].GetCellValue<DateTime>()),
+                worksheet.Cells[row, 11].GetCellValue<string>(),
+                worksheet.Cells[row, 12].GetCellValue<string>(),
+                worksheet.Cells[row, 13].GetCellValue<string>(),
+                worksheet.Cells[row, 14].GetCellValue<string>(),
+                worksheet.Cells[row, 17].GetCellValue<string>());
+
+            assets.Add(entry);
+        }
+
+        excel.Dispose();
+        return Task.FromResult(assets);
     }
 
     public async Task<MemoryStream> CreatePTOFile(

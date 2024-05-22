@@ -26,6 +26,12 @@ public class StudentRepository : IStudentRepository
         _dateTime = dateTime;
     }
 
+    public async Task<List<Student>> GetAll(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .ToListAsync(cancellationToken);
+
     public async Task<Student?> GetById(
         string StudentId,
         CancellationToken cancellationToken = default) =>
