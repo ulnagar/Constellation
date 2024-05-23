@@ -41,9 +41,9 @@ internal sealed class GetAllAssetsQueryHandler
             string locationName = location?.Category switch
             {
                 _ when location is null => string.Empty,
-                _ when location.Category.Equals(LocationCategory.CoordinatingOffice) => $"{location.Category.Name} - {location.Room}",
-                _ when location.Category.Equals(LocationCategory.PrivateResidence) => $"{location.Category.Name}",
-                _ => $"{location.Category.Name} - {location.Site}"
+                _ when location.Category.Equals(LocationCategory.CoordinatingOffice) => $"{location.Room}",
+                _ when location.Category.Equals(LocationCategory.PublicSchool) => $"{location.Site}",
+                _ => string.Empty
             };
 
             response.Add(new(
@@ -55,6 +55,7 @@ internal sealed class GetAllAssetsQueryHandler
                 allocation?.Id,
                 allocation?.ResponsibleOfficer,
                 location?.Id,
+                location?.Category.Name ?? string.Empty,
                 locationName));
         }
 

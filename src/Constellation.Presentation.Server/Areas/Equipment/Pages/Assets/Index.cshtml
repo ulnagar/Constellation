@@ -1,6 +1,8 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Equipment.Pages.Assets.IndexModel
+@using Constellation.Application.Extensions
 @using Constellation.Presentation.Server.Areas.Equipment.Pages.Assets
+@using LinqKit
 
 <h2>Assets</h2>
 
@@ -42,6 +44,7 @@
             <th>Status</th>
             <th>User</th>
             <th>Location</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -49,11 +52,38 @@
         {
             <tr>
                 <td>@item.AssetNumber</td>
-                <td>@item.SerialNumber</td>
+                <td data-order="@item.SerialNumber" data-search="@item.SerialNumber">
+                    @if (item.SerialNumber.Length > 10)
+                    {
+                        <span>@item.SerialNumber[..10] ...</span>
+                    }
+                    else
+                    {
+                        <span>@item.SerialNumber</span>
+                    }
+                </td>
                 <td>@item.ModelDescription</td>
                 <td>@item.Status</td>
                 <td>@item.AllocatedTo</td>
-                <td>@item.Location</td>
+                <td>
+                    @if (!string.IsNullOrWhiteSpace(item.LocationType))
+                    {
+                        @item.LocationType<br />
+                        @if (item.LocationName.Contains(','))
+                        {
+                            var lines = item.LocationName.Split(',');
+                            var combined = string.Join("<br />", lines.Select(line => line.Trim()));
+                            <span class="text-nowrap">@Html.Raw(combined)</span>
+                        }
+                        else
+                        {
+                            @item.LocationName
+                        }
+                    }
+                </td>
+                <td>
+                    <a asp-page="/Assets/Details" asp-route-assetNumber="@item.AssetNumber" asp-area="Equipment" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
             </tr>
         }
     </tbody>

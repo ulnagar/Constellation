@@ -13,4 +13,5 @@ public sealed record AssetListItem(
     AllocationId? AllocationId,
     string AllocatedTo,
     LocationId? LocationId,
-    string Location);
+    string LocationType,
+    string LocationName);

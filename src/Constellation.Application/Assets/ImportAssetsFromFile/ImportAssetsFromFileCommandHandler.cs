@@ -1,4 +1,5 @@
-﻿namespace Constellation.Application.Assets.ImportAssetsFromFile;
+﻿#nullable enable
+namespace Constellation.Application.Assets.ImportAssetsFromFile;
 
 using Abstractions.Messaging;
 using Core.Abstractions.Clock;
@@ -126,7 +127,19 @@ internal sealed class ImportAssetsFromFileCommandHandler
                 continue;
             }
 
-            School locationSchool = schools.FirstOrDefault(entry => entry.Name == importAsset.LocationSite);
+            Result statusUpdate = asset.Value.UpdateStatus(status);
+
+            if (asset.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(ImportAssetDto), importAsset, true)
+                    .ForContext(nameof(Error), statusUpdate.Error, true)
+                    .Warning("Failed to import Asset");
+
+                continue;
+            }
+
+            School? locationSchool = schools.FirstOrDefault(entry => entry.Name == importAsset.LocationSite);
 
             if (locationSchool is null && locationCategory.Equals(LocationCategory.PublicSchool))
             {
@@ -147,16 +160,16 @@ internal sealed class ImportAssetsFromFileCommandHandler
                 _ when locationCategory.Equals(LocationCategory.PrivateResidence) =>
                     Location.CreatePrivateResidenceLocationRecord(asset.Value.Id, true, _dateTime.Today),
                 _ when locationCategory.Equals(LocationCategory.PublicSchool) =>
-                    Location.CreatePublicSchoolLocationRecord(asset.Value.Id, importAsset.LocationSite ?? locationSchool.Name, locationSchool.Code, true, _dateTime.Today)
+                    Location.CreatePublicSchoolLocationRecord(asset.Value.Id, importAsset.LocationSite ?? locationSchool!.Name, locationSchool!.Code, true, _dateTime.Today)
             };
                 
             asset.Value.AddLocation(location);
 
             if (!string.IsNullOrWhiteSpace(importAsset.ResponsibleOfficer))
             {
-                School allocationSchool = schools.FirstOrDefault(entry => entry.Code == importAsset.ResponsibleOfficer);
-                Staff staffMember = staff.FirstOrDefault(entry => entry.StaffId == importAsset.ResponsibleOfficer);
-                Student student = students.FirstOrDefault(entry => entry.StudentId == importAsset.ResponsibleOfficer);
+                School? allocationSchool = schools.FirstOrDefault(entry => entry.Code == importAsset.ResponsibleOfficer);
+                Staff? staffMember = staff.FirstOrDefault(entry => entry.StaffId == importAsset.ResponsibleOfficer);
+                Student? student = students.FirstOrDefault(entry => entry.StudentId == importAsset.ResponsibleOfficer);
 
                 if (allocationSchool is not null)
                 {
@@ -234,6 +247,25 @@ internal sealed class ImportAssetsFromFileCommandHandler
             }
 
             asset.Value.AddNote(note.Value);
+
+            if (!string.IsNullOrWhiteSpace(importAsset.Notes))
+            {
+                Result<Note> oldNote = Note.Create(
+                    asset.Value.Id,
+                    importAsset.Notes);
+
+                if (oldNote.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(ImportAssetDto), importAsset, true)
+                        .ForContext(nameof(Error), oldNote.Error, true)
+                        .Warning("Failed to import Asset");
+
+                    continue;
+                }
+
+                asset.Value.AddNote(oldNote.Value);
+            }
 
             _assetRepository.Insert(asset.Value);
             await _unitOfWork.CompleteAsync(cancellationToken);
