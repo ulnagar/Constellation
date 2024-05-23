@@ -38,7 +38,12 @@
             <dd>@Model.Asset.AllocatedTo</dd>
             
             <dt>Allocated On</dt>
-            <dd>@Model.Asset.AllocatedOn</dd>
+            <dd>
+                @if (Model.Asset.AllocatedOn != DateOnly.MinValue)
+                {
+                    <span>@Model.Asset.AllocatedOn</span>
+                }
+            </dd>
         </dl>
         
         <h3 class="mt-2">Current Location Details</h3>
@@ -53,7 +58,12 @@
             <dd>@Model.Asset.Room</dd>
             
             <dt>Arrival Date</dt>
-            <dd>@Model.Asset.ArrivalDate</dd>
+            <dd>
+                @if (Model.Asset.ArrivalDate != DateOnly.MinValue)
+                {
+                    <span>@Model.Asset.ArrivalDate</span>
+                }
+            </dd>
         </dl>
     </div>
 </div>
@@ -69,7 +79,12 @@
             <dd>@Model.Asset.PurchaseDocument</dd>
     
             <dt>Purchase Cost</dt>
-            <dd>@Model.Asset.PurchaseCost.ToString("C")</dd>
+            <dd>
+                @if (Model.Asset.PurchaseCost > 0)
+                {
+                    @Model.Asset.PurchaseCost.ToString("C")
+                }
+            </dd>
         </dl>
     </div>
     
@@ -80,7 +95,12 @@
             <dd>@Model.Asset.SightedBy</dd>
             
             <dt>Sighted At</dt>
-            <dd>@Model.Asset.SightedAt</dd>
+            <dd>
+                @if (Model.Asset.SightedAt != DateTime.MinValue)
+                {
+                    <span>@Model.Asset.SightedAt</span>
+                }
+            </dd>
             
             <dt>Notes</dt>
             <dd>@Model.Asset.SightingNotes</dd>
