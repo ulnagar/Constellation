@@ -47,8 +47,8 @@ public class RollModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public string Mode { get; set; }
 
-    [BindProperty]
-    public List<TutorialRollStudentResponse> Students { get; set; }
+    [BindProperty] 
+    public List<TutorialRollStudentResponse> Students { get; set; } = new();
 
     public TutorialRollDetailResponse Roll { get; set; }
 
@@ -74,27 +74,23 @@ public class RollModel : BasePageModel
 
     public async Task<IActionResult> OnPostSubmit()
     {
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, TutorialId, AuthPolicies.CanSubmitGroupTutorialRolls);
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, TutorialId, AuthPolicies.CanSubmitGroupTutorialRolls);
 
         if (!isAuthorised.Succeeded)
-        {
             return ShowError(DomainErrors.Permissions.Unauthorised);
-        }
 
-        var username = _currentUserService.UserName;
+        string emailAddress = _currentUserService.EmailAddress;
 
-        var studentData = Students.ToDictionary(k => k.StudentId, k => k.Present);
+        Dictionary<string, bool> studentData = Students.ToDictionary(k => k.StudentId, k => k.Present);
 
-        var result = await _mediator.Send(new SubmitRollCommand(
+        Result result = await _mediator.Send(new SubmitRollCommand(
             GroupTutorialId.FromValue(TutorialId),
             TutorialRollId.FromValue(RollId),
-            username,
+            emailAddress,
             studentData));
 
         if (result.IsFailure)
-        {
             return ShowError(result.Error);
-        }
 
         return RedirectToPage("Details", new { Id = TutorialId });
     }
@@ -154,7 +150,7 @@ public class RollModel : BasePageModel
             Error = new ErrorDisplay
             {
                 Error = rollResult.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/GroupTutorials/Tutorials/Roll", values: new { area = "Subject", TutorialId, RollId, Mode })
+                RedirectPath = _linkGenerator.GetPathByPage("/GroupTutorials/Tutorials/Index", values: new { area = "Subject" })
             };
 
             Roll = new(

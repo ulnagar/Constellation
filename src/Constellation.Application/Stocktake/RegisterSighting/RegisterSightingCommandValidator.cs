@@ -2,7 +2,7 @@
 
 using FluentValidation;
 
-internal sealed class RegisterSightingCommandValidator : AbstractValidator<RegisterSightingCommand>
+public sealed class RegisterSightingCommandValidator : AbstractValidator<RegisterSightingCommand>
 {
     public RegisterSightingCommandValidator()
     {
