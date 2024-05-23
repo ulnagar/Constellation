@@ -27,27 +27,24 @@ public class BaseAPIController : ControllerBase
         string userId = userIdClaim.Value;
 
         return await UserManager.FindByIdAsync(userId);
-
     }
 
     protected async Task<bool> IsUserAdmin(AppUser user)
     {
         if (User.Identity is null || !User.Identity.IsAuthenticated) return false;
-        
-        IList<string> roles = await UserManager.GetRolesAsync(user);
-        
-        return roles.Contains(AuthRoles.Admin);
+
+        return await UserManager.IsInRoleAsync(user, AuthRoles.Admin);
     }
 
     protected async Task<List<string>> GetCurrentUserSchools()
     {
-        List<string> schoolCodes = new List<string>();
+        List<string> schoolCodes = new();
 
         if (User.Identity is null || !User.Identity.IsAuthenticated) return schoolCodes;
         
         List<Claim> schoolCodeClaims = User.FindAll(AuthClaimType.SchoolCode).ToList();
 
-        if (!schoolCodes.Any())
+        if (schoolCodeClaims.Count == 0) // If schoolCodes is empty
         {
             AppUser user = await GetCurrentUser();
 
@@ -56,7 +53,7 @@ public class BaseAPIController : ControllerBase
             schoolCodeClaims = claims.Where(claim => claim.Type == "Schools").ToList();
         }
 
-        if (!schoolCodeClaims.Any())
+        if (schoolCodeClaims.Count == 0) // If schoolCodeClaims is still empty
             return schoolCodes;
 
         foreach (Claim claim in schoolCodeClaims)
