@@ -175,11 +175,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var roll in Model.Tutorial.Rolls.OrderBy(roll => roll.Date))
+                    @foreach (var roll in Model.Tutorial.Rolls.OrderByDescending(roll => roll.Date))
                     {
                         <tr>
                             <td></td>
-                            <td>@roll.Date.ToLongDateString()</td>
+                            <td data-order="@roll.Date.ToString("yyyy-MM-dd")">@roll.Date.ToLongDateString()</td>
                             <td>@(roll.Completed ? "Submitted" : "Unsubmitted")</td>
                             <td>@roll.PresentStudents / @roll.TotalStudents</td>
                             <td> 

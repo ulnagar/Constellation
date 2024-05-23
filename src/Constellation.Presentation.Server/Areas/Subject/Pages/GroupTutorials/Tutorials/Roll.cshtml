@@ -72,54 +72,57 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @for (var i = 0; i < Model.Students.Count(); i++)
+                    @if (Model.Roll.Students.Count != 0)
                     {
-                        var details = Model.Roll.Students.First(entry => entry.StudentId == Model.Students[i].StudentId);
+                        @for (var i = 0; i < Model.Students.Count(); i++)
+                        {
+                            var details = Model.Roll.Students.FirstOrDefault(entry => entry.StudentId == Model.Students[i].StudentId);
 
-                        <tr>
-                            <input type="hidden" asp-for="Students[i].StudentId"/>
-                            <td>
-                                @if (details.Enrolled)
-                                {
-                                    <span class="glyphicon glyphicon-lock"></span>
-                                }
-                                else
-                                {
-                                    <span class="glyphicon glyphicon-link"></span>
-                                }
-                                @details.Name (@details.Grade)
-                            </td>
-                            <td>
-                                @if (Model.Mode == "Edit")
-                                {
-                                    <input type="checkbox" asp-for="Students[i].Present" class="checkbox-toggle"/>
-                                }
-                                else if (Model.Roll.Status != TutorialRollStatus.Submitted)
-                                {
-                                    <span class="glyphicon glyphicon-minus glyph-color-orange"></span>
-                                }
-                                else 
-                                {
-                                    @if (details.Present)
+                            <tr>
+                                <input type="hidden" asp-for="Students[i].StudentId"/>
+                                <td>
+                                    @if (details.Enrolled)
                                     {
-                                        <span class="glyphicon glyphicon-check glyph-color-green"></span>
+                                        <span class="glyphicon glyphicon-lock"></span>
                                     }
                                     else
                                     {
-                                        <span class="glyphicon glyphicon-remove glyph-color-red"></span>
+                                        <span class="glyphicon glyphicon-link"></span>
                                     }
-                                }
-                            </td>
-                            <td>
-                                @if (canSubmitTest.Succeeded &&
-                                     Model.Roll.Status == Constellation.Core.Enums.TutorialRollStatus.Unsubmitted &&
-                                     Model.Mode == "View" &&
-                                     !details.Enrolled)
-                                {
-                                    <a asp-page-handler="RemoveStudent" asp-route-studentId="@details.StudentId" class="btn btn-sm btn-danger">Remove</a>
-                                }
-                            </td>
-                        </tr>
+                                    @details.Name (@details.Grade)
+                                </td>
+                                <td>
+                                    @if (Model.Mode == "Edit")
+                                    {
+                                        <input type="checkbox" asp-for="Students[i].Present" class="checkbox-toggle"/>
+                                    }
+                                    else if (Model.Roll.Status != TutorialRollStatus.Submitted)
+                                    {
+                                        <span class="glyphicon glyphicon-minus glyph-color-orange"></span>
+                                    }
+                                    else
+                                    {
+                                        @if (details.Present)
+                                        {
+                                            <span class="glyphicon glyphicon-check glyph-color-green"></span>
+                                        }
+                                        else
+                                        {
+                                            <span class="glyphicon glyphicon-remove glyph-color-red"></span>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    @if (canSubmitTest.Succeeded &&
+                                         Model.Roll.Status == Constellation.Core.Enums.TutorialRollStatus.Unsubmitted &&
+                                         Model.Mode == "View" &&
+                                         !details.Enrolled)
+                                    {
+                                        <a asp-page-handler="RemoveStudent" asp-route-studentId="@details.StudentId" class="btn btn-sm btn-danger">Remove</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
                     }
                     </tbody>
                 </table>
