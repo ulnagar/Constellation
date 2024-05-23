@@ -30,11 +30,6 @@
             <span><span class="font-weight-bold">Daily Affirmation:</span> @Model.Message</span>
         </div>
     }
-
-    @*    <div class="alert alert-info text-left mt-3" role="alert">
-        <h4 class="alert-heading">Stocktake</h4>
-        <p>Please take the time to register your Aurora College equipment in the current stocktake. Click <a class="alert-link" asp-area="Equipment" asp-controller="Stocktake" asp-action="StaffDashboard" asp-route-id="256d068a-d8cc-4220-ec2b-08da5fb7be30">here</a> to view the stocktake details, or use the stocktake button in the Quick Links section below.</p>
-    </div>*@
 </div>
 
 <div class="quick-links">
@@ -47,8 +42,11 @@
     }
 
     <a class="btn btn-success btn-block" asp-page="/Training/Staff/Index" asp-route-staffId="@Model.StaffId" asp-area="SchoolAdmin">Mandatory Training <span class="badge badge-light">@Model.ExpiringTraining</span><span class="sr-only">training certificates expiring soon</span></a>
-
-    @*<a class="btn btn-warning btn-block" asp-area="Equipment" asp-controller="Stocktake" asp-action="StaffDashboard" asp-route-id="256d068a-d8cc-4220-ec2b-08da5fb7be30">Stocktake</a>*@
+    
+    @foreach (var stocktake in Model.ActiveStocktakeEvents)
+    {
+        <a class="btn btn-warning btn-block" asp-area="Equipment" asp-controller="Stocktake" asp-action="StaffDashboard" asp-route-id="@stocktake.Id">@stocktake.Name</a>
+    }
 
     @foreach (var entry in @Model.Classes.OrderBy(entry => entry.Key))
     {
@@ -65,6 +63,18 @@
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
+    
+    @if (Model.ActiveStocktakeEvents.Count > 0)
+    {
+        <div class="alert alert-info text-left mt-3" role="alert">
+            <h4 class="alert-heading">Stocktake</h4>
+            <p>Please take the time to register your Aurora College equipment in the current stocktake.</p>
+            @foreach (var stocktake in Model.ActiveStocktakeEvents)
+            {
+                <a class="alert-link" asp-area="Equipment" asp-controller="Stocktake" asp-action="StaffDashboard" asp-route-id="@stocktake.Id">@stocktake.Name</a>
+            }
+        </div>
+    }
     
     <div class="row row-cols-1 row-cols-md-3" id="sortable-cards">
         <vc:show-dashboard-widgets user="@Model.User" />

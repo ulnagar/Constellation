@@ -2,6 +2,7 @@
 namespace Constellation.Presentation.Server.Areas.Home.Pages;
 
 using Application.Affirmations;
+using Application.Stocktake.GetCurrentStocktakeEvents;
 using Application.Training.Modules.GetCountOfExpiringCertificatesForStaffMember;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
@@ -10,6 +11,7 @@ using Constellation.Application.StaffMembers.Models;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using Core.Models.Offerings.Identifiers;
+using Hangfire.States;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +31,7 @@ public class DashboardModel : BasePageModel
     public string StaffId { get; set; } = string.Empty;
 
     public string Message { get; set; } = string.Empty;
+    public IReadOnlyList<StocktakeEventResponse> ActiveStocktakeEvents { get; set; }
 
     public int ExpiringTraining { get; set; } = 0;
 
@@ -56,6 +59,9 @@ public class DashboardModel : BasePageModel
         {
             Message = messageRequest.Value;
         }
+
+        Result<List<StocktakeEventResponse>>? stocktakeEvents = await _mediator.Send(new GetCurrentStocktakeEventsQuery(), cancellationToken);
+        ActiveStocktakeEvents = stocktakeEvents.IsSuccess ? stocktakeEvents.Value : new List<StocktakeEventResponse>();
 
         if (teacherRequest.IsFailure)
         {
