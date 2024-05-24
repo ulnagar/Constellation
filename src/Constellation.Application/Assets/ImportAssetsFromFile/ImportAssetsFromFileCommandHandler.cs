@@ -111,10 +111,10 @@ internal sealed class ImportAssetsFromFileCommandHandler
                 importAsset.ModelNumber ?? string.Empty,
                 importAsset.ModelDescription ?? string.Empty,
                 category,
+                importAsset.PurchaseDate ?? _dateTime.Today,
                 string.Empty,
                 importAsset.PurchaseCost,
                 importAsset.WarrantyEndDate ?? DateOnly.MinValue,
-                _dateTime,
                 _assetRepository);
 
             if (asset.IsFailure)

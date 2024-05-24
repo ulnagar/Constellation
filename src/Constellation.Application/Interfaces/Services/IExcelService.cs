@@ -1,21 +1,21 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
 using Absences.ExportUnexplainedPartialAbsencesReport;
+using Absences.GetAbsencesWithFilterForReport;
+using Assets.ImportAssetsFromFile;
+using Attendance.GenerateAttendanceReportForPeriod;
 using Attendance.GetAttendanceDataFromSentral;
-using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
-using Constellation.Application.Assets.ImportAssetsFromFile;
-using Constellation.Application.Attendance.GenerateAttendanceReportForPeriod;
-using Constellation.Application.Awards.ExportAwardNominations;
-using Constellation.Application.Compliance.GetWellbeingReportFromSentral;
+using Awards.ExportAwardNominations;
+using Compliance.GetWellbeingReportFromSentral;
 using Constellation.Application.Contacts.Models;
-using Constellation.Application.DTOs;
-using Constellation.Application.DTOs.CSV;
-using Constellation.Application.ExternalDataConsistency;
-using Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
-using Constellation.Application.Rollover.ImportStudents;
-using Constellation.Application.Training.Modules.GenerateOverallReport;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Infrastructure.Jobs;
+using Core.Models.Assets;
+using DTOs;
+using DTOs.CSV;
+using ExternalDataConsistency;
+using GroupTutorials.GenerateTutorialAttendanceReport;
+using Rollover.ImportStudents;
 using SchoolContacts.GetContactsBySchool;
 using SciencePracs.GenerateOverdueReport;
 using System;
@@ -24,6 +24,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Training.Models;
+using Training.Modules.GenerateOverallReport;
 using WorkFlows.ExportOpenCaseReport;
 
 public interface IExcelService
@@ -55,4 +56,5 @@ public interface IExcelService
     Task<MemoryStream> CreateWorkFlowReport(List<CaseReportItem> records, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateSchoolContactExport(List<SchoolWithContactsResponse> records, CancellationToken cancellationToken = default);
     Task<List<ImportAssetDto>> ImportAssetsFromFile(MemoryStream stream, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateAssetExportFile(List<Asset> assets, CancellationToken cancellationToken = default);
 }

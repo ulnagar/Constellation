@@ -73,7 +73,12 @@
         <h3>Purchase Details</h3>
         <dl>
             <dt>Purchase Date</dt>
-            <dd>@Model.Asset.PurchaseDate</dd>
+            <dd>
+                @if (Model.Asset.PurchaseDate != DateOnly.MinValue)
+                {
+                    <span>@Model.Asset.PurchaseDate</span>
+                }
+            </dd>
     
             <dt>Purchase Document</dt>
             <dd>@Model.Asset.PurchaseDocument</dd>

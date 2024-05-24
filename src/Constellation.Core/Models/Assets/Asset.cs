@@ -1,6 +1,4 @@
 ﻿#nullable enable
-using Constellation.Core.Models.Assets.Repositories;
-
 namespace Constellation.Core.Models.Assets;
 
 using Abstractions.Clock;
@@ -9,6 +7,7 @@ using Errors;
 using Events;
 using Identifiers;
 using Primitives;
+using Repositories;
 using Shared;
 using System;
 using System.Collections.Generic;
@@ -114,6 +113,47 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
             PurchaseCost = purchaseCost,
             WarrantyEndDate = warrantyEndDate,
             PurchaseDate = dateTime.Today,
+            Status = AssetStatus.Active
+        };
+
+        asset.RaiseDomainEvent(new AssetRegisteredDomainEvent(new(), asset.Id, asset.AssetNumber));
+
+        return asset;
+    }
+
+    public static async Task<Result<Asset>> Create(
+        AssetNumber assetNumber,
+        string serialNumber,
+        string? sapEquipmentNumber,
+        string modelNumber,
+        string description,
+        AssetCategory category,
+        DateOnly purchaseDate,
+        string purchaseDocument,
+        decimal purchaseCost,
+        DateOnly warrantyEndDate,
+        IAssetRepository repository)
+    {
+        if (string.IsNullOrWhiteSpace(serialNumber))
+            return Result.Failure<Asset>(AssetErrors.SerialNumberEmpty);
+
+        bool assetNumberTaken = await repository.IsAssetNumberTaken(assetNumber);
+
+        if (assetNumberTaken)
+            return Result.Failure<Asset>(AssetErrors.CreateAssetNumberTaken(assetNumber));
+
+        Asset asset = new(
+            assetNumber,
+            serialNumber,
+            description,
+            category)
+        {
+            SapEquipmentNumber = string.IsNullOrWhiteSpace(sapEquipmentNumber) ? null : sapEquipmentNumber,
+            ModelNumber = modelNumber,
+            PurchaseDocument = purchaseDocument,
+            PurchaseCost = purchaseCost,
+            WarrantyEndDate = warrantyEndDate,
+            PurchaseDate = purchaseDate,
             Status = AssetStatus.Active
         };
 

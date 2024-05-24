@@ -1,36 +1,47 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Equipment.Pages.Assets.IndexModel
-@using Constellation.Application.Extensions
-@using Constellation.Presentation.Server.Areas.Equipment.Pages.Assets
-@using LinqKit
+
+@using Constellation.Application.Assets.Enums
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult canManageAssets = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAssets);
+}
 
 <h2>Assets</h2>
 
 <div class="page-menu">
     @{
-        var all_style = "btn-outline-secondary";
-        var active_style = all_style;
-        var disposed_style = all_style;
+        var allStyle = "btn-outline-secondary";
+        var activeStyle = allStyle;
+        var disposedStyle = allStyle;
 
         switch (Model.Filter)
         {
-            case IndexModel.FilterEnum.All:
-                all_style = "btn-primary";
+            case AssetFilter.All:
+                allStyle = "btn-primary";
                 break;
-            case IndexModel.FilterEnum.Active:
-                active_style = "btn-primary";
+            case AssetFilter.Active:
+                activeStyle = "btn-primary";
                 break;
-            case IndexModel.FilterEnum.Disposed:
-                disposed_style = "btn-primary";
+            case AssetFilter.Disposed:
+                disposedStyle = "btn-primary";
                 break;
         }
     }
 
     <div class="btn-group">
-        <a asp-route-filter="@IndexModel.FilterEnum.All" class="btn @all_style">All</a>
-        <a asp-route-filter="@IndexModel.FilterEnum.Active" class="btn @active_style">Active</a>
-        <a asp-route-filter="@IndexModel.FilterEnum.Disposed" class="btn @disposed_style">Disposed</a>
+        <a asp-route-filter="@AssetFilter.All" class="btn @allStyle">All</a>
+        <a asp-route-filter="@AssetFilter.Active" class="btn @activeStyle">Active</a>
+        <a asp-route-filter="@AssetFilter.Disposed" class="btn @disposedStyle">Disposed</a>
     </div>
+
+    @if (canManageAssets.Succeeded)
+    {
+        <a asp-page-handler="export" class="btn btn-warning">Export</a>
+
+        <a asp-page="/Assets/Upsert" asp-area="Equipment" class="btn btn-success">Create</a>
+    }
 </div>
 
 <hr />
@@ -55,7 +66,7 @@
                 <td data-order="@item.SerialNumber" data-search="@item.SerialNumber">
                     @if (item.SerialNumber.Length > 10)
                     {
-                        <span>@item.SerialNumber[..10] ...</span>
+                        <span data-toggle="tooltip" data-placement="bottom" title="@item.SerialNumber">@item.SerialNumber[..10] ...</span>
                     }
                     else
                     {
@@ -82,7 +93,17 @@
                     }
                 </td>
                 <td>
-                    <a asp-page="/Assets/Details" asp-route-assetNumber="@item.AssetNumber" asp-area="Equipment" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <a asp-page="/Assets/Details" asp-route-assetNumber="@item.AssetNumber" asp-area="Equipment" class="dropdown-item">Details</a>
+                            
+                            @if (canManageAssets.Succeeded)
+                            {
+                                <a asp-page="/Assets/Upsert" asp-area="Equipment" asp-route-assetNumber="@item.AssetNumber" class="dropdown-item">Update</a>
+                            }
+                        </div>
+                    </div>
                 </td>
             </tr>
         }
