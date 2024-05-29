@@ -21,10 +21,6 @@
     <ProjectReference Include="..\src\Constellation.Core\Constellation.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Areas\Staff\" />
-  </ItemGroup>
-
 
 
 </Project>

@@ -1,0 +1,131 @@
+﻿@page
+@model IndexModel
+
+@using Constellation.Application.Models.Auth
+@using Constellation.Application.Training.Models
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion
+@using Constellation.Presentation.Shared.Pages.Shared.Components.UploadTrainingCompletionCertificate
+@using Microsoft.AspNetCore.Authorization
+
+@inject IAuthorizationService AuthorizationService
+
+@{
+    var isEditorTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+    var canRunReportsTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanRunTrainingModuleReports);
+}
+
+<h2>Mandatory Training Completion Records</h2>
+
+<div>
+    @{
+        var all_style = "btn-outline-secondary";
+        var current_style = all_style;
+        var expiring_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case IndexModel.FilterDto.All:
+                all_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Current:
+                current_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Expiring:
+                expiring_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Current" class="btn @current_style">Current</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Expiring" class="btn @expiring_style">Expiring Soon</a>
+    </div>
+
+    @if (isEditorTest.Succeeded)
+    {
+        <div class="btn-group">
+            <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">
+                Create
+            </button>
+            <div class="dropdown-menu">
+                <a asp-page="Upsert" class="dropdown-item" asp-route-Mode="@CompletionPageMode.Full">Create New</a>
+                <a asp-page="Upload" class="dropdown-item">Bulk Upload</a>
+            </div>
+        </div>
+    } 
+    else
+    {
+        <a asp-page="/SchoolAdmin/Training/Completion/Upsert" asp-area="Staff" class="btn btn-warning" asp-route-Mode="@CompletionPageMode.SoloStaff">Create New</a>
+    }
+
+    <button class="btn btn-secondary" data-toggle="modal" data-target="#legend">View Legend</button>
+</div>
+
+<partial name="_StatusIconModalPartial" />
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Staff Member</th>
+            <th>Module</th>
+            <th>Date Completed</th>
+            <th></th>
+        </tr>
+    </thead>
+    @foreach (var item in Model.CompletionRecords)
+    {
+        <tr>
+            <td>
+                @{
+                    if (item.Status == CompletionRecordDto.ExpiryStatus.Active)
+                    {
+                        if (item.ExpiryCountdown > 31)
+                        {
+                            <img src="/images/GreenLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                        }
+                        else if (item.ExpiryCountdown > 15)
+                        {
+                            <img src="/images/YellowLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                        }
+                        else if (item.ExpiryCountdown > 1)
+                        {
+                            <img src="/images/RedLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                        }
+                        else
+                        {
+                            <img src="/images/RedLight.png" class="training status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
+                        }
+                    }
+                }
+            </td>
+            <td>@item.StaffFirstName @item.StaffLastName</td>
+            <td>@item.ModuleName</td>
+            <td>
+                @{
+                    if (!item.CompletedDate.HasValue)
+                    {
+                        @:N/A
+                    }
+                    else
+                    {
+                        @item.CompletedDate.Value.ToString("dd/MM/yyyy")
+                    }
+                }
+            </td>
+            <td>
+                @{
+                    var canViewDetailsTest = await AuthorizationService.AuthorizeAsync(User, item.Id, AuthPolicies.CanViewTrainingCompletionRecord);
+
+                    if (canViewDetailsTest.Succeeded)
+                    {
+                            <a asp-page="/SchoolAdmin/Training/Completion/Details" asp-area="Staff" asp-route-moduleId="@item.ModuleId.Value" asp-route-completionId="@item.Id.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                    }
+                }
+            </td>
+        </tr>
+    }
+</table>

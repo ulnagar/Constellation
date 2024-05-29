@@ -1,0 +1,88 @@
+﻿@page "/Awards/Nominations/{PeriodId:guid}/Details"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations.DetailsModel
+
+@using Constellation.Application.Models.Auth
+@using Constellation.Core.Extensions
+@using Microsoft.AspNetCore.Authorization
+
+@inject IAuthorizationService authService;
+
+@{
+    AuthorizationResult canAddTest = await authService.AuthorizeAsync(User, AuthPolicies.CanAddAwards);
+    AuthorizationResult canManageTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAwards);
+}
+
+<h2>Nomination Period Details</h2>
+
+<div class="page-menu">
+    @if (canAddTest.Succeeded && Model.Period.LockoutDate >= DateOnly.FromDateTime(DateTime.Today))
+    {
+        <a asp-page="/SchoolAdmin/Awards/Nominations/Nominate" asp-area="Staff" asp-route-periodId="@Model.PeriodId" class="btn btn-primary">Add Nomination</a>
+    }
+
+    @if (canManageTest.Succeeded)
+    {
+        <a asp-page="/SchoolAdmin/Awards/Nominations/Upsert" asp-area="Staff" asp-route-id="@Model.PeriodId" class="btn btn-primary">Edit</a>
+        <a asp-page-handler="Export" class="btn btn-warning">Export Nominations</a>
+    }
+
+    <a asp-page="/SchoolAdmin/Awards/Nominations/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div>
+    <dl class="row">
+        <dt class="col-md-2">
+            <label asp-for="Period.Name">Name</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Period.Name</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Period.LockoutDate">Lockout Date</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Period.LockoutDate.ToShortDateString()</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Period.IncludedGrades">Grades</label>
+        </dt>
+        <dd class="col-md-10">
+            @String.Join(", ", Model.Period.IncludedGrades.Select(grade => grade.AsName()).ToList())
+        </dd>
+    </dl>
+</div>
+
+<hr />
+
+<h3>Nominations</h3>
+
+<table class="table-striped data-table">
+    <thead>
+        <tr>
+            <th>Award</th>
+            <th>Student</th>
+            <th>Nominated By</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.Period.Nominations)
+        {
+            <tr>
+                <td>@entry.AwardType.Value<br />@entry.Description</td>
+                <td>@entry.Student.DisplayName</td>
+                <td>@entry.NominatedBy</td>
+                <td>
+                    @if (canManageTest.Succeeded)
+                    {
+                        <a asp-page-handler="Delete" asp-route-entryId="@entry.Id.Value" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

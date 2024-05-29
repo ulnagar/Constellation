@@ -1,0 +1,41 @@
+﻿@page "{caseId}/{actionId}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.WorkFlows.Actions.UpdateModel
+
+@using Constellation.Core.Models.WorkFlow.Identifiers
+
+@{
+    bool hasParent = Model.Case.Actions.Any(action => action.ActionId == Model.ActionId);
+    ActionId? parentId = (hasParent) ? Model.Case.Actions.First(action => action.ActionId == Model.ActionId).ParentActionId : null;
+}
+
+<h2>WorkFlow Case</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div class="p-4">
+    <div class="row">
+        <div class="col-12 border-bottom border-dark py-2"><h3>@Model.Case?.CaseDescription</h3></div>
+        <div class="col-6 mt-3">
+            <vc:display-case-details case-id="@Model.CaseId"></vc:display-case-details>
+        </div>
+        <div class="col-6 mt-3">
+            <dl>
+                <dt>Created</dt>
+                <dd>@Model.Case?.CreatedAt.ToString("dd/MM/yyyy h:mm tt")</dd>
+
+                <dt>Status</dt>
+                <dd>@Model.Case?.Status.Name</dd>
+            </dl>
+        </div>
+    </div>
+    @if (hasParent && parentId is not null)
+    {
+        <vc:display-case-action case-id="Model.CaseId.Value" action-id="parentId.Value" show-menu="false"></vc:display-case-action>
+    }
+    <vc:display-case-action case-id="Model.CaseId.Value" action-id="Model.ActionId.Value" show-menu="false"></vc:display-case-action>
+    <vc:action-update-form case-id="@Model.CaseId.Value" action-id="@Model.ActionId.Value" />
+</div>

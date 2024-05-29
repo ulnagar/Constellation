@@ -1,0 +1,108 @@
+﻿@page "{id:Guid}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Consent.Responses.DetailsModel
+
+@using Constellation.Core.Extensions
+
+<h2>Consent Response</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div>
+    <dt class="col-md-2">
+        <label asp-for="Transaction.Id">Id</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Transaction.Id.Value</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Transaction.Name">Student</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Transaction.Name.DisplayName</span>
+    </dd>
+
+    <dt class="col-md-2">
+        <label asp-for="Transaction.Grade"></label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Transaction.Grade.AsName()</span>
+    </dd>
+    
+    <dt class="col-md-2">
+        <label asp-for="Transaction.School"></label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Transaction.School</span>
+    </dd>
+    
+    <dt class="col-md-2">
+        <label asp-for="Transaction.SubmittedBy"></label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Transaction.SubmittedBy</span>
+    </dd>
+    
+    <dt class="col-md-2">
+        <label asp-for="Transaction.SubmittedAt"></label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Transaction.SubmittedAt.ToLongDateString()</span>
+    </dd>
+    
+    <dt class="col-md-2">
+        <label asp-for="Transaction.SubmissionMethod"></label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Transaction.SubmissionMethod.Name</span>
+    </dd>
+    
+    <dt class="col-md-2">
+        <label asp-for="Transaction.SubmissionNotes"></label>
+    </dt>
+    <dd class="col-md-2">
+        <span>@Model.Transaction.SubmissionNotes</span>
+    </dd>
+</div>
+
+<hr />
+
+<h4>Applications</h4>
+
+<table class="table table-striped table-hover data-table">
+    <thead>
+    <tr>
+        <th>Application Name</th>
+        <th>Consent Provided</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var consent in Model.Transaction.Applications.OrderBy(app => app.Name))
+    {
+        string style = (!consent.MostRecentResponse) ? "superseded" : "valid";
+
+        <tr class="@style">
+            <td>@consent.Name</td>
+            <td>
+                @if (!consent.MostRecentResponse)
+                {
+                    <span>This entry has been superseded by a new submission from the parent, and may no longer be valid.</span>
+                }
+                else if (consent.ConsentProvided)
+                {
+                    <span class="badge badge-success">Yes</span>
+                }
+                else
+                {
+                    <span class="badge badge-danger">No</span>
+                    <span class="text-muted">The students details must not be entered into this application. For more details, please contact the Technology Support Team.</span>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

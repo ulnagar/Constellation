@@ -1,0 +1,152 @@
+﻿@page "{Id}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Workflows.DetailsModel
+
+@using Constellation.Application.Models.Auth
+@using Microsoft.AspNetCore.Authorization
+
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult isAdminTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageWorkflows);
+}
+
+<h2>WorkFlow Case</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div class="p-4">
+    <div class="row">
+        <div class="col-12 border-bottom border-dark py-2"><h3>@Model.Case?.CaseDescription</h3></div>
+        <div class="col-12 mt-1">
+            @if (isAdminTest.Succeeded)
+            {
+                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#add-action-modal">New Action</button>
+                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#update-case-status-modal">Update Status</button>
+            }
+        </div>
+        <div class="col-6 mt-3">
+            <vc:display-case-details case-id="@Model.Id"></vc:display-case-details>
+        </div>
+        <div class="col-6 mt-3">
+            <dl>
+                <dt>Created</dt>
+                <dd>@Model.Case?.CreatedAt.ToString("dd/MM/yyyy h:mm tt")</dd>
+
+                <dt>Status</dt>
+                <dd>@Model.Case?.Status.Name</dd>
+            </dl>
+        </div>
+    </div>
+    @foreach (var action in Model.Case?.Actions.Where(action => action.ParentActionId is null).OrderBy(action => action.CreatedAt))
+    {
+        <vc:display-case-action case-id="@Model.Id.Value" action-id="@action.ActionId.Value" show-menu="true"></vc:display-case-action>
+
+        @foreach (var subAction in Model.Case?.Actions.Where(item => item.ParentActionId == action.ActionId).OrderBy(item => item.CreatedAt))
+        {
+            <vc:display-case-action case-id="@Model.Id.Value" action-id="@subAction.ActionId.Value" show-menu="true"></vc:display-case-action>
+        }
+    }
+</div>
+
+@Html.AntiForgeryToken()
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+        </div>
+    </div>
+</div>
+
+<vc:add-action-modal></vc:add-action-modal>
+<vc:update-case-status-modal></vc:update-case-status-modal>
+
+@section scripts
+{
+    <script>
+        $('.cancel-action-button').click(function (event) {
+            var actionId = $(this).data('actionId');
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            console.log(actionId);
+
+            $.ajax({
+                url: "?handler=AjaxActionConfirmation",
+                type: "POST",
+                data: {
+                    actionId: actionId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.add-action-note-button').click(function (event) {
+            var actionId = $(this).data('actionId');
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            console.log(actionId);
+
+            $.ajax({
+                url: "?handler=AjaxAddActionNote",
+                type: "POST",
+                data: {
+                    actionId: actionId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.reassign-action-button').click(function (event) {
+            var actionId = $(this).data('actionId');
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            console.log(actionId);
+
+            $.ajax({
+                url: "?handler=AjaxReassignAction",
+                type: "POST",
+                data: {
+                    actionId: actionId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+
+                // Activate any comboboxes
+                $("#page-modal .combo").select2({ theme: 'bootstrap' });
+            });
+        });
+
+        $('#addActionButton').click(function (event) {
+            //event.preventDefault();
+            var actionType = $('#newActionType').val();
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $('#add-action-modal').modal('hide');
+
+            $.ajax({
+                url: "?handler=AjaxNewAction",
+                type: "POST",
+                data: {
+                    actionType: actionType,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function(data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+
+                $('#page-modal .combo').select2({ theme: 'bootstrap' });
+            });
+        });
+    </script>
+}

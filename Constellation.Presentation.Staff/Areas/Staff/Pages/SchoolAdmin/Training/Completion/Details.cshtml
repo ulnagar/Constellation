@@ -1,0 +1,87 @@
+﻿@page "/SchoolAdmin/Training/Modules/{ModuleId:Guid}/Completions/{CompletionId:Guid}"
+@model DetailsModel
+
+@using Constellation.Application.Helpers
+@using Constellation.Application.Models.Auth
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion
+@using Constellation.Presentation.Shared.Pages.Shared.Components.UploadTrainingCompletionCertificate
+@using Microsoft.AspNetCore.Authorization
+
+@inject IAuthorizationService AuthorizationService
+
+<h2>Training Completion Record Details</h2>
+
+@{
+    var canManage = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+}
+
+<div class="page-menu">
+    @if (canManage.Succeeded)
+    {
+        <a asp-page="/SchoolAdmin/Training/Completion/Upsert" asp-area="Staff" asp-route-id="@Model.Record.Id.Value" asp-route-moduleId="@Model.Record.ModuleId.Value" asp-route-mode="@CompletionPageMode.Full" class="btn btn-warning">Edit</a>
+        
+        <form asp-page-handler="DeleteRecord" asp-route-completionId="@Model.CompletionId" asp-route-moduleId="@Model.ModuleId" method="post">
+            <button type="submit" class="btn btn-danger">Delete Entry</button>
+        </form>
+    }
+    else
+    {
+        <button class="btn btn-warning" data-toggle="modal" data-target="#uploadCertificateModal">Upload Certificate</button>
+    }
+    
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div>
+    <dl class="row">
+        <dt class="col-md-2">
+            <label asp-for="Record.Id"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Record.Id.Value</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Record.StaffId">Staff Member</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Record.StaffFirstName @Model.Record.StaffLastName</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Record.ModuleId">Module</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Record.ModuleName</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Record.ModuleExpiry">Expiry</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Record.ModuleExpiry.GetDisplayName()</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Record.CompletedDate">Completed Date</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Record.CompletedDate!.Value.ToString("dd/MM/yyyy")</span>
+        </dd>
+    </dl>
+</div>
+
+@if (Model.UploadedCertificate is not null && Model.UploadedCertificate.FileData is not null)
+{
+    <h3>Certificate</h3>
+    <div class="mb-3">
+        <a asp-page-handler="DownloadCertificate" class="btn btn-secondary">Download Certificate</a>
+    </div>
+    <div class="embed-responsive embed-responsive-4by3">
+        <embed src="data:application/pdf;base64,@Model.UploadedCertificate.FileDataBase64" class="embed-responsive-item" />
+    </div>
+}
+
+<vc:upload-training-completion-certificate module-id="@Model.ModuleId" completion-id="@Model.CompletionId" completion-date="@Model.Record.CompletedDate!.Value" />

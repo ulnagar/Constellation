@@ -1,0 +1,84 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.ShortTerm.Casuals.IndexModel
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.ShortTerm.Casuals
+@inject IAuthorizationService AuthorizationService
+
+@{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditCasuals);
+}
+
+<h2>Casual Teacher List</h2>
+
+<div>
+    @{
+        var all_style = "btn-outline-secondary";
+        var active_style = all_style;
+        var inactive_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case IndexModel.FilterDto.All:
+                all_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Active:
+                active_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Inactive:
+                inactive_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Active" class="btn @active_style">Active</a>
+        <a asp-page="Index" asp-route-filter="@IndexModel.FilterDto.Inactive" class="btn @inactive_style">Inactive</a>
+    </div>
+
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="/ShortTerm/Casuals/Upsert" asp-area="Staff" class="btn btn-info">Create New</a>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>School</th>
+            <th>Email Address</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Casuals)
+        {
+            <tr>
+                <td>@item.FirstName @item.LastName</td>
+                <td>@item.SchoolName</td>
+                <td>@Html.DisplayFor(model => item.EmailAddress, "EmailAddress")</td>
+                <td>
+                    @if (canEditTest.Succeeded)
+                    {
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                            <div class="dropdown-menu">
+                                <a asp-page="Upsert" asp-route-id="@item.Id" class="dropdown-item">Edit</a>
+                                @if(item.IsActive)
+                                {
+                                    <a asp-page-handler="Delete" asp-route-id="@item.Id" class="dropdown-item">Delete</a>
+                                }
+                                else
+                                {
+                                    <a asp-page-handler="Restore" asp-route-id="@item.Id" class="dropdown-item">Restore</a>
+                                }
+                            </div>
+                        </div>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,243 @@
+﻿@page "/SchoolAdmin/Training/Modules/{Id:Guid}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Modules.DetailsModel
+
+@inject IAuthorizationService AuthorizationService
+
+@using Constellation.Application.Models.Auth
+@using Constellation.Application.Training.Models
+@using Constellation.Presentation.Shared.Pages.Shared.Components.UploadTrainingCompletionCertificate
+@using Microsoft.AspNetCore.Authorization
+
+@{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+
+    var completionsGroupedByYear = Model.Module.Completions
+        .GroupBy(record => {
+            if (record.CompletedDate.HasValue)
+                return record.CompletedDate.Value.Year.ToString();
+            if (!record.CompletedDate.HasValue)
+                return "Never";
+            return "Unknown";
+        })
+        .OrderByDescending(group => group.Key);
+
+    var completionsExpiringSoon = Model.Module.Completions
+        .Where(record =>
+            record.ExpiryCountdown < 30 &&
+            record.Status == CompletionRecordDto.ExpiryStatus.Active);
+}
+
+<h2>Training Module Details</h2>
+
+<div>
+    @if (canEditTest.Succeeded){
+        <a asp-page="/SchoolAdmin/Training/Modules/Upsert" asp-area="Staff" asp-route-id="@Model.Module.Id.Value" class="btn btn-warning">Edit</a>
+        @if (Model.Module.IsActive)
+        {
+            <a asp-page-handler="RetireModule" class="btn btn-danger">Retire Module</a>
+        } else 
+        {
+            <a asp-page-handler="ReinstateModule" class="btn btn-danger">Reinstate Module</a>
+        }
+    }
+
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div>
+    <dl class="row">
+        <dt class="col-md-2">
+            <label asp-for="Module.Id"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Module.Id.Value</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Module.Name">Module</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Module.Name</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Module.Expiry">Expiry Frequency</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Module.Expiry</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Module.Url">Link</label>
+        </dt>
+        <dd class="col-md-10">
+            <span><a href="@Model.Module.Url" target="_blank">@Model.Module.Url</a></span>
+        </dd>
+    </dl>
+</div>
+
+<hr />
+
+<h3>Completion Records</h3>
+
+<div class="mb-3">
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="/SchoolAdmin/Training/Completion/Upsert" asp-area="Staff" class="btn btn-info" asp-route-ModuleId="@Model.Module.Id.Value" asp-route-Mode="@CompletionPageMode.SoloModule">Create New</a>
+    }
+    <button class="btn btn-secondary" data-toggle="modal" data-target="#legend">View Legend</button>
+</div>
+
+<partial name="_StatusIconModalPartial" />
+
+<div>
+    <ul class="nav nav-pills" data-tabs="tabs" role="tablist">
+        <li class="nav-item mr-1">
+            <a class="nav-link active" href="#expiring" data-toggle="pill">
+                Expiring Soon <span class="badge badge-light">@completionsExpiringSoon.Count()</span>
+            </a>
+        </li>
+
+        @foreach (var year in completionsGroupedByYear)
+        {
+            <li class="nav-item mr-1">
+                <a class="nav-link" href="#Y-@year.Key" data-toggle="pill">
+                    @year.Key
+                </a>
+            </li>
+        }
+    </ul>
+
+    <div class="tab-content">
+        <div id="expiring" class="tab-pane active" role="tabpanel">
+            <h4>Records Expiring Soon</h4>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Faculty</th>
+                        <th>Completed Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in completionsExpiringSoon)
+                    {
+                        <tr>
+                            <td>
+                                @{
+                                    if (item.ExpiryCountdown > 31)
+                                    {
+                                        <img src="/images/GreenLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                    }
+                                    else if (item.ExpiryCountdown > 15)
+                                    {
+                                        <img src="/images/YellowLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                    }
+                                    else if (item.ExpiryCountdown > 1)
+                                    {
+                                        <img src="/images/RedLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                    }
+                                    else
+                                    {
+                                        <img src="/images/RedLight.png" class="training status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
+                                    }
+                                }
+                            </td>
+                            <td>@item.StaffFirstName @item.StaffLastName</td>
+                            <td>@item.StaffFaculty</td>
+                            <td>
+                                @{
+                                    if (!item.CompletedDate.HasValue)
+                                    {
+                                        @:N/A
+                                    }
+                                    else
+                                    {
+                                        @item.CompletedDate.Value.ToString("dd/MM/yyyy")
+                                    }
+                                }
+                            </td>
+                            <td>
+                                <a asp-page="/SchoolAdmin/Training/Completion/Details" asp-area="Staff" asp-route-moduleId="@item.ModuleId.Value" asp-route-completionId="@item.Id.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @foreach (var year in completionsGroupedByYear) 
+        {
+            <div id="Y-@year.Key" class="tab-pane" role="tabpanel">
+                <h4>Records from @year.Key</h4>
+
+                <table class="table-striped table-hover data-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th>Faculty</th>
+                            <th>Completed Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in year)
+                        {
+                            <tr>
+                                <td>
+                                    @{
+                                        if (item.Status == CompletionRecordDto.ExpiryStatus.Active)
+                                        {
+                                            if (item.ExpiryCountdown > 31)
+                                            {
+                                                <img src="/images/GreenLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                            }
+                                            else if (item.ExpiryCountdown > 15)
+                                            {
+                                                <img src="/images/YellowLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                            }
+                                            else if (item.ExpiryCountdown > 1)
+                                            {
+                                                <img src="/images/RedLight.png" class="training status-icon" title="@item.ExpiryCountdown Days Remaining" />
+                                            }
+                                            else
+                                            {
+                                                <img src="/images/RedLight.png" class="training status-icon blink" title="@item.ExpiryCountdown Days Remaining" />
+                                            }
+                                        }
+                                    }
+                                </td>
+                                <td>@item.StaffFirstName @item.StaffLastName</td>
+                                <td>@item.StaffFaculty</td>
+                                <td>
+                                    @{
+                                        if (!item.CompletedDate.HasValue)
+                                        {
+                                            @:N/A
+                                        }
+                                        else if (item.CompletedDate.HasValue)
+                                        {
+                                            @item.CompletedDate.Value.ToString("dd/MM/yyyy")
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Id is not null)
+                                    {
+                                        <a asp-page="/SchoolAdmin/Training/Completion/Details" asp-area="Staff" asp-route-id="@item.Id.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

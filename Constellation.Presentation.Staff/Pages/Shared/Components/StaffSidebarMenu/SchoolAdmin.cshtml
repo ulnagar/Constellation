@@ -1,0 +1,164 @@
+@model (string ActivePage, string StaffId)
+
+@{
+    var segments = Model.ActivePage.Split('.');
+    var module = segments[1];
+}
+
+<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+    <div class="sidebar-sticky pt-3">
+        <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#absences" data-parent="#sidebarMenu">
+            <span>Absences</span>
+        </h4>
+        <div id="absences" class="collapse @(module == "Absences" ? "show" : "")">
+            <ul class="nav flex-column mx-2">
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Absences_List ? "active" : "")" asp-page="/SchoolAdmin/Absences/List" asp-area="Staff">
+                        List
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Absences_Audit ? "active" : "")" asp-page="/SchoolAdmin/Absences/Audit" asp-area="Staff">
+                        Student Settings
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Absences_Report ? "active" : "")" asp-page="/SchoolAdmin/Absences/Report" asp-area="Staff">
+                        Reports
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#awards">
+            <span>Awards</span>
+        </h4>
+        <div id="awards" class="collapse @(module == "Awards" ? "show" : "")">
+            <ul class="nav flex-column mx-2">
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Awards_List ? "active" : "")" asp-page="/SchoolAdmin/Awards/Index" asp-area="Staff">
+                        List
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Awards_Dashboard ? "active" : "")" asp-page="/SchoolAdmin/Awards/Dashboard" asp-area="Staff">
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Awards_Leaderboard ? "active" : "")" asp-page="/SchoolAdmin/Awards/Leaderboard" asp-area="Staff">
+                        Leaderboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Awards_Changes ? "active" : "")" asp-page="/SchoolAdmin/Awards/Changes" asp-area="Staff">
+                        Recent Changes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Awards_Nominations ? "active" : "")" asp-page="/SchoolAdmin/Awards/Nominations/Index" asp-area="Staff">
+                        Award Nominations
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#compliance">
+            <span>Compliance</span>
+        </h4>
+        <div id="compliance" class="collapse @(module == "Compliance" ? "show" : "")">
+            <ul class="nav flex-column mx-2">
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Compliance_Attendance ? "active" : "")" asp-page="/SchoolAdmin/Compliance/Attendance/Index" asp-area="Staff">
+                        Attendance Records
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Compliance_AttendanceReports ? "active" : "")" asp-page="/SchoolAdmin/Compliance/Attendance/Reports" asp-area="Staff">
+                        Attendance Reports
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Compliance_Wellbeing ? "active" : "")" asp-page="/SchoolAdmin/Compliance/Wellbeing/Index" asp-area="Staff">
+                        N-Award Compliance
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#consent">
+            <span>Third Party Consent</span>
+        </h4>
+        <div id="consent" class="collapse @(module == "Consent" ? "show" : "")">
+            <ul class="nav flex-column mx-2">
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Consent_Applications ? "active" : "")" asp-page="/SchoolAdmin/Consent/Applications/Index" asp-area="Staff">
+                        Applications
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Consent_Transactions ? "active" : "")" asp-page="/SchoolAdmin/Consent/Responses/Index" asp-area="Staff">
+                        Responses
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Consent_Reports ? "active" : "")" asp-page="/SchoolAdmin/Consent/Reports/Index" asp-area="Staff">
+                        Reports
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#training">
+            <span>Mandatory Training</span>
+        </h4>
+        
+        <div id="training" class="collapse @(module == "Training" ? "show" : "")">
+            <ul class="nav flex-column mx-2">
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Training_Staff ? "active" : "")" asp-page="/SchoolAdmin/Training/Staff/Index" asp-area="Staff" asp-route-staffId="@Model.StaffId">
+                        My Records
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Training_Modules ? "active" : "")" asp-page="/SchoolAdmin/Training/Modules/Index" asp-area="Staff">
+                        Modules
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Training_Completions ? "active" : "")" asp-page="/SchoolAdmin/Training/Completion/Index" asp-area="Staff">
+                        Certificates
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Training_Roles ? "active" : "")" asp-page="/SchoolAdmin/Training/Roles/Index" asp-area="Staff">
+                        Roles
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Training_Reports ? "active" : "")" asp-page="/SchoolAdmin/Training/Reports/Index" asp-area="Staff">
+                        Reports
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#workflows">
+            <span>WorkFlows</span>
+        </h4>
+        <div id="workflows" class="collapse @(module == "WorkFlows" ? "show" : "")">
+            <ul class="nav flex-column mx-2">
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_WorkFlows_Cases ? "active" : "")" asp-page="/SchoolAdmin/Workflows/Index" asp-area="Staff">
+                        Cases
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_WorkFlows_Reports ? "active" : "")" asp-page="/SchoolAdmin/Workflows/Reports/Index" asp-area="Staff">
+                        Reports
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

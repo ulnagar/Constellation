@@ -1,0 +1,87 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Roles.IndexModel
+
+@using Constellation.Application.Models.Auth
+@using Microsoft.AspNetCore.Authorization
+
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult canEdit = await authService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+}
+
+<h2>Training Roles</h2>
+
+<div class="page-menu">
+    @if (canEdit.Succeeded)
+    {
+        <a asp-page="/SchoolAdmin/Training/Roles/Upsert" asp-area="Staff" class="btn btn-success">Create</a>
+    }
+</div>
+
+<hr />
+
+<table class="table table-striped data-table">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Members</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var entry in Model.Roles)
+    {
+        <tr>
+            <td>@entry.Name</td>
+            <td>@entry.MemberCount</td>
+            <td>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                    <div class="dropdown-menu">
+                        <a asp-page="/SchoolAdmin/Training/Roles/Details" asp-area="Staff" asp-route-id="@entry.Id.Value" class="dropdown-item">Details</a>
+                        @if (canEdit.Succeeded)
+                        {
+                            <a asp-page="/SchoolAdmin/Training/Roles/Upsert" asp-area="Staff" asp-route-Id="@entry.Id.Value" class="dropdown-item">Edit</a>
+                            <button data-role-id="@entry.Id.Value.ToString()" data-role-name="@entry.Name" class="dropdown-item delete-role-button">Remove</button>
+                        }
+                    </div>
+                </div>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@Html.AntiForgeryToken()
+
+<div class="modal fade" id="page-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $('.delete-role-button').click(function (event) {
+            var roleId = $(this).data("roleId");
+            var roleName = $(this).data("roleName");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxRemoveRole",
+                type: "POST",
+                data: {
+                    roleId: roleId,
+                    roleName: roleName,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+    </script>
+}

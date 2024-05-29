@@ -1,0 +1,114 @@
+﻿@page "{Id:Guid}"
+@using Constellation.Application.Extensions
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Roles.BulkAddMembersModel
+@{
+}
+
+<h2>Add Members</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<h4>Select staff members to be added to the @Model.Role.Name Training Role</h4>
+
+<form method="post">
+    <div class="row">
+        <div class="col">
+            <label class="text-bold">Existing Members:</label>
+            <div>
+                @foreach (var entry in Model.Role.Members)
+                {
+                    <button type="button" class="btn btn-outline-success staff-button">@entry.Name.DisplayName</button>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <hr />
+    
+    <div asp-validation-summary="All" class="text-danger"></div>
+    
+    <div class="row">
+        <div class="col">
+            <label class="text-bold">Selected Staff:</label>
+            <div id="SelectedStaffList">
+                @foreach (var entry in Model.SelectedStaffIds)
+                {
+                    var member = Model.StaffMembers.FirstOrDefault(staff => staff.StaffId == entry);
+
+                    if (member is not null)
+                    {
+                        <button type="button" id="staffSelect-@member.StaffId" class="btn btn-outline-info staff-button" onClick="toggleStaff(@member.StaffId)">@member.Name.DisplayName</button>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    
+    <hr />
+    
+    <div class="form-group">
+        <div class="col-md-3">
+            <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+        </div>
+    </div>
+</form>
+
+<hr />
+
+<div class="row">
+    @{
+        var partitionedList = Model.StaffMembers.OrderBy(member => member.Name.SortOrder).Partition(Model.StaffMembers.Count / 3);
+
+        foreach (var list in partitionedList)
+        {
+                    <div class="col-4 button-list">
+                        @foreach (var entry in list)
+                {
+                    if (Model.Role.Members.Any(member => member.StaffId == entry.StaffId))
+                    {
+                                <button type="button" class="btn btn-outline-success staff-button">@entry.Name.DisplayName</button>
+                    }
+                    else
+                    {
+                                <button type="button" id="staffSelect-@entry.StaffId" class="btn btn-outline-info staff-button" onClick="toggleStaff(@entry.StaffId)">@entry.Name.DisplayName</button>
+                    }
+                }
+                    </div>
+        }
+    }
+</div>
+
+@section scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        function toggleStaff(staffId) {
+            var selectDiv = $('#staffSelect-' + staffId);
+            if (selectDiv.hasClass('btn-info')) {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info');
+
+                $('#pd-staffSelect-' + staffId).remove();
+                $('#i-staffSelect-' + staffId).remove();
+            } else {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info');
+
+                var pageDisplayDiv = $('#staffSelect-' + staffId).clone().prop('id', 'pd-staffSelect-' + staffId);
+                pageDisplayDiv.appendTo('#SelectedStaffList');
+
+                var input = $('<input>').attr('id', 'i-staffSelect-' + staffId)
+                    .attr('name', 'SelectedStaffIds')
+                    .attr('type', 'hidden');
+                input.val(staffId);
+                pageDisplayDiv.append(input);
+            }
+        }
+    </script>
+}

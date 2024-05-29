@@ -16,8 +16,8 @@
                 </p>
             </div>
             <div class="modal-footer">
-                <a asp-page="/Training/Completion/Upsert" asp-route-id="@Model.CompletionId.Value" asp-route-moduleId="@Model.ModuleId.Value" asp-route-mode="@CompletionPageMode.CertUpload" class="btn btn-success">Continue to upload</a>
-                <a asp-page="/Training/Completion/Upsert" asp-route-moduleId="@Model.ModuleId.Value" asp-route-mode="@CompletionPageMode.SoloStaff" class="btn btn-success">Create new record</a>
+                <a asp-page="/SchoolAdmin/Training/Completion/Upsert" asp-area="Staff" asp-route-id="@Model.CompletionId.Value" asp-route-moduleId="@Model.ModuleId.Value" asp-route-mode="@CompletionPageMode.CertUpload" class="btn btn-success">Continue to upload</a>
+                <a asp-page="/SchoolAdmin/Training/Completion/Upsert" asp-area="Staff" asp-route-moduleId="@Model.ModuleId.Value" asp-route-mode="@CompletionPageMode.SoloStaff" class="btn btn-success">Create new record</a>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
