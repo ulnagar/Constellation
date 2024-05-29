@@ -17,6 +17,7 @@ namespace Constellation.Presentation.Server.Areas.Equipment.Controllers
     using Application.StaffMembers.Models;
     using Application.Students.GetStudentsFromSchoolForSelectionList;
     using Core.Shared;
+    using Staff = Core.Models.Staff;
     using ValidationResult = FluentValidation.Results.ValidationResult;
 
     [Area("Equipment")]

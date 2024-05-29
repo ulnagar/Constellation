@@ -8,11 +8,11 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Pages.Shared.Components.FamilyAddStudent;
 using Core.Models.Students.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Shared.Pages.Shared.Components.FamilyAddStudent;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel

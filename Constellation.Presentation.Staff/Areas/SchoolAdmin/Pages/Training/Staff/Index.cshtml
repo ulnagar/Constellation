@@ -1,0 +1,75 @@
+﻿@page "{StaffId}"
+@model Constellation.Presentation.Staff.Areas.SchoolAdmin.Pages.Training.Staff.IndexModel
+
+@using Constellation.Core.Enums
+@using Constellation.Application.Helpers
+@using Constellation.Presentation.Shared.Pages.Shared.Components.UploadTrainingCompletionCertificate
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+
+<h2>Mandatory Training Register</h2>
+
+<div>
+    <a asp-page="/Training/Completion/Upsert" class="btn btn-warning" asp-route-Mode="@CompletionPageMode.SoloStaff">Create New</a>
+</div>
+
+<hr />
+
+<table class="table table-striped data-table-25">
+    <thead>
+        <tr>
+            <th>Module</th>
+            <th>Expiry</th>
+            <th>Mandatory?</th>
+            <th>Required By Roles</th>
+            <th>Date Last Completed</th>
+            <th>Date Next Due</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.Modules)
+        {
+            <tr>
+                <td>@entry.ModuleName</td>
+                <td>@entry.Expiry.GetDisplayName()</td>
+                <td>
+                    @if (entry.IsRequired)
+                    {
+                        <badge class="badge badge-success">Yes</badge>
+                    }
+                    else
+                    {
+                        <badge class="badge badge-danger">No</badge>
+                    }
+                </td>
+                <td>
+                    @foreach (var item in entry.Roles)
+                    {
+                        <a asp-page="/Training/Roles/Details" asp-area="SchoolAdmin" asp-route-id="@item.Key" class="badge badge-info">@item.Value</a>
+                    }
+                </td>
+                <td>
+                    @if (entry.IsCompleted)
+                    {
+                        @entry.DateCompleted!.Value.ToShortDateString()
+                    }
+                </td>
+                <td>
+                    @if (entry.IsCompleted && entry.IsRequired)
+                    {
+                        if (entry.Expiry != TrainingModuleExpiryFrequency.OnceOff)
+                        {
+                            @entry.DueDate!.Value.ToShortDateString()
+                        }
+                    }
+                </td>
+                <td>
+                    @if (entry.IsCompleted)
+                    {
+                        <a asp-page="/Training/Completion/Details" asp-route-moduleId="@entry.ModuleId.Value" asp-route-completionId="@entry.CompletionId.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

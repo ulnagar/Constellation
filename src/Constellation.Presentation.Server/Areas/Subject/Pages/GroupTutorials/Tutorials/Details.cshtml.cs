@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.GroupTutorials.Tutorials;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.GroupTutorials.AddStudentToTutorial;
 using Constellation.Application.GroupTutorials.AddTeacherToTutorial;
 using Constellation.Application.GroupTutorials.CreateRoll;
@@ -13,13 +14,13 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Areas.Subject.Models;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Pages.Shared.Components.TutorialRollCreate;
-using Constellation.Presentation.Server.Pages.Shared.Components.TutorialStudentEnrolment;
-using Constellation.Presentation.Server.Pages.Shared.Components.TutorialTeacherAssignment;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Pages.Shared.Components.TutorialRollCreate;
+using Presentation.Shared.Pages.Shared.Components.TutorialStudentEnrolment;
+using Presentation.Shared.Pages.Shared.Components.TutorialTeacherAssignment;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.CanViewGroupTutorials)]

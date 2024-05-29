@@ -1,0 +1,30 @@
+﻿@page
+
+@model Constellation.Presentation.Staff.Areas.SchoolAdmin.Pages.WorkFlows.Reports.IndexModel
+
+@{
+}
+
+<h2>Reports</h2>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <h4>Attendance Percentage Values</h4>
+        A list of recent weekly Attendance Percentage values, with the option to create or update WorkFlow Cases as required.
+    </div>
+    <div class="col-md-2">
+        <a asp-page="/WorkFlows/Reports/Attendance" asp-area="SchoolAdmin" class="btn btn-block btn-secondary">Run Report</a>
+    </div>
+</div>
+
+<hr />
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <h4>Outstanding Case Report</h4>
+        An Excel export of each Case and the status of each linked Action
+    </div>
+    <div class="col-md-2">
+        <a asp-page-handler="DownloadReport" class="btn btn-block btn-secondary">Run Report</a>
+    </div>
+</div>

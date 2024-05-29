@@ -1,0 +1,56 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.SchoolAdmin.Pages.Training.Completion.UploadModel
+
+<h2>Bulk Upload Training Certificates</h2>
+
+<div class="row">
+    <a asp-page="Index" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<form method="post" enctype="multipart/form-data">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        
+        <div class="form-group row">
+            <label class="col-md-2">Instructions</label>
+            <div class="col-md-8">
+                <span class="d-block">Download the excel template here: </span>
+                <span class="d-block">Col 1 - 4 should be details of the training course. You can include details for an existing course and it will be matched, but the NAME (col 1) must be identical.</span>
+                <span class="d-block">Each subsequent column should use the Staff Id at the heading, and the date the course was COMPLETED in each row.</span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="UploadFile" class="col-md-2">Excel File</label>
+            <div class="col-md-8">
+                <div class="custom-file">
+                    <input asp-for="UploadFile" type="file" class="custom-file-input" />
+                    <label class="custom-file-label" asp-for="UploadFile">Choose file</label>
+                </div>
+                <div class="font-italic">
+                    Only accepts XLSX files. Max file size is 10Mb.
+                </div>
+                <span asp-validation-for="UploadFile" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(".custom-file-input").on("change", function () {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+    </script>
+}

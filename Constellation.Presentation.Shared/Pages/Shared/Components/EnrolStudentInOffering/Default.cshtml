@@ -1,0 +1,32 @@
+﻿@model Constellation.Presentation.Shared.Pages.Shared.Components.EnrolStudentInOffering.EnrolStudentInOfferingSelection
+
+<div class="modal fade" tabindex="-1" id="addStudentModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@Model.OfferingId.Value" asp-page-handler="EnrolStudent">
+                <div class="modal-header">
+                    <h5 class="modal-title">Enrol Student In Offering</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Student</span>
+                            <select asp-for="StudentId" asp-items="@(new SelectList(Model.Students, "Key", "Value"))" class="combo" style="width:100%">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col">
+                            <span>will be added to <span clas="font-weight-bold">@Model.CourseName</span> offering <span class="font-weight-bold">@Model.OfferingName</span>.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

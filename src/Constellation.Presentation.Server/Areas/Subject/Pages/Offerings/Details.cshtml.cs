@@ -14,8 +14,6 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Pages.Shared.Components.AddSessionToOffering;
-using Constellation.Presentation.Server.Pages.Shared.Components.AddTeacherToOffering;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveAllSessionsModal;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveResourceFromOfferingModal;
 using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveSessionModal;
@@ -24,7 +22,9 @@ using Constellation.Presentation.Server.Pages.Shared.PartialViews.UnenrolStudent
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Server.Pages.Shared.Components.EnrolStudentInOffering;
+using Presentation.Shared.Pages.Shared.Components.AddSessionToOffering;
+using Presentation.Shared.Pages.Shared.Components.AddTeacherToOffering;
+using Presentation.Shared.Pages.Shared.Components.EnrolStudentInOffering;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel

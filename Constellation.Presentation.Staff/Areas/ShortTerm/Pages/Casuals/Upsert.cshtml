@@ -1,0 +1,120 @@
+﻿@page "{id:guid?}"
+@model Constellation.Presentation.Staff.Areas.ShortTerm.Pages.Casuals.UpsertModel
+@inject IAuthorizationService AuthorizationService
+
+@{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditCasuals);
+    var title = (Model.Id.HasValue ? "Edit Casual" : "Create Casual");
+    var editing = Model.Id.HasValue;
+}
+
+<h2>@title</h2>
+
+<div class="row">
+    <a asp-page="/Casuals/Index" asp-area="ShortTerm" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-page-handler="Update" method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="form-group row">
+            <label asp-for="FirstName" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="LastName" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="EmailAddress" class="col-md-2"></label>
+            <div class="col-md-3">
+                @if (editing)
+                {
+                    <input asp-for="EmailAddress" class="form-control" readonly="readonly" />
+                } 
+                else
+                {
+                    <input asp-for="EmailAddress" class="form-control" />
+
+                }
+                <span asp-validation-for="EmailAddress" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row" id="acpid-group">
+            <label asp-for="AdobeConnectId" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="AdobeConnectId" class="form-control" />
+                <span asp-validation-for="AdobeConnectId" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <button id="getPID" type="button" class="btn btn-secondary">Search Adobe Connect</button>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="SchoolCode" class="col-md-2"></label>
+            <div class="col-md-3">
+                <select asp-for="SchoolCode" asp-items="@(new SelectList(Model.Schools, "Code", "Name", Model.SchoolCode))" class="form-control combo">
+                    <option value="">-- Select --</option>
+                </select>
+                <span asp-validation-for="SchoolCode" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $('#getPID')
+            .on('click',
+                function (event) {
+                    var url = "@Url.Action("_getUserACPID", "AdobeConnect", new {area = "Admin"})";
+                    $('span[id="warningIcon"]').remove();
+                    $('span[id="helpBlock"]').remove();
+                    $('#acpid-group').removeClass("has-warning").removeClass("has-feedback");
+                    $.ajax({
+                        dataType: "json",
+                        url: url,
+                        data: { username: $('#EmailAddress').val() },
+                        success: function (data) {
+                            var response = JSON.parse(data);
+                            $('#AdobeConnectId').val(response);
+                            $('span[id="warningIcon"]').remove();
+                            $('span[id="helpBlock"]').remove();
+                            $('#acpid-group').removeClass("has-warning").removeClass("has-feedback");
+                        },
+                        error: function () {
+                            var newContent = $('' +
+                                '<span id="warningIcon" class="glyphicon glyphicon-warning-sign form-control-feedback" aria-hidden="true"></span>' +
+                                '<span id="helpBlock" class="form-text">This user has not logged into the Adobe Connect server yet. No automatic process will be able to provide this user with access to rooms.</span>');
+                            $('#acpid-group').addClass("has-warning").addClass("has-feedback");
+                            $('#AdobeConnectId')
+                                .parent()
+                                .append(newContent);
+                        }
+                    });
+                });
+    </script>
+}

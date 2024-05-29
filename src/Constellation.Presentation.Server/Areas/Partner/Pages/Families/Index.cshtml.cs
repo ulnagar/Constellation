@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Partner.Pages.Families;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Families.DeleteFamilyById;
 using Constellation.Application.Families.DeleteParentById;
 using Constellation.Application.Families.GetFamilyContactsForStudent;

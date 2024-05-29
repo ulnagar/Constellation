@@ -1,0 +1,38 @@
+﻿namespace Constellation.Presentation.Shared.ViewComponents;
+
+using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
+using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Pages.Shared.Components.ClassListNavBar;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+
+public class ClassListNavBarViewComponent : ViewComponent
+{
+    private readonly ISender _mediator;
+
+    public ClassListNavBarViewComponent(
+        ISender mediator)
+    {
+        _mediator = mediator;
+    }
+
+    public async Task<IViewComponentResult> InvokeAsync()
+    {
+        ClassListNavBarViewModel viewModel = new();
+
+        string username = User.Identity?.Name;
+
+        if (username is null)
+            return View(viewModel);
+
+        Result<List<TeacherOfferingResponse>> query = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(null, username));
+
+        if (query.IsFailure)
+            return View(viewModel);
+
+        foreach (TeacherOfferingResponse entry in query.Value)
+            viewModel.Classes.Add(entry.OfferingName, entry.OfferingId);
+
+        return View(viewModel);
+    }
+}

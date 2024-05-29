@@ -1,0 +1,339 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.SchoolAdmin.Pages.Consent.Responses.UpsertModel
+
+@using Constellation.Core.Models.ThirdPartyConsent.Enums
+
+<h2>Add Consent Response</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group row">
+            <label asp-for="StudentId" class="col-md-2">Student</label>
+            <div class="col-md-5">
+                <select asp-for="StudentId" asp-items="@(new SelectList(Model.Students, "Key", "Value"))" class="form-control combo" style="width:100%">
+                    <option value=""> -- Select Student -- </option>
+                </select>
+                <span asp-validation-for="StudentId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Submitter" class="col-md-2">Parent</label>
+            <div class="col-md-8">
+                <select asp-for="Submitter" class="form-control combo">
+                    @if (Model.Parents.Any())
+                    {
+                        <option value=""> -- Select Parent -- </option>
+                        @foreach (var parent in Model.Parents.Where(entry => entry.ParentId != null))
+                        {
+                            if (Model.Submitter == parent.ParentId?.Value)
+                            {
+                                <option value="@parent.ParentId.Value" selected="selected">@parent.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@parent.ParentId.Value">@parent.Name</option>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <option value=""> -- Select Student First -- </option>
+                    }
+                </select>
+                <span asp-validation-for="Submitter" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="Method" class="col-md-2">Method</label>
+            <div class="col-md-8">
+                <select asp-for="Method" class="form-control">
+                    <option value="@ConsentMethod.Email.Value">@ConsentMethod.Email.Name</option>
+                    <option value="@ConsentMethod.PhoneCall.Value">@ConsentMethod.PhoneCall.Name</option>
+                </select>
+                <span asp-validation-for="Method" class="text-danger"></span>
+            </div>
+        </div>
+
+
+        <div class="form-group row">
+            <label asp-for="Responses" class="col-md-2">Consent Responses</label>
+            <div class="col-md-8">
+                <button type="button" class="btn btn-success" onclick="addApplicationRow()">Add Application</button>
+                <span asp-validation-for="Responses" class="text-danger"></span>
+                <div id="consent-rows" class="mt-1">
+                    @foreach (var response in Model.Responses)
+                    {
+                        var index = Model.Responses.IndexOf(response);
+
+                        <div class="input-group mt-2" id="consent-@index">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-outline-danger" type="button">
+                                    <i class="fal fa-do-not-enter"></i>
+                                </button>
+                            </div>
+                            <select class="custom-select form-control combo" name="Responses[@index].ApplicationId">
+                                @if (response.ApplicationId == Guid.Empty)
+                                {
+                                    <option value="@Guid.Empty" selected="selected"> -- Select Application -- </option>
+                                }
+                                else
+                                {
+                                    <option value="@Guid.Empty"> -- Select Application -- </option>
+                                }
+
+                                @foreach (var entry in Model.Applications.OrderBy(entry => entry.Name))
+                                {
+                                    if (entry.Id.Value == response.ApplicationId)
+                                    {
+                                        if (entry.ConsentRequired)
+                                        {
+                                            <option value="@entry.Id.Value" selected="selected">@entry.Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@entry.Id.Value" selected="selected">@entry.Name (Not Required)</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (entry.ConsentRequired)
+                                        {
+                                            <option value="@entry.Id.Value">@entry.Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@entry.Id.Value">@entry.Name (Not Required)</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                            <div class="input-group-append">
+                                <input type="hidden" name="Responses[@index].Consent" value="@response.Consent"/>
+                                @if (response.Consent)
+                                {
+                                    <button class="btn btn-success" type="button">
+                                        <i class="fal fa-check"></i> Granted
+                                    </button>
+                                    <button class="btn btn-outline-danger" type="button">
+                                        <i class="fal fa-times"></i> Denied
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-outline-success" type="button">
+                                        <i class="fal fa-check"></i> Granted
+                                    </button>
+                                    <button class="btn btn-danger" type="button">
+                                        <i class="fal fa-times"></i> Denied
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Notes" class="col-md-2">Notes</label>
+            <div class="col-md-8">
+                <input asp-for="Notes" class="form-control" />
+                <span asp-validation-for="Notes" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-none">
+        <div class="input-group mt-2" id="consent-template">
+            <div class="input-group-prepend">
+                <button class="btn btn-outline-danger" type="button" id="consent-template-remove">
+                    <i class="fal fa-do-not-enter"></i>
+                </button>
+            </div>
+            <select class="custom-select form-control" name="Responses[999].ApplicationId">
+                <option value="@Guid.Empty"> -- Select Application -- </option>
+                @foreach (var entry in Model.Applications.OrderBy(entry => entry.Name))
+                {
+                    if (entry.ConsentRequired)
+                    {
+                        <option value="@entry.Id.Value">@entry.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@entry.Id.Value">@entry.Name (Not Required)</option>
+                    }
+                }
+            </select>
+            <div class="input-group-append">
+                <input type="hidden" name="Responses[999].Consent"/>
+                <button class="btn btn-outline-success" type="button" id="consent-template-granted">
+                    <i class="fal fa-check"></i> Granted
+                </button>
+                <button class="btn btn-outline-danger" type="button" id="consent-template-denied">
+                    <i class="fal fa-times"></i> Denied
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function consentProvided(event) {
+            var index = event.data.index;
+
+            // Update hidden field to have value of true
+            $('#consent-' + index + ' .input-group-append input:hidden').val('true');
+            
+            // Update buttons to have solid check and outline times
+            $('#consent-' + index + '-granted')
+                .addClass('btn-success')
+                .removeClass('btn-outline-success');
+
+            $('#consent-' + index + '-denied')
+                .addClass('btn-outline-danger')
+                .removeClass('btn-danger');
+        }
+
+        function consentDenied(event) {
+            var index = event.data.index;
+
+            // Update hidden field to have value of true
+            $('#consent-' + index + ' .input-group-append input:hidden').val('false');
+
+            // Update buttons to have solid check and outline times
+            $('#consent-' + index + '-granted')
+                .addClass('btn-outline-success')
+                .removeClass('btn-success');
+
+            $('#consent-' + index + '-denied')
+                .addClass('btn-danger')
+                .removeClass('btn-outline-danger');
+        }
+
+        function removeConsent(event) {
+            var index = event.data.index;
+
+            // Remove current item
+            $('#consent-' + index).remove();
+
+            // Re-index remaining items
+            var i = 0;
+            $('#consent-rows').children().each(function () {
+                $(this).prop('id', 'consent-' + i);
+
+                $(this).find('.custom-select')
+                    .select2('destroy')
+                    .prop('name', 'Responses[' + i + '].ApplicationId')
+                    .select2({ theme: 'bootstrap' });
+
+                $(this).find('input:hidden').prop('name', 'Responses[' + i + '].Consent');
+
+                $(this).find('#consent-' + index + '-granted')
+                    .prop('id', 'consent-' + i + '-granted')
+                    .off('click')
+                    .on('click', { index: i }, consentProvided);
+
+                $(this).find('#consent-' + index + '-denied')
+                    .prop('id', 'consent-' + i + '-denied')
+                    .off('click')
+                    .on('click', { index: i }, consentDenied);
+
+                $(this).find('#consent-' + index + '-remove')
+                    .prop('id', 'consent-' + i + '-remove')
+                    .off('click')
+                    .on('click', { index: i }, removeConsent);
+
+                i++;
+            });
+        }
+
+        function addApplicationRow() {
+            var index = $('#consent-rows').children().length;
+
+            // Clone hidden template group
+            var clone = $('#consent-template').clone(true, true);
+            
+            clone.prop('id', 'consent-' + index);
+            
+            clone.find('.custom-select')
+                .prop('name', 'Responses[' + index + '].ApplicationId')
+                .select2({ theme: 'bootstrap' });
+            
+            clone.find('input:hidden')
+            .prop('name', 'Responses[' + index + '].Consent');
+
+            clone.find('#consent-template-granted')
+                .prop('id', 'consent-' + index + '-granted')
+                .on('click', { index: index }, consentProvided);
+
+            clone.find('#consent-template-denied')
+                .prop('id', 'consent-' + index + '-denied')
+                .on('click', { index: index }, consentDenied);
+            
+            clone.find('#consent-template-remove')
+                .prop('id', 'consent-' + index + '-remove')
+                .on('click', { index: index }, removeConsent);
+            
+            $('#consent-rows').append(clone);
+        }
+
+        $(document).ready(function() {
+            $('#StudentId').on('select2:select', function (e) {
+                var studentId = e.params.data.id;
+                var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+                $('#Submitter')
+                    .empty()
+                    .append($('<option/>', {
+                        value: null,
+                        text: " -- Select Parent -- "
+                    }));
+
+                $.ajax({
+                    url: "?handler=AjaxGetParents",
+                    type: "POST",
+                    data: {
+                        studentId: studentId,
+                        __RequestVerificationToken: xsrfHeader
+                    }
+                }).done(function (contacts) {
+                    if (contacts != null && !jQuery.isEmptyObject(contacts)) {
+                        console.log(contacts);
+                        
+                        $.each(contacts, function (index, contact) {
+                            if (!jQuery.isEmptyObject(contact.parentId))
+                            {
+                                $('#Submitter').append($('<option/>', {
+                                    value: contact.parentId.value,
+                                    text: contact.name
+                                }));
+                            }
+                        });
+
+                        $('#Submitter')
+                            .select2({ theme: 'bootstrap' });
+                    }
+                });
+            });
+        })
+    </script>
+}

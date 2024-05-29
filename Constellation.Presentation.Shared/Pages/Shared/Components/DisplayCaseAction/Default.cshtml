@@ -1,0 +1,62 @@
+﻿@model DisplayCaseActionViewModel
+
+@using Constellation.Core.Models.WorkFlow.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using System.Text.RegularExpressions
+@using Constellation.Presentation.Shared.ViewComponents
+
+@{
+    var subAction = Model.Action.ParentActionId is not null;
+    var notesDiv = Regex.Replace(Convert.ToBase64String(Guid.NewGuid().ToByteArray()), "[/+=]", "");
+}
+
+<div class="border border-success row mt-1 pb-1 @(subAction ? "ml-3" : "")">
+    <div class="col-12 border-bottom border-dark py-1"><strong>Action: @Model.Action.ToString()</strong></div>
+    @if (Model.ShowMenu)
+    {
+        <div class="col-12 mt-1">
+            @if (Model.Action.Status == ActionStatus.Open && (Model.AssignedToMe || Model.IsAdmin))
+            {
+                <a asp-page="/WorkFlows/Actions/Update" asp-route-caseId="@Model.Action.CaseId" asp-route-actionId="@Model.Action.Id" class="btn btn-sm btn-success">Update Action</a>
+                <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-secondary add-action-note-button">Add Note</button>
+            }
+            @if (Model.Action.Status == ActionStatus.Open && Model.IsAdmin)
+            {
+                <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-secondary reassign-action-button">Reassign</button>
+                <button type="button" data-action-id="@Model.Action.Id.Value" class="btn btn-sm btn-danger cancel-action-button">Mark Cancelled</button>
+            }
+            <button type="button" data-toggle="collapse" data-target="#@notesDiv" aria-expanded="false" aria-controls="@notesDiv" class="btn btn-sm btn-primary">Show Notes</button>
+        </div>
+    }
+    <div class="col-12 mt-3">
+        @Model.Action.Description
+    </div>
+    <div class="col-6 mt-3">
+        <DisplayCaseActionDetailsViewComponent action="@Model.Action"></DisplayCaseActionDetailsViewComponent>
+    </div>
+    <div class="col-6 mt-3">
+        <dl>
+            <dt>Created</dt>
+            <dd>@Model.Action.CreatedAt.ToString("dd/MM/yyyy h:mm tt")</dd>
+
+            <dt>Assigned To</dt>
+            <dd>@Model.Action.AssignedTo</dd>
+
+            <dt>Assigned</dt>
+            <dd>@Model.Action.AssignedAt.ToString("dd/MM/yyyy h:mm tt")</dd>
+
+            <dt>Status</dt>
+            <dd>@Model.Action.Status.Name</dd>
+        </dl>
+    </div>
+    <div class="col-12 mt-2 collapse" id="@notesDiv">
+        <strong>Notes:</strong>
+        @foreach (var note in Model.Action.Notes.OrderBy(note => note.SubmittedAt))
+        {
+            <div class="col-12 alert alert-info">
+                <span>@note.SubmittedBy : @note.SubmittedAt.ToString("dd/MM/yyyy h:mm tt")</span>
+                <p class="mb-0">@note.Note</p>
+            </div>
+        }
+    </div>
+</div>

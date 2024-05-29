@@ -1,0 +1,32 @@
+﻿@model Constellation.Presentation.Shared.Pages.Shared.Components.ActionUpdateForm.CreateSentralEntryActionViewModel
+
+<form asp-page-handler="UpdateSentralEntryAction" method="post">
+    <div class="border border-success row mt-1 pb-1">
+        <div class="col-12 border-bottom border-dark py-1"><strong>Update Action</strong></div>
+        <div class="col-12 mt-1">
+            <button type="submit" class="btn btn-sm btn-success">Save</button>
+            <a href="javascript:history.go(-1)" class="btn btn-sm btn-danger mr-3">Go Back</a>
+        </div>
+        <div class="col-12 mt-3">
+            @if (Model.NotRequiredAllowed)
+            {
+                <div class="form-group row">
+                    <label asp-for="NotRequired" class="col-md-2">Entry Not Required</label>
+                    <div class="col-md-5">
+                        <input asp-for="NotRequired" class="form-control" />
+                        <span asp-validation-for="NotRequired" class="text-danger"></span>
+                        <span class="text-danger">By marking this action as Not Required you are affirming that the student has no outstanding work in the indicated class despite their attendance issues, and that no Letter of Concern or N-Award Warning is required.</span>
+                    </div>
+                </div>
+            }
+                
+            <div class="form-group row">
+                <label asp-for="IncidentNumber" class="col-md-2">Sentral Incident Number</label>
+                <div class="col-md-5">
+                    <input asp-for="IncidentNumber" class="form-control" />
+                    <span asp-validation-for="IncidentNumber" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

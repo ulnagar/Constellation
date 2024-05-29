@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.GroupTutorials.Tutorials;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.GroupTutorials.AddStudentToRoll;
 using Constellation.Application.GroupTutorials.GetTutorialRollWithDetailsById;
 using Constellation.Application.GroupTutorials.RemoveStudentFromTutorialRoll;
@@ -9,12 +10,12 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Pages.Shared.Components.TutorialRollAddStudent;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Pages.Shared.Components.TutorialRollAddStudent;
 
 [Authorize(Policy = AuthPolicies.CanViewGroupTutorials)]
 public class RollModel : BasePageModel

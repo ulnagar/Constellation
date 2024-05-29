@@ -84,7 +84,9 @@ builder.Services.AddHangfire((provider, configuration) => configuration
     }));
 GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
 
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages()
+    .AddApplicationPart(Constellation.Presentation.Staff.AssemblyReference.Assembly);
+
 builder.Services.AddMvc()
     .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 

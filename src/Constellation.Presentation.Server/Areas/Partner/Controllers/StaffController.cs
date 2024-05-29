@@ -12,9 +12,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
 using Constellation.Application.Offerings.GetSessionListForTeacher;
 using Constellation.Presentation.Server.Areas.Partner.Models;
-using Constellation.Presentation.Server.BaseModels;
 using Constellation.Presentation.Server.Helpers.Attributes;
-using Constellation.Presentation.Server.Pages.Shared.Components.TeacherAddFaculty;
 using Core.Models.Faculty;
 using Core.Models.Faculty.Identifiers;
 using Core.Models.Faculty.Repositories;
@@ -25,6 +23,7 @@ using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Presentation.Shared.Pages.Shared.Components.TeacherAddFaculty;
 
 [Area("Partner")]
 [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]

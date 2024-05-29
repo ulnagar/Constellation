@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Subject.Pages.GroupTutorials.Tutorials;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.GroupTutorials.CreateGroupTutorial;
 using Constellation.Application.GroupTutorials.EditGroupTutorial;
 using Constellation.Application.GroupTutorials.GetTutorialById;

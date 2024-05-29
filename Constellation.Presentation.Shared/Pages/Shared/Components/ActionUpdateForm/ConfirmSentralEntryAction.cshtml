@@ -1,0 +1,21 @@
+﻿@model Constellation.Presentation.Shared.Pages.Shared.Components.ActionUpdateForm.ConfirmSentralEntryActionViewModel
+
+<form asp-page-handler="UpdateConfirmEntryAction" method="post">
+    <div class="border border-success row mt-1 pb-1">
+        <div class="col-12 border-bottom border-dark py-1"><strong>Update Action</strong></div>
+        <div class="col-12 mt-1">
+            <button type="submit" class="btn btn-sm btn-success">Save</button>
+            <a href="javascript:history.go(-1)" class="btn btn-sm btn-danger mr-3">Go Back</a>
+        </div>
+        <div class="col-12 mt-3">
+            <div class="form-group row">
+                <label asp-for="Confirmed" class="col-md-2">Entry Confirmed</label>
+                <div class="col-md-5">
+                    <input asp-for="Confirmed" class="form-control" />
+                    <span asp-validation-for="Confirmed" class="text-danger"></span>
+                    <span class="text-danger">By marking this action as Confirmed you are affirming that the classroom teacher has correctly created a Sentral Incident for outstanding work in the indicated class, or that such an entry was not required.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

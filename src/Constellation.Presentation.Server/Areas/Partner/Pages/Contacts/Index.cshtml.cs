@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Partner.Pages.Contacts;
 
+using Application.Common.PresentationModels;
 using Application.DTOs;
 using Application.StaffMembers.Models;
 using Constellation.Application.Contacts.ExportContactList;
@@ -13,11 +14,11 @@ using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Shared.Models;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Staff.Shared.Models;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel

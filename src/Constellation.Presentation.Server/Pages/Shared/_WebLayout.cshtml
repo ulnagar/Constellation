@@ -1,4 +1,4 @@
-﻿@model Constellation.Presentation.Server.BaseModels.IBaseModel
+﻿@model Constellation.Application.Common.PresentationModels.IBaseModel
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,7 +37,7 @@
     <script src="~/lib/jquery-sortablejs/jquery-sortable.min.js"></script>
 </head>
 <body>
-    @await Html.PartialAsync("_NavBar", Model) 
+    @await Html.PartialAsync("_NavBar") 
 
     <div id="main-container" class="container">
         <div class="pb-3">

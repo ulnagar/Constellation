@@ -1,19 +1,19 @@
 namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.AdminDashboards.AddUserToRole;
 using Constellation.Application.AdminDashboards.RemoveUserFromRole;
-using Constellation.Application.GroupTutorials.GetTutorialWithDetailsById;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Pages.Shared.Components.RoleAddUser;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Pages.Shared.Components.RoleAddUser;
 
 [Authorize(Policy = AuthPolicies.IsSiteAdmin)]
 public class RoleModel : BasePageModel

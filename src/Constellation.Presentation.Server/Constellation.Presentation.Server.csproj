@@ -35,6 +35,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Constellation.Presentation.Shared\Constellation.Presentation.Shared.csproj" />
+    <ProjectReference Include="..\..\Constellation.Presentation.Staff\Constellation.Presentation.Staff.csproj" />
     <ProjectReference Include="..\Constellation.Application\Constellation.Application.csproj" />
     <ProjectReference Include="..\Constellation.Core\Constellation.Core.csproj" />
     <ProjectReference Include="..\Constellation.Infrastructure.Templates\Constellation.Infrastructure.Templates.csproj" />

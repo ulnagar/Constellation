@@ -1,0 +1,240 @@
+﻿@page
+
+@model Constellation.Presentation.Staff.Areas.SchoolAdmin.Pages.WorkFlows.Reports.AttendanceModel
+
+@using Constellation.Core.Extensions
+@using Constellation.Presentation.Staff.Areas.SchoolAdmin.Pages.WorkFlows.Reports
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+
+<h2>Attendance Percentages</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-page-handler="CreateWorkFlows" id="pageForm">
+    <div class="d-none" id="formInputs"></div>
+
+    <table id="attendanceData" class="table-striped custom-data-table w-100">
+        <thead>
+        <tr>
+            <th>Band</th>
+            <th>Name</th>
+            <th>School</th>
+            <th>Value</th>
+            <th>Graph</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+
+        @foreach (var entry in Model.Students)
+        {
+            var actionType = entry.ExistingCase ? AttendanceModel.WorkFlowNeeded.ActionType.Update : AttendanceModel.WorkFlowNeeded.ActionType.Create;
+
+            <tr data-student-id="@entry.StudentId" data-action-type="@actionType">
+                <td>@entry.Severity.Name</td>
+                <td data-order="@entry.Name.SortOrder">
+                    @if (entry.ExistingCase)
+                    {
+                        <i class="fal fa-vote-yea"></i>
+                        @:&nbsp;
+                    }
+                    @entry.Name.DisplayName (@entry.Grade.AsName())
+                </td>
+                <td>@entry.SchoolName</td>
+                <td>@entry.WeekZeroValue</td>
+                <td>
+                    <canvas
+                        class="sparkline"
+                        width="100"
+                        height="50"
+                        id="graph-@entry.StudentId"
+                        data-week-zero="@entry.WeekZeroValue"
+                        data-week-one="@entry.WeekOneValue"
+                        data-week-two="@entry.WeekTwoValue"
+                        data-week-three="@entry.WeekThreeValue"
+                        data-week-four="@entry.WeekFourValue"></canvas>
+                </td>
+                <td></td>
+            </tr>
+        }
+        </tbody>
+        <tfoot>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th>
+                <button id="submit" type="submit" class="btn btn-success">Create WorkFlows</button>
+            </th>
+        </tr>
+        </tfoot>
+    </table>
+</form>
+
+<script>
+    var table;
+
+    $('#attendanceData tbody tr').on('click', function (e) {
+        var studentId = $(this).data('studentId');
+        var actionType = $(this).data('actionType');
+
+        $(this).toggleClass('selected');
+
+        if ($(this).hasClass('selected')) {
+            // newly added, create entries
+
+            var rowIndex = $('tr.selected').length - 1;
+
+            var inputIndex = $('#formInputs input[id^=i-entry]').length;
+
+            var index = Math.max(rowIndex, inputIndex);
+
+            var studentIdInput = $('<input>')
+                .attr({
+                    id: 'i-entry-' + studentId,
+                    type: 'hidden',
+                    name: 'Entries[' + index + '].StudentId',
+                    value: studentId
+                });
+
+            studentIdInput.appendTo('#formInputs');
+
+            var actionTypeInput = $('<input>')
+                .attr({
+                    id: 'a-entry-' + studentId,
+                    type: 'hidden',
+                    name: 'Entries[' + index + '].Type',
+                    value: actionType
+                });
+
+            actionTypeInput.appendTo('#formInputs');
+        }
+        else {
+            // recently removed, delete entries
+
+            $('#i-entry-' + studentId).remove();
+            $('#a-entry-' + studentId).remove();
+
+            var inputs = $('[id^="i-entry-"]');
+
+            var i = 0;
+
+            $.each(inputs, function (index, value) {
+                $(this).attr('name', 'Entries[' + i + '].StudentId');
+
+                var currentStudentId = $(this).attr('id').match(/\d+/);
+                $('#a-entry-' + currentStudentId).attr('name', 'Entries[' + i + '].Type');
+
+                i++;
+            });
+        }
+    });
+
+    $('#pageForm').on('submit', function (e) {
+        var inputs = $('[id^="i-entry-"]');
+
+        var i = 0;
+
+        $.each(inputs, function (index, value) {
+            $(this).attr('name', 'Entries[' + i + '].StudentId');
+
+            var currentStudentId = $(this).attr('id').match(/\d+/);
+            $('#a-entry-' + currentStudentId).attr('name', 'Entries[' + i + '].Type');
+
+            i++;
+        });
+    });
+
+    $(document).ready(function () {
+        $('.sparkline').each(function () {
+            var weekZero = $(this).data('weekZero');
+            var weekOne = $(this).data('weekOne');
+            var weekTwo = $(this).data('weekTwo');
+            var weekThree = $(this).data('weekThree');
+            var weekFour = $(this).data('weekFour');
+
+            var elemId = $(this).prop('id');
+
+            var object = [
+                weekFour,
+                weekThree,
+                weekTwo,
+                weekOne,
+                weekZero
+            ];
+
+            showGraph(elemId, object, object);
+        });
+
+        table = $('.custom-data-table')
+            .DataTable({
+                "order": [],
+                "rowGroup": {
+                    "dataSrc": 0
+                },
+                "columnDefs": [
+                    { "visible": false, "targets": 0 }
+                ]
+            });
+    });
+
+    function showGraph(elementId, labels, values) {
+        ctx = document.getElementById(elementId).getContext('2d');
+        chart = new Chart(ctx,
+            {
+                type: 'line',
+                data:
+                {
+                    labels: labels,
+                    datasets:
+                        [
+                            {
+                                data: values,
+                                fill: true,
+                                pointRadius: 0,
+                                spanGaps: true,
+                                tension: 0.2
+                            }
+                        ]
+                },
+                options: {
+                    responsive: false,
+                    borderColor: '#434343',
+                    borderWidth: 1.5,
+                    plugins:
+                    {
+                        legend:
+                        {
+                            display: false,
+                            labels: {
+                                display: false
+                            }
+                        },
+                        tooltips:
+                        {
+                            enabled: false
+                        },
+                    },
+                    scales:
+                    {
+                        yAxis:
+                        {
+                            display: false,
+                            min: 0,
+                            max: 100
+                        },
+                        xAxis:
+                        {
+                            display: false
+                        }
+                    }
+                }
+            });
+    };
+</script>

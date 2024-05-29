@@ -5,11 +5,11 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Pages.Shared.Components.TeacherAddFaculty;
 using Core.Models.Faculty.Identifiers;
 using Core.Models.Faculty.ValueObjects;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.SchoolContacts.Identifiers;
+using Presentation.Shared.Pages.Shared.Components.TeacherAddFaculty;
 using System.ComponentModel.DataAnnotations;
 
 public class Staff_DetailsViewModel : BaseViewModel

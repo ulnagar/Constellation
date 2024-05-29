@@ -1,0 +1,117 @@
+﻿@page
+
+@model Constellation.Presentation.Staff.Areas.Home.Pages.DashboardModel
+
+<style>
+    .quick-links {
+        width: 27%;
+        margin-right: 3%;
+        float: left;
+    }
+
+    .classwork-notifications {
+        width: 70%;
+        float: right;
+    }
+
+    .page-heading {
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid orange;
+    }
+</style>
+
+<div class="page-heading">
+    <h2 class="text-center m-2">Welcome, @Model.UserName</h2>
+    
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <div class="alert alert-success">
+            <span><span class="font-weight-bold">Daily Affirmation:</span> @Model.Message</span>
+        </div>
+    }
+</div>
+
+<div class="quick-links">
+    <h3>Quick Links</h3>
+    
+    <a asp-page="Index" asp-area="Staff" class="btn btn-success btn-block">Test Page</a>
+    
+    @if (Model.IsAdmin)
+    {
+        <a class="btn btn-success btn-block" href="/hangfire">Hangfire</a>
+        <a asp-page="HangfireDashboard" asp-area="Admin" class="btn btn-success btn-block">Job Activation</a>
+    }
+
+    <a class="btn btn-success btn-block" asp-page="/Training/Staff/Index" asp-route-staffId="@Model.StaffId" asp-area="SchoolAdmin">Mandatory Training <span class="badge badge-light">@Model.ExpiringTraining</span><span class="sr-only">training certificates expiring soon</span></a>
+    
+    @foreach (var stocktake in Model.ActiveStocktakeEvents)
+    {
+        <a class="btn btn-warning btn-block" asp-area="Equipment" asp-controller="Stocktake" asp-action="StaffDashboard" asp-route-id="@stocktake.Id">@stocktake.Name</a>
+    }
+
+    @foreach (var entry in @Model.Classes.OrderBy(entry => entry.Key))
+    {
+        <a class="btn btn-secondary btn-block" asp-area="Subject" asp-page="/Offerings/Details" asp-route-id="@entry.Value">@entry.Key</a>
+    }
+</div>
+
+<div class="main-content">
+    <div class="alert alert-info alert-dismissible fade show feature-alert d-none" data-version="1.14.4">
+        <h4 class="alert-heading">New Features!</h4>
+        <p>The latest feature added to Constellation is the Third Party Consent. You can now see whether students have permission to use third party applications by selecting the SchoolAdmin menu above, then the Third Party Consent menu option.</p>
+        <p>Please be patient while we collect permission from parents. If you have any questions, please contact the Technology Support Team at <a href="mailto:support@aurora.nsw.edu.au" class="alert-link">support@aurora.nsw.edu.au</a></p>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    
+    @if (Model.ActiveStocktakeEvents.Count > 0)
+    {
+        <div class="alert alert-info text-left mt-3" role="alert">
+            <h4 class="alert-heading">Stocktake</h4>
+            <p>Please take the time to register your Aurora College equipment in the current stocktake.</p>
+            @foreach (var stocktake in Model.ActiveStocktakeEvents)
+            {
+                <a class="alert-link" asp-area="Equipment" asp-controller="Stocktake" asp-action="StaffDashboard" asp-route-id="@stocktake.Id">@stocktake.Name</a>
+            }
+        </div>
+    }
+    
+    <div class="row row-cols-1 row-cols-md-3" id="sortable-cards">
+        <vc:show-dashboard-widgets user="@Model.User" />
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            $('#sortable-cards').sortable({
+                group: 'dashboard-cards',
+                store: {
+                    get: function (sortable) {
+                        var order = localStorage.getItem(sortable.options.group.name);
+                        return order ? order.split('|') : [];
+                    },
+                    set: function (sortable) {
+                        var order = sortable.toArray();
+                        localStorage.setItem(sortable.options.group.name, order.join('|'));
+                    }
+                }
+            });
+
+            var featureAlert = $('.feature-alert');
+            var version = featureAlert.data('version');
+
+            if (localStorage.getItem('feature-alert-' + version) === null) 
+            {
+                featureAlert.removeClass('d-none');
+
+                featureAlert.on('closed.bs.alert', function () {
+                    localStorage.setItem('feature-alert-' + version, 'closed');
+                });
+            }
+        });
+    </script>
+}

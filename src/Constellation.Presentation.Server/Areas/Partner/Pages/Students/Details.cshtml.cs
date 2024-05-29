@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Partner.Pages.Students;
 
+using Application.Common.PresentationModels;
 using Application.Students.GetLifecycleDetailsForStudent;
 using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
 using Constellation.Application.Assets.GetDevicesAllocatedToStudent;

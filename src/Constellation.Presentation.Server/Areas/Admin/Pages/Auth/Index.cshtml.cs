@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.AdminDashboards.AuditUser;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;

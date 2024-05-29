@@ -1,6 +1,5 @@
 ﻿@using Constellation.Application.Models.Auth
 
-@model Constellation.Presentation.Server.BaseModels.IBaseModel
 <nav class="navbar navbar-expand-xl navbar-toggleable-xl navbar-dark bg-dark box-shadow fixed-top">
     <div class="container">
         <a class="navbar-brand" asp-area="Home" asp-page="/Dashboard"><img src="~/logo.svg" class="nav-bar-logo d-inline-block align-middle" />Constellation</a>
@@ -80,7 +79,6 @@
                     var loggedIn = User.Identity.IsAuthenticated;
                     var isAdmin = User.IsInRole(AuthRoles.Admin);
                 }
-                
                 <vc:class-list-nav-bar></vc:class-list-nav-bar>
 
                 <li class="nav-item dropdown">

@@ -1,0 +1,107 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.SchoolAdmin.Pages.Awards.ChangesModel
+
+@using Constellation.Application.Awards.Enums
+@using Constellation.Core.Extensions
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+
+<h2>Student Award Changes</h2>
+
+@{
+    var all_style = "btn-outline-secondary";
+    var additions_style = all_style;
+    var overages_style = all_style;
+
+    switch (Model.Filter)
+    {
+        case AwardsFilter.Additions:
+            additions_style = "btn-primary";
+            break;
+        case AwardsFilter.Overages:
+            overages_style = "btn-primary";
+            break;
+        default:
+            all_style = "btn-primary";
+            break;
+    }
+}
+
+<div class="page-menu">
+    <div class="btn-group" role="group">
+        <a asp-route-filter="@AwardsFilter.All" class="btn @all_style">All</a>
+        <a asp-route-filter="@AwardsFilter.Additions" class="btn @additions_style">Additions</a>
+        <a asp-route-filter="@AwardsFilter.Overages" class="btn @overages_style">Overages</a>
+    </div>
+    
+    <a asp-page-handler="AuditValues" class="btn btn-danger">Audit Calculations</a>
+</div>
+
+<hr />
+
+@foreach (var entry in Model.AwardStatistics.OrderBy(award => award.Grade))
+{
+    <h4>@entry.Name.DisplayName (@entry.Grade.AsName())</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Astras</th>
+                <th>Stellars</th>
+                <th>Galaxies</th>
+                <th>Universals</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Awarded</th>
+                <td>@entry.AwardedAstras</td>
+                <td>@entry.AwardedStellars</td>
+                <td>@entry.AwardedGalaxies</td>
+                <td>@entry.AwardedUniversals</td>
+            </tr>
+            <tr>
+                <th>Calculated</th>
+                <td></td>
+                @if (entry.CalculatedStellars > entry.AwardedStellars)
+                {
+                    <td class="Over">@entry.CalculatedStellars</td>
+                }
+                else if (entry.CalculatedStellars < entry.AwardedStellars)
+                {
+                    <td class="Under">@entry.CalculatedStellars</td>
+                }
+                else
+                {
+                    <td>@entry.CalculatedStellars</td>
+                }
+
+                @if (entry.CalculatedGalaxies > entry.AwardedGalaxies)
+                {
+                    <td class="Over">@entry.CalculatedGalaxies</td>
+                }
+                else if (entry.CalculatedGalaxies < entry.AwardedGalaxies)
+                {
+                    <td class="Under">@entry.CalculatedGalaxies</td>
+                }
+                else
+                {
+                    <td>@entry.CalculatedGalaxies</td>
+                }
+
+                @if (entry.CalculatedUniversals > entry.AwardedUniversals)
+                {
+                    <td class="Over">@entry.CalculatedUniversals</td>
+                }
+                else if (entry.CalculatedUniversals < entry.AwardedUniversals)
+                {
+                    <td class="Under">@entry.CalculatedUniversals</td>
+                }
+                else
+                {
+                    <td>@entry.CalculatedUniversals</td>
+                }
+            </tr>
+        </tbody>
+    </table>
+    <br />
+}

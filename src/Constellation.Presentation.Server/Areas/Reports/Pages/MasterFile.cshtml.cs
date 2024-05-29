@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Reports.Pages;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.ExternalDataConsistency;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
