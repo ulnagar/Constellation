@@ -1,10 +1,9 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Application.Assets.ImportAssetsFromFile;
+using Application.Common.PresentationModels;
 using Application.Interfaces.Repositories;
 using BaseModels;
-using Constellation.Application.Training.Modules.ProcessTrainingImportFile;
-using Constellation.Presentation.Server.Helpers.Validation;
 using Core.Abstractions.Clock;
 using Core.Models;
 using Core.Models.Assets;
@@ -16,7 +15,7 @@ using Core.Models.Students.Repositories;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
+using Shared.Helpers.Attributes;
 
 public class IndexModel : BasePageModel
 {

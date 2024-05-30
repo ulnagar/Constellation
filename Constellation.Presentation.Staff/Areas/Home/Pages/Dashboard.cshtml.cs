@@ -30,7 +30,6 @@ public class DashboardModel : BasePageModel
     public string StaffId { get; set; } = string.Empty;
 
     public string Message { get; set; } = string.Empty;
-    public IReadOnlyList<StocktakeEventResponse> ActiveStocktakeEvents { get; set; }
 
     public IReadOnlyList<StocktakeEventResponse> ActiveStocktakeEvents { get; set; } =
         new List<StocktakeEventResponse>();

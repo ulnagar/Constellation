@@ -20,14 +20,27 @@ a.navbar-brand {
 .sidebar-layout .sidebar-sticky {
     position: sticky;
     top: 0;
-    height: calc(100vh - 120px);
+    height: calc(100vh - 121px);
     overflow-x: hidden;
     overflow-y: auto;
 }
 
-.sidebar-layout .sidebar-heading {
-    text-align: center;
+#accordion .card {
+    border: none;
 }
+
+#accordion .card-header {
+    padding: 0;
+}
+
+#accordion .card-body {
+    background-color: rgba(0,0,0,.03);
+    padding: 0;
+}
+
+/*.sidebar-layout .sidebar-heading {
+    text-align: center;
+}*/
 
 .sidebar-layout .nav-item {
     /*font-size: 0.9rem;*/
