@@ -47,7 +47,7 @@ public class IndexModel : BasePageModel
             Error = new()
             {
                 Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
             };
 
             return Page();
@@ -62,7 +62,7 @@ public class IndexModel : BasePageModel
             Error = new()
             {
                 Error = result.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
             };
 
             return Page();
@@ -80,7 +80,7 @@ public class IndexModel : BasePageModel
             Error = new()
             {
                 Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
             };
 
             return Page();
@@ -96,7 +96,7 @@ public class IndexModel : BasePageModel
             Error = new()
             {
                 Error = result.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
             };
 
             return Page();
@@ -114,7 +114,7 @@ public class IndexModel : BasePageModel
             Error = new ErrorDisplay
             {
                 Error = contactRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
             };
 
             return Page();

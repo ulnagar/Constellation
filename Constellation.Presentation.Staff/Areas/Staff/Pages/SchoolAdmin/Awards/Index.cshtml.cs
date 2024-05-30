@@ -61,7 +61,7 @@ public class IndexModel : BasePageModel
             Error = new()
             {
                 Error = awardRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Home/Dashboard", values: new { area = "Staff" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
             };
 
             return;

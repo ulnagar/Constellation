@@ -55,7 +55,7 @@ public class IndexModel : BasePageModel
                 Error = new ErrorDisplay
                 {
                     Error = recordsRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Home" })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
                 };
 
                 return Page();

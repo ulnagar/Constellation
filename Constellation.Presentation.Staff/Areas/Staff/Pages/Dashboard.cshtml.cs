@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace Constellation.Presentation.Staff.Areas.Home.Pages;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages;
 
 using Application.Affirmations;
 using Application.Stocktake.GetCurrentStocktakeEvents;
@@ -10,7 +10,6 @@ using Constellation.Application.StaffMembers.GetStaffByEmail;
 using Constellation.Application.StaffMembers.Models;
 using Constellation.Core.Shared;
 using Core.Models.Offerings.Identifiers;
-using Hangfire.States;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -57,17 +56,13 @@ public class DashboardModel : BasePageModel
         Result<string> messageRequest = await _mediator.Send(new GetAffirmationQuery(teacherRequest.Value?.StaffId), cancellationToken);
 
         if (messageRequest.IsSuccess)
-        {
             Message = messageRequest.Value;
-        }
 
         Result<List<StocktakeEventResponse>>? stocktakeEvents = await _mediator.Send(new GetCurrentStocktakeEventsQuery(), cancellationToken);
         ActiveStocktakeEvents = stocktakeEvents.IsSuccess ? stocktakeEvents.Value : new List<StocktakeEventResponse>();
 
         if (teacherRequest.IsFailure)
-        {
             return Page();
-        }
 
         StaffId = teacherRequest.Value!.StaffId;
         UserName = $"{teacherRequest.Value.FirstName} {teacherRequest.Value.LastName}";
