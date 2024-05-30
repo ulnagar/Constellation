@@ -55,11 +55,11 @@ public static class DomainErrors
 
     public static class Auth
     {
-        public static readonly Error UserNotFound = new Error(
+        public static readonly Error UserNotFound = new(
             "Auth.UserNotFound",
             "Cannot find a user that matches the entry");
 
-        public static readonly Error RoleNotFound = new Error(
+        public static readonly Error RoleNotFound = new(
             "Auth.RoleNotFound",
             "Cannot find a role that matches the entry");
 
@@ -251,7 +251,7 @@ public static class DomainErrors
                 "GroupTutorials.TutorialRoll.NotFound",
                 $"A roll with the Id {id.Value} could not be found");
 
-            public static readonly Error SubmitInvalidStatus = new Error(
+            public static readonly Error SubmitInvalidStatus = new(
                 "GroupTutorials.TutorialRoll.SubmitInvalidStatus",
                 "Cannot submit a roll that has been cancelled or previously submitted");
 
@@ -422,7 +422,7 @@ public static class DomainErrors
 
     public static class Permissions
     {
-        public static readonly Error Unauthorised = new Error(
+        public static readonly Error Unauthorised = new(
             "Permissions.Unauthorised",
             "You do not have the required permissions to perform this action");
     }
@@ -431,29 +431,29 @@ public static class DomainErrors
     {
         public static class EmailAddress
         {
-            public static readonly Error EmailEmpty = new Error(
+            public static readonly Error EmailEmpty = new(
                 "ValueObjects.EmailAddress.EmailEmpty",
                 "Email Address must not be empty.");
 
-            public static readonly Error EmailInvalid = new Error(
+            public static readonly Error EmailInvalid = new(
                 "ValueObjects.EmailAddress.EmailInvalid",
                 "Email Address is not valid.");
         }
 
         public static class EmailRecipient
         {
-            public static readonly Error NameEmpty = new Error(
+            public static readonly Error NameEmpty = new(
                 "ValueObjects.EmailRecipient.NameEmpty",
                 "Email Recipient must have a valid name.");
         }
 
         public static class Name
         {
-            public static readonly Error FirstNameEmpty = new Error(
+            public static readonly Error FirstNameEmpty = new(
                 "ValueObjects.Name.FirstNameEmpty",
                 "First Name must not be empty.");
 
-            public static readonly Error LastNameEmpty = new Error(
+            public static readonly Error LastNameEmpty = new(
                 "ValueObjects.Name.LastNameEmpty",
                 "Last Name must not be empty.");
         }
@@ -462,7 +462,7 @@ public static class DomainErrors
         {
             public static readonly Func<Grade, Error> InvalidGrade = grade => new(
                 "ValueObjects.OfferingName.InvalidGrade",
-                $"Invalid grade supplied: {grade.ToString()}");
+                $"Invalid grade supplied: {grade}");
 
             public static readonly Func<string, Error> InvalidCourseCode = code => new(
                 "ValueObjects.OfferingName.InvalidCourseCode",

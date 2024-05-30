@@ -2,7 +2,6 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.WorkFlow;
-using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models;
@@ -11,6 +10,7 @@ using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
 using Core.Models.WorkFlow.Events;
 using Core.Models.WorkFlow.Repositories;
+using Core.Shared;
 using Interfaces.Configuration;
 using Interfaces.Repositories;
 using Microsoft.Extensions.Options;
@@ -53,7 +53,7 @@ internal sealed class AddSendEmailActionForAttendanceCase
         {
             _logger
                 .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(notification.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(notification.CaseId), true)
                 .Warning("Could not create default Action for new Case");
 
             return;

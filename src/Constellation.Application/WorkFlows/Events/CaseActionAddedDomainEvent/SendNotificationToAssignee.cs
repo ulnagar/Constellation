@@ -2,13 +2,13 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.WorkFlow.Errors;
-using Constellation.Core.Shared;
 using Core.Errors;
 using Core.Models;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Events;
 using Core.Models.WorkFlow.Repositories;
+using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Services;
 using Serilog;
@@ -45,7 +45,7 @@ internal sealed class SendNotificationToAssignee
         {
             _logger
                 .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(notification.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(notification.CaseId), true)
                 .Warning("Could not send notification to Assignee for new Action");
 
             return;
@@ -57,7 +57,7 @@ internal sealed class SendNotificationToAssignee
         {
             _logger
                 .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(notification.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(notification.CaseId), true)
                 .Warning("Could not send notification to Assignee for new Action");
 
             return;

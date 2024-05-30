@@ -6,7 +6,7 @@ using System;
 public abstract class CanvasOperation
 {
     public int Id { get; set; }
-    public string UserId { get; protected set; }
+    public string UserId { get; protected set; } = string.Empty;
     public DateTime CreatedAt { get; private set; } = DateTime.Now;
     public DateTime ScheduledFor { get; protected set; } = DateTime.Now;
     public bool IsCompleted { get; private set; }
@@ -34,10 +34,10 @@ public class CreateUserCanvasOperation : CanvasOperation
         EmailAddress = emailAddress;
     }
 
-    public string FirstName { get; private set; }
-    public string LastName { get; private set; }
-    public string PortalUsername { get; private set; }
-    public string EmailAddress { get; private set; }
+    public string FirstName { get; private set; } = string.Empty;
+    public string LastName { get; private set; } = string.Empty;
+    public string PortalUsername { get; private set; } = string.Empty;
+    public string EmailAddress { get; private set; } = string.Empty;
 }
 
 public class ModifyEnrolmentCanvasOperation : CanvasOperation
@@ -62,9 +62,9 @@ public class ModifyEnrolmentCanvasOperation : CanvasOperation
             }
     }
 
-    public CanvasUserType UserType { get; private set; }
-    public string CourseId { get; private set; }
-    public CanvasAction Action { get; private set; }
+    public CanvasUserType UserType { get; private set; } = CanvasUserType.Student;
+    public string CourseId { get; private set; } = string.Empty;
+    public CanvasAction Action { get; private set; } = CanvasAction.Add;
 }
 
 public class DeleteUserCanvasOperation : CanvasOperation

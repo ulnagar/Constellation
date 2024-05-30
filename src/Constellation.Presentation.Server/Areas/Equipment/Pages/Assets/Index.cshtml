@@ -1,0 +1,111 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.Equipment.Pages.Assets.IndexModel
+
+@using Constellation.Application.Assets.Enums
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult canManageAssets = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAssets);
+}
+
+<h2>Assets</h2>
+
+<div class="page-menu">
+    @{
+        var allStyle = "btn-outline-secondary";
+        var activeStyle = allStyle;
+        var disposedStyle = allStyle;
+
+        switch (Model.Filter)
+        {
+            case AssetFilter.All:
+                allStyle = "btn-primary";
+                break;
+            case AssetFilter.Active:
+                activeStyle = "btn-primary";
+                break;
+            case AssetFilter.Disposed:
+                disposedStyle = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-route-filter="@AssetFilter.All" class="btn @allStyle">All</a>
+        <a asp-route-filter="@AssetFilter.Active" class="btn @activeStyle">Active</a>
+        <a asp-route-filter="@AssetFilter.Disposed" class="btn @disposedStyle">Disposed</a>
+    </div>
+
+    @if (canManageAssets.Succeeded)
+    {
+        <a asp-page-handler="export" class="btn btn-warning">Export</a>
+
+        <a asp-page="/Assets/Upsert" asp-area="Equipment" class="btn btn-success">Create</a>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th>Asset Number</th>
+            <th>Serial Number</th>
+            <th>Model</th>
+            <th>Status</th>
+            <th>User</th>
+            <th>Location</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Assets.OrderBy(item => item.AssetNumber))
+        {
+            <tr>
+                <td>@item.AssetNumber</td>
+                <td data-order="@item.SerialNumber" data-search="@item.SerialNumber">
+                    @if (item.SerialNumber.Length > 10)
+                    {
+                        <span data-toggle="tooltip" data-placement="bottom" title="@item.SerialNumber">@item.SerialNumber[..10] ...</span>
+                    }
+                    else
+                    {
+                        <span>@item.SerialNumber</span>
+                    }
+                </td>
+                <td>@item.ModelDescription</td>
+                <td>@item.Status</td>
+                <td>@item.AllocatedTo</td>
+                <td>
+                    @if (!string.IsNullOrWhiteSpace(item.LocationType))
+                    {
+                        @item.LocationType<br />
+                        @if (item.LocationName.Contains(','))
+                        {
+                            var lines = item.LocationName.Split(',');
+                            var combined = string.Join("<br />", lines.Select(line => line.Trim()));
+                            <span class="text-nowrap">@Html.Raw(combined)</span>
+                        }
+                        else
+                        {
+                            @item.LocationName
+                        }
+                    }
+                </td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <a asp-page="/Assets/Details" asp-route-assetNumber="@item.AssetNumber" asp-area="Equipment" class="dropdown-item">Details</a>
+                            
+                            @if (canManageAssets.Succeeded)
+                            {
+                                <a asp-page="/Assets/Upsert" asp-area="Equipment" asp-route-assetNumber="@item.AssetNumber" class="dropdown-item">Update</a>
+                            }
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

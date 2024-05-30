@@ -6,26 +6,23 @@ using System;
 
 public static class AttendanceValueErrors
 {
-    public static Func<AttendanceValueId, Error> NotFound = id => new(
+    public static readonly Func<AttendanceValueId, Error> NotFound = id => new(
         "AttendanceValue.NotFound",
         $"Could not find an Attendance Value with the Id {id}");
 
-    public static Func<string, Error> NotFoundForStudent = id => new(
+    public static readonly Func<string, Error> NotFoundForStudent = id => new(
         "AttendanceValue.NotFoundForStudent",
         $"Could not find an Attendance Value for the student with Id {id}");
 
-    public static class Create
-    {
-        public static Error EmptyValues => new(
-            "AttendanceValue.Create.EmptyValues",
-            "At least one data value must not be zero");
+    public static readonly Error CreateEmptyValues = new(
+        "AttendanceValue.Create.EmptyValues",
+        "At least one data value must not be zero");
 
-        public static Error MinimumDates => new(
-            "AttendanceValue.Create.MinimumDates",
-            "Start Date and End Date must be valid dates");
+    public static readonly Error CreateMinimumDates = new(
+        "AttendanceValue.Create.MinimumDates",
+        "Start Date and End Date must be valid dates");
 
-        public static Error DateRangeInvalid => new(
-            "AttendanceValue.Create.DateRangeInvalid",
-            "The Start Date must be less than the End Date");
-    }
+    public static readonly Error CreateDateRangeInvalid = new(
+        "AttendanceValue.Create.DateRangeInvalid",
+        "The Start Date must be less than the End Date");
 }

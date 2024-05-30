@@ -53,10 +53,10 @@ internal sealed class UpdateSendEmailActionCommandHandler
         {
             _logger
                 .ForContext(nameof(UpdateSendEmailActionCommand), request, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(request.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(request.CaseId), true)
                 .Warning("Failed to update Action");
 
-            return Result.Failure(CaseErrors.Case.NotFound(request.CaseId));
+            return Result.Failure(CaseErrors.NotFound(request.CaseId));
         }
 
         Action action = item.Actions.FirstOrDefault(action => action.Id == request.ActionId);
@@ -66,10 +66,10 @@ internal sealed class UpdateSendEmailActionCommandHandler
             _logger
                 .ForContext(nameof(UpdateSendEmailActionCommand), request, true)
                 .ForContext(nameof(Case), item, true)
-                .ForContext(nameof(Error), CaseErrors.Action.NotFound(request.ActionId), true)
+                .ForContext(nameof(Error), ActionErrors.NotFound(request.ActionId), true)
                 .Warning("Failed to update Action");
 
-            return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+            return Result.Failure(ActionErrors.NotFound(request.ActionId));
         }
 
         if (action is SendEmailAction emailAction)
@@ -80,7 +80,7 @@ internal sealed class UpdateSendEmailActionCommandHandler
             {
                 MemoryStream stream = new(file.FileData);
 
-                Attachment attachment = new Attachment(stream, file.FileName);
+                Attachment attachment = new(stream, file.FileName);
 
                 attachments.Add(attachment);
             }
@@ -90,9 +90,8 @@ internal sealed class UpdateSendEmailActionCommandHandler
                 request.Sender, 
                 request.Subject, 
                 request.Body,
-                request.Attachments.Any(), 
-                _dateTime.Now, 
-                _currentUserService.UserName);
+                request.Attachments.Count > 0, 
+                _dateTime.Now);
 
             if (updateAction.IsFailure)
             {
@@ -102,7 +101,7 @@ internal sealed class UpdateSendEmailActionCommandHandler
                     .ForContext(nameof(Error), updateAction.Error, true)
                     .Warning("Failed to update Action");
 
-                return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+                return Result.Failure(updateAction.Error);
             }
 
             Result statusUpdate = item.UpdateActionStatus(action.Id, ActionStatus.Completed, _currentUserService.UserName);
@@ -115,7 +114,7 @@ internal sealed class UpdateSendEmailActionCommandHandler
                     .ForContext(nameof(Error), statusUpdate.Error, true)
                     .Warning("Failed to update Action");
 
-                return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+                return Result.Failure(statusUpdate.Error);
             }
 
             await _emailService.SendEnteredEmailForAction(
@@ -135,11 +134,11 @@ internal sealed class UpdateSendEmailActionCommandHandler
             .ForContext(nameof(UpdateSendEmailActionCommand), request, true)
             .ForContext(nameof(Case), item, true)
             .ForContext(nameof(Error),
-                CaseErrors.Action.Update.TypeMismatch(nameof(SendEmailAction), action.GetType().ToString()),
+                ActionErrors.UpdateTypeMismatch(nameof(SendEmailAction), action.GetType().ToString()),
                 true)
             .Warning("Failed to update Action");
 
-        return Result.Failure(CaseErrors.Action.Update.TypeMismatch(nameof(SendEmailAction), action.GetType().ToString()));
+        return Result.Failure(ActionErrors.UpdateTypeMismatch(nameof(SendEmailAction), action.GetType().ToString()));
 
     }
 }

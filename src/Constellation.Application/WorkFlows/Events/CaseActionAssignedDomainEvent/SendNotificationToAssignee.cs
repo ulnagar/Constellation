@@ -1,16 +1,16 @@
 ﻿namespace Constellation.Application.WorkFlows.Events.CaseActionAssignedDomainEvent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Errors;
+using Abstractions.Messaging;
 using Constellation.Core.Models;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Errors;
 using Constellation.Core.Models.WorkFlow.Events;
 using Constellation.Core.Models.WorkFlow.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Errors;
+using Core.Shared;
+using Core.ValueObjects;
+using Interfaces.Services;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +45,7 @@ internal sealed class SendNotificationToAssignee
         {
             _logger
                 .ForContext(nameof(CaseActionAssignedDomainEvent), notification, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(notification.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(notification.CaseId), true)
                 .Warning("Could not send notification to Assignee for new Action");
 
             return;
@@ -57,7 +57,7 @@ internal sealed class SendNotificationToAssignee
         {
             _logger
                 .ForContext(nameof(CaseActionAssignedDomainEvent), notification, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(notification.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(notification.CaseId), true)
                 .Warning("Could not send notification to Assignee for new Action");
 
             return;

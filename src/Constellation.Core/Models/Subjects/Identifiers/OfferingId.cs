@@ -4,8 +4,10 @@ using System;
 
 public sealed record CourseId(Guid Value)
 {
-    public static CourseId FromValue(Guid Value) =>
-        new(Value);
+    public static readonly CourseId Empty = new(Guid.Empty);
+
+    public static CourseId FromValue(Guid value) =>
+        new(value);
 
     public CourseId()
         : this(Guid.NewGuid()) { }

@@ -20,23 +20,15 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>
     public int Value { get; protected init; }
     public string Name { get; protected init; } = string.Empty;
 
-    public static TEnum? FromValue(int value)
-    {
-        return Enumerations.TryGetValue(
-            value,
-            out TEnum? enumeration) ?
-                enumeration :
-                default;
-    }
+    public static TEnum? FromValue(int value) =>
+        Enumerations.GetValueOrDefault(value);
 
-    public static TEnum? FromName(string name)
-    {
-        return Enumerations
+    public static TEnum? FromName(string name) =>
+        Enumerations
             .Values
             .SingleOrDefault(e => e.Name == name);
-    }
 
-    public bool Equals(IntEnumeration<TEnum> other)
+    public bool Equals(IntEnumeration<TEnum>? other)
     {
         if (other is null)
             return false;
@@ -45,27 +37,22 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>
             Value == other.Value;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
-        return obj is IntEnumeration<TEnum> other &&
-            Equals(other);
+        IntEnumeration<TEnum>? other = obj as IntEnumeration<TEnum>;
+        return other != null &&
+               Equals(other);
     }
 
-    public override int GetHashCode()
-    {
-        return Value.GetHashCode();
-    }
+    public override int GetHashCode() => Value.GetHashCode();
 
-    public override string ToString()
-    {
-        return Name;
-    }
+    public override string ToString() => Name;
 
     private static Dictionary<int, TEnum> CreateEnumerations()
     {
-        var enumerationType = typeof(TEnum);
+        Type enumerationType = typeof(TEnum);
 
-        var fieldsForType = enumerationType
+        IEnumerable<TEnum> fieldsForType = enumerationType
             .GetFields(
                 BindingFlags.Public |
                 BindingFlags.Static |
@@ -97,27 +84,19 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
         Order = order;
     }
 
-    public string Value { get; protected init; } = string.Empty;
-    public string Name { get; protected init; } = string.Empty;
-    public int Order { get; protected init; } = 0;
+    public string Value { get; protected init; }
+    public string Name { get; protected init; }
+    public int Order { get; protected init; }
 
-    public static TEnum? FromValue(string value)
-    {
-        return Enumerations.TryGetValue(
-            value,
-            out TEnum? enumeration) ?
-                enumeration :
-                default;
-    }
+    public static TEnum? FromValue(string value) =>
+        Enumerations.GetValueOrDefault(value);
 
-    public static TEnum? FromName(string name)
-    {
-        return Enumerations
+    public static TEnum? FromName(string name) =>
+        Enumerations
             .Values
             .SingleOrDefault(e => e.Name == name);
-    }
 
-    public bool Equals(StringEnumeration<TEnum> other)
+    public bool Equals(StringEnumeration<TEnum>? other)
     {
         if (other is null)
             return false;
@@ -126,40 +105,32 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
             Value == other.Value;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
-        return obj is StringEnumeration<TEnum> other &&
-            Equals(other);
+        StringEnumeration<TEnum>? other = obj as StringEnumeration<TEnum>;
+        return other is not null &&
+               Equals(other);
     }
 
-    public override int GetHashCode()
-    {
-        return Value.GetHashCode();
-    }
+    public override int GetHashCode() => Value.GetHashCode();
 
-    public override string ToString()
-    {
-        return Name;
-    }
+    public override string ToString() => Name;
 
     public int CompareTo(object? obj)
     {
-        TEnum? incomingObject = obj as TEnum;
-
-        if (incomingObject is null)
+        if (obj is not TEnum incomingObject)
             return -1;
 
-        if (incomingObject?.Order == 0)
-            return string.Compare(this.Value, incomingObject?.Value, StringComparison.OrdinalIgnoreCase);
-        else
-            return string.CompareOrdinal(this.Order.ToString(), incomingObject?.Order.ToString());
+        return incomingObject?.Order == 0 
+            ? string.Compare(Value, incomingObject?.Value, StringComparison.OrdinalIgnoreCase) 
+            : string.CompareOrdinal(Order.ToString(), incomingObject?.Order.ToString());
     }
 
     private static Dictionary<string, TEnum> CreateEnumerations()
     {
-        var enumerationType = typeof(TEnum);
+        Type enumerationType = typeof(TEnum);
 
-        var fieldsForType = enumerationType
+        IEnumerable<TEnum> fieldsForType = enumerationType
             .GetFields(
                 BindingFlags.Public |
                 BindingFlags.Static |

@@ -1,17 +1,17 @@
 ﻿namespace Constellation.Application.WorkFlows.UpdateCaseStatus;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Models.WorkFlow.Errors;
 using Constellation.Core.Models.WorkFlow.Repositories;
 using Core.Abstractions.Clock;
+using Core.Errors;
 using Core.Models;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,10 +50,10 @@ internal sealed class UpdateCaseStatusCommandHandler
         {
             _logger
                 .ForContext(nameof(UpdateCaseStatusCommand), request, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(request.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(request.CaseId), true)
                 .Warning("Failed to update Case Status");
 
-            return Result.Failure(CaseErrors.Case.NotFound(request.CaseId));
+            return Result.Failure(CaseErrors.NotFound(request.CaseId));
         }
 
         CaseStatus currentStatus = item.Status;

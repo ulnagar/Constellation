@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 public interface IAttendanceRepository
 {
-    Task<AttendanceValue> GetById(AttendanceValueId id, CancellationToken cancellationToken = default);
+    Task<AttendanceValue?> GetById(AttendanceValueId id, CancellationToken cancellationToken = default);
     Task<List<AttendanceValue>> GetAll(CancellationToken cancellationToken = default);
     Task<List<AttendanceValue>> GetAllRecent(CancellationToken cancellationToken = default);
     Task<List<AttendanceValue>> GetAllForStudent(int year, string studentId, CancellationToken cancellationToken = default);
-    Task<AttendanceValue> GetLatestForStudent(string studentId, CancellationToken cancellationToken = default);
+    Task<AttendanceValue?> GetLatestForStudent(string studentId, CancellationToken cancellationToken = default);
     Task<List<AttendanceValue>> GetAllForDate(DateOnly selectedDate, CancellationToken cancellationToken = default);
     Task<List<AttendanceValue>> GetAllForStudentAndDate(string studentId, DateOnly selectedDate, CancellationToken cancellationToken = default);
     Task<List<AttendanceValue>> GetAllForGrade(int year, Grade selectedGrade, CancellationToken cancellationToken = default);

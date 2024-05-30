@@ -1,11 +1,10 @@
 ﻿namespace Constellation.Application.WorkFlows.UpdateAttendanceCaseDetails;
 
 using Abstractions.Messaging;
-using Constellation.Application.WorkFlows.AddCaseDetailUpdateAction;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Models.WorkFlow.Enums;
 using Core.Abstractions.Services;
+using Core.Errors;
 using Core.Models;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Errors;
@@ -53,14 +52,14 @@ internal sealed class UpdateAttendanceCaseDetailsCommandHandler
         {
             _logger
                 .ForContext(nameof(UpdateAttendanceCaseDetailsCommand), request, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFoundForStudent(request.StudentId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFoundForStudent(request.StudentId), true)
                 .Warning("Failed to update existing Case");
 
-            return Result.Failure(CaseErrors.Case.NotFoundForStudent(request.StudentId));
+            return Result.Failure(CaseErrors.NotFoundForStudent(request.StudentId));
         }
 
         if (!item.Type!.Equals(CaseType.Attendance))
-            return Result.Failure(CaseErrors.Action.Create.CaseTypeMismatch(CaseType.Attendance.Value, item.Type.Value));
+            return Result.Failure(ActionErrors.CreateCaseTypeMismatch(CaseType.Attendance.Value, item.Type.Value));
 
         AttendanceValue value = await _attendanceRepository.GetLatestForStudent(request.StudentId, cancellationToken);
 
@@ -93,7 +92,7 @@ internal sealed class UpdateAttendanceCaseDetailsCommandHandler
         if (action.IsFailure)
         {
             _logger
-                .ForContext(nameof(AddCaseDetailUpdateActionCommand), request, true)
+                .ForContext(nameof(UpdateAttendanceCaseDetailsCommand), request, true)
                 .ForContext(nameof(Error), action.Error, true)
                 .Warning("Could not add Case Detail Update Action to Case");
 

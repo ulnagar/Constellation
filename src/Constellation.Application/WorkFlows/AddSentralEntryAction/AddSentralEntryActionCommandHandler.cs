@@ -1,9 +1,7 @@
 ﻿namespace Constellation.Application.WorkFlows.AddSentralEntryAction;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.StaffMembers.Repositories;
@@ -11,9 +9,11 @@ using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Enums;
 using Constellation.Core.Models.WorkFlow.Errors;
 using Constellation.Core.Models.WorkFlow.Repositories;
+using Core.Errors;
 using Core.Models;
 using Core.Models.Offerings;
 using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,14 +52,14 @@ internal sealed class AddSentralEntryActionCommandHandler
         {
             _logger
                 .ForContext(nameof(AddSentralEntryActionCommand), request, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(request.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(request.CaseId), true)
                 .Warning("Could not add Create Sentral Entry Action to Case");
 
-            return Result.Failure(CaseErrors.Case.NotFound(request.CaseId));
+            return Result.Failure(CaseErrors.NotFound(request.CaseId));
         }
 
         if (!item.Type!.Equals(CaseType.Attendance))
-            return Result.Failure(CaseErrors.Action.Create.CaseTypeMismatch(CaseType.Attendance.Value, item.Type.Value));
+            return Result.Failure(ActionErrors.CreateCaseTypeMismatch(CaseType.Attendance.Value, item.Type.Value));
         
         Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
 

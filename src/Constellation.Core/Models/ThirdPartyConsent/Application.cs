@@ -11,7 +11,8 @@ public sealed class Application : IAuditableEntity
 {
     private readonly List<Consent> _consents = new();
 
-    private Application() { } // Required by EF Core
+    private Application() // Required by EF Core
+    { } 
 
     private Application(
         string name,
@@ -21,7 +22,6 @@ public sealed class Application : IAuditableEntity
         string[] sharedWith,
         bool consentRequired)
     {
-        Id = new();
         Name = name;
         Purpose = purpose;
         InformationCollected = informationCollected;
@@ -30,21 +30,21 @@ public sealed class Application : IAuditableEntity
         ConsentRequired = consentRequired;
     }
 
-    public ApplicationId Id { get; private set; }
-    public string Name { get; private set; }
-    public string Purpose { get; private set; }
-    public string[] InformationCollected { get; private set; }
-    public string StoredCountry { get; private set; }
-    public string[] SharedWith { get; private set; }
+    public ApplicationId Id { get; private set; } = new();
+    public string Name { get; private set; } = string.Empty;
+    public string Purpose { get; private set; } = string.Empty;
+    public string[] InformationCollected { get; private set; } = Array.Empty<string>();
+    public string StoredCountry { get; private set; } = string.Empty;
+    public string[] SharedWith { get; private set; } = Array.Empty<string>();
     public bool ConsentRequired { get; private set; }
     public IReadOnlyList<Consent> Consents => _consents.ToList();
 
-    public string CreatedBy { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; }
+    public string ModifiedBy { get; set; } = string.Empty;
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; private set; }
-    public string DeletedBy { get; set; }
+    public string DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; }
 
     public static Application Create(
@@ -84,13 +84,13 @@ public sealed class Application : IAuditableEntity
         return Result.Success();
     }
     
-    public List<Consent> GetActiveConsents()
+    public List<Consent?> GetActiveConsents()
     {
         List<string> studentIds = _consents
             .Select(consent => consent.StudentId)
             .Distinct()
             .ToList();
-
+        
         return studentIds
             .Select(studentId => 
                 _consents
@@ -105,6 +105,6 @@ public sealed class Application : IAuditableEntity
     {
         IsDeleted = false;
         DeletedAt = DateTime.MinValue;
-        DeletedBy = null;
+        DeletedBy = string.Empty;
     }
 }

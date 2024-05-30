@@ -2,6 +2,7 @@
 
 using Application.Absences.ExportUnexplainedPartialAbsencesReport;
 using Application.Absences.GetAbsencesWithFilterForReport;
+using Application.Assets.ImportAssetsFromFile;
 using Application.Attendance.GenerateAttendanceReportForPeriod;
 using Application.Attendance.GetAttendanceDataFromSentral;
 using Application.Awards.ExportAwardNominations;
@@ -20,6 +21,7 @@ using Application.Training.Models;
 using Application.Training.Modules.GenerateOverallReport;
 using Application.WorkFlows.ExportOpenCaseReport;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Models.Assets;
 using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Extensions;
@@ -60,6 +62,155 @@ public class ExcelService : IExcelService
         IDateTimeProvider dateTime)
     {
         _dateTime = dateTime;
+    }
+
+    public Task<List<ImportAssetDto>> ImportAssetsFromFile(
+        MemoryStream stream,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new(stream);
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets[0];
+
+        int numRows = worksheet.Dimension.Rows;
+
+        List<ImportAssetDto> assets = new();
+
+        for (int row = 2; row <= numRows; row++)
+        {
+            ImportAssetDto entry = new(
+                row,
+                worksheet.Cells[row, 1].GetCellValue<string>(),
+                worksheet.Cells[row, 2].GetCellValue<string>(),
+                worksheet.Cells[row, 3].GetCellValue<string>(),
+                worksheet.Cells[row, 4].GetCellValue<string>(),
+                worksheet.Cells[row, 5].GetCellValue<string>(),
+                worksheet.Cells[row, 6].GetCellValue<string>(),
+                worksheet.Cells[row, 7].GetCellValue<string>(),
+                DateOnly.FromDateTime(worksheet.Cells[row, 8].GetCellValue<DateTime>()),
+                worksheet.Cells[row, 9].GetCellValue<decimal>(),
+                DateOnly.FromDateTime(worksheet.Cells[row, 10].GetCellValue<DateTime>()),
+                worksheet.Cells[row, 11].GetCellValue<string>(),
+                worksheet.Cells[row, 12].GetCellValue<string>(),
+                worksheet.Cells[row, 13].GetCellValue<string>(),
+                worksheet.Cells[row, 14].GetCellValue<string>(),
+                worksheet.Cells[row, 15].GetCellValue<string>());
+
+            assets.Add(entry);
+        }
+
+        excel.Dispose();
+        return Task.FromResult(assets);
+    }
+
+    public async Task<MemoryStream> CreateAssetExportFile(
+        List<Asset> assets,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Sheet 1");
+
+        worksheet.Cells[1, 1].Value = "Asset Number";
+        worksheet.Cells[1, 2].Value = "Serial Number";
+        worksheet.Cells[1, 3].Value = "SAP Equipment Number";
+        worksheet.Cells[1, 4].Value = "Model Number";
+        worksheet.Cells[1, 5].Value = "Model Description";
+        worksheet.Cells[1, 6].Value = "Status";
+        worksheet.Cells[1, 7].Value = "Device Category";
+        worksheet.Cells[1, 8].Value = "Purchase Date";
+        worksheet.Cells[1, 9].Value = "Purchase Cost";
+        worksheet.Cells[1, 10].Value = "Warranty End Date";
+        worksheet.Cells[1, 11].Value = "Location Category";
+        worksheet.Cells[1, 12].Value = "Location Site";
+        worksheet.Cells[1, 13].Value = "Location Room";
+        worksheet.Cells[1, 14].Value = "Responsible Officer";
+        worksheet.Cells[1, 15].Value = "Last Seen";
+        worksheet.Cells[1, 16].Value = "Last Seen By";
+        worksheet.Cells[1, 17].Value = "Notes";
+
+        int row = 2;
+
+        foreach (Asset asset in assets)
+        {
+            worksheet.Cells[row, 1].Value = asset.AssetNumber;
+            worksheet.Cells[row, 2].Value = asset.SerialNumber;
+            worksheet.Cells[row, 3].Value = asset.SapEquipmentNumber;
+            worksheet.Cells[row, 4].Value = asset.ModelNumber;
+            worksheet.Cells[row, 5].Value = asset.ModelDescription;
+            worksheet.Cells[row, 6].Value = asset.Status.Name;
+            worksheet.Cells[row, 7].Value = asset.Category.Name;
+
+            if (asset.PurchaseDate == DateOnly.MinValue)
+            {
+                worksheet.Cells[row, 8].Value = string.Empty;
+            }
+            else
+            {
+                worksheet.Cells[row, 8].Value = asset.PurchaseDate.ToDateTime(TimeOnly.MinValue);
+                worksheet.Cells[row, 8].Style.Numberformat.Format = "dd/MM/yyyy";
+            }
+
+            if (asset.PurchaseCost == 0m)
+            {
+                worksheet.Cells[row, 9].Value = string.Empty;
+            }
+            else 
+            {
+                worksheet.Cells[row, 9].Value = asset.PurchaseCost;
+                worksheet.Cells[row, 9].Style.Numberformat.Format = "_-$* #,##0.00_-;-$* #,##0.00_-;_-$* \"-\"_-;_-@_-";
+            }
+
+            if (asset.WarrantyEndDate == DateOnly.MinValue)
+            {
+                worksheet.Cells[row, 10].Value = string.Empty;
+            }
+            else
+            {
+                worksheet.Cells[row, 10].Value = asset.WarrantyEndDate.ToDateTime(TimeOnly.MinValue);
+                worksheet.Cells[row, 10].Style.Numberformat.Format = "dd/MM/yyyy";
+            }
+
+            worksheet.Cells[row, 11].Value = asset.CurrentLocation?.Category.Name;
+            worksheet.Cells[row, 12].Value = asset.CurrentLocation?.Site;
+            worksheet.Cells[row, 13].Value = asset.CurrentLocation?.Room;
+            worksheet.Cells[row, 14].Value = asset.CurrentAllocation?.ResponsibleOfficer;
+
+            if (asset.LastSighting is null || asset.LastSighting.SightedAt == DateTime.MinValue)
+            {
+                worksheet.Cells[row, 15].Value = string.Empty;
+            }
+            else
+            {
+                worksheet.Cells[row, 15].Value = asset.LastSighting.SightedAt;
+                worksheet.Cells[row, 15].Style.Numberformat.Format = "dd/MM/yyyy HH:mm";
+            }
+
+            worksheet.Cells[row, 16].Value = asset.LastSighting?.SightedBy;
+
+            if (asset.Notes.Count > 0)
+            {
+                IOrderedEnumerable<Note> orderedNotes = asset.Notes.OrderByDescending(note => note.CreatedAt);
+                IEnumerable<string> noteText = orderedNotes.Select(note => $"{note.CreatedAt} - {note.CreatedBy} - {note.Message}");
+
+                worksheet.Cells[row, 17].RichText.Add(string.Join("\r\n", noteText));
+                worksheet.Cells[row, 17].Style.WrapText = true;
+                worksheet.Cells[row, 17].Style.VerticalAlignment = ExcelVerticalAlignment.Top;
+            }
+
+            row++;
+        }
+
+        worksheet.Columns[17].Width = 80;
+        worksheet.View.FreezePanes(2, 1);
+        worksheet.Cells[1, 1, row, 17].AutoFilter = true;
+        worksheet.Cells[1, 1, row, 16].AutoFitColumns();
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+
+        excel.Dispose();
+        return memoryStream;
     }
 
     public async Task<MemoryStream> CreatePTOFile(

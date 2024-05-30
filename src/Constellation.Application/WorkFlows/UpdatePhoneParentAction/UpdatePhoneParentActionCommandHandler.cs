@@ -1,14 +1,13 @@
 ﻿namespace Constellation.Application.WorkFlows.UpdatePhoneParentAction;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Enums;
 using Constellation.Core.Models.WorkFlow.Errors;
 using Constellation.Core.Models.WorkFlow.Repositories;
-using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -18,20 +17,17 @@ internal sealed class UpdatePhoneParentActionCommandHandler
 : ICommandHandler<UpdatePhoneParentActionCommand>
 {
     private readonly ICaseRepository _caseRepository;
-    private readonly IStaffRepository _staffRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public UpdatePhoneParentActionCommandHandler(
         ICaseRepository caseRepository,
-        IStaffRepository staffRepository,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _caseRepository = caseRepository;
-        _staffRepository = staffRepository;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<UpdatePhoneParentActionCommand>();
@@ -45,10 +41,10 @@ internal sealed class UpdatePhoneParentActionCommandHandler
         {
             _logger
                 .ForContext(nameof(UpdatePhoneParentActionCommand), request, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(request.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(request.CaseId), true)
                 .Warning("Failed to update Action");
 
-            return Result.Failure(CaseErrors.Case.NotFound(request.CaseId));
+            return Result.Failure(CaseErrors.NotFound(request.CaseId));
         }
 
         Action action = item.Actions.FirstOrDefault(action => action.Id == request.ActionId);
@@ -58,10 +54,10 @@ internal sealed class UpdatePhoneParentActionCommandHandler
             _logger
                 .ForContext(nameof(UpdatePhoneParentActionCommand), request, true)
                 .ForContext(nameof(Case), item, true)
-                .ForContext(nameof(Error), CaseErrors.Action.NotFound(request.ActionId), true)
+                .ForContext(nameof(Error), ActionErrors.NotFound(request.ActionId), true)
                 .Warning("Failed to update Action");
 
-            return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+            return Result.Failure(ActionErrors.NotFound(request.ActionId));
         }
 
         if (action is PhoneParentAction phoneAction)
@@ -76,7 +72,7 @@ internal sealed class UpdatePhoneParentActionCommandHandler
                     .ForContext(nameof(Error), updateAction.Error, true)
                     .Warning("Failed to update Action");
 
-                return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+                return Result.Failure(updateAction.Error);
             }
 
             Result statusUpdate = item.UpdateActionStatus(action.Id, ActionStatus.Completed, _currentUserService.UserName);
@@ -89,7 +85,7 @@ internal sealed class UpdatePhoneParentActionCommandHandler
                     .ForContext(nameof(Error), statusUpdate.Error, true)
                     .Warning("Failed to update Action");
 
-                return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+                return Result.Failure(statusUpdate.Error);
             }
 
             await _unitOfWork.CompleteAsync(cancellationToken);
@@ -100,9 +96,9 @@ internal sealed class UpdatePhoneParentActionCommandHandler
         _logger
             .ForContext(nameof(UpdatePhoneParentActionCommand), request, true)
             .ForContext(nameof(Case), item, true)
-            .ForContext(nameof(Error), CaseErrors.Action.Update.TypeMismatch(nameof(PhoneParentAction), action.GetType().ToString()), true)
+            .ForContext(nameof(Error), ActionErrors.UpdateTypeMismatch(nameof(PhoneParentAction), action.GetType().ToString()), true)
             .Warning("Failed to update Action");
 
-        return Result.Failure(CaseErrors.Action.Update.TypeMismatch(nameof(PhoneParentAction), action.GetType().ToString()));
+        return Result.Failure(ActionErrors.UpdateTypeMismatch(nameof(PhoneParentAction), action.GetType().ToString()));
     }
 }

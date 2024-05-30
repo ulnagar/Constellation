@@ -19,7 +19,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using static Constellation.Application.Models.EmailQueue.EmailQueueItem.EmailQueueReferenceType.LessonRolls;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class ReportsModel : BasePageModel

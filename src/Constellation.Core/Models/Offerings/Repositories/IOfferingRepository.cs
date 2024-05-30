@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 public interface IOfferingRepository
 {
-    Task<Offering> GetById(OfferingId offeringId, CancellationToken cancellationToken = default);
+    Task<Offering?> GetById(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<Offering>> GetAllFuture(CancellationToken cancellationToken = default);
     Task<List<Offering>> GetAllInactive(CancellationToken cancellationToken = default);
@@ -32,7 +32,7 @@ public interface IOfferingRepository
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<List<Offering>> GetByStudentId(string studentId, CancellationToken cancellationToken = default);
-    Task<Offering> GetFromYearAndName(int year, string name, CancellationToken cancellationToken = default);
+    Task<Offering?> GetFromYearAndName(int year, string name, CancellationToken cancellationToken = default);
 
     void Insert(Offering offering);
     void Remove(Resource resource);

@@ -23,7 +23,7 @@ public readonly record struct CanvasCourseCode : IComparable
 
     public override string ToString() => _value;
 
-    public int CompareTo(object obj)
+    public int CompareTo(object? obj)
     {
         if (obj is null) return 1;
 

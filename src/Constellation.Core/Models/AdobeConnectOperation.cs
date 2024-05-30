@@ -7,10 +7,10 @@ using System;
 public abstract class AdobeConnectOperation
 {
     public int Id { get; set; }
-    public string GroupSco { get; set; }
-    public string ScoId { get; set; }
-    public AdobeConnectRoom Room { get; set; }
-    public string PrincipalId { get; set; }
+    public string GroupSco { get; set; } = string.Empty;
+    public string ScoId { get; set; } = string.Empty;
+    public AdobeConnectRoom? Room { get; set; }
+    public string PrincipalId { get; set; } = string.Empty;
     public AdobeConnectOperationAction Action { get; set; }
     public DateTime DateScheduled { get; set; }
     public bool IsCompleted { get; set; }
@@ -22,8 +22,8 @@ public abstract class AdobeConnectOperation
 
 public class StudentAdobeConnectOperation : AdobeConnectOperation
 {
-    public string StudentId { get; set; }
-    public Student Student { get; set; }
+    public string StudentId { get; set; } = string.Empty;
+    public Student? Student { get; set; }
 }
 
 public class CasualAdobeConnectOperation : AdobeConnectOperation
@@ -33,13 +33,13 @@ public class CasualAdobeConnectOperation : AdobeConnectOperation
 
 public class TeacherAdobeConnectOperation : AdobeConnectOperation
 {
-    public string StaffId { get; set; }
-    public Staff Teacher { get; set; }
+    public string StaffId { get; set; } = string.Empty;
+    public Staff? Teacher { get; set; }
 }
 
 public class TeacherAdobeConnectGroupOperation : AdobeConnectOperation
 {
-    public string TeacherId { get; set; }
-    public Staff Teacher { get; set; }
-    public string GroupName { get; set; }
+    public string TeacherId { get; set; } = string.Empty;
+    public Staff? Teacher { get; set; }
+    public string GroupName { get; set; } = string.Empty;
 }

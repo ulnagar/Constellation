@@ -2,8 +2,10 @@
 
 using System;
 
-public sealed record CaseId(Guid Value)
+public readonly record struct CaseId(Guid Value)
 {
+    public static readonly CaseId Empty = new(Guid.Empty);
+
     public static CaseId FromValue(Guid value) =>
         new(value);
 

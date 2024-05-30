@@ -10,6 +10,7 @@ using Constellation.Application.StaffMembers.GetStaffByEmail;
 using Constellation.Application.StaffMembers.Models;
 using Constellation.Core.Shared;
 using Core.Models.Offerings.Identifiers;
+using Hangfire.States;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +30,7 @@ public class DashboardModel : BasePageModel
     public string StaffId { get; set; } = string.Empty;
 
     public string Message { get; set; } = string.Empty;
+    public IReadOnlyList<StocktakeEventResponse> ActiveStocktakeEvents { get; set; }
 
     public IReadOnlyList<StocktakeEventResponse> ActiveStocktakeEvents { get; set; } =
         new List<StocktakeEventResponse>();

@@ -42,10 +42,10 @@ internal sealed class CancelActionCommandHandler
         {
             _logger
                 .ForContext(nameof(CancelActionCommand), request, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(request.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(request.CaseId), true)
                 .Warning("Failed to mark Action as cancelled");
 
-            return Result.Failure(CaseErrors.Case.NotFound(request.CaseId));
+            return Result.Failure(CaseErrors.NotFound(request.CaseId));
         }
 
         Action action = item.Actions.FirstOrDefault(action => action.Id == request.ActionId);
@@ -55,10 +55,10 @@ internal sealed class CancelActionCommandHandler
             _logger
                 .ForContext(nameof(CancelActionCommand), request, true)
                 .ForContext(nameof(Case), item, true)
-                .ForContext(nameof(Error), CaseErrors.Action.NotFound(request.ActionId), true)
+                .ForContext(nameof(Error), ActionErrors.NotFound(request.ActionId), true)
                 .Warning("Failed to mark Action as cancelled");
 
-            return Result.Failure(CaseErrors.Action.NotFound(request.ActionId));
+            return Result.Failure(ActionErrors.NotFound(request.ActionId));
         }
 
         Result update = action.AssignedTo == _currentUserService.UserName

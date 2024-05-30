@@ -11,8 +11,9 @@ using System.Threading.Tasks;
 
 public interface IStudentRepository
 {
-    Task<Student> GetById(string studentId, CancellationToken cancellationToken = default);
-    Task<Student> GetWithSchoolById(string studentId, CancellationToken cancellationToken = default);
+    Task<List<Student>> GetAll(CancellationToken cancellationToken = default);
+    Task<Student?> GetById(string studentId, CancellationToken cancellationToken = default);
+    Task<Student?> GetWithSchoolById(string studentId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentStudentsWithSchool(CancellationToken cancellationToken = default);
     Task<List<Student>> GetListFromIds(List<string> studentIds, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentEnrolmentsForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
@@ -30,7 +31,7 @@ public interface IStudentRepository
     /// <param name="emailAddress"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Student> GetCurrentByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
+    Task<Student?> GetCurrentByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get any student with a specified email address. Can return deleted students.
@@ -38,7 +39,7 @@ public interface IStudentRepository
     /// <param name="emailAddress"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Student> GetAnyByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
+    Task<Student?> GetAnyByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
 
     Task<int> GetCountCurrentStudentsWithPartialAbsenceScanDisabled(CancellationToken cancellationToken = default);
     Task<int> GetCountCurrentStudentsWithWholeAbsenceScanDisabled(CancellationToken cancellationToken = default);
@@ -47,10 +48,10 @@ public interface IStudentRepository
     Task<int> GetCountCurrentStudentsWithAwardOverages(CancellationToken cancellationToken = default);
     Task<int> GetCountCurrentStudentsWithPendingAwards(CancellationToken cancellationToken = default);
 
-    Task<Student> GetForExistCheck(string id);
+    Task<Student?> GetForExistCheck(string id);
     Task<ICollection<Student>> ForListAsync(Expression<Func<Student, bool>> predicate);
-    Task<Student> ForEditAsync(string studentId);
-    Task<Student> ForBulkUnenrolAsync(string studentId);
+    Task<Student?> ForEditAsync(string studentId);
+    Task<Student?> ForBulkUnenrolAsync(string studentId);
     Task<ICollection<Student>> ForSelectionListAsync();
     Task<List<Student>> ForInterviewsExportAsync(List<int> filterGrades, List<OfferingId> filterClasses, bool perFamily, bool resFamilyOnly, CancellationToken cancellationToken = default);
     Task<ICollection<Student>> WithoutAdobeConnectDetailsForUpdate();

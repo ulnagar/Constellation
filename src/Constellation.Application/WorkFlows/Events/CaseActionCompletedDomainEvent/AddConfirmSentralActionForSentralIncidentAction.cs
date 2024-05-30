@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.WorkFlows.Events.CaseActionCompletedDomainEvent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models;
 using Constellation.Core.Models.StaffMembers.Repositories;
@@ -11,7 +10,8 @@ using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Errors;
 using Constellation.Core.Models.WorkFlow.Events;
 using Constellation.Core.Models.WorkFlow.Repositories;
-using Constellation.Core.Shared;
+using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,7 +52,7 @@ internal sealed class AddConfirmSentralActionForSentralIncidentAction
         {
             _logger
                 .ForContext(nameof(CaseActionCompletedDomainEvent), notification, true)
-                .ForContext(nameof(Error), CaseErrors.Case.NotFound(notification.CaseId), true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(notification.CaseId), true)
                 .Warning("Could not create confirm Action for completed Sentral Incident action");
 
             return;
@@ -64,7 +64,7 @@ internal sealed class AddConfirmSentralActionForSentralIncidentAction
         {
             _logger
                 .ForContext(nameof(CaseActionCompletedDomainEvent), notification, true)
-                .ForContext(nameof(Error), CaseErrors.Action.NotFound(notification.ActionId), true)
+                .ForContext(nameof(Error), ActionErrors.NotFound(notification.ActionId), true)
                 .Warning("Could not create confirm Action for completed Sentral Incident action");
 
             return;
@@ -81,7 +81,7 @@ internal sealed class AddConfirmSentralActionForSentralIncidentAction
         {
             _logger
                 .ForContext(nameof(CaseActionCompletedDomainEvent), notification, true)
-                .ForContext(nameof(Error), CaseErrors.Action.NotFound(notification.ActionId), true)
+                .ForContext(nameof(Error), ActionErrors.NotFound(notification.ActionId), true)
                 .Warning("Could not create confirm Action for completed Sentral Incident action");
 
             return;

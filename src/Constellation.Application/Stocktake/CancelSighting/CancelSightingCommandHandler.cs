@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Stocktake.CancelSighting;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Core.Models.Stocktake;
 using Core.Models.Stocktake.Errors;
 using Core.Models.Stocktake.Repositories;
 using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,16 +29,16 @@ internal sealed class CancelSightingCommandHandler
 
     public async Task<Result> Handle(CancelSightingCommand request, CancellationToken cancellationToken)
     {
-        StocktakeSighting sighting = await _stocktakeRepository.GetSightingById(request.SightingId, cancellationToken);
+        StocktakeSighting? sighting = await _stocktakeRepository.GetSightingById(request.SightingId, cancellationToken);
 
         if (sighting is null)
         {
             _logger
                 .ForContext(nameof(CancelSightingCommand), request, true)
-                .ForContext(nameof(Error), StocktakeErrors.Sighting.NotFound(request.SightingId), true)
+                .ForContext(nameof(Error), StocktakeErrors.SightingNotFound(request.SightingId), true)
                 .Warning("Failed to cancel Stocktake Sighting");
 
-            return Result.Failure(StocktakeErrors.Sighting.NotFound(request.SightingId));
+            return Result.Failure(StocktakeErrors.SightingNotFound(request.SightingId));
         }
 
         sighting.Cancel(request.Comment, request.CancelledBy);

@@ -8,9 +8,9 @@ public sealed class ActionNote
     private ActionNote() { }
 
     public ActionNoteId Id { get; private set; } = new();
-    public ActionId ActionId { get; private set; }
-    public string Note { get; private set; }
-    public string SubmittedBy { get; private set; }
+    public ActionId ActionId { get; private set; } = ActionId.Empty;
+    public string Note { get; private set; } = string.Empty;
+    public string SubmittedBy { get; private set; } = string.Empty;
     public DateTime SubmittedAt { get; private set; }
 
     internal static ActionNote Create(

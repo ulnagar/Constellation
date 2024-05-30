@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
+	<!--<Nullable>enable</Nullable>-->
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +14,14 @@
   <ItemGroup>
     <Folder Include="Models\Assignments\Services\" />
     <Folder Include="Models\Training\Events\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EditorConfigFiles Remove="D:\Development\repos\Constellation\src\Constellation.Core\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="D:\Development\repos\Constellation\src\Constellation.Core\.editorconfig" />
   </ItemGroup>
 
 </Project>

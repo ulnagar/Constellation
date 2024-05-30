@@ -35,12 +35,12 @@ public sealed class Case : AggregateRoot, IAuditableEntity
     public CaseStatus Status { get; private set; } = CaseStatus.Open;
 
     public IReadOnlyList<Action> Actions => _actions.ToList();
-    public string? CreatedBy { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.MinValue;
-    public string? ModifiedBy { get; set; }
+    public string ModifiedBy { get; set; } = string.Empty;
     public DateTime ModifiedAt { get; set; } = DateTime.MinValue;
     public bool IsDeleted { get; private set; }
-    public string? DeletedBy { get; set; }
+    public string DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; } = DateTime.MinValue;
 
     public DateOnly DueDate { get; private set; }
@@ -57,7 +57,7 @@ public sealed class Case : AggregateRoot, IAuditableEntity
         Action? action = _actions.FirstOrDefault(entry => entry.Id == actionId);
 
         if (action is null)
-            return Result.Failure(CaseErrors.Action.NotFound(actionId));
+            return Result.Failure(ActionErrors.NotFound(actionId));
 
         Result noteAction = action.AddNote(message, currentUser);
 
@@ -73,10 +73,10 @@ public sealed class Case : AggregateRoot, IAuditableEntity
         Action? action = _actions.FirstOrDefault(entry => entry.Id == actionId);
 
         if (action is null)
-            return Result.Failure(CaseErrors.Action.NotFound(actionId));
+            return Result.Failure(ActionErrors.NotFound(actionId));
 
         if (!action.Status.Equals(ActionStatus.Open))
-            return Result.Failure(CaseErrors.Action.UpdateStatus.AlreadyClosed(action.Status));
+            return Result.Failure(ActionErrors.UpdateStatusAlreadyClosed(action.Status));
 
         Result statusUpdate = action.UpdateStatus(newStatus, currentUser);
 
@@ -97,7 +97,7 @@ public sealed class Case : AggregateRoot, IAuditableEntity
         Action? action = _actions.FirstOrDefault(entry => entry.Id == actionId);
 
         if (action is null)
-            return Result.Failure(CaseErrors.Action.NotFound(actionId));
+            return Result.Failure(ActionErrors.NotFound(actionId));
 
         if (action.AssignedToId == newAssignee.StaffId)
             return Result.Success();
@@ -117,7 +117,7 @@ public sealed class Case : AggregateRoot, IAuditableEntity
         string currentUser)
     {
         if (newStatus.Equals(CaseStatus.Completed) && _actions.Any(action => action.Status.Equals(ActionStatus.Open)))
-            return Result.Failure(CaseErrors.Case.UpdateStatus.CompletedWithOutstandingActions);
+            return Result.Failure(CaseErrors.UpdateStatusCompletedWithOutstandingActions);
 
         if (newStatus.Equals(CaseStatus.Cancelled))
             foreach (Action action in _actions)
@@ -135,7 +135,7 @@ public sealed class Case : AggregateRoot, IAuditableEntity
         if (Type!.Equals(CaseType.Attendance))
         {
             if (detail is not AttendanceCaseDetail)
-                return Result.Failure(CaseErrors.Case.AttachDetails.DetailMismatch(Type.Name, nameof(AttendanceCaseDetail)));
+                return Result.Failure(CaseErrors.AttachDetailsDetailMismatch(Type.Name, nameof(AttendanceCaseDetail)));
             
             Detail = detail;
             DetailId = detail.Id;
@@ -143,7 +143,7 @@ public sealed class Case : AggregateRoot, IAuditableEntity
             return Result.Success();
         }
 
-        return Result.Failure(CaseErrors.Case.AttachDetails.UnknownDetails);
+        return Result.Failure(CaseErrors.AttachDetailsUnknownDetails);
     }
 
     public Result SetDueDate(IDateTimeProvider dateTime)
@@ -158,7 +158,7 @@ public sealed class Case : AggregateRoot, IAuditableEntity
     public Result SetDueDate(IDateTimeProvider dateTime, DateOnly dueDate)
     {
         if (dueDate < dateTime.Today)
-            return Result.Failure(CaseErrors.Case.DueDateInPast(dueDate));
+            return Result.Failure(CaseErrors.DueDateInPast(dueDate));
 
         DueDate = dueDate;
 
