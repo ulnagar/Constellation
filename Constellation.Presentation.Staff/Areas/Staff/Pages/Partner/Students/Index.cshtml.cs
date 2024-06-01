@@ -1,11 +1,14 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 
+using Application.Models.Auth;
 using Application.Students.GetFilteredStudents;
 using Core.Shared;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
+[Authorize(Policy = AuthPolicies.IsStaffMember)]
 public sealed class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
