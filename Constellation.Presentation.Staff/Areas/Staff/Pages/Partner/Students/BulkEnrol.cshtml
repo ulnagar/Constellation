@@ -1,0 +1,104 @@
+﻿@page "{id}"
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.BulkEnrolModel
+@{
+}
+
+<h2>Enrol in Multiple Classes</h2>
+
+<div class="page-menu">
+    <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@Model.Student.StudentId" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<h4>Select offerings to enrol @Model.Student.DisplayName in.</h4>
+
+<form method="post">
+    <div class="row">
+        <div class="col">
+            <label class="text-bold">Existing Enrolments:</label>
+            <div>
+                @foreach (var entry in Model.ExistingEnrolments)
+                {
+                    <button type="button" class="btn btn-outline-success offering-button">@entry.Name</button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="row">
+        <div class="col">
+            <label class="text-bold">Selected Offerings:</label>
+            <div id="SelectedOfferingsList">
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="form-group">
+        <div class="col-md-3">
+            <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+        </div>
+    </div>
+</form>
+
+<hr />
+
+<div class="row">
+    @{
+        var partitionedList = Model.Offerings.OrderBy(offering => offering.FacultyName).GroupBy(offering => offering.FacultyName);
+
+        foreach (var list in partitionedList)
+        {
+            <div class="col-4 button-list">
+                @foreach (var entry in list.OrderBy(entry => entry.Name))
+                {
+                    if (Model.ExistingEnrolments.Any(enrol => enrol.OfferingId == entry.OfferingId))
+                    {
+                        <button type="button" class="btn btn-outline-success offering-button">@entry.Name</button>
+                    }
+                    else
+                    {
+                        <button type="button" id="offeringSelect-@entry.OfferingId.Value" class="btn btn-outline-info offering-button" onClick="toggleOffering('@entry.OfferingId.Value')">@entry.Name</button>
+                    }
+                }
+            </div>
+        }
+    }
+</div>
+
+@section Scripts
+{
+    <script>
+        function toggleOffering(offeringId) {
+            var selectDiv = $('#offeringSelect-' + offeringId);
+            if (selectDiv.hasClass('btn-info')) {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
+
+                $('#pd-offeringSelect-' + offeringId).remove();
+                $('#i-offeringSelect-' + offeringId).remove();
+            }
+            else {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info')
+
+                var pageDisplayDiv = $('#offeringSelect-' + offeringId).clone().prop('id', 'pd-offeringSelect-' + offeringId);
+                pageDisplayDiv.appendTo('#SelectedOfferingsList');
+
+                var input = $('<input>').attr('id', 'i-offeringSelect-' + offeringId)
+                    .attr('name', 'SelectedOfferingIds')
+                    .attr('type', "hidden");
+                input.val(offeringId);
+                var classInputDiv = $('#SelectedOfferingsList');
+                classInputDiv.append(input);
+            }
+        }
+    </script>
+}

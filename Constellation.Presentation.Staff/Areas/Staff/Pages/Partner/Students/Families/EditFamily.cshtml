@@ -1,0 +1,106 @@
+﻿@page "/Partner/Students/Families/{id:Guid}/Edit"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Families.EditFamilyModel
+
+<h2>Edit Family</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-page-handler="Update">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="form-group row">
+            <label asp-for="FamilyTitle" class="col-md-2"></label>
+            <div class="col-md-8">
+                <input asp-for="FamilyTitle" class="form-control" />
+                <span asp-validation-for="FamilyTitle" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-8 offset-2">
+                <div class="card-deck">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Parents</h5>
+                            <p class="card-text">The following parents are linked to this family.</p>
+                            <ul>
+                                @foreach (var parent in Model.Parents)
+                                {
+                                    <li>@parent</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Students</h5>
+                            <p class="card-text">The following students are linked to this family.</p>
+                            <ul>
+                                @foreach (var student in Model.Students)
+                                {
+                                    <li>@student</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="AddressLine1" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="AddressLine1" class="form-control" />
+                <span asp-validation-for="AddressLine1" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="AddressLine2" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="AddressLine2" class="form-control" />
+                <span asp-validation-for="AddressLine2" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="AddressTown" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="AddressTown" class="form-control" />
+                <span asp-validation-for="AddressTown" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="AddressPostCode" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="AddressPostCode" class="form-control" />
+                <span asp-validation-for="AddressPostCode" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="FamilyEmail" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="FamilyEmail" class="form-control" />
+                <span asp-validation-for="FamilyEmail" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,48 @@
+﻿@page
+@model IndexModel
+
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff.Faculties
+@inject IAuthorizationService AuthorizationService
+
+@{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditFaculties);
+    var canViewDetailsTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanViewFacultyDetails);
+}
+
+<h2>Faculties</h2>
+
+<div>
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="/Partner/Staff/Faculties/Upsert" asp-area="Staff" class="btn btn-warning">Create New</a>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Badge</th>
+            <th># Members</th>
+            <th></th>
+        </tr>
+    </thead>
+    @foreach (var item in Model.Faculties)
+    {
+        <tr>
+            <td></td>
+            <td>@item.Name</td>
+            <td><Faculty-Label faculty="item" /></td>
+            <td>@item.MemberCount</td>
+            <td>
+                @if (canViewDetailsTest.Succeeded)
+                {
+                    <a asp-page="/Partner/Staff/Faculties/Details" asp-page="Staff" asp-route-facultyId="@item.FacultyId.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                }
+            </td>
+        </tr>
+    }
+</table>

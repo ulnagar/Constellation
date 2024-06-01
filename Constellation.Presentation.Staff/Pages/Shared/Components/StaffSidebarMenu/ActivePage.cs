@@ -8,6 +8,16 @@ public sealed class ActivePage
     public const string Equipment_Assets_Locations = "Equipment.Assets.Locations";
     public const string Equipment_Assets_Reports = "Equipment.Assets.Reports";
 
+    public const string Partner_Contacts_List = "Partner.Contacts.List";
+    public const string Partner_Schools_Schools = "Partner.Schools.Schools";
+    public const string Partner_Schools_Contacts = "Partner.Schools.Contacts";
+    public const string Partner_Schools_ContactReports = "Partner.Schools.ContactReports";
+    public const string Partner_Staff_Staff = "Partner.Staff.Staff";
+    public const string Partner_Staff_Faculties = "Partner.Staff.Faculties";
+    public const string Partner_Students_Students = "Partner.Students.Students";
+    public const string Partner_Students_Families = "Partner.Students.Families";
+    public const string Partner_Students_Reports = "Partner.Students.Reports";
+
     public const string SchoolAdmin_Absences_Audit = "SchoolAdmin.Absences.Audit";
     public const string SchoolAdmin_Absences_List = "SchoolAdmin.Absences.List";
     public const string SchoolAdmin_Absences_Report = "SchoolAdmin.Absences.Report";

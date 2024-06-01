@@ -1,0 +1,116 @@
+@model string
+
+@{
+    var segments = Model.Split('.');
+    var module = segments[1];
+}
+
+<nav id="accordion" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+    <div class="sidebar-sticky pt-3">
+        <div class="card">
+            <div class="card-header" id="contactsHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#contacts">
+                    Contacts
+                </h4>
+            </div>
+
+            <div id="contacts" class="collapse @(module == "Contacts" ? "show" : "")" data-parent="#accordion">
+                <div class="card-body">
+                    <ul class="nav flex-column mx-2">
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Partner_Contacts_List ? "active" : "")" asp-page="/Partner/Contacts/Index" asp-area="Staff">
+                                List
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" id="schoolsHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#schools">
+                    Schools
+                </h4>
+            </div>
+
+            <div id="schools" class="collapse @(module == "Schools" ? "show" : "")" data-parent="#accordion">
+                <div class="card-body">
+                    <ul class="nav flex-column mx-2">
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Partner_Schools_Schools ? "active" : "")" asp-page="/Partner/Schools/Index" asp-area="Staff">
+                                Schools
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Partner_Schools_Contacts ? "active" : "")" asp-page="/Partner/Schools/Contacts/Index" asp-area="Staff">
+                                Contacts
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Partner_Schools_ContactReports ? "active" : "")" asp-page="/Partner/Schools/Contacts/Reports" asp-area="Staff">
+                                Reports
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" id="staffHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#staff">
+                    Staff
+                </h4>
+            </div>
+
+            <div id="staff" class="collapse @(module == "Staff" ? "show" : "")" data-parent="#accordion">
+                <div class="card-body">
+                    <ul class="nav flex-column mx-2">
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Partner_Staff_Staff ? "active" : "")" asp-page="/Partner/Staff/Index" asp-area="Staff">
+                                Staff
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Partner_Staff_Faculties ? "active" : "")" asp-page="/Partner/Staff/Faculties/Index" asp-area="Staff">
+                                Faculties
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" id="studentHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#students">
+                    Students
+                </h4>
+            </div>
+
+            <div id="students" class="collapse @(module == "Students" ? "show" : "")" data-parent="#accordion">
+                <div class="card-body">
+                    <ul class="nav flex-column mx-2">
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Partner_Students_Students ? "active" : "")" asp-page="/Partner/Students/Index" asp-area="Staff">
+                                Students
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Partner_Students_Families ? "active" : "")" asp-page="/Partner/Students/Families/Index" asp-area="Staff">
+                                Families
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Partner_Students_Reports ? "active" : "")" asp-page="/Partner/Students/Reports/Index" asp-area="Staff">
+                                Reports
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</nav>

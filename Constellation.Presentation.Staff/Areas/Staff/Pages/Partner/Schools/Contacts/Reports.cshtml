@@ -1,0 +1,153 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools.Contacts.ReportsModel
+
+@inject IAuthorizationService authService
+
+@{
+    var authorised = await authService.AuthorizeAsync(User, AuthPolicies.CanManageSchoolContacts);
+}
+<h2>School Contacts by School</h2>
+
+<div class="page-menu">
+    <a asp-page-handler="Export" class="btn btn-warning">Export List</a>
+
+    @if (authorised.Succeeded)
+    {
+        <div class="btn-group" role="group">
+            <a asp-page="/Partner/Schools/Contacts/Create" asp-area="Staff" class="btn btn-info">Create New</a>
+        </div>
+    }
+</div>
+
+<hr />
+
+<table class="table table-striped table-hover grouped-data-table">
+    <thead>
+        <tr>
+            <th>School</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone Number</th>
+            <th>Role</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var school in Model.Schools)
+        {
+            if (school.Contacts.Count == 0)
+            {
+                <tr>
+                    <td>@school.SchoolName (@school.SchoolCode)</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            }
+
+            foreach (var contact in school.Contacts)
+            {
+                <tr>
+                    <td>@school.SchoolName (@school.SchoolCode)</td>
+                    <td data-order="@contact.Contact.SortOrder">@contact.Contact.DisplayName</td>
+                    <td>@Html.DisplayFor(model => contact.EmailAddress.Email, "EmailAddress")</td>
+                    <td>@contact.PhoneNumber.ToString()</td>
+                    <td>
+                        @contact.Role
+                        @if (!string.IsNullOrWhiteSpace(contact.Note))
+                        {
+                            <br />
+                            <span class="font-italic text-muted">@contact.Note</span>
+                        }
+                    </td>
+                    <td>
+                        @if (authorised.Succeeded)
+                        {
+                            <div class="btn-group" role="group">
+                                <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                    <a asp-page="/Partner/Schools/Contacts/Update" asp-area="Staff" asp-route-id="@contact.ContactId" class="dropdown-item">Edit Contact</a>
+                                    <button class="dropdown-item create-assignment-button" data-contact-id="@contact.ContactId.Value" data-name="@contact.Contact.DisplayName">Add Role</button>
+                                    @if (!string.IsNullOrEmpty(contact.Role))
+                                    {
+                                        <button data-contact-id="@contact.ContactId.Value" data-role-id="@contact.AssignmentId.Value" data-name="@contact.Contact.DisplayName" data-role="@contact.Role" data-school="@school.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
+                                    }
+                                    <div class="dropdown-divider"></div>
+                                    <a asp-page-handler="RepairUser" asp-route-id="@contact.ContactId" class="dropdown-item">Repair Account</a>
+                                </div>
+                            </div>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@Html.AntiForgeryToken()
+
+<div class="modal fade" id="page-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $('.delete-role-button').click(function (event) {
+            var contactId = $(this).data("contactId");
+            var roleId = $(this).data("roleId");
+            var name = $(this).data("name");
+            var role = $(this).data("role");
+            var school = $(this).data("school");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxDelete",
+                type: "POST",
+                data: {
+                    contactId: contactId,
+                    roleId: roleId,
+                    name: name,
+                    role: role,
+                    school: school,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.create-assignment-button').click(function (event) {
+            var contactId = $(this).data("contactId");
+            var name = $(this).data("name");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxAssign",
+                type: "POST",
+                data: {
+                    name: name,
+                    contactId: contactId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+
+                // Activate any comboboxes
+                $("#page-modal .combo").select2({ theme: 'bootstrap' });
+
+                // Activate any comboboxes with free-text entry
+                $("#page-modal .combo-with-tag").select2({
+                    theme: 'bootstrap',
+                    tags: true
+                });
+            });
+        });
+    </script>
+}

@@ -1,0 +1,47 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff.Faculties.UpsertModel
+
+@{
+    var title = Model.Id.HasValue ? "Edit Faculty" : "Create New Faculty";
+}
+
+<h2>@title</h2>
+
+<div class="page-menu">
+    <a asp-page="/Partner/Staff/Faculties/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-page-handler="Update">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="form-group row">
+            <label asp-for="Name" class="col-md-2"></label>
+            <div class="col-md-8">
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Colour" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input type="color" asp-for="Colour" class="form-control" />
+                <span asp-validation-for="Colour" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

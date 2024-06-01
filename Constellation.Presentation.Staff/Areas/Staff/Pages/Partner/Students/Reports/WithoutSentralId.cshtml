@@ -1,0 +1,36 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports.WithoutSentralIdModel
+
+<h2>Students without Sentral Id</h2>
+
+<div class="page-menu">
+    <a asp-page-handler="UpdateSentralIds" class="btn btn-warning">Bulk Update</a>
+</div>
+
+<hr />
+
+<table class="table table-striped table-hover data-table">
+    <thead>
+    <tr>
+        <th>SRN</th>
+        <th>Name</th>
+        <th>Grade</th>
+        <th>School</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Students)
+    {
+        <tr>
+            <td>@item.StudentId</td>
+            <td>@item.DisplayName</td>
+            <td>@Html.DisplayFor(model => item.CurrentGrade, "Grade")</td>
+            <td>@item.School</td>
+            <td>
+                <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

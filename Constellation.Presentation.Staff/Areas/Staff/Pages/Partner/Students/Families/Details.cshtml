@@ -1,0 +1,177 @@
+﻿@page "/Partner/Students/Families/{id:Guid}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Families.DetailsModel
+
+@inject IAuthorizationService authService;
+
+@using Constellation.Core.ValueObjects;
+@using Constellation.Core.Extensions
+
+@{
+    var isAuthorised = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+    var isNotResidential = (Model.Family is null ? false : !Model.Family.IsResidential);
+
+    var canEdit = isAuthorised.Succeeded && isNotResidential;
+}
+
+<h2>Family Details</h2>
+
+<div class="page-menu">
+    @if (canEdit)
+    {
+        <a asp-page="/Partner/Students/Families/EditFamily" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success">Edit</a>
+        <button data-toggle="modal" data-target="#addStudentModal" class="btn btn-success">Add Student</button>
+        <a asp-page="/Partner/Students/Families/AddParent" asp-area="Staff" asp-route-familyIdentifier="@Model.Id" class="btn btn-success">Add Parent</a>
+    }
+
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+@if (Model.Family is not null)
+{
+    <div>
+        <dl class="row">
+            <dt class="col-md-2">
+                <label asp-for="Family.FamilyId">Family Id</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Id</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Family.FamilyTitle">Family Name</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Family.FamilyTitle</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Family.AddressLine1">Address</label>
+            </dt>
+            <dd class="col-md-10">
+                <span>@Model.Family.AddressLine1</span><br />
+                @if (!string.IsNullOrWhiteSpace(Model.Family.AddressLine2))
+                {
+                    <span>@Model.Family.AddressLine2</span>
+
+                    <br />
+                }
+                <span>@Model.Family.AddressTown</span><br />
+                <span>@Model.Family.AddressPostCode</span>
+            </dd>
+
+            <dt class="col-md-2">
+                <label asp-for="Family.FamilyEmail">Email Address</label>
+            </dt>
+            <dd class="col-md-10">
+                @Html.DisplayFor(model => model.Family.FamilyEmail, "EmailAddress")
+            </dd>
+        </dl>
+    </div>
+
+    <h3 class="mt-3">Parents</h3>
+    <div class="container">
+        <div class="row row-cols-1 row-cols-md-3">
+            @foreach (var parent in Model.Family.Parents)
+            {
+                <div class="col mb4">
+                    <div class="card h-100">
+                        <h5 class="card-header">@parent.Name.DisplayName</h5>
+                        <div class="card-body">
+                            @if (parent.PhoneNumber is not null)
+                            {
+                                <p class="card-text">M: @parent.PhoneNumber.ToString(PhoneNumber.Format.Mobile)</p>
+                            }
+                            <p class="card-text text-nowrap">E: @Html.DisplayFor(model => parent.EmailAddress.Email, "EmailAddress")</p>
+                        </div>
+                        @if (canEdit)
+                        {
+                            <div class="card-footer bg-transparent">
+                                <a asp-page="/Partner/Students/Families/EditParent" asp-area="Staff" asp-route-familyIdentifier="@Model.Family.FamilyId.Value" asp-route-parentIdentifier="@parent.ParentId.Value" class="btn btn-success">Edit</a>
+                                <button data-parent-name="@parent.Name.DisplayName" data-parent-id="@parent.ParentId.Value" data-family-name="@Model.Family.FamilyTitle" data-family-id="@Model.Family.FamilyId.Value" class="btn btn-danger btn-pull-right remove-parent-button">Remove</button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <h3 class="mt-3">Students</h3>
+    <div class="container">
+        <div class="row row-cols-1 row-cols-md-3">
+            @foreach (var student in Model.Family.Students)
+            {
+                <div class="col mb4">
+                    <div class="card h-100">
+                        <h5 class="card-header">@student.Name.DisplayName</h5>
+                        <div class="card-body">
+                            <p class="card-text">@student.CurrentGrade.AsName()</p>
+                            <p class="card-text">@student.SchoolName</p>
+                            <p class="card-text text-nowrap">E: @Html.DisplayFor(model => student.EmailAddress.Email, "EmailAddress")</p>
+                        </div>
+                        @if (canEdit)
+                        {
+                            <div class="card-footer bg-transparent">
+                                <button data-student-name="@student.Name.DisplayName" data-student-id="@student.StudentId" data-family-name="@Model.Family.FamilyTitle" data-family-id="@Model.Family.FamilyId.Value" class="btn btn-danger btn-pull-right remove-student-button">Remove</button>
+                           </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+        </div>
+    </div>
+</div>
+
+<vc:family-add-student family-id="@Model.Id"></vc:family-add-student>
+
+@section scripts
+{
+    <script>
+        $('.remove-student-button').click(function (event) {
+            var familyId = $(this).data("familyId");
+            var studentId = $(this).data("studentId");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxDeleteStudent",
+                type: "POST",
+                data: {
+                    familyId: familyId,
+                    parentId: parentId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.remove-parent-button').click(function (event) {
+            var familyId = $(this).data("familyId");
+            var parentId = $(this).data("parentId");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxDeleteParent",
+                type: "POST",
+                data: {
+                    familyId: familyId,
+                    parentId: parentId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+    </script>
+}
