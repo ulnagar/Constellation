@@ -29,6 +29,7 @@ public class StaffSidebarMenuViewComponent : ViewComponent
         
         return module switch
         {
+            "Equipment" => View("Equipment", activePage),
             "ShortTerm" => View("ShortTerm", activePage),
             "SchoolAdmin" => View("SchoolAdmin", (activePage, staffId)),
             _ => Content(string.Empty)

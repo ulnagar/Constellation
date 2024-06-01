@@ -3,8 +3,10 @@
 
 public sealed class ActivePage
 {
-    public const string ShortTerm_Casuals_Index = "ShortTerm.Casuals.Index";
-    public const string ShortTerm_Covers_Index = "ShortTerm.Covers.Index";
+    public const string Equipment_Assets_Assets = "Equipment.Assets.Assets";
+    public const string Equipment_Assets_Allocations = "Equipment.Assets.Allocations";
+    public const string Equipment_Assets_Locations = "Equipment.Assets.Locations";
+    public const string Equipment_Assets_Reports = "Equipment.Assets.Reports";
 
     public const string SchoolAdmin_Absences_Audit = "SchoolAdmin.Absences.Audit";
     public const string SchoolAdmin_Absences_List = "SchoolAdmin.Absences.List";
@@ -27,4 +29,7 @@ public sealed class ActivePage
     public const string SchoolAdmin_Training_Reports = "SchoolAdmin.Training.Reports";
     public const string SchoolAdmin_WorkFlows_Cases = "SchoolAdmin.WorkFlows.Cases";
     public const string SchoolAdmin_WorkFlows_Reports = "SchoolAdmin.WorkFlows.Reports";
+
+    public const string ShortTerm_Casuals_Index = "ShortTerm.Casuals.Index";
+    public const string ShortTerm_Covers_Index = "ShortTerm.Covers.Index";
 }

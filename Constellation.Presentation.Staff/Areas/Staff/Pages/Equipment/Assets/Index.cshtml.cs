@@ -1,15 +1,15 @@
-namespace Constellation.Presentation.Server.Areas.Equipment.Pages.Assets;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets;
 
-using Application.Assets.Enums;
-using Application.Assets.ExportAssetsToExcel;
-using Application.Assets.GetAllActiveAssets;
-using Application.Assets.GetAllAssets;
-using Application.Assets.GetAllDisposedAssets;
-using Application.Assets.Models;
-using Application.DTOs;
-using Application.Models.Auth;
-using BaseModels;
-using Core.Shared;
+using Constellation.Application.Assets.Enums;
+using Constellation.Application.Assets.ExportAssetsToExcel;
+using Constellation.Application.Assets.GetAllActiveAssets;
+using Constellation.Application.Assets.GetAllAssets;
+using Constellation.Application.Assets.GetAllDisposedAssets;
+using Constellation.Application.Assets.Models;
+using Constellation.Application.DTOs;
+using Constellation.Application.Models.Auth;
+using Constellation.Core.Shared;
+using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,8 +24,7 @@ public class IndexModel : BasePageModel
     {
         _mediator = mediator;
     }
-
-    [ViewData] public string ActivePage => AssetsPages.Assets;
+    [ViewData] public string ActivePage => Constellation.Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Assets;
 
     [BindProperty(SupportsGet = true)] 
     public AssetFilter Filter { get; set; } = AssetFilter.Active;

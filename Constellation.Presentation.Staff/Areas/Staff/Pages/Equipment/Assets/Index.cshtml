@@ -1,5 +1,5 @@
 ﻿@page
-@model Constellation.Presentation.Server.Areas.Equipment.Pages.Assets.IndexModel
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets.IndexModel
 
 @using Constellation.Application.Assets.Enums
 @inject IAuthorizationService authService
@@ -40,7 +40,7 @@
     {
         <a asp-page-handler="export" class="btn btn-warning">Export</a>
 
-        <a asp-page="/Assets/Upsert" asp-area="Equipment" class="btn btn-success">Create</a>
+        <a asp-page="/Equipment/Assets/Upsert" asp-area="Staff" class="btn btn-success">Create</a>
     }
 </div>
 
@@ -96,11 +96,11 @@
                     <div class="btn-group" role="group">
                         <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
                         <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                            <a asp-page="/Assets/Details" asp-route-assetNumber="@item.AssetNumber" asp-area="Equipment" class="dropdown-item">Details</a>
+                            <a asp-page="/Equipment/Assets/Details" asp-route-assetNumber="@item.AssetNumber" asp-area="Staff" class="dropdown-item">Details</a>
                             
                             @if (canManageAssets.Succeeded)
                             {
-                                <a asp-page="/Assets/Upsert" asp-area="Equipment" asp-route-assetNumber="@item.AssetNumber" class="dropdown-item">Update</a>
+                                <a asp-page="/Equipment/Assets/Upsert" asp-area="Staff" asp-route-assetNumber="@item.AssetNumber" class="dropdown-item">Update</a>
                             }
                         </div>
                     </div>

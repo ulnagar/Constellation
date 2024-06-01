@@ -1,16 +1,17 @@
 #nullable enable
-namespace Constellation.Presentation.Server.Areas.Equipment.Pages.Assets;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets;
 
-using Application.Assets.GetAssetByAssetNumber;
-using Application.Models.Auth;
-using BaseModels;
-using Constellation.Presentation.Server.Helpers.ModelBinders;
-using Core.Models.Assets.Errors;
-using Core.Models.Assets.ValueObjects;
-using Core.Shared;
+using Constellation.Application.Assets.GetAssetByAssetNumber;
+using Constellation.Application.Models.Auth;
+using Constellation.Core.Models.Assets.Errors;
+using Constellation.Core.Models.Assets.ValueObjects;
+using Constellation.Core.Shared;
+using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.ModelBinders;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
@@ -26,7 +27,7 @@ public class DetailsModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => AssetsPages.Assets;
+    [ViewData] public string ActivePage => Constellation.Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Assets;
 
     [BindProperty(SupportsGet = true)]
     [ModelBinder(typeof(AssetNumberBinder))]
@@ -41,7 +42,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = AssetNumberErrors.Empty,
-                RedirectPath = _linkGenerator.GetPathByPage("/Assets/Index", values: new { area = "Equipment" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Equipment/Assets/Index", values: new { area = "Staff" })
             };
 
             return;
@@ -54,7 +55,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = result.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Assets/Index", values: new { area = "Equipment" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Equipment/Assets/Index", values: new { area = "Staff" })
             };
 
             return;

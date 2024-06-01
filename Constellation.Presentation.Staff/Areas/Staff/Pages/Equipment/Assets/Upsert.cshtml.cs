@@ -1,15 +1,16 @@
-namespace Constellation.Presentation.Server.Areas.Equipment.Pages.Assets;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets;
 
-using Application.Assets.GetAssetByAssetNumber;
-using Application.Models.Auth;
-using BaseModels;
-using Core.Models.Assets.Enums;
-using Core.Models.Assets.ValueObjects;
-using Core.Shared;
-using Helpers.ModelBinders;
+using Constellation.Application.Assets.GetAssetByAssetNumber;
+using Constellation.Application.Models.Auth;
+using Constellation.Core.Models.Assets.Enums;
+using Constellation.Core.Models.Assets.ValueObjects;
+using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.ModelBinders;
+using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanManageAssets)]
@@ -26,7 +27,8 @@ public class UpsertModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => AssetsPages.Assets;
+    [ViewData]
+    public string ActivePage => Constellation.Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Assets;
 
     [BindProperty(SupportsGet = true)]
     [ModelBinder(typeof(AssetNumberBinder))]

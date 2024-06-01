@@ -44,9 +44,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Equipment\Pages\Allocations\" />
-    <Folder Include="Areas\Equipment\Pages\Locations\" />
-    <Folder Include="Areas\Equipment\Pages\Reports\" />
     <Folder Include="wwwroot\private\" />
   </ItemGroup>
 
