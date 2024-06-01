@@ -1,0 +1,72 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.IndexModel
+
+@using Constellation.Application.Students.GetFilteredStudents
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+
+}
+
+<h2>Students</h2>
+
+<div class="page-menu">
+    @{
+        var allStyle = "btn-outline-secondary";
+        var activeStyle = allStyle;
+        var inactiveStyle = allStyle;
+
+        switch (Model.Filter)
+        {
+            case StudentFilter.All:
+                allStyle = "btn-primary";
+                break;
+            case StudentFilter.Active:
+                activeStyle = "btn-primary";
+                break;
+            case StudentFilter.Inactive:
+                inactiveStyle = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-route-filter="@StudentFilter.All" class="btn @allStyle">All</a>
+        <a asp-route-filter="@StudentFilter.Active" class="btn @activeStyle">Active</a>
+        <a asp-route-filter="@StudentFilter.Inactive" class="btn @inactiveStyle">Inactive</a>
+    </div>
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+    <tr>
+        <th></th>
+        <th>SRN</th>
+        <th>Name</th>
+        <th>Grade</th>
+        <th>School</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Students)
+    {
+        <tr>
+            <td data-order="@item.EnrolmentCount">
+                @if (item.EnrolmentCount > 0)
+                {
+                    <span class="badge badge-info">@item.EnrolmentCount</span>
+                }
+            </td>
+            <td>@item.StudentId</td>
+            <td data-order="@item.StudentName.SortOrder">@Html.DisplayFor(model => item.Gender, "Gender") @item.StudentName.DisplayName</td>
+            <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
+            <td>@item.School</td>
+            <td>
+                <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

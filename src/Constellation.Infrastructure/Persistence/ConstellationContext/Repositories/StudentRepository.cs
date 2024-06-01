@@ -32,6 +32,13 @@ public class StudentRepository : IStudentRepository
             .Set<Student>()
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Student>> GetAllWithSchool(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Include(student => student.School)
+            .ToListAsync(cancellationToken);
+    
     public async Task<Student?> GetById(
         string StudentId,
         CancellationToken cancellationToken = default) =>
@@ -122,6 +129,14 @@ public class StudentRepository : IStudentRepository
             .Set<Student>()
             .Include(student => student.School)
             .Where(student => !student.IsDeleted)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Student>> GetInactiveStudentsWithSchool(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Include(student => student.School)
+            .Where(student => student.IsDeleted)
             .ToListAsync(cancellationToken);
 
     public async Task<List<Student>> GetCurrentStudentsWithFamilyMemberships(

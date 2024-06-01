@@ -41,6 +41,26 @@ public class EnrolmentRepository : IEnrolmentRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<int> GetCurrentCountByStudentId(
+        string studentId,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<OfferingId> currentOfferings = _context
+            .Set<Offering>()
+            .Where(offering =>
+                offering.StartDate <= _dateTime.Today &&
+                offering.EndDate >= _dateTime.Today)
+            .Select(offering => offering.Id);
+
+        return await _context
+            .Set<Enrolment>()
+            .Where(enrol =>
+                enrol.StudentId == studentId &&
+                !enrol.IsDeleted &&
+                currentOfferings.Contains(enrol.OfferingId))
+            .CountAsync(cancellationToken);
+    }
+
     public async Task<List<Enrolment>> GetCurrentByOfferingId(
         OfferingId offeringId,
         CancellationToken cancellationToken = default) =>

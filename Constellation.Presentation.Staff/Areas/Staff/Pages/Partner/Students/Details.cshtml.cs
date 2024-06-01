@@ -1,5 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 
+using Application.Enrolments.UnenrolStudent;
+using Application.Enrolments.UnenrolStudentFromAllOfferings;
 using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
 using Constellation.Application.Assets.GetDevicesAllocatedToStudent;
 using Constellation.Application.Common.PresentationModels;
@@ -16,6 +18,7 @@ using Constellation.Application.Students.WithdrawStudent;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
+using Core.Models.Offerings.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -72,7 +75,7 @@ public class DetailsModel : BasePageModel
 
     private async Task<bool> PreparePage(CancellationToken cancellationToken)
     {
-        var studentRequest = await _mediator.Send(new GetStudentByIdQuery(Id), cancellationToken);
+        Result<StudentResponse>? studentRequest = await _mediator.Send(new GetStudentByIdQuery(Id), cancellationToken);
 
         if (studentRequest.IsFailure)
         {
@@ -82,27 +85,27 @@ public class DetailsModel : BasePageModel
 
         Student = studentRequest.Value;
 
-        var familyRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(Id), cancellationToken);
+        Result<List<FamilyContactResponse>>? familyRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(Id), cancellationToken);
 
         FamilyContacts = familyRequest.IsSuccess ? familyRequest.Value : new();
 
-        var enrolmentRequest = await _mediator.Send(new GetStudentEnrolmentsWithDetailsQuery(Id), cancellationToken);
+        Result<List<StudentEnrolmentResponse>>? enrolmentRequest = await _mediator.Send(new GetStudentEnrolmentsWithDetailsQuery(Id), cancellationToken);
 
         Enrolments = enrolmentRequest.IsSuccess ? enrolmentRequest.Value : new();
 
-        var sessionRequest = await _mediator.Send(new GetSessionDetailsForStudentQuery(Id), cancellationToken);
+        Result<List<StudentSessionDetailsResponse>>? sessionRequest = await _mediator.Send(new GetSessionDetailsForStudentQuery(Id), cancellationToken);
 
         Sessions = sessionRequest.IsSuccess ? sessionRequest.Value : new();
 
-        var equipmentRequest = await _mediator.Send(new GetDevicesAllocatedToStudentQuery(Id), cancellationToken);
+        Result<List<StudentDeviceResponse>>? equipmentRequest = await _mediator.Send(new GetDevicesAllocatedToStudentQuery(Id), cancellationToken);
 
         Equipment = equipmentRequest.IsSuccess ? equipmentRequest.Value : new();
 
-        var absencesRequest = await _mediator.Send(new GetAbsenceSummaryForStudentQuery(Id), cancellationToken);
+        Result<List<StudentAbsenceSummaryResponse>>? absencesRequest = await _mediator.Send(new GetAbsenceSummaryForStudentQuery(Id), cancellationToken);
 
         Absences = absencesRequest.IsSuccess ? absencesRequest.Value : new();
 
-        var lifecycleRequest = await _mediator.Send(new GetLifecycleDetailsForStudentQuery(Id), cancellationToken);
+        Result<RecordLifecycleDetailsResponse>? lifecycleRequest = await _mediator.Send(new GetLifecycleDetailsForStudentQuery(Id), cancellationToken);
 
         RecordLifecycle = lifecycleRequest.IsSuccess ? lifecycleRequest.Value : new(string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue);
         
@@ -111,7 +114,7 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGetWithdraw(CancellationToken cancellationToken)
     {
-        var authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 
         if (authorised.Succeeded)
         {
@@ -127,7 +130,7 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGetReinstate(CancellationToken cancellationToken)
     {
-        var authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 
         if (authorised.Succeeded)
         {
@@ -141,12 +144,50 @@ public class DetailsModel : BasePageModel
         await PreparePage(cancellationToken);
     }
 
+    public async Task OnGetUnenrol(Guid offeringId, CancellationToken cancellationToken)
+    {
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+
+        if (authorised.Succeeded)
+        {
+            Result? result = await _mediator.Send(new UnenrolStudentCommand(Id, OfferingId.FromValue(offeringId)), cancellationToken);
+
+            if (result.IsFailure)
+                GenerateError(result.Error);
+        }
+        else
+        {
+            GenerateError(DomainErrors.Permissions.Unauthorised);
+        }
+
+        await PreparePage(cancellationToken);
+    }
+
+    public async Task OnGetBulkUnenrol(CancellationToken cancellationToken)
+    {
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+
+        if (authorised.Succeeded)
+        {
+            Result? result = await _mediator.Send(new UnenrolStudentFromAllOfferingsCommand(Id), cancellationToken);
+
+            if (result.IsFailure)
+                GenerateError(result.Error);
+        }
+        else
+        {
+            GenerateError(DomainErrors.Permissions.Unauthorised);
+        }
+
+        await PreparePage(cancellationToken);
+    }
+
     private void GenerateError(Error error)
     {
-        Error = new ErrorDisplay
+        Error = new()
         {
             Error = error,
-            RedirectPath = _linkGenerator.GetPathByAction("Index", "Students", new { area = "Partner" })
+            RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" })
         };
 
         Student = new("", "", Core.Enums.Grade.SpecialProgram, "", "", "", false);
@@ -154,7 +195,7 @@ public class DetailsModel : BasePageModel
 
     private int CalculateTotalSessionDuration()
     {
-        if (Sessions is null || !Sessions.Any())
+        if (!Sessions.Any())
             return 0;
 
         return Sessions.Sum(session => session.Duration);

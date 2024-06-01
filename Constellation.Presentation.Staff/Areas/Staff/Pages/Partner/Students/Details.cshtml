@@ -190,9 +190,8 @@
 
             @if (authorised.Succeeded)
             {
-                @* <a asp-action="BulkEnrol" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Bulk Enrol</a> *@
                 <a asp-page="/Partner/Students/BulkEnrol" asp-area="Staff" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Bulk Enrol</a>
-                <a asp-action="UnenrolAll" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Bulk Unenrol</a>
+                <a asp-page-handler="BulkUnenrol" class="btn btn-warning">Bulk Unenrol</a>
             }
 
             <table class="table-striped table-hover data-table">
@@ -219,7 +218,7 @@
                         <td>
                             @if (authorised.Succeeded)
                             {
-                                @Html.ActionLink("Remove", "Unenrol", "Students", new {area = "Partner", id = Model.Student.StudentId, classId = item.OfferingId}, new {@class = "btn btn-sm btn-danger btn-show-hover"})
+                                <a asp-page-handler="Unenrol" asp-route-offeringId="@item.OfferingId.Value" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
                             }
                         </td>
                     </tr>

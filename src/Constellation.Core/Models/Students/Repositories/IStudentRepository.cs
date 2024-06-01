@@ -12,9 +12,11 @@ using System.Threading.Tasks;
 public interface IStudentRepository
 {
     Task<List<Student>> GetAll(CancellationToken cancellationToken = default);
+    Task<List<Student>> GetAllWithSchool(CancellationToken cancellationToken = default);
     Task<Student?> GetById(string studentId, CancellationToken cancellationToken = default);
     Task<Student?> GetWithSchoolById(string studentId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentStudentsWithSchool(CancellationToken cancellationToken = default);
+    Task<List<Student>> GetInactiveStudentsWithSchool(CancellationToken cancellationToken = default);
     Task<List<Student>> GetListFromIds(List<string> studentIds, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentEnrolmentsForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentEnrolmentsForCourse(CourseId courseId, CancellationToken cancellationToken = default);

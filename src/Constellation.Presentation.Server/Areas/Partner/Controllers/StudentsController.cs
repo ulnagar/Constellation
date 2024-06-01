@@ -1,139 +1,67 @@
-﻿using Constellation.Application.DTOs;
+﻿namespace Constellation.Presentation.Server.Areas.Partner.Controllers;
+
+using Application.Students.UpdateStudent;
 using Constellation.Application.Enrolments.EnrolStudent;
 using Constellation.Application.Enrolments.UnenrolStudent;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
-using Constellation.Core.Shared;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.Helpers.Attributes;
+using Core.Models;
+using Core.Models.Enrolments;
+using Core.Models.Offerings;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace Constellation.Presentation.Server.Areas.Partner.Controllers
+[Area("Partner")]
+[Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
+public class StudentsController : Controller
 {
-    using Application.Students.UpdateStudent;
+    private readonly IOfferingRepository _offeringRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMediator _mediator;
 
-    [Area("Partner")]
-    [Roles(AuthRoles.Admin, AuthRoles.Editor, AuthRoles.StaffMember)]
-    public class StudentsController : Controller
+    public StudentsController(
+        IOfferingRepository offeringRepository,
+        IUnitOfWork unitOfWork,
+        IMediator mediator)
     {
-        private readonly IOfferingRepository _offeringRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMediator _mediator;
+        _offeringRepository = offeringRepository;
+        _unitOfWork = unitOfWork;
+        _mediator = mediator;
+    }
 
-        public StudentsController(
-            IOfferingRepository offeringRepository,
-            IUnitOfWork unitOfWork,
-            IMediator mediator)
+
+    [Roles(AuthRoles.Admin, AuthRoles.Editor)]
+    public async Task<IActionResult> Update(string id)
+    {
+        if (string.IsNullOrEmpty(id))
         {
-            _offeringRepository = offeringRepository;
-            _unitOfWork = unitOfWork;
-            _mediator = mediator;
+            return RedirectToPage("/Partner/Students/Index", new { area = "Staff" });
         }
 
-        public IActionResult Index()
+        Student? student = await _unitOfWork.Students.ForEditAsync(id);
+
+        if (student is null)
         {
-            return RedirectToAction("Active");
+            return RedirectToPage("/Partner/Students/Index", new { area = "Staff" });
         }
 
-        public async Task<IActionResult> All()
+        List<School> schools = (await _unitOfWork.Schools.ForSelectionAsync()).ToList();
+
+        List<SelectListItem> genders = new()
         {
-            var students = await _unitOfWork.Students.ForListAsync(student => true);
+            new() { Text ="Male", Value = "M" },
+            new() { Text = "Female", Value = "F" }
+        };
 
-            var viewModel = new Student_ViewModel();
-            viewModel.Students = students.Select(Student_ViewModel.StudentDto.ConvertFromStudent).ToList();
-
-            return View("Index", viewModel);
-        }
-
-        public async Task<IActionResult> Active()
-        {
-            var students = await _unitOfWork.Students.ForListAsync(student => !student.IsDeleted);
-
-            foreach (var student in students)
-            {
-                if (student.AbsenceConfigurations.Count == 0 && student.IncludeInAbsenceNotifications)
-                {
-                    Result<AbsenceConfiguration> wholeRequest = AbsenceConfiguration.Create(student.StudentId, AbsenceType.Whole, DateOnly.FromDateTime(student.AbsenceNotificationStartDate.Value), null);
-
-                    if (wholeRequest.IsSuccess)
-                        student.AddAbsenceConfiguration(wholeRequest.Value);
-
-                    Result<AbsenceConfiguration> partialRequest = AbsenceConfiguration.Create(student.StudentId, AbsenceType.Partial, DateOnly.FromDateTime(student.AbsenceNotificationStartDate.Value), null);
-
-                    if (partialRequest.IsSuccess)
-                        student.AddAbsenceConfiguration(partialRequest.Value);
-
-                    await _unitOfWork.CompleteAsync();
-                }
-            }
-
-            var viewModel = new Student_ViewModel();
-            viewModel.Students = students.Select(Student_ViewModel.StudentDto.ConvertFromStudent).ToList();
-
-            return View("Index", viewModel);
-        }
-
-        public async Task<IActionResult> Inactive()
-        {
-            var students = await _unitOfWork.Students.ForListAsync(student => student.IsDeleted);
-
-            var viewModel = new Student_ViewModel();
-            viewModel.Students = students.Select(Student_ViewModel.StudentDto.ConvertFromStudent).ToList();
-
-            return View("Index", viewModel);
-        }
-
-        public async Task<IActionResult> WithoutACDetails()
-        {
-            var students = await _unitOfWork.Students.ForListAsync(student => string.IsNullOrWhiteSpace(student.AdobeConnectPrincipalId));
-
-            var viewModel = new Student_ViewModel();
-            viewModel.Students = students.Select(Student_ViewModel.StudentDto.ConvertFromStudent).ToList();
-
-            return View("Index", viewModel);
-        }
-
-        public async Task<IActionResult> WithoutDevice()
-        {
-            var students = await _unitOfWork.Students.ForListAsync(student => student.Devices.Any(device => !device.IsDeleted));
-
-            var viewModel = new Student_ViewModel();
-            viewModel.Students = students.Select(Student_ViewModel.StudentDto.ConvertFromStudent).ToList();
-
-            return View("Index", viewModel);
-        }
-
-        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Update(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return RedirectToAction("Index");
-            }
-
-            var student = await _unitOfWork.Students.ForEditAsync(id);
-
-            if (student == null)
-            {
-                return RedirectToAction("Index");
-            }
-
-            var schools = await _unitOfWork.Schools.ForSelectionAsync();
-
-            var genders = new List<SelectListItem>()
-            {
-                new SelectListItem() { Text ="Male", Value = "M" },
-                new SelectListItem() { Text = "Female", Value = "F" }
-            };
-
-            var viewModel = new Student_UpdateViewModel();
-            viewModel.Student = new StudentDto
+        Student_UpdateViewModel viewModel = new()
+        { 
+            Student = new()
             {
                 StudentId = student.StudentId,
                 FirstName = student.FirstName,
@@ -145,137 +73,86 @@ namespace Constellation.Presentation.Server.Areas.Partner.Controllers
                 CurrentGrade = student.CurrentGrade,
                 Gender = student.Gender,
                 SchoolCode = student.SchoolCode
-            };
-            viewModel.IsNew = false;
-            viewModel.SchoolList = new SelectList(schools, "Code", "Name", student.SchoolCode);
-            viewModel.GenderList = new SelectList(genders, "Value", "Text", student.Gender);
+            },
+            IsNew = false,
+            SchoolList = new(schools, "Code", "Name", student.SchoolCode),
+            GenderList = new(genders, "Value", "Text", student.Gender)
+        };
 
-            return View(viewModel);
-        }
+        return View(viewModel);
+    }
 
-        [HttpPost]
-        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Update(Student_UpdateViewModel viewModel)
+    [HttpPost]
+    [Roles(AuthRoles.Admin, AuthRoles.Editor)]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Update(Student_UpdateViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid)
+            List<School> schools = (await _unitOfWork.Schools.ForSelectionAsync()).ToList();
+            List<SelectListItem> genders = new()
             {
-                var schools = await _unitOfWork.Schools.ForSelectionAsync();
-                var genders = new List<SelectListItem>()
-                {
-                    new SelectListItem() { Text ="Male", Value = "M" },
-                    new SelectListItem() { Text = "Female", Value = "F" }
-                };
-
-                viewModel.SchoolList = new SelectList(schools, "Code", "Name", viewModel.Student.SchoolCode);
-                viewModel.GenderList = new SelectList(genders, "Value", "Text", viewModel.Student.Gender);
-
-                return View("Update", viewModel);
-            }
-
-            if (viewModel.IsNew)
-            {
-                Student student = Student.Create(
-                    viewModel.Student.StudentId,
-                    viewModel.Student.FirstName,
-                    viewModel.Student.LastName,
-                    viewModel.Student.PortalUsername,
-                    viewModel.Student.CurrentGrade,
-                    viewModel.Student.SchoolCode,
-                    viewModel.Student.Gender);
-
-                _unitOfWork.Students.Insert(student);
-            }
-            else
-            {
-                await _mediator.Send(new UpdateStudentCommand(
-                    viewModel.Student.StudentId,
-                    viewModel.Student.FirstName,
-                    viewModel.Student.LastName,
-                    viewModel.Student.PortalUsername,
-                    viewModel.Student.AdobeConnectPrincipalId,
-                    viewModel.Student.SentralStudentId,
-                    viewModel.Student.CurrentGrade,
-                    viewModel.Student.EnrolledGrade,
-                    viewModel.Student.Gender,
-                    viewModel.Student.SchoolCode));
-            }
-
-            await _unitOfWork.CompleteAsync();
-
-            return RedirectToAction("Index");
-        }
-
-        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Create()
-        {
-            var schools = await _unitOfWork.Schools.ForSelectionAsync();
-
-            var genders = new List<SelectListItem>()
-            {
-                new SelectListItem() { Text ="Male", Value = "M" },
-                new SelectListItem() { Text = "Female", Value = "F" }
+                new() { Text ="Male", Value = "M" },
+                new() { Text = "Female", Value = "F" }
             };
 
-            var viewModel = new Student_UpdateViewModel();
-            viewModel.IsNew = true;
-            viewModel.SchoolList = new SelectList(schools, "Code", "Name");
-            viewModel.GenderList = new SelectList(genders, "Value", "Text");
+            viewModel.SchoolList = new(schools, "Code", "Name", viewModel.Student.SchoolCode);
+            viewModel.GenderList = new(genders, "Value", "Text", viewModel.Student.Gender);
 
             return View("Update", viewModel);
         }
 
-        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> UnenrolAll(string id)
+        if (viewModel.IsNew)
         {
-            var student = await _unitOfWork.Students.ForBulkUnenrolAsync(id);
+            Student student = Student.Create(
+                viewModel.Student.StudentId,
+                viewModel.Student.FirstName,
+                viewModel.Student.LastName,
+                viewModel.Student.PortalUsername,
+                viewModel.Student.CurrentGrade,
+                viewModel.Student.SchoolCode,
+                viewModel.Student.Gender);
 
-            foreach (var enrolment in student.Enrolments.Where(e => !e.IsDeleted))
-            {
-                await _mediator.Send(new UnenrolStudentCommand(student.StudentId, enrolment.OfferingId));
-            }
-
-            return RedirectToPage("/Students/Details", new { area = "Partner", id });
+            _unitOfWork.Students.Insert(student);
+        }
+        else
+        {
+            await _mediator.Send(new UpdateStudentCommand(
+                viewModel.Student.StudentId,
+                viewModel.Student.FirstName,
+                viewModel.Student.LastName,
+                viewModel.Student.PortalUsername,
+                viewModel.Student.AdobeConnectPrincipalId,
+                viewModel.Student.SentralStudentId,
+                viewModel.Student.CurrentGrade,
+                viewModel.Student.EnrolledGrade,
+                viewModel.Student.Gender,
+                viewModel.Student.SchoolCode));
         }
 
-        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Unenrol(string id, Guid classId)
+        await _unitOfWork.CompleteAsync();
+
+        return RedirectToPage("/Partner/Students/Index", new { area = "Staff" });
+    }
+
+    [Roles(AuthRoles.Admin, AuthRoles.Editor)]
+    public async Task<IActionResult> Create()
+    {
+        List<School> schools = (await _unitOfWork.Schools.ForSelectionAsync()).ToList();
+
+        List<SelectListItem> genders = new()
         {
-            OfferingId offeringId = OfferingId.FromValue(classId);
+            new() { Text ="Male", Value = "M" },
+            new() { Text = "Female", Value = "F" }
+        };
 
-            if (offeringId is null)
-                return RedirectToPage("/Students/Details", new { area = "Partner", id });
-
-            await _mediator.Send(new UnenrolStudentCommand(id, offeringId));
-
-            return RedirectToPage("/Students/Details", new { area = "Partner", id });
-        }
-
-        [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-        public async Task<IActionResult> Enrol(string id, Guid classId)
+        Student_UpdateViewModel viewModel = new()
         {
-            var student = await _unitOfWork.Students.ForEditAsync(id);
+            IsNew = true,
+            SchoolList = new(schools, "Code", "Name"),
+            GenderList = new(genders, "Value", "Text")
+        };
 
-            if (student == null)
-            {
-                return RedirectToAction("Index");
-            }
-
-            OfferingId offeringId = OfferingId.FromValue(classId);
-
-            var offering = await _offeringRepository.GetById(offeringId);
-
-            if (offering == null)
-            {
-                return RedirectToAction("Index");
-            }
-
-            if (!student.Enrolments.Any(e => e.OfferingId == offeringId && !e.IsDeleted))
-            {
-                await _mediator.Send(new EnrolStudentCommand(student.StudentId, offering.Id));
-            }
-
-            return RedirectToPage("/Students/Details", new { area = "Partner", id });
-        }
+        return View("Update", viewModel);
     }
 }
