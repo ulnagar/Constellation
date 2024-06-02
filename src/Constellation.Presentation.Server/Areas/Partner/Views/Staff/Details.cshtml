@@ -11,7 +11,7 @@
 @if (authorised)
 {
     <div>
-        <a asp-action="Update" asp-controller="Staff" asp-area="Partner" asp-route-id="@Model.Staff.StaffId" class="btn btn-warning">Edit</a>
+        <a asp-page="/Partner/Staff/Upsert" asp-area="Staff" asp-route-id="@Model.Staff.StaffId" class="btn btn-warning">Edit</a>
 
         @if (Model.Staff.IsDeleted)
         {

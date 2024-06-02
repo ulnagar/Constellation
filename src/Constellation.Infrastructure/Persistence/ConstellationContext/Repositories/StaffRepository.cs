@@ -187,6 +187,8 @@ public class StaffRepository : IStaffRepository
                 emailAddress.Contains(staff.PortalUsername))
             .FirstOrDefaultAsync(cancellationToken);
 
+    public void Insert(Staff member) => _context.Set<Staff>().Add(member);
+        
     public Staff WithDetails(string id)
     {
         return Collection()

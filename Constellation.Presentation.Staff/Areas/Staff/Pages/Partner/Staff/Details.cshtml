@@ -1,0 +1,293 @@
+﻿@page "{id}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff.DetailsModel
+
+@inject IAuthorizationService authService
+
+@{
+    var authorised = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStaff);
+}
+
+<h2>Staff Member Details</h2>
+
+<div class="page-menu">
+    @if (authorised.Succeeded)
+    {
+        <a asp-page="/Partner/Staff/Upsert" asp-area="Staff" asp-route-id="@Model.StaffMember.StaffId" class="btn btn-warning">Edit</a>
+
+        @if (Model.StaffMember.IsDeleted)
+        {
+            <a asp-page-handler="Reinstate" class="btn btn-danger">Reinstate</a>
+        }
+        else
+        {
+            <a asp-page-handler="Resign" class="btn btn-danger">Resign</a>
+        }
+    }
+    
+    <button class="btn btn-secondary" data-toggle="modal" data-target="#lifecycleDetailsModal">View Extended Details</button>
+    
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+@if (Model.StaffMember.IsDeleted)
+{
+    <div class="alert alert-warning">
+        This staff member has been marked resigned.
+    </div>
+}
+
+<div>
+    <dl class="row">
+        <dt class="col-md-2">
+            <label asp-for="StaffMember.StaffId">Employee Id</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.StaffMember.StaffId</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="StaffMember.StaffName.DisplayName"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.StaffMember.StaffName.DisplayName</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="StaffMember.EmailAddress"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span><a href="mailto:@Model.StaffMember.EmailAddress">@Model.StaffMember.EmailAddress</a></span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="StaffMember.SchoolName">School</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>
+                @Html.ActionLink(Model.StaffMember.SchoolName, "Details", "Schools", new { area = "Partner", id = Model.StaffMember.SchoolCode }, new { htmlAttributes = new { @class = "form-control" } })
+            </span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="StaffMember.IsShared">Is Shared Staff Member</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.StaffMember.IsShared</span>
+        </dd>
+    </dl>
+</div>
+
+<hr />
+
+<div>
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            <a class="nav-link active" href="#faculties" data-toggle="tab" role="tab">Faculties</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#classes" data-toggle="tab" role="tab">
+                Active classes
+                @if (Model.StaffMember.Offerings.Any())
+                {
+                    <span class="badge">@Model.StaffMember.Offerings.Count()</span>
+                }
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#sessions" data-toggle="tab" role="tab">
+                Active periods
+                @if (Model.StaffMember.Sessions.Any())
+                {
+                    <span class="badge">@Model.StaffMember.Sessions.Count()</span>
+                }
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#schoolStaff" data-toggle="tab" role="tab">
+                School contacts
+                @if (Model.StaffMember.Contacts.Any())
+                {
+                    <span class="badge">@Model.StaffMember.Contacts.Count()</span>
+                }
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="faculties" class="tab-pane active">
+            <h3>Faculty Membership</h3>
+
+            <button class="btn btn-warning" data-target="#addMembership" data-toggle="modal">Add Faculty Membership</button>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.StaffMember.Faculties)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>@item.Role</td>
+                            <td>
+                                <a asp-page-handler="DeleteFacultyRole" asp-route-facultyId="@item.FacultyId.Value" class="btn btn-sm btn-warning btn-show-hover">Remove</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="schoolStaff" class="tab-pane">
+            <h3>Partner School Staff</h3>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email Address</th>
+                        <th>Phone Number</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.StaffMember.Contacts)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>@Html.DisplayFor(model => item.EmailAddress, "EmailAddress")</td>
+                            <td>@Html.DisplayFor(model => item.PhoneNumber, "PhoneNumber")</td>
+                            <td>@item.Role</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="sessions" class="tab-pane">
+            <h3>Scheduled Periods</h3>
+
+            <table class="table-striped table-hover hidden-sort-data-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Period</th>
+                        <th>Class</th>
+                        <th>Duration</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.StaffMember.Sessions)
+                    {
+                        <tr>
+                            <td>@item.PeriodSortOrder</td>
+                            <td>@item.PeriodName</td>
+                            <td>@item.ClassName</td>
+                            <td>@item.Length</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="classes" class="tab-pane">
+            <h3>Classes</h3>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Course</th>
+                        <th>Type</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.StaffMember.Offerings)
+                    {
+                        <tr>
+                            <td>@item.ClassName</td>
+                            <td>@item.CourseName</td>
+                            <td>@item.Role</td>
+                            <td>
+                                <a asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@item.OfferingId.Value" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<vc:teacher-add-faculty staff-id="@Model.StaffMember.StaffId"></vc:teacher-add-faculty>
+
+
+<div class="modal" id="lifecycleDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Lifecycle Details</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <dl class="row">
+                        <dt class="col-md-4">
+                            <label asp-for="RecordLifecycle.CreatedBy">Created By</label>
+                        </dt>
+                        <dd class="col-md-8">
+                            <span>@Model.RecordLifecycle.CreatedBy</span>
+                        </dd>
+
+                        <dt class="col-md-4">
+                            <label asp-for="RecordLifecycle.CreatedAt">Created At</label>
+                        </dt>
+                        <dd class="col-md-8">
+                            <span>@Model.RecordLifecycle.CreatedAt.ToString("f")</span>
+                        </dd>
+
+                        <dt class="col-md-4">
+                            <label asp-for="RecordLifecycle.ModifiedBy">Modified By</label>
+                        </dt>
+                        <dd class="col-md-8">
+                            <span>@Model.RecordLifecycle.ModifiedBy</span>
+                        </dd>
+
+                        <dt class="col-md-4">
+                            <label asp-for="RecordLifecycle.ModifiedAt">Modified On</label>
+                        </dt>
+                        <dd class="col-md-8">
+                            <span>@(Model.RecordLifecycle.ModifiedAt == DateTime.MinValue ? null : Model.RecordLifecycle.ModifiedAt.ToString("f"))</span>
+                        </dd>
+
+                        <dt class="col-md-4">
+                            <label asp-for="RecordLifecycle.DeletedBy">Deleted By</label>
+                        </dt>
+                        <dd class="col-md-8">
+                            <span>@Model.RecordLifecycle.DeletedBy</span>
+                        </dd>
+
+                        <dt class="col-md-4">
+                            <label asp-for="RecordLifecycle.DeletedAt">Deleted At</label>
+                        </dt>
+                        <dd class="col-md-8">
+                            <span>@Model.RecordLifecycle.DeletedAt?.ToString("f")</span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

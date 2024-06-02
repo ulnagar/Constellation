@@ -50,4 +50,6 @@ public interface IStaffRepository
     Task<bool> AnyWithId(string id);
     Task<Staff> ForDeletion(string id);
     Task<Staff> GetFromName(string name);
+
+    void Insert(Staff member);
 }

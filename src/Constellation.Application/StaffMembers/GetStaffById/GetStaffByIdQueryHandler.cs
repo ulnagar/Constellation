@@ -56,7 +56,10 @@ internal sealed class GetStaffByIdQueryHandler
         StaffResponse response = new(
             staffMember.StaffId,
             staffName.Value,
-            staffEmail.Value);
+            staffEmail.Value,
+            staffMember.PortalUsername,
+            staffMember.SchoolCode,
+            staffMember.IsShared);
 
         return response;
     }

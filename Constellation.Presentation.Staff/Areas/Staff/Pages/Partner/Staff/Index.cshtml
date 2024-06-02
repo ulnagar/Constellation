@@ -51,7 +51,7 @@
     @if (canManageStaff.Succeeded)
     {
         <div class="btn-group new-group" role="group">
-            <a asp-action="Create" asp-controller="Staff" asp-area="Partner" class="btn btn-info">Create New</a>
+            <a asp-page="/Partner/Staff/Upsert" asp-area="Staff" class="btn btn-info">Create New</a>
         </div>
     }
 </div>

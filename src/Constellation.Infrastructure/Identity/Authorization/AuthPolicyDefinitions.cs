@@ -91,6 +91,9 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanManageAssets, policy =>
             policy.RequireRole(AuthRoles.EquipmentEditor, AuthRoles.Admin));
 
+        options.AddPolicy(AuthPolicies.CanEditSchools, policy =>
+            policy.RequireRole(AuthRoles.Editor, AuthRoles.Admin));
+
         return options;
     }
 }

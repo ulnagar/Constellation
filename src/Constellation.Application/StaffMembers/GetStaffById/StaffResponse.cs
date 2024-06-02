@@ -5,4 +5,7 @@ using Constellation.Core.ValueObjects;
 public sealed record StaffResponse(
     string StaffId,
     Name Name,
-    EmailAddress EmailAddress);
+    EmailAddress EmailAddress,
+    string PortalUsername,
+    string SchoolCode,
+    bool IsShared);

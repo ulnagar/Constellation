@@ -332,6 +332,10 @@ public static class DomainErrors
 
         public static class Staff
         {
+            public static readonly Func<string, Error> AlreadyExists = id => new(
+                "Partners.Staff.AlreadyExists",
+                $"A staff member with the Id {id} already exists");
+
             public static readonly Func<int, Error> NotFoundLinkedToOffering = id => new Error(
                 "Partners.Staff.NotFoundLinkedToOffering",
                 $"Could not retrieve list of teachers for the offering {id}");
