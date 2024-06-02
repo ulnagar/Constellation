@@ -16,7 +16,7 @@
 <div class="page-menu">
     @if (authorised.Succeeded)
     {
-        <a asp-action="Update" asp-controller="Students" asp-area="Partner" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Edit</a>
+        <a asp-page="/Partner/Students/Upsert" asp-area="Staff" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Edit</a>
 
         @if (Model.Student.IsDeleted)
         {
@@ -52,10 +52,10 @@
         </dd>
 
         <dt class="col-md-2">
-            <label asp-for="Student.DisplayName"></label>
+            <label asp-for="Student.Name.DisplayName"></label>
         </dt>
         <dd class="col-md-10">
-            <span>@Model.Student.DisplayName</span>
+            <span>@Model.Student.Name.DisplayName</span>
         </dd>
 
         <dt class="col-md-2">

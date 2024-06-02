@@ -59,7 +59,7 @@ public class DetailsModel : BasePageModel
         {
             FamilyName = family.Value?.FamilyName ?? string.Empty,
             Title = "Remove student from family",
-            UserName = student.Value?.DisplayName ?? string.Empty,
+            UserName = student.Value?.Name.DisplayName ?? string.Empty,
             FamilyId = familyId,
             StudentId = studentId
         };

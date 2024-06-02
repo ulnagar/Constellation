@@ -45,10 +45,10 @@ internal sealed class UpdateStudentCommandHandler
             request.FirstName,
             request.LastName,
             request.PortalUsername,
-            request.AdobeConnectId,
-            request.SentralId,
+            student.AdobeConnectPrincipalId,
+            student.SentralStudentId,
             request.CurrentGrade,
-            request.EnrolledGrade,
+            student.EnrolledGrade,
             request.Gender,
             request.SchoolCode);
 

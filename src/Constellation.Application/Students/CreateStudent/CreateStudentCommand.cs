@@ -1,14 +1,14 @@
-﻿namespace Constellation.Application.Students.UpdateStudent;
+﻿namespace Constellation.Application.Students.CreateStudent;
 
 using Abstractions.Messaging;
 using Core.Enums;
 
-public sealed record UpdateStudentCommand(
+public sealed record CreateStudentCommand(
     string StudentId,
     string FirstName,
     string LastName,
-    string PortalUsername,
-    Grade CurrentGrade,
     string Gender,
+    Grade Grade,
+    string PortalUsername,
     string SchoolCode)
     : ICommand;

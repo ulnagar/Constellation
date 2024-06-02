@@ -4,7 +4,6 @@ using Application.Enrolments.UnenrolStudent;
 using Application.Enrolments.UnenrolStudentFromAllOfferings;
 using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
 using Constellation.Application.Assets.GetDevicesAllocatedToStudent;
-using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Enrolments.GetStudentEnrolmentsWithDetails;
 using Constellation.Application.Families.GetFamilyContactsForStudent;
 using Constellation.Application.Families.Models;
@@ -19,6 +18,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Models.Offerings.Identifiers;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -190,7 +190,7 @@ public class DetailsModel : BasePageModel
             RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" })
         };
 
-        Student = new("", "", Core.Enums.Grade.SpecialProgram, "", "", "", false);
+        Student = new("", Name.Create("John", "", "Doe").Value, "", Core.Enums.Grade.SpecialProgram, "", "", "", "", false);
     }
 
     private int CalculateTotalSessionDuration()

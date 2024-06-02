@@ -4,8 +4,10 @@
 @using Constellation.Application.Students.GetFilteredStudents
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 
-@{
+@inject IAuthorizationService authService
 
+@{
+    var canEditStudents = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 }
 
 <h2>Students</h2>
@@ -35,6 +37,11 @@
         <a asp-route-filter="@StudentFilter.Active" class="btn @activeStyle">Active</a>
         <a asp-route-filter="@StudentFilter.Inactive" class="btn @inactiveStyle">Inactive</a>
     </div>
+    
+    @if (canEditStudents.Succeeded)
+    {
+        <a asp-page="/Partner/Students/Upsert" asp-area="Staff" class="btn btn-success">Create</a>
+    }
 </div>
 
 <hr />

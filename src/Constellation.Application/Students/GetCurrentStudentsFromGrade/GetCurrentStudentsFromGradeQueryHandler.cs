@@ -57,8 +57,10 @@ internal sealed class GetCurrentStudentsFromGradeQueryHandler
 
             response.Add(new(
                 student.StudentId,
-                student.DisplayName,
+                student.GetName(),
+                student.Gender,
                 student.CurrentGrade,
+                student.PortalUsername,
                 student.EmailAddress,
                 schoolName,
                 student.SchoolCode,

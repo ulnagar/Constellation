@@ -58,7 +58,7 @@ public class IndexModel : BasePageModel
 
             Result<StudentResponse> student = await _mediator.Send(new GetStudentByIdQuery(StudentId));
 
-            ReportFor = student.IsSuccess ? student.Value.DisplayName : $"student with Id {StudentId}";
+            ReportFor = student.IsSuccess ? student.Value.Name.DisplayName : $"student with Id {StudentId}";
 
             return;
         }

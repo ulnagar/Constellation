@@ -61,9 +61,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configuration", "configurat
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Constellation.Presentation.Staff", "Constellation.Presentation.Staff\Constellation.Presentation.Staff.csproj", "{EE94FE90-E753-4D81-8937-FECD25DD55F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Presentation.Staff", "Constellation.Presentation.Staff\Constellation.Presentation.Staff.csproj", "{EE94FE90-E753-4D81-8937-FECD25DD55F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Constellation.Presentation.Shared", "Constellation.Presentation.Shared\Constellation.Presentation.Shared.csproj", "{6B6B3A8E-852C-425C-9D92-FCC26FB91C85}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Presentation.Shared", "Constellation.Presentation.Shared\Constellation.Presentation.Shared.csproj", "{6B6B3A8E-852C-425C-9D92-FCC26FB91C85}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

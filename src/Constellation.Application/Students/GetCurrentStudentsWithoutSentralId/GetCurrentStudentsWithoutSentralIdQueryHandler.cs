@@ -30,8 +30,10 @@ internal sealed class GetCurrentStudentsWithoutSentralIdQueryHandler
         {
             response.Add(new(
                 student.StudentId,
-                student.GetName().DisplayName,
+                student.GetName(),
+                student.Gender,
                 student.CurrentGrade,
+                student.PortalUsername,
                 student.EmailAddress,
                 student.School.Name,
                 student.SchoolCode,

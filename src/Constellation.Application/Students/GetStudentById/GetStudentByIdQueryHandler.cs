@@ -29,8 +29,10 @@ internal sealed class GetStudentByIdQueryHandler
 
         return new StudentResponse(
             student.StudentId,
-            student.DisplayName,
+            student.GetName(),
+            student.Gender,
             student.CurrentGrade,
+            student.PortalUsername,
             student.EmailAddress,
             student.School.Name,
             student.SchoolCode,

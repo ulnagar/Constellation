@@ -109,11 +109,11 @@ public class RolloverModel : BasePageModel
             return Page();
         }
 
-        foreach (StudentResponse entry in attempt.Value.OrderBy(student => student.DisplayName))
+        foreach (StudentResponse entry in attempt.Value.OrderBy(student => student.Name.SortOrder))
         {
             Statuses.Add(new(
                 entry.StudentId,
-                entry.DisplayName,
+                entry.Name.DisplayName,
                 grade,
                 entry.School));
         }

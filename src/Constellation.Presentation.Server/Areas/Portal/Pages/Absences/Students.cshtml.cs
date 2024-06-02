@@ -42,7 +42,7 @@ public class StudentsModel : PageModel
         if (studentRequest.IsFailure)
             throw new InvalidDataException(studentRequest.Error.Message);
 
-        StudentName = studentRequest.Value.DisplayName;
+        StudentName = studentRequest.Value.Name.DisplayName;
 
         // Get all absences for this student from this year.
         var absencesRequest = await _mediator.Send(new GetAbsenceSummaryForStudentQuery(StudentId), cancellationToken);
