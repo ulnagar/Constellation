@@ -13,6 +13,7 @@ public interface ISchoolRepository
 {
     void Insert(School school);
     Task<List<School>> GetAllActive(CancellationToken cancellationToken = default);
+    Task<List<School>> GetAllInactive(CancellationToken cancellationToken = default);
     Task<School?> GetById(string id, CancellationToken cancellationToken = default);
     Task<List<School>> GetAll(CancellationToken cancellationToken = default);
     Task<List<School>> GetWithCurrentStudents(CancellationToken cancellationToken = default);

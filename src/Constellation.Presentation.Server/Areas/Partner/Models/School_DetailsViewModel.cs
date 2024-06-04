@@ -22,7 +22,6 @@ namespace Constellation.Presentation.Server.Areas.Partner.Models
         public ICollection<ContactDto> Contacts { get; set; }
         public ICollection<StudentDto> Students { get; set; }
         public ICollection<StaffDto> Staff { get; set; }
-        public Contacts_AssignmentViewModel RoleAssignmentDto { get; set; }
 
         public class SchoolDto
         {

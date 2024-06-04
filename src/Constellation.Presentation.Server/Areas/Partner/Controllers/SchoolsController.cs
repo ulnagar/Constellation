@@ -41,154 +41,14 @@ public class SchoolsController : Controller
         _schoolService = schoolService;
         _mediator = mediator;
     }
-
-    public IActionResult Index()
-    {
-        return RedirectToAction("WithEither");
-    }
-
-    public async Task<IActionResult> All()
-    {
-        var schools = await _unitOfWork.Schools.ForListAsync(school => true);
-
-        var viewModel = new School_ViewModel();
-        viewModel.Schools = schools.Select(School_ViewModel.SchoolDto.ConvertFromSchool).ToList();
-
-        return View("Index", viewModel);
-    }
-
-    public async Task<IActionResult> WithStudents()
-    {
-        var schools = await _unitOfWork.Schools.ForListAsync(school => school.Students.Any(student => !student.IsDeleted));
-
-        var viewModel = new School_ViewModel();
-        viewModel.Schools = schools.Select(School_ViewModel.SchoolDto.ConvertFromSchool).ToList();
-
-        return View("Index", viewModel);
-    }
-
-    public async Task<IActionResult> WithStaff()
-    {
-        var schools = await _unitOfWork.Schools.ForListAsync(school => school.Staff.Any(staff => !staff.IsDeleted));
-
-        var viewModel = new School_ViewModel();
-        viewModel.Schools = schools.Select(School_ViewModel.SchoolDto.ConvertFromSchool).ToList();
-
-        return View("Index", viewModel);
-    }
-
-    public async Task<IActionResult> WithBoth()
-    {
-        var schools = await _unitOfWork.Schools.ForListAsync(school => school.Students.Any(student => !student.IsDeleted) && school.Staff.Any(staff => !staff.IsDeleted));
-
-        var viewModel = new School_ViewModel();
-        viewModel.Schools = schools.Select(School_ViewModel.SchoolDto.ConvertFromSchool).ToList();
-
-        return View("Index", viewModel);
-    }
-
-    public async Task<IActionResult> WithEither()
-    {
-        var schools = await _unitOfWork.Schools.ForListAsync(school => school.Students.Any(student => !student.IsDeleted) || school.Staff.Any(staff => !staff.IsDeleted));
-
-
-        var viewModel = new School_ViewModel();
-        viewModel.Schools = schools.Select(School_ViewModel.SchoolDto.ConvertFromSchool).ToList();
-
-        return View("Index", viewModel);
-    }
-
-    public async Task<IActionResult> WithNeither()
-    {
-        var schools = await _unitOfWork.Schools.ForListAsync(school => !school.Students.Any(student => !student.IsDeleted) && !school.Staff.Any(staff => !staff.IsDeleted));
-
-        var viewModel = new School_ViewModel();
-        viewModel.Schools = schools.Select(School_ViewModel.SchoolDto.ConvertFromSchool).ToList();
-
-        return View("Index", viewModel);
-    }
-
+    
     public async Task<IActionResult> _GetGraphData(string id, int day)
     {
         var data = await _mediator.Send(new GetGraphDataForSchoolQuery { SchoolCode = id, Day = day });
 
         return Json(data);
     }
-
-    [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-    public async Task<IActionResult> Update(string id)
-    {
-        if (string.IsNullOrEmpty(id))
-        {
-            return RedirectToAction("Index");
-        }
-
-        var school = await _unitOfWork.Schools.ForEditAsync(id);
-
-        if (school == null)
-        {
-            return RedirectToAction("Index");
-        }
-
-        var viewModel = new School_UpdateViewModel();
-        viewModel.Resource = new SchoolDto
-        {
-            Code = school.Code,
-            Name = school.Name,
-            Address = school.Address,
-            Division = school.Division,
-            Electorate = school.Electorate,
-            EmailAddress = school.EmailAddress,
-            FaxNumber = school.FaxNumber,
-            HeatSchool = school.HeatSchool,
-            PhoneNumber = school.PhoneNumber,
-            PostCode = school.PostCode,
-            PrincipalNetwork = school.PrincipalNetwork,
-            RollCallGroup = school.RollCallGroup,
-            State = school.State,
-            TimetableApplication = school.TimetableApplication,
-            Town = school.Town
-        };
-            
-        viewModel.IsNew = false;
-
-        return View(viewModel);
-    }
-
-    [HttpPost]
-    [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Update(School_UpdateViewModel returnModel)
-    {
-        if (!ModelState.IsValid)
-        {
-            return View("Update", returnModel);
-        }
-
-        if (returnModel.IsNew)
-        {
-            await _schoolService.CreateSchool(returnModel.Resource);
-        }
-        else
-        {
-            await _schoolService.UpdateSchool(returnModel.Resource.Code, returnModel.Resource);
-        }
-
-        await _unitOfWork.CompleteAsync();
-
-        return RedirectToAction("Index");
-    }
-
-    [Roles(AuthRoles.Admin, AuthRoles.Editor)]
-    public async Task<IActionResult> Create()
-    {
-        var viewModel = new School_UpdateViewModel();
-        viewModel.Resource = new SchoolDto();
-        viewModel.IsNew = true;
-
-        return View("Update", viewModel);
-    }
-
+    
     public async Task<IActionResult> Details(string id)
     {
         if (string.IsNullOrEmpty(id))
@@ -274,18 +134,7 @@ public class SchoolsController : Controller
             };
 
             viewModel.Staff.Add(entry);
-        }                
-
-        viewModel.RoleAssignmentDto = new Contacts_AssignmentViewModel
-        {
-            ContactRole = new SchoolContactRoleDto
-            {
-                SchoolCode = school.Code,
-                SchoolName = school.Name
-            },
-            SchoolStaffList = new SelectList(contacts, "Id", "DisplayName"),
-            RoleList = new SelectList(roles)
-        };
+        }
 
         return View(viewModel);
     }

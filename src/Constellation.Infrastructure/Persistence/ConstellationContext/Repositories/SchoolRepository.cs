@@ -27,7 +27,16 @@ public class SchoolRepository : ISchoolRepository
                 school.Students.Any(student => !student.IsDeleted) ||
                 school.Staff.Any(staff => !staff.IsDeleted))
             .ToListAsync(cancellationToken);
-    
+
+    public async Task<List<School>> GetAllInactive(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<School>()
+            .Where(school =>
+                school.Students.All(student => student.IsDeleted) &&
+                school.Staff.All(staff => staff.IsDeleted))
+            .ToListAsync(cancellationToken);
+
     public async Task<List<School>> GetListFromIds(
         List<string> schoolCodes, 
         CancellationToken cancellationToken = default) =>

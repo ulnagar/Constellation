@@ -29,8 +29,8 @@ internal sealed class UpsertSchoolCommandHandler
     {
         _logger.Information("UpsertSchoolCommandHandler called with request {@request}", request);
 
-        var entity = await _schoolRepository.GetById(request.Code, cancellationToken);
-        var newSchool = false;
+        School entity = await _schoolRepository.GetById(request.Code, cancellationToken);
+        bool newSchool = false;
 
         if (entity is null)
         {

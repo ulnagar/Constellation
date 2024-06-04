@@ -1,0 +1,121 @@
+﻿@page
+@using Constellation.Application.Schools.GetSchoolsSummaryList
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools.IndexModel
+
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult authorised = await authService.AuthorizeAsync(User, AuthPolicies.CanEditSchools);
+}
+
+<h2>School List</h2>
+
+<div class="page-menu">
+    @{
+        var allStyle = "btn-outline-secondary";
+        var activeStyle = allStyle;
+        var inactiveStyle = allStyle;
+
+        switch (Model.Filter)
+        {
+            case SchoolFilter.All:
+                allStyle = "btn-primary";
+                break;
+            case SchoolFilter.Active:
+                activeStyle = "btn-primary";
+                break;
+            case SchoolFilter.Inactive:
+                inactiveStyle = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-route-filter="@SchoolFilter.All" class="btn @allStyle">All</a>
+        <a asp-route-filter="@SchoolFilter.Active" class="btn @activeStyle">Active</a>
+        <a asp-route-filter="@SchoolFilter.Inactive" class="btn @inactiveStyle">Inactive</a>
+    </div>
+
+    <div class="btn-group new-group" role="group">
+        <form asp-page="/Partner/Schools/Map" asp-area="Staff" id="MapForm">
+            <div id="MapFormInputs"></div>
+            <a id="mapSchools" class="btn btn-info" href="">Map Schools</a>
+        </form>
+    </div>
+
+    @if (authorised.Succeeded)
+    {
+        <div class="btn-group new-group" role="group">
+            <a asp-page="/Partner/Schools/Upsert" asp-area="Staff" class="btn btn-info">Create New</a>
+        </div>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover custom-data-table">
+    <thead>
+        <tr>
+            <th>School Code</th>
+            <th>Name</th>
+            <th>Town</th>
+            <th>Phone Number</th>
+            <th>Email Address</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Schools)
+        {
+            <tr>
+                <td>@item.SchoolCode</td>
+                <td>@item.Name</td>
+                <td>@item.Town</td>
+                <td>@Html.DisplayFor(model => item.PhoneNumber, "PhoneNumber")</td>
+                <td>@Html.DisplayFor(model => item.EmailAddress, "EmailAddress")</td>
+                <td>
+                    <a asp-page="/Partner/Schools/Details" asp-area="Staff" asp-route-id="@item.SchoolCode" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts
+{
+    <script>
+        var customTable;
+
+        $(document).ready(function () {
+            customTable = $('.custom-data-table').DataTable({
+                "order": [ [ 1, 'asc' ] ]
+            });
+        });
+
+        $('#mapSchools')
+            .on('click',
+                function (event) {
+                    customTable.page.len(-1);
+                    var schools = customTable.column(0, { search: 'applied' }).data();
+
+                    console.log(schools);
+
+                    var formGroup = document.getElementById('MapFormInputs');
+
+                    $.each(schools, function (key, value) {
+                        console.log(key, value);
+
+                        var input = document.createElement("input");
+                        input.type = "hidden";
+                        input.name = "schoolCodes";
+                        input.value = value;
+
+                        formGroup.appendChild(input);
+                    });
+
+                    var form = document.getElementById('MapForm');
+                    form.submit();
+                });
+
+    </script>
+}
