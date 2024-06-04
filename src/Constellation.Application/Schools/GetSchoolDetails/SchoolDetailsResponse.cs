@@ -32,6 +32,7 @@ public sealed record SchoolDetailsResponse(
     public sealed record SchoolStudent(
         string StudentId,
         Name Name,
+        string Gender,
         Grade Grade,
         List<string> Offerings);
 
@@ -40,6 +41,7 @@ public sealed record SchoolDetailsResponse(
         SchoolContactRoleId RoleId,
         Name Name,
         string Role,
+        string Note,
         PhoneNumber PhoneNumber,
         EmailAddress EmailAddress);
 }

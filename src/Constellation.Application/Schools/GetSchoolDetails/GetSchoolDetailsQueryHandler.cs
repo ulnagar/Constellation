@@ -78,6 +78,7 @@ internal sealed class GetSchoolDetailsQueryHandler
             studentResponse.Add(new(
                 student.StudentId,
                 student.GetName(),
+                student.Gender,
                 student.CurrentGrade,
                 studentOfferings));
         }
@@ -120,6 +121,7 @@ internal sealed class GetSchoolDetailsQueryHandler
                     role.Id,
                     contact.GetName(),
                     role.Role,
+                    role.Note,
                     string.IsNullOrWhiteSpace(contact.PhoneNumber) ? PhoneNumber.Empty : PhoneNumber.Create(contact.PhoneNumber).Value,
                     string.IsNullOrWhiteSpace(contact.EmailAddress) ? EmailAddress.None : EmailAddress.Create(contact.EmailAddress).Value));
             }

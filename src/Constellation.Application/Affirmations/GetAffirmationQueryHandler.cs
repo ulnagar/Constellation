@@ -169,6 +169,49 @@ internal sealed class GetAffirmationQueryHandler
         "I am deserving of recognition and advancement, and I confidently seize opportunities for growth."
     };
 
+    private readonly string[] _quoteAffirmations = new string[]
+    {
+        @"""I am in the right place at the right time, doing the right thing"" - Louise Hay",
+        @"""Conscious breathing is my anchor"" - Thích Nhất Hạnh",
+        @"""You are loved just for being who you are, just for existing"" - Ram Dass",
+        @"""The chance to love and be loved exists no matter where you are"" - Oprah",
+        @"""Courage starts with showing up and letting ourselves be seen"" - Brené Brown",
+        @"""Make way for the unprecedented and watch your reality rearrange itself"" - Yrsa Daley-Ward",
+        @"""Open your heart and drink in this glorious day"" - Heather Havrilesky",
+        @"""Am I good enough? Yes I am."" - Michelle Obama", @"""The perfect moment is this one"" - Jon Kabat-Zinn",
+        @"""I am deliberate and afraid of nothing"" - Audre Lord",
+        @"""Your life is about to be incredible"" - Tim Storey",
+        @"""Who you are inside is what helps you make and do everything in life"" - Mister Rogers",
+        @"""Your perspective is unique. It's important and it counts"" - Glenn Close",
+        @"""Every day above earth is a good day"" - Ernest Hemingway",
+        @"""Nothing can dim the light that shines from within"" - Maya Angelou",
+        @"""You must do the things you think you cannot do"" - Eleanor Roosevelt",
+        @"""The secret of attraction is to love yourself"" - Deepak Chopra",
+        @"""Good riddance to decisions that don't support self-care, self-value, and self-worth"" - Oprah",
+        @"""I am the greatest. I said that even before I knew I was."" - Muhammad Ali",
+        @"""I say looking on the bright side of life never killed anybody"" - Jenny Han",
+        @"""I'm better than I used to be. Better than I was yesterday. But hopefully not as good as I'll be tomorrow."" - Marianne Williamson",
+        @"""I have never ever focused on the negative of things. I always look at the positive"" - Sonia Sotomayor",
+        @"""I'm giving you permission to root for yourself and while you're at it root for those around you, too"" - Mindy Kaling",
+        @"""We must accept finite disappointment, but never lose infinite hope."" - Martin Luther King Jr.",
+        @"""Your life is already a miracle of change waiting for you to shape its destiny"" - Toni Morrison",
+        @"""If you really think small, your world will be small. If you think big, your world will be big"" - Paulo Coelho",
+        @"""Embrace the glorious mess that you are"" - Elizabeth Gilbert",
+        @"""The ultimate truth of who you are is not I am this or I am that, but I am."" - Eckhard Tolle",
+        @"""Gratitude is a celebration we are all invited to"" - Cleo Wade",
+        @"""We must be willing to let go of the life we planned so as to have the life that is waiting for us"" - Joseph Campbell",
+        @"""Nothing is impossible. The word itself says 'I'm possible!'."" - Audrey Hepburn",
+        @"""The only courage you ever need is the courage to fulfill the dreams of your own life"" - Oprah",
+        @"""Failure is just another way to learn how to do something right"" - Marian Wright Edelman",
+        @"""The emotion that can break your heart is sometimes the very one that heals it"" - Nicholas Sparks",
+        @"""Your crown has been bought and paid for. Put it on your head and wear it"" - Maya Angelou",
+        @"""Everything passes if you learn to hold things lightly"" - Oprah",
+        @"""Write it on your heart that every day is the best day in the year"" - Ralph Waldo Emerson",
+        @"""Hold up your head! You were note made for failure, you were made for victory"" - Anne Gilchrist",
+        @"""If you have good thoughts they will shine out of your face like sunbeams and you will always look lovely"" - Roald Dahl",
+        @"""There is nothing either good or bad, but thinking makes it so"" - William Shakespeare"
+    };
+
 #pragma warning disable CA5394
     public async Task<Result<string>> Handle(GetAffirmationQuery request, CancellationToken cancellationToken)
     {
@@ -177,27 +220,28 @@ internal sealed class GetAffirmationQueryHandler
 
         Random random = !success ? new(dateTicks) : new(userId + dateTicks);
 
-        bool multipart = random.NextDouble() <= 0.125;
-        
-        if (multipart)
+        double typeSelector = random.NextDouble();
+
+        return typeSelector switch
         {
-            int index1 = random.Next(_phrase1.Length);
-            int index2 = random.Next(_phrase2.Length);
-            int index3 = random.Next(_phrase3.Length);
-            int index4 = random.Next(_phrase4.Length);
+            < 0.01 => GetMultipartAffirmation(random),
+            >= 0.01 and < 0.45 => _completeAffirmations[random.Next(_completeAffirmations.Length)],
+            >= 0.45 or _ => _quoteAffirmations[random.Next(_quoteAffirmations.Length)]
+        };
+    }
 
-            string seed = $"{(index1)}.{(index2)}.{(index3)}.{(index4)}";
+    private string GetMultipartAffirmation(Random random)
+    {
+        int index1 = random.Next(_phrase1.Length);
+        int index2 = random.Next(_phrase2.Length);
+        int index3 = random.Next(_phrase3.Length);
+        int index4 = random.Next(_phrase4.Length);
 
-            string result = $"{_phrase1[index1]} {_phrase2[index2]} {_phrase3[index3]} {_phrase4[index4]} ({seed})";
+        string seed = $"{(index1)}.{(index2)}.{(index3)}.{(index4)}";
 
-            return result;
-        }
-        else
-        {
-            int index = random.Next(_completeAffirmations.Length);
+        string result = $"{_phrase1[index1]} {_phrase2[index2]} {_phrase3[index3]} {_phrase4[index4]} ({seed})";
 
-            return _completeAffirmations[index];
-        }
+        return result;
     }
 #pragma warning restore CA5394
 }
