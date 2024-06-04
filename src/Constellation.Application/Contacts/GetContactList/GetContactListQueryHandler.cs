@@ -8,9 +8,6 @@ using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.Students;
 using Core.Shared;
 using Core.ValueObjects;
-using Core.Models.Faculty;
-using Core.Models.Faculty.Repositories;
-using Core.Models.Faculty.ValueObjects;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Offerings.Repositories;
@@ -25,6 +22,9 @@ using Constellation.Core.Models.Students.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects.Repositories;
 using Constellation.Application.Contacts.Models;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Repositories;
+using Core.Models.Faculties.ValueObjects;
 
 internal sealed class GetContactListQueryHandler
     : IQueryHandler<GetContactListQuery, List<ContactResponse>>

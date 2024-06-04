@@ -2,15 +2,15 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Faculty;
-using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Core.Errors;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
-using Core.Models.Faculty.ValueObjects;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Repositories;
+using Core.Models.Faculties.ValueObjects;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training.Contexts.Roles;

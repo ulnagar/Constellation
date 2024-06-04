@@ -3,12 +3,12 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Faculty;
-using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Shared;
 using Core.Errors;
-using Core.Models.Faculty.ValueObjects;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Repositories;
+using Core.Models.Faculties.ValueObjects;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training.Contexts.Roles;
 using Core.Models.Training.Repositories;

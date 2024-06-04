@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.StaffMembers.AddStaffToFaculty;
 
 using Abstractions.Messaging;
-using Core.Models.Faculty.Identifiers;
-using Core.Models.Faculty.ValueObjects;
+using Core.Models.Faculties.Identifiers;
+using Core.Models.Faculties.ValueObjects;
 
 public sealed record AddStaffToFacultyCommand(
         string StaffId,

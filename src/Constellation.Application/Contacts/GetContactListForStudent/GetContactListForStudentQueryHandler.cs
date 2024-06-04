@@ -2,8 +2,6 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models.Faculty.Repositories;
-using Constellation.Core.Models.Faculty.ValueObjects;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.SchoolContacts;
@@ -14,7 +12,9 @@ using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Repositories;
 using Core.Models;
-using Core.Models.Faculty;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Repositories;
+using Core.Models.Faculties.ValueObjects;
 using Core.Models.Families;
 using Core.Models.Offerings;
 using Core.Shared;

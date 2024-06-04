@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Faculties.UpdateFaculty;
 
 using Abstractions.Messaging;
-using Core.Models.Faculty.Identifiers;
+using Core.Models.Faculties.Identifiers;
 
 public sealed record UpdateFacultyCommand(
     FacultyId Id,

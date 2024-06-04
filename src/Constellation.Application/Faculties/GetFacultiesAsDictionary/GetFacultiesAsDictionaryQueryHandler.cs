@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.Faculties.GetFacultiesAsDictionary;
 
 using Abstractions.Messaging;
-using Core.Models.Faculty;
-using Core.Models.Faculty.Identifiers;
-using Core.Models.Faculty.Repositories;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Identifiers;
+using Core.Models.Faculties.Repositories;
 using Core.Shared;
 using Serilog;
 using System.Collections.Generic;

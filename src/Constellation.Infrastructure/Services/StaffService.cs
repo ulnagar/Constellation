@@ -7,8 +7,8 @@ using Constellation.Infrastructure.DependencyInjection;
 
 namespace Constellation.Infrastructure.Services
 {
-    using Core.Models.Faculty;
-    using Core.Models.Faculty.Repositories;
+    using Core.Models.Faculties;
+    using Core.Models.Faculties.Repositories;
 
     // Reviewed for ASYNC Operations
     public class StaffService : IStaffService, IScopedService

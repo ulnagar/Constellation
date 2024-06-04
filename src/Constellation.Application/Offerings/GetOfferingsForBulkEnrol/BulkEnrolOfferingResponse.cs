@@ -2,7 +2,7 @@
 
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
-using Core.Models.Faculty.Identifiers;
+using Core.Models.Faculties.Identifiers;
 
 public sealed record BulkEnrolOfferingResponse(
     OfferingId OfferingId,

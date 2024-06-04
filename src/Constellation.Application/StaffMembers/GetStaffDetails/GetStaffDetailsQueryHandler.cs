@@ -3,9 +3,9 @@
 using Abstractions.Messaging;
 using Core.Errors;
 using Core.Models;
-using Core.Models.Faculty;
-using Core.Models.Faculty.Errors;
-using Core.Models.Faculty.Repositories;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Errors;
+using Core.Models.Faculties.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
@@ -14,6 +14,8 @@ using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.Subjects;
+using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
@@ -28,6 +30,7 @@ internal sealed class GetStaffDetailsQueryHandler
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly IFacultyRepository _facultyRepository;
     private readonly ISchoolContactRepository _contactRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
@@ -37,6 +40,7 @@ internal sealed class GetStaffDetailsQueryHandler
         IStaffRepository staffRepository,
         ISchoolRepository schoolRepository,
         IOfferingRepository offeringRepository,
+        ICourseRepository courseRepository,
         IFacultyRepository facultyRepository,
         ISchoolContactRepository contactRepository,
         ITimetablePeriodRepository periodRepository,
@@ -45,6 +49,7 @@ internal sealed class GetStaffDetailsQueryHandler
         _staffRepository = staffRepository;
         _schoolRepository = schoolRepository;
         _offeringRepository = offeringRepository;
+        _courseRepository = courseRepository;
         _facultyRepository = facultyRepository;
         _contactRepository = contactRepository;
         _periodRepository = periodRepository;
@@ -118,12 +123,18 @@ internal sealed class GetStaffDetailsQueryHandler
         }
 
         List<TimetablePeriod> periods = await _periodRepository.GetAll(cancellationToken);
+        List<Course> courses = await _courseRepository.GetAll(cancellationToken);
 
         List<StaffDetailsResponse.OfferingResponse> linkedOfferings = new();
         List<StaffDetailsResponse.SessionResponse> linkedSessions = new();
 
         foreach (Offering offering in offerings)
         {
+            Course? course = courses.FirstOrDefault(course => course.Id == offering.CourseId);
+
+            if (course is null)
+                continue;
+
             TeacherAssignment assignment = offering.Teachers.FirstOrDefault(entry => entry.StaffId == staffMember.StaffId);
 
             if (assignment is null)
@@ -132,7 +143,7 @@ internal sealed class GetStaffDetailsQueryHandler
             linkedOfferings.Add(new(
                 offering.Id,
                 offering.Name,
-                string.Empty,
+                course.ToString(),
                 assignment.Type.Value));
 
             if (assignment.Type != AssignmentType.ClassroomTeacher)
@@ -147,7 +158,7 @@ internal sealed class GetStaffDetailsQueryHandler
 
                 linkedSessions.Add(new(
                     session.Id,
-                    period.Name,
+                    period.ToString(),
                     period.SortOrder,
                     offering.Name,
                     period.Duration));

@@ -3,14 +3,14 @@
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
-using Core.Models.Faculty.Identifiers;
-using Core.Models.Faculty.ValueObjects;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Identifiers;
+using Core.Models.Faculties.ValueObjects;
 using Core.Models.StaffMembers.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;

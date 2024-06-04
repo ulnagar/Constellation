@@ -2,10 +2,10 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models.Faculty.Repositories;
 using Core.Models;
-using Core.Models.Faculty;
-using Core.Models.Faculty.Identifiers;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Identifiers;
+using Core.Models.Faculties.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Faculties.GetFaculty;

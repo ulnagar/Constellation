@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Faculties.GetFacultiesSummary;
 
-using Core.Models.Faculty.Identifiers;
+using Core.Models.Faculties.Identifiers;
 
 public sealed record FacultySummaryResponse(
     FacultyId FacultyId,

@@ -82,7 +82,7 @@
                 </td>
                 <td>@item.School</td>
                 <td>
-                    <a asp-action="Details" asp-controller="Staff" asp-area="Partner" asp-route-id="@item.StaffId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                    <a asp-page="/Partner/Staff/Details" asp-area="Staff" asp-route-id="@item.StaffId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                 </td>
             </tr>
         }

@@ -11,7 +11,7 @@ using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
 using Constellation.Presentation.Server.Areas.Partner.Models;
 using Constellation.Presentation.Server.Helpers.Attributes;
 using Core.Models;
-using Core.Models.Faculty;
+using Core.Models.Faculties;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.Students;

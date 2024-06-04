@@ -1,9 +1,9 @@
-﻿namespace Constellation.Core.Models.Faculty;
+﻿namespace Constellation.Core.Models.Faculties;
 
-using Primitives;
 using Errors;
 using Events;
 using Identifiers;
+using Primitives;
 using Shared;
 using System;
 using System.Collections.Generic;

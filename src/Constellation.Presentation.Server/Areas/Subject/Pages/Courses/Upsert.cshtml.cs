@@ -7,10 +7,10 @@ using Constellation.Application.Courses.UpdateCourse;
 using Constellation.Application.Faculties.GetFacultiesForSelectionList;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Faculty.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Models.Faculties.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -108,7 +108,7 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        FacultyId facultyId = Core.Models.Faculty.Identifiers.FacultyId.FromValue(FacultyId);
+        FacultyId facultyId = Core.Models.Faculties.Identifiers.FacultyId.FromValue(FacultyId);
 
         Result request = await _mediator.Send(new CreateCourseCommand(
             Name,
@@ -170,7 +170,7 @@ public class UpsertModel : BasePageModel
 
         CourseId courseId = CourseId.FromValue(Id.Value);
 
-        FacultyId facultyId = Core.Models.Faculty.Identifiers.FacultyId.FromValue(FacultyId);
+        FacultyId facultyId = Core.Models.Faculties.Identifiers.FacultyId.FromValue(FacultyId);
         
         Result request = await _mediator.Send(new UpdateCourseCommand(
             courseId,

@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Core.Models.Faculty;
-using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
-using Core.Models.Faculty.Identifiers;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Identifiers;
+using Core.Models.Faculties.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class FacultyRepository : IFacultyRepository

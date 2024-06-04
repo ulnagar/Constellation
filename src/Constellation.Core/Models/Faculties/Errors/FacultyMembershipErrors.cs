@@ -1,6 +1,6 @@
-﻿namespace Constellation.Core.Models.Faculty.Errors;
+﻿namespace Constellation.Core.Models.Faculties.Errors;
 
-using Shared;
+using Constellation.Core.Shared;
 using System;
 
 public static class FacultyMembershipErrors

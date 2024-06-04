@@ -1,6 +1,7 @@
-﻿namespace Constellation.Core.Models;
+﻿using Constellation.Core.Models.Faculties;
 
-using Faculty;
+namespace Constellation.Core.Models;
+
 using Training.Contexts.Modules;
 using Shared;
 using ValueObjects;

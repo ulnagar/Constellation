@@ -4,10 +4,10 @@ using Constellation.Application.Faculties.GetFaculty;
 using Constellation.Application.Features.Common.Queries;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.StaffMembers.AddStaffToFaculty;
-using Constellation.Core.Models.Faculty.Identifiers;
-using Constellation.Core.Models.Faculty.ValueObjects;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
+using Core.Models.Faculties.Identifiers;
+using Core.Models.Faculties.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -52,7 +52,7 @@ public class AddMemberModel : BasePageModel
         StaffList = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
         MemberDefinition.FacultyId = FacultyId;
         
-        FacultyId facultyId = Core.Models.Faculty.Identifiers.FacultyId.FromValue(FacultyId);
+        FacultyId facultyId = Core.Models.Faculties.Identifiers.FacultyId.FromValue(FacultyId);
 
         Result<FacultyResponse> faculty = await _mediator.Send(new GetFacultyQuery(facultyId));
 
@@ -73,7 +73,7 @@ public class AddMemberModel : BasePageModel
         {
             FacultyMembershipRole role = FacultyMembershipRole.FromValue(MemberDefinition.Role);
 
-            FacultyId facultyId = Core.Models.Faculty.Identifiers.FacultyId.FromValue(MemberDefinition.FacultyId.Value);
+            FacultyId facultyId = Core.Models.Faculties.Identifiers.FacultyId.FromValue(MemberDefinition.FacultyId.Value);
             await _mediator.Send(new AddStaffToFacultyCommand(
                 MemberDefinition.StaffId,
                 facultyId,

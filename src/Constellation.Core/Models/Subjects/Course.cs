@@ -1,4 +1,6 @@
-﻿namespace Constellation.Core.Models.Subjects;
+﻿using Constellation.Core.Models.Faculties.Identifiers;
+
+namespace Constellation.Core.Models.Subjects;
 
 using Enums;
 using Offerings;
@@ -7,7 +9,6 @@ using Identifiers;
 using Primitives;
 using Shared;
 using Extensions;
-using Faculty.Identifiers;
 using System.Collections.Generic;
 
 public sealed class Course : AggregateRoot

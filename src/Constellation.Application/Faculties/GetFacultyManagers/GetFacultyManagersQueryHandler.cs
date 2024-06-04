@@ -2,10 +2,10 @@
 
 using Abstractions.Messaging;
 using Core.Models;
-using Core.Models.Faculty;
-using Core.Models.Faculty.Errors;
-using Core.Models.Faculty.Repositories;
-using Core.Models.Faculty.ValueObjects;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Errors;
+using Core.Models.Faculties.Repositories;
+using Core.Models.Faculties.ValueObjects;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Serilog;

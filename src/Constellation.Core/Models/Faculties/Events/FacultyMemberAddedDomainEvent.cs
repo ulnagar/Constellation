@@ -1,7 +1,7 @@
-﻿namespace Constellation.Core.Models.Faculty.Events;
+﻿namespace Constellation.Core.Models.Faculties.Events;
 
-using DomainEvents;
-using Identifiers;
+using Constellation.Core.DomainEvents;
+using Constellation.Core.Models.Faculties.Identifiers;
 using Constellation.Core.Models.Identifiers;
 
 public sealed record FacultyMemberAddedDomainEvent(

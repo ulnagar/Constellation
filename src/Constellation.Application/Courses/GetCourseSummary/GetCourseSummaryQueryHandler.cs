@@ -2,12 +2,12 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Courses.Models;
-using Constellation.Core.Models.Faculty;
-using Constellation.Core.Models.Faculty.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
-using Core.Models.Faculty.Errors;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Errors;
+using Core.Models.Faculties.Repositories;
 using Core.Models.Subjects.Repositories;
 using Serilog;
 using System.Threading;

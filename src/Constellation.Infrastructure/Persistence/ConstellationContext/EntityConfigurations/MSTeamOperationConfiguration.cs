@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations
 {
-    using Core.Models.Faculty.Identifiers;
+    using Core.Models.Faculties.Identifiers;
     using Core.Models.SchoolContacts.Identifiers;
 
     public class MSTeamOperationConfiguration : IEntityTypeConfiguration<MSTeamOperation>

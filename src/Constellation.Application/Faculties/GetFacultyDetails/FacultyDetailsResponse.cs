@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Faculties.GetFacultyDetails;
 
-using Core.Models.Faculty.Identifiers;
-using Core.Models.Faculty.ValueObjects;
+using Core.Models.Faculties.Identifiers;
+using Core.Models.Faculties.ValueObjects;
 using Core.ValueObjects;
 using System.Collections.Generic;
 

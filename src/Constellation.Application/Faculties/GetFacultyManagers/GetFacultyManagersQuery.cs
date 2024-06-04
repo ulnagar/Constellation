@@ -2,7 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Models;
-using Core.Models.Faculty.Identifiers;
+using Core.Models.Faculties.Identifiers;
 using System.Collections.Generic;
 
 public sealed record GetFacultyManagersQuery(

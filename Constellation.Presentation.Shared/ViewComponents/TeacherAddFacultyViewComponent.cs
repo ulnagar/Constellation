@@ -2,11 +2,11 @@
 
 using Constellation.Application.Faculties.GetFacultiesAsDictionary;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Faculty.Identifiers;
-using Constellation.Core.Models.Faculty.ValueObjects;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Pages.Shared.Components.TeacherAddFaculty;
+using Core.Models.Faculties.Identifiers;
+using Core.Models.Faculties.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;

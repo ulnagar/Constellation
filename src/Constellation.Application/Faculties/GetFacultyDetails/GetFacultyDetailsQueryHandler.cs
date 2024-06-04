@@ -2,11 +2,11 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Faculties.UpdateFaculty;
-using Constellation.Core.Models.Faculty.Errors;
 using Core.Errors;
 using Core.Models;
-using Core.Models.Faculty;
-using Core.Models.Faculty.Repositories;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Errors;
+using Core.Models.Faculties.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Core.ValueObjects;

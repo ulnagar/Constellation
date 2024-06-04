@@ -17,7 +17,7 @@ $(document).ready(function () {
     $.fn.dataTable.moment('D/M/YYYY');
 
     // Activate any datatables
-    $('.data-table').DataTable({ "order": [] });
+    $('.data-table').DataTable({ "order": [[0, 'asc']] });
 
     $('.data-table-25')
         .DataTable({

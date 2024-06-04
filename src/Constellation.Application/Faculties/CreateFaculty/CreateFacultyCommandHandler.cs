@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Faculties.CreateFaculty;
 
 using Abstractions.Messaging;
-using Core.Models.Faculty;
-using Core.Models.Faculty.Repositories;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
 using System.Threading;

@@ -2,9 +2,9 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models.Faculty.Errors;
-using Constellation.Core.Models.Faculty.Repositories;
-using Core.Models.Faculty;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Errors;
+using Core.Models.Faculties.Repositories;
 using Core.Shared;
 using Serilog;
 using System.Threading;

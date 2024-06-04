@@ -1,7 +1,8 @@
-﻿namespace Constellation.Core.Models.StaffMembers.Repositories;
+﻿using Constellation.Core.Models.Faculties.Identifiers;
+
+namespace Constellation.Core.Models.StaffMembers.Repositories;
 
 using Constellation.Core.Models;
-using Constellation.Core.Models.Faculty.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using System;
 using System.Collections.Generic;

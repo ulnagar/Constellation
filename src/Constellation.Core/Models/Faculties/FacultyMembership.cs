@@ -1,9 +1,9 @@
-﻿namespace Constellation.Core.Models.Faculty;
+﻿namespace Constellation.Core.Models.Faculties;
 
-using Primitives;
-using Identifiers;
+using Constellation.Core.Models.Faculties.Identifiers;
+using Constellation.Core.Models.Faculties.ValueObjects;
+using Constellation.Core.Primitives;
 using System;
-using ValueObjects;
 
 public sealed class FacultyMembership : IAuditableEntity
 {

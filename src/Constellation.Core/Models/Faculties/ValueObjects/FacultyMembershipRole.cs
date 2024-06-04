@@ -1,6 +1,6 @@
-﻿namespace Constellation.Core.Models.Faculty.ValueObjects;
+﻿namespace Constellation.Core.Models.Faculties.ValueObjects;
 
-using Primitives;
+using Constellation.Core.Primitives;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;

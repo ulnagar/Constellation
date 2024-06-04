@@ -1,7 +1,7 @@
-﻿namespace Constellation.Core.Models.Faculty.Errors;
+﻿namespace Constellation.Core.Models.Faculties.Errors;
 
-using Identifiers;
-using Shared;
+using Constellation.Core.Models.Faculties.Identifiers;
+using Constellation.Core.Shared;
 using System;
 
 public static class FacultyErrors

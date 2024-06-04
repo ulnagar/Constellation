@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Subjects;
 
-using Constellation.Core.Models.Faculty;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
-using Core.Models.Faculty.Identifiers;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

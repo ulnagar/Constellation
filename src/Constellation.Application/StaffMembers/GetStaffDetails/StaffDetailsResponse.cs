@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.StaffMembers.GetStaffDetails;
 
-using Core.Models.Faculty.Identifiers;
+using Core.Models.Faculties.Identifiers;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.ValueObjects;

@@ -1,8 +1,7 @@
-﻿namespace Constellation.Core.Models.Faculty.Repositories;
+﻿namespace Constellation.Core.Models.Faculties.Repositories;
 
-using Constellation.Core.Models.Faculty;
+using Constellation.Core.Models.Faculties.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Identifiers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

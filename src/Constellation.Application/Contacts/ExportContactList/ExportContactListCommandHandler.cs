@@ -6,7 +6,6 @@ using DTOs;
 using Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Faculty.ValueObjects;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
@@ -15,8 +14,6 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Subjects;
 using Core.Shared;
 using Core.ValueObjects;
-using Core.Models.Faculty;
-using Core.Models.Faculty.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.SchoolContacts.Repositories;
@@ -30,6 +27,9 @@ using Constellation.Core.Models.Students.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects.Repositories;
 using Constellation.Application.Contacts.Models;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Repositories;
+using Core.Models.Faculties.ValueObjects;
 
 internal sealed class ExportContactListCommandHandler
     : ICommandHandler<ExportContactListCommand, FileDto>

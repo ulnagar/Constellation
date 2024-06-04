@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.Faculty.Identifiers;
+﻿namespace Constellation.Core.Models.Faculties.Identifiers;
 
 using System;
 

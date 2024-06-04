@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Faculties;
 
-using Constellation.Core.Models.Faculty;
-using Core.Models.Faculty.Identifiers;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
