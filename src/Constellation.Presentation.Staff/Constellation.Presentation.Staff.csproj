@@ -16,9 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Constellation.Application\Constellation.Application.csproj" />
     <ProjectReference Include="..\Constellation.Presentation.Shared\Constellation.Presentation.Shared.csproj" />
-    <ProjectReference Include="..\src\Constellation.Application\Constellation.Application.csproj" />
-    <ProjectReference Include="..\src\Constellation.Core\Constellation.Core.csproj" />
   </ItemGroup>
 
 

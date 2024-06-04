@@ -12,8 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Constellation.Application\Constellation.Application.csproj" />
-    <ProjectReference Include="..\src\Constellation.Core\Constellation.Core.csproj" />
+    <ProjectReference Include="..\Constellation.Application\Constellation.Application.csproj" />
   </ItemGroup>
 
 
