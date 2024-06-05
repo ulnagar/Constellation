@@ -1,0 +1,140 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods.IndexModel
+
+@inject IAuthorizationService authService
+
+@{
+    var authorised = await authService.AuthorizeAsync(User, AuthPolicies.IsSiteAdmin);
+}
+
+<h2>Periods View</h2>
+
+<div class="page-menu">
+    @if (authorised.Succeeded)
+    {
+        <a asp-page="/Subject/Periods/Upsert" asp-area="Staff" class="btn btn-info">Create New</a>
+     }
+</div>
+
+<hr />
+
+<div>
+    <div class="nav nav-pills" data-tabs="tabs">
+        @{
+            var timetables = Model.Periods.OrderBy(p => p.Timetable).GroupBy(p => p.Timetable);
+            bool firstTab = true;
+
+            foreach (var timetable in timetables)
+            {
+                <a class="nav-link @(firstTab ? "active" : "")" href="#@timetable.Key" data-toggle="tab">@timetable.Key</a>
+                firstTab = false;
+            }
+        }
+    </div>
+
+    <div class="tab-content">
+        @{
+            firstTab = true;
+            foreach (var block in timetables)
+            {
+                <div id="@block.Key" class="tab-pane @(firstTab ? "active" : "")">
+                    @{
+                        var dayList = block.Select(p => p.Day).Distinct().ToList();
+                        var weekList = dayList.Max();
+                        var numWeeks = weekList / 5;
+                        int i;
+
+                        for (i = 1; i <= numWeeks; i++)
+                        {
+                            <div class="Timetable-Week">
+                                @foreach (var day in dayList.Where(d => d <= i * 5 && d > (i - 1) * 5))
+                                {
+                                    <div class="Timetable-Day">
+                                        @{
+                                            var WeekNo = (day - 1) / 5;
+                                            var WeekName = "";
+                                            switch (WeekNo)
+                                            {
+                                                case 0:
+                                                    WeekName = "Week A";
+                                                    break;
+                                                case 1:
+                                                    WeekName = "Week B";
+                                                    break;
+                                                case 2:
+                                                    WeekName = "Week C";
+                                                    break;
+                                                case 4:
+                                                    WeekName = "Week D";
+                                                    break;
+                                                default:
+                                                    WeekName = "";
+                                                    break;
+                                            }
+
+                                            var DayNo = day % 5;
+                                            var DayName = "";
+                                            switch (DayNo)
+                                            {
+                                                case 1:
+                                                    DayName = "Monday";
+                                                    break;
+                                                case 2:
+                                                    DayName = "Tuesday";
+                                                    break;
+                                                case 3:
+                                                    DayName = "Wednesday";
+                                                    break;
+                                                case 4:
+                                                    DayName = "Thursday";
+                                                    break;
+                                                case 0:
+                                                    DayName = "Friday";
+                                                    break;
+                                                default:
+                                                    DayName = "";
+                                                    break;
+                                            }
+                                        }
+
+                                        @WeekName - @DayName
+
+                                        @{
+                                            var daysPeriods = block.Where(p => p.Day == day);
+
+                                            foreach (var period in daysPeriods)
+                                            {
+                                                var length = period.EndTime.Subtract(period.StartTime).Minutes;
+                                                length += period.EndTime.Subtract(period.StartTime).Hours * 60;
+                                                var lengthpx = (length * 1.25) + "px";
+
+                                                if (authorised.Succeeded)
+                                                {
+                                                    <a asp-page="/Subject/Periods/Upsert" asp-area="Staff" asp-route-id="@period.Id" class="blockLink">
+                                                        <div class="Timetable-Period Timetable-@period.Type" style="height: @lengthpx;" title="@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
+                                                            @period.Name<br />
+                                                        </div>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <div class="Timetable-Period Timetable-@period.Type" style="height: @lengthpx;" title="@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
+                                                        @period.Name<br />
+                                                    </div>
+                                                }
+                                            }
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+
+                {
+                    firstTab = false;
+                }
+            }
+        }
+    </div>
+</div>

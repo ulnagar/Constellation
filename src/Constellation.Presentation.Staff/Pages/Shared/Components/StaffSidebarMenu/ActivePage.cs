@@ -50,4 +50,6 @@ public sealed class ActivePage
     public const string Subject_SciencePracs_Teachers = "Subject.SciencePracs.Teachers";
     public const string Subject_SciencePracs_Reports = "Subject.SciencePracs.Reports";
     public const string Subject_GroupTutorials_Tutorials = "Subject.GroupTutorials.Tutorials";
+
+    public const string Subject_Periods_Periods = "Subject.Periods.Periods";
 }

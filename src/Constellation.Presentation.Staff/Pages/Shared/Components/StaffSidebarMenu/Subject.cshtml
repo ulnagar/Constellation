@@ -66,6 +66,26 @@
                 </div>
             </div>
         </div>
+        
+        <div class="card">
+            <div class="card-header" id="periodsHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#periods">
+                    Periods
+                </h4>
+            </div>
+
+            <div id="periods" class="collapse @(module == "Periods" ? "show" : "")" data-parent="#accordion">
+                <div class="card-body">
+                    <ul class="nav flex-column mx-2">
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Subject_Periods_Periods ? "active" : "")" asp-page="/Subject/Periods/Index" asp-area="Staff">
+                                List
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 
         <div class="card">
             <div class="card-header" id="pracsHeading">
