@@ -1,0 +1,82 @@
+﻿@page "{id:guid?}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Teachers.UpsertModel
+
+@using Constellation.Core.Models.SchoolContacts;
+
+@{
+    string Title = Model.Id.HasValue ? "Edit Contact" : "New Contact";
+}
+
+<h2>@Title</h2>
+
+<div class="page-menu">
+    <a asp-page="/Subject/SciencePracs/Teachers/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-page-handler="Update" method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new {@class = "text-danger"})
+
+        <div class="form-group row">
+            <label asp-for="FirstName" class="col-md-2">First Name</label>
+            <div class="col-md-3">
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="LastName" class="col-md-2">Last Name</label>
+            <div class="col-md-3">
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="EmailAddress" class="col-md-2">Email Address</label>
+            <div class="col-md-6">
+                <input asp-for="EmailAddress" class="form-control" />
+                <span asp-validation-for="EmailAddress" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="PhoneNumber" class="col-md-2">Phone Number</label>
+            <div class="col-md-3">
+                <input asp-for="PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+        </div>
+
+        @if (!Model.Id.HasValue)
+        {
+            <h4>Is Science Practial Teacher for:</h4>
+
+            <div class="form-group row">
+                <label asp-for="SchoolCode" class="col-md-2">School</label>
+                <div class="col-md-6">
+                    <select asp-for="SchoolCode" asp-items="@Model.SchoolList" class="combo" style="width:100%">
+                        <option value="">-- Select --</option>
+                    </select>
+                    <span asp-validation-for="SchoolCode" class="text-danger"></span>
+                </div>
+            </div>
+
+            <input type="hidden" asp-for="Role" value="@SchoolContactRole.SciencePrac" />
+        }
+
+        <div class="form-group">
+            <div class="col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts
+    {
+    <partial name="_ValidationScriptsPartial" />
+}

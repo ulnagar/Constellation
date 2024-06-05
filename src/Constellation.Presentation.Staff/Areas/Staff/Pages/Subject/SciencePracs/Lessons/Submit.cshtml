@@ -1,0 +1,78 @@
+﻿@page "{lessonId:guid}/{rollId:guid}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Lessons.SubmitModel
+
+<h2>Submit Roll</h2>
+
+<div class="page-menu">
+    <a asp-page="/Subject/SciencePracs/Lessons/Roll" asp-area="Staff" asp-route-lessonId="@Model.LessonId" asp-route-rollId="@Model.RollId" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-page-handler="Submit" method="post">
+    <div class="form-horizontal">
+
+        <div class="form-group row">
+            <label asp-for="LessonName" class="col-md-2">Lesson Name</label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.LessonName</span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="DueDate" class="col-md-2">Due Date</label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.DueDate.ToShortDateString()</span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="LessonDate" class="col-md-2">Lesson Delivered Date</label>
+            <div class="col-md-2">
+                <input asp-for="LessonDate" class="form-control" type="date" value="@Model.LessonDate.ToString("yyyy")-@Model.LessonDate.ToString("MM")-@Model.LessonDate.ToString("dd")" />
+                <span asp-validation-for="LessonDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="col-md-4"><label>Name</label></th>
+                        <th><label>Present?</label></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var i = 0; i < Model.Attendance.Count(); i++)
+                    {
+                        <tr>
+                            @Html.HiddenFor(model => Model.Attendance[i].Id)
+                            @Html.HiddenFor(model => Model.Attendance[i].StudentId)
+                            <td>@Model.Attendance[i].Name</td>
+                            <td>
+                                <div class="custom-control custom-switch">
+                                    @Html.CheckBoxFor(model => Model.Attendance[i].Present, new { @class = "custom-control-input" })
+                                    <label class="custom-control-label" asp-for="Attendance[i].Present">&nbsp;</label>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Comment" class="col-md-2"></label>
+            <div class="col-md-6">
+                <textarea asp-for="Comment" class="form-control"></textarea>
+                <span asp-validation-for="Comment" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>

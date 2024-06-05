@@ -1,0 +1,125 @@
+﻿@page "{id:guid}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Teachers.AuditModel
+
+<h2>Coordinator Access Audit</h2>
+
+<div class="page-menu">
+    <a asp-page-handler="Repair" asp-route-id="@Model.Id" class="btn btn-warning">Fix User</a>
+    <a asp-page="/Subject/SciencePracs/Teachers/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<table class="table data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Category</th>
+            <th>Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                @if (Model.Audit.ContactPresent)
+                {
+                    <i class="fa fa-check"></i>
+                }
+            </td>
+            <td>
+                <label asp-for="Audit.ContactPresent"></label>
+            </td>
+            <td>
+                @if (Model.Audit.Contact != null)
+                {
+                    <span>@Model.Audit.Contact.FirstName @Model.Audit.Contact.LastName</span>
+
+                    <br />
+                    @Model.Audit.Contact.EmailAddress
+                }
+            </td>
+        </tr>
+        
+        <tr>
+            <td>
+                @if (Model.Audit.RolesPresent)
+                {
+                    <i class="fa fa-check"></i>
+                }
+            </td>
+            <td>
+                <label asp-for="Audit.RolesPresent">Role(s)</label>    
+            </td>
+            <td>
+                @foreach (var role in Model.Audit.Roles)
+                {
+                    <div class="control-label text-only border-bottom">
+                        @role.Id<br />
+                        @role.Role<br />
+                        @role.SchoolName
+                    </div>
+                }
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                @if (Model.Audit.UserPresent)
+                {
+                    <i class="fa fa-check"></i>
+                }
+            </td>
+            <td>
+                <label asp-for="Audit.UserPresent"></label>    
+            </td>
+            <td>
+                @if (Model.Audit.User != null)
+                {
+                    @Model.Audit.User.UserName
+
+                    <br />
+                    @Model.Audit.User.Id
+                }
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                @if (Model.Audit.UserPropertiesPresent)
+                {
+                    <i class="fa fa-check"></i>
+                }
+            </td>
+            <td>
+                <label asp-for="Audit.UserPropertiesPresent"></label>
+            </td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>
+                @if (Model.Audit.UserContactLinkPresent)
+                {
+                    <i class="fa fa-check"></i>
+                }
+            </td>
+            <td>
+                <label asp-for="Audit.UserContactLinkPresent"></label>
+            </td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>
+                @if (Model.Audit.UserRolePresent)
+                {
+                    <i class="fa fa-check"></i>
+                }
+            </td>
+            <td>
+                <label asp-for="Audit.UserRolePresent"></label>
+            </td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>

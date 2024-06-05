@@ -1,0 +1,83 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.GroupTutorials.Tutorials.IndexModel
+
+@inject IAuthorizationService AuthorizationService
+@using Constellation.Application.GroupTutorials.GetAllTutorials
+
+@{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+}
+
+<h2>Group Tutorials</h2>
+
+<div class="page-menu">
+    @{
+        var all_style = "btn-outline-secondary";
+        var active_style = all_style;
+        var inactive_style = all_style;
+        var future_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case GetAllTutorialsQuery.FilterEnum.All:
+                all_style = "btn-primary";
+                break;
+            case GetAllTutorialsQuery.FilterEnum.Active:
+                active_style = "btn-primary";
+                break;
+            case GetAllTutorialsQuery.FilterEnum.Inactive:
+                inactive_style = "btn-primary";
+                break;
+            case GetAllTutorialsQuery.FilterEnum.Future:
+                future_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Index" asp-route-filter="@GetAllTutorialsQuery.FilterEnum.All" class="btn @all_style">All</a>
+        <a asp-page="Index" asp-route-filter="@GetAllTutorialsQuery.FilterEnum.Active" class="btn @active_style">Active</a>
+        <a asp-page="Index" asp-route-filter="@GetAllTutorialsQuery.FilterEnum.Inactive" class="btn @inactive_style">Inactive</a>
+        <a asp-page="Index" asp-route-filter="@GetAllTutorialsQuery.FilterEnum.Future" class="btn @future_style">Future</a>
+    </div>
+
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="/Subject/GroupTutorials/Tutorials/Upsert" asp-area="Staff" class="btn btn-warning">Create New</a>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Teachers</th>
+            <th># Students</th>
+            <th></th>
+        </tr>
+    </thead>
+    @foreach (var item in Model.Tutorials)
+    {
+        <tr>
+            <td></td>
+            <td>@item.Name</td>
+            <td>@item.StartDate.ToShortDateString()</td>
+            <td>@item.EndDate.ToShortDateString()</td>
+            <td>
+                @foreach (var teacher in item.Teachers)
+                {
+                    <span>@teacher</span>
+                }
+            </td>
+            <td>@item.Students</td>
+            <td>
+                <a asp-page="/Subject/GroupTutorials/Tutorials/Details" asp-area="Staff" asp-route-id="@item.Id" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+            </td>
+        </tr>
+    }
+</table>

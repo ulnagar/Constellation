@@ -1,0 +1,165 @@
+﻿@page "{TutorialId:Guid}/{RollId:Guid}/{Mode}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.GroupTutorials.Tutorials.RollModel
+
+@using Constellation.Core.Enums
+@inject IAuthorizationService AuthorizationService
+
+@{
+    var canSubmitTest = await AuthorizationService.AuthorizeAsync(User, Model.TutorialId, AuthPolicies.CanSubmitGroupTutorialRolls);
+}
+
+<h2>Roll Details</h2>
+
+<div class="page-menu">
+    @if (canSubmitTest.Succeeded && 
+        Model.Roll.Status == Constellation.Core.Enums.TutorialRollStatus.Unsubmitted && 
+        Model.Mode == "View")
+    {
+        <a asp-page="/Subject/GroupTutorials/Tutorials/Roll" asp-area="Staff" asp-route-tutorialId="@Model.TutorialId" asp-route-rollId="@Model.RollId" asp-route-mode="Edit" class="btn btn-warning">Submit Roll</a>
+    }
+
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form asp-page-handler="Submit" id="pageForm">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.RollId)
+
+        <div class="form-group row">
+            <label asp-for="Roll.TutorialName" class="col-md-2">Tutorial Name</label>
+            <div class="col-md-5">
+                <span>@Model.Roll.TutorialName</span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Roll.SessionDate" class="col-md-2">Roll Date</label>
+            <div class="col-md-5">
+                <span>@Model.Roll.SessionDate.ToShortDateString()</span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Roll.StaffName" class="col-md-2">Marked By</label>
+            <div class="col-md-5">
+                <span>@Model.Roll.StaffName</span>
+            </div>
+        </div>
+
+        <div>
+            <h3>Students</h3>
+
+            @if (canSubmitTest.Succeeded &&
+                 Model.Roll.Status == Constellation.Core.Enums.TutorialRollStatus.Unsubmitted &&
+                 Model.Mode == "View")
+            {
+                <div>
+                    <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#rollAddStudentModal">Add Temporary Student</button>
+                </div>
+            }
+
+            <hr/>
+
+            <div>
+                <table class="table table-striped table-hover data-table-no-page">
+                    <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Present?</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @if (Model.Roll.Students.Count != 0)
+                    {
+                        @for (var i = 0; i < Model.Students.Count(); i++)
+                        {
+                            var details = Model.Roll.Students.FirstOrDefault(entry => entry.StudentId == Model.Students[i].StudentId);
+
+                            <tr>
+                                <input type="hidden" asp-for="Students[i].StudentId"/>
+                                <td>
+                                    @if (details.Enrolled)
+                                    {
+                                        <span class="glyphicon glyphicon-lock"></span>
+                                    }
+                                    else
+                                    {
+                                        <span class="glyphicon glyphicon-link"></span>
+                                    }
+                                    @details.Name (@details.Grade)
+                                </td>
+                                <td>
+                                    @if (Model.Mode == "Edit")
+                                    {
+                                        <input type="checkbox" asp-for="Students[i].Present" class="checkbox-toggle"/>
+                                    }
+                                    else if (Model.Roll.Status != TutorialRollStatus.Submitted)
+                                    {
+                                        <span class="glyphicon glyphicon-minus glyph-color-orange"></span>
+                                    }
+                                    else
+                                    {
+                                        @if (details.Present)
+                                        {
+                                            <span class="glyphicon glyphicon-check glyph-color-green"></span>
+                                        }
+                                        else
+                                        {
+                                            <span class="glyphicon glyphicon-remove glyph-color-red"></span>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    @if (canSubmitTest.Succeeded &&
+                                         Model.Roll.Status == Constellation.Core.Enums.TutorialRollStatus.Unsubmitted &&
+                                         Model.Mode == "View" &&
+                                         !details.Enrolled)
+                                    {
+                                        <a asp-page-handler="RemoveStudent" asp-route-studentId="@details.StudentId" class="btn btn-sm btn-danger">Remove</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @if (Model.Mode == "Edit")
+        {
+            <div class="form-group mt-3">
+                <div class="col-md-3">
+                    <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                </div>
+            </div>
+        }
+    </div>
+</form>
+
+<vc:tutorial-roll-add-student></vc:tutorial-roll-add-student>
+
+@section scripts
+{
+    <script>
+        $('#rollAddStudentSubmitButton').click(function (e) {
+            e.preventDefault();
+            $('#rollAddStudentModal').modal('hide');
+            $('#rollAddStudentForm').submit();
+        });
+
+        var table = $('.data-table-no-page')
+            .DataTable({
+                "order": [],
+                "paging": false
+            });
+
+        $('#pageForm').on('submit', function (e) {
+            table.search('').draw();
+        });
+    </script>
+}

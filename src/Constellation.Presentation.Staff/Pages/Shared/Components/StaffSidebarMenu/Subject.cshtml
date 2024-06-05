@@ -48,23 +48,18 @@
         </div>
 
         <div class="card">
-            <div class="card-header" id="staffHeading">
-                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#staff">
-                    Staff
+            <div class="card-header" id="assignmentsHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#assignments">
+                    Assignments
                 </h4>
             </div>
 
-            <div id="staff" class="collapse @(module == "Staff" ? "show" : "")" data-parent="#accordion">
+            <div id="assignments" class="collapse @(module == "Assignments" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
                     <ul class="nav flex-column mx-2">
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Staff_Staff ? "active" : "")" asp-page="/Partner/Staff/Index" asp-area="Staff">
-                                Staff
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Staff_Faculties ? "active" : "")" asp-page="/Partner/Staff/Faculties/Index" asp-area="Staff">
-                                Faculties
+                            <a class="nav-link @(Model == ActivePage.Subject_Assignments_Assignments ? "active" : "")" asp-page="/Subject/Assignments/Index" asp-area="Staff">
+                                List
                             </a>
                         </li>
                     </ul>
@@ -73,28 +68,48 @@
         </div>
 
         <div class="card">
-            <div class="card-header" id="studentHeading">
-                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#students">
-                    Students
+            <div class="card-header" id="pracsHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#pracs">
+                    Science Pracs
                 </h4>
             </div>
 
-            <div id="students" class="collapse @(module == "Students" ? "show" : "")" data-parent="#accordion">
+            <div id="pracs" class="collapse @(module == "SciencePracs" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
                     <ul class="nav flex-column mx-2">
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Students_Students ? "active" : "")" asp-page="/Partner/Students/Index" asp-area="Staff">
-                                Students
+                            <a class="nav-link @(Model == ActivePage.Subject_SciencePracs_Lessons ? "active" : "")" asp-page="/Subject/SciencePracs/Lessons/Index" asp-area="Staff">
+                                Lessons
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Students_Families ? "active" : "")" asp-page="/Partner/Students/Families/Index" asp-area="Staff">
-                                Families
+                            <a class="nav-link @(Model == ActivePage.Subject_SciencePracs_Teachers ? "active" : "")" asp-page="/Subject/SciencePracs/Teachers/Index" asp-area="Staff">
+                                Teachers
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Students_Reports ? "active" : "")" asp-page="/Partner/Students/Reports/Index" asp-area="Staff">
+                            <a class="nav-link @(Model == ActivePage.Subject_SciencePracs_Reports ? "active" : "")" asp-page="/Subject/SciencePracs/Reports/Index" asp-area="Staff">
                                 Reports
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header" id="tutorialsHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#tutorials">
+                    Group Tutorials
+                </h4>
+            </div>
+
+            <div id="tutorials" class="collapse @(module == "GroupTutorials" ? "show" : "")" data-parent="#accordion">
+                <div class="card-body">
+                    <ul class="nav flex-column mx-2">
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Subject_GroupTutorials_Tutorials ? "active" : "")" asp-page="/Subject/GroupTutorials/Tutorials/Index" asp-area="Staff">
+                                List
                             </a>
                         </li>
                     </ul>
