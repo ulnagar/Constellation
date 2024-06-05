@@ -1,12 +1,15 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools;
 
+using Application.DTOs;
 using Application.Models.Auth;
 using Application.Schools.GetSchoolDetails;
+using Constellation.Application.Features.API.Schools.Queries;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using System.Net.Http.Json;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
@@ -45,5 +48,12 @@ public class DetailsModel : BasePageModel
         }
 
         School = request.Value;
+    }
+
+    public async Task<IActionResult> OnGetAjaxGetGraphData(string id, int day)
+    {
+        GraphData data = await _mediator.Send(new GetGraphDataForSchoolQuery { SchoolCode = id, Day = day });
+
+        return new JsonResult(data);
     }
 }

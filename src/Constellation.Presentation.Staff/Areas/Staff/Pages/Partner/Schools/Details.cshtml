@@ -157,10 +157,12 @@
                 <tbody>
                     @foreach (var item in Model.School.Contacts)
                     {
+                        var number = item.PhoneNumber.ToString();
+
                         <tr>
                             <td>@item.Name</td>
-                            <td>@Html.DisplayFor(model => item.EmailAddress, "EmailAddress")</td>
-                            <td>@Html.DisplayFor(model => item.PhoneNumber, "PhoneNumber")</td>
+                            <td>@Html.DisplayFor(model => item.EmailAddress.Email, "EmailAddress")</td>
+                            <td>@Html.DisplayFor(model => number, "PhoneNumber")</td>
                             <td>
                                 @item.Role
                                 @if (!string.IsNullOrWhiteSpace(item.Note))
@@ -197,7 +199,7 @@
                             <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
                             <td>@Html.DisplayFor(model => item.Offerings, "StringList")</td>
                             <td>
-                                <a asp-page="/Students/Details" asp-area="Partner" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                                <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                             </td>
                         </tr>
                     }
@@ -232,7 +234,7 @@
                             </td>
                             <td>@Html.DisplayFor(model => item.Offerings, "StringList")</td>
                             <td>
-                                @Html.ActionLink("More Info...", "Details", "Staff", new { id = item.StaffId }, new { @class = "btn btn-sm btn-info btn-show-hover" })
+                                <a asp-page="/Partner/Staff/Details" asp-area="Staff" asp-route-id="@item.StaffId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                             </td>
                         </tr>
                     }
@@ -262,7 +264,7 @@
                     var ctx = document.getElementById('bandwidthChart').getContext('2d');
                     canvasLoadingDisplay(ctx);
                     $.ajax({
-                        url: "/Partner/Schools/_GetGraphData",
+                        url: "?handler=AjaxGetGraphData",
                         type: "GET",
                         dataType: "json",
                         data: { "id": "@Model.School.SchoolCode", "day": 0 },
@@ -286,7 +288,7 @@
                     var ctx = document.getElementById('bandwidthChart').getContext('2d');
                     canvasLoadingDisplay(ctx);
                     $.ajax({
-                        url: "/Partner/Schools/_GetGraphData",
+                        url: "?handler=AjaxGetGraphData",
                         type: "GET",
                         dataType: "json",
                         data: { "id": "@Model.School.SchoolCode", "day": -1 },
