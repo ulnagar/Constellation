@@ -1,17 +1,18 @@
-namespace Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
-using Application.Enrolments.EnrolMultipleStudentsInOffering;
-using Application.Enrolments.GetCurrentEnrolmentsForOffering;
-using Application.Models.Auth;
-using Application.Offerings.GetOfferingSummary;
-using Application.Offerings.Models;
-using Application.Students.GetStudentsFromOfferingGrade;
-using BaseModels;
-using Core.Models.Offerings.Identifiers;
-using Core.Shared;
+using Constellation.Application.Enrolments.EnrolMultipleStudentsInOffering;
+using Constellation.Application.Enrolments.GetCurrentEnrolmentsForOffering;
+using Constellation.Application.Models.Auth;
+using Constellation.Application.Offerings.GetOfferingSummary;
+using Constellation.Application.Offerings.Models;
+using Constellation.Application.Students.GetStudentsFromOfferingGrade;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Shared;
+using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 [Authorize(Policy = AuthPolicies.CanEditSubjects)]
 public class AddStudentsModel : BasePageModel
@@ -27,7 +28,7 @@ public class AddStudentsModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => SubjectPages.Offerings;
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Subject_Offerings_Offerings;
 
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }
@@ -56,7 +57,7 @@ public class AddStudentsModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
             };
 
             await PreparePage();
@@ -64,7 +65,7 @@ public class AddStudentsModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage("/Offerings/Details", new { area = "Subject", Id = Id });
+        return RedirectToPage("/Subject/Offerings/Details", new { area = "Staff", Id = Id });
     }
 
     private async Task PreparePage()
@@ -79,7 +80,7 @@ public class AddStudentsModel : BasePageModel
             Error = new()
             {
                 Error = enrolmentRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
             };
 
             return;
@@ -95,7 +96,7 @@ public class AddStudentsModel : BasePageModel
             Error = new()
             {
                 Error = studentsRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
             };
 
             return;
@@ -111,7 +112,7 @@ public class AddStudentsModel : BasePageModel
             Error = new()
             {
                 Error = offeringRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
             };
 
             return;

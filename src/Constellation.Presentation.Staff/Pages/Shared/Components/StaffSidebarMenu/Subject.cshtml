@@ -28,28 +28,18 @@
         </div>
 
         <div class="card">
-            <div class="card-header" id="schoolsHeading">
-                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#schools">
-                    Schools
+            <div class="card-header" id="classesHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#classes">
+                    Classes
                 </h4>
             </div>
 
-            <div id="schools" class="collapse @(module == "Schools" ? "show" : "")" data-parent="#accordion">
+            <div id="classes" class="collapse @(module == "Offerings" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
                     <ul class="nav flex-column mx-2">
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Schools_Schools ? "active" : "")" asp-page="/Partner/Schools/Index" asp-area="Staff">
-                                Schools
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Schools_Contacts ? "active" : "")" asp-page="/Partner/Schools/Contacts/Index" asp-area="Staff">
-                                Contacts
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Schools_ContactReports ? "active" : "")" asp-page="/Partner/Schools/Contacts/Reports" asp-area="Staff">
-                                Reports
+                            <a class="nav-link @(Model == ActivePage.Subject_Offerings_Offerings ? "active" : "")" asp-page="/Subject/Offerings/Index" asp-area="Staff">
+                                List
                             </a>
                         </li>
                     </ul>

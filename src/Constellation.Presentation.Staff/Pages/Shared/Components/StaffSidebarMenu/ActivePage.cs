@@ -44,4 +44,5 @@ public sealed class ActivePage
     public const string ShortTerm_Covers_Index = "ShortTerm.Covers.Index";
 
     public const string Subject_Courses_Courses = "Subject.Courses.Courses";
+    public const string Subject_Offerings_Offerings = "Subject.Offerings.Offerings";
 }

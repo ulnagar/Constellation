@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
 using Constellation.Application.Courses.GetCourseSummary;
 using Constellation.Application.Courses.Models;
@@ -15,10 +15,11 @@ using Constellation.Application.Teams.Models;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 [Authorize(Policy = AuthPolicies.CanEditSubjects)]
 public class ResourceModel : BasePageModel
@@ -34,7 +35,7 @@ public class ResourceModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => SubjectPages.Offerings;
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Subject_Offerings_Offerings;
 
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }
@@ -88,7 +89,7 @@ public class ResourceModel : BasePageModel
                 Error = new()
                 {
                     Error = roomRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
                 };
 
                 return Page();
@@ -122,7 +123,7 @@ public class ResourceModel : BasePageModel
                 Error = new()
                 {
                     Error = teamRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
                 };
 
                 return Page();
@@ -153,7 +154,7 @@ public class ResourceModel : BasePageModel
                 Error = new()
                 {
                     Error = offeringRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
                 };
 
                 return Page();
@@ -166,7 +167,7 @@ public class ResourceModel : BasePageModel
                 Error = new()
                 {
                     Error = courseRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
                 };
 
                 return Page();
@@ -207,7 +208,7 @@ public class ResourceModel : BasePageModel
                     Error = new()
                     {
                         Error = roomRequest.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                        RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id })
                     };
 
                     return Page();
@@ -220,7 +221,7 @@ public class ResourceModel : BasePageModel
                     Error = new()
                     {
                         Error = request.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                        RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id })
                     };
 
                     return Page();
@@ -239,7 +240,7 @@ public class ResourceModel : BasePageModel
                     Error = new()
                     {
                         Error = roomRequest.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                        RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id })
                     };
 
                     return Page();
@@ -252,7 +253,7 @@ public class ResourceModel : BasePageModel
                     Error = new()
                     {
                         Error = request.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                        RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id })
                     };
 
                     return Page();
@@ -268,7 +269,7 @@ public class ResourceModel : BasePageModel
                     Error = new()
                     {
                         Error = teamRequest.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                        RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id })
                     };
 
                     return Page();
@@ -281,7 +282,7 @@ public class ResourceModel : BasePageModel
                     Error = new()
                     {
                         Error = request.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                        RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id })
                     };
 
                     return Page();
@@ -297,7 +298,7 @@ public class ResourceModel : BasePageModel
                     Error = new()
                     {
                         Error = request.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Resource", values: new { area = "Subject", Id = Id })
+                        RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id })
                     };
 
                     return Page();
@@ -305,7 +306,7 @@ public class ResourceModel : BasePageModel
             }
         }
 
-        return RedirectToPage("/Offerings/Details", new { area = "Subject", Id = Id });
+        return RedirectToPage("/Subject/Offerings/Details", new { area = "Staff", Id = Id });
     }
 
     public enum Phase

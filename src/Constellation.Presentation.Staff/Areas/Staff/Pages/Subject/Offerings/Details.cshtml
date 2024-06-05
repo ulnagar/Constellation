@@ -1,5 +1,5 @@
 ﻿@page "{Id:guid}"
-@model Constellation.Presentation.Server.Areas.Subject.Pages.Offerings.DetailsModel
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings.DetailsModel
 
 @using Constellation.Application.Helpers;
 @using Constellation.Core.Enums;
@@ -16,10 +16,12 @@
 <div class="page-menu">
     @if (canEditTest.Succeeded)
     {
-        <a asp-page="/Offerings/Upsert" asp-area="Subject" asp-route-id="@Model.Offering.Id.Value" class="btn btn-warning">Edit</a>
+        <a asp-page="/Subject/Offerings/Upsert" asp-area="Staff" asp-route-id="@Model.Offering.Id.Value" class="btn btn-warning">Edit</a>
     }
 
-    <a asp-page="/Offerings/Index" asp-area="Subject" class="btn btn-danger btn-pull-right">Go Back</a>
+    <a asp-page="/Subject/Offerings/Map" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-primary">View Map</a>
+    
+    <a asp-page="/Subject/Offerings/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />
@@ -114,10 +116,10 @@
             @if (canEditTest.Succeeded)
             {
                 <button data-toggle="modal" data-target="#addStudentModal" class="btn btn-success">Enrol Student</button>
-                <a asp-page="/Offerings/AddStudents" asp-area="Subject" asp-route-id="@Model.Id" class="btn btn-success">Bulk Enrol</a>
+                <a asp-page="/Subject/Offerings/AddStudents" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success">Bulk Enrol</a>
             }
 
-            <table class="table-striped table-hover data-table">
+            <table class="table-striped table-hover data-table-sort-1">
                 <thead>
                     <tr>
                         <th>SRN</th>
@@ -133,7 +135,7 @@
                     {
                         <tr>
                             <td>@item.StudentId</td>
-                            <td>@Html.DisplayFor(model => item.Gender, "Gender") @item.Name.DisplayName</td>
+                            <td data-order="@item.Name.SortOrder">@Html.DisplayFor(model => item.Gender, "Gender") @item.Name.DisplayName</td>
                             <td>@item.Grade.AsName()</td>
                             <td>@item.SchoolName</td>
                             <td>
@@ -143,7 +145,7 @@
                                 }
                             </td>
                             <td>
-                                <a asp-page="/Students/Details" asp-area="Partner" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                                <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                             </td>
                         </tr>
                     }
@@ -173,7 +175,7 @@
                     {
                         <tr>
                             <td>@item.StaffId</td>
-                            <td>@item.Name.DisplayName</td>
+                            <td data-order="@item.Name.SortOrder">@item.Name.DisplayName</td>
                             <td>@item.Type</td>
                             <td>
                                 @if (canEditTest.Succeeded)
@@ -192,7 +194,7 @@
 
             @if (canEditTest.Succeeded)
             {
-                <a asp-page="/Offerings/Resource" asp-area="Subject" asp-route-id="@Model.Id" class="btn btn-success btn-sm">Add a Resource</a>
+                <a asp-page="/Subject/Offerings/Resource" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success btn-sm">Add a Resource</a>
             }
 
             <table class="table-striped table-hover data-table">
@@ -236,7 +238,7 @@
             @if (canEditTest.Succeeded)
             {
                 <button type="button" data-toggle="modal" data-target="#addSession" class="btn btn-success btn-sm">Assign a new session</button>
-                <a asp-page="AddSessions" asp-area="Subject" asp-route-id="@Model.Id" class="btn btn-sm btn-success">Bulk Add Sessions</a>
+                <a asp-page="/Subject/Offerings/AddSessions" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-sm btn-success">Bulk Add Sessions</a>
                 <button data-course-name="@Model.Offering.CourseName" data-offering-name="@Model.Offering.Name" class="btn btn-sm btn-danger remove-all-sessions-button">Remove All Sessions</button>
             }
 
@@ -288,7 +290,7 @@
                     @foreach (var lesson in Model.Offering.Lessons.OrderBy(l => l.DueDate))
                     {
                         <tr>
-                            <td>@lesson.DueDate.ToShortDateString()</td>
+                            <td data-order="@lesson.DueDate.ToString("yyyy-MM-dd")">@lesson.DueDate.ToShortDateString()</td>
                             <td>@lesson.Name</td>
                             <td>@lesson.Students.Count(student => student.WasPresent) / @lesson.Students.Count()</td>
                             <td>

@@ -1,13 +1,14 @@
 ﻿@page "{Id:guid}/Resources/Add"
-@model Constellation.Presentation.Server.Areas.Subject.Pages.Offerings.ResourceModel
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings.ResourceModel
 
 @using Constellation.Core.Models.Offerings.ValueObjects;
-@using Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 
 <h2>Add Resource</h2>
 
 <div class="page-menu">
-    <a asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@Model.Id" class="btn btn-danger btn-pull-right">Go Back</a>
+    <a asp-page="/Subject/Offerings/Details" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />

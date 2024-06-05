@@ -11,6 +11,6 @@
     </div>
 </div>
 <div class="modal-footer">
-    <a asp-page-handler="RemoveResource" asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@Model.OfferingId.Value" asp-route-resourceId="@Model.ResourceId.Value" class="btn btn-danger">Remove Resource</a>
+    <a asp-page-handler="RemoveResource" asp-page="/Subject/Offerings/Details" asp-area="Staff" asp-route-id="@Model.OfferingId.Value" asp-route-resourceId="@Model.ResourceId.Value" class="btn btn-danger">Remove Resource</a>
     <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
 </div>

@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
@@ -6,12 +6,12 @@ using Constellation.Application.Offerings.GetOfferingLocationsAsMapLayers;
 using Constellation.Application.Offerings.GetOfferingSummary;
 using Constellation.Application.Offerings.Models;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class MapModel : BasePageModel
@@ -27,7 +27,7 @@ public class MapModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => SubjectPages.Offerings;
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Subject_Offerings_Offerings;
 
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }
@@ -46,7 +46,7 @@ public class MapModel : BasePageModel
             Error = new()
             {
                 Error = offeringResult.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Index", values: new { area = "Subject" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" })
             };
 
             return;
@@ -55,5 +55,18 @@ public class MapModel : BasePageModel
         OfferingName = offeringResult.Value.Name;
 
         Result<List<MapLayer>> layers = await _mediator.Send(new GetOfferingLocationsAsMapLayersQuery(offeringId));
+
+        if (layers.IsFailure)
+        {
+            Error = new()
+            {
+                Error = layers.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" })
+            };
+
+            return;
+        }
+        
+        Layers = layers.Value;
     }
 }

@@ -1,5 +1,5 @@
 ﻿@page
-@model Constellation.Presentation.Server.Areas.Subject.Pages.Offerings.IndexModel
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings.IndexModel
 
 @using Constellation.Application.Offerings.GetAllOfferingSummaries
 @using Constellation.Core.Extensions
@@ -48,7 +48,7 @@
         <div class="dropdown-menu">
             @foreach (var grade in Model.Grades)
             {
-                <a asp-page="Index" asp-route-selectedGrade="@grade" class="dropdown-item">@grade.AsName()</a>
+                <a asp-page="/Subject/Offerings/Index" asp-area="Staff" asp-route-selectedGrade="@grade" class="dropdown-item">@grade.AsName()</a>
             }
         </div>
     </div>
@@ -58,14 +58,14 @@
         <div class="dropdown-menu">
             @foreach (var faculty in Model.Faculties)
             {
-                <a asp-page="Index" asp-route-selectedFaculty="@faculty" class="dropdown-item">@faculty</a>
+                <a asp-page="/Subject/Offerings/Index" asp-area="Staff" asp-route-selectedFaculty="@faculty" class="dropdown-item">@faculty</a>
             }
         </div>
     </div>
 
     @if (canEditTest.Succeeded)
     {
-        <a asp-page="/Offerings/Upsert" asp-area="Subject" class="btn btn-info">Create New</a>
+        <a asp-page="/Subject/Offerings/Upsert" asp-area="Staff" class="btn btn-info">Create New</a>
     }
 </div>
 
@@ -92,7 +92,7 @@
                 <td>@Html.DisplayFor(modelItem => item.Teachers, "StringList")</td>
                 <td>@item.MinPerFN</td>
                 <td>
-                    <a asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@item.Id.Value" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                    <a asp-page="/Subject/Offerings/Details" asp-area="Staff" asp-route-id="@item.Id.Value" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                 </td>
             </tr>
         }

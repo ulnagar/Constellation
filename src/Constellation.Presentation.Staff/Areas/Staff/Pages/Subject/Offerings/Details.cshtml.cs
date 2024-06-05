@@ -1,6 +1,6 @@
-namespace Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
-using Application.Enrolments.EnrolStudent;
+using Constellation.Application.Enrolments.EnrolStudent;
 using Constellation.Application.Enrolments.UnenrolStudent;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.AddSessionToOffering;
@@ -13,18 +13,20 @@ using Constellation.Application.Offerings.RemoveTeacherFromOffering;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveAllSessionsModal;
-using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveResourceFromOfferingModal;
-using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveSessionModal;
-using Constellation.Presentation.Server.Pages.Shared.PartialViews.RemoveTeacherFromOfferingModal;
-using Constellation.Presentation.Server.Pages.Shared.PartialViews.UnenrolStudentModal;
+using Constellation.Presentation.Shared.Pages.Shared.Components.AddSessionToOffering;
+using Constellation.Presentation.Shared.Pages.Shared.Components.AddTeacherToOffering;
+using Constellation.Presentation.Shared.Pages.Shared.Components.EnrolStudentInOffering;
+using Constellation.Presentation.Staff.Areas;
+using Core.Models.Offerings.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Presentation.Shared.Pages.Shared.Components.AddSessionToOffering;
-using Presentation.Shared.Pages.Shared.Components.AddTeacherToOffering;
-using Presentation.Shared.Pages.Shared.Components.EnrolStudentInOffering;
+using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Pages.Shared.PartialViews.RemoveAllSessionsModal;
+using Presentation.Shared.Pages.Shared.PartialViews.RemoveResourceFromOfferingModal;
+using Presentation.Shared.Pages.Shared.PartialViews.RemoveSessionModal;
+using Presentation.Shared.Pages.Shared.PartialViews.RemoveTeacherFromOfferingModal;
+using Presentation.Shared.Pages.Shared.PartialViews.UnenrolStudentModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
@@ -40,7 +42,7 @@ public class DetailsModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => SubjectPages.Offerings;
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Subject_Offerings_Offerings;
     
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }
@@ -58,7 +60,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = query.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Index", values: new { area = "Subject" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" })
             };
 
             return;
@@ -97,7 +99,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
             };
 
             return Page();
@@ -138,7 +140,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
             };
 
             return Page();
@@ -172,7 +174,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
             };
 
             return Page();
@@ -186,7 +188,18 @@ public class DetailsModel : BasePageModel
     {
         OfferingId offeringId = OfferingId.FromValue(Id);
 
-        AssignmentType type = AssignmentType.FromValue(viewModel.AssignmentType);
+        AssignmentType? type = AssignmentType.FromValue(viewModel.AssignmentType);
+
+        if (type is null)
+        {
+            Error = new()
+            {
+                Error = new("Offering.TeacherAssignment.AssignmentType", "Invalid Assignment Type"),
+                RedirectPath = null
+            };
+
+            return Page();
+        }
 
         Result request = await _sender.Send(new AddTeacherToOfferingCommand(offeringId, viewModel.StaffId, type));
 
@@ -259,7 +272,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
             };
 
             return Page();
@@ -302,7 +315,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id })
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
             };
 
             return Page();

@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Server.Areas.Subject.Pages.Offerings;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
 using Constellation.Application.Courses.GetCoursesForSelectionList;
 using Constellation.Application.Models.Auth;
@@ -6,15 +6,16 @@ using Constellation.Application.Offerings.CreateOffering;
 using Constellation.Application.Offerings.GetOfferingSummary;
 using Constellation.Application.Offerings.Models;
 using Constellation.Application.Offerings.UpdateOffering;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Server.BaseModels;
-using Core.Abstractions.Clock;
+using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Routing;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanEditSubjects)]
@@ -34,7 +35,7 @@ public class UpsertModel : BasePageModel
         _dateTime = dateTime;
     }
 
-    [ViewData] public string ActivePage => SubjectPages.Offerings;
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Subject_Offerings_Offerings;
 
     [BindProperty(SupportsGet = true)]
     public Guid? Id { get; set; }
@@ -67,7 +68,7 @@ public class UpsertModel : BasePageModel
                 Error = new()
                 {
                     Error = offering.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Index", values: new { area = "Subject" })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" })
                 };
 
                 return;
@@ -107,13 +108,13 @@ public class UpsertModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Index", values: new { area = "Subject" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" })
             };
 
             return Page();
         }
 
-        return RedirectToPage("/Offerings/Details", new { area = "Subject", Id = request.Value.Value });
+        return RedirectToPage("/Subject/Offerings/Details", new { area = "Staff", Id = request.Value.Value });
     }
 
     public async Task<IActionResult> OnPostUpdate()
@@ -136,7 +137,7 @@ public class UpsertModel : BasePageModel
                 Error = new()
                 {
                     Error = offering.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Index", values: new { area = "Subject" })
+                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" })
                 };
 
                 return Page();
@@ -148,13 +149,13 @@ public class UpsertModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Offerings/Details", values: new { area = "Subject", Id = Id.Value })
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id.Value })
             };
 
             return Page();
         }
 
-        return RedirectToPage("/Offerings/Details", new { area = "Subject", Id = Id.Value });
+        return RedirectToPage("/Subject/Offerings/Details", new { area = "Staff", Id = Id.Value });
     }
 
     private async Task BuildCourseSelectList()

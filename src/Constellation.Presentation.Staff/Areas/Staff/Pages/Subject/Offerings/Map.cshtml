@@ -1,0 +1,20 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings.MapModel
+
+@{
+    var elementId = $"map-{Guid.NewGuid():D}";
+}
+
+<h2>Map of @Model.OfferingName</h2>
+
+<div id="@elementId" style="height: 80vh"></div>
+
+@section scripts
+{
+    <script>
+        $(document).ready(
+            function () {
+                DisplayMap('@elementId', @Html.Raw(Json.Serialize(Model.Layers)));
+            });
+    </script>
+}
