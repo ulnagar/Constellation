@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Server.Areas.Subject.Pages.Courses;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Courses;
 
 using Constellation.Application.Courses.CreateCourse;
 using Constellation.Application.Courses.GetCourseSummary;
@@ -7,10 +7,10 @@ using Constellation.Application.Courses.UpdateCourse;
 using Constellation.Application.Faculties.GetFacultiesForSelectionList;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Faculties.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Server.BaseModels;
-using Core.Models.Faculties.Identifiers;
+using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +26,7 @@ public class UpsertModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData] public string ActivePage => SubjectPages.Courses;
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Subject_Courses_Courses;
 
     [BindProperty(SupportsGet = true)]
     public Guid? Id { get; set; }
@@ -143,7 +143,7 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage("/Courses/Index", new { area = "Subject" });
+        return RedirectToPage("/Subject/Courses/Index", new { area = "Staff" });
     }
 
     public async Task<IActionResult> OnPostUpdate()
@@ -206,6 +206,6 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage("/Courses/Index", new { area = "Subject" });
+        return RedirectToPage("/Subject/Courses/Index", new { area = "Staff" });
     }
 }

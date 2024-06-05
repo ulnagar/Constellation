@@ -42,4 +42,6 @@ public sealed class ActivePage
 
     public const string ShortTerm_Casuals_Index = "ShortTerm.Casuals.Index";
     public const string ShortTerm_Covers_Index = "ShortTerm.Covers.Index";
+
+    public const string Subject_Courses_Courses = "Subject.Courses.Courses";
 }

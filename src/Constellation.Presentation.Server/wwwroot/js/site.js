@@ -19,6 +19,10 @@ $(document).ready(function () {
     // Activate any datatables
     $('.data-table').DataTable({ "order": [[0, 'asc']] });
 
+    $('.data-table-sort-1').DataTable({ "order": [[1, 'asc']] });
+
+    $('.data-table-no-sort').DataTable({ "order": [] });
+
     $('.data-table-25')
         .DataTable({
             "order": [],

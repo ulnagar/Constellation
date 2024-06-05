@@ -1,6 +1,7 @@
 ﻿@page "{id:guid?}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Courses.UpsertModel
+
 @using Constellation.Core.Enums;
-@model Constellation.Presentation.Server.Areas.Subject.Pages.Courses.UpsertModel
 
 @{
     var title = Model.Id.HasValue ? "Edit Course" : "Create New Course";
@@ -9,7 +10,7 @@
 <h2>@title</h2>
 
 <div class="page-menu">
-    <a asp-page="/Courses/Index" asp-area="Subject" class="btn btn-danger btn-pull-right">Go Back</a>
+    <a asp-page="/Subject/Courses/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />

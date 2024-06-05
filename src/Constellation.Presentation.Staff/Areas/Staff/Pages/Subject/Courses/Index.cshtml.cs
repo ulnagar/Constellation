@@ -1,10 +1,10 @@
-namespace Constellation.Presentation.Server.Areas.Subject.Pages.Courses;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Courses;
 
 using Constellation.Application.Courses.GetCourseSummaryList;
 using Constellation.Application.Courses.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +20,7 @@ public class IndexModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData] public string ActivePage => SubjectPages.Courses;
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Subject_Courses_Courses;
 
     [BindProperty(SupportsGet = true)]
     public FilterDto Filter { get; set; } = FilterDto.Active;

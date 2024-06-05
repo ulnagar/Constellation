@@ -33,6 +33,7 @@ public class StaffSidebarMenuViewComponent : ViewComponent
             "Partner" => View("Partner", activePage),
             "ShortTerm" => View("ShortTerm", activePage),
             "SchoolAdmin" => View("SchoolAdmin", (activePage, staffId)),
+            "Subject" => View("Subject", activePage),
             _ => Content(string.Empty)
         };
     }

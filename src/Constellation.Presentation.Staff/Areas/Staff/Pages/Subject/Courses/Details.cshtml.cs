@@ -1,13 +1,13 @@
-namespace Constellation.Presentation.Server.Areas.Subject.Pages.Courses;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Courses;
 
 using Constellation.Application.Courses.GetCourseDetails;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Server.BaseModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
@@ -23,7 +23,7 @@ public class DetailsModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => SubjectPages.Courses;
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Subject_Courses_Courses;
 
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }
@@ -41,7 +41,7 @@ public class DetailsModel : BasePageModel
             Error = new()
             {
                 Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Courses/Index", values: new { area = "Subjects" })
+                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Courses/Index", values: new { area = "Staff" })
             };
 
             return;

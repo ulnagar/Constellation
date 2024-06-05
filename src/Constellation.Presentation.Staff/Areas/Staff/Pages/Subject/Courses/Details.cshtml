@@ -1,6 +1,8 @@
 ﻿@page "{id:guid}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Courses.DetailsModel
+
 @using Constellation.Core.Extensions
-@model Constellation.Presentation.Server.Areas.Subject.Pages.Courses.DetailsModel
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 
 @inject IAuthorizationService authService
 
@@ -13,7 +15,7 @@
 <div class="page-menu">
     @if (canEditTest.Succeeded)
     {
-        <a asp-page="/Courses/Upsert" asp-area="Subject" asp-route-id="@Model.Course.Id.Value" class="btn btn-warning">Edit</a>
+        <a asp-page="/Subject/Courses/Upsert" asp-area="Staff" asp-route-id="@Model.Course.Id.Value" class="btn btn-warning">Edit</a>
     }
 
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -86,7 +88,7 @@
         <div id="classes" class="tab-pane active">
             <h3>Classes</h3>
 
-            <table class="table-striped table-hover data-table">
+            <table class="table-striped table-hover data-table-no-sort">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -104,7 +106,7 @@
                             <td>
                                 @foreach (var teacher in item.Teachers)
                                 {
-                                    <a asp-action="Details" asp-controller="Staff" asp-area="Partner" asp-route-id="@teacher.StaffId"><span class="badge badge-info mr-3">@teacher.Name</span></a>
+                                    <a asp-page="/Partner/Staff/Details" asp-area="Staff" asp-route-id="@teacher.StaffId"><span class="badge badge-info mr-3">@teacher.Name</span></a>
                                 }
                             </td>
                             <td>@item.EndDate.ToString("yyyy")</td>
@@ -125,7 +127,7 @@
                                 }
                             </td>
                             <td>
-                                <a asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@item.Id.Value" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                                <a asp-page="/Subject/Offerings/Details" asp-area="Staff" asp-route-id="@item.Id.Value" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                             </td>
                         </tr>
                     }
