@@ -55,7 +55,7 @@ public interface IStudentRepository
     Task<Student?> ForEditAsync(string studentId);
     Task<Student?> ForBulkUnenrolAsync(string studentId);
     Task<ICollection<Student>> ForSelectionListAsync();
-    Task<List<Student>> ForInterviewsExportAsync(List<int> filterGrades, List<OfferingId> filterClasses, bool perFamily, bool resFamilyOnly, CancellationToken cancellationToken = default);
+    Task<List<Student>> ForInterviewsExportAsync(List<int> filterGrades, List<OfferingId> filterClasses, CancellationToken cancellationToken = default);
     Task<ICollection<Student>> WithoutAdobeConnectDetailsForUpdate();
 
     void Insert(Student student);

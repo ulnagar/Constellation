@@ -6,12 +6,12 @@
 <h2>Current Enrolments by Student</h2>
 
 <div class="page-menu">
-    <a asp-action="Index" asp-controller="Students" asp-area="Partner" class="btn btn-danger btn-pull-right">Go Back</a>
+    <a asp-page="/Partner/Students/Reports/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />
 
-<table class="table-striped table-hover data-table">
+<table class="table-striped table-hover data-table-no-sort">
     <thead>
         <tr>
             <th>SRN</th>
@@ -27,7 +27,7 @@
         {
             <tr>
                 <td>@item.StudentId</td>
-                <td>@item.Name.DisplayName</td>
+                <td data-order="@item.Name.SortOrder">@item.Name.DisplayName</td>
                 <td>@item.Grade.AsName()</td>
                 <td>@item.SchoolName</td>
                 <td>

@@ -45,7 +45,6 @@ public class InterviewsModel : BasePageModel
     [BindProperty]
     public bool ResidentialFamilyOnly { get; set; }
 
-    [BindProperty]
     public SelectList AllClasses { get; set; }
 
     public async Task OnGet()

@@ -51,7 +51,7 @@ internal sealed class CreateInterviewsImportQueryHandler
     {
         List<InterviewExportDto> result = new();
 
-        List<Student> students = await _studentRepository.ForInterviewsExportAsync(request.Grades, request.ClassList, request.PerFamily, request.ResidentialFamilyOnly, cancellationToken);
+        List<Student> students = await _studentRepository.ForInterviewsExportAsync(request.Grades, request.ClassList, cancellationToken);
 
         List<Course> courses = await _courseRepository.GetAll(cancellationToken);
 

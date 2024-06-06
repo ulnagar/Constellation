@@ -11,7 +11,7 @@
         {
             foreach (var entry in Model.Classes.OrderBy(x => x.Key))
             {
-                <a class="dropdown-item" asp-area="Subject" asp-page="/Offerings/Details" asp-route-id="@entry.Value.Value">@entry.Key</a>
+                <a class="dropdown-item" asp-area="Staff" asp-page="/Subject/Offerings/Details" asp-route-id="@entry.Value.Value">@entry.Key</a>
             }
         }
     </div>
