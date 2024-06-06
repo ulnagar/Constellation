@@ -7,6 +7,7 @@ public sealed class ActivePage
     public const string Equipment_Assets_Allocations = "Equipment.Assets.Allocations";
     public const string Equipment_Assets_Locations = "Equipment.Assets.Locations";
     public const string Equipment_Assets_Reports = "Equipment.Assets.Reports";
+    public const string Equipment_Stocktake_Dashboard = "Equipment.Stocktake.Dashboard";
 
     public const string Partner_Contacts_List = "Partner.Contacts.List";
     public const string Partner_Schools_Schools = "Partner.Schools.Schools";

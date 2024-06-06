@@ -27,7 +27,7 @@
     
         @foreach (var stocktake in Model.ActiveStocktakeEvents)
         {
-            <a class="btn btn-warning btn-block" asp-area="Equipment" asp-controller="Stocktake" asp-action="StaffDashboard" asp-route-id="@stocktake.Id">@stocktake.Name</a>
+            <a class="btn btn-warning btn-block" asp-area="Staff" asp-page="/Equipment/Stocktake/Dashboard" asp-route-id="@stocktake.Id">@stocktake.Name</a>
         }
 
         @foreach (var entry in @Model.Classes.OrderBy(entry => entry.Key))
@@ -53,7 +53,7 @@
                 <p>Please take the time to register your Aurora College equipment in the current stocktake.</p>
                 @foreach (var stocktake in Model.ActiveStocktakeEvents)
                 {
-                    <a class="alert-link" asp-area="Equipment" asp-controller="Stocktake" asp-action="StaffDashboard" asp-route-id="@stocktake.Id">@stocktake.Name</a>
+                    <a class="alert-link" asp-area="Staff" asp-page="/Equipment/Stocktake/Dashboard" asp-route-id="@stocktake.Id">@stocktake.Name</a>
                 }
             </div>
         }

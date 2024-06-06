@@ -70,6 +70,19 @@ internal sealed class StocktakeRepository : IStocktakeRepository
             .Set<StocktakeSighting>()
             .FirstOrDefaultAsync(sighting => sighting.Id == sightingId, cancellationToken);
 
+    public async Task<List<StocktakeSighting>> GetForStaffMember(
+        Guid stocktakeEventId,
+        string staffId,
+        string emailAddress,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<StocktakeSighting>()
+            .Where(sighting => 
+                sighting.StocktakeEventId == stocktakeEventId &&
+                ((sighting.UserType == StocktakeSighting.UserTypes.Staff && sighting.UserCode == staffId) ||
+                 sighting.SightedBy == emailAddress))
+            .ToListAsync(cancellationToken);
+
     public void Insert(StocktakeSighting sighting) => _context.Set<StocktakeSighting>().Add(sighting);
     public void Insert(StocktakeEvent stocktake) => _context.Set<StocktakeEvent>().Add(stocktake);
 }

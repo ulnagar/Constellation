@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Portal.Schools.Server.Controllers;
 
 using Application.Models.Identity;
+using Application.Stocktake.Models;
 using Constellation.Application.Stocktake.CancelSighting;
 using Constellation.Application.Stocktake.GetCurrentStocktakeEvents;
 using Constellation.Application.Stocktake.GetStocktakeSightingsForSchool;

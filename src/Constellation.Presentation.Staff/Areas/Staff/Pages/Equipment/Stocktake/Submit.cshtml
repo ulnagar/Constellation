@@ -1,14 +1,17 @@
-﻿@model StaffStocktakeSightingViewModel
+﻿@page "{id:guid}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake.SubmitModel
 
 @using Constellation.Core.Models.Stocktake
-@using Constellation.Presentation.Server.Areas.Equipment.Models.Stocktake
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+}
 
 <h2>Stocktake Device Sighting</h2>
 
-<form asp-action="Submit" asp-controller="Stocktake" asp-area="Equipment" method="post">
+<form method="post">
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.HiddenFor(model => model.StocktakeEventId)
 
         <div class="form-group row">
             <div class="col-md-8 alert alert-warning">
@@ -79,9 +82,9 @@
                         <div id="UserTypeStudent">
                             <select id="Student_UserCode" onchange="UpdateStudent()" class="form-control">
                                 <option value="">-- Select --</option>
-                                @foreach (var student in Model.Students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName))
+                                @foreach (var student in Model.StudentList)
                                 {
-                                    <option value="@student.StudentId">@student.DisplayName (@student.CurrentGrade)</option>
+                                    <option value="@student.StudentId">@student.Name (@student.CurrentGrade)</option>
                                 }
                             </select>
                             <span asp-validation-for="UserCode" class="text-danger"></span>
@@ -90,7 +93,7 @@
                         <div id="UserTypeStaff">
                             <select id="Staff_UserCode" onchange="UpdateStaff()" class="form-control">
                                 <option value="">-- Select --</option>
-                                @foreach (var staff in Model.Staff.OrderBy(staff => staff.LastName))
+                                @foreach (var staff in Model.StaffList)
                                 {
                                     <option value="@staff.StaffId">@staff.DisplayName</option>
                                 }
@@ -101,7 +104,7 @@
                         <div id="UserTypeSchool">
                             <select id="School_UserCode" onchange="UpdateSchool()" class="form-control">
                                 <option value="">-- Select --</option>
-                                @foreach (var school in Model.Schools)
+                                @foreach (var school in Model.SchoolList)
                                 {
                                     <option value="@school.Code">@school.Name</option>
                                 }
@@ -120,7 +123,7 @@
                 Select the type of user (Student, Aurora College Staff Member, School, Community Member, or Other), and then the relevant user.
             </div>
         </div>
-        
+
         <div class="form-group row">
             <label class="col-md-2">Location Type</label>
             <div class="col-md-3">
@@ -147,7 +150,7 @@
                 <div id="LocationTypeSchool">
                     <select id="School_LocationCode" onchange="UpdateSchoolLocation()" class="form-control">
                         <option value="">-- Select --</option>
-                        @foreach (var school in Model.Schools)
+                        @foreach (var school in Model.SchoolList)
                         {
                             <option value="@school.Code">@school.Name</option>
                         }
@@ -189,7 +192,7 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             UpdateUserType();
             UpdateLocationType();
         })
@@ -218,8 +221,8 @@
                 $('#UserTypeStaff').show();
             } else if (userType.val() === "@StocktakeSighting.UserTypes.School") {
                 $('#UserTypeSchool').show();
-            } else if (userType.val() === "@StocktakeSighting.UserTypes.CommunityMember" || 
-                    userType.val() === "@StocktakeSighting.UserTypes.Other") {
+            } else if (userType.val() === "@StocktakeSighting.UserTypes.CommunityMember" ||
+                userType.val() === "@StocktakeSighting.UserTypes.Other") {
                 $('#UserTypeOther').show();
             }
         }

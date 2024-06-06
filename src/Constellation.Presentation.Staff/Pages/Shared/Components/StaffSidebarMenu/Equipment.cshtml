@@ -27,5 +27,21 @@
                 </a>
             </li>
         </ul>
+        
+        <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted">
+            <span class="w-100">Stocktake</span>
+        </h4>
+        <ul class="nav flex-column mx-2">
+            <li class="nav-item">
+                <a class="nav-link @(Model == ActivePage.Equipment_Stocktake_Dashboard ? "active" : "")" asp-page="/Equipment/Stocktake/Dashboard" asp-area="Staff">
+                    Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(Model == ActivePage.Equipment_Assets_Allocations ? "active" : "")" asp-page="/Equipment/Allocations/Index" asp-area="Staff">
+                    Periods
+                </a>
+            </li>
+        </ul>
     </div>
 </nav>

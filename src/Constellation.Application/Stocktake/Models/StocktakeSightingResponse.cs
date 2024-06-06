@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Stocktake.GetStocktakeSightingsForSchool;
+﻿namespace Constellation.Application.Stocktake.Models;
 
 using System;
 

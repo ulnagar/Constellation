@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Stocktake.GetCurrentStocktakeEvents;
 
 using Abstractions.Messaging;
+using Constellation.Application.Stocktake.Models;
 using Core.Models.Stocktake;
 using Core.Models.Stocktake.Repositories;
 using Core.Shared;

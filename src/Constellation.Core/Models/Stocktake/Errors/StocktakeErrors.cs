@@ -5,6 +5,10 @@ using System;
 
 public static class StocktakeErrors
 {
+    public static readonly Func<Guid, Error> EventNotFound = id => new(
+        "Stocktake.Event.NotFound",
+        $"Could not find a Stocktake Event with the Id {id}");
+
     public static Error SightingAlreadyCancelled => new(
         "Stocktake.Sighting.AlreadyCancelled",
         "The selected stocktake sighting record has already been cancelled");

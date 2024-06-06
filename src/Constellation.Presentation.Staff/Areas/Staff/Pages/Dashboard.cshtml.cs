@@ -8,6 +8,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
 using Constellation.Application.StaffMembers.GetStaffByEmail;
 using Constellation.Application.StaffMembers.Models;
+using Constellation.Application.Stocktake.Models;
 using Constellation.Core.Shared;
 using Core.Models.Offerings.Identifiers;
 using MediatR;
